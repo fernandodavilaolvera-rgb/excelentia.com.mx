@@ -7,7 +7,12 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
   <style>
-    :root{--bg:#eef3fa;--surface:#ffffff;--primary:#1a3a7c;--primary-dk:#122a5e;--accent:#2e7bcf;--accent-lt:#cfe0f5;--teal:#1e9fc4;--text:#1a1a2e;--muted:#5a6a82;--border:#d0dcea;--error:#c0392b;--shadow:0 4px 28px rgba(26,58,124,0.10)}
+    :root {
+      --bg:#eef3fa;--surface:#ffffff;--primary:#1a3a7c;--primary-dk:#122a5e;
+      --accent:#2e7bcf;--accent-lt:#cfe0f5;--teal:#1e9fc4;--text:#1a1a2e;
+      --muted:#5a6a82;--border:#d0dcea;--error:#c0392b;
+      --shadow:0 4px 28px rgba(26,58,124,0.10);
+    }
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
     header{background:linear-gradient(135deg,var(--primary-dk) 0%,var(--primary) 60%,var(--accent) 100%);padding:14px 36px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(26,58,124,0.25)}
@@ -34,10 +39,12 @@
     .form-body{padding:32px 40px 20px}
     .field-group{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
     .field-group.full{grid-template-columns:1fr}
+    .field-group.three{grid-template-columns:1fr 1fr 1fr}
     .field{display:flex;flex-direction:column;gap:6px}
     label{font-size:.73rem;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
     input[type="text"],input[type="date"],select{padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito Sans',sans-serif;font-size:.92rem;color:var(--text);background:#fff;transition:border-color .2s;outline:none}
     input:focus,select:focus{border-color:var(--accent)}
+    input[readonly]{background:#f8fafd;color:var(--muted);cursor:default}
     .section-label{font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:24px 0 14px;display:flex;align-items:center;gap:8px}
     .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
     .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#f8fafd;position:relative}
@@ -66,23 +73,10 @@
     #submit-btn.loading .btn-text{display:none}
     #logout-btn{padding:13px 18px;background:transparent;border:1.5px solid var(--border);border-radius:10px;font-family:'Nunito Sans',sans-serif;font-size:.85rem;color:var(--muted);cursor:pointer;transition:all .2s}
     #logout-btn:hover{border-color:var(--error);color:var(--error)}
-    #drive-btn {
-  padding: 13px 18px;
-  background: transparent;
-  border: 1.5px solid var(--accent);
-  border-radius: 10px;
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.85rem;
-  color: var(--accent);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-}
-#drive-btn:hover { background: var(--accent-lt); }
+    #drive-btn{padding:13px 18px;background:transparent;border:1.5px solid var(--accent);border-radius:10px;font-family:'Nunito Sans',sans-serif;font-size:.85rem;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:6px;transition:all .2s}
+    #drive-btn:hover{background:var(--accent-lt)}
     @keyframes spin{to{transform:rotate(360deg)}}
-    @media(max-width:520px){.field-group{grid-template-columns:1fr}.form-body,.form-footer{padding-left:22px;padding-right:22px}.form-header{padding:20px 22px}#status-msg{margin-left:22px;margin-right:22px}}
+    @media(max-width:520px){.field-group,.field-group.three{grid-template-columns:1fr}.form-body,.form-footer{padding-left:22px;padding-right:22px}.form-header{padding:20px 22px}#status-msg{margin-left:22px;margin-right:22px}}
   </style>
 </head>
 <body>
@@ -121,7 +115,8 @@
       </div>
     </div>
     <div class="form-body">
-      <div class="section-label">Datos del paciente</div>
+
+      <div class="section-label">Datos del estudio</div>
       <div class="field-group">
         <div class="field">
           <label for="nombre">Nombre del paciente</label>
@@ -142,6 +137,43 @@
           </select>
         </div>
       </div>
+
+      <div class="section-label">Datos del paciente</div>
+      <div class="field-group">
+        <div class="field">
+          <label for="sexo">Sexo</label>
+          <select id="sexo">
+            <option value="">— Seleccione —</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fecha_nacimiento">Fecha de nacimiento</label>
+          <input type="date" id="fecha_nacimiento" />
+        </div>
+      </div>
+      <div class="field-group three">
+        <div class="field">
+          <label for="edad">Edad</label>
+          <input type="text" id="edad" placeholder="Ej. 45" />
+        </div>
+        <div class="field">
+          <label for="peso">Peso (kg)</label>
+          <input type="text" id="peso" placeholder="Ej. 70" />
+        </div>
+        <div class="field">
+          <label for="talla">Talla (m)</label>
+          <input type="text" id="talla" placeholder="Ej. 1.70" />
+        </div>
+      </div>
+      <div class="field-group full">
+        <div class="field">
+          <label for="asc">ASC — Área de Superficie Corporal (m²)</label>
+          <input type="text" id="asc" placeholder="Se calcula automáticamente al ingresar peso y talla" readonly />
+        </div>
+      </div>
+
       <div class="section-label">Imágenes del estudio</div>
       <div class="upload-zone" id="upload-zone">
         <input type="file" id="file-input" accept="image/jpeg,image/png" multiple />
@@ -171,10 +203,12 @@
   const WEBHOOK_URL='https://excelentia.app.n8n.cloud/webhook/e4c4b6e9-eb20-4a11-b43e-be5c73181852';
   const MAX_FILES=10;
   let currentUser=null,selectedFiles=[];
+
   function signInWithGoogle(){google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:'openid email profile',callback:(t)=>{if(!t.error)fetchUserInfo(t.access_token)}}).requestAccessToken()}
   function fetchUserInfo(t){fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then(u=>{currentUser=u;showForm(u)})}
-  function showForm(u){document.getElementById('login-section').style.display='none';document.getElementById('form-section').style.display='block';document.getElementById('user-name-display').textContent = 'Dr. ' + (u.name || u.email);document.getElementById('user-initials').textContent=(u.name||u.email).split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();document.getElementById('fecha').valueAsDate=new Date()}
+  function showForm(u){document.getElementById('login-section').style.display='none';document.getElementById('form-section').style.display='block';document.getElementById('user-name-display').textContent='Dr. '+(u.name||u.email);document.getElementById('user-initials').textContent=(u.name||u.email).split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();document.getElementById('fecha').valueAsDate=new Date()}
   function signOut(){google.accounts.id.disableAutoSelect();currentUser=null;selectedFiles=[];document.getElementById('preview-grid').innerHTML='';document.getElementById('file-count').textContent='';document.getElementById('form-section').style.display='none';document.getElementById('login-section').style.display='block'}
+
   const fileInput=document.getElementById('file-input'),previewGrid=document.getElementById('preview-grid'),fileCount=document.getElementById('file-count'),uploadZone=document.getElementById('upload-zone');
   fileInput.addEventListener('change',e=>handleFiles(e.target.files));
   uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('drag-over')});
@@ -184,16 +218,58 @@
   function renderPreviews(){previewGrid.innerHTML='';selectedFiles.forEach((f,i)=>{const url=URL.createObjectURL(f),item=document.createElement('div');item.className='preview-item';item.innerHTML=`<img src="${url}" alt="img ${i+1}"/><button class="remove-btn" onclick="removeFile(${i})">✕</button>`;previewGrid.appendChild(item)});fileCount.textContent=selectedFiles.length>0?`${selectedFiles.length} imagen${selectedFiles.length!==1?'es':''} seleccionada${selectedFiles.length!==1?'s':''}`:''}
   function removeFile(i){selectedFiles.splice(i,1);renderPreviews()}
   function showStatus(msg,type){const el=document.getElementById('status-msg');el.textContent=msg;el.className=type;el.style.display='block'}
+
+  document.getElementById('peso').addEventListener('input',calcASC);
+  document.getElementById('talla').addEventListener('input',calcASC);
+  function calcASC(){
+    const peso=parseFloat(document.getElementById('peso').value);
+    const talla=parseFloat(document.getElementById('talla').value);
+    if(peso&&talla){
+      const asc=(0.007184*Math.pow(peso,0.425)*Math.pow(talla*100,0.725)).toFixed(2);
+      document.getElementById('asc').value=asc+' m²';
+    } else {
+      document.getElementById('asc').value='';
+    }
+  }
+
   async function submitForm(){
-    const nombre=document.getElementById('nombre').value.trim(),fecha=document.getElementById('fecha').value,tipo=document.getElementById('tipo').value;
+    const nombre=document.getElementById('nombre').value.trim();
+    const fecha=document.getElementById('fecha').value;
+    const tipo=document.getElementById('tipo').value;
     if(!nombre)return showStatus('Por favor ingresa el nombre del paciente.','error');
     if(!fecha)return showStatus('Por favor selecciona la fecha del estudio.','error');
     if(!tipo)return showStatus('Por favor selecciona el tipo de estudio.','error');
     if(!selectedFiles.length)return showStatus('Por favor adjunta al menos una imagen del estudio.','error');
     const btn=document.getElementById('submit-btn');btn.disabled=true;btn.classList.add('loading');document.getElementById('status-msg').style.display='none';
-    const fd=new FormData();fd.append('nombre_paciente',nombre);fd.append('fecha_estudio',fecha);fd.append('tipo_estudio',tipo);fd.append('medico_nombre',currentUser?.name||'');fd.append('medico_email',currentUser?.email||'');selectedFiles.forEach((f,i)=>fd.append(`imagen_${i+1}`,f));
-    try{const res=await fetch(WEBHOOK_URL,{method:'POST',body:fd});if(res.ok){showStatus('✓ Estudio enviado correctamente. Recibirás el reporte en breve.','success');document.getElementById('nombre').value='';document.getElementById('tipo').value='';document.getElementById('fecha').valueAsDate=new Date();selectedFiles=[];renderPreviews()}else showStatus(`Error al enviar (${res.status}). Intenta de nuevo.`,'error')}
-    catch(e){showStatus('Error de conexión. Verifica tu internet e intenta de nuevo.','error')}
+    const fd=new FormData();
+    fd.append('nombre_paciente',nombre);
+    fd.append('fecha_estudio',fecha);
+    fd.append('tipo_estudio',tipo);
+    fd.append('medico_nombre',currentUser?.name||'');
+    fd.append('medico_email',currentUser?.email||'');
+    fd.append('sexo',document.getElementById('sexo').value);
+    fd.append('fecha_nacimiento',document.getElementById('fecha_nacimiento').value);
+    fd.append('edad',document.getElementById('edad').value);
+    fd.append('peso',document.getElementById('peso').value);
+    fd.append('talla',document.getElementById('talla').value);
+    fd.append('asc',document.getElementById('asc').value);
+    selectedFiles.forEach((f,i)=>fd.append(`imagen_${i+1}`,f));
+    try{
+      const res=await fetch(WEBHOOK_URL,{method:'POST',body:fd});
+      if(res.ok){
+        showStatus('✓ Estudio enviado correctamente. Recibirás el reporte en breve.','success');
+        document.getElementById('nombre').value='';
+        document.getElementById('tipo').value='';
+        document.getElementById('sexo').value='';
+        document.getElementById('fecha_nacimiento').value='';
+        document.getElementById('edad').value='';
+        document.getElementById('peso').value='';
+        document.getElementById('talla').value='';
+        document.getElementById('asc').value='';
+        document.getElementById('fecha').valueAsDate=new Date();
+        selectedFiles=[];renderPreviews();
+      } else showStatus(`Error al enviar (${res.status}). Intenta de nuevo.`,'error');
+    } catch(e){showStatus('Error de conexión. Verifica tu internet e intenta de nuevo.','error')}
     finally{btn.disabled=false;btn.classList.remove('loading')}
   }
 </script>
