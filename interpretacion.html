@@ -219,6 +219,17 @@
   function removeFile(i){selectedFiles.splice(i,1);renderPreviews()}
   function showStatus(msg,type){const el=document.getElementById('status-msg');el.textContent=msg;el.className=type;el.style.display='block'}
 
+  document.getElementById('fecha_nacimiento').addEventListener('change',calcEdad);
+function calcEdad(){
+  const fn=document.getElementById('fecha_nacimiento').value;
+  if(!fn)return;
+  const hoy=new Date();
+  const nac=new Date(fn);
+  let edad=hoy.getFullYear()-nac.getFullYear();
+  const m=hoy.getMonth()-nac.getMonth();
+  if(m<0||(m===0&&hoy.getDate()<nac.getDate()))edad--;
+  document.getElementById('edad').value=edad;
+}
   document.getElementById('peso').addEventListener('input',calcASC);
   document.getElementById('talla').addEventListener('input',calcASC);
   function calcASC(){
