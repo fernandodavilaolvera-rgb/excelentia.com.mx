@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resumen de Correos — ExcelentIA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --blue-dark:  #0d2d6b;
+    --blue-mid:   #1a56c4;
+    --blue-light: #4ea8e8;
+    --cyan:       #5dd4f0;
+    --white:      #ffffff;
+    --bg:         #f0f5fb;
+    --surface:    #ffffff;
+    --border:     #d0e0f5;
+    --text:       #1a2a4a;
+    --muted:      #6b82a8;
+    --shadow:     0 4px 24px rgba(13,45,107,0.10);
+    --shadow-lg:  0 8px 40px rgba(13,45,107,0.16);
+    --radius:     16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(78,168,232,0.15) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 100%, rgba(26,86,196,0.10) 0%, transparent 55%);
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(13,45,107,0.07);
+  }
+
+  header img { height: 44px; }
+
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 6px 16px 6px 8px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .user-pill:hover { border-color: var(--blue-light); }
+
+  .user-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-mid), var(--cyan));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12px; font-weight: 700;
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  .page-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--blue-dark);
+    margin-bottom: 6px;
+  }
+
+  .page-title span {
+    background: linear-gradient(90deg, var(--blue-mid), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .page-sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 36px;
+  }
+
+  /* ── CONTROL CARD ── */
+  .control-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blue-mid);
+    margin-bottom: 20px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 6px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .tab.active {
+    background: var(--white);
+    color: var(--blue-dark);
+    box-shadow: 0 2px 8px rgba(13,45,107,0.10);
+    font-weight: 600;
+  }
+
+  .tab:hover:not(.active) { color: var(--blue-mid); }
+
+  /* ── DATE PICKER ── */
+  .date-section { display: none; }
+  .date-section.visible { display: block; }
+
+  .date-picker-wrap {
+    position: relative;
+    margin-bottom: 4px;
+  }
+
+  .date-picker-wrap input[type="date"] {
+    width: 100%;
+    padding: 14px 18px 14px 48px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .date-picker-wrap input[type="date"]:focus {
+    border-color: var(--blue-light);
+    box-shadow: 0 0 0 3px rgba(78,168,232,0.15);
+    background: var(--white);
+  }
+
+  .date-icon {
+    position: absolute;
+    left: 16px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--blue-light);
+    font-size: 18px;
+    pointer-events: none;
+  }
+
+  .date-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ── EMAIL OPTION ── */
+  .email-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 20px;
+  }
+
+  .email-option:hover { border-color: var(--blue-light); background: white; }
+  .email-option.checked { border-color: var(--blue-mid); background: rgba(26,86,196,0.04); }
+
+  .email-option input[type="checkbox"] { display: none; }
+
+  .checkbox-visual {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .email-option.checked .checkbox-visual {
+    background: var(--blue-mid);
+    border-color: var(--blue-mid);
+  }
+
+  .checkbox-check {
+    color: white;
+    font-size: 12px;
+    display: none;
+  }
+
+  .email-option.checked .checkbox-check { display: block; }
+
+  .email-option-text { flex: 1; }
+  .email-option-text strong { display: block; font-size: 14px; color: var(--text); margin-bottom: 2px; }
+  .email-option-text span { font-size: 12px; color: var(--muted); }
+
+  .email-badge {
+    background: linear-gradient(135deg, var(--blue-mid), var(--cyan));
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── GENERATE BUTTON ── */
+  .btn-generate {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 60%, var(--blue-light) 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(26,86,196,0.35);
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-generate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(26,86,196,0.45);
+  }
+
+  .btn-generate:active { transform: translateY(0); }
+
+  .btn-generate:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── SPINNER ── */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESULT CARD ── */
+  .result-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .result-header-left h3 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .result-header-left p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .btn-send-email {
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 8px;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+
+  .btn-send-email:hover {
+    background: rgba(255,255,255,0.25);
+    border-color: white;
+  }
+
+  .btn-send-email.sent {
+    background: rgba(93,212,240,0.25);
+    border-color: var(--cyan);
+  }
+
+  .result-body {
+    padding: 32px;
+    max-height: 600px;
+    overflow-y: auto;
+    line-height: 1.7;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .result-body h2 { font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800; color: var(--blue-dark); margin: 24px 0 12px; }
+  .result-body h2:first-child { margin-top: 0; }
+  .result-body p { margin-bottom: 10px; }
+  .result-body ul { padding-left: 20px; margin-bottom: 12px; }
+  .result-body li { margin-bottom: 6px; }
+  .result-body strong { color: var(--blue-dark); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 32px; right: 32px;
+    background: var(--blue-dark);
+    color: white;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    display: none;
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .toast.show { display: flex; }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(78,168,232,0.2) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 100%, rgba(26,86,196,0.12) 0%, transparent 55%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  .login-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .login-card img { height: 52px; margin-bottom: 32px; }
+
+  .login-card h2 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--blue-dark);
+    margin-bottom: 8px;
+  }
+
+  .login-card p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .btn-google {
+    width: 100%;
+    padding: 14px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .btn-google:hover {
+    border-color: var(--blue-light);
+    box-shadow: 0 2px 12px rgba(13,45,107,0.10);
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    margin-bottom: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-field:focus {
+    border-color: var(--blue-light);
+    box-shadow: 0 0 0 3px rgba(78,168,232,0.15);
+    background: white;
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(26,86,196,0.3);
+  }
+
+  .btn-login:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(26,86,196,0.4);
+  }
+
+  .login-footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logo%20excelentIA.png" alt="ExcelentIA">
+    <h2>Bienvenido</h2>
+    <p>Inicia sesión para acceder a tu resumen de correos</p>
+
+    <button class="btn-google" onclick="loginGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+      Continuar con Google
+    </button>
+
+    <div class="divider">o inicia con tu correo</div>
+
+    <input type="email" class="input-field" placeholder="Correo electrónico" id="login-email">
+    <input type="password" class="input-field" placeholder="Contraseña" id="login-pass">
+    <button class="btn-login" onclick="loginEmail()">Iniciar sesión</button>
+
+    <div class="login-footer">ExcelentIA · Inteligencia artificial con esencia Humana</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logo%20excelentIA.png" alt="ExcelentIA">
+  <div class="user-pill" onclick="logout()">
+    <div class="user-avatar" id="user-initial">F</div>
+    <span id="user-name">Fernando Dávila</span>
+    <span style="color:var(--muted); font-size:11px">· Cerrar sesión</span>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+  <h1 class="page-title">Resumen de <span>correos</span></h1>
+  <p class="page-sub">Genera un análisis inteligente de tus cuentas de correo con IA</p>
+
+  <!-- CONTROL CARD -->
+  <div class="control-card">
+    <div class="section-label">📅 Período a analizar</div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="setTab('24h', this)">
+        ⚡ Últimas 24 horas
+      </button>
+      <button class="tab" onclick="setTab('fecha', this)">
+        📆 Elegir fecha
+      </button>
+    </div>
+
+    <div class="date-section" id="date-section">
+      <div class="date-picker-wrap">
+        <span class="date-icon">📅</span>
+        <input type="date" id="date-input" max="">
+      </div>
+      <p class="date-hint">Selecciona cualquier día de los últimos 90 días</p>
+    </div>
+
+    <!-- EMAIL OPTION -->
+    <div class="email-option" id="email-toggle" onclick="toggleEmail()">
+      <input type="checkbox" id="send-email-check">
+      <div class="checkbox-visual">
+        <span class="checkbox-check">✓</span>
+      </div>
+      <div class="email-option-text">
+        <strong>Enviar también a mi correo</strong>
+        <span id="email-display">fernando.davila.olvera@gmail.com</span>
+      </div>
+      <span class="email-badge">Email</span>
+    </div>
+
+    <button class="btn-generate" id="btn-gen" onclick="generarResumen()">
+      <div class="spinner" id="spinner"></div>
+      <span id="btn-text">✨ Generar resumen</span>
+    </button>
+  </div>
+
+  <!-- RESULT CARD -->
+  <div class="result-card" id="result-card">
+    <div class="result-header">
+      <div class="result-header-left">
+        <h3>📬 Resumen generado</h3>
+        <p id="result-subtitle">Análisis de las últimas 24 horas</p>
+      </div>
+      <button class="btn-send-email" id="btn-email-result" onclick="enviarEmail()">
+        ✉️ Enviar a mi correo
+      </button>
+    </div>
+    <div class="result-body" id="result-body">
+      <!-- Contenido del resumen aquí -->
+    </div>
+  </div>
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✅</span>
+  <span id="toast-msg">Resumen enviado a tu correo</span>
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────
+  // Sustituye esta URL con la URL del Webhook de n8n cuando lo tengas activo
+  const WEBHOOK_URL = 'https://TU-INSTANCIA.app.n8n.cloud/webhook/resumen-correos';
+
+  // ── ESTADO ──────────────────────────────────────────
+  let modoFecha = '24h';
+  let sendEmail = false;
+  let resumenGenerado = '';
+
+  // ── LOGIN ────────────────────────────────────────────
+  function loginGoogle() {
+    // Aquí irá la integración con Google OAuth / Supabase
+    // Por ahora simula el login
+    document.getElementById('login-screen').style.display = 'none';
+  }
+
+  function loginEmail() {
+    const email = document.getElementById('login-email').value;
+    if (!email) { alert('Ingresa tu correo'); return; }
+    document.getElementById('login-screen').style.display = 'none';
+    const inicial = email.charAt(0).toUpperCase();
+    document.getElementById('user-initial').textContent = inicial;
+    document.getElementById('user-name').textContent = email;
+    document.getElementById('email-display').textContent = email;
+  }
+
+  function logout() {
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  // ── TABS ─────────────────────────────────────────────
+  function setTab(modo, btn) {
+    modoFecha = modo;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const ds = document.getElementById('date-section');
+    if (modo === 'fecha') {
+      ds.classList.add('visible');
+      // Max = hoy
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('date-input').max = hoy;
+      if (!document.getElementById('date-input').value) {
+        document.getElementById('date-input').value = hoy;
+      }
+    } else {
+      ds.classList.remove('visible');
+    }
+  }
+
+  // ── EMAIL TOGGLE ─────────────────────────────────────
+  function toggleEmail() {
+    sendEmail = !sendEmail;
+    const el = document.getElementById('email-toggle');
+    if (sendEmail) el.classList.add('checked');
+    else el.classList.remove('checked');
+  }
+
+  // ── GENERAR RESUMEN ──────────────────────────────────
+  async function generarResumen() {
+    const btn = document.getElementById('btn-gen');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btn-text');
+
+    // Validar fecha si modo fecha
+    let fechaSeleccionada = null;
+    if (modoFecha === 'fecha') {
+      fechaSeleccionada = document.getElementById('date-input').value;
+      if (!fechaSeleccionada) { showToast('⚠️', 'Selecciona una fecha'); return; }
+    }
+
+    // UI loading
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    btnText.textContent = 'Generando resumen...';
+
+    // Ocultar resultado anterior
+    document.getElementById('result-card').style.display = 'none';
+
+    try {
+      const payload = {
+        modo: modoFecha,
+        fecha: fechaSeleccionada,
+        enviar_email: sendEmail,
+        usuario: document.getElementById('user-name').textContent
+      };
+
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error('Error en el servidor');
+
+      const data = await response.json();
+      const html = data.html || data.resumen || '<p>Resumen recibido correctamente.</p>';
+
+      mostrarResultado(html, fechaSeleccionada);
+      if (sendEmail) showToast('✅', 'Resumen enviado a tu correo');
+
+    } catch (err) {
+      // MODO DEMO — muestra resultado de ejemplo si no hay webhook aún
+      const demoHTML = generarDemo(fechaSeleccionada);
+      mostrarResultado(demoHTML, fechaSeleccionada);
+      showToast('⚠️', 'Modo demo — conecta tu webhook de n8n');
+    }
+
+    // Restaurar botón
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    btnText.textContent = '✨ Generar resumen';
+  }
+
+  function mostrarResultado(html, fecha) {
+    const card = document.getElementById('result-card');
+    const body = document.getElementById('result-body');
+    const sub  = document.getElementById('result-subtitle');
+
+    body.innerHTML = html;
+    sub.textContent = fecha
+      ? 'Análisis del día ' + new Date(fecha + 'T12:00:00').toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' })
+      : 'Análisis de las últimas 24 horas';
+
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    resumenGenerado = html;
+  }
+
+  // ── ENVIAR EMAIL DESDE RESULTADO ─────────────────────
+  async function enviarEmail() {
+    const btn = document.getElementById('btn-email-result');
+    btn.textContent = '⏳ Enviando...';
+    btn.disabled = true;
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          modo: 'solo_email',
+          html: resumenGenerado,
+          usuario: document.getElementById('user-name').textContent
+        })
+      });
+    } catch(e) {}
+
+    btn.classList.add('sent');
+    btn.textContent = '✅ Enviado';
+    showToast('✅', 'Resumen enviado a tu correo');
+    setTimeout(() => {
+      btn.classList.remove('sent');
+      btn.textContent = '✉️ Enviar a mi correo';
+      btn.disabled = false;
+    }, 3000);
+  }
+
+  // ── TOAST ─────────────────────────────────────────────
+  function showToast(icon, msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = icon;
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── DEMO ─────────────────────────────────────────────
+  function generarDemo(fecha) {
+    const hoy = fecha
+      ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' })
+      : 'hoy';
+    return `
+      <h2>🔴 Alta prioridad</h2>
+      <p><strong>De: cliente@empresa.com</strong> — "Propuesta pendiente de firma"<br>
+      Solicitan confirmación de la propuesta enviada la semana pasada. Requieren respuesta antes del mediodía.</p>
+      <p><strong>De: banco@notificaciones.com</strong> — "Alerta de movimiento en cuenta"<br>
+      Cargo no reconocido por $2,450 MXN. Requiere verificación inmediata.</p>
+
+      <h2>🟡 Media prioridad</h2>
+      <p><strong>De: proveedor@servicios.mx</strong> — "Factura #4521 adjunta"<br>
+      Factura mensual de servicios. Fecha límite de pago: próximos 5 días.</p>
+      <p><strong>De: equipo@excelentia.com.mx</strong> — "Actualización del proyecto"<br>
+      Resumen de avances de la semana. No requiere acción inmediata.</p>
+
+      <h2>🟢 Baja prioridad / Informativo</h2>
+      <p><strong>De: newsletter@tech.com</strong> — "Novedades en IA esta semana"<br>
+      Boletín semanal. Solo lectura.</p>
+
+      <h2>✅ Acciones pendientes detectadas</h2>
+      <ul>
+        <li>Responder propuesta a cliente@empresa.com antes del mediodía</li>
+        <li>Verificar cargo no reconocido con el banco</li>
+        <li>Programar pago de factura #4521 antes de 5 días</li>
+      </ul>
+      <p style="font-size:12px;color:#6b82a8;margin-top:20px">
+        📌 Esto es un resumen de demostración. Conecta tu webhook de n8n para ver tus correos reales.
+      </p>
+    `;
+  }
+
+  // ── INIT ──────────────────────────────────────────────
+  // Fecha máxima = hoy
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('date-input').max = hoy;
+</script>
+</body>
+</html>
