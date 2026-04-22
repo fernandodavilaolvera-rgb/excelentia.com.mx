@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Adeudos — Club Berimbau</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --verde:   #3AAA35;
+    --naranja: #EF4B1F;
+    --bg:      #ffffff;
+    --surface: #f7f7f5;
+    --surface2:#f0efe9;
+    --border:  #e5e4de;
+    --text:    #1a1a18;
+    --text2:   #6b6b65;
+    --text3:   #9a9a92;
+    --radius:  10px;
+    --font:    "DM Sans", sans-serif;
+    --mono:    "DM Mono", monospace;
+  }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--bg);
+    border-bottom: 3px solid var(--verde);
+    padding: 12px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo-img { height: 42px; width: auto; display: block; }
+  .header-divider { width: 1px; height: 36px; background: var(--border); }
+  .header-text .title { font-size: 15px; font-weight: 500; color: var(--text); }
+  .header-text .sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .header-date { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+
+  main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+
+  .filters-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; align-items: center; }
+  .filter-label { font-size: 12px; color: var(--text3); font-weight: 500; }
+  select, input[type=text] {
+    font-family: var(--font); font-size: 13px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 12px; cursor: pointer; outline: none; transition: border-color .15s;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239a9a92' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
+  }
+  input[type=text] { background-image: none; padding-right: 12px; min-width: 180px; }
+  select:focus, input[type=text]:focus { border-color: var(--verde); }
+  .btn-reset {
+    font-family: var(--font); font-size: 12px; color: var(--text2);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 7px; padding: 7px 14px; cursor: pointer; transition: background .15s;
+  }
+  .btn-reset:hover { background: var(--surface2); }
+
+  .summary-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 20px; margin-bottom: 16px; overflow-x: auto;
+  }
+  .summary-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+  .summary-table th {
+    font-size: 11px; font-weight: 500; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .04em;
+    padding: 6px 20px; text-align: center; border-bottom: 1px solid var(--border);
+  }
+  .summary-table th:first-child { text-align: left; }
+  .summary-table td { padding: 8px 20px; text-align: center; font-family: var(--mono); font-size: 14px; font-weight: 500; }
+  .summary-table td:first-child { text-align: left; font-family: var(--font); font-weight: 500; font-size: 13px; color: var(--text2); }
+
+  .seg-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 20px; }
+  .seg-card {
+    border-radius: var(--radius); padding: 14px 16px;
+    cursor: pointer; border: 2px solid transparent;
+    transition: border-color .15s, opacity .15s; user-select: none;
+  }
+  .seg-card.active { border-color: currentColor; }
+  .seg-card.inactive { opacity: .4; }
+  .seg-ok   { background: #e8f7f0; color: #1a8a6e; }
+  .seg-med  { background: #fdf8ec; color: #a07c1a; }
+  .seg-med.active { border-color: #c8a84b !important; }
+  .seg-high { background: #fff4ee; color: var(--naranja); }
+  .seg-high.active { border-color: var(--naranja) !important; }
+  .seg-crit { background: #fef2f2; color: #c0392b; }
+  .seg-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; display: inline-block; margin-right: 6px; }
+  .seg-name { font-size: 12px; font-weight: 500; display: flex; align-items: center; margin-bottom: 6px; }
+  .seg-count { font-size: 26px; font-weight: 300; font-family: var(--mono); line-height: 1; }
+  .seg-desc { font-size: 11px; opacity: .8; margin-top: 4px; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .card { background: var(--bg); border: 2px solid var(--verde); border-radius: var(--radius); padding: 20px; }
+  .card-title { font-size: 12px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 14px; }
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  .table-card { background: var(--bg); border: 2px solid var(--verde); border-radius: var(--radius); padding: 20px; }
+  .results-count { font-size: 12px; color: var(--text3); margin-bottom: 10px; }
+  .table-wrap { overflow-x: auto; }
+  table.detail { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.detail thead th {
+    font-size: 11px; font-weight: 500; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .04em;
+    padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border);
+    white-space: nowrap; cursor: pointer; user-select: none; transition: color .15s;
+  }
+  table.detail thead th:hover { color: var(--verde); }
+  table.detail thead th.asc  .si::after { content: " ▲"; color: var(--verde); }
+  table.detail thead th.desc .si::after { content: " ▼"; color: var(--verde); }
+  table.detail thead th:not(.asc):not(.desc) .si::after { content: " ⇅"; opacity: .4; }
+  table.detail tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  table.detail tbody tr:last-child { border-bottom: none; }
+  table.detail tbody tr:hover { background: var(--surface); }
+  table.detail tbody td { padding: 9px 12px; }
+  .mono { font-family: var(--mono); font-size: 12px; }
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .badge-ok   { background: #e8f7f0; color: #1a8a6e; }
+  .badge-med  { background: #fdf8ec; color: #a07c1a; }
+  .badge-high { background: #fff4ee; color: var(--naranja); }
+  .badge-crit { background: #fef2f2; color: #c0392b; }
+  .badge-tipo { background: var(--surface2); color: var(--text2); }
+  .empty-state { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; display: none; }
+
+  @media (max-width: 900px) {
+    .seg-strip { grid-template-columns: repeat(2,1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+    header { padding: 10px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="https://excelentia.com.mx/logo_club_berimbau.png" alt="Club Berimbau" class="logo-img">
+    <div class="header-divider"></div>
+    <div class="header-text">
+      <div class="title">Dashboard de Adeudos</div>
+      <div class="sub">Club Berimbau · Reporte Marzo 2026</div>
+    </div>
+  </div>
+  <div class="header-date">Actualizado: 21/04/2026</div>
+</header>
+
+<main>
+
+  <div class="filters-bar">
+    <span class="filter-label">Filtrar:</span>
+    <input type="text" id="f-memb" placeholder="Buscar membresía..." oninput="applyFilters()">
+    <select id="f-tipo" onchange="applyFilters()">
+      <option value="">Tipo de pago</option>
+      <option>Pago Mensual</option>
+      <option>Pago Anual</option>
+      <option>Pago Trimestral</option>
+      <option>Pago Semestral</option>
+      <option>Pago Mantenimiento</option>
+    </select>
+    <select id="f-socio" onchange="applyFilters()">
+      <option value="">Tipo socio</option>
+      <option value="1">Tipo 1</option>
+      <option value="0">Tipo 0</option>
+    </select>
+    <select id="f-seg" onchange="applyFilters()">
+      <option value="">Periodo de adeudo</option>
+      <option value="0-30">0–30 días</option>
+      <option value="31-60">31–60 días</option>
+      <option value="61-90">61–90 días</option>
+      <option value="+90">+90 días</option>
+    </select>
+    <button class="btn-reset" onclick="resetFilters()">Limpiar filtros</button>
+  </div>
+
+  <div class="summary-wrap">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Resumen de cartera</th>
+          <th>Total registros</th>
+          <th>Membresías únicas</th>
+          <th>0–30 días</th>
+          <th>31–60 días</th>
+          <th>61–90 días</th>
+          <th>+90 días</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Adeudos en el reporte</td>
+          <td id="st-total">—</td>
+          <td id="st-membs">—</td>
+          <td id="st-030">—</td>
+          <td id="st-3160">—</td>
+          <td id="st-6190">—</td>
+          <td id="st-90">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="seg-strip">
+    <div class="seg-card seg-ok active" id="seg-0-30" onclick="toggleSeg('0-30')">
+      <div class="seg-name"><span class="seg-dot"></span>0 – 30 días</div>
+      <div class="seg-count" id="sc-0-30">—</div>
+      <div class="seg-desc">Olvido / descuido</div>
+    </div>
+    <div class="seg-card seg-med active" id="seg-31-60" onclick="toggleSeg('31-60')">
+      <div class="seg-name"><span class="seg-dot"></span>31 – 60 días</div>
+      <div class="seg-count" id="sc-31-60">—</div>
+      <div class="seg-desc">Problema temporal</div>
+    </div>
+    <div class="seg-card seg-high active" id="seg-61-90" onclick="toggleSeg('61-90')">
+      <div class="seg-name"><span class="seg-dot"></span>61 – 90 días</div>
+      <div class="seg-count" id="sc-61-90">—</div>
+      <div class="seg-desc">Riesgo alto</div>
+    </div>
+    <div class="seg-card seg-crit active" id="seg-+90" onclick="toggleSeg('+90')">
+      <div class="seg-name"><span class="seg-dot"></span>+90 días</div>
+      <div class="seg-count" id="sc-+90">—</div>
+      <div class="seg-desc">Posible abandono</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Adeudos por tipo de pago</div>
+      <div class="chart-legend" id="legend-tipo"></div>
+      <div style="position:relative;height:200px;">
+        <canvas id="chartTipo" role="img" aria-label="Distribución por tipo de pago"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Adeudos por período de vencimiento</div>
+      <div style="position:relative;height:230px;">
+        <canvas id="chartPeriodo" role="img" aria-label="Adeudos por mes de vencimiento"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="card-title">Detalle de adeudos</div>
+    <div class="results-count" id="results-count">Cargando...</div>
+    <div class="table-wrap">
+      <table class="detail">
+        <thead>
+          <tr>
+            <th onclick="sortTable('memb')"     data-col="memb">Membresía<span class="si"></span></th>
+            <th onclick="sortTable('folio')"    data-col="folio">Folio<span class="si"></span></th>
+            <th onclick="sortTable('socio')"    data-col="socio">Tipo socio<span class="si"></span></th>
+            <th onclick="sortTable('tipo')"     data-col="tipo">Concepto<span class="si"></span></th>
+            <th onclick="sortTable('fechaFin')" data-col="fechaFin">Fin período<span class="si"></span></th>
+            <th onclick="sortTable('dias')"     data-col="dias">Días vencido<span class="si"></span></th>
+            <th onclick="sortTable('seg')"      data-col="seg">Status<span class="si"></span></th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state">Sin resultados para los filtros seleccionados.</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const HOY = new Date(2026, 3, 21);
+
+const RAW = [
+  ["8874","2","1","30/04/2026","Pago Mensual"],["8869","4","1","30/04/2026","Pago Mensual"],
+  ["8867","2","1","30/04/2026","Pago Mensual"],["6810","32","1","30/04/2026","Pago Mensual"],
+  ["2597","311","1","30/04/2026","Pago Mensual"],["8875","2","1","30/04/2026","Pago Mensual"],
+  ["8876","2","1","30/04/2026","Pago Mensual"],["2771","1","1","30/04/2026","Pago Mensual"],
+  ["8726","3","1","30/04/2026","Pago Mensual"],["8811","6","1","31/01/2026","Pago Mensual"],
+  ["8775","9","1","31/01/2026","Pago Mensual"],["8466","38","1","31/01/2026","Pago Mensual"],
+  ["8340","39","1","31/01/2026","Pago Mensual"],["393","72","1","31/01/2026","Pago Mensual"],
+  ["8814","6","1","31/01/2026","Pago Mensual"],["2552","140","1","31/01/2026","Pago Mensual"],
+  ["8597","25","1","31/01/2026","Pago Mensual"],["616","180","1","31/01/2026","Pago Mensual"],
+  ["6577","77","1","31/12/2025","Pago Mensual"],["8798","3","1","31/12/2025","Pago Trimestral"],
+  ["1341","135","1","31/12/2025","Pago Mensual"],["8672","27","1","31/12/2025","Pago Mensual"],
+  ["7627","74","1","31/12/2025","Pago Mensual"],["10049","5","1","31/12/2025","Pago Mensual"],
+  ["10046","19","1","31/12/2025","Pago Mensual"],["8101","23","1","31/12/2025","Pago Mensual"],
+  ["8698","24","1","31/12/2025","Pago Mensual"],["1453","119","1","31/12/2025","Pago Mensual"],
+  ["8279","52","1","31/12/2025","Pago Mensual"],["8785","5","1","31/12/2025","Pago Trimestral"],
+  ["5537","100","1","31/12/2025","Pago Trimestral"],["5433","80","1","31/12/2025","Pago Semestral"],
+  ["8704","2","1","31/12/2025","Pago Mantenimiento"],["8700","2","1","31/12/2025","Pago Mantenimiento"],
+  ["8487","6","1","31/12/2025","Pago Anual"],["6795","20","1","31/12/2025","Pago Anual"],
+  ["839","63","1","31/12/2025","Pago Anual"],["6725","14","1","31/12/2025","Pago Anual"],
+  ["7880","29","1","31/12/2025","Pago Anual"],["6368","40","1","31/12/2025","Pago Anual"],
+  ["1516","148","1","31/12/2025","Pago Anual"],["7428","32","1","31/12/2025","Pago Anual"],
+  ["8584","5","1","31/12/2025","Pago Anual"],["8376","22","1","31/12/2025","Pago Anual"],
+  ["7778","24","1","31/12/2025","Pago Anual"],["2694","70","1","31/12/2025","Pago Anual"],
+  ["7885","35","1","30/11/2025","Pago Mensual"],["8333","45","1","30/11/2025","Pago Mensual"],
+  ["8767","5","1","30/11/2025","Pago Mensual"],["8112","24","1","30/11/2025","Pago Mensual"],
+  ["8238","46","1","30/11/2025","Pago Mensual"],["8803","2","1","30/11/2025","Pago Mantenimiento"],
+  ["8797","2","1","30/11/2025","Pago Mantenimiento"],["8773","2","1","30/11/2025","Pago Mantenimiento"],
+  ["7783","33","1","31/10/2025","Pago Mensual"],["6945","127","1","31/10/2025","Pago Mensual"],
+  ["8530","25","1","31/10/2025","Pago Mensual"],["8741","7","1","31/10/2025","Pago Mensual"],
+  ["7836","16","1","31/10/2025","Pago Mensual"],["8450","31","1","31/10/2025","Pago Mensual"],
+  ["7602","74","1","31/10/2025","Pago Mensual"],["8789","3","1","31/10/2025","Pago Mantenimiento"],
+  ["8770","2","1","31/10/2025","Pago Mantenimiento"],["8711","9","1","30/09/2025","Pago Mensual"],
+  ["513","159","1","30/09/2025","Pago Mensual"],["8653","15","1","30/09/2025","Pago Mensual"],
+  ["5654","85","1","30/09/2025","Pago Mensual"],["6866","43","1","30/09/2025","Pago Mensual"],
+  ["8331","42","1","31/08/2025","Pago Mensual"],["5829","146","1","31/08/2025","Pago Mensual"],
+  ["8328","32","1","31/08/2025","Pago Mensual"],["8020","88","0","31/08/2025","Pago Mensual"],
+  ["495","127","1","31/07/2025","Pago Mensual"],["3321","109","1","31/07/2025","Pago Mensual"],
+  ["8629","13","1","31/07/2025","Pago Mensual"],["6946","26","1","31/07/2025","Pago Mensual"],
+  ["8739","2","1","31/07/2025","Pago Mantenimiento"],["6778","98","1","30/06/2025","Pago Mensual"],
+  ["7925","10","1","30/06/2025","Pago Mensual"],["7476","56","1","30/06/2025","Pago Mensual"],
+  ["5516","137","1","30/06/2025","Pago Mensual"],["1528","182","1","30/06/2025","Pago Mensual"],
+  ["5425","186","1","30/06/2025","Pago Mensual"],["8519","8","1","30/06/2025","Pago Semestral"],
+  ["8702","7","1","31/05/2025","Pago Mensual"],["7033","101","1","31/05/2025","Pago Mensual"],
+  ["8657","9","1","31/05/2025","Pago Mensual"],["8617","12","1","31/05/2025","Pago Mensual"],
+  ["8590","12","1","31/05/2025","Pago Mensual"],["7501","28","1","31/05/2025","Pago Mensual"],
+  ["8690","3","1","31/05/2025","Pago Mantenimiento"],["6661","198","1","30/04/2025","Pago Mensual"],
+  ["7531","61","1","30/04/2025","Pago Mensual"],["8511","20","1","30/04/2025","Pago Mensual"],
+  ["6452","75","1","30/04/2025","Pago Mensual"],["8677","3","1","30/04/2025","Pago Mensual"],
+  ["8626","7","1","31/03/2025","Pago Mensual"],["7852","59","1","31/03/2025","Pago Mensual"],
+  ["5593","165","1","28/02/2025","Pago Mensual"],["7072","67","1","28/02/2025","Pago Mensual"],
+  ["8025","80","0","28/02/2025","Pago Mensual"],["6659","130","1","31/12/2024","Pago Mensual"],
+  ["7353","31","1","31/12/2024","Pago Mensual"],["7170","34","1","31/12/2024","Pago Mensual"],
+  ["3775","98","1","31/12/2024","Pago Mensual"],["1545","136","1","31/12/2024","Pago Anual"],
+  ["7985","13","1","31/12/2024","Pago Anual"],["7361","36","1","31/12/2024","Pago Anual"],
+  ["7900","9","1","31/12/2024","Pago Anual"],["6819","91","1","31/12/2024","Pago Anual"],
+  ["7719","39","1","31/12/2024","Pago Anual"],["808","84","1","31/12/2024","Pago Anual"],
+  ["7987","22","1","31/12/2024","Pago Anual"],["8464","14","1","31/07/2024","Pago Mensual"],
+  ["668","156","1","30/06/2024","Pago Trimestral"],["8448","12","1","30/04/2024","Pago Mensual"]
+];
+
+function parseFecha(s) { const [d,m,y]=s.split('/'); return new Date(+y,+m-1,+d); }
+function diasVencido(s) { return Math.floor((HOY - parseFecha(s)) / 86400000); }
+function getSeg(d) { return d<=30?'0-30':d<=60?'31-60':d<=90?'61-90':'+90'; }
+
+const DATA = RAW.map(r => {
+  const dias = diasVencido(r[3]);
+  const [d,m,y] = r[3].split('/');
+  const periodoKey = `${y}-${m.padStart(2,'0')}`;
+  return { memb:r[0], folio:r[1], socio:r[2], fechaFin:r[3], tipo:r[4], dias, seg:getSeg(dias), periodoKey };
+});
+
+let activeSeg = new Set(['0-30','31-60','61-90','+90']);
+let sortCol = 'dias', sortDir = 'desc';
+let activePeriodo = null;
+
+function togglePeriodo(key) {
+  activePeriodo = activePeriodo === key ? null : key;
+  applyFilters();
+}
+
+function toggleSeg(s) {
+  const allSegs = ['0-30','31-60','61-90','+90'];
+  const isOnlyActive = activeSeg.size === 1 && activeSeg.has(s);
+  if (isOnlyActive) {
+    activeSeg = new Set(allSegs);
+  } else {
+    activeSeg = new Set([s]);
+  }
+  document.querySelectorAll('.seg-card').forEach(el => {
+    const seg = el.id.replace('seg-','');
+    el.classList.toggle('active', activeSeg.has(seg));
+    el.classList.toggle('inactive', !activeSeg.has(seg));
+  });
+  document.getElementById('f-seg').value = '';
+  applyFilters();
+}
+
+function getFiltered() {
+  const memb  = document.getElementById('f-memb').value.trim().toLowerCase();
+  const tipo  = document.getElementById('f-tipo').value;
+  const socio = document.getElementById('f-socio').value;
+  const segF  = document.getElementById('f-seg').value;
+  return DATA.filter(r => {
+    if (memb  && !r.memb.toLowerCase().includes(memb)) return false;
+    if (tipo  && r.tipo !== tipo) return false;
+    if (socio && r.socio !== socio) return false;
+    if (segF) { if (r.seg !== segF) return false; }
+    else      { if (!activeSeg.has(r.seg)) return false; }
+    if (activePeriodo && r.periodoKey !== activePeriodo) return false;
+    return true;
+  });
+}
+
+function applyFilters() {
+  const f = getFiltered();
+  updateSummary(f);
+  updateSegCards(f);
+  renderTable(f);
+  updateCharts(f);
+}
+
+function resetFilters() {
+  document.getElementById('f-memb').value = '';
+  document.getElementById('f-tipo').value = '';
+  document.getElementById('f-socio').value = '';
+  document.getElementById('f-seg').value = '';
+  activeSeg = new Set(['0-30','31-60','61-90','+90']);
+  document.querySelectorAll('.seg-card').forEach(el => {
+    el.classList.add('active'); el.classList.remove('inactive');
+  });
+  applyFilters();
+}
+
+function updateSummary(rows) {
+  document.getElementById('st-total').textContent  = rows.length;
+  document.getElementById('st-membs').textContent  = new Set(rows.map(r=>r.memb)).size;
+  document.getElementById('st-030').textContent    = rows.filter(r=>r.seg==='0-30').length;
+  document.getElementById('st-3160').textContent   = rows.filter(r=>r.seg==='31-60').length;
+  document.getElementById('st-6190').textContent   = rows.filter(r=>r.seg==='61-90').length;
+  document.getElementById('st-90').textContent     = rows.filter(r=>r.seg==='+90').length;
+}
+
+function updateSegCards(rows) {
+  ['0-30','31-60','61-90','+90'].forEach(s =>
+    document.getElementById('sc-'+s).textContent = rows.filter(r=>r.seg===s).length
+  );
+}
+
+function sortTable(col) {
+  if (sortCol === col) sortDir = sortDir==='asc'?'desc':'asc';
+  else { sortCol = col; sortDir = col==='dias'?'desc':'asc'; }
+  document.querySelectorAll('table.detail thead th').forEach(th => {
+    th.classList.remove('asc','desc');
+    if (th.dataset.col === col) th.classList.add(sortDir);
+  });
+  applyFilters();
+}
+
+const segBadge = {
+  '0-30':  ['badge-ok',   'Reciente'],
+  '31-60': ['badge-med',  'Temporal'],
+  '61-90': ['badge-high', 'Riesgo alto'],
+  '+90':   ['badge-crit', 'Crítico'],
+};
+
+function renderTable(rows) {
+  const tbody = document.getElementById('tabla-body');
+  const empty = document.getElementById('empty-state');
+  const meses = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  let countTxt = `Mostrando ${rows.length} registro${rows.length!==1?'s':''}`;
+  if (activePeriodo) {
+    const [y,m] = activePeriodo.split('-');
+    countTxt += ` · Período: ${meses[+m]} ${y} <span onclick="togglePeriodo(null)" style="cursor:pointer;color:var(--naranja);font-weight:500;margin-left:4px;">✕ quitar filtro</span>`;
+  }
+  document.getElementById('results-count').innerHTML = countTxt;
+  if (!rows.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  const sorted = [...rows].sort((a,b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    if (['dias','folio','memb'].includes(sortCol)) { va=+va; vb=+vb; }
+    // Ordenamiento de fechas DD/MM/YYYY
+    if (sortCol === 'fechaFin') {
+      const toDate = s => { const [d,m,y] = s.split('/'); return new Date(+y,+m-1,+d); };
+      va = toDate(va); vb = toDate(vb);
+    }
+    // Orden personalizado de segmento: Crítico → Riesgo alto → Temporal → Reciente
+    if (sortCol === 'seg') {
+      const SEG_ORDER = {'+90':0,'61-90':1,'31-60':2,'0-30':3};
+      va = SEG_ORDER[va] !== undefined ? SEG_ORDER[va] : 99;
+      vb = SEG_ORDER[vb] !== undefined ? SEG_ORDER[vb] : 99;
+    }
+    if (va < vb) return sortDir==='asc'?-1:1;
+    if (va > vb) return sortDir==='asc'?1:-1;
+    return 0;
+  });
+
+  tbody.innerHTML = sorted.map(r => {
+    const [bc, bl] = segBadge[r.seg];
+    return `<tr>
+      <td class="mono">${r.memb}</td>
+      <td class="mono">${r.folio}</td>
+      <td>${r.socio==='1'?'Tipo 1':'Tipo 0'}</td>
+      <td><span class="badge badge-tipo">${r.tipo.replace('Pago ','')}</span></td>
+      <td class="mono">${r.fechaFin}</td>
+      <td class="mono">${r.dias>0?r.dias:'&lt;1'}</td>
+      <td><span class="badge ${bc}">${bl} · ${r.dias}d</span></td>
+    </tr>`;
+  }).join('');
+}
+
+let chartTipo, chartPeriodo;
+
+const tipoColors = {
+  'Pago Mensual':       '#3AAA35',
+  'Pago Trimestral':    '#83b7fb',
+  'Pago Semestral':     '#13498f',
+  'Pago Mantenimiento': '#ffd200',
+  'Pago Anual':         '#EF4B1F',
+};
+
+function updateCharts(rows) {
+  const tipoMap = {};
+  rows.forEach(r => { tipoMap[r.tipo] = (tipoMap[r.tipo]||0)+1; });
+  const tLabels = Object.keys(tipoMap);
+  const tVals   = tLabels.map(k => tipoMap[k]);
+  const tColors = tLabels.map(k => tipoColors[k]||'#888');
+
+  if (chartTipo) chartTipo.destroy();
+  chartTipo = new Chart(document.getElementById('chartTipo').getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: tLabels, datasets: [{ data: tVals, backgroundColor: tColors, borderWidth: 2, borderColor: '#fff' }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } } }
+    }
+  });
+  document.getElementById('legend-tipo').innerHTML = tLabels.map((l,i) =>
+    `<div class="leg-item"><span class="leg-dot" style="background:${tColors[i]}"></span>${l.replace('Pago ','')} (${tVals[i]})</div>`
+  ).join('');
+
+  const periodoMap = {};
+  rows.forEach(r => {
+    const [d,m,y] = r.fechaFin.split('/');
+    const key = `${y}-${m.padStart(2,'0')}`;
+    periodoMap[key] = (periodoMap[key]||0)+1;
+  });
+
+  // Build keys from ALL data so chart always shows all periods
+  const allPeriodoMap = {};
+  DATA.forEach(r => { allPeriodoMap[r.periodoKey] = (allPeriodoMap[r.periodoKey]||0)+1; });
+  const pKeys   = Object.keys(allPeriodoMap).sort();
+  const meses   = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const pLabels = pKeys.map(k => { const [y,m]=k.split('-'); return `${meses[+m]} ${y.slice(2)}`; });
+  const pVals   = pKeys.map(k => allPeriodoMap[k]);
+  const pColors = pKeys.map((k,i) => {
+    if (activePeriodo && k === activePeriodo) return i%2===0 ? '#3AAA35' : '#EF4B1F';
+    if (activePeriodo && k !== activePeriodo) return i%2===0 ? '#c8e8c6' : '#f9d0be';
+    return i%2===0 ? '#a8d5a2' : '#f5b89a';
+  });
+
+  if (chartPeriodo) chartPeriodo.destroy();
+  chartPeriodo = new Chart(document.getElementById('chartPeriodo').getContext('2d'), {
+    type: 'bar',
+    data: { labels: pLabels, datasets: [{ data: pVals, backgroundColor: pColors, borderRadius: 4, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } }
+      },
+      onClick: (evt, elements) => {
+        if (elements.length > 0) {
+          const idx = elements[0].index;
+          togglePeriodo(pKeys[idx]);
+        } else {
+          togglePeriodo(null);
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10, family: 'DM Mono' }, color: '#9a9a92', maxRotation: 45, autoSkip: false } },
+        y: { grid: { color: '#e5e4de' }, ticks: { font: { size: 11 }, color: '#9a9a92', stepSize: 3 } }
+      }
+    }
+  });
+  document.getElementById('chartPeriodo').style.cursor = 'pointer';
+}
+
+document.querySelector('th[data-col="dias"]').classList.add('desc');
+applyFilters();
+</script>
+</body>
+</html>
