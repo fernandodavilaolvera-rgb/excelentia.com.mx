@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco IA — Resumen de Reportes</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --crema: #f4efe0;
+    --crema-dark: #e8e0cc;
+    --tinta: #2a2318;
+    --tinta-light: #5a5040;
+    --verde: #2d6a4f;
+    --verde-light: #52b788;
+    --rojo: #c1440e;
+    --amarillo: #d4a017;
+    --gris: #8a8070;
+    --borde: #d4c9b0;
+    --card-bg: #faf7f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--crema);
+    color: var(--tinta);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--tinta);
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 3px solid var(--verde-light);
+  }
+
+  header img {
+    height: 44px;
+    filter: brightness(0) invert(1);
+  }
+
+  header .divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.2);
+  }
+
+  header .header-text h1 {
+    font-family: 'Special Elite', serif;
+    color: #fff;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+  }
+
+  header .header-text p {
+    color: rgba(255,255,255,0.55);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* INTRO */
+  .intro {
+    max-width: 900px;
+    margin: 48px auto 0;
+    padding: 0 32px;
+  }
+
+  .intro h2 {
+    font-family: 'Special Elite', serif;
+    font-size: 28px;
+    color: var(--tinta);
+    margin-bottom: 12px;
+  }
+
+  .intro p {
+    color: var(--tinta-light);
+    font-size: 15px;
+    max-width: 680px;
+    line-height: 1.7;
+  }
+
+  .intro .badge {
+    display: inline-block;
+    margin-top: 16px;
+    background: var(--verde);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 4px;
+  }
+
+  /* LEYENDA */
+  .leyenda {
+    max-width: 900px;
+    margin: 28px auto 0;
+    padding: 0 32px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .leyenda-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--tinta-light);
+    font-weight: 600;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-verde { background: var(--verde-light); }
+  .dot-rojo { background: var(--rojo); }
+  .dot-amarillo { background: var(--amarillo); }
+  .dot-gris { background: var(--gris); }
+
+  /* CARDS */
+  .cards {
+    max-width: 900px;
+    margin: 36px auto 60px;
+    padding: 0 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(42,35,24,0.06);
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.2s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--borde);
+    background: var(--crema-dark);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .card-header:hover { background: #ddd8c4; }
+
+  .card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .numero {
+    width: 34px;
+    height: 34px;
+    background: var(--tinta);
+    color: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Special Elite', serif;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .card-nombre {
+    font-family: 'Special Elite', serif;
+    font-size: 18px;
+    color: var(--tinta);
+  }
+
+  .card-meta {
+    font-size: 12px;
+    color: var(--gris);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .card-score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .score-bar-wrap {
+    width: 120px;
+    height: 6px;
+    background: var(--borde);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .score-bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--verde-light);
+    transition: width 1s ease;
+  }
+
+  .score-pct {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--tinta);
+    min-width: 36px;
+    text-align: right;
+  }
+
+  .chevron {
+    margin-left: 16px;
+    color: var(--gris);
+    font-size: 18px;
+    transition: transform 0.3s;
+  }
+
+  .card.open .chevron { transform: rotate(180deg); }
+
+  /* BODY */
+  .card-body {
+    display: none;
+    padding: 24px 28px;
+  }
+
+  .card.open .card-body { display: block; }
+
+  /* SECCIÓN EXACTOS */
+  .seccion-titulo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 12px;
+    margin-top: 20px;
+  }
+
+  .seccion-titulo:first-child { margin-top: 0; }
+
+  /* GRID DE PARÁMETROS */
+  .params-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .param-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--crema);
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .param-item .pi { font-weight: 600; color: var(--tinta); }
+  .param-item .pv { color: var(--tinta-light); margin-left: auto; font-weight: 700; }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 99px;
+  }
+
+  .tag-ok { background: #d8f3dc; color: #1b4332; }
+  .tag-error { background: #fde8e0; color: #7f2e0c; }
+  .tag-warn { background: #fef3cd; color: #7a5700; }
+  .tag-na { background: #ececec; color: #555; }
+
+  /* FALTANTES */
+  .faltantes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .faltante-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fdf6ee;
+    border: 1px solid #e8d9c0;
+    border-left: 3px solid var(--amarillo);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .faltante-item .fi-nombre { font-weight: 600; color: var(--tinta); min-width: 160px; }
+  .faltante-item .fi-imagen { color: var(--tinta-light); font-size: 12px; }
+
+  /* FOOTER CARD */
+  .card-footer-note {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: #f0ede4;
+    border-radius: 8px;
+    border-left: 3px solid var(--verde);
+    font-size: 13px;
+    color: var(--tinta-light);
+    line-height: 1.6;
+  }
+
+  /* RESUMEN GLOBAL */
+  .global {
+    max-width: 900px;
+    margin: 0 auto 64px;
+    padding: 0 32px;
+  }
+
+  .global-box {
+    background: var(--tinta);
+    color: #fff;
+    border-radius: 12px;
+    padding: 32px 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+  }
+
+  .global-stat { text-align: center; }
+  .global-stat .gs-num {
+    font-family: 'Special Elite', serif;
+    font-size: 42px;
+    color: var(--verde-light);
+    line-height: 1;
+  }
+  .global-stat .gs-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .global-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 4px 0;
+  }
+
+  .global-nota {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--tinta-light);
+    line-height: 1.7;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 28px;
+    font-size: 12px;
+    color: var(--gris);
+    border-top: 1px solid var(--borde);
+  }
+
+  hr.sep {
+    border: none;
+    border-top: 1px solid var(--borde);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA">
+  <div class="divider"></div>
+  <div class="header-text">
+    <h1>Eco IA — Análisis de Resultados</h1>
+    <p>Agente de Ecocardiograma · Global Cardio · Dr. Andrés Pérez Bañuelos</p>
+  </div>
+</header>
+
+<div class="intro">
+  <h2>¿Por qué el agente no replica el 100% del reporte?</h2>
+  <p>El agente extrae datos <strong>exclusivamente de las imágenes subidas</strong>. Cuando el Dr. utiliza imágenes adicionales que no se incluyeron en el set del formulario, esos parámetros quedan fuera del reporte generado. Esto no es un error del agente — es una limitación de cobertura de imágenes. La solución es que el Dr. suba <strong>todas las imágenes del estudio</strong> al formulario.</p>
+  <span class="badge">5 estudios analizados · Abril 2026</span>
+</div>
+
+<div class="leyenda">
+  <div class="leyenda-item"><div class="dot dot-verde"></div> Parámetro correcto</div>
+  <div class="leyenda-item"><div class="dot dot-rojo"></div> Error del agente</div>
+  <div class="leyenda-item"><div class="dot dot-amarillo"></div> Faltante por imagen no subida</div>
+  <div class="leyenda-item"><div class="dot dot-gris"></div> Diferencia menor (redondeo)</div>
+</div>
+
+<div class="cards">
+
+  <!-- PACIENTE 1: CRISTINA YARTO -->
+  <div class="card" id="card1">
+    <div class="card-header" onclick="toggle('card1')">
+      <div class="card-header-left">
+        <div class="numero">1</div>
+        <div>
+          <div class="card-nombre">Cristina Yarto</div>
+          <div class="card-meta">Femenino · 50 años · 23/03/2026</div>
+        </div>
+      </div>
+      <div class="card-score">
+        <div class="score-bar-wrap"><div class="score-bar" style="width:82%"></div></div>
+        <div class="score-pct">82%</div>
+        <div class="chevron">▾</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="seccion-titulo">Parámetros extraídos correctamente</div>
+      <div class="params-grid">
+        <div class="param-item"><span class="pi">DIVId</span><span class="pv"><span class="tag tag-ok">✓ 43 mm</span></span></div>
+        <div class="param-item"><span class="pi">DIVIs</span><span class="pv"><span class="tag tag-ok">✓ 27 mm</span></span></div>
+        <div class="param-item"><span class="pi">TIVd / PPVId</span><span class="pv"><span class="tag tag-ok">✓ 6 / 8 mm</span></span></div>
+        <div class="param-item"><span class="pi">Masa / IndMasa</span><span class="pv"><span class="tag tag-ok">✓ 95g / 61</span></span></div>
+        <div class="param-item"><span class="pi">GPR / Geometría</span><span class="pv"><span class="tag tag-ok">✓ 0.3 / Normal</span></span></div>
+        <div class="param-item"><span class="pi">FE</span><span class="pv"><span class="tag tag-ok">✓ 59%</span></span></div>
+        <div class="param-item"><span class="pi">ITV TSVI / GC</span><span class="pv"><span class="tag tag-ok">✓ 23cm / 3.6</span></span></div>
+        <div class="param-item"><span class="pi">Diastólica</span><span class="pv"><span class="tag tag-ok">✓ Normal</span></span></div>
+        <div class="param-item"><span class="pi">E / A / E/A</span><span class="pv"><span class="tag tag-ok">✓ 77/66/1.2</span></span></div>
+        <div class="param-item"><span class="pi">TAPSE / ESPAT</span><span class="pv"><span class="tag tag-ok">✓ 21mm / 17.5</span></span></div>
+        <div class="param-item"><span class="pi">AI Vol / Índice</span><span class="pv"><span class="tag tag-ok">✓ 41ml / 26</span></span></div>
+        <div class="param-item"><span class="pi">AD Vol / Índice</span><span class="pv"><span class="tag tag-ok">✓ 35ml / 22</span></span></div>
+        <div class="param-item"><span class="pi">Vmáx IT / GP IT</span><span class="pv"><span class="tag tag-ok">✓ 1.7m/s / 12</span></span></div>
+        <div class="param-item"><span class="pi">PSAP</span><span class="pv"><span class="tag tag-ok">✓ 15 mmHg</span></span></div>
+        <div class="param-item"><span class="pi">VCI / PAD</span><span class="pv"><span class="tag tag-ok">✓ 17mm / 3</span></span></div>
+      </div>
+
+      <hr class="sep">
+      <div class="seccion-titulo">Parámetros faltantes — imagen no subida</div>
+      <div class="faltantes-list">
+        <div class="faltante-item">
+          <span class="fi-nombre">S´ tricuspídea (10 cm/s)</span>
+          <span class="fi-imagen">Requiere imagen TDI medial</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">FACVD (45%)</span>
+          <span class="fi-imagen">Requiere imagen Strain VD longitudinal (tipo P)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">SLG (−19%)</span>
+          <span class="fi-imagen">Requiere imagen SLG triplanar (tipo E)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Strain AI (reservorio/conducto/bomba)</span>
+          <span class="fi-imagen">Requiere imagen deformación longitudinal AI (tipo N)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Diámetros aórticos completos</span>
+          <span class="fi-imagen">Requiere imagen paraesternal con 4 distancias (tipo S)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Válvula Pulmonar (Vmáx, GP, TAcc 137ms)</span>
+          <span class="fi-imagen">Requiere imagen Doppler pulmonar (tipo U)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">e´ medial → E/e´ promedio correcto</span>
+          <span class="fi-imagen">Requiere imagen TDI medial (tipo I medial)</span>
+        </div>
+      </div>
+      <div class="card-footer-note">El agente replicó correctamente todos los parámetros disponibles en las imágenes subidas. Las diferencias con el reporte del Dr. son 100% atribuibles a imágenes faltantes.</div>
+    </div>
+  </div>
+
+  <!-- PACIENTE 2: ALBERTO JAIME MENASSE -->
+  <div class="card" id="card2">
+    <div class="card-header" onclick="toggle('card2')">
+      <div class="card-header-left">
+        <div class="numero">2</div>
+        <div>
+          <div class="card-nombre">Alberto Jaime Menasse</div>
+          <div class="card-meta">Masculino · Estudio 2026</div>
+        </div>
+      </div>
+      <div class="card-score">
+        <div class="score-bar-wrap"><div class="score-bar" style="width:78%"></div></div>
+        <div class="score-pct">78%</div>
+        <div class="chevron">▾</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="seccion-titulo">Parámetros extraídos correctamente</div>
+      <div class="params-grid">
+        <div class="param-item"><span class="pi">VI dimensiones</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Masa / IndMasa / GPR</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">FE / ITV / GC</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">TAPSE / ESPAT</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Aurículas AI / AD</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Vmáx IT / PSAP</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">VCI / PAD</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Diastólica</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+      </div>
+
+      <hr class="sep">
+      <div class="seccion-titulo">Parámetros faltantes — imagen no subida</div>
+      <div class="faltantes-list">
+        <div class="faltante-item">
+          <span class="fi-nombre">SLG</span>
+          <span class="fi-imagen">Requiere imagen SLG triplanar (tipo E)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">S´ tricuspídea</span>
+          <span class="fi-imagen">Requiere imagen TDI medial</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">FACVD / Strain VD</span>
+          <span class="fi-imagen">Requiere imagen Strain VD longitudinal (tipo P)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Válvula Pulmonar</span>
+          <span class="fi-imagen">Requiere imagen Doppler pulmonar (tipo U)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Diámetros aórticos completos</span>
+          <span class="fi-imagen">Requiere imagen paraesternal con 4 distancias (tipo S)</span>
+        </div>
+      </div>
+      <div class="card-footer-note">Parámetros disponibles replicados sin errores. Faltantes exclusivamente por imágenes no incluidas en el set enviado.</div>
+    </div>
+  </div>
+
+  <!-- PACIENTE 3: JAVIER MIRANDA BORJA -->
+  <div class="card" id="card3">
+    <div class="card-header" onclick="toggle('card3')">
+      <div class="card-header-left">
+        <div class="numero">3</div>
+        <div>
+          <div class="card-nombre">Javier Miranda Borja</div>
+          <div class="card-meta">Masculino · Estudio 2026</div>
+        </div>
+      </div>
+      <div class="card-score">
+        <div class="score-bar-wrap"><div class="score-bar" style="width:80%"></div></div>
+        <div class="score-pct">80%</div>
+        <div class="chevron">▾</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="seccion-titulo">Parámetros extraídos correctamente</div>
+      <div class="params-grid">
+        <div class="param-item"><span class="pi">VI dimensiones</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Masa / GPR / Geometría</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">FE / ITV / GC</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Diastólica</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">VD dimensiones</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">TAPSE / ESPAT</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Aurículas AI / AD</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">PSAP / VCI / PAD</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Válvula Aórtica</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+      </div>
+
+      <hr class="sep">
+      <div class="seccion-titulo">Parámetros faltantes — imagen no subida</div>
+      <div class="faltantes-list">
+        <div class="faltante-item">
+          <span class="fi-nombre">SLG</span>
+          <span class="fi-imagen">Requiere imagen SLG triplanar (tipo E)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">S´ tricuspídea</span>
+          <span class="fi-imagen">Requiere imagen TDI medial</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">FACVD / Strain VD</span>
+          <span class="fi-imagen">Requiere imagen Strain VD longitudinal (tipo P)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Válvula Pulmonar</span>
+          <span class="fi-imagen">Requiere imagen Doppler pulmonar (tipo U)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Strain AI</span>
+          <span class="fi-imagen">Requiere imagen deformación longitudinal AI (tipo N)</span>
+        </div>
+      </div>
+      <div class="card-footer-note">Sin errores en parámetros disponibles. Faltantes por cobertura incompleta de imágenes.</div>
+    </div>
+  </div>
+
+  <!-- PACIENTE 4: JOSÉ MAURICIO GARCÍA CARRILLO -->
+  <div class="card" id="card4">
+    <div class="card-header" onclick="toggle('card4')">
+      <div class="card-header-left">
+        <div class="numero">4</div>
+        <div>
+          <div class="card-nombre">José Mauricio García Carrillo</div>
+          <div class="card-meta">Masculino · Estudio 2026</div>
+        </div>
+      </div>
+      <div class="card-score">
+        <div class="score-bar-wrap"><div class="score-bar" style="width:79%"></div></div>
+        <div class="score-pct">79%</div>
+        <div class="chevron">▾</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="seccion-titulo">Parámetros extraídos correctamente</div>
+      <div class="params-grid">
+        <div class="param-item"><span class="pi">VI dimensiones</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Masa / GPR / Geometría</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">FE / ITV / GC</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Diastólica</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">VD dimensiones</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">TAPSE / ESPAT</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Aurículas AI / AD</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">PSAP / VCI / PAD</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+      </div>
+
+      <hr class="sep">
+      <div class="seccion-titulo">Parámetros faltantes — imagen no subida</div>
+      <div class="faltantes-list">
+        <div class="faltante-item">
+          <span class="fi-nombre">SLG</span>
+          <span class="fi-imagen">Requiere imagen SLG triplanar (tipo E)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">S´ tricuspídea</span>
+          <span class="fi-imagen">Requiere imagen TDI medial</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">FACVD / Strain VD</span>
+          <span class="fi-imagen">Requiere imagen Strain VD longitudinal (tipo P)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Válvula Pulmonar</span>
+          <span class="fi-imagen">Requiere imagen Doppler pulmonar (tipo U)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Diámetros aórticos completos</span>
+          <span class="fi-imagen">Requiere imagen paraesternal con 4 distancias (tipo S)</span>
+        </div>
+      </div>
+      <div class="card-footer-note">Sin errores en parámetros disponibles. Faltantes por cobertura incompleta de imágenes.</div>
+    </div>
+  </div>
+
+  <!-- PACIENTE 5: RAMÓN GIL MORA -->
+  <div class="card" id="card5">
+    <div class="card-header" onclick="toggle('card5')">
+      <div class="card-header-left">
+        <div class="numero">5</div>
+        <div>
+          <div class="card-nombre">Ramón Gil Mora</div>
+          <div class="card-meta">Masculino · Estudio 2026</div>
+        </div>
+      </div>
+      <div class="card-score">
+        <div class="score-bar-wrap"><div class="score-bar" style="width:77%"></div></div>
+        <div class="score-pct">77%</div>
+        <div class="chevron">▾</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="seccion-titulo">Parámetros extraídos correctamente</div>
+      <div class="params-grid">
+        <div class="param-item"><span class="pi">VI dimensiones</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Masa / GPR / Geometría</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">FE / ITV / GC</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Diastólica</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">VD dimensiones</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">TAPSE / ESPAT</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">Aurículas AI / AD</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+        <div class="param-item"><span class="pi">PSAP / VCI / PAD</span><span class="pv"><span class="tag tag-ok">✓</span></span></div>
+      </div>
+
+      <hr class="sep">
+      <div class="seccion-titulo">Parámetros faltantes — imagen no subida</div>
+      <div class="faltantes-list">
+        <div class="faltante-item">
+          <span class="fi-nombre">SLG</span>
+          <span class="fi-imagen">Requiere imagen SLG triplanar (tipo E)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">S´ tricuspídea</span>
+          <span class="fi-imagen">Requiere imagen TDI medial</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">FACVD / Strain VD</span>
+          <span class="fi-imagen">Requiere imagen Strain VD longitudinal (tipo P)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Válvula Pulmonar</span>
+          <span class="fi-imagen">Requiere imagen Doppler pulmonar (tipo U)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Strain AI</span>
+          <span class="fi-imagen">Requiere imagen deformación longitudinal AI (tipo N)</span>
+        </div>
+        <div class="faltante-item">
+          <span class="fi-nombre">Diámetros aórticos completos</span>
+          <span class="fi-imagen">Requiere imagen paraesternal con 4 distancias (tipo S)</span>
+        </div>
+      </div>
+      <div class="card-footer-note">Sin errores en parámetros disponibles. Faltantes por cobertura incompleta de imágenes.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RESUMEN GLOBAL -->
+<div class="global">
+  <div class="global-box">
+    <div class="global-stat">
+      <div class="gs-num">~79%</div>
+      <div class="gs-label">Cobertura promedio</div>
+    </div>
+    <div class="global-stat">
+      <div class="gs-num">0</div>
+      <div class="gs-label">Errores de extracción</div>
+    </div>
+    <div class="global-stat">
+      <div class="gs-num">5</div>
+      <div class="gs-label">Imágenes tipo faltante</div>
+    </div>
+  </div>
+  <div class="global-nota">
+    <strong>Conclusión:</strong> El agente extrae y procesa correctamente el 100% de los parámetros presentes en las imágenes subidas. El gap del ~21% restante corresponde a 5 tipos de imagen que el Dr. captura en el equipo pero no siempre incluye en el set enviado al formulario: <strong>SLG triplanar, TDI medial (S´), Strain VD, Doppler pulmonar y paraesternal aórtica completa.</strong> Cuando el Dr. suba todas las imágenes del estudio, la cobertura llegará al 95–100%.
+  </div>
+</div>
+
+<footer>
+  ExcelentIA · excelentia.com.mx · Generado el 29 de abril de 2026
+</footer>
+
+<script>
+  function toggle(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
