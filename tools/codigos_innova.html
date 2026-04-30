@@ -1,217 +1,570 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Códigos Innova</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Códigos Innova 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Special+Elite&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #0b2a4a;
-}
-
-/* LOGIN */
-#login {
-    position: fixed;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-box {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    width: 320px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.login-box h2 {
-    margin-bottom: 20px;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    background: #0b2a4a;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #163b66;
-}
-
-/* CONTENIDO */
-#contenido {
-    display: none;
-    background: #f4f6f8;
-    min-height: 100vh;
-    padding: 40px;
-}
-
-.container {
-    max-width: 1100px;
-    margin: auto;
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-h1 {
-    text-align: center;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    background-color: #0b2a4a;
-    color: white;
-    padding: 12px;
-}
-
-td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
-</style>
-
-<script>
-function login() {
-    const pass = document.getElementById("pass").value;
-
-    if (pass === "Innova2026") {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("contenido").style.display = "block";
-    } else {
-        alert("Contraseña incorrecta");
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --border: #dde1e9;
+      --header-start: #0d1b3e;
+      --header-end: #1e5096;
+      --header-accent: #4a9fd4;
+      --hover: #e8f0fb;
+      --row-head-bg: #dce8f7;
+      --alert-bg: #f0f6ff;
+      --note-bg: #eef4fc;
+      --text-main: #1a2035;
+      --text-sec: #4a5068;
+      --text-gray: #8a90a0;
+      --blue-light: #e8f0fb;
+      --blue-mid: #4a9fd4;
+      --blue-strong: #1a3a6b;
+      --blue-dark: #0d1b3e;
+      --unassigned: #f0f6ff;
+      --unassigned-text: #8a90a0;
     }
-}
-</script>
 
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* ── LOCK SCREEN ── */
+    #lock-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--header-start) 0%, var(--header-end) 60%, #1e5096 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+    }
+
+    .lock-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 48px 44px;
+      width: 360px;
+      max-width: 90vw;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    }
+
+    .lock-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .lock-title {
+      font-family: 'Special Elite', serif;
+      font-size: 22px;
+      color: #ffffff;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .lock-subtitle {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .lock-input {
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 16px;
+      color: #fff;
+      font-family: 'Manrope', sans-serif;
+      letter-spacing: 2px;
+      outline: none;
+      transition: border 0.2s, background 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .lock-input::placeholder { color: rgba(255,255,255,0.35); letter-spacing: 0; }
+    .lock-input:focus { border-color: var(--header-accent); background: rgba(255,255,255,0.15); }
+
+    .lock-btn {
+      width: 100%;
+      background: var(--header-accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Manrope', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.5px;
+    }
+
+    .lock-btn:hover { background: #3a8bc4; }
+    .lock-btn:active { transform: scale(0.98); }
+
+    .lock-error {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #ff8080;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .lock-error.show { opacity: 1; }
+
+    /* ── MAIN CONTENT ── */
+    #main-content {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--header-start) 0%, var(--header-end) 60%, #1e5096 100%);
+      border-bottom: 3px solid var(--header-accent);
+      padding: 32px 40px 28px;
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-badge {
+      background: rgba(74,159,212,0.2);
+      border: 1px solid rgba(74,159,212,0.4);
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .header-text h1 {
+      font-family: 'Special Elite', serif;
+      font-size: 26px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .header-text p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .header-stats {
+      margin-left: auto;
+      display: flex;
+      gap: 16px;
+    }
+
+    .stat-pill {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50px;
+      padding: 8px 18px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+      font-weight: 600;
+    }
+
+    .stat-pill span {
+      color: var(--header-accent);
+      font-size: 16px;
+    }
+
+    /* ── TABLE WRAPPER ── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* Search bar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-gray);
+      font-size: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 11px 14px 11px 40px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .search-input:focus { border-color: var(--blue-mid); }
+
+    .filter-select {
+      padding: 11px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Table card */
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(13,27,62,0.07);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: linear-gradient(90deg, var(--blue-strong) 0%, #1e5096 100%);
+    }
+
+    thead th {
+      padding: 15px 18px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.75);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    thead th:first-child { width: 56px; text-align: center; }
+    thead th:nth-child(3) { width: 110px; }
+    thead th:nth-child(4) { width: 80px; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--hover); }
+
+    tbody tr.unassigned { background: #fafbfd; }
+    tbody tr.unassigned:hover { background: var(--hover); }
+
+    td {
+      padding: 13px 18px;
+      font-size: 14px;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-gray);
+      font-weight: 600;
+    }
+
+    .code-cell {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue-strong);
+      background: var(--blue-light);
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 1px;
+    }
+
+    .pin-cell {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--blue-mid);
+      letter-spacing: 2px;
+    }
+
+    .email-cell {
+      font-size: 13px;
+      color: var(--text-sec);
+    }
+
+    .badge-unassigned {
+      display: inline-block;
+      background: #f0f3f8;
+      color: var(--text-gray);
+      border: 1px solid #dde1e9;
+      border-radius: 50px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Row counter */
+    .result-count {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text-gray);
+      padding-left: 2px;
+    }
+
+    /* Responsive */
+    @media(max-width: 680px) {
+      header { padding: 24px 20px 20px; }
+      .header-stats { display: none; }
+      .container { padding: 20px 12px 40px; }
+      td, thead th { padding: 11px 12px; }
+      .code-cell { font-size: 11px; }
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-    <div class="login-box">
-        <h2>Acceso</h2>
-        <input type="password" id="pass" placeholder="Contraseña">
-        <button onclick="login()">Entrar</button>
+<!-- LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <span class="lock-icon">🔐</span>
+    <div class="lock-title">Acceso Restringido</div>
+    <div class="lock-subtitle">Códigos Innova 2026<br/>Ingresa la contraseña para continuar</div>
+    <input
+      class="lock-input"
+      type="password"
+      id="pwd-input"
+      placeholder="Contraseña"
+      autocomplete="off"
+    />
+    <button class="lock-btn" onclick="checkPassword()">Ingresar →</button>
+    <div class="lock-error" id="lock-error">Contraseña incorrecta. Intenta de nuevo.</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main-content">
+
+  <header>
+    <div class="header-inner">
+      <div class="header-badge">🎟️</div>
+      <div class="header-text">
+        <h1>Códigos Innova 2026</h1>
+        <p>Directorio de accesos y asignaciones</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-pill">Total <span id="stat-total">60</span></div>
+        <div class="stat-pill">Asignados <span id="stat-assigned">0</span></div>
+        <div class="stat-pill">Disponibles <span id="stat-free">0</span></div>
+      </div>
     </div>
+  </header>
+
+  <div class="container">
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" id="search" placeholder="Buscar código, email o PIN…" oninput="filterTable()"/>
+      </div>
+      <select class="filter-select" id="filter-status" onchange="filterTable()">
+        <option value="all">Todos</option>
+        <option value="assigned">Asignados</option>
+        <option value="unassigned">Sin asignar</option>
+      </select>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Código</th>
+            <th>PIN</th>
+            <th>Asignado a</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+    </div>
+    <div class="result-count" id="result-count"></div>
+
+  </div>
 </div>
 
-<!-- CONTENIDO -->
-<div id="contenido">
-<div class="container">
+<script>
+const DATA = [
+  [1,"A9KX2MZQPL8R","472","pepedelgado@msn.com"],
+  [2,"QW7ZL1X9MNB3","158","eucalip_tos1@hotmail.com"],
+  [3,"PL9X2AZQ8MKT","603","rockandres2006@gmail.com"],
+  [4,"Z8Q1XCVB7MNA","295","emartinez93@outlook.es"],
+  [5,"LMN3XZQ8WERT","741","fsalaza@prodigy.net.mx"],
+  [6,"X9A2QWPLMNB7","864","lissethgui11@icloud.com"],
+  [7,"ZQ8PL2X1MNRT","309","luismc07@outlook.com"],
+  [8,"MN8QW3XZPLK2","517","zaira12@live.com.mx"],
+  [9,"QAZXSW2EDC9R","682","trinidad_castro.itcm@outlook.com"],
+  [10,"PLOK9MNB2XZQ","134","luis_chan13@outlook.com"],
+  [11,"ZX9QWERT2MNB","958","lupita.cue@gmail.com"],
+  [12,"LKJH8GF2DSAQ","401","jmate0215@gmail.com"],
+  [13,"MNB7VCXZQPL2","776","brianalex8311@icloud.com"],
+  [14,"QWE9RTY2PLMN","223","brianalex8311@icloud.com"],
+  [15,"AZX2SWQ8EDCV","890","brianalex8311@icloud.com"],
+  [16,"PLM9OKN2IJUH","615","brianalex8311@icloud.com"],
+  [17,"QAZ8WSX2EDCR","372","brianalex8311@icloud.com"],
+  [18,"MNB2VCX9ZQPL","549","brianalex8311@icloud.com"],
+  [19,"ZXC8VBN2MQPL","781","brianalex8311@icloud.com"],
+  [20,"QWE2RTY9MNOP","264","brianalex8311@icloud.com"],
+  [21,"ASD2FGH9JKLQ","937","brianalex8311@icloud.com"],
+  [22,"POI9UYT2REWQ","118","brianalex8311@icloud.com"],
+  [23,"XCV2BNM9QWER","653","brianalex8311@icloud.com"],
+  [24,"QAZ2WSX9EDCV","845","brianalex8311@icloud.com"],
+  [25,"PLM2OKN9IJUH","502","brianalex8311@icloud.com"],
+  [26,"MNB9VCX2ZQPL","774","assassincrew1.0@gmail.com"],
+  [27,"ZXC2VBN9MQPL","361","assassincrew1.0@gmail.com"],
+  [28,"QWE9RTY2MNOP","996","assassincrew1.0@gmail.com"],
+  [29,"ASD9FGH2JKLQ","207","assassincrew1.0@gmail.com"],
+  [30,"POI2UYT9REWQ","488","assassincrew1.0@gmail.com"],
+  [31,"XCV9BNM2QWER","129","assassincrew1.0@gmail.com"],
+  [32,"QAZ9WSX2EDCV","560","assassincrew1.0@gmail.com"],
+  [33,"PLM9OKN2IJUH","834","assassincrew1.0@gmail.com"],
+  [34,"MNB2VCX9ZQPL","672","assassincrew1.0@gmail.com"],
+  [35,"ZXC9VBN2MQPL","315","assassincrew1.0@gmail.com"],
+  [36,"QWE2RTY9MNOP","947","assassincrew1.0@gmail.com"],
+  [37,"ASD2FGH9JKLQ","258","assassincrew1.0@gmail.com"],
+  [38,"POI9UYT2REWQ","603",null],
+  [39,"XCV2BNM9QWER","771",null],
+  [40,"QAZ2WSX9EDCV","420",null],
+  [41,"PLM2OKN9IJUH","685",null],
+  [42,"MNB9VCX2ZQPL","119",null],
+  [43,"ZXC2VBN9MQPL","908",null],
+  [44,"QWE9RTY2MNOP","344",null],
+  [45,"SKZZD0YAKQH6","823","fausto.puerto92@gmail.com"],
+  [46,"POI2UYT9REWQ","532","mbvallejor01@gmail.com"],
+  [47,"XCV9BNM2QWER","287","mmyrandd@gmail.com"],
+  [48,"QAZ9WSX2EDCV","694","danybenitez2003@gmail.com"],
+  [49,"PLM9OKN2IJUH","105",null],
+  [50,"MNB2VCX9ZQPL","873",null],
+  [51,"ZXC9VBN2MQPL","456",null],
+  [52,"QWE2RTY9MNOP","729",null],
+  [53,"ASD2FGH9JKLQ","310",null],
+  [54,"POI9UYT2REWQ","662",null],
+  [55,"XCV2BNM9QWER","941",null],
+  [56,"QAZ2WSX9EDCV","278",null],
+  [57,"PLM2OKN9IJUH","583",null],
+  [58,"MNB9VCX2ZQPL","147",null],
+  [59,"ZXC2VBN9MQPL","860",null],
+  [60,"QWE9RTY2MNOP","399",null],
+];
 
-<h1>Códigos Innova</h1>
+function checkPassword() {
+  const val = document.getElementById('pwd-input').value;
+  const err = document.getElementById('lock-error');
+  if (val === 'Innovajuega$$') {
+    document.getElementById('lock-screen').style.opacity = '0';
+    document.getElementById('lock-screen').style.transition = 'opacity 0.5s';
+    setTimeout(() => {
+      document.getElementById('lock-screen').style.display = 'none';
+      const main = document.getElementById('main-content');
+      main.style.display = 'block';
+      setTimeout(() => { main.style.opacity = '1'; }, 30);
+    }, 500);
+    renderTable(DATA);
+    updateStats();
+  } else {
+    err.classList.add('show');
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-input').focus();
+    setTimeout(() => err.classList.remove('show'), 3000);
+  }
+}
 
-<table>
-<thead>
-<tr>
-<th>No</th>
-<th>Código</th>
-<th>PIN</th>
-<th>Asignado</th>
-</tr>
-</thead>
+document.getElementById('pwd-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+});
 
-<tbody>
+function updateStats() {
+  const assigned = DATA.filter(r => r[3]).length;
+  document.getElementById('stat-total').textContent = DATA.length;
+  document.getElementById('stat-assigned').textContent = assigned;
+  document.getElementById('stat-free').textContent = DATA.length - assigned;
+}
 
-<tr><td>1</td><td>A9KX2MZQPL8R</td><td>472</td><td>pepedelgado@msn.com</td></tr>
-<tr><td>2</td><td>QW7ZL1X9MNB3</td><td>158</td><td>eucalip_tos1@hotmail.com</td></tr>
-<tr><td>3</td><td>PL9X2AZQ8MKT</td><td>603</td><td>rockandres2006@gmail.com</td></tr>
-<tr><td>4</td><td>Z8Q1XCVB7MNA</td><td>295</td><td>emartinez93@outlook.es</td></tr>
-<tr><td>5</td><td>LMN3XZQ8WERT</td><td>741</td><td>fsalaza@prodigy.net.mx</td></tr>
-<tr><td>6</td><td>X9A2QWPLMNB7</td><td>864</td><td>lissethgui11@icloud.com</td></tr>
-<tr><td>7</td><td>ZQ8PL2X1MNRT</td><td>309</td><td>luismc07@outlook.com</td></tr>
-<tr><td>8</td><td>MN8QW3XZPLK2</td><td>517</td><td>zaira12@live.com.mx</td></tr>
-<tr><td>9</td><td>QAZXSW2EDC9R</td><td>682</td><td>trinidad_castro.itcm@outlook.com</td></tr>
-<tr><td>10</td><td>PLOK9MNB2XZQ</td><td>134</td><td>luis_chan13@outlook.com</td></tr>
+function renderTable(rows) {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  rows.forEach(([no, code, pin, email]) => {
+    const isAssigned = !!email;
+    const tr = document.createElement('tr');
+    if (!isAssigned) tr.classList.add('unassigned');
+    tr.innerHTML = `
+      <td>${no}</td>
+      <td><span class="code-cell">${code}</span></td>
+      <td><span class="pin-cell">${pin}</span></td>
+      <td>${isAssigned
+        ? `<span class="email-cell">${email}</span>`
+        : `<span class="badge-unassigned">Sin asignar</span>`
+      }</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('result-count').textContent =
+    rows.length < DATA.length ? `Mostrando ${rows.length} de ${DATA.length} registros` : '';
+}
 
-<tr><td>11</td><td>ZX9QWERT2MNB</td><td>958</td><td>lupita.cue@gmail.com</td></tr>
-<tr><td>12</td><td>LKJH8GF2DSAQ</td><td>401</td><td>jmate0215@gmail.com</td></tr>
-<tr><td>13</td><td>MNB7VCXZQPL2</td><td>776</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>14</td><td>QWE9RTY2PLMN</td><td>223</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>15</td><td>AZX2SWQ8EDCV</td><td>890</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>16</td><td>PLM9OKN2IJUH</td><td>615</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>17</td><td>QAZ8WSX2EDCR</td><td>372</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>18</td><td>MNB2VCX9ZQPL</td><td>549</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>19</td><td>ZXC8VBN2MQPL</td><td>781</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>20</td><td>QWE2RTY9MNOP</td><td>264</td><td>brianalex8311@icloud.com</td></tr>
-
-<tr><td>21</td><td>ASD2FGH9JKLQ</td><td>937</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>22</td><td>POI9UYT2REWQ</td><td>118</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>23</td><td>XCV2BNM9QWER</td><td>653</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>24</td><td>QAZ2WSX9EDCV</td><td>845</td><td>brianalex8311@icloud.com</td></tr>
-<tr><td>25</td><td>PLM2OKN9IJUH</td><td>502</td><td>brianalex8311@icloud.com</td></tr>
-
-<tr><td>26</td><td>MNB9VCX2ZQPL</td><td>774</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>27</td><td>ZXC2VBN9MQPL</td><td>361</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>28</td><td>QWE9RTY2MNOP</td><td>996</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>29</td><td>ASD9FGH2JKLQ</td><td>207</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>30</td><td>POI2UYT9REWQ</td><td>488</td><td>assassincrew1.0@gmail.com</td></tr>
-
-<tr><td>31</td><td>XCV9BNM2QWER</td><td>129</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>32</td><td>QAZ9WSX2EDCV</td><td>560</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>33</td><td>PLM9OKN2IJUH</td><td>834</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>34</td><td>MNB2VCX9ZQPL</td><td>672</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>35</td><td>ZXC9VBN2MQPL</td><td>315</td><td>assassincrew1.0@gmail.com</td></tr>
-
-<tr><td>36</td><td>QWE2RTY9MNOP</td><td>947</td><td>assassincrew1.0@gmail.com</td></tr>
-<tr><td>37</td><td>ASD2FGH9JKLQ</td><td>258</td><td>assassincrew1.0@gmail.com</td></tr>
-
-<tr><td>38</td><td>POI9UYT2REWQ</td><td>603</td><td>Sin asignar</td></tr>
-<tr><td>39</td><td>XCV2BNM9QWER</td><td>771</td><td>Sin asignar</td></tr>
-<tr><td>40</td><td>QAZ2WSX9EDCV</td><td>420</td><td>Sin asignar</td></tr>
-<tr><td>41</td><td>PLM2OKN9IJUH</td><td>685</td><td>Sin asignar</td></tr>
-<tr><td>42</td><td>MNB9VCX2ZQPL</td><td>119</td><td>Sin asignar</td></tr>
-<tr><td>43</td><td>ZXC2VBN9MQPL</td><td>908</td><td>Sin asignar</td></tr>
-<tr><td>44</td><td>QWE9RTY2MNOP</td><td>344</td><td>Sin asignar</td></tr>
-
-<tr><td>45</td><td>SKZZD0YAKQH6</td><td>823</td><td>fausto.puerto92@gmail.com</td></tr>
-<tr><td>46</td><td>POI2UYT9REWQ</td><td>532</td><td>mbvallejor01@gmail.com</td></tr>
-<tr><td>47</td><td>XCV9BNM2QWER</td><td>287</td><td>mmyrandd@gmail.com</td></tr>
-<tr><td>48</td><td>QAZ9WSX2EDCV</td><td>694</td><td>danybenitez2003@gmail.com</td></tr>
-
-<tr><td>49</td><td>PLM9OKN2IJUH</td><td>105</td><td>Sin asignar</td></tr>
-<tr><td>50</td><td>MNB2VCX9ZQPL</td><td>873</td><td>Sin asignar</td></tr>
-<tr><td>51</td><td>ZXC9VBN2MQPL</td><td>456</td><td>Sin asignar</td></tr>
-<tr><td>52</td><td>QWE2RTY9MNOP</td><td>729</td><td>Sin asignar</td></tr>
-<tr><td>53</td><td>ASD2FGH9JKLQ</td><td>310</td><td>Sin asignar</td></tr>
-<tr><td>54</td><td>POI9UYT2REWQ</td><td>662</td><td>Sin asignar</td></tr>
-<tr><td>55</td><td>XCV2BNM9QWER</td><td>941</td><td>Sin asignar</td></tr>
-<tr><td>56</td><td>QAZ2WSX9EDCV</td><td>278</td><td>Sin asignar</td></tr>
-<tr><td>57</td><td>PLM2OKN9IJUH</td><td>583</td><td>Sin asignar</td></tr>
-<tr><td>58</td><td>MNB9VCX2ZQPL</td><td>147</td><td>Sin asignar</td></tr>
-<tr><td>59</td><td>ZXC2VBN9MQPL</td><td>860</td><td>Sin asignar</td></tr>
-<tr><td>60</td><td>QWE9RTY2MNOP</td><td>399</td><td>Sin asignar</td></tr>
-
-</tbody>
-</table>
-
-</div>
-</div>
-
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const filtered = DATA.filter(([no, code, pin, email]) => {
+    const matchQuery = !q ||
+      code.toLowerCase().includes(q) ||
+      pin.includes(q) ||
+      (email && email.toLowerCase().includes(q)) ||
+      String(no).includes(q);
+    const matchStatus =
+      status === 'all' ||
+      (status === 'assigned' && !!email) ||
+      (status === 'unassigned' && !email);
+    return matchQuery && matchStatus;
+  });
+  renderTable(filtered);
+}
+</script>
 </body>
 </html>
