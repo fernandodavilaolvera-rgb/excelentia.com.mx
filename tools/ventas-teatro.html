@@ -437,23 +437,7 @@ header .subtitle {
 .toast.error { background: #3a000f; border-color: var(--neon-magenta); color: var(--neon-magenta); box-shadow: 0 4px 24px rgba(255,45,120,0.3); }
 
 /* ── MODAL EDITOR ── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(4px);
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.modal-overlay.open {
-  opacity: 1;
-  pointer-events: all;
-}
+/* modal now inline, no overlay needed */
 .modal-box {
   background: linear-gradient(160deg, #001f12, #000d08);
   border: 1.5px solid rgba(0,255,136,0.35);
@@ -461,10 +445,9 @@ header .subtitle {
   padding: 28px 24px 24px;
   width: min(340px, 90vw);
   box-shadow: 0 0 60px rgba(0,255,136,0.15);
-  transform: translateY(20px) scale(0.97);
-  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+
 }
-.modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+
 
 .modal-title {
   font-family: 'Black Ops One', cursive;
@@ -566,7 +549,7 @@ header .subtitle {
 
 <!-- HINT -->
 <div class="longpress-hint">
-  💡 Mantén presionado cualquier producto para editar el precio
+  ✌️ Toca dos veces cualquier producto para editar su precio
 </div>
 
 <!-- SECCIÓN 1: PRODUCTOS + ART 1 -->
@@ -575,6 +558,19 @@ header .subtitle {
   <!-- Una sola grilla 3 col: Tote/Stickers/Oráculo · Gorra/Playera/Art1 -->
   <div class="btn-grid-3" id="productGrid"></div>
   <p class="cart-summary" id="cartSummary"></p>
+</div>
+
+<!-- MODAL INLINE -->
+<div id="modalOverlay" style="display:none; margin:14px 14px 0;">
+  <div class="modal-box" style="width:100%;border-radius:20px;">
+    <p class="modal-title" id="modalTitle">Editar precio</p>
+    <p class="modal-subtitle" id="modalSubtitle">Solo aplica para esta venta</p>
+    <div id="modalFields"></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-btn modal-btn-confirm" id="modalConfirm">Aplicar</button>
+    </div>
+  </div>
 </div>
 
 <div class="divider"></div>
@@ -632,87 +628,65 @@ header .subtitle {
 
 <!-- SECCIÓN 6: ART 2-6 -->
 <div class="section">
-  <p class="section-label">Artículos extra <span style="opacity:0.4;font-size:9px;letter-spacing:0.1em">· presiona para configurar</span></p>
+  <p class="section-label">Artículos extra <span style="opacity:0.4;font-size:9px;letter-spacing:0.1em">· toca dos veces para editar</span></p>
   <div class="btn-grid-3" id="artGrid"></div>
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- MODAL EDITAR PRECIO / CONFIGURAR ART -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-box">
-    <p class="modal-title" id="modalTitle">Editar precio</p>
-    <p class="modal-subtitle" id="modalSubtitle">Solo aplica para esta venta</p>
-    <div id="modalFields"></div>
-    <div class="modal-btns">
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="modal-btn modal-btn-confirm" id="modalConfirm">Aplicar</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// ── GOOGLE SCRIPT URL ──────────────────────────────
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKMqASBXbW7ZzyhUTN_HBB8z8Vr2VWQr0c2SNpezFIL2_cONpoTMNOt7NA_FDUCG_gAQ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwe-dD_QDPLLguCrbyIDkEwajeVC4lcSGbC6XN8Z168qn7kaWGK_eGxRVZTtwBXueZD/exec';
 
-// ── PRODUCTOS FIJOS ────────────────────────────────
-// Orden: Bolsas, Stickers, Oráculo, Gorras, Playeras
+// ── PRODUCTOS FIJOS ──
 const FIXED_PRODUCTS = [
-  { key: 'bolsas',   name: 'Tote Bag',   icon: '👜', basePrice: 210 },
-  { key: 'stickers', name: 'Stickers',   icon: '✨', basePrice: 120 },
-  { key: 'oraculos', name: 'Oráculo',    icon: '🔮', basePrice: 150 },
-  { key: 'gorras',   name: 'Gorra',      icon: '🧢', basePrice: 150 },
-  { key: 'playeras', name: 'Playera',    icon: '👕', basePrice: 350 },
+  { key:'bolsas',   name:'Tote Bag',  icon:'👜', basePrice:210 },
+  { key:'stickers', name:'Stickers',  icon:'✨', basePrice:120 },
+  { key:'oraculos', name:'Oráculo',   icon:'🔮', basePrice:150 },
+  { key:'gorras',   name:'Gorra',     icon:'🧢', basePrice:150 },
+  { key:'playeras', name:'Playera',   icon:'👕', basePrice:350 },
 ];
-
-// 6 artículos comodín: art1..art6
 const ART_COUNT = 6;
 
-// ── ESTADO ────────────────────────────────────────
-let fixedQty     = FIXED_PRODUCTS.map(() => 0);
-let fixedPrices  = FIXED_PRODUCTS.map(p => p.basePrice); // precio actual (puede estar editado)
-let artConfigs   = Array(ART_COUNT).fill(null).map(() => ({ name:'', icon:'🎁', price:0, configured:false }));
-let artQty       = Array(ART_COUNT).fill(0);
-let artPrices    = Array(ART_COUNT).fill(0); // precio actual art
-
+// ── ESTADO ──
+let fixedQty    = FIXED_PRODUCTS.map(()=>0);
+let fixedPrices = FIXED_PRODUCTS.map(p=>p.basePrice);
+let artConfigs  = Array(ART_COUNT).fill(null).map(()=>({name:'',icon:'🎁',price:0,configured:false}));
+let artQty      = Array(ART_COUNT).fill(0);
+let artPrices   = Array(ART_COUNT).fill(0);
 let paymentMethod = null;
+let modalMode = null, modalIdx = -1;
 
-// Modal state
-let modalMode = null; // 'editPrice' | 'configArt' | 'editArtPrice'
-let modalIdx  = -1;
+// Doble tap
+const DOUBLE_TAP_MS = 350;
+let tapTimers = {};
 
-// LongPress
-const LONG_PRESS_MS = 600;
-let pressTimer = null;
-let pressEl = null;
-
-// ── FONDO CANVAS ───────────────────────────────────
+// ── FONDO CANVAS ──
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let W, H, t = 0;
-function resizeCanvas() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+function resizeCanvas(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-function drawBg() {
-  ctx.fillStyle = '#060d0b'; ctx.fillRect(0,0,W,H);
-  const cx = W*.5, cy = H*.38;
-  for (let i=18; i>0; i--) {
-    const r = (i/18)*Math.max(W,H)*.75, wave = Math.sin(t*.4+i*.5)*12;
+function drawBg(){
+  ctx.fillStyle='#060d0b'; ctx.fillRect(0,0,W,H);
+  const cx=W*.5, cy=H*.38;
+  for(let i=18;i>0;i--){
+    const r=(i/18)*Math.max(W,H)*.75, wave=Math.sin(t*.4+i*.5)*12;
     ctx.beginPath(); ctx.arc(cx,cy,r+wave,0,Math.PI*2);
-    ctx.strokeStyle = `hsla(${150+i*4+t*5},80%,45%,${0.04+(i%3===0?.03:0)})`;
+    ctx.strokeStyle=`hsla(${150+i*4+t*5},80%,45%,${0.04+(i%3===0?.03:0)})`;
     ctx.lineWidth=1.5; ctx.stroke();
   }
-  for (let i=0;i<12;i++) {
-    const a=(i/12)*Math.PI*2+t*.05, x2=cx+Math.cos(a)*Math.max(W,H), y2=cy+Math.sin(a)*Math.max(W,H);
+  for(let i=0;i<12;i++){
+    const a=(i/12)*Math.PI*2+t*.05,x2=cx+Math.cos(a)*Math.max(W,H),y2=cy+Math.sin(a)*Math.max(W,H);
     const g=ctx.createLinearGradient(cx,cy,x2,y2);
     g.addColorStop(0,'rgba(0,255,136,0.06)'); g.addColorStop(1,'rgba(0,255,136,0)');
     ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x2,y2);
     ctx.strokeStyle=g; ctx.lineWidth=1; ctx.stroke();
   }
-  for (let i=0;i<24;i++) {
-    const a=(i/24)*Math.PI*2+t*.08, r=Math.min(W,H)*.35;
-    const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r, p=.5+.5*Math.sin(t*2+i*.8);
+  for(let i=0;i<24;i++){
+    const a=(i/24)*Math.PI*2+t*.08,r=Math.min(W,H)*.35;
+    const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r,p=.5+.5*Math.sin(t*2+i*.8);
     ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2);
     ctx.fillStyle=`rgba(0,255,136,${.15*p})`; ctx.fill();
   }
@@ -720,362 +694,325 @@ function drawBg() {
 }
 drawBg();
 
-// ── RENDER ────────────────────────────────────────
-function renderFixed() {
+// ── DOBLE TAP ──
+// key: string identificador del botón
+// onSingle: función para tap simple
+// onDouble: función para doble tap
+function setupDoubleTap(btn, key, onSingle, onDouble) {
+  btn.addEventListener('click', (e) => {
+    if (tapTimers[key]) {
+      clearTimeout(tapTimers[key]);
+      delete tapTimers[key];
+      onDouble();
+    } else {
+      tapTimers[key] = setTimeout(() => {
+        delete tapTimers[key];
+        onSingle();
+      }, DOUBLE_TAP_MS);
+    }
+  });
+}
+
+// ── INIT BOTONES (una sola vez) ──
+function initButtons() {
   const grid = document.getElementById('productGrid');
-  grid.innerHTML = '';
 
   // 5 productos fijos
   FIXED_PRODUCTS.forEach((p, i) => {
     const btn = document.createElement('button');
-    btn.className = 'main-btn' + (fixedQty[i]>0?' active-product':'') + (fixedPrices[i]!==p.basePrice?' price-edited':'');
+    btn.className = 'main-btn';
     btn.id = 'fixed-btn-'+i;
     btn.innerHTML = `
-      <span class="qty-badge ${fixedQty[i]>0?'visible':''}" id="fixed-badge-${i}">${fixedQty[i]}</span>
-      <div class="press-ring"><div class="press-ring-fill" id="fixed-ring-${i}"></div></div>
+      <span class="qty-badge" id="fixed-badge-${i}">0</span>
       <span class="btn-icon">${p.icon}</span>
       <span class="btn-name">${p.name}</span>
-      <span class="btn-price" id="fixed-price-${i}">$${fixedPrices[i]}</span>
+      <span class="btn-price" id="fixed-price-${i}">$${p.basePrice}</span>
     `;
-    setupProductBtn(btn, 'fixed', i);
+    setupDoubleTap(btn, 'f'+i,
+      () => { fixedQty[i]++; updateUI(); },
+      () => openEditPrice(i)
+    );
     grid.appendChild(btn);
   });
 
-  // Art 1 como 6º botón — mismo tamaño, misma grilla
-  grid.appendChild(makeArtBtn(0));
+  // Art 1 como 6º botón
+  grid.appendChild(createArtBtn(0));
+
+  // Art 2-6
+  const artGrid = document.getElementById('artGrid');
+  for(let i=1; i<ART_COUNT; i++) artGrid.appendChild(createArtBtn(i));
 }
 
-function renderArt() {
-  // Art 2-6 → sección inferior (artGrid)
-  const grid = document.getElementById('artGrid');
-  if (grid) {
-    grid.innerHTML = '';
-    for (let i = 1; i < ART_COUNT; i++) {
-      grid.appendChild(makeArtBtn(i));
-    }
-  }
-}
-
-function makeArtBtn(i) {
-  const cfg = artConfigs[i];
-  const isArt1 = i === 0;
-  const baseClass = isArt1 ? 'main-btn' : 'art-btn';
+function createArtBtn(i) {
+  const isArt1 = i===0;
   const btn = document.createElement('button');
-  btn.className = baseClass + (cfg.configured?' configured':'') + (artQty[i]>0?' active-product':'') + (cfg.configured && artPrices[i]!==cfg.price?' price-edited':'');
+  btn.className = isArt1 ? 'main-btn' : 'art-btn';
   btn.id = 'art-btn-'+i;
-  if (cfg.configured) {
-    btn.innerHTML = `
-      <span class="qty-badge ${artQty[i]>0?'visible':''}" id="art-badge-${i}">${artQty[i]}</span>
-      <div class="press-ring"><div class="press-ring-fill" id="art-ring-${i}"></div></div>
-      <span class="btn-icon">${cfg.icon}</span>
-      <span class="btn-name">${cfg.name}</span>
-      <span class="btn-price" id="art-price-${i}">$${artPrices[i]}</span>
-    `;
-    setupProductBtn(btn, 'art', i);
-  } else {
-    btn.innerHTML = `
-      <span class="${isArt1 ? 'btn-icon' : 'art-plus'}" style="font-size:20px;opacity:0.35">＋</span>
-      <span class="${isArt1 ? 'btn-name' : 'art-empty-label'}">Art ${i+1}</span>
-    `;
-    btn.addEventListener('click', () => openConfigArt(i));
-  }
+  btn.innerHTML = `
+    <span class="qty-badge" id="art-badge-${i}">0</span>
+    <div class="art-layer-empty" id="art-empty-${i}">
+      <span style="font-size:22px;opacity:0.4">＋</span>
+      <span class="${isArt1?'btn-name':'art-empty-label'}">Art ${i+1}</span>
+    </div>
+    <div class="art-layer-cfg" id="art-cfg-${i}" style="display:none;flex-direction:column;align-items:center;gap:3px;">
+      <span class="${isArt1?'btn-icon':'art-icon'}" id="art-icon-${i}">🎁</span>
+      <span class="${isArt1?'btn-name':'art-name'}" id="art-label-${i}"></span>
+      <span class="${isArt1?'btn-price':'art-price'}" id="art-price-${i}"></span>
+    </div>
+  `;
+  setupDoubleTap(btn, 'a'+i,
+    () => {
+      // Tap simple
+      if (artConfigs[i].configured) { artQty[i]++; updateUI(); }
+      else openConfigArt(i);
+    },
+    () => {
+      // Doble tap
+      if (artConfigs[i].configured) openEditArtPrice(i);
+      else openConfigArt(i);
+    }
+  );
   return btn;
 }
 
-// ── LONG PRESS SETUP ──────────────────────────────
-function setupProductBtn(btn, type, idx) {
-  // Usamos una variable de estado por closure, no compartida
-  let pressing = false;
-  let longFired = false;
-  let timer = null;
-
-  const getring = () => btn.querySelector('.press-ring-fill');
-
-  const openEditor = () => {
-    if (type==='fixed') openEditPrice(idx);
-    else openEditArtPrice(idx);
-  };
-
-  const startPress = () => {
-    if (pressing) return;
-    pressing = true;
-    longFired = false;
-    btn.classList.add('pressing');
-    const r = btn.querySelector('.press-ring-fill');
-    if (r) r.style.height = '100%';
-    timer = setTimeout(() => {
-      longFired = true;
-      pressing = false;
-      btn.classList.remove('pressing');
-      const r2 = btn.querySelector('.press-ring-fill');
-      if (r2) r2.style.height = '0%';
-      if (navigator.vibrate) navigator.vibrate([40,20,40]);
-      openEditor();
-    }, LONG_PRESS_MS);
-  };
-
-  const endPress = () => {
-    if (!pressing) return; // ya terminó (long press se disparó)
-    clearTimeout(timer);
-    pressing = false;
-    btn.classList.remove('pressing');
-    const r = btn.querySelector('.press-ring-fill');
-    if (r) r.style.height = '0%';
-    if (!longFired) {
-      if (navigator.vibrate) navigator.vibrate(30);
-      if (type==='fixed') { fixedQty[idx]++; }
-      else { artQty[idx]++; }
-      updateUI();
-    }
-    longFired = false;
-  };
-
-  const cancelPress = () => {
-    clearTimeout(timer);
-    pressing = false;
-    longFired = false;
-    btn.classList.remove('pressing');
-    const r = btn.querySelector('.press-ring-fill');
-    if (r) r.style.height = '0%';
-  };
-
-  // Touch (movil)
-  btn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(); }, {passive:false});
-  btn.addEventListener('touchend',   (e) => { e.preventDefault(); endPress(); },   {passive:false});
-  btn.addEventListener('touchcancel',(e) => { e.preventDefault(); cancelPress(); },{passive:false});
-
-  // Mouse (desktop)
-  btn.addEventListener('mousedown', startPress);
-  btn.addEventListener('mouseup',   endPress);
-  btn.addEventListener('mouseleave', cancelPress);
-}
-
-// ── UPDATE UI ─────────────────────────────────────
+// ── UPDATE UI ──
 function updateUI() {
-  renderFixed();
-  renderArt();
+  // Productos fijos
+  FIXED_PRODUCTS.forEach((p,i) => {
+    const btn   = document.getElementById('fixed-btn-'+i);
+    const badge = document.getElementById('fixed-badge-'+i);
+    const price = document.getElementById('fixed-price-'+i);
+    if(!btn) return;
+    btn.className = 'main-btn'
+      +(fixedQty[i]>0?' active-product':'')
+      +(fixedPrices[i]!==p.basePrice?' price-edited':'');
+    badge.textContent = fixedQty[i];
+    badge.className = 'qty-badge'+(fixedQty[i]>0?' visible':'');
+    price.textContent = '$'+fixedPrices[i];
+    // Indicador de precio editado
+    btn.querySelector('.price-edit-dot') && btn.querySelector('.price-edit-dot').remove();
+    if(fixedPrices[i]!==p.basePrice){
+      const dot = document.createElement('span');
+      dot.className='price-edit-dot';
+      dot.style.cssText='position:absolute;top:6px;left:8px;font-size:10px;color:var(--neon-orange)';
+      dot.textContent='✎';
+      btn.appendChild(dot);
+    }
+  });
 
+  // Art
+  for(let i=0;i<ART_COUNT;i++) updateArtBtn(i);
+
+  // Total
   const total = calcTotal();
-  document.getElementById('totalAmount').textContent = '$' + total.toLocaleString('es-MX');
+  document.getElementById('totalAmount').textContent = '$'+total.toLocaleString('es-MX');
 
   // Summary
   const parts = [];
-  FIXED_PRODUCTS.forEach((p,i) => { if(fixedQty[i]>0) parts.push(`${fixedQty[i]}× ${p.name}`); });
-  artConfigs.forEach((c,i) => { if(c.configured && artQty[i]>0) parts.push(`${artQty[i]}× ${c.name}`); });
+  FIXED_PRODUCTS.forEach((p,i)=>{ if(fixedQty[i]>0) parts.push(`${fixedQty[i]}× ${p.name}`); });
+  artConfigs.forEach((c,i)=>{ if(c.configured&&artQty[i]>0) parts.push(`${artQty[i]}× ${c.name}`); });
   document.getElementById('cartSummary').textContent = parts.join('  ·  ');
 
   // Pago
-  ['Efectivo','Tarjeta','Transferencia'].forEach(m => {
+  ['Efectivo','Tarjeta','Transferencia'].forEach(m=>{
     const el = document.getElementById('pay-'+m);
-    el.className = 'main-btn' + (m===paymentMethod?' active-pay':'');
+    el.className = 'main-btn'+(m===paymentMethod?' active-pay':'');
   });
 
-  const hasItems = fixedQty.some(q=>q>0) || artQty.some(q=>q>0);
-  document.getElementById('registerBtn').disabled = !(hasItems && paymentMethod);
+  const hasItems = fixedQty.some(q=>q>0)||artQty.some(q=>q>0);
+  document.getElementById('registerBtn').disabled = !(hasItems && paymentMethod && total>0);
 }
 
-function calcTotal() {
-  let t = 0;
-  fixedQty.forEach((q,i) => t += q * fixedPrices[i]);
-  artQty.forEach((q,i) => { if(artConfigs[i].configured) t += q * artPrices[i]; });
-  return t;
+function updateArtBtn(i) {
+  const cfg    = artConfigs[i];
+  const isArt1 = i===0;
+  const btn    = document.getElementById('art-btn-'+i);
+  const badge  = document.getElementById('art-badge-'+i);
+  const layerE = document.getElementById('art-empty-'+i);
+  const layerC = document.getElementById('art-cfg-'+i);
+  const label  = document.getElementById('art-label-'+i);
+  const price  = document.getElementById('art-price-'+i);
+  const icon   = document.getElementById('art-icon-'+i);
+  if(!btn) return;
+
+  if(cfg.configured){
+    btn.className = (isArt1?'main-btn':'art-btn configured')
+      +(artQty[i]>0?' active-product':'')
+      +(artPrices[i]!==cfg.price?' price-edited':'');
+    layerE.style.display='none';
+    layerC.style.display='flex';
+    if(icon)  icon.textContent  = cfg.icon;
+    if(label) label.textContent = cfg.name;
+    if(price) price.textContent = '$'+artPrices[i];
+    if(badge){ badge.textContent=artQty[i]; badge.className='qty-badge'+(artQty[i]>0?' visible':''); }
+  } else {
+    btn.className = isArt1?'main-btn':'art-btn';
+    layerE.style.display='';
+    layerC.style.display='none';
+    if(badge){ badge.textContent='0'; badge.className='qty-badge'; }
+  }
 }
 
-// ── PAGO ──────────────────────────────────────────
-function selectPayment(method) {
-  paymentMethod = method;
+function calcTotal(){
+  let total=0;
+  fixedQty.forEach((q,i)=>total+=q*fixedPrices[i]);
+  artQty.forEach((q,i)=>{ if(artConfigs[i].configured) total+=q*artPrices[i]; });
+  return total;
+}
+
+// ── PAGO ──
+function selectPayment(method){ paymentMethod=method; updateUI(); }
+
+// ── LIMPIAR ──
+function clearCart(silent){
+  fixedQty=FIXED_PRODUCTS.map(()=>0);
+  fixedPrices=FIXED_PRODUCTS.map(p=>p.basePrice);
+  artQty=Array(ART_COUNT).fill(0);
+  artPrices=artConfigs.map(c=>c.price);
+  paymentMethod=null;
   updateUI();
+  if(!silent) showToast('Venta borrada');
 }
 
-// ── LIMPIAR ───────────────────────────────────────
-function clearCart(silent) {
-  fixedQty     = FIXED_PRODUCTS.map(()=>0);
-  fixedPrices  = FIXED_PRODUCTS.map(p=>p.basePrice);
-  artQty       = Array(ART_COUNT).fill(0);
-  artPrices    = artConfigs.map(c=>c.price);
-  paymentMethod = null;
-  updateUI();
-  if (!silent) showToast('Venta borrada');
+// ── MODAL ──
+function openModal(){ const m=document.getElementById('modalOverlay'); m.style.display='block'; m.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+function closeModal(){
+  document.getElementById('modalOverlay').style.display='none';
+  document.getElementById('modalFields').innerHTML='';
 }
 
-// ── MODAL ─────────────────────────────────────────
-function openModal() { document.getElementById('modalOverlay').classList.add('open'); }
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.getElementById('modalFields').innerHTML = '';
-}
-
-// Editar precio producto fijo
-function openEditPrice(idx) {
-  const p = FIXED_PRODUCTS[idx];
-  modalMode = 'editPrice'; modalIdx = idx;
-  document.getElementById('modalTitle').textContent = `Precio: ${p.name}`;
-  document.getElementById('modalSubtitle').textContent = `Base $${p.basePrice} · solo esta venta`;
-  document.getElementById('modalFields').innerHTML = `
+function openEditPrice(idx){
+  const p=FIXED_PRODUCTS[idx];
+  modalMode='editPrice'; modalIdx=idx;
+  document.getElementById('modalTitle').textContent=`Precio: ${p.name}`;
+  document.getElementById('modalSubtitle').textContent=`Base $${p.basePrice} · solo esta venta`;
+  document.getElementById('modalFields').innerHTML=`
     <div class="modal-field">
       <label>Nuevo precio</label>
-      <input type="number" id="modalInput" value="${fixedPrices[idx]}" min="0" inputmode="numeric" placeholder="$${p.basePrice}">
+      <input type="number" id="modalInput" value="${fixedPrices[idx]}" min="0" inputmode="numeric">
     </div>
-    <div class="price-chips">
-      ${quickChips(p.basePrice)}
-    </div>
+    <div class="price-chips">${quickChips(p.basePrice)}</div>
   `;
-  document.getElementById('modalConfirm').onclick = confirmEditPrice;
+  document.getElementById('modalConfirm').onclick=()=>{
+    const val=parseInt(document.getElementById('modalInput').value);
+    if(!isNaN(val)&&val>=0){
+      fixedPrices[idx]=val;
+      if(fixedQty[idx]===0) fixedQty[idx]=1; // agrega 1 automaticamente
+    }
+    closeModal(); updateUI();
+  };
   openModal();
-  setTimeout(()=>document.getElementById('modalInput').select(),300);
+  setTimeout(()=>{ const inp=document.getElementById('modalInput'); if(inp) inp.select(); },300);
 }
 
-function confirmEditPrice() {
-  const val = parseInt(document.getElementById('modalInput').value);
-  if (!isNaN(val) && val >= 0) { fixedPrices[modalIdx] = val; }
-  closeModal(); updateUI();
-}
-
-// Editar precio art
-function openEditArtPrice(idx) {
-  const cfg = artConfigs[idx];
-  modalMode = 'editArtPrice'; modalIdx = idx;
-  document.getElementById('modalTitle').textContent = `Precio: ${cfg.name}`;
-  document.getElementById('modalSubtitle').textContent = `Base $${cfg.price} · solo esta venta`;
-  document.getElementById('modalFields').innerHTML = `
+function openEditArtPrice(idx){
+  const cfg=artConfigs[idx];
+  modalMode='editArtPrice'; modalIdx=idx;
+  document.getElementById('modalTitle').textContent=`Precio: ${cfg.name}`;
+  document.getElementById('modalSubtitle').textContent=`Base $${cfg.price} · solo esta venta`;
+  document.getElementById('modalFields').innerHTML=`
     <div class="modal-field">
       <label>Nuevo precio</label>
       <input type="number" id="modalInput" value="${artPrices[idx]}" min="0" inputmode="numeric">
     </div>
     <div class="price-chips">${quickChips(cfg.price)}</div>
   `;
-  document.getElementById('modalConfirm').onclick = confirmEditArtPrice;
+  document.getElementById('modalConfirm').onclick=()=>{
+    const val=parseInt(document.getElementById('modalInput').value);
+    if(!isNaN(val)&&val>=0){
+      artPrices[idx]=val;
+      if(artQty[idx]===0) artQty[idx]=1; // agrega 1 automaticamente
+    }
+    closeModal(); updateUI();
+  };
   openModal();
-  setTimeout(()=>document.getElementById('modalInput').select(),300);
+  setTimeout(()=>{ const inp=document.getElementById('modalInput'); if(inp) inp.select(); },300);
 }
 
-function confirmEditArtPrice() {
-  const val = parseInt(document.getElementById('modalInput').value);
-  if (!isNaN(val) && val >= 0) { artPrices[modalIdx] = val; }
-  closeModal(); updateUI();
-}
-
-// Configurar art nuevo
-function openConfigArt(idx) {
-  modalMode = 'configArt'; modalIdx = idx;
-  document.getElementById('modalTitle').textContent = `Artículo ${idx+1}`;
-  document.getElementById('modalSubtitle').textContent = 'Configura nombre y precio';
-  document.getElementById('modalFields').innerHTML = `
+function openConfigArt(idx){
+  modalMode='configArt'; modalIdx=idx;
+  document.getElementById('modalTitle').textContent=`Artículo ${idx+1}`;
+  document.getElementById('modalSubtitle').textContent='Configura nombre y precio';
+  document.getElementById('modalFields').innerHTML=`
     <div class="modal-field">
       <label>Nombre</label>
-      <input type="text" id="modalName" placeholder="Ej: Poster, Pin, etc." style="font-size:15px" value="${artConfigs[idx].name}">
+      <input type="text" id="modalName" placeholder="Ej: Poster, Pin..." style="font-size:15px" value="${artConfigs[idx].name}">
     </div>
     <div class="modal-field">
       <label>Precio</label>
       <input type="number" id="modalInput" value="${artConfigs[idx].price||''}" min="0" inputmode="numeric" placeholder="$0">
     </div>
   `;
-  document.getElementById('modalConfirm').onclick = confirmConfigArt;
+  document.getElementById('modalConfirm').onclick=()=>{
+    const name=(document.getElementById('modalName').value||'').trim();
+    const price=parseInt(document.getElementById('modalInput').value)||0;
+    if(!name){ showToast('Escribe un nombre',true); return; }
+    artConfigs[idx]={name,icon:'🎁',price,configured:true};
+    artPrices[idx]=price;
+    closeModal(); updateUI();
+  };
   openModal();
-  setTimeout(()=>document.getElementById('modalName').focus(),300);
+  setTimeout(()=>{ const inp=document.getElementById('modalName'); if(inp) inp.focus(); },300);
 }
 
-function confirmConfigArt() {
-  const name  = (document.getElementById('modalName').value || '').trim();
-  const price = parseInt(document.getElementById('modalInput').value) || 0;
-  if (!name) { showToast('Escribe un nombre', true); return; }
-  artConfigs[modalIdx] = { name, icon:'🎁', price, configured:true };
-  artPrices[modalIdx]  = price;
-  closeModal(); updateUI();
-}
-
-// Chips de precio rápido
-function quickChips(base) {
-  const opts = new Set([base, base-10, base-20, base-50, Math.round(base*.9/10)*10]);
-  return [...opts].filter(v=>v>0).sort((a,b)=>a-b).map(v =>
-    `<span class="price-chip" onclick="document.getElementById('modalInput').value=${v}">\$${v}</span>`
+function quickChips(base){
+  const opts=new Set([base,base-10,base-20,base-50,Math.round(base*.9/10)*10]);
+  return [...opts].filter(v=>v>0).sort((a,b)=>a-b).map(v=>
+    `<span class="price-chip" onclick="document.getElementById('modalInput').value=${v}">$${v}</span>`
   ).join('');
 }
 
-// Cerrar modal al click en overlay
-document.getElementById('modalOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// ── TOAST ─────────────────────────────────────────
-function showToast(msg, isError) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError?' error':'');
+// ── TOAST ──
+function showToast(msg,isError){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(isError?' error':'');
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// ── REGISTRAR VENTA ───────────────────────────────
-async function registerSale() {
-  const total = calcTotal();
-  if (!total || !paymentMethod) return;
-
-  const btn = document.getElementById('registerBtn');
-  btn.disabled = true;
-  btn.innerHTML = '⏳';
-
-  const fecha = new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
-  const pago  = paymentMethod;
-
-  // Items descripción
-  const itemParts = [];
-  FIXED_PRODUCTS.forEach((p,i) => { if(fixedQty[i]>0) itemParts.push(`${fixedQty[i]}x ${p.name}${fixedPrices[i]!==p.basePrice?' ($'+fixedPrices[i]+')':''}`); });
-  artConfigs.forEach((c,i) => { if(c.configured && artQty[i]>0) itemParts.push(`${artQty[i]}x ${c.name}${artPrices[i]!==c.price?' ($'+artPrices[i]+')':''}`); });
-  const items = itemParts.join(', ');
-
-  // Totales por método
-  const esEfectivo      = pago==='Efectivo'      ? total : 0;
-  const esTarjeta       = pago==='Tarjeta'       ? total : 0;
-  const esTransferencia = pago==='Transferencia' ? total : 0;
-
-  // Precios individuales (subtotal por tipo)
-  const bolsasTotal   = fixedQty[0] * fixedPrices[0];
-  const stickersTotal = fixedQty[1] * fixedPrices[1];
-  const oraTotal      = fixedQty[2] * fixedPrices[2];
-  const gorrasTotal   = fixedQty[3] * fixedPrices[3];
-  const playerasTotal = fixedQty[4] * fixedPrices[4];
-  const artTotals     = artQty.map((q,i) => artConfigs[i].configured ? q * artPrices[i] : 0);
-
-  const params = new URLSearchParams({
-    fecha,
-    bolsas:   fixedQty[0],
-    stickers: fixedQty[1],
-    oraculos: fixedQty[2],
-    gorras:   fixedQty[3],
-    playeras: fixedQty[4],
-    art1: artConfigs[0].configured ? artQty[0] : 0,
-    art2: artConfigs[1].configured ? artQty[1] : 0,
-    art3: artConfigs[2].configured ? artQty[2] : 0,
-    art4: artConfigs[3].configured ? artQty[3] : 0,
-    art5: artConfigs[4].configured ? artQty[4] : 0,
-    art6: artConfigs[5].configured ? artQty[5] : 0,
-    art1nombre: artConfigs[0].name||'',
-    art2nombre: artConfigs[1].name||'',
-    art3nombre: artConfigs[2].name||'',
-    art4nombre: artConfigs[3].name||'',
-    art5nombre: artConfigs[4].name||'',
-    art6nombre: artConfigs[5].name||'',
-    items,
-    pago,
-    total,
-    esEfectivo,
-    esTarjeta,
-    esTransferencia,
+// ── REGISTRAR VENTA ──
+async function registerSale(){
+  const total=calcTotal();
+  if(!total||!paymentMethod) return;
+  const btn=document.getElementById('registerBtn');
+  btn.disabled=true; btn.innerHTML='⏳';
+  const fecha=new Date().toLocaleString('es-MX',{timeZone:'America/Mexico_City'});
+  const pago=paymentMethod;
+  const itemParts=[];
+  FIXED_PRODUCTS.forEach((p,i)=>{ if(fixedQty[i]>0) itemParts.push(`${fixedQty[i]}x ${p.name}${fixedPrices[i]!==p.basePrice?' ($'+fixedPrices[i]+')':''}`); });
+  artConfigs.forEach((c,i)=>{ if(c.configured&&artQty[i]>0) itemParts.push(`${artQty[i]}x ${c.name}`); });
+  const items=itemParts.join(', ');
+  const esEfectivo=pago==='Efectivo'?total:0;
+  const esTarjeta=pago==='Tarjeta'?total:0;
+  const esTransferencia=pago==='Transferencia'?total:0;
+  const params=new URLSearchParams({
+    fecha, bolsas:fixedQty[0], stickers:fixedQty[1], oraculos:fixedQty[2],
+    gorras:fixedQty[3], playeras:fixedQty[4],
+    art1:artConfigs[0].configured?artQty[0]:0,
+    art2:artConfigs[1].configured?artQty[1]:0,
+    art3:artConfigs[2].configured?artQty[2]:0,
+    art4:artConfigs[3].configured?artQty[3]:0,
+    art5:artConfigs[4].configured?artQty[4]:0,
+    art6:artConfigs[5].configured?artQty[5]:0,
+    art1nombre:artConfigs[0].name||'',
+    art2nombre:artConfigs[1].name||'',
+    art3nombre:artConfigs[2].name||'',
+    art4nombre:artConfigs[3].name||'',
+    art5nombre:artConfigs[4].name||'',
+    art6nombre:artConfigs[5].name||'',
+    items, pago, total, esEfectivo, esTarjeta, esTransferencia
   });
-
-  try {
-    await fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
-  } catch(e) { console.log('fetch error:', e); }
-
-  await new Promise(r => setTimeout(r, 1500));
-  showToast(`✓ Registrado · $${total.toLocaleString('es-MX')}`);
+  try{ await fetch(GOOGLE_SCRIPT_URL+'?'+params.toString(),{method:'GET',mode:'no-cors'}); }
+  catch(e){ console.log(e); }
+  await new Promise(r=>setTimeout(r,1500));
+  showToast(`✓ Registrado · $${total.toLocaleString('es-MX')} (${pago})`);
   clearCart(true);
-  btn.innerHTML = '✓<br>Registrar';
-  btn.disabled = false;
+  btn.innerHTML='✓<br>Registrar'; btn.disabled=false;
 }
 
-// ── INIT ──────────────────────────────────────────
+// ── INIT ──
+initButtons();
 updateUI();
 </script>
 </body>
