@@ -244,9 +244,9 @@ header .subtitle {
 }
 
 .art-btn .art-plus { font-size: 20px; color: rgba(0,255,136,0.3); line-height: 1; }
-.art-btn .art-empty-label { font-size: 9px; letter-spacing: 0.15em; color: rgba(0,255,136,0.25); text-transform: uppercase; }
+.art-btn .art-empty-label { font-size: 13px; letter-spacing: 0.1em; color: rgba(0,255,136,0.35); text-transform: uppercase; font-weight: 800; }
 .art-btn .art-icon { font-size: 20px; line-height: 1; }
-.art-btn .art-name { font-size: 10px; font-weight: 800; color: var(--text); line-height: 1.2; text-align: center; padding: 0 4px; }
+.art-btn .art-name { font-size: 13px; font-weight: 800; color: var(--text); line-height: 1.2; text-align: center; padding: 0 4px; }
 .art-btn .art-price {
   font-family: 'Black Ops One', cursive;
   font-size: 13px;
@@ -784,48 +784,70 @@ function makeArtBtn(i) {
 
 // ── LONG PRESS SETUP ──────────────────────────────
 function setupProductBtn(btn, type, idx) {
-  // Tap normal
-  btn.addEventListener('click', (e) => {
-    if (btn._longFired) { btn._longFired = false; return; }
-    if (type==='fixed') { fixedQty[idx]++; }
-    else { artQty[idx]++; }
-    if (navigator.vibrate) navigator.vibrate(30);
-    updateUI();
-  });
+  // Usamos una variable de estado por closure, no compartida
+  let pressing = false;
+  let longFired = false;
+  let timer = null;
 
-  // Long press — iniciar
+  const getring = () => btn.querySelector('.press-ring-fill');
+
+  const openEditor = () => {
+    if (type==='fixed') openEditPrice(idx);
+    else openEditArtPrice(idx);
+  };
+
   const startPress = () => {
-    btn._longFired = false;
-    pressEl = btn;
-    const ring = btn.querySelector('.press-ring-fill');
-    if (ring) ring.style.height = '100%';
+    if (pressing) return;
+    pressing = true;
+    longFired = false;
     btn.classList.add('pressing');
-    pressTimer = setTimeout(() => {
-      btn._longFired = true;
+    const r = btn.querySelector('.press-ring-fill');
+    if (r) r.style.height = '100%';
+    timer = setTimeout(() => {
+      longFired = true;
+      pressing = false;
       btn.classList.remove('pressing');
-      if (ring) ring.style.height = '0%';
+      const r2 = btn.querySelector('.press-ring-fill');
+      if (r2) r2.style.height = '0%';
       if (navigator.vibrate) navigator.vibrate([40,20,40]);
-      if (type==='fixed') openEditPrice(idx);
-      else openEditArtPrice(idx);
+      openEditor();
     }, LONG_PRESS_MS);
   };
 
-  const cancelPress = () => {
-    clearTimeout(pressTimer);
-    if (pressEl) {
-      pressEl.classList.remove('pressing');
-      const ring = pressEl.querySelector('.press-ring-fill');
-      if (ring) ring.style.height = '0%';
-      pressEl = null;
+  const endPress = () => {
+    if (!pressing) return; // ya terminó (long press se disparó)
+    clearTimeout(timer);
+    pressing = false;
+    btn.classList.remove('pressing');
+    const r = btn.querySelector('.press-ring-fill');
+    if (r) r.style.height = '0%';
+    if (!longFired) {
+      if (navigator.vibrate) navigator.vibrate(30);
+      if (type==='fixed') { fixedQty[idx]++; }
+      else { artQty[idx]++; }
+      updateUI();
     }
+    longFired = false;
   };
 
-  btn.addEventListener('mousedown', startPress);
+  const cancelPress = () => {
+    clearTimeout(timer);
+    pressing = false;
+    longFired = false;
+    btn.classList.remove('pressing');
+    const r = btn.querySelector('.press-ring-fill');
+    if (r) r.style.height = '0%';
+  };
+
+  // Touch (movil)
   btn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(); }, {passive:false});
-  btn.addEventListener('mouseup', cancelPress);
+  btn.addEventListener('touchend',   (e) => { e.preventDefault(); endPress(); },   {passive:false});
+  btn.addEventListener('touchcancel',(e) => { e.preventDefault(); cancelPress(); },{passive:false});
+
+  // Mouse (desktop)
+  btn.addEventListener('mousedown', startPress);
+  btn.addEventListener('mouseup',   endPress);
   btn.addEventListener('mouseleave', cancelPress);
-  btn.addEventListener('touchend', cancelPress);
-  btn.addEventListener('touchcancel', cancelPress);
 }
 
 // ── UPDATE UI ─────────────────────────────────────
