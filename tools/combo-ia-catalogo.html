@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combo IA — Catálogo de Agentes</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --violet-50: #f0f6ff;
+    --violet-100: #e8f0fb;
+    --violet-200: #dce8f7;
+    --violet-300: #c8d9f0;
+    --violet-400: #4a9fd4;
+    --violet-500: #1e5096;
+    --violet-600: #1a3a6b;
+    --violet-700: #0d1b3e;
+    --violet-800: #0a1530;
+    --violet-900: #060e20;
+    --white: #ffffff;
+    --text-main: #1a2035;
+    --text-secondary: #4a5068;
+    --text-muted: #8a90a0;
+    --border: #dde1e9;
+    --border-strong: #4a9fd4;
+    --bg-page: #f5f6f8;
+    --bg-card: #ffffff;
+    --bg-section: #eef4fc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--bg-page);
+    color: var(--text-main);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 60%, #1e5096 100%);
+    border-bottom: 3px solid #4a9fd4;
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; right: -40px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    color: #dce8f7;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .header h1 {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .header p {
+    color: #c8d9f0;
+    font-size: 1rem;
+    max-width: 520px;
+    margin: 0 auto 1.5rem;
+    font-weight: 400;
+  }
+  .header-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: #c8d9f0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 3px;
+  }
+
+  /* ─── MAIN ─── */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ─── CANAL BADGE ─── */
+  .canal-notice {
+    background: #f0f6ff;
+    border: 1px solid #c8d9f0;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2.5rem;
+  }
+  .canal-icon {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: #1a3a6b;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+  .canal-text strong { color: #1a3a6b; font-weight: 600; }
+  .canal-text span { color: var(--text-secondary); font-size: 13px; }
+
+  /* ─── SECTION TITLE ─── */
+  .section-title {
+    font-family: 'Special Elite', serif;
+    font-size: 1.5rem;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    margin-top: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── COMBOS GRID ─── */
+  .combos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 1rem;
+  }
+  .combo-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .combo-card:hover {
+    border-color: #4a9fd4;
+    box-shadow: 0 4px 20px rgba(26,58,107,0.1);
+  }
+  .combo-header {
+    background: linear-gradient(135deg, #0d1b3e, #1a3a6b);
+    padding: 1rem 1.25rem 0.85rem;
+  }
+  .combo-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    margin-bottom: 3px;
+  }
+  .combo-tag {
+    font-size: 11px;
+    color: var(--violet-200);
+    font-weight: 400;
+  }
+  .combo-body { padding: 1rem 1.25rem; }
+  .combo-agents {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 0.75rem;
+  }
+  .agent-pill {
+    background: #f0f6ff;
+    border: 1px solid #c8d9f0;
+    color: #1a3a6b;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .combo-price {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .combo-price strong {
+    color: #1a3a6b;
+    font-size: 14px;
+  }
+
+  /* ─── CATEGORY BLOCK ─── */
+  .category-block {
+    margin-bottom: 0.5rem;
+  }
+  .category-toggle {
+    width: 100%;
+    background: var(--bg-section);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s, border-color 0.2s;
+    margin-bottom: 2px;
+  }
+  .category-toggle:hover {
+    background: #e8f0fb;
+    border-color: #c8d9f0;
+  }
+  .category-toggle.open {
+    background: #e8f0fb;
+    border-color: #4a9fd4;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 0;
+  }
+  .cat-left { display: flex; align-items: center; gap: 10px; }
+  .cat-emoji { font-size: 20px; }
+  .cat-name {
+    font-family: 'Special Elite', serif;
+    font-size: 1rem;
+    color: var(--text-main);
+  }
+  .cat-count {
+    font-size: 11px;
+    background: #dce8f7;
+    color: #1a3a6b;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .cat-chevron {
+    width: 20px; height: 20px;
+    border: 1.5px solid #4a9fd4;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .cat-chevron svg { width: 10px; height: 10px; stroke: #1a3a6b; }
+  .category-toggle.open .cat-chevron { transform: rotate(180deg); }
+
+  .category-content {
+    display: none;
+    background: var(--white);
+    border: 1px solid #4a9fd4;
+    border-top: none;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+  .category-content.open { display: block; }
+
+  /* ─── AGENT ROW ─── */
+  .agent-row {
+    border-bottom: 1px solid var(--border);
+  }
+  .agent-row:last-child { border-bottom: none; }
+
+  .agent-toggle {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .agent-toggle:hover { background: #f0f6ff; }
+  .agent-toggle.open { background: #f0f6ff; }
+
+  .agent-num {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1e5096;
+    min-width: 26px;
+    font-variant-numeric: tabular-nums;
+  }
+  .agent-name-row {
+    flex: 1;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-main);
+  }
+  .agent-badges { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .badge-built { background: #dce8f7; color: #1a3a6b; }
+  .badge-easy { background: #eaf3de; color: #2d5a10; }
+  .badge-medium { background: #faeeda; color: #7a4800; }
+  .badge-star { background: #dce8f7; color: #1a3a6b; }
+  .badge-tg { background: #e3f2fd; color: #0d47a1; }
+
+  .agent-chevron {
+    width: 16px; height: 16px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .agent-chevron svg { width: 10px; height: 10px; stroke: var(--text-muted); }
+  .agent-toggle.open .agent-chevron { transform: rotate(180deg); }
+
+  /* ─── AGENT DETAIL ─── */
+  .agent-detail {
+    display: none;
+    padding: 0 1.25rem 1.25rem 3.5rem;
+    background: #f0f6ff;
+  }
+  .agent-detail.open { display: block; }
+
+  .agent-desc-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+  @media (max-width: 560px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .detail-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+  }
+  .detail-box-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #1e5096;
+    margin-bottom: 0.4rem;
+  }
+  .detail-box ul {
+    list-style: none;
+    padding: 0;
+  }
+  .detail-box ul li {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 2px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .detail-box ul li::before {
+    content: '›';
+    color: #4a9fd4;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .detail-box p {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+  .footer strong { color: #1a3a6b; }
+
+  /* ─── CANAL ESTRATEGIA ─── */
+  .strategy-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid #4a9fd4;
+    border-radius: 0 12px 12px 0;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 560px) { .strategy-box { grid-template-columns: 1fr; } }
+  .strategy-col-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+  .strategy-col-title.tg { color: #1565c0; }
+  .strategy-col-title.wa { color: #1b5e20; }
+  .strategy-col p { font-size: 12px; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">ExcelentIA — Vertical de consumo masivo</div>
+  <h1>Combo IA</h1>
+  <p>Agentes de automatización para personas comunes. Sin apps, sin complicaciones — todo por WhatsApp o Telegram.</p>
+  <div class="header-stats">
+    <div class="stat"><div class="stat-num">30</div><div class="stat-label">Agentes</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Combos</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Categorías</div></div>
+    <div class="stat"><div class="stat-num">1</div><div class="stat-label">Ya en producción</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ESTRATEGIA DE CANAL -->
+  <div style="margin-top:0.5rem; margin-bottom:1.5rem;">
+    <div class="section-title" style="margin-top:0;">Estrategia de canal</div>
+    <div class="strategy-box">
+      <div class="strategy-col">
+        <div class="strategy-col-title tg">🔵 Telegram — Laboratorio</div>
+        <p>Canal para desarrollo, pruebas y primeros clientes. Conexión nativa con n8n, sin costo adicional, sin intermediarios. Ideal para iterar rápido.</p>
+      </div>
+      <div class="strategy-col">
+        <div class="strategy-col-title wa">🟢 WhatsApp — Producto comercial</div>
+        <p>Canal final para el mercado masivo mexicano. Se migra una vez que el agente está probado y estable. Requiere YCloud como intermediario.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMBOS -->
+  <div class="section-title">Combos prediseñados</div>
+  <div class="combos-grid">
+
+    <div class="combo-card">
+      <div class="combo-header">
+        <div class="combo-name">Combo Básico</div>
+        <div class="combo-tag">El arranque perfecto para cualquier persona</div>
+      </div>
+      <div class="combo-body">
+        <div class="combo-agents">
+          <span class="agent-pill">01 Correos</span>
+          <span class="agent-pill">05 Gastos</span>
+          <span class="agent-pill">19 Fechas</span>
+        </div>
+        <div class="combo-price">Desde <strong>$299 MXN/mes</strong></div>
+      </div>
+    </div>
+
+    <div class="combo-card">
+      <div class="combo-header">
+        <div class="combo-name">Combo Familia</div>
+        <div class="combo-tag">Para organizar el hogar y a los hijos</div>
+      </div>
+      <div class="combo-body">
+        <div class="combo-agents">
+          <span class="agent-pill">08 Comidas</span>
+          <span class="agent-pill">09 Hábitos</span>
+          <span class="agent-pill">19 Fechas</span>
+          <span class="agent-pill">20 Viajes</span>
+          <span class="agent-pill">22 Tutor</span>
+        </div>
+        <div class="combo-price">Desde <strong>$449 MXN/mes</strong></div>
+      </div>
+    </div>
+
+    <div class="combo-card">
+      <div class="combo-header">
+        <div class="combo-name">Combo Salud</div>
+        <div class="combo-tag">Bienestar físico y emocional</div>
+      </div>
+      <div class="combo-body">
+        <div class="combo-agents">
+          <span class="agent-pill">13 Medicamentos</span>
+          <span class="agent-pill">14 Síntomas</span>
+          <span class="agent-pill">15 Ejercicio</span>
+          <span class="agent-pill">16 Emocional</span>
+        </div>
+        <div class="combo-price">Desde <strong>$399 MXN/mes</strong></div>
+      </div>
+    </div>
+
+    <div class="combo-card">
+      <div class="combo-header">
+        <div class="combo-name">Combo Freelancer</div>
+        <div class="combo-tag">Para quien trabaja por su cuenta</div>
+      </div>
+      <div class="combo-body">
+        <div class="combo-agents">
+          <span class="agent-pill">01 Correos</span>
+          <span class="agent-pill">24 Facturación</span>
+          <span class="agent-pill">25 Contenido</span>
+          <span class="agent-pill">26 Ventas</span>
+          <span class="agent-pill">29 Logros</span>
+        </div>
+        <div class="combo-price">Desde <strong>$499 MXN/mes</strong></div>
+      </div>
+    </div>
+
+    <div class="combo-card">
+      <div class="combo-header">
+        <div class="combo-name">Combo Hogar</div>
+        <div class="combo-tag">Control total de la casa</div>
+      </div>
+      <div class="combo-body">
+        <div class="combo-agents">
+          <span class="agent-pill">10 Garantías</span>
+          <span class="agent-pill">11 Servicios</span>
+          <span class="agent-pill">12 Mantenimiento</span>
+          <span class="agent-pill">19 Fechas</span>
+        </div>
+        <div class="combo-price">Desde <strong>$349 MXN/mes</strong></div>
+      </div>
+    </div>
+
+    <div class="combo-card">
+      <div class="combo-header">
+        <div class="combo-name">Combo Bienestar</div>
+        <div class="combo-tag">Para cuidarte por dentro y por fuera</div>
+      </div>
+      <div class="combo-body">
+        <div class="combo-agents">
+          <span class="agent-pill">09 Hábitos</span>
+          <span class="agent-pill">13 Ejercicio</span>
+          <span class="agent-pill">16 Check-in</span>
+          <span class="agent-pill">17 Meditación</span>
+        </div>
+        <div class="combo-price">Desde <strong>$349 MXN/mes</strong></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AGENTES POR CATEGORÍA -->
+  <div class="section-title">Catálogo completo de agentes</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:1.25rem;">Haz clic en cada categoría o agente para ver los detalles y stack sugerido.</p>
+
+  <!-- CAT 1: PRODUCTIVIDAD -->
+  <div class="category-block">
+    <button class="category-toggle" onclick="toggleCat(this)">
+      <div class="cat-left">
+        <span class="cat-emoji">⚡</span>
+        <span class="cat-name">Productividad personal</span>
+        <span class="cat-count">4 agentes</span>
+      </div>
+      <div class="cat-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </button>
+    <div class="category-content">
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">01</span>
+          <span class="agent-name-row">Resumen inteligente de correos</span>
+          <div class="agent-badges"><span class="badge badge-built">✅ Listo</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Resume Gmail, Google Workspace y Outlook diariamente. Detecta correos urgentes, filtra el ruido y entrega un email HTML con lo más importante. Ya en producción en ExcelentIA.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul>
+                <li>n8n Cloud (trigger programado)</li>
+                <li>Gmail / Outlook API</li>
+                <li>Claude Haiku (resumen)</li>
+                <li>Email HTML de entrega</li>
+              </ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul>
+                <li>Ahorra 30-45 min diarios</li>
+                <li>No se pierde correos urgentes</li>
+                <li>Llega solo, sin abrir nada</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">02</span>
+          <span class="agent-name-row">Asistente de pendientes por WhatsApp</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span><span class="badge badge-tg">Telegram primero</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Le dices tus tareas por mensaje y el agente las guarda, organiza y te recuerda en el momento correcto. Sin apps, sin listas interminables que nunca revisas.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul>
+                <li>n8n + Telegram Bot</li>
+                <li>Google Sheets (almacén)</li>
+                <li>GPT-4.1-mini (interpretación)</li>
+                <li>Trigger por horario (recordatorios)</li>
+              </ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul>
+                <li>Captura de tarea en segundos</li>
+                <li>Recordatorio activo, no pasivo</li>
+                <li>Sin instalar nada nuevo</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">03</span>
+          <span class="agent-name-row">Resumen semanal de noticias</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Cada lunes llega un resumen personalizado con las noticias de tu industria o intereses personales. Tú defines los temas una sola vez y el agente hace el resto.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul>
+                <li>n8n (trigger lunes 7am)</li>
+                <li>Jina AI (web scraping noticias)</li>
+                <li>GPT-4.1-mini (síntesis)</li>
+                <li>Telegram / Email entrega</li>
+              </ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul>
+                <li>Información filtrada y relevante</li>
+                <li>Sin perderse en redes sociales</li>
+                <li>Llega sola cada semana</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">04</span>
+          <span class="agent-name-row">Diario personal con IA</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Le escribes cómo te fue en el día por mensaje y el agente lo guarda organizado, agrega una reflexión breve y genera un resumen mensual de tus experiencias.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul>
+                <li>n8n + Telegram Bot</li>
+                <li>Google Drive (almacén)</li>
+                <li>Claude Haiku (reflexión)</li>
+                <li>Trigger mensual (resumen)</li>
+              </ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul>
+                <li>Hábito de escritura sin esfuerzo</li>
+                <li>Memoria personal organizada</li>
+                <li>Reflexiones automáticas</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CAT 2: FINANZAS -->
+  <div class="category-block">
+    <button class="category-toggle" onclick="toggleCat(this)">
+      <div class="cat-left">
+        <span class="cat-emoji">💰</span>
+        <span class="cat-name">Dinero y finanzas personales</span>
+        <span class="cat-count">3 agentes</span>
+      </div>
+      <div class="cat-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </button>
+    <div class="category-content">
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">05</span>
+          <span class="agent-name-row">Control de gastos e ingresos</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span><span class="badge badge-star">⭐ Prioridad 1</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Registras cada gasto o ingreso con un mensaje: "gasté 150 en comida". El agente lo categoriza, lo guarda en Sheets y genera un dashboard con balance mensual y alertas de presupuesto.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul>
+                <li>n8n + Telegram Bot</li>
+                <li>GPT-4.1-mini (clasificación)</li>
+                <li>Google Sheets (base de datos)</li>
+                <li>Dashboard HTML (reporte)</li>
+                <li>Redis (sesión conversacional)</li>
+              </ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul>
+                <li>Registro en 5 segundos</li>
+                <li>Categorización automática</li>
+                <li>Alerta cuando se acerca al límite</li>
+                <li>Reporte mensual automático</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">06</span>
+          <span class="agent-name-row">Rastreador de deudas y pagos</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Sigue lo que debes y lo que te deben. Te avisa antes de que venza un pago para que nunca caigas en mora. Puedes registrar abonos parciales.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul>
+                <li>n8n + Telegram Bot</li>
+                <li>Google Sheets</li>
+                <li>GPT-4.1-mini</li>
+                <li>Trigger de recordatorios</li>
+              </ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul>
+                <li>Cero olvidos de pago</li>
+                <li>Control de quién te debe</li>
+                <li>Historial de abonos</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">07</span>
+          <span class="agent-name-row">Simulador de ahorro e inversión</span>
+          <div class="agent-badges"><span class="badge badge-medium">Medio</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Le dices cuánto puedes ahorrar al mes y el agente te muestra escenarios: CETES, fondos de inversión, plazo fijo. Calcula en cuánto tiempo llegas a tu meta.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul>
+                <li>n8n + Telegram Bot</li>
+                <li>GPT-4.1-mini (cálculos + texto)</li>
+                <li>Jina AI (tasas CETES actuales)</li>
+                <li>Google Sheets (proyecciones)</li>
+              </ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul>
+                <li>Educación financiera práctica</li>
+                <li>Metas con fecha real</li>
+                <li>Sin ir a un banco</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CAT 3: HOGAR -->
+  <div class="category-block">
+    <button class="category-toggle" onclick="toggleCat(this)">
+      <div class="cat-left">
+        <span class="cat-emoji">🏠</span>
+        <span class="cat-name">Vida diaria y hogar</span>
+        <span class="cat-count">5 agentes</span>
+      </div>
+      <div class="cat-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </button>
+    <div class="category-content">
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">08</span>
+          <span class="agent-name-row">Planificador de comidas y lista de compras</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Sugiere el menú de la semana según tu presupuesto y preferencias. Genera automáticamente la lista del súper y te la manda lista para ir al mercado.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4o (menús creativos)</li><li>Google Sheets (preferencias)</li><li>Trigger semanal</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Fin al "¿qué comemos hoy?"</li><li>Ahorro en el súper</li><li>Menos desperdicio de comida</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">09</span>
+          <span class="agent-name-row">Seguimiento de hábitos</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Cada noche te pregunta si cumpliste tus metas del día. Reporta tu racha semanal y te motiva cuando fallas sin hacerte sentir mal.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets (rachas)</li><li>Claude Haiku (motivación)</li><li>Trigger nocturno</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Accountability sin juicio</li><li>Visualización de progreso</li><li>Refuerzo positivo diario</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">10</span>
+          <span class="agent-name-row">Gestor de garantías y documentos del hogar</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span><span class="badge badge-star">💎 Joya</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Le mandas foto de una factura o garantía y el agente extrae los datos, los guarda en Drive y te avisa cuando está por vencer. Nunca más pierdes una garantía.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4o Vision (OCR)</li><li>Google Drive (archivos)</li><li>Google Sheets (registro)</li><li>Trigger de vencimientos</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Garantías siempre localizables</li><li>Alertas antes de que venzan</li><li>Nadie más lo ofrece así</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">11</span>
+          <span class="agent-name-row">Control de servicios del hogar</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Registra cuándo pagas luz, agua, internet, predial y gas. Te avisa antes de que venza cada uno y lleva historial de montos para detectar aumentos.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets</li><li>Trigger de fechas límite</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Cero cortes de servicio</li><li>Detecta aumentos anómalos</li><li>Un solo lugar para todo</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">12</span>
+          <span class="agent-name-row">Agenda de mantenimiento del hogar</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Lleva registro de mantenimientos periódicos: tinaco, boiler, fumigación, jardín, filtros de agua. Te recuerda cuándo toca cada uno y guarda historial de costos.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets</li><li>Google Calendar (opcional)</li><li>Trigger periódico</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Prevención antes de averías</li><li>Historial para inquilinos/venta</li><li>Paz mental total</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CAT 4: SALUD -->
+  <div class="category-block">
+    <button class="category-toggle" onclick="toggleCat(this)">
+      <div class="cat-left">
+        <span class="cat-emoji">🩺</span>
+        <span class="cat-name">Salud y bienestar</span>
+        <span class="cat-count">5 agentes</span>
+      </div>
+      <div class="cat-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </button>
+    <div class="category-content">
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">13</span>
+          <span class="agent-name-row">Recordatorio de medicamentos</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Manda mensaje a la hora exacta de cada medicamento. Lleva historial de toma y puede reportar al familiar cuidador si no hay respuesta de confirmación.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets (horarios)</li><li>Trigger múltiple por hora</li><li>Confirmación por respuesta</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Crítico para adultos mayores</li><li>Tranquilidad para la familia</li><li>Historial para el médico</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">14</span>
+          <span class="agent-name-row">Seguimiento de síntomas o glucosa</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Registras síntomas, glucosa o presión diariamente con un mensaje. Genera gráfica semanal lista para mostrarle al médico en tu próxima cita.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets (datos)</li><li>Claude Haiku (análisis)</li><li>Reporte PDF/imagen semanal</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Datos listos para el médico</li><li>Detecta tendencias preocupantes</li><li>Diabéticos e hipertensos</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">15</span>
+          <span class="agent-name-row">Coach de ejercicio personal</span>
+          <div class="agent-badges"><span class="badge badge-medium">Medio</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Te manda rutina diaria personalizada según tu nivel y metas. Celebra tus logros y ajusta la dificultad cada semana según tu progreso reportado.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4o (rutinas adaptativas)</li><li>Google Sheets (progreso)</li><li>Redis (perfil de usuario)</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Sin ir al gym ni contratar coach</li><li>Rutina que evoluciona contigo</li><li>Motivación constante</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">16</span>
+          <span class="agent-name-row">Check-in emocional diario</span>
+          <div class="agent-badges"><span class="badge badge-star">⭐ Diferenciador</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Cada noche te pregunta cómo te sentiste. Detecta patrones de estrés o ansiedad a lo largo del tiempo y genera un resumen semanal de tu estado de ánimo. Nadie más ofrece esto en México por WhatsApp.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Claude Sonnet (empatía)</li><li>Google Sheets (registro)</li><li>Análisis de sentimiento</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Autoconocimiento emocional</li><li>Detecta burnout a tiempo</li><li>Sin terapia, sin app extra</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">17</span>
+          <span class="agent-name-row">Meditación y respiración guiada</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">A la hora que elijas, te manda una rutina de respiración o meditación corta y diferente cada día. Simple, sin audios ni apps adicionales.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4.1-mini (variedad)</li><li>Trigger programado</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Pausa diaria garantizada</li><li>Sin Headspace, sin costo extra</li><li>Se adapta al estado de ánimo</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CAT 5: FAMILIA -->
+  <div class="category-block">
+    <button class="category-toggle" onclick="toggleCat(this)">
+      <div class="cat-left">
+        <span class="cat-emoji">👨‍👩‍👧‍👦</span>
+        <span class="cat-name">Familia y organización</span>
+        <span class="cat-count">6 agentes</span>
+      </div>
+      <div class="cat-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </button>
+    <div class="category-content">
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">18</span>
+          <span class="agent-name-row">Agenda familiar compartida</span>
+          <div class="agent-badges"><span class="badge badge-medium">Medio</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Cada miembro de la familia le manda sus compromisos al agente por Telegram. El agente coordina, detecta conflictos de horario y manda recordatorio a quien corresponda.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot (grupo)</li><li>Google Calendar</li><li>GPT-4.1-mini (coordinación)</li><li>Redis (sesiones por usuario)</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Sin conflictos de horario</li><li>Todos informados en un canal</li><li>Sin apps de familia extra</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">19</span>
+          <span class="agent-name-row">Recordatorio de fechas importantes</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Cumpleaños, aniversarios, citas médicas. Te avisa 3 días antes con sugerencias de regalo o cómo celebrar. Nunca más olvidas una fecha que importa.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets (fechas)</li><li>GPT-4.1-mini (sugerencias)</li><li>Trigger diario de revisión</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Relaciones más fuertes</li><li>Sugerencias personalizadas</li><li>Universal — todos lo necesitan</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">20</span>
+          <span class="agent-name-row">Organizador de viajes</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Guardas vuelos, hoteles y reservas con un mensaje. El agente arma el itinerario y te lo manda completo la noche anterior al viaje para que salgas sin estrés.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Drive (docs)</li><li>GPT-4o (itinerario)</li><li>Trigger pre-viaje</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Todo en un lugar</li><li>Salida sin estrés</li><li>Itinerario listo automáticamente</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">21</span>
+          <span class="agent-name-row">Asistente de salud para mascotas</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Recuerda vacunas, desparasitaciones y citas al veterinario. Guarda historial médico del peludo para no andar buscando papeles en cada consulta.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets (historial)</li><li>Trigger de recordatorios</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Mascotas siempre al día</li><li>Historial en el celular</li><li>Mercado enorme en México</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">22</span>
+          <span class="agent-name-row">Tutor de tareas para niños</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">El niño le manda su duda por Telegram y recibe una explicación simple, amigable y con ejemplos — sin que el agente haga la tarea por él.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4o (pedagogía adaptada)</li><li>Instrucciones de edad configuradas</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Apoyo escolar 24/7</li><li>Papás más tranquilos</li><li>El niño aprende, no copia</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">23</span>
+          <span class="agent-name-row">Seguimiento escolar de los hijos</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Registra calificaciones, tareas pendientes y eventos escolares. Genera reporte semanal para los papás con lo más importante del desempeño de cada hijo.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets (calificaciones)</li><li>Claude Haiku (reporte)</li><li>Trigger semanal</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Papás siempre informados</li><li>Detección temprana de problemas</li><li>Sin depender de la agenda de papel</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CAT 6: TRABAJO -->
+  <div class="category-block">
+    <button class="category-toggle" onclick="toggleCat(this)">
+      <div class="cat-left">
+        <span class="cat-emoji">💼</span>
+        <span class="cat-name">Trabajo y micro-emprendedores</span>
+        <span class="cat-count">6 agentes</span>
+      </div>
+      <div class="cat-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </button>
+    <div class="category-content">
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">24</span>
+          <span class="agent-name-row">Facturación y control de clientes freelance</span>
+          <div class="agent-badges"><span class="badge badge-medium">Medio</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Registra proyectos, montos y estatus de pago. Manda alerta automática cuando un cliente lleva más de X días sin pagar. Control total sin contratar un contador.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets (CRM mínimo)</li><li>GPT-4.1-mini</li><li>Trigger de cobranza</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Cobro sin pena ni olvido</li><li>Historial por cliente</li><li>Sabe cuánto ganó en el mes</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">25</span>
+          <span class="agent-name-row">Generador de contenido para redes sociales</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Le dices el tema o tu negocio y recives 5 ideas de post listas para copiar y publicar en Instagram, Facebook o LinkedIn. Con variaciones de tono.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4o (creatividad)</li><li>Google Sheets (historial)</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Presencia digital sin agencia</li><li>Ahorro de horas semanales</li><li>Variedad sin repetirse</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">26</span>
+          <span class="agent-name-row">Seguimiento de ventas simple</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Registras cada venta o lead con un mensaje. Dashboard mensual con tu tasa de cierre, ingresos y qué productos van mejor. Un CRM mínimo que cualquiera puede usar.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Sheets (pipeline)</li><li>Dashboard HTML mensual</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Sabe qué vende más</li><li>Mide su propio rendimiento</li><li>Sin Salesforce ni CRM caro</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">27</span>
+          <span class="agent-name-row">Asistente de aprendizaje continuo</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Cada día te manda un dato, concepto o mini-ejercicio del tema que quieres dominar: inglés, Excel, marketing, finanzas. Aprendes 10 minutos al día sin darte cuenta.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4o (contenido variado)</li><li>Google Sheets (progreso)</li><li>Trigger diario</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Hábito de aprendizaje fácil</li><li>Personalizado por tema</li><li>Sin cursos ni plataformas</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">28</span>
+          <span class="agent-name-row">Preparador de entrevistas de trabajo</span>
+          <div class="agent-badges"><span class="badge badge-star">⭐ Diferenciador</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Le dices el puesto al que aplicas y el agente te hace preguntas de entrevista reales. Evalúa tus respuestas, te dice qué mejorar y te prepara con confianza.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4o (evaluación profunda)</li><li>Redis (sesión de entrevista)</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Urgencia real = alta disposición a pagar</li><li>Sin coach ni academia cara</li><li>Disponible a las 2am</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">29</span>
+          <span class="agent-name-row">Bitácora de logros profesionales</span>
+          <div class="agent-badges"><span class="badge badge-star">⭐ Diferenciador</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Registras tus logros del día o semana con un mensaje. Cuando necesitas actualizar el CV o LinkedIn, el agente los organiza y redacta por ti de forma profesional.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>Google Drive (archivo)</li><li>GPT-4o (redacción CV/LinkedIn)</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>CV siempre actualizado</li><li>No depende de la memoria</li><li>Redacción profesional gratis</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CAT 7: ENTRETENIMIENTO -->
+  <div class="category-block">
+    <button class="category-toggle" onclick="toggleCat(this)">
+      <div class="cat-left">
+        <span class="cat-emoji">🎬</span>
+        <span class="cat-name">Entretenimiento y cultura</span>
+        <span class="cat-count">1 agente</span>
+      </div>
+      <div class="cat-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </button>
+    <div class="category-content">
+
+      <div class="agent-row">
+        <button class="agent-toggle" onclick="toggleAgent(this)">
+          <span class="agent-num">30</span>
+          <span class="agent-name-row">Curador de películas, series y libros</span>
+          <div class="agent-badges"><span class="badge badge-easy">Fácil</span></div>
+          <div class="agent-chevron"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,3 5,7 8,3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </button>
+        <div class="agent-detail">
+          <p class="agent-desc-text">Le dices tu estado de ánimo o cuánto tiempo tienes y te recomienda qué ver o leer. Recuerda lo que ya viste para no repetir y aprende tus gustos con el tiempo.</p>
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-box-title">Stack técnico</div>
+              <ul><li>n8n + Telegram Bot</li><li>GPT-4.1-mini (recomendaciones)</li><li>Google Sheets (historial visto)</li></ul>
+            </div>
+            <div class="detail-box">
+              <div class="detail-box-title">Valor para el usuario</div>
+              <ul><li>Fin al scroll interminable</li><li>Recomendación personalizada real</li><li>Memoria de lo ya visto</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Elaborado por <strong>ExcelentIA</strong> — excelentia.com.mx &nbsp;|&nbsp; Documento vivo, se actualiza con cada sesión
+</div>
+
+<script>
+  function toggleCat(btn) {
+    const content = btn.nextElementSibling;
+    btn.classList.toggle('open');
+    content.classList.toggle('open');
+  }
+  function toggleAgent(btn) {
+    const detail = btn.nextElementSibling;
+    btn.classList.toggle('open');
+    detail.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
