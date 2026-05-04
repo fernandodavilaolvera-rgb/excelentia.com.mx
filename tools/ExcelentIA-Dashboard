@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExcelentIA Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --white: #ffffff;
+    --border: #dde1e9;
+    --header-from: #0d1b3e;
+    --header-to: #1e5096;
+    --accent: #4a9fd4;
+    --accent-dark: #1a3a6b;
+    --hover: #e8f0fb;
+    --card-head: #dce8f7;
+    --alert-bg: #f0f6ff;
+    --alert-border: #c8d9f0;
+    --note-bg: #eef4fc;
+    --text: #1a2035;
+    --text-sec: #4a5068;
+    --text-muted: #8a90a0;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 17px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, var(--header-from) 0%, #1a3a6b 60%, var(--header-to) 100%);
+    border-bottom: 3px solid var(--accent);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-text {
+    font-family: 'Special Elite', serif;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .divider-v {
+    width: 1px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+  }
+
+  .client-badge {
+    background: rgba(74,159,212,0.2);
+    border: 1px solid rgba(74,159,212,0.4);
+    border-radius: 20px;
+    padding: 4px 14px;
+    color: #a8d4f0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34,197,94,0.15);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4ade80;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .header-time {
+    color: rgba(255,255,255,0.75);
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .header-greeting {
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+  }
+
+  /* ── TABS ── */
+  .tabs-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs-bar::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    user-select: none;
+  }
+
+  .tab:hover {
+    color: var(--accent-dark);
+    background: var(--hover);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .tab.active {
+    color: var(--accent-dark);
+    border-bottom-color: var(--accent);
+    font-weight: 700;
+  }
+
+  .tab-count {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    padding: 28px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── SUMMARY BAR ── */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .summary-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: background 0.2s;
+  }
+
+  .summary-card:hover { background: var(--hover); }
+
+  .summary-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .summary-icon.blue { background: #dce8f7; }
+  .summary-icon.green { background: #dcfce7; }
+  .summary-icon.orange { background: #fef3c7; }
+  .summary-icon.purple { background: #ede9fe; }
+
+  .summary-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .summary-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 3px;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Special Elite', serif;
+    font-size: 19px;
+    color: var(--accent-dark);
+  }
+
+  .refresh-btn {
+    background: var(--alert-bg);
+    border: 1px solid var(--alert-border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .refresh-btn:hover { background: var(--hover); }
+
+  /* ── GRID LAYOUTS ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .card-head {
+    background: var(--card-head);
+    padding: 13px 18px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-body { padding: 18px; }
+
+  /* ── AGENDA ── */
+  .event-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .event-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .event-item:first-child { padding-top: 0; }
+
+  .event-time {
+    min-width: 68px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .event-bar {
+    width: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    min-height: 40px;
+  }
+
+  .event-info { flex: 1; }
+
+  .event-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .event-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .event-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+
+  .badge-now { background: #dcfce7; color: #15803d; }
+  .badge-next { background: #fef3c7; color: #b45309; }
+  .badge-later { background: var(--alert-bg); color: var(--accent-dark); }
+
+  /* ── CORREO ── */
+  .mail-item {
+    display: flex;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 8px;
+    padding-left: 8px;
+  }
+
+  .mail-item:hover { background: var(--hover); }
+  .mail-item:last-child { border-bottom: none; }
+
+  .mail-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .mail-body { flex: 1; min-width: 0; }
+
+  .mail-from {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .mail-subject {
+    font-size: 14px;
+    color: var(--text-sec);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mail-preview {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mail-meta {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .mail-time {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .mail-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin: 6px auto 0;
+  }
+
+  .unread .mail-from,
+  .unread .mail-subject { color: var(--text); font-weight: 700; }
+
+  /* ── TAREAS ── */
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .task-item:last-child { border-bottom: none; }
+
+  .task-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    cursor: pointer;
+    margin-top: 1px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .task-check:hover { border-color: var(--accent); background: var(--hover); }
+  .task-check.done { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .task-content { flex: 1; }
+
+  .task-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .task-title.done-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+
+  .task-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+  }
+
+  .task-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+  }
+
+  .tag-alta { background: #fee2e2; color: #991b1b; }
+  .tag-media { background: #fef3c7; color: #92400e; }
+  .tag-baja { background: #dcfce7; color: #166534; }
+  .tag-proyecto { background: var(--alert-bg); color: var(--accent-dark); }
+
+  /* ── GASTOS ── */
+  .gasto-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .gasto-item:last-child { border-bottom: none; }
+
+  .gasto-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .gasto-info { flex: 1; }
+
+  .gasto-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .gasto-cat {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .gasto-amount {
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gasto-amount.egreso { color: var(--red); }
+  .gasto-amount.ingreso { color: var(--green); }
+
+  /* Barra de progreso presupuesto */
+  .budget-bar-wrap {
+    margin-top: 6px;
+  }
+
+  .budget-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  .budget-bar {
+    height: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .budget-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* ── NOTICIAS ── */
+  .noticia-item {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  .noticia-item:last-child { border-bottom: none; }
+  .noticia-item:hover .noticia-title { color: var(--accent); }
+
+  .noticia-source {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 5px;
+  }
+
+  .noticia-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.35;
+    transition: color 0.2s;
+  }
+
+  .noticia-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .noticia-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ── PROYECTOS ── */
+  .proyecto-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .proyecto-card:hover {
+    box-shadow: 0 4px 20px rgba(26,58,107,0.1);
+  }
+
+  .proyecto-head {
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .proyecto-emoji {
+    font-size: 28px;
+  }
+
+  .proyecto-name {
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+  }
+
+  .proyecto-client {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-produccion { background: var(--green); }
+  .status-desarrollo { background: var(--orange); }
+  .status-pendiente { background: var(--text-muted); }
+
+  .proyecto-body { padding: 16px 18px; }
+
+  .progress-wrap { margin-bottom: 12px; }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+    transition: width 0.8s ease;
+  }
+
+  .proyecto-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .ptag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 8px;
+    background: var(--alert-bg);
+    color: var(--accent-dark);
+    border: 1px solid var(--alert-border);
+  }
+
+  /* ── CHART (mini barras CSS) ── */
+  .mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 70px;
+    padding: 0 4px;
+  }
+
+  .bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+    transition: height 0.6s ease;
+  }
+
+  .bar-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  /* ── NOTA FOOTER ── */
+  .note-footer {
+    background: var(--note-bg);
+    border-left: 3px solid var(--accent-dark);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-sec);
+    margin-top: 16px;
+  }
+
+  /* ── ALERT ── */
+  .alert-info {
+    background: var(--alert-bg);
+    border: 1px solid var(--alert-border);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--accent-dark);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .summary-bar { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .header { padding: 0 16px; height: auto; min-height: 60px; flex-wrap: wrap; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
+    .content { padding: 16px; }
+    .tabs-bar { padding: 0 12px; }
+    .tab { padding: 12px 14px; font-size: 13px; }
+    .summary-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .summary-num { font-size: 22px; }
+    .header-right { gap: 10px; }
+    .logo-text { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-area">
+      <span class="logo-text">ExcelentIA</span>
+      <span class="logo-sub">Dashboard</span>
+    </div>
+    <div class="divider-v"></div>
+    <span class="client-badge" id="client-name">Fernando Dávila</span>
+  </div>
+  <div class="header-right">
+    <div>
+      <div class="header-time" id="live-time">--:--</div>
+      <div class="header-greeting" id="live-greeting">—</div>
+    </div>
+    <div class="live-badge">
+      <span class="live-dot"></span>LIVE
+    </div>
+  </div>
+</header>
+
+<!-- ══ TABS ══ -->
+<nav class="tabs-bar">
+  <div class="tab active" onclick="switchTab('agenda')">📅 Agenda <span class="tab-count">4</span></div>
+  <div class="tab" onclick="switchTab('correo')">📧 Correo <span class="tab-count">7</span></div>
+  <div class="tab" onclick="switchTab('tareas')">✅ Tareas <span class="tab-count">5</span></div>
+  <div class="tab" onclick="switchTab('gastos')">💸 Gastos</div>
+  <div class="tab" onclick="switchTab('noticias')">📰 Noticias</div>
+  <div class="tab" onclick="switchTab('proyectos')">🚀 Proyectos</div>
+</nav>
+
+<!-- ══ CONTENT ══ -->
+<main class="content">
+
+  <!-- ━━ AGENDA ━━ -->
+  <div id="panel-agenda" class="panel active">
+
+    <div class="summary-bar">
+      <div class="summary-card">
+        <div class="summary-icon blue">📅</div>
+        <div>
+          <div class="summary-num">4</div>
+          <div class="summary-label">Eventos hoy</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon green">⏰</div>
+        <div>
+          <div class="summary-num">23 min</div>
+          <div class="summary-label">Próximo evento</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon orange">📆</div>
+        <div>
+          <div class="summary-num">11</div>
+          <div class="summary-label">Esta semana</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon purple">🕐</div>
+        <div>
+          <div class="summary-num">5.5 h</div>
+          <div class="summary-label">En reuniones hoy</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Hoy -->
+      <div class="card">
+        <div class="card-head">
+          <span>📅 Hoy — Viernes 2 de mayo</span>
+          <button class="refresh-btn">↻ Actualizar</button>
+        </div>
+        <div class="card-body">
+          <div class="event-item">
+            <div class="event-time">09:00</div>
+            <div class="event-bar" style="background:#22c55e;"></div>
+            <div class="event-info">
+              <div class="event-title">Stand-up ExcelentIA</div>
+              <div class="event-meta">Google Meet · 30 min · Equipo</div>
+            </div>
+            <span class="event-badge badge-now">En curso</span>
+          </div>
+          <div class="event-item">
+            <div class="event-time">10:00</div>
+            <div class="event-bar" style="background:#f59e0b;"></div>
+            <div class="event-info">
+              <div class="event-title">Demo Eco-IA — Dr. Andrés</div>
+              <div class="event-meta">Zoom · 1 hora · Global Cardio</div>
+            </div>
+            <span class="event-badge badge-next">En 23 min</span>
+          </div>
+          <div class="event-item">
+            <div class="event-time">12:00</div>
+            <div class="event-bar" style="background:#4a9fd4;"></div>
+            <div class="event-info">
+              <div class="event-title">Revisión Dashboard Berimbau</div>
+              <div class="event-meta">Meet · 45 min</div>
+            </div>
+            <span class="event-badge badge-later">En 2 h</span>
+          </div>
+          <div class="event-item">
+            <div class="event-time">16:00</div>
+            <div class="event-bar" style="background:#8b5cf6;"></div>
+            <div class="event-info">
+              <div class="event-title">Llamada agentes inmobiliarios</div>
+              <div class="event-meta">Zoom · 1 hora</div>
+            </div>
+            <span class="event-badge badge-later">En 6 h</span>
+          </div>
+        </div>
+        <div class="note-footer">💡 Conectado a Google Calendar — datos de muestra. Al conectar con n8n verás tus eventos reales en tiempo real.</div>
+      </div>
+
+      <!-- Semana -->
+      <div class="card">
+        <div class="card-head">📆 Vista semanal</div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">L</div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">M</div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">X</div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">J</div>
+            <div style="font-size:11px;color:var(--accent);font-weight:800;">V</div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">S</div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">D</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;margin-bottom:20px;">
+            <div style="font-size:14px;font-weight:600;color:var(--text-muted);">28</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-muted);">29</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-muted);">30</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-muted);">1</div>
+            <div style="font-size:14px;font-weight:800;background:var(--accent);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;margin:0 auto;">2</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-muted);">3</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-muted);">4</div>
+          </div>
+
+          <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Eventos por día</div>
+          <div class="mini-chart">
+            <div class="bar-wrap"><div class="bar" style="height:40%;"></div><div class="bar-label">L</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:70%;"></div><div class="bar-label">M</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:55%;"></div><div class="bar-label">X</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:30%;"></div><div class="bar-label">J</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:90%;background:linear-gradient(180deg,#22c55e,#15803d);"></div><div class="bar-label" style="color:var(--accent);">V</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:20%;"></div><div class="bar-label">S</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:10%;"></div><div class="bar-label">D</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━ CORREO ━━ -->
+  <div id="panel-correo" class="panel">
+    <div class="summary-bar">
+      <div class="summary-card">
+        <div class="summary-icon blue">📧</div>
+        <div><div class="summary-num">7</div><div class="summary-label">No leídos</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon green">📨</div>
+        <div><div class="summary-num">12</div><div class="summary-label">Nuevos hoy</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon orange">⚡</div>
+        <div><div class="summary-num">3</div><div class="summary-label">Requieren respuesta</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon purple">📤</div>
+        <div><div class="summary-num">5</div><div class="summary-label">Enviados hoy</div></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span>⚡ Requieren respuesta</span>
+          <button class="refresh-btn">↻ Actualizar</button>
+        </div>
+        <div class="card-body">
+          <div class="mail-item unread">
+            <div class="mail-avatar" style="background:#1a3a6b;">AP</div>
+            <div class="mail-body">
+              <div class="mail-from">Dr. Andrés Pérez</div>
+              <div class="mail-subject">Re: Reporte ecocardiograma — corrección urgente</div>
+              <div class="mail-preview">Hola Fernando, el reporte tiene un error en la sección de...</div>
+            </div>
+            <div class="mail-meta"><div class="mail-time">09:14</div><div class="mail-unread-dot"></div></div>
+          </div>
+          <div class="mail-item unread">
+            <div class="mail-avatar" style="background:#7c3aed;">CB</div>
+            <div class="mail-body">
+              <div class="mail-from">Club Berimbau</div>
+              <div class="mail-subject">Dashboard — acceso para el director</div>
+              <div class="mail-preview">¿Podrías crear un usuario adicional para...</div>
+            </div>
+            <div class="mail-meta"><div class="mail-time">08:45</div><div class="mail-unread-dot"></div></div>
+          </div>
+          <div class="mail-item unread">
+            <div class="mail-avatar" style="background:#b45309;">NI</div>
+            <div class="mail-body">
+              <div class="mail-from">Nuevo Interesado</div>
+              <div class="mail-subject">Cotización agente WhatsApp</div>
+              <div class="mail-preview">Buenos días, vi su trabajo en LinkedIn y me interesa...</div>
+            </div>
+            <div class="mail-meta"><div class="mail-time">08:22</div><div class="mail-unread-dot"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">📥 Recientes</div>
+        <div class="card-body">
+          <div class="mail-item">
+            <div class="mail-avatar" style="background:#059669;">N8</div>
+            <div class="mail-body">
+              <div class="mail-from">n8n Newsletter</div>
+              <div class="mail-subject">New nodes: WhatsApp Business API v3</div>
+              <div class="mail-preview">This week we're releasing 14 new nodes...</div>
+            </div>
+            <div class="mail-meta"><div class="mail-time">07:00</div></div>
+          </div>
+          <div class="mail-item">
+            <div class="mail-avatar" style="background:#dc2626;">GW</div>
+            <div class="mail-body">
+              <div class="mail-from">Google Workspace</div>
+              <div class="mail-subject">Tu almacenamiento está al 78%</div>
+              <div class="mail-preview">Considera limpiar archivos o actualizar tu plan...</div>
+            </div>
+            <div class="mail-meta"><div class="mail-time">Ayer</div></div>
+          </div>
+          <div class="mail-item">
+            <div class="mail-avatar" style="background:#4a9fd4;">SC</div>
+            <div class="mail-body">
+              <div class="mail-from">Scarlett Dávila</div>
+              <div class="mail-subject">Diseño Medket — versión final</div>
+              <div class="mail-preview">Papá, te mando los archivos finales del logo...</div>
+            </div>
+            <div class="mail-meta"><div class="mail-time">Ayer</div></div>
+          </div>
+          <div class="mail-item">
+            <div class="mail-avatar" style="background:#0d1b3e;">OA</div>
+            <div class="mail-body">
+              <div class="mail-from">OpenAI</div>
+              <div class="mail-subject">Your API usage — April 2025</div>
+              <div class="mail-preview">Summary: 2.4M tokens used this month...</div>
+            </div>
+            <div class="mail-meta"><div class="mail-time">30 abr</div></div>
+          </div>
+        </div>
+        <div class="note-footer">📧 Conectado a Gmail vía n8n · Actualización cada 15 min</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━ TAREAS ━━ -->
+  <div id="panel-tareas" class="panel">
+    <div class="summary-bar">
+      <div class="summary-card">
+        <div class="summary-icon blue">✅</div>
+        <div><div class="summary-num">5</div><div class="summary-label">Pendientes</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon green">🎯</div>
+        <div><div class="summary-num">3</div><div class="summary-label">Para hoy</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon orange">🔥</div>
+        <div><div class="summary-num">2</div><div class="summary-label">Alta prioridad</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon purple">✓</div>
+        <div><div class="summary-num">8</div><div class="summary-label">Completadas esta semana</div></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span>🔥 Prioridad alta</span>
+          <button class="refresh-btn">+ Nueva tarea</button>
+        </div>
+        <div class="card-body">
+          <div class="task-item">
+            <div class="task-check" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Corregir bug doble mensaje citas médicas</div>
+              <div class="task-tags">
+                <span class="task-tag tag-alta">Alta</span>
+                <span class="task-tag tag-proyecto">Citas Médicas</span>
+              </div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Revisar reporte Eco-IA para Dr. Andrés</div>
+              <div class="task-tags">
+                <span class="task-tag tag-alta">Alta</span>
+                <span class="task-tag tag-proyecto">Eco-IA</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">📋 Esta semana</div>
+        <div class="card-body">
+          <div class="task-item">
+            <div class="task-check" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Actualizar dashboard Berimbau con nuevos filtros</div>
+              <div class="task-tags">
+                <span class="task-tag tag-media">Media</span>
+                <span class="task-tag tag-proyecto">Berimbau</span>
+              </div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Preparar demo agentes inmobiliarios</div>
+              <div class="task-tags">
+                <span class="task-tag tag-media">Media</span>
+                <span class="task-tag tag-proyecto">Inmobiliaria</span>
+              </div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check done" onclick="toggleTask(this)">✓</div>
+            <div class="task-content">
+              <div class="task-title done-text">Publicar skill maestra en Claude</div>
+              <div class="task-tags">
+                <span class="task-tag tag-baja">Completada</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="note-footer">✅ Las tareas se sincronizan con Google Sheets — edita directo en tu hoja de cálculo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━ GASTOS ━━ -->
+  <div id="panel-gastos" class="panel">
+    <div class="summary-bar">
+      <div class="summary-card">
+        <div class="summary-icon green">💰</div>
+        <div><div class="summary-num">$48,500</div><div class="summary-label">Ingresos mayo</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon orange">💸</div>
+        <div><div class="summary-num">$12,340</div><div class="summary-label">Gastos mayo</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon blue">📊</div>
+        <div><div class="summary-num">$36,160</div><div class="summary-label">Balance</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon purple">📈</div>
+        <div><div class="summary-num">74%</div><div class="summary-label">Margen</div></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span>💸 Últimos movimientos</span>
+          <button class="refresh-btn">↻ Desde Sheets</button>
+        </div>
+        <div class="card-body">
+          <div class="gasto-item">
+            <div class="gasto-icon" style="background:#dcfce7;">💵</div>
+            <div class="gasto-info">
+              <div class="gasto-name">Pago mensual — Berimbau</div>
+              <div class="gasto-cat">2 mayo · Clientes</div>
+            </div>
+            <div class="gasto-amount ingreso">+$8,000</div>
+          </div>
+          <div class="gasto-item">
+            <div class="gasto-icon" style="background:#fee2e2;">🤖</div>
+            <div class="gasto-info">
+              <div class="gasto-name">OpenAI API</div>
+              <div class="gasto-cat">1 mayo · Infraestructura</div>
+            </div>
+            <div class="gasto-amount egreso">-$1,240</div>
+          </div>
+          <div class="gasto-item">
+            <div class="gasto-icon" style="background:#fee2e2;">☁️</div>
+            <div class="gasto-info">
+              <div class="gasto-name">n8n Cloud — Pro</div>
+              <div class="gasto-cat">1 mayo · Infraestructura</div>
+            </div>
+            <div class="gasto-amount egreso">-$480</div>
+          </div>
+          <div class="gasto-item">
+            <div class="gasto-icon" style="background:#dcfce7;">💵</div>
+            <div class="gasto-info">
+              <div class="gasto-name">Retainer Eco-IA — Dr. Andrés</div>
+              <div class="gasto-cat">30 abr · Clientes</div>
+            </div>
+            <div class="gasto-amount ingreso">+$15,000</div>
+          </div>
+          <div class="gasto-item">
+            <div class="gasto-icon" style="background:#fee2e2;">🚀</div>
+            <div class="gasto-info">
+              <div class="gasto-name">Railway — servidor Word</div>
+              <div class="gasto-cat">30 abr · Infraestructura</div>
+            </div>
+            <div class="gasto-amount egreso">-$320</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">📊 Presupuesto por categoría</div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="budget-bar-wrap">
+              <div class="budget-label"><span>🤖 APIs de IA</span><span>$2,100 / $3,000</span></div>
+              <div class="budget-bar"><div class="budget-fill" style="width:70%;background:linear-gradient(90deg,#4a9fd4,#1a3a6b);"></div></div>
+            </div>
+            <div class="budget-bar-wrap">
+              <div class="budget-label"><span>☁️ Infraestructura</span><span>$1,400 / $2,000</span></div>
+              <div class="budget-bar"><div class="budget-fill" style="width:70%;background:linear-gradient(90deg,#4a9fd4,#1a3a6b);"></div></div>
+            </div>
+            <div class="budget-bar-wrap">
+              <div class="budget-label"><span>📱 SaaS / Herramientas</span><span>$800 / $1,500</span></div>
+              <div class="budget-bar"><div class="budget-fill" style="width:53%;background:linear-gradient(90deg,#22c55e,#15803d);"></div></div>
+            </div>
+            <div class="budget-bar-wrap">
+              <div class="budget-label"><span>📣 Marketing</span><span>$2,800 / $3,000</span></div>
+              <div class="budget-bar"><div class="budget-fill" style="width:93%;background:linear-gradient(90deg,#f59e0b,#b45309);"></div></div>
+            </div>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.5px;">Ingresos este mes</div>
+          <div class="mini-chart">
+            <div class="bar-wrap"><div class="bar" style="height:60%;"></div><div class="bar-label">S1</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:45%;"></div><div class="bar-label">S2</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:80%;"></div><div class="bar-label">S3</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:100%;background:linear-gradient(180deg,#22c55e,#15803d);"></div><div class="bar-label">S4</div></div>
+          </div>
+        </div>
+        <div class="note-footer">💸 Datos desde Google Sheets — actualiza tu hoja y el dashboard se sincroniza solo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━ NOTICIAS ━━ -->
+  <div id="panel-noticias" class="panel">
+    <div class="alert-info">
+      📰 Noticias filtradas por IA — temas: Inteligencia Artificial · Automatización · n8n · Negocios México
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span>🤖 IA & Automatización</span>
+          <button class="refresh-btn">↻ Actualizar</button>
+        </div>
+        <div class="card-body">
+          <div class="noticia-item">
+            <div class="noticia-source">The Verge · Hace 2h</div>
+            <div class="noticia-title">Anthropic lanza Claude 4: capacidades de agentes autónomos más avanzadas</div>
+            <div class="noticia-desc">El nuevo modelo puede ejecutar tareas complejas de múltiples pasos sin intervención humana, lo que abre posibilidades para automatización empresarial.</div>
+          </div>
+          <div class="noticia-item">
+            <div class="noticia-source">n8n Blog · Hace 4h</div>
+            <div class="noticia-title">n8n 1.90: nuevos nodos para WhatsApp Business API y Google Gemini</div>
+            <div class="noticia-desc">La actualización incluye mejoras en el manejo de errores y nuevas integraciones que simplifican los flujos de trabajo con IA.</div>
+          </div>
+          <div class="noticia-item">
+            <div class="noticia-source">MIT Tech Review · Hace 6h</div>
+            <div class="noticia-title">El 68% de las PyMEs latinoamericanas adoptará IA en 2025, según nuevo reporte</div>
+            <div class="noticia-desc">México lidera la región con mayor adopción de herramientas de automatización en pequeñas y medianas empresas.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">🇲🇽 Negocios & Tecnología México</div>
+        <div class="card-body">
+          <div class="noticia-item">
+            <div class="noticia-source">Forbes MX · Hace 3h</div>
+            <div class="noticia-title">Startups mexicanas de IA reciben $120M en financiamiento en el primer trimestre</div>
+            <div class="noticia-desc">El ecosistema de inteligencia artificial en México consolida su posición como el hub tecnológico más importante de LATAM.</div>
+          </div>
+          <div class="noticia-item">
+            <div class="noticia-source">Expansión · Hace 5h</div>
+            <div class="noticia-title">SAT incorpora IA para detección de evasión fiscal en facturas electrónicas</div>
+            <div class="noticia-desc">El sistema analiza patrones en el CFDI para identificar irregularidades de forma automática.</div>
+          </div>
+          <div class="noticia-item">
+            <div class="noticia-source">El Economista · Hace 8h</div>
+            <div class="noticia-title">WhatsApp Business supera 500,000 empresas activas en México</div>
+            <div class="noticia-desc">El crecimiento abre oportunidades para agentes conversacionales y automatización de atención al cliente.</div>
+          </div>
+        </div>
+        <div class="note-footer">📡 Fuentes: RSS feeds filtrados por GPT-4o · Actualización cada 2 horas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━ PROYECTOS ━━ -->
+  <div id="panel-proyectos" class="panel">
+    <div class="summary-bar">
+      <div class="summary-card">
+        <div class="summary-icon green">🚀</div>
+        <div><div class="summary-num">1</div><div class="summary-label">En producción</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon orange">🔧</div>
+        <div><div class="summary-num">3</div><div class="summary-label">En desarrollo</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon blue">📋</div>
+        <div><div class="summary-num">1</div><div class="summary-label">Por iniciar</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon purple">👥</div>
+        <div><div class="summary-num">4</div><div class="summary-label">Clientes activos</div></div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="proyecto-card">
+        <div class="proyecto-head">
+          <span class="proyecto-emoji">🫀</span>
+          <div style="flex:1">
+            <div class="proyecto-name">Eco-IA</div>
+            <div class="proyecto-client">Dr. Andrés Pérez — Global Cardio</div>
+          </div>
+          <span class="status-dot status-produccion" title="En producción"></span>
+        </div>
+        <div class="proyecto-body">
+          <div class="progress-wrap">
+            <div class="progress-label"><span>Avance</span><span style="color:var(--green);font-weight:700;">95%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:95%;"></div></div>
+          </div>
+          <div class="proyecto-tags">
+            <span class="ptag">n8n</span>
+            <span class="ptag">Railway</span>
+            <span class="ptag">Google Drive</span>
+            <span class="ptag">Word</span>
+          </div>
+          <div class="note-footer" style="margin-top:12px;">✅ En producción · Pendiente: carpetas duplicadas en Drive</div>
+        </div>
+      </div>
+
+      <div class="proyecto-card">
+        <div class="proyecto-head">
+          <span class="proyecto-emoji">📅</span>
+          <div style="flex:1">
+            <div class="proyecto-name">Agente Citas Médicas</div>
+            <div class="proyecto-client">Clínica médica</div>
+          </div>
+          <span class="status-dot status-desarrollo" title="En desarrollo"></span>
+        </div>
+        <div class="proyecto-body">
+          <div class="progress-wrap">
+            <div class="progress-label"><span>Avance</span><span style="color:var(--orange);font-weight:700;">65%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:65%;"></div></div>
+          </div>
+          <div class="proyecto-tags">
+            <span class="ptag">WhatsApp</span>
+            <span class="ptag">YCloud</span>
+            <span class="ptag">Redis</span>
+            <span class="ptag">Calendar</span>
+          </div>
+          <div class="note-footer" style="margin-top:12px;">🐛 Bugs: doble mensaje · slots ocupados · fechas hardcoded</div>
+        </div>
+      </div>
+
+      <div class="proyecto-card">
+        <div class="proyecto-head">
+          <span class="proyecto-emoji">📧</span>
+          <div style="flex:1">
+            <div class="proyecto-name">Agente Correos</div>
+            <div class="proyecto-client">Uso interno ExcelentIA</div>
+          </div>
+          <span class="status-dot status-desarrollo" title="En desarrollo"></span>
+        </div>
+        <div class="proyecto-body">
+          <div class="progress-wrap">
+            <div class="progress-label"><span>Avance</span><span style="color:var(--orange);font-weight:700;">75%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:75%;"></div></div>
+          </div>
+          <div class="proyecto-tags">
+            <span class="ptag">Gmail</span>
+            <span class="ptag">Claude Haiku</span>
+            <span class="ptag">HTML email</span>
+          </div>
+          <div class="note-footer" style="margin-top:12px;">⚠️ Crítico: cuerpo en d.text (no d.text.plain)</div>
+        </div>
+      </div>
+
+      <div class="proyecto-card">
+        <div class="proyecto-head">
+          <span class="proyecto-emoji">🏋️</span>
+          <div style="flex:1">
+            <div class="proyecto-name">Club Berimbau</div>
+            <div class="proyecto-client">Club deportivo — Estado de México</div>
+          </div>
+          <span class="status-dot status-desarrollo" title="En desarrollo"></span>
+        </div>
+        <div class="proyecto-body">
+          <div class="progress-wrap">
+            <div class="progress-label"><span>Avance</span><span style="color:var(--orange);font-weight:700;">60%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:60%;"></div></div>
+          </div>
+          <div class="proyecto-tags">
+            <span class="ptag">Dashboard</span>
+            <span class="ptag">Aspel</span>
+            <span class="ptag">WhatsApp</span>
+          </div>
+          <div class="note-footer" style="margin-top:12px;">🔧 En desarrollo · Dashboard adeudos + chatbot horarios</div>
+        </div>
+      </div>
+
+      <div class="proyecto-card">
+        <div class="proyecto-head">
+          <span class="proyecto-emoji">🏠</span>
+          <div style="flex:1">
+            <div class="proyecto-name">Agentes Inmobiliarios</div>
+            <div class="proyecto-client">Agencia inmobiliaria</div>
+          </div>
+          <span class="status-dot status-pendiente" title="Por iniciar"></span>
+        </div>
+        <div class="proyecto-body">
+          <div class="progress-wrap">
+            <div class="progress-label"><span>Avance</span><span style="color:var(--text-muted);font-weight:700;">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:0%;"></div></div>
+          </div>
+          <div class="proyecto-tags">
+            <span class="ptag">Jina AI</span>
+            <span class="ptag">Sheets</span>
+            <span class="ptag">Inmuebles24</span>
+          </div>
+          <div class="note-footer" style="margin-top:12px;">📋 Por iniciar · 2 agentes: captura + buscador</div>
+        </div>
+      </div>
+
+      <!-- Card nuevo proyecto -->
+      <div class="proyecto-card" style="border:2px dashed var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:200px;" onclick="alert('Próximamente: agregar proyectos desde el dashboard')">
+        <div style="text-align:center;color:var(--text-muted);">
+          <div style="font-size:36px;margin-bottom:8px;">＋</div>
+          <div style="font-weight:600;font-size:15px;">Nuevo proyecto</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ── Reloj en vivo ──
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('live-time').textContent = `${h}:${m}:${s}`;
+
+    const hour = now.getHours();
+    let greeting = hour < 12 ? 'Buenos días ☀️' : hour < 19 ? 'Buenas tardes 🌤️' : 'Buenas noches 🌙';
+    document.getElementById('live-greeting').textContent = greeting;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ── Cambio de pestañas ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+    const tabs = ['agenda','correo','tareas','gastos','noticias','proyectos'];
+    const idx = tabs.indexOf(tab);
+    document.querySelectorAll('.tab')[idx].classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  // ── Toggle tareas ──
+  function toggleTask(el) {
+    const isDone = el.classList.toggle('done');
+    const title = el.nextElementSibling.querySelector('.task-title');
+    if (isDone) {
+      el.textContent = '✓';
+      title.classList.add('done-text');
+    } else {
+      el.textContent = '';
+      title.classList.remove('done-text');
+    }
+  }
+</script>
+
+</body>
+</html>
