@@ -823,5 +823,241 @@
   }
 </script>
 
+
+<!-- SECCIÓN: MODO ALTERNATIVO ESCANEO -->
+<div style="max-width:900px; margin: 0 auto 60px; padding: 0 32px;">
+
+  <div style="border:1px solid #dde1e9; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(42,35,24,0.06); background:#fff;">
+
+    <!-- Header desplegable -->
+    <div onclick="toggleEscaneo()" style="padding:20px 28px; display:flex; align-items:center; justify-content:space-between; background:#dce8f7; cursor:pointer; user-select:none; transition:background 0.2s;" onmouseover="this.style.background='#e8f0fb'" onmouseout="this.style.background='#dce8f7'">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="width:34px; height:34px; background:#1a3a6b; color:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">⊞</div>
+        <div>
+          <div style="font-family:'Special Elite',serif; font-size:16px; color:#1a2035;">Modo alternativo: Escaneo y tabla de datos</div>
+          <div style="font-size:12px; color:#4a5068; margin-top:2px;">Otra forma en que el agente puede apoyar al Dr. — sin generar el reporte, solo organizar los datos</div>
+        </div>
+      </div>
+      <div id="chevron-escaneo" style="font-size:20px; color:#1a3a6b; transition:transform 0.3s;">▾</div>
+    </div>
+
+    <!-- Cuerpo -->
+    <div id="body-escaneo" style="display:none; padding:28px;">
+
+      <!-- Descripción -->
+      <div style="background:#f0f6ff; border-left:4px solid #4a9fd4; border-radius:0 8px 8px 0; padding:16px 20px; margin-bottom:28px;">
+        <div style="font-size:13px; font-weight:700; color:#1a3a6b; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.8px;">¿En qué consiste esta opción?</div>
+        <div style="font-size:14px; color:#4a5068; line-height:1.7;">
+          En lugar de generar el reporte Word, el agente escanea <strong>todas las imágenes</strong> del estudio, extrae cada dato visible y los organiza por sección. El Dr. revisa la tabla y copia los valores directamente a su reporte. <strong>Mismo ahorro de tiempo, control total.</strong>
+        </div>
+      </div>
+
+      <!-- MINIATURAS: grid de imágenes -->
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#8a90a0; margin-bottom:12px;">Estudio de ejemplo — Cristina Yarto · 23/03/2026 · 20 imágenes procesadas</div>
+      <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:28px;">
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 1 — Modo M diástole</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">TIVd 0.651cm<br>DIVId 4.32cm<br>PPVId 0.827cm<br>VTD 84ml<br>GPR 0.3<br>Masa 95.7g<br>Ind.masa 61g/m²</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 2 — Modo M sístole</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">DIVIs 2.79cm<br>VTS 29.3ml<br>FE 65.1%<br>IE cúbico 37.5ml/m²<br>IE Teich 34.8ml/m²</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 3 — Paraesternal aórtica</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Anillo 1.97cm<br>Senos 2.56cm<br>UST 1.93cm<br>Ao asc. 2.61cm</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 4 — ESPAT modo M</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">ESPAT 2.10cm<br>(TAPSE = 21mm)</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 5 — IT Tricúspide CW</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Vmáx IT 170cm/s<br>GP máx 12mmHg</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 6 — VD 4 distancias</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Anillo 3.13cm<br>Basal 4.08cm<br>Medio 3.05cm<br>Long. 7.10cm</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 7 — Doppler mitral E/A</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Vel E 77.6cm/s<br>GP 2mmHg<br>Vel A 66.4cm/s<br>Tdesac 322ms<br>E/A 1.2</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 8 — TDI lateral</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Vel E´lat 12.1cm/s<br>E/E´lat 6.4</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#27500A; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 9 — Strain VD</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#7dc857; line-height:1.5;">DLPLVD -21.9%<br>DL4CVD -17.2%</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 10 — AI volumen</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Long 5.35cm<br>Área 17cm²<br>Vol 41.7ml<br>Dist 3.49cm<br>Índice 26.6ml/m²</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#27500A; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 11 — Strain AI</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#7dc857; line-height:1.5;">Reservorio 29.6%<br>Conducto -20.9%<br>Bomba -8.7%</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 12 — AD volumen</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Long 4.38cm<br>Área 13.4cm²<br>Vol 35ml<br>Dist 3.54cm<br>Índice 22.3ml/m²</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#111;">
+          <div style="padding:5px 7px; background:#4a5068; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 13 — A4C aceptación</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#8a90a0; line-height:1.5;">FC 68lpm<br>Contorno pendiente<br>Sin valores finales</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 14 — A4CÁM diástole</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">VI-Long 7.81cm<br>VI-Área 28.6cm²<br>VI-Vol 85.4ml<br>VTD 85.3ml</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 15 — A4CÁM sístole</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">VI-Long 6.58cm<br>VI-Área 16.8cm²<br>VI-Vol 35.6ml<br>VTS 35.6ml<br>FE 58.3%<br>IE 31.7ml/m²</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#111;">
+          <div style="padding:5px 7px; background:#4a5068; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 16 — Sin datos</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#8a90a0; line-height:1.5;">Imagen en negro<br>Sin valores visibles</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#633806; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 17 — THP Insuf. Aórtica</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#f0a050; line-height:1.5;">Vmáx 464cm/s<br>Pendiente 217cm/s²<br>T½p 627ms</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 18 — Pared libre VD</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Dist 0.469cm<br>(Pared libre = 4.7mm)</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#1a3a6b; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 19 — VCI modo M</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#4a9fd4; line-height:1.5;">Dist 1.74cm<br>FC 72bpm<br>Colapso &gt;50%</div>
+        </div>
+
+        <div style="border:1px solid #dde1e9; border-radius:6px; overflow:hidden; background:#000;">
+          <div style="padding:5px 7px; background:#27500A; color:#fff; font-size:9px; font-weight:700; text-align:center; letter-spacing:0.5px;">IMG 20 — SLG triplanar</div>
+          <div style="padding:7px; font-family:monospace; font-size:9px; color:#7dc857; line-height:1.5;">A4C -18.7%<br>A2C -19.1%<br>A3C -19.4%<br>Prom. -19.1%</div>
+        </div>
+
+      </div><!-- /grid miniaturas -->
+
+      <!-- TABLA ORGANIZADA POR SECCIÓN -->
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#8a90a0; margin-bottom:12px;">Tabla de datos extraídos — organizados por sección</div>
+      <div style="overflow-x:auto; border-radius:8px; border:1px solid #dde1e9; margin-bottom:20px;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+
+          <!-- VENTRÍCULO IZQUIERDO -->
+          <thead><tr style="background:#1a3a6b; color:#fff;"><th colspan="3" style="padding:10px 16px; text-align:left; font-weight:700; letter-spacing:0.5px; font-size:12px;">❤️ VENTRÍCULO IZQUIERDO</th></tr></thead>
+          <tr style="background:#f5f6f8;"><th style="padding:8px 16px; text-align:left; color:#8a90a0; font-size:11px; font-weight:700; width:35%;">Parámetro</th><th style="padding:8px 16px; text-align:left; color:#8a90a0; font-size:11px; font-weight:700; width:30%;">Valor</th><th style="padding:8px 16px; text-align:left; color:#8a90a0; font-size:11px; font-weight:700;">Fuente</th></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">TIVd (Septo IV en diástole)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">0.651 cm (6.5 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 1</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">DIVId (Diámetro VI en diástole)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">4.32 cm (43 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 1</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">PPVId (Pared posterior en diástole)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">0.827 cm (8 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 1</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">DIVIs (Diámetro VI en sístole)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">2.79 cm (27 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 2</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">VTD — Volumen telediastólico (Teich)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">84.0 ml</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 1</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">VTD — Volumen telediastólico (A4CÁM)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">85.3 ml</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 14</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">VTS — Volumen telesistólico (A4CÁM)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">35.6 ml</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 15</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">FE — Fracción de expulsión (Teich)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">65.1%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 2</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">FE — Fracción de expulsión (A4CÁM Simpson)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">58.3%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 15</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">IE — Índice telesistólico (A4CÁM)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">31.7 ml/m²</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 15</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Masa VI</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">95.7 g</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 1</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Índice de masa VI</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">61.0 g/m²</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 1</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">GPR — Grosor parietal relativo</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">0.3 → Geometría normal</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 1</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">SLG — Strain longitudinal global (A4C)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">-18.7%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 20</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">SLG — Strain longitudinal global (A2C)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">-19.1%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 20</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">SLG — Strain longitudinal global (A3C)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">-19.4%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 20</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">SLG — Promedio triplanar</td><td style="padding:9px 16px; color:#27500A; font-weight:700;">-19.1%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 20</td></tr>
+
+          <!-- DIASTÓLICA -->
+          <tr style="background:#1a3a6b; color:#fff;"><td colspan="3" style="padding:10px 16px; font-weight:700; font-size:12px; letter-spacing:0.5px;">📊 FUNCIÓN DIASTÓLICA</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Onda E (velocidad llenado precoz mitral)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">77.6 cm/s</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 7</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Onda A (velocidad llenado tardío mitral)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">66.4 cm/s</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 7</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Relación E/A</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">1.2</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 7</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Tiempo de desaceleración mitral</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">322 ms</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 7</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Vel. E´ lateral (TDI anillo mitral)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">12.1 cm/s</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 8</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Relación E/E´ lateral</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">6.4 → Sin aumento de presiones</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 8</td></tr>
+
+          <!-- VENTRÍCULO DERECHO -->
+          <tr style="background:#1a3a6b; color:#fff;"><td colspan="3" style="padding:10px 16px; font-weight:700; font-size:12px; letter-spacing:0.5px;">🫀 VENTRÍCULO DERECHO</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Anillo tricúspideo</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">3.13 cm (31 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 6</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Diámetro basal VD</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">4.08 cm (40 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 6</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Diámetro medio VD</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">3.05 cm (30 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 6</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Diámetro longitudinal VD</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">7.10 cm (71 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 6</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Pared libre VD</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">0.469 cm (4.7 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 18</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">TAPSE / ESPAT (función sistólica long.)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">2.10 cm = 21 mm</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 4</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Strain pared libre VD (DLPLVD)</td><td style="padding:9px 16px; color:#27500A; font-weight:700;">-21.9%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 9</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Strain 4C VD (DL4CVD)</td><td style="padding:9px 16px; color:#27500A; font-weight:700;">-17.2%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 9</td></tr>
+
+          <!-- AURÍCULAS -->
+          <tr style="background:#1a3a6b; color:#fff;"><td colspan="3" style="padding:10px 16px; font-weight:700; font-size:12px; letter-spacing:0.5px;">🫁 AURÍCULAS</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AI — Longitud auricular</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">5.35 cm</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 10</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AI — Área auricular</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">17.0 cm²</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 10</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AI — Volumen auricular</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">41.7 ml</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 10</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AI — Índice de volumen (VTS)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">26.6 ml/m² → No dilatada</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 10</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AI — Strain reservorio</td><td style="padding:9px 16px; color:#27500A; font-weight:700;">29.6%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 11</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AI — Strain conducto</td><td style="padding:9px 16px; color:#27500A; font-weight:700;">-20.9%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 11</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AI — Strain bomba</td><td style="padding:9px 16px; color:#27500A; font-weight:700;">-8.7%</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 11</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AD — Longitud auricular</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">4.38 cm</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 12</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AD — Área auricular</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">13.4 cm²</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 12</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AD — Volumen auricular</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">35.0 ml</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 12</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">AD — Índice de volumen (VTS)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">22.3 ml/m² → No dilatada</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 12</td></tr>
+
+          <!-- VÁLVULAS -->
+          <tr style="background:#1a3a6b; color:#fff;"><td colspan="3" style="padding:10px 16px; font-weight:700; font-size:12px; letter-spacing:0.5px;">🔵 VÁLVULAS</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Mitral — Velocidad máxima E</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">77.6 cm/s = 0.78 m/s</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 7</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Mitral — Gradiente medio</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">2 mmHg</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 7</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Tricúspide IT — Velocidad máxima</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">170 cm/s = 1.7 m/s</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 5</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Tricúspide IT — Gradiente máximo</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">12 mmHg</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 5</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Aórtica insuf. — T½p (THP)</td><td style="padding:9px 16px; color:#633806; font-weight:700;">627 ms → Insuficiencia ligera</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 17</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Aórtica insuf. — Velocidad máxima</td><td style="padding:9px 16px; color:#633806; font-weight:700;">464 cm/s</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 17</td></tr>
+
+          <!-- GRANDES VASOS -->
+          <tr style="background:#1a3a6b; color:#fff;"><td colspan="3" style="padding:10px 16px; font-weight:700; font-size:12px; letter-spacing:0.5px;">🩺 GRANDES VASOS Y VCI</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Anillo aórtico</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">1.97 cm (19 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 3</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Senos de Valsalva</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">2.56 cm (25 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 3</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Unión sinotubular (UST)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">1.93 cm (19 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 3</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">Aorta ascendente</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">2.61 cm (26 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 3</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">VCI — Diámetro</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">1.74 cm (17 mm)</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 19</td></tr>
+          <tr style="border-top:1px solid #dde1e9;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">VCI — Colapso inspiratorio</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">&gt;50% → PAD estimada 3 mmHg</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 19</td></tr>
+          <tr style="border-top:1px solid #dde1e9; background:#fafbfc;"><td style="padding:9px 16px; font-weight:500; color:#1a2035;">PSAP estimada (GP IT + PAD)</td><td style="padding:9px 16px; color:#1a3a6b; font-weight:600;">12 + 3 = 15 mmHg</td><td style="padding:9px 16px; color:#8a90a0; font-size:12px;">Img 5 + Img 19</td></tr>
+
+        </table>
+      </div>
+
+      <!-- Nota final -->
+      <div style="background:#eef4fc; border-left:3px solid #1a3a6b; border-radius:0 8px 8px 0; padding:14px 18px; font-size:13px; color:#4a5068; line-height:1.6;">
+        <strong style="color:#1a2035;">Nota:</strong> Todos los datos son extraídos directamente de lo visible en cada imagen. La columna "Fuente" indica qué imagen los contiene. En este modo el Dr. decide qué valores copiar a su reporte — sin ningún paso intermedio de redacción automática.
+      </div>
+
+    </div><!-- /body-escaneo -->
+  </div><!-- /card -->
+</div>
+
+<script>
+  function toggleEscaneo() {
+    const body = document.getElementById('body-escaneo');
+    const chevron = document.getElementById('chevron-escaneo');
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+</script>
+
 </body>
 </html>
