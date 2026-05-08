@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Gastos — ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #dde1e9;
+    --header-start: #0d1b3e;
+    --header-mid: #1a3a6b;
+    --header-end: #1e5096;
+    --accent: #4a9fd4;
+    --hover-card: #e8f0fb;
+    --card-header-bg: #dce8f7;
+    --alert-bg: #f0f6ff;
+    --alert-border: #c8d9f0;
+    --note-bg: #eef4fc;
+    --text-main: #1a2035;
+    --text-sec: #4a5068;
+    --text-gray: #8a90a0;
+    --fer: #1e5096;
+    --juanjo: #2a7d4f;
+    --adolfo: #8b4513;
+    --shared: #6b4fa8;
+    --nada: #8a90a0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    font-size: 17px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--header-start) 0%, var(--header-mid) 60%, var(--header-end) 100%);
+    border-bottom: 3px solid var(--accent);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .header-logo {
+    height: 52px;
+    width: auto;
+  }
+
+  .header-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+
+  .header-sub {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.65);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .last-update {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+
+  .refresh-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .refresh-btn:hover { background: rgba(255,255,255,0.22); }
+
+  .refresh-icon { font-size: 1rem; }
+
+  /* SOCIOS */
+  main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
+
+  .section-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 32px;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    transition: box-shadow 0.2s;
+  }
+
+  .kpi-card:hover { box-shadow: 0 4px 20px rgba(26,58,107,0.1); background: var(--hover-card); }
+
+  .kpi-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-gray);
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1;
+  }
+
+  .kpi-value.accent { color: var(--accent); }
+
+  .kpi-sub {
+    font-size: 0.78rem;
+    color: var(--text-gray);
+    margin-top: 6px;
+  }
+
+  .kpi-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  /* SOCIO CARDS */
+  .socios-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 32px;
+  }
+
+  .socio-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .socio-header {
+    background: var(--card-header-bg);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .socio-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .av-fer { background: var(--fer); }
+  .av-jj { background: var(--juanjo); }
+  .av-adolfo { background: var(--adolfo); }
+
+  .socio-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-main);
+  }
+
+  .socio-role {
+    font-size: 0.76rem;
+    color: var(--text-gray);
+    font-weight: 500;
+  }
+
+  .socio-body { padding: 20px; }
+
+  .socio-total {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+
+  .socio-sub {
+    font-size: 0.78rem;
+    color: var(--text-gray);
+    margin-bottom: 14px;
+  }
+
+  .socio-bar-wrap {
+    background: var(--bg);
+    border-radius: 100px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+
+  .socio-bar {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 1s ease;
+  }
+
+  .bar-fer { background: var(--fer); }
+  .bar-jj { background: var(--juanjo); }
+  .bar-adolfo { background: var(--adolfo); }
+
+  .socio-detalle {
+    font-size: 0.8rem;
+    color: var(--text-sec);
+    line-height: 1.8;
+  }
+
+  /* CHARTS GRID */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .chart-card.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .chart-header {
+    background: var(--card-header-bg);
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chart-body {
+    padding: 24px;
+    position: relative;
+  }
+
+  .chart-body canvas {
+    max-height: 280px;
+  }
+
+  /* TABLA */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .table-header-bar {
+    background: var(--card-header-bg);
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  thead th {
+    background: var(--bg);
+    color: var(--text-gray);
+    font-weight: 700;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--hover-card); }
+
+  tbody td {
+    padding: 13px 16px;
+    color: var(--text-sec);
+    vertical-align: middle;
+  }
+
+  .badge-socio {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .badge-fer { background: #e8f0fb; color: var(--fer); }
+  .badge-jj { background: #e8f5ef; color: var(--juanjo); }
+  .badge-adolfo { background: #f5ede6; color: var(--adolfo); }
+  .badge-nada { background: #f0f0f0; color: var(--nada); }
+
+  .plat-pill {
+    display: inline-block;
+    background: var(--alert-bg);
+    border: 1px solid var(--alert-border);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .monto {
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .mes-chip {
+    background: var(--card-header-bg);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* LOADING */
+  #loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    color: var(--text-gray);
+    gap: 16px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #error-msg {
+    display: none;
+    background: #fff0f0;
+    border: 1px solid #fcc;
+    border-left: 4px solid #e05;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    color: #a00;
+    font-size: 0.9rem;
+  }
+
+  #dashboard { display: none; }
+
+  /* FOOTER */
+  footer {
+    background: var(--note-bg);
+    border-top: 3px solid var(--header-mid);
+    padding: 20px 40px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-gray);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    header { flex-direction: column; align-items: flex-start; padding: 20px 20px; }
+    main { padding: 20px 16px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .socios-grid { grid-template-columns: 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .chart-card.full-width { grid-column: auto; }
+    .header-right { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+  }
+
+  @media (max-width: 600px) {
+    .header-title { font-size: 1.2rem; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .kpi-value { font-size: 1.5rem; }
+    main { padding: 16px 12px; }
+    thead th, tbody td { padding: 10px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA" class="header-logo"
+         onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo%20excelentIA.png';">
+    <div id="logo-text" style="display:none; font-family:'Manrope',sans-serif; font-weight:900; font-size:1.5rem; color:#fff; letter-spacing:1px;">ExcelentIA</div>
+    <div>
+      <div class="header-title">Dashboard de Gastos</div>
+      <div class="header-sub">Control financiero de operaciones · Socios: Adolfo · Juan José · Fernando</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="last-update" id="last-update-txt">Cargando datos...</div>
+    <button class="refresh-btn" onclick="cargarDatos()">
+      <span class="refresh-icon">↻</span> Actualizar
+    </button>
+  </div>
+</header>
+
+<main>
+  <div id="loading">
+    <div class="spinner"></div>
+    <span>Conectando con Google Sheets...</span>
+  </div>
+
+  <div id="error-msg"></div>
+
+  <div id="dashboard">
+
+    <!-- KPIs -->
+    <div class="section-title">📊 Resumen General</div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Gasto Total Acumulado</div>
+        <div class="kpi-value accent" id="kpi-total">—</div>
+        <div class="kpi-sub">Todos los socios · todos los meses</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Plataformas Activas</div>
+        <div class="kpi-value" id="kpi-plataformas">—</div>
+        <div class="kpi-sub">Registradas en el historial</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Meses Registrados</div>
+        <div class="kpi-value" id="kpi-meses">—</div>
+        <div class="kpi-sub" id="kpi-meses-rango">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Promedio Mensual</div>
+        <div class="kpi-value" id="kpi-promedio">—</div>
+        <div class="kpi-sub">Por mes del período</div>
+      </div>
+    </div>
+
+    <!-- SOCIOS -->
+    <div class="section-title">👥 Gasto por Socio</div>
+    <div class="socios-grid">
+      <div class="socio-card">
+        <div class="socio-header">
+          <div class="socio-avatar av-adolfo">AC</div>
+          <div>
+            <div class="socio-name">Adolfo Cabrera</div>
+            <div class="socio-role">CEO</div>
+          </div>
+        </div>
+        <div class="socio-body">
+          <div class="socio-total" id="adolfo-total">—</div>
+          <div class="socio-sub" id="adolfo-pct">— del total</div>
+          <div class="socio-bar-wrap"><div class="socio-bar bar-adolfo" id="adolfo-bar" style="width:0%"></div></div>
+          <div class="socio-detalle" id="adolfo-detalle">—</div>
+        </div>
+      </div>
+
+      <div class="socio-card">
+        <div class="socio-header">
+          <div class="socio-avatar av-jj">JJ</div>
+          <div>
+            <div class="socio-name">Juan José García</div>
+            <div class="socio-role">CSO</div>
+          </div>
+        </div>
+        <div class="socio-body">
+          <div class="socio-total" id="jj-total">—</div>
+          <div class="socio-sub" id="jj-pct">— del total</div>
+          <div class="socio-bar-wrap"><div class="socio-bar bar-jj" id="jj-bar" style="width:0%"></div></div>
+          <div class="socio-detalle" id="jj-detalle">—</div>
+        </div>
+      </div>
+
+      <div class="socio-card">
+        <div class="socio-header">
+          <div class="socio-avatar av-fer">FD</div>
+          <div>
+            <div class="socio-name">Fernando Dávila</div>
+            <div class="socio-role">COO</div>
+          </div>
+        </div>
+        <div class="socio-body">
+          <div class="socio-total" id="fer-total">—</div>
+          <div class="socio-sub" id="fer-pct">— del total</div>
+          <div class="socio-bar-wrap"><div class="socio-bar bar-fer" id="fer-bar" style="width:0%"></div></div>
+          <div class="socio-detalle" id="fer-detalle">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICOS -->
+    <div class="section-title">📈 Análisis Visual</div>
+    <div class="charts-grid">
+
+      <div class="chart-card">
+        <div class="chart-header">🍩 Gasto Total por Plataforma</div>
+        <div class="chart-body">
+          <canvas id="chartPlataformas"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">🧑‍💼 Gasto Acumulado por Socio</div>
+        <div class="chart-body">
+          <canvas id="chartSocios"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card full-width">
+        <div class="chart-header">📅 Gasto Mensual (barras apiladas por plataforma)</div>
+        <div class="chart-body" style="height: 300px;">
+          <canvas id="chartMensual"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">📦 Gasto por Categoría</div>
+        <div class="chart-body">
+          <canvas id="chartCategorias"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">📈 Evolución del Gasto Mensual</div>
+        <div class="chart-body">
+          <canvas id="chartEvolucion"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TABLA HISTORIAL -->
+    <div class="section-title">🧾 Historial de Pagos</div>
+    <div class="table-card">
+      <div class="table-header-bar">
+        <span>Todos los registros</span>
+        <span id="tabla-count" style="font-size:0.78rem; color:var(--text-gray); font-weight:500;">—</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Fecha</th>
+              <th>Plataforma</th>
+              <th>Costo Original</th>
+              <th>Monto MXN</th>
+              <th>Pagado por</th>
+              <th>Uso / Descripción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /dashboard -->
+</main>
+
+<footer>
+  ExcelentIA · Dashboard de Gastos Operativos · Los datos se actualizan en tiempo real desde Google Sheets
+</footer>
+
+<script>
+const SHEET_ID = '1g5MDKWf2yO_NSKn6cKQG_TqES3MwV7zv_UWisrm-Awc';
+const GID = '1814822849';
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+
+let chartPlataformas, chartSocios, chartMensual, chartCategorias, chartEvolucion;
+
+const COLORES_PLATAFORMA = {
+  'n8n': '#ea5c0a',
+  'Google Workspace': '#4285f4',
+  'Claude Pro': '#d97706',
+  'Claude API': '#b45309',
+  'Open AI API': '#10b981',
+  'Lucid': '#8b5cf6',
+  'Horizontes': '#ec4899',
+  'NoteBookLM': '#06b6d4',
+  'Dominio': '#6b7280',
+  'Google Suite': '#4285f4',
+};
+
+const CATEGORIAS = {
+  'n8n': 'Infraestructura',
+  'Google Workspace': 'Infraestructura',
+  'Google Suite': 'Infraestructura',
+  'Dominio': 'Infraestructura',
+  'Claude Pro': 'IA',
+  'Claude API': 'IA',
+  'Open AI API': 'IA',
+  'NoteBookLM': 'IA',
+  'Lucid': 'Herramientas',
+  'Horizontes': 'Educación',
+};
+
+function mxn(n) {
+  return n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
+}
+
+function getSocioKey(nombre) {
+  const n = (nombre || '').toLowerCase();
+  if (n.includes('fer') || n === 'fernando') return 'fer';
+  if (n.includes('juan') || n.includes('jj') || n.includes('juan josé') || n.includes('juan jose')) return 'jj';
+  if (n.includes('adolfo')) return 'adolfo';
+  return 'otro';
+}
+
+function getMes(fecha) {
+  const f = (fecha || '').toLowerCase();
+  if (f.includes('feb')) return 'Feb';
+  if (f.includes('mar')) return 'Mar';
+  if (f.includes('abr')) return 'Abr';
+  if (f.includes('may')) return 'May';
+  if (f.includes('jun')) return 'Jun';
+  if (f.includes('jul')) return 'Jul';
+  if (f.includes('ago') || f.includes('aug')) return 'Ago';
+  if (f.includes('sep')) return 'Sep';
+  if (f.includes('oct')) return 'Oct';
+  if (f.includes('nov')) return 'Nov';
+  if (f.includes('dic') || f.includes('dec')) return 'Dic';
+  if (f.includes('ene') || f.includes('jan')) return 'Ene';
+  return '—';
+}
+
+function parsearMonto(s) {
+  if (!s) return 0;
+  const limpio = s.replace(/[^0-9.]/g, '');
+  return parseFloat(limpio) || 0;
+}
+
+function colorSocio(key) {
+  if (key === 'fer') return '#1e5096';
+  if (key === 'jj') return '#2a7d4f';
+  if (key === 'adolfo') return '#8b4513';
+  return '#8a90a0';
+}
+
+function badgeSocio(nombre) {
+  const k = getSocioKey(nombre);
+  const labels = { fer: 'Fernando', jj: 'Juan José', adolfo: 'Adolfo', otro: nombre || 'Sin info' };
+  const cls = { fer: 'badge-fer', jj: 'badge-jj', adolfo: 'badge-adolfo', otro: 'badge-nada' };
+  return `<span class="badge-socio ${cls[k]}">● ${labels[k]}</span>`;
+}
+
+async function cargarDatos() {
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('error-msg').style.display = 'none';
+
+  try {
+    const res = await fetch(CSV_URL + '&t=' + Date.now());
+    if (!res.ok) throw new Error('No se pudo obtener el archivo CSV del Sheets.');
+    const text = await res.text();
+    const filas = parsearCSV(text);
+    procesarDatos(filas);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('last-update-txt').textContent = 'Actualizado: ' + new Date().toLocaleString('es-MX', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    const err = document.getElementById('error-msg');
+    err.style.display = 'block';
+    err.innerHTML = `<strong>⚠️ No se pudieron cargar los datos.</strong><br>Asegúrate de que el Google Sheets esté compartido como "Cualquiera con el enlace puede ver".<br><small>${e.message}</small>`;
+  }
+}
+
+function parsearCSV(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  return lines.map(l => {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < l.length; i++) {
+      const c = l[i];
+      if (c === '"') { inQ = !inQ; continue; }
+      if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    cols.push(cur.trim());
+    return cols;
+  });
+}
+
+function encontrarSeccionPagos(filas) {
+  // Buscamos la fila encabezado con "N° de Pago" o "Fecha de pago"
+  for (let i = 0; i < filas.length; i++) {
+    const f = filas[i].join(' ').toLowerCase();
+    if (f.includes('fecha de pago') || f.includes('plataforma') && f.includes('costo')) {
+      return i + 1; // datos desde siguiente fila
+    }
+  }
+  return -1;
+}
+
+function procesarDatos(filas) {
+  const inicio = encontrarSeccionPagos(filas);
+  if (inicio < 0) {
+    throw new Error('No se encontró la sección de historial de pagos en el Sheets.');
+  }
+
+  const pagos = [];
+  for (let i = inicio; i < filas.length; i++) {
+    const f = filas[i];
+    // columnas: N°, Fecha, Plataforma, Costo, Costo MXN, Pagado por, Uso, Comentarios
+    const fecha = f[1] || '';
+    const plataforma = f[2] || '';
+    const costoOrig = f[3] || '';
+    const costoMXN = parsearMonto(f[4] || '');
+    const pagadoPor = f[5] || '';
+    const uso = f[6] || '';
+    const comentarios = f[7] || '';
+
+    if (!plataforma || !fecha) continue;
+    if (costoMXN === 0 && (costoOrig === '-' || costoOrig === '—' || costoOrig === '')) continue;
+    if (costoMXN === 0) continue;
+
+    const mes = getMes(fecha);
+    const socioKey = getSocioKey(pagadoPor);
+
+    pagos.push({ fecha, mes, plataforma, costoOrig, costoMXN, pagadoPor, socioKey, uso, comentarios });
+  }
+
+  if (pagos.length === 0) throw new Error('No se encontraron pagos con monto válido en el historial.');
+
+  // ---- KPIs ----
+  const total = pagos.reduce((s, p) => s + p.costoMXN, 0);
+  const plataformasUnicas = [...new Set(pagos.map(p => p.plataforma))];
+  const mesesUnicos = [...new Set(pagos.map(p => p.mes))].filter(m => m !== '—');
+  const ORDEN_MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  mesesUnicos.sort((a,b) => ORDEN_MESES.indexOf(a) - ORDEN_MESES.indexOf(b));
+
+  document.getElementById('kpi-total').textContent = mxn(total);
+  document.getElementById('kpi-plataformas').textContent = plataformasUnicas.length;
+  document.getElementById('kpi-meses').textContent = mesesUnicos.length;
+  document.getElementById('kpi-meses-rango').textContent = mesesUnicos.length > 0 ? mesesUnicos[0] + ' → ' + mesesUnicos[mesesUnicos.length-1] + ' 2025' : '—';
+  document.getElementById('kpi-promedio').textContent = mesesUnicos.length > 0 ? mxn(Math.round(total / mesesUnicos.length)) : '—';
+
+  // ---- SOCIOS ----
+  const porSocio = { fer: 0, jj: 0, adolfo: 0 };
+  const detalleSocio = { fer: {}, jj: {}, adolfo: {} };
+
+  pagos.forEach(p => {
+    if (porSocio[p.socioKey] !== undefined) {
+      porSocio[p.socioKey] += p.costoMXN;
+      detalleSocio[p.socioKey][p.plataforma] = (detalleSocio[p.socioKey][p.plataforma] || 0) + p.costoMXN;
+    }
+  });
+
+  const totalSocios = porSocio.fer + porSocio.jj + porSocio.adolfo;
+
+  ['fer', 'jj', 'adolfo'].forEach(k => {
+    const val = porSocio[k];
+    const pct = totalSocios > 0 ? Math.round((val / totalSocios) * 100) : 0;
+    document.getElementById(`${k}-total`).textContent = mxn(val);
+    document.getElementById(`${k}-pct`).textContent = pct + '% del total entre socios';
+    setTimeout(() => { document.getElementById(`${k}-bar`).style.width = pct + '%'; }, 100);
+
+    const det = detalleSocio[k];
+    const lineas = Object.entries(det).sort((a,b) => b[1]-a[1]).map(([pl, m]) => `${pl}: ${mxn(m)}`).join('<br>');
+    document.getElementById(`${k}-detalle`).innerHTML = lineas || 'Sin registros';
+  });
+
+  // ---- TABLA ----
+  const tbody = document.getElementById('tabla-body');
+  tbody.innerHTML = '';
+  const pagosOrdenados = [...pagos].sort((a,b) => ORDEN_MESES.indexOf(a.mes) - ORDEN_MESES.indexOf(b.mes));
+  pagosOrdenados.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="mes-chip">${p.mes}</span></td>
+      <td style="color:var(--text-gray); font-size:0.82rem;">${p.fecha}</td>
+      <td><span class="plat-pill">${p.plataforma}</span></td>
+      <td style="color:var(--text-gray); font-size:0.82rem;">${p.costoOrig || '—'}</td>
+      <td class="monto">${mxn(p.costoMXN)}</td>
+      <td>${badgeSocio(p.pagadoPor)}</td>
+      <td style="color:var(--text-gray); font-size:0.82rem; max-width:200px;">${p.uso || p.comentarios || '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('tabla-count').textContent = pagos.length + ' registros';
+
+  // ---- GRÁFICOS ----
+  dibujarGraficos(pagos, mesesUnicos, plataformasUnicas, total, porSocio, ORDEN_MESES);
+}
+
+function colorPlat(nombre) {
+  const colores = [
+    '#4a9fd4','#ea5c0a','#2a7d4f','#d97706','#8b5cf6',
+    '#ec4899','#10b981','#06b6d4','#f59e0b','#ef4444',
+    '#6b7280','#1e5096'
+  ];
+  const keys = Object.keys(COLORES_PLATAFORMA);
+  const idx = keys.indexOf(nombre);
+  return COLORES_PLATAFORMA[nombre] || colores[idx % colores.length] || colores[0];
+}
+
+function destruir(chart) { if (chart) chart.destroy(); }
+
+function dibujarGraficos(pagos, meses, plataformas, total, porSocio, ORDEN_MESES) {
+  const commonFont = { family: 'Manrope', size: 13 };
+  Chart.defaults.font = commonFont;
+  Chart.defaults.color = '#4a5068';
+
+  // 1. DONUT: por plataforma
+  destruir(chartPlataformas);
+  const platTotales = {};
+  pagos.forEach(p => { platTotales[p.plataforma] = (platTotales[p.plataforma] || 0) + p.costoMXN; });
+  const platOrdenadas = Object.entries(platTotales).sort((a,b) => b[1]-a[1]);
+  chartPlataformas = new Chart(document.getElementById('chartPlataformas'), {
+    type: 'doughnut',
+    data: {
+      labels: platOrdenadas.map(([k]) => k),
+      datasets: [{
+        data: platOrdenadas.map(([,v]) => v),
+        backgroundColor: platOrdenadas.map(([k]) => colorPlat(k)),
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      cutout: '60%',
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 14, padding: 14, font: { size: 12 } } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${mxn(ctx.raw)} (${Math.round(ctx.raw/total*100)}%)` } }
+      }
+    }
+  });
+
+  // 2. BARRAS HORIZONTALES: por socio
+  destruir(chartSocios);
+  chartSocios = new Chart(document.getElementById('chartSocios'), {
+    type: 'bar',
+    data: {
+      labels: ['Adolfo Cabrera', 'Juan José García', 'Fernando Dávila'],
+      datasets: [{
+        label: 'Gasto MXN',
+        data: [porSocio.adolfo, porSocio.jj, porSocio.fer],
+        backgroundColor: ['#8b4513','#2a7d4f','#1e5096'],
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${mxn(ctx.raw)}` } }
+      },
+      scales: {
+        x: { grid: { color: '#dde1e9' }, ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+
+  // 3. BARRAS APILADAS: por mes y plataforma
+  destruir(chartMensual);
+  const mesesOrdenados = [...meses].sort((a,b) => ORDEN_MESES.indexOf(a) - ORDEN_MESES.indexOf(b));
+  const platSet = [...new Set(pagos.map(p => p.plataforma))];
+  const datasets = platSet.map(plat => {
+    const data = mesesOrdenados.map(mes => {
+      return pagos.filter(p => p.plataforma === plat && p.mes === mes).reduce((s,p) => s + p.costoMXN, 0);
+    });
+    return {
+      label: plat,
+      data,
+      backgroundColor: colorPlat(plat),
+      borderRadius: 4,
+      borderSkipped: false,
+    };
+  });
+  chartMensual = new Chart(document.getElementById('chartMensual'), {
+    type: 'bar',
+    data: { labels: mesesOrdenados, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${mxn(ctx.raw)}` } }
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, grid: { color: '#dde1e9' }, ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
+      }
+    }
+  });
+
+  // 4. DONUT: por categoría
+  destruir(chartCategorias);
+  const catTotales = {};
+  pagos.forEach(p => {
+    const cat = CATEGORIAS[p.plataforma] || 'Otros';
+    catTotales[cat] = (catTotales[cat] || 0) + p.costoMXN;
+  });
+  const catOrdenadas = Object.entries(catTotales).sort((a,b) => b[1]-a[1]);
+  const catColores = ['#4a9fd4','#ea5c0a','#2a7d4f','#d97706','#8b5cf6'];
+  chartCategorias = new Chart(document.getElementById('chartCategorias'), {
+    type: 'doughnut',
+    data: {
+      labels: catOrdenadas.map(([k]) => k),
+      datasets: [{
+        data: catOrdenadas.map(([,v]) => v),
+        backgroundColor: catColores,
+        borderWidth: 2, borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true, cutout: '60%',
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 14, padding: 14, font: { size: 12 } } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${mxn(ctx.raw)} (${Math.round(ctx.raw/total*100)}%)` } }
+      }
+    }
+  });
+
+  // 5. LÍNEA: evolución mensual total
+  destruir(chartEvolucion);
+  const totalPorMes = mesesOrdenados.map(mes => pagos.filter(p => p.mes === mes).reduce((s,p) => s + p.costoMXN, 0));
+  chartEvolucion = new Chart(document.getElementById('chartEvolucion'), {
+    type: 'line',
+    data: {
+      labels: mesesOrdenados,
+      datasets: [{
+        label: 'Gasto mensual total',
+        data: totalPorMes,
+        borderColor: '#4a9fd4',
+        backgroundColor: 'rgba(74,159,212,0.12)',
+        borderWidth: 3,
+        pointBackgroundColor: '#4a9fd4',
+        pointRadius: 6,
+        pointHoverRadius: 9,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` Total: ${mxn(ctx.raw)}` } }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: { grid: { color: '#dde1e9' }, ticks: { callback: v => '$' + (v/1000).toFixed(1) + 'k' } }
+      }
+    }
+  });
+}
+
+// Auto-refresh cada 5 minutos
+setInterval(cargarDatos, 5 * 60 * 1000);
+
+// Carga inicial
+cargarDatos();
+</script>
+</body>
+</html>
