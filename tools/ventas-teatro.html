@@ -175,7 +175,7 @@ header .subtitle {
 }
 
 .main-btn .btn-icon { font-size: 24px; line-height: 1; }
-.main-btn .btn-name { font-size: 11px; font-weight: 800; color: var(--text); line-height: 1.2; text-align: center; padding: 0 4px; }
+.main-btn .btn-name { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; text-align: center; padding: 0 4px; }
 .main-btn .btn-price {
   font-family: 'Black Ops One', cursive;
   font-size: 15px;
@@ -640,11 +640,17 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwe-dD_QDPLLg
 
 // ── PRODUCTOS FIJOS ──
 const FIXED_PRODUCTS = [
-  { key:'bolsas',   name:'Tote Bag',  icon:'👜', basePrice:210 },
-  { key:'stickers', name:'Stickers',  icon:'✨', basePrice:120 },
-  { key:'oraculos', name:'Oráculo',   icon:'🔮', basePrice:150 },
-  { key:'gorras',   name:'Gorra',     icon:'🧢', basePrice:150 },
-  { key:'playeras', name:'Playera',   icon:'👕', basePrice:350 },
+  { key:'constance', name:'Constance', basePrice:350 },
+  { key:'janedoe',   name:'Jane Doe',  basePrice:350 },
+  { key:'ocean',     name:'Ocean',     basePrice:350 },
+  { key:'mischa',    name:'Mischa',    basePrice:350 },
+  { key:'noel',      name:'Noel',      basePrice:350 },
+  { key:'ricky',     name:'Ricky',     basePrice:350 },
+  { key:'bolsas',    name:'Tote Bag',  basePrice:210 },
+  { key:'karnak',    name:'Karnak',    basePrice:350 },
+  { key:'oraculos',  name:'Oráculo',   basePrice:150 },
+  { key:'gorras',    name:'Gorra',     basePrice:150 },
+  { key:'stickers',  name:'Stickers',  basePrice:120 },
 ];
 const ART_COUNT = 6;
 
@@ -724,7 +730,6 @@ function initButtons() {
     btn.id = 'fixed-btn-'+i;
     btn.innerHTML = `
       <span class="qty-badge" id="fixed-badge-${i}">0</span>
-      <span class="btn-icon">${p.icon}</span>
       <span class="btn-name">${p.name}</span>
       <span class="btn-price" id="fixed-price-${i}">$${p.basePrice}</span>
     `;
@@ -755,7 +760,6 @@ function createArtBtn(i) {
       <span class="${isArt1?'btn-name':'art-empty-label'}">Art ${i+1}</span>
     </div>
     <div class="art-layer-cfg" id="art-cfg-${i}" style="display:none;flex-direction:column;align-items:center;gap:3px;">
-      <span class="${isArt1?'btn-icon':'art-icon'}" id="art-icon-${i}">🎁</span>
       <span class="${isArt1?'btn-name':'art-name'}" id="art-label-${i}"></span>
       <span class="${isArt1?'btn-price':'art-price'}" id="art-price-${i}"></span>
     </div>
@@ -988,8 +992,11 @@ async function registerSale(){
   const esTarjeta=pago==='Tarjeta'?total:0;
   const esTransferencia=pago==='Transferencia'?total:0;
   const params=new URLSearchParams({
-    fecha, bolsas:fixedQty[0], stickers:fixedQty[1], oraculos:fixedQty[2],
-    gorras:fixedQty[3], playeras:fixedQty[4],
+    fecha,
+    constance:fixedQty[0], janedoe:fixedQty[1], ocean:fixedQty[2],
+    mischa:fixedQty[3], noel:fixedQty[4], ricky:fixedQty[5],
+    bolsas:fixedQty[6], karnak:fixedQty[7], oraculos:fixedQty[8],
+    gorras:fixedQty[9], stickers:fixedQty[10],
     art1:artConfigs[0].configured?artQty[0]:0,
     art2:artConfigs[1].configured?artQty[1]:0,
     art3:artConfigs[2].configured?artQty[2]:0,
