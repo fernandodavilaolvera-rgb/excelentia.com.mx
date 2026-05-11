@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Ventas · Ride The Cyclone</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060d0b;
+  --neon-green: #00ff88;
+  --neon-green-dim: #00cc66;
+  --neon-cyan: #00e5ff;
+  --neon-magenta: #ff2d78;
+  --neon-orange: #ff9500;
+  --btn-green: #00a855;
+  --card-border: rgba(0,255,136,0.2);
+  --text: #ffffff;
+  --text-dim: #5a8870;
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 60px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.bg-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+body > *:not(.bg-canvas) { position: relative; z-index: 1; }
+
+/* HEADER */
+header {
+  text-align: center;
+  padding: 24px 16px 18px;
+  border-bottom: 1px solid rgba(0,255,136,0.2);
+  background: linear-gradient(180deg, rgba(0,20,12,0.95) 0%, transparent 100%);
+}
+
+.logo-wrap {
+  width: 260px; height: 120px;
+  margin: 0 auto 12px;
+  border-radius: 18px; overflow: hidden;
+  border: 1.5px solid rgba(0,255,136,0.25);
+  background: rgba(0,20,12,0.6);
+}
+
+.logo-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+
+header h1 {
+  font-family: 'Black Ops One', cursive;
+  font-size: 16px;
+  color: var(--neon-green);
+  text-shadow: 0 0 16px rgba(0,255,136,0.5);
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+header .subtitle {
+  font-size: 11px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--neon-green-dim); opacity: 0.7;
+}
+
+header .report-date {
+  font-size: 10px; color: rgba(0,229,255,0.55);
+  letter-spacing: 0.12em; margin-top: 6px;
+}
+
+/* LAYOUT */
+.section { margin: 18px 14px 0; }
+.section-label {
+  font-size: 9px; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 10px; padding-left: 2px;
+}
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.2), transparent);
+  margin: 18px 14px 0;
+}
+
+/* KPI GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.kpi-card {
+  background: linear-gradient(160deg, #0d1f17 0%, #060d0b 100%);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  position: relative; overflow: hidden;
+}
+
+.kpi-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; width: 3px; height: 100%;
+}
+.kpi-card.green::before   { background: linear-gradient(180deg, var(--neon-green), transparent); }
+.kpi-card.cyan::before    { background: linear-gradient(180deg, var(--neon-cyan), transparent); }
+.kpi-card.magenta::before { background: linear-gradient(180deg, var(--neon-magenta), transparent); }
+.kpi-card.orange::before  { background: linear-gradient(180deg, var(--neon-orange), transparent); }
+.kpi-card.wide { grid-column: 1 / -1; }
+
+.kpi-label {
+  font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
+}
+
+.kpi-value {
+  font-family: 'Black Ops One', cursive;
+  font-size: 30px; line-height: 1;
+}
+.kpi-card.green   .kpi-value { color: var(--neon-green);   text-shadow: 0 0 16px rgba(0,255,136,0.5); }
+.kpi-card.cyan    .kpi-value { color: var(--neon-cyan);    text-shadow: 0 0 16px rgba(0,229,255,0.5); }
+.kpi-card.magenta .kpi-value { color: var(--neon-magenta); text-shadow: 0 0 16px rgba(255,45,120,0.5); }
+.kpi-card.orange  .kpi-value { color: var(--neon-orange);  text-shadow: 0 0 16px rgba(255,149,0,0.5); }
+
+.kpi-sub { font-size: 11px; color: #ffffff; font-weight: 700; margin-top: 5px; opacity: 0.6; }
+
+/* ALERTS */
+.alerts-bar {
+  background: rgba(0,229,255,0.04);
+  border: 1px solid rgba(0,229,255,0.18);
+  border-left: 3px solid var(--neon-cyan);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 18px 14px 0;
+}
+
+.alerts-title {
+  font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--neon-cyan);
+  opacity: 0.8; margin-bottom: 10px;
+}
+
+.alert-item {
+  display: flex; align-items: flex-start;
+  gap: 8px; margin-bottom: 7px;
+  font-size: 12px; font-weight: 700;
+  color: #ffffff; line-height: 1.4;
+}
+.alert-item:last-child { margin-bottom: 0; }
+
+.alert-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+}
+.dot-red    { background: var(--neon-magenta); box-shadow: 0 0 6px rgba(255,45,120,0.7); }
+.dot-yellow { background: var(--neon-orange);  box-shadow: 0 0 6px rgba(255,149,0,0.7); }
+.dot-green  { background: var(--neon-green);   box-shadow: 0 0 6px rgba(0,255,136,0.7); }
+
+/* TWO COL */
+.two-col { display: flex; flex-direction: column; gap: 20px; }
+@media (min-width: 640px) {
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .kpi-card.wide { grid-column: auto; }
+}
+
+/* SEMAFORO */
+.sem-list { display: flex; flex-direction: column; gap: 8px; }
+.sem-row {
+  display: flex; align-items: center;
+  gap: 11px; padding: 11px 13px;
+  border-radius: 12px; border: 1px solid transparent;
+}
+.sem-row.green   { background: rgba(0,255,136,0.05);  border-color: rgba(0,255,136,0.18); }
+.sem-row.yellow  { background: rgba(255,149,0,0.06);  border-color: rgba(255,149,0,0.22); }
+.sem-row.red     { background: rgba(255,45,120,0.05); border-color: rgba(255,45,120,0.18); }
+
+.sem-icon { font-size: 15px; flex-shrink: 0; }
+.sem-info { flex: 1; min-width: 0; }
+.sem-fecha  { font-size: 12px; font-weight: 900; color: #ffffff; line-height: 1.2; }
+.sem-detail { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.sem-pct {
+  font-family: 'Black Ops One', cursive;
+  font-size: 17px; flex-shrink: 0;
+}
+.sem-row.green  .sem-pct { color: var(--neon-green);   text-shadow: 0 0 8px rgba(0,255,136,0.5); }
+.sem-row.yellow .sem-pct { color: var(--neon-orange);  text-shadow: 0 0 8px rgba(255,149,0,0.5); }
+.sem-row.red    .sem-pct { color: var(--neon-magenta); text-shadow: 0 0 8px rgba(255,45,120,0.5); }
+
+/* TICKET PROMEDIO */
+.tp-list { display: flex; flex-direction: column; gap: 9px; }
+.tp-row  { display: flex; align-items: center; gap: 10px; }
+.tp-fecha {
+  font-size: 10px; font-weight: 900;
+  color: rgba(255,255,255,0.55); width: 48px; flex-shrink: 0;
+}
+.tp-bar-bg {
+  flex: 1; height: 22px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.tp-bar-fill {
+  height: 100%; border-radius: 6px;
+  display: flex; align-items: center;
+  padding-left: 9px;
+  font-size: 11px; font-weight: 900; color: #ffffff;
+}
+
+/* TABLA */
+.card {
+  background: linear-gradient(160deg, #0d1f17 0%, #060d0b 100%);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.card-head {
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(0,255,136,0.15);
+  font-size: 9px; font-weight: 900;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--neon-green-dim);
+}
+
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 580px; }
+
+thead tr { border-bottom: 1px solid rgba(0,255,136,0.22); }
+th {
+  padding: 10px 12px; text-align: left;
+  font-size: 9px; font-weight: 900;
+  color: var(--neon-green-dim);
+  text-transform: uppercase; letter-spacing: 0.14em; white-space: nowrap;
+}
+td {
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.7); font-weight: 700; vertical-align: middle;
+}
+td strong { color: #ffffff; font-weight: 900; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,255,136,0.03); }
+
+.badge {
+  display: inline-block; padding: 3px 9px;
+  border-radius: 20px; font-size: 10px;
+  font-weight: 900; letter-spacing: 0.04em; white-space: nowrap;
+}
+.badge-gray   { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+.badge-yellow { background: rgba(255,149,0,0.12);  color: var(--neon-orange);  border: 1px solid rgba(255,149,0,0.28); }
+.badge-red    { background: rgba(255,45,120,0.12); color: var(--neon-magenta); border: 1px solid rgba(255,45,120,0.28); }
+
+.ocp-wrap { display: flex; align-items: center; gap: 7px; }
+.ocp-bar-bg {
+  flex: 1; height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px; overflow: hidden; min-width: 55px;
+}
+.ocp-bar-fill { height: 100%; border-radius: 99px; }
+.ocp-pct { font-size: 11px; font-weight: 900; min-width: 38px; text-align: right; color: #ffffff; }
+
+/* TIP BOX */
+.tip-box {
+  margin-top: 14px;
+  background: rgba(0,229,255,0.04);
+  border: 1px solid rgba(0,229,255,0.14);
+  border-left: 3px solid var(--neon-cyan);
+  border-radius: 10px; padding: 12px 14px;
+  font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,0.6); line-height: 1.6;
+}
+
+/* FOOTER */
+footer {
+  margin: 24px 14px 0;
+  padding: 14px;
+  background: rgba(0,255,136,0.03);
+  border: 1px dashed rgba(0,255,136,0.12);
+  border-radius: var(--radius);
+  font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  text-align: center; letter-spacing: 0.06em;
+}
+</style>
+</head>
+<body>
+
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-wrap">
+    <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_ride_the_cyclone.jpg"
+         alt="Ride The Cyclone"
+         onerror="this.onerror=null; this.style.display='none';">
+  </div>
+  <h1>Dashboard de Ventas</h1>
+  <p class="subtitle">Teatro Xola Julio Prieto · CDMX · 9 Funciones</p>
+  <p class="report-date">↯ Reporte al 9 MAY 2026 · 8:01 AM PDT</p>
+</header>
+
+<!-- KPIs -->
+<div class="section">
+  <p class="section-label">Resumen General</p>
+  <div class="kpi-grid">
+
+    <div class="kpi-card green">
+      <div class="kpi-label">Vendidos</div>
+      <div class="kpi-value">1,069</div>
+      <div class="kpi-sub">de 4,346 disponibles</div>
+    </div>
+
+    <div class="kpi-card cyan">
+      <div class="kpi-label">Recaudación Bruta</div>
+      <div class="kpi-value" style="font-size:22px;">$590K</div>
+      <div class="kpi-sub">MXN acumulado</div>
+    </div>
+
+    <div class="kpi-card orange">
+      <div class="kpi-label">Ocupación Promedio</div>
+      <div class="kpi-value">24.6%</div>
+      <div class="kpi-sub">Promedio 9 funciones</div>
+    </div>
+
+    <div class="kpi-card magenta">
+      <div class="kpi-label">En Riesgo</div>
+      <div class="kpi-value">5</div>
+      <div class="kpi-sub">Funciones &lt;15% ocupadas</div>
+    </div>
+
+    <div class="kpi-card green wide">
+      <div class="kpi-label">Ticket Promedio General</div>
+      <div class="kpi-value">$624 <span style="font-size:14px;opacity:0.5">MXN</span></div>
+      <div class="kpi-sub">Rango $489 – $772 por función</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ALERTAS -->
+<div class="alerts-bar">
+  <div class="alerts-title">⚡ Alertas activas</div>
+  <div class="alert-item"><div class="alert-dot dot-red"></div>May 12 — 3 días restantes y solo 40% vendido. Acción inmediata.</div>
+  <div class="alert-item"><div class="alert-dot dot-red"></div>Jun 2, 9, 16 y 23 — menos del 6% de ocupación con semanas por delante.</div>
+  <div class="alert-item"><div class="alert-dot dot-yellow"></div>May 19 — 10 días, apenas 18.8% vendido (90 boletos).</div>
+  <div class="alert-item"><div class="alert-dot dot-green"></div>Abr 28 y May 5 — concluidas con 63–67% de ocupación. ✓</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SEMÁFORO + TICKET PROMEDIO -->
+<div class="section">
+  <div class="two-col">
+
+    <!-- SEMÁFORO -->
+    <div>
+      <p class="section-label">Semáforo por Función</p>
+      <div class="sem-list">
+
+        <div class="sem-row green">
+          <div class="sem-icon">✅</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 28 Abr · ETJ0504</div>
+            <div class="sem-detail">Concluida · 334 boletos · $163,451</div>
+          </div>
+          <div class="sem-pct">66.7%</div>
+        </div>
+
+        <div class="sem-row green">
+          <div class="sem-icon">✅</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 5 May · ETJ0511</div>
+            <div class="sem-detail">Concluida · 318 boletos · $164,354</div>
+          </div>
+          <div class="sem-pct">63.9%</div>
+        </div>
+
+        <div class="sem-row yellow">
+          <div class="sem-icon">⚠️</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 12 May · ETJ0518</div>
+            <div class="sem-detail">3 días · 191 boletos · $108,400</div>
+          </div>
+          <div class="sem-pct">40.1%</div>
+        </div>
+
+        <div class="sem-row yellow">
+          <div class="sem-icon">⚠️</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 19 May · ETJ0525</div>
+            <div class="sem-detail">10 días · 90 boletos · $56,800</div>
+          </div>
+          <div class="sem-pct">18.8%</div>
+        </div>
+
+        <div class="sem-row red">
+          <div class="sem-icon">🔴</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 26 May · ETJ0601</div>
+            <div class="sem-detail">17 días · 55 boletos · $39,360</div>
+          </div>
+          <div class="sem-pct">11.5%</div>
+        </div>
+
+        <div class="sem-row red">
+          <div class="sem-icon">🔴</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 2 Jun · ETJ0608</div>
+            <div class="sem-detail">24 días · 16 boletos · $9,280</div>
+          </div>
+          <div class="sem-pct">3.3%</div>
+        </div>
+
+        <div class="sem-row red">
+          <div class="sem-icon">🔴</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 9 Jun · ETJ0615</div>
+            <div class="sem-detail">31 días · 18 boletos · $12,960</div>
+          </div>
+          <div class="sem-pct">3.8%</div>
+        </div>
+
+        <div class="sem-row red">
+          <div class="sem-icon">🔴</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 16 Jun · ETJ0622</div>
+            <div class="sem-detail">38 días · 23 boletos · $17,760</div>
+          </div>
+          <div class="sem-pct">4.8%</div>
+        </div>
+
+        <div class="sem-row red">
+          <div class="sem-icon">🔴</div>
+          <div class="sem-info">
+            <div class="sem-fecha">Mar 23 Jun · ETJ0629</div>
+            <div class="sem-detail">45 días · 24 boletos · $18,160</div>
+          </div>
+          <div class="sem-pct">5.0%</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TICKET PROMEDIO -->
+    <div>
+      <p class="section-label">Ticket Promedio por Función (MXN)</p>
+      <div class="tp-list">
+
+        <div class="tp-row">
+          <div class="tp-fecha">28 Abr</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:61%;background:linear-gradient(90deg,#00a855,#00ff88);">$489</div></div>
+        </div>
+        <div class="tp-row">
+          <div class="tp-fecha">5 May</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:65%;background:linear-gradient(90deg,#00a855,#00ff88);">$517</div></div>
+        </div>
+        <div class="tp-row">
+          <div class="tp-fecha">12 May</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:71%;background:linear-gradient(90deg,#00c866,#00e5ff);">$568</div></div>
+        </div>
+        <div class="tp-row">
+          <div class="tp-fecha">19 May</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:79%;background:linear-gradient(90deg,#ff9500,#ffb700);">$631</div></div>
+        </div>
+        <div class="tp-row">
+          <div class="tp-fecha">26 May</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:90%;background:linear-gradient(90deg,#ff9500,#ff2d78);">$716</div></div>
+        </div>
+        <div class="tp-row">
+          <div class="tp-fecha">2 Jun</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:73%;background:linear-gradient(90deg,#ff7700,#ff2d78);">$580</div></div>
+        </div>
+        <div class="tp-row">
+          <div class="tp-fecha">9 Jun</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:91%;background:linear-gradient(90deg,#ff2d78,#c4003a);">$720</div></div>
+        </div>
+        <div class="tp-row">
+          <div class="tp-fecha">16 Jun</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:97%;background:linear-gradient(90deg,#ff2d78,#c4003a);">$772</div></div>
+        </div>
+        <div class="tp-row">
+          <div class="tp-fecha">23 Jun</div>
+          <div class="tp-bar-bg"><div class="tp-bar-fill" style="width:95%;background:linear-gradient(90deg,#ff2d78,#c4003a);">$757</div></div>
+        </div>
+
+      </div>
+
+      <div class="tip-box">
+        💡 El ticket promedio sube conforme se acerca la función — posible efecto de precio dinámico o asientos premium restantes. Funciones lejanas tienen tickets altos pero pocas ventas.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- TABLA DETALLE -->
+<div class="section">
+  <p class="section-label">Detalle por Función</p>
+  <div class="card">
+    <div class="card-head">↯ Todas las funciones · Teatro Xola Julio Prieto · MXN</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Función</th>
+            <th>Código</th>
+            <th>Días Rest.</th>
+            <th>Vendidos</th>
+            <th>Opens</th>
+            <th>Ocupación</th>
+            <th>Bruto MXN</th>
+            <th>T. Prom.</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td><strong>28 Abr 2026</strong></td>
+            <td>ETJ0504</td><td>—</td><td>334</td><td>165</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:66.7%;background:var(--neon-green);box-shadow:0 0 5px rgba(0,255,136,0.5);"></div></div>
+                <div class="ocp-pct">66.7%</div>
+              </div>
+            </td>
+            <td>$163,451</td><td>$489</td>
+            <td><span class="badge badge-gray">Concluida</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>5 May 2026</strong></td>
+            <td>ETJ0511</td><td>—</td><td>318</td><td>180</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:63.9%;background:var(--neon-green);box-shadow:0 0 5px rgba(0,255,136,0.5);"></div></div>
+                <div class="ocp-pct">63.9%</div>
+              </div>
+            </td>
+            <td>$164,354</td><td>$517</td>
+            <td><span class="badge badge-gray">Concluida</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>12 May 2026</strong></td>
+            <td>ETJ0518</td><td>3</td><td>191</td><td>285</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:40.1%;background:var(--neon-orange);box-shadow:0 0 5px rgba(255,149,0,0.5);"></div></div>
+                <div class="ocp-pct">40.1%</div>
+              </div>
+            </td>
+            <td>$108,400</td><td>$568</td>
+            <td><span class="badge badge-yellow">⚠ Urgente</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>19 May 2026</strong></td>
+            <td>ETJ0525</td><td>10</td><td>90</td><td>390</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:18.8%;background:var(--neon-orange);box-shadow:0 0 5px rgba(255,149,0,0.5);"></div></div>
+                <div class="ocp-pct">18.8%</div>
+              </div>
+            </td>
+            <td>$56,800</td><td>$631</td>
+            <td><span class="badge badge-yellow">⚠ Atención</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>26 May 2026</strong></td>
+            <td>ETJ0601</td><td>17</td><td>55</td><td>423</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:11.5%;background:var(--neon-magenta);box-shadow:0 0 5px rgba(255,45,120,0.5);"></div></div>
+                <div class="ocp-pct">11.5%</div>
+              </div>
+            </td>
+            <td>$39,360</td><td>$716</td>
+            <td><span class="badge badge-red">🔴 Crítico</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>2 Jun 2026</strong></td>
+            <td>ETJ0608</td><td>24</td><td>16</td><td>462</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:3.3%;background:var(--neon-magenta);box-shadow:0 0 5px rgba(255,45,120,0.5);"></div></div>
+                <div class="ocp-pct">3.3%</div>
+              </div>
+            </td>
+            <td>$9,280</td><td>$580</td>
+            <td><span class="badge badge-red">🔴 Crítico</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>9 Jun 2026</strong></td>
+            <td>ETJ0615</td><td>31</td><td>18</td><td>460</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:3.8%;background:var(--neon-magenta);box-shadow:0 0 5px rgba(255,45,120,0.5);"></div></div>
+                <div class="ocp-pct">3.8%</div>
+              </div>
+            </td>
+            <td>$12,960</td><td>$720</td>
+            <td><span class="badge badge-red">🔴 Crítico</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>16 Jun 2026</strong></td>
+            <td>ETJ0622</td><td>38</td><td>23</td><td>455</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:4.8%;background:var(--neon-magenta);box-shadow:0 0 5px rgba(255,45,120,0.5);"></div></div>
+                <div class="ocp-pct">4.8%</div>
+              </div>
+            </td>
+            <td>$17,760</td><td>$772</td>
+            <td><span class="badge badge-red">🔴 Crítico</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>23 Jun 2026</strong></td>
+            <td>ETJ0629</td><td>45</td><td>24</td><td>454</td>
+            <td>
+              <div class="ocp-wrap">
+                <div class="ocp-bar-bg"><div class="ocp-bar-fill" style="width:5%;background:var(--neon-magenta);box-shadow:0 0 5px rgba(255,45,120,0.5);"></div></div>
+                <div class="ocp-pct">5.0%</div>
+              </div>
+            </td>
+            <td>$18,160</td><td>$757</td>
+            <td><span class="badge badge-red">🔴 Crítico</span></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  Generado por ExcelentIA · excelentia.com.mx · Datos: Ticketmaster Sales Comparison — 9 MAY 2026
+</footer>
+
+<!-- CANVAS FONDO ANIMADO -->
+<script>
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, t = 0;
+function resizeCanvas(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+function drawBg(){
+  ctx.fillStyle = '#060d0b'; ctx.fillRect(0,0,W,H);
+  const cx = W * .5, cy = H * .28;
+  for(let i = 16; i > 0; i--){
+    const r = (i/16) * Math.max(W,H) * .72;
+    const wave = Math.sin(t * .35 + i * .5) * 9;
+    ctx.beginPath(); ctx.arc(cx, cy, r + wave, 0, Math.PI*2);
+    ctx.strokeStyle = `hsla(${148 + i*4 + t*4}, 78%, 44%, ${0.025 + (i%3===0?.018:0)})`;
+    ctx.lineWidth = 1.2; ctx.stroke();
+  }
+  for(let i = 0; i < 9; i++){
+    const a = (i/9)*Math.PI*2 + t*.04;
+    const x2 = cx + Math.cos(a)*Math.max(W,H);
+    const y2 = cy + Math.sin(a)*Math.max(W,H);
+    const g = ctx.createLinearGradient(cx,cy,x2,y2);
+    g.addColorStop(0,'rgba(0,255,136,0.04)'); g.addColorStop(1,'rgba(0,255,136,0)');
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x2,y2);
+    ctx.strokeStyle = g; ctx.lineWidth = 1; ctx.stroke();
+  }
+  t += .009; requestAnimationFrame(drawBg);
+}
+drawBg();
+</script>
+
+</body>
+</html>
