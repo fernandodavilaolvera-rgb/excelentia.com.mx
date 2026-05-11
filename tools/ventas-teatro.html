@@ -705,7 +705,39 @@ drawBg();
 // onSingle: función para tap simple
 // onDouble: función para doble tap
 function setupDoubleTap(btn, key, onSingle, onDouble) {
+  const MOVE_THRESHOLD = 10;
+  let startX = 0, startY = 0, didMove = false;
+
+  btn.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    didMove = false;
+  }, {passive: true});
+
+  btn.addEventListener('touchmove', (e) => {
+    const dx = Math.abs(e.touches[0].clientX - startX);
+    const dy = Math.abs(e.touches[0].clientY - startY);
+    if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) didMove = true;
+  }, {passive: true});
+
+  btn.addEventListener('touchend', (e) => {
+    if (didMove) return;
+    e.preventDefault();
+    if (tapTimers[key]) {
+      clearTimeout(tapTimers[key]);
+      delete tapTimers[key];
+      onDouble();
+    } else {
+      tapTimers[key] = setTimeout(() => {
+        delete tapTimers[key];
+        onSingle();
+      }, DOUBLE_TAP_MS);
+    }
+  }, {passive: false});
+
+  // Desktop
   btn.addEventListener('click', (e) => {
+    if ('ontouchstart' in window) return;
     if (tapTimers[key]) {
       clearTimeout(tapTimers[key]);
       delete tapTimers[key];
