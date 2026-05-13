@@ -2,430 +2,509 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Radar Test — Dashboard | Eureka</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Radar Test — Eureka</title>
 <link href="https://fonts.googleapis.com/css2?family=Kodchasan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-:root{
-  --bg:     #07090a;
-  --card:   #0c110c;
-  --border: #172017;
-  --green:  #aaff00;
-  --green2: #ccff44;
-  --cyan:   #00ffee;
-  --yellow: #ffee00;
-  --pink:   #ff44cc;
-  --text:   #ddeedd;
-  --font:   'Kodchasan',sans-serif;
-  --c0: #64c8ff;
-  --c1: #cc66ff;
-  --c2: #ffcc00;
-  --c3: #aaff00;
+:root {
+  --bg:      #080c08;
+  --card:    #0f150f;
+  --border:  #1c2e1c;
+  --green:   #aaff00;
+  --green2:  #ccff44;
+  --cyan:    #00ffee;
+  --yellow:  #ffee00;
+  --pink:    #ff44aa;
+  --gdim:    rgba(170,255,0,0.12);
+  --text:    #e8f5e8;
+  --radius:  16px;
+  --font:    'Kodchasan', sans-serif;
 }
 
-html,body{height:100%;overflow:hidden;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
-
-body::before{
-  content:'';position:fixed;inset:0;
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content:''; position:fixed; inset:0;
   background-image:
-    linear-gradient(rgba(170,255,0,.02) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(170,255,0,.02) 1px,transparent 1px);
-  background-size:48px 48px;pointer-events:none;z-index:0;
-}
-body::after{
-  content:'';position:fixed;inset:0;
-  background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(170,255,0,.05) 0%,transparent 70%);
-  pointer-events:none;z-index:0;
+    linear-gradient(rgba(170,255,0,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(170,255,0,0.022) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events:none; z-index:0;
 }
 
-.wrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;padding:20px 28px 16px;}
+.app { position:relative; z-index:1; max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; }
 
 /* ══ HEADER ══ */
-.topbar{
-  display:flex;align-items:center;
-  border-bottom:1px solid var(--border);
-  padding-bottom:14px;margin-bottom:18px;
-  gap:18px;
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+/* Header centrado para quiz y resultado */
+.header.centered {
+  justify-content: center;
+}
+.logo-eureka {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+/* Logo grande para intro */
+.logo-eureka-big {
+  height: 110px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 4px;
+}
+.header-center {
+  flex: 1;
+  text-align: center;
+}
+.header-center h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.header-center p {
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: .5px;
+  margin-top: 3px;
+  opacity: .85;
+}
+/* Título centrado sin subtexto para quiz/resultado */
+.header-title-only {
+  text-align: center;
+}
+.header-title-only h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.radar-svg { width: 52px; height: 52px; flex-shrink: 0; }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.sweep { transform-origin: 26px 26px; animation: spin 3s linear infinite; }
+
+/* ══ SCREENS ══ */
+.screen { display:none; flex-direction:column; flex:1; animation:fadeUp .3s ease; }
+.screen.active { display:flex; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+/* ══ BOTÓN PRIMARY ══ */
+.btn-primary {
+  background: var(--green); color: #050a05;
+  border: none; border-radius: var(--radius);
+  padding: 17px 24px;
+  font-family: var(--font); font-size: 15px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; width: 100%;
+  transition: all .2s;
+  box-shadow: 0 0 28px rgba(170,255,0,.28);
+  -webkit-appearance: none;
+}
+.btn-primary:active { transform: scale(.97); }
+.btn-primary:disabled { opacity: .3; cursor: not-allowed; transform: none; }
+.btn-wrap { padding: 14px 22px 32px; }
+
+/* ══════════════════════════════
+   INTRO
+══════════════════════════════ */
+.intro-body { flex:1; display:flex; flex-direction:column; padding:28px 22px 20px; gap:24px; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--gdim); border: 1px solid rgba(170,255,0,.25);
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 11px; font-weight: 700; color: var(--green);
+  letter-spacing: 1.5px; text-transform: uppercase; width: fit-content;
 }
 
-.logo-eureka{height:110px;width:auto;object-fit:contain;flex-shrink:0;}
-.vline{width:1px;height:44px;background:var(--border);}
+.intro-title { font-size: 27px; font-weight: 700; line-height: 1.22; color: var(--text); }
+.intro-title em { color: var(--green); font-style: normal; }
 
-/* Título centrado */
-.hcenter{flex:1;text-align:center;}
-.hcenter h1{
-  font-size:28px;font-weight:700;
-  color:var(--green);letter-spacing:4px;text-transform:uppercase;line-height:1;
+/* Descripción: cyan fluorescente */
+.intro-desc { font-size: 15px; color: var(--cyan); line-height: 1.75; opacity: .9; }
+
+.pills { display: flex; gap: 10px; }
+.pill { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 8px; text-align: center; }
+.pill .n { font-size: 30px; font-weight: 700; color: var(--green); line-height: 1; }
+/* Labels de pills: amarillo fluorescente */
+.pill .l { font-size: 11px; color: var(--yellow); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-weight: 600; }
+
+.pchips { display: flex; gap: 6px; }
+.pchip { flex:1; border-radius: 8px; padding: 8px 4px; text-align: center; font-size: 9px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; line-height: 1.3; border: 1px solid; }
+.pc0 { background:rgba(100,200,255,.08); border-color:rgba(100,200,255,.3); color:#64c8ff; }
+.pc1 { background:rgba(180,100,255,.08); border-color:rgba(180,100,255,.3); color:#cc66ff; }
+.pc2 { background:rgba(255,180,0,.08);   border-color:rgba(255,180,0,.3);   color:#ffcc00; }
+.pc3 { background:rgba(170,255,0,.08);   border-color:rgba(170,255,0,.3);   color:#aaff00; }
+
+.input-g { display: flex; flex-direction: column; gap: 8px; }
+/* Label "Tu nombre": verde fluorescente */
+.input-g label { font-size: 12px; color: var(--green2); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
+.input-g input {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 15px 18px; font-family: var(--font); font-size: 16px; color: var(--text);
+  outline: none; transition: border-color .25s, box-shadow .25s; -webkit-appearance: none; width: 100%;
 }
-.hcenter p{
-  font-size:13px;color:var(--cyan);
-  margin-top:4px;letter-spacing:1px;opacity:.9;
+.input-g input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--gdim); }
+/* Placeholder visible */
+.input-g input::placeholder { color: var(--cyan); opacity: .5; }
+
+/* ══════════════════════════════
+   QUIZ
+══════════════════════════════ */
+.progress-w { padding: 16px 20px 0; }
+.pmeta { display:flex; justify-content:space-between; font-size: 12px; color: var(--green2); margin-bottom: 8px; letter-spacing: .5px; font-weight: 600; }
+.ptrack { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.pfill { height:100%; background: var(--green); border-radius: 2px; transition: width .5s cubic-bezier(.4,0,.2,1); box-shadow: 0 0 10px var(--green); }
+
+.question-area { flex:1; display:flex; flex-direction:column; padding:22px 20px 14px; gap:18px; }
+.q-num { font-size: 11px; font-weight: 700; color: var(--cyan); letter-spacing: 3px; text-transform: uppercase; }
+.q-text { font-size: 20px; font-weight: 700; line-height: 1.35; color: var(--text); }
+
+.opts { display:flex; flex-direction:column; gap: 10px; flex:1; }
+.opt {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 15px; display: flex; align-items: center; gap: 12px;
+  cursor: pointer; font-family: var(--font); font-size: 14px; color: var(--text);
+  text-align: left; transition: all .2s; position: relative; overflow: hidden;
+  -webkit-appearance: none; width: 100%;
 }
-
-/* Radar más grande */
-.radar-svg{width:72px;height:72px;flex-shrink:0;}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.sweep{transform-origin:36px 36px;animation:spin 3s linear infinite;}
-
-.live-badge{
-  display:flex;align-items:center;gap:8px;
-  background:rgba(170,255,0,.08);border:1px solid rgba(170,255,0,.2);
-  border-radius:20px;padding:8px 18px;flex-shrink:0;
+.opt.sel { border-color: var(--green); background: rgba(170,255,0,.07); box-shadow: 0 0 20px rgba(170,255,0,.09); }
+/* Letra del inciso: amarillo fluorescente visible */
+.opt-l {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid rgba(255,238,0,.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--yellow);
+  flex-shrink: 0; transition: all .2s;
 }
-.live-dot{width:9px;height:9px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease infinite;}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(170,255,0,.5)}50%{opacity:.7;box-shadow:0 0 0 7px rgba(170,255,0,0)}}
-.live-txt{font-size:13px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;}
+.opt.sel .opt-l { background: var(--green); color: #050a05; border-color: var(--green); }
+.opt-t { flex:1; line-height: 1.4; color: var(--text); }
 
-.total-badge{
-  text-align:center;background:var(--card);border:1px solid var(--border);
-  border-radius:14px;padding:10px 20px;flex-shrink:0;
-}
-.total-num{font-size:34px;font-weight:700;color:var(--green);line-height:1;}
-.total-lbl{font-size:11px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;font-weight:600;}
+/* ══════════════════════════════
+   RESULTADO
+══════════════════════════════ */
+.result-body { flex:1; display:flex; flex-direction:column; align-items:center; padding:26px 22px 14px; gap:20px; }
 
-.clock{font-size:14px;color:var(--yellow);letter-spacing:1px;font-variant-numeric:tabular-nums;font-weight:600;flex-shrink:0;}
+/* Nombre usuario: cyan */
+.res-user { font-size: 13px; color: var(--cyan); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
 
-/* ══ GRID ══ */
-.main{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;min-height:0;}
+.ring-wrap { position:relative; width:188px; height:188px; flex-shrink:0; }
+.ring-wrap svg { transform: rotate(-90deg); }
+.ring-label { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-score { font-size: 54px; font-weight: 700; color: var(--green); line-height: 1; }
+/* "DE 40 PTS": visible */
+.ring-max { font-size: 13px; color: var(--green2); letter-spacing: 1px; margin-top: 2px; font-weight: 600; }
+.ring-arc { transition: stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1); }
 
-/* ══ CARD ══ */
-.card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:18px;padding:18px 20px;
-  display:flex;flex-direction:column;gap:10px;
-  position:relative;overflow:hidden;
-}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:18px 18px 0 0;}
-.card.c0::before{background:var(--c0);}
-.card.c1::before{background:var(--c1);}
-.card.c2::before{background:var(--c2);}
-.card.c3::before{background:var(--c3);box-shadow:0 0 20px rgba(170,255,0,.3);}
-.card.c3{border-color:rgba(170,255,0,.18);}
+.res-profile { text-align:center; }
+.res-pname { font-size: 23px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+/* Descripción del perfil: cyan — más grande */
+.res-pdesc { font-size: 18px; color: var(--cyan); line-height: 1.75; opacity: .9; }
 
-/* Perfil card */
-.card-name{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
-.card-range{font-size:12px;color:var(--cyan);letter-spacing:1px;font-weight:600;}
-.bar-wrap{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;}
-.bar-row{display:flex;align-items:center;gap:10px;}
-.bar-pct{font-size:40px;font-weight:700;line-height:1;min-width:78px;}
-.bar-col{flex:1;display:flex;flex-direction:column;gap:6px;}
-.bar-track{width:100%;height:9px;background:var(--border);border-radius:5px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:5px;transition:width 1s cubic-bezier(.4,0,.2,1);}
-.bar-votos{font-size:12px;color:var(--yellow);letter-spacing:.5px;font-weight:600;}
-.card-desc{font-size:11px;color:var(--cyan);line-height:1.5;opacity:.8;}
+.range-card { width:100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+/* "Espectro de perfiles": amarillo */
+.range-title { font-size: 11px; color: var(--yellow); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; font-weight: 700; }
+.range-track { display:flex; gap:4px; margin-bottom:10px; }
+.rseg { flex:1; height:5px; border-radius:3px; background: var(--border); transition: all .5s ease; }
+.rseg.active.r0 { background:#64c8ff; box-shadow:0 0 8px #64c8ff; }
+.rseg.active.r1 { background:#cc66ff; box-shadow:0 0 8px #cc66ff; }
+.rseg.active.r2 { background:#ffcc00; box-shadow:0 0 8px #ffcc00; }
+.rseg.active.r3 { background:#aaff00; box-shadow:0 0 8px #aaff00; }
+.range-labs { display:flex; gap:4px; }
+.rlab { flex:1; font-size: 8px; color: rgba(200,220,200,.5); text-align:center; line-height:1.3; }
+.rlab.active.r0 { color:#64c8ff; font-weight:700; }
+.rlab.active.r1 { color:#cc66ff; font-weight:700; }
+.rlab.active.r2 { color:#ffcc00; font-weight:700; }
+.rlab.active.r3 { color:#aaff00; font-weight:700; }
 
-/* ══ CARD TOTAL (2 cols) ══ */
-.card-total{grid-column:span 2;}
-.total-content{flex:1;display:flex;align-items:center;gap:28px;}
-.big-num{font-size:90px;font-weight:700;color:var(--green);line-height:1;}
-.big-sub{font-size:16px;color:var(--cyan);margin-top:6px;letter-spacing:1px;font-weight:600;}
-.sect-title{font-size:12px;font-weight:700;color:var(--yellow);letter-spacing:2px;text-transform:uppercase;}
-
-/* Dona */
-.donut-wrap{position:relative;width:190px;height:190px;flex-shrink:0;}
-.donut-wrap svg{transform:rotate(-90deg);}
-.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.donut-lbl{font-size:12px;color:var(--cyan);text-align:center;letter-spacing:.5px;opacity:.9;line-height:1.5;}
-
-/* Leyenda */
-.legend{display:flex;flex-direction:column;gap:12px;flex:1;}
-.leg-row{display:flex;align-items:center;gap:10px;}
-.leg-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
-.leg-name{font-size:13px;color:var(--text);flex:1;letter-spacing:.5px;}
-.leg-pct{font-size:16px;font-weight:700;}
-
-/* ══ CARD ACTIVIDAD (2 cols) ══ */
-.card-act{grid-column:span 2;}
-.act-header{display:flex;align-items:center;justify-content:space-between;}
-.act-sub{font-size:11px;color:var(--cyan);margin-top:2px;opacity:.8;}
-.timeline{flex:1;display:flex;align-items:flex-end;gap:5px;min-height:0;}
-.tbar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.tbar{width:100%;border-radius:4px 4px 0 0;transition:height .8s cubic-bezier(.4,0,.2,1);min-height:2px;}
-.tbar-lbl{font-size:9px;color:var(--cyan);letter-spacing:.3px;text-align:center;opacity:.7;}
-
-/* ══ FOOTER ══ */
-.footer{margin-top:12px;display:flex;align-items:center;justify-content:space-between;}
-.footer-txt{font-size:11px;color:var(--cyan);letter-spacing:1px;opacity:.7;}
-.update-txt{font-size:11px;color:var(--yellow);letter-spacing:.5px;font-weight:600;}
+.save-msg { font-size: 12px; color: rgba(170,255,0,.6); letter-spacing: .5px; text-align:center; min-height:18px; }
+.save-msg.ok  { color: var(--green); }
+.save-msg.err { color: #ff6666; }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="app">
 
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <img class="logo-eureka"
-      src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/Eureka_Logo.png"
-      alt="Eureka" onerror="this.style.display='none'">
-    <div class="vline"></div>
-
-    <!-- CENTRO: título centrado -->
-    <div class="hcenter">
-      <h1>Radar Test</h1>
-      <p>Resultados grupales en tiempo real</p>
+  <!-- HEADER QUIZ/RESULTADO -->
+  <div class="header" id="header-quiz" style="display:none; justify-content:space-between; align-items:center; padding:10px 16px;">
+    <!-- Espacio fijo del logo — siempre ocupa lugar aunque no cargue la imagen -->
+    <div style="width:70px;height:52px;flex-shrink:0;display:flex;align-items:center;">
+      <img
+        src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/Eureka_Logo.png"
+        alt="Eureka" style="height:52px;width:auto;object-fit:contain;max-width:70px;">
     </div>
-
-    <!-- Radar grande -->
-    <svg class="radar-svg" viewBox="0 0 72 72" fill="none">
-      <circle cx="36" cy="36" r="32" stroke="#aaff00" stroke-width="1" opacity=".22"/>
-      <circle cx="36" cy="36" r="22" stroke="#aaff00" stroke-width="1" opacity=".32"/>
-      <circle cx="36" cy="36" r="13" stroke="#aaff00" stroke-width="1" opacity=".45"/>
-      <circle cx="36" cy="36" r="5"  fill="#aaff00"/>
-      <line x1="36" y1="4"  x2="36" y2="68" stroke="#aaff00" stroke-width=".5" opacity=".15"/>
-      <line x1="4"  y1="36" x2="68" y2="36" stroke="#aaff00" stroke-width=".5" opacity=".15"/>
+    <div style="flex:1;text-align:center;">
+      <h1 style="font-size:22px;font-weight:700;color:var(--green);letter-spacing:3px;text-transform:uppercase;line-height:1;">RADAR TEST</h1>
+    </div>
+    <svg class="radar-svg" viewBox="0 0 52 52" fill="none">
+      <circle cx="26" cy="26" r="23" stroke="#aaff00" stroke-width="1" opacity=".25"/>
+      <circle cx="26" cy="26" r="16" stroke="#aaff00" stroke-width="1" opacity=".35"/>
+      <circle cx="26" cy="26" r="9"  stroke="#aaff00" stroke-width="1" opacity=".5"/>
+      <circle cx="26" cy="26" r="3"  fill="#aaff00"/>
+      <line x1="26" y1="3"  x2="26" y2="49" stroke="#aaff00" stroke-width=".5" opacity=".18"/>
+      <line x1="3"  y1="26" x2="49" y2="26" stroke="#aaff00" stroke-width=".5" opacity=".18"/>
       <g class="sweep">
-        <line x1="36" y1="36" x2="36" y2="4" stroke="#aaff00" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="36" y1="36" x2="62" y2="16" stroke="#aaff00" stroke-width="1" opacity=".35"/>
+        <line x1="26" y1="26" x2="26" y2="3" stroke="#aaff00" stroke-width="2" stroke-linecap="round"/>
+        <line x1="26" y1="26" x2="45" y2="11" stroke="#aaff00" stroke-width=".8" opacity=".4"/>
       </g>
-      <circle cx="58" cy="18" r="3.5" fill="#aaff00" opacity=".95"/>
-      <circle cx="48" cy="9"  r="2"   fill="#00ffee" opacity=".8"/>
-      <circle cx="22" cy="58" r="1.5" fill="#ffee00" opacity=".6"/>
+      <circle cx="42" cy="12" r="2.5" fill="#aaff00" opacity=".95"/>
+      <circle cx="34" cy="7"  r="1.5" fill="#00ffee" opacity=".7"/>
     </svg>
-
-    <div class="live-badge">
-      <div class="live-dot"></div>
-      <span class="live-txt">EN VIVO</span>
-    </div>
-
-    <div class="total-badge">
-      <div class="total-num" id="hdr-total">0</div>
-      <div class="total-lbl">Participantes</div>
-    </div>
-
-    <div class="clock" id="clock">00:00:00</div>
   </div>
 
-  <!-- MAIN GRID -->
-  <div class="main">
-
-    <!-- TREND ROOKIE -->
-    <div class="card c0">
-      <div class="card-name" style="color:var(--c0)">Trend Rookie</div>
-      <div class="card-range">10 – 18 puntos</div>
-      <div class="bar-wrap">
-        <div class="bar-row">
-          <div class="bar-pct" id="pct-0" style="color:var(--c0)">0%</div>
-          <div class="bar-col">
-            <div class="bar-track"><div class="bar-fill" id="bar-0" style="width:0%;background:var(--c0);box-shadow:0 0 12px var(--c0)"></div></div>
-            <div class="bar-votos" id="vot-0">0 participantes</div>
-          </div>
-        </div>
+  <!-- ══ INTRO ══ -->
+  <div class="screen active" id="s-intro">
+    <!-- Zona superior: logo + título -->
+    <div style="display:flex;flex-direction:column;align-items:center;padding:32px 22px 20px;gap:12px;">
+      <div style="height:100px;display:flex;align-items:center;justify-content:center;">
+        <img
+          src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/Eureka_Logo.png"
+          alt="EÜREKa!" style="height:100px;width:auto;object-fit:contain;">
       </div>
-      <div class="card-desc">Te mantienes informado, pero rara vez exploras activamente.</div>
+      <div style="font-size:48px;font-weight:700;color:var(--green);letter-spacing:4px;text-transform:uppercase;line-height:1.05;text-align:center;text-shadow:0 0 30px rgba(170,255,0,.5);">RADAR<br>TEST</div>
     </div>
 
-    <!-- CULTURE SCANNER -->
-    <div class="card c1">
-      <div class="card-name" style="color:var(--c1)">Culture Scanner</div>
-      <div class="card-range">19 – 28 puntos</div>
-      <div class="bar-wrap">
-        <div class="bar-row">
-          <div class="bar-pct" id="pct-1" style="color:var(--c1)">0%</div>
-          <div class="bar-col">
-            <div class="bar-track"><div class="bar-fill" id="bar-1" style="width:0%;background:var(--c1);box-shadow:0 0 12px var(--c1)"></div></div>
-            <div class="bar-votos" id="vot-1">0 participantes</div>
-          </div>
-        </div>
-      </div>
-      <div class="card-desc">Detectas cambios, pero aún no siempre los conectas.</div>
+    <!-- Zona central: input + botón -->
+    <div style="display:flex;flex-direction:column;align-items:center;padding:0 22px;gap:14px;">
+      <label style="font-size:13px;color:var(--green2);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:center;">Escribe tu nombre</label>
+      <input type="text" id="nombre" placeholder="Tu nombre aquí"
+        autocomplete="off" autocorrect="off" autocapitalize="words"
+        style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(170,255,0,0.4);border-radius:var(--radius);padding:15px 18px;font-family:var(--font);font-size:16px;color:var(--text);outline:none;width:100%;text-align:center;-webkit-appearance:none;"
+        onfocus="this.style.borderColor='var(--green)';this.style.boxShadow='0 0 0 3px rgba(170,255,0,.15)';"
+        onblur="this.style.borderColor='rgba(170,255,0,0.4)';this.style.boxShadow='none';">
+      <button class="btn-primary" onclick="iniciar()"
+        style="background:linear-gradient(135deg,#aaff00,#ccff44);box-shadow:0 0 40px rgba(170,255,0,.5),0 4px 20px rgba(170,255,0,.3);">
+        COMENZAR
+      </button>
     </div>
 
-    <!-- OPPORTUNITY SEEKER -->
-    <div class="card c2">
-      <div class="card-name" style="color:var(--c2)">Opportunity Seeker</div>
-      <div class="card-range">29 – 34 puntos</div>
-      <div class="bar-wrap">
-        <div class="bar-row">
-          <div class="bar-pct" id="pct-2" style="color:var(--c2)">0%</div>
-          <div class="bar-col">
-            <div class="bar-track"><div class="bar-fill" id="bar-2" style="width:0%;background:var(--c2);box-shadow:0 0 12px var(--c2)"></div></div>
-            <div class="bar-votos" id="vot-2">0 participantes</div>
-          </div>
-        </div>
+    <!-- Zona inferior: radar animado + texto -->
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:20px 22px 28px;gap:16px;">
+      <!-- Radar con foco animado -->
+      <div style="position:relative;width:160px;height:160px;">
+        <svg viewBox="0 0 160 160" width="160" height="160" style="position:absolute;top:0;left:0;">
+          <defs>
+            <radialGradient id="rglow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#aaff00" stop-opacity=".15"/>
+              <stop offset="100%" stop-color="#aaff00" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="80" cy="80" r="74" stroke="#aaff00" stroke-width="1" opacity=".2" fill="none"/>
+          <circle cx="80" cy="80" r="54" stroke="#aaff00" stroke-width="1" opacity=".3" fill="none"/>
+          <circle cx="80" cy="80" r="34" stroke="#aaff00" stroke-width="1" opacity=".45" fill="none"/>
+          <circle cx="80" cy="80" r="14" stroke="#aaff00" stroke-width="1.5" opacity=".7" fill="none"/>
+          <line x1="80" y1="6"  x2="80" y2="154" stroke="#aaff00" stroke-width=".5" opacity=".15"/>
+          <line x1="6"  y1="80" x2="154" y2="80" stroke="#aaff00" stroke-width=".5" opacity=".15"/>
+          <!-- Foco / bulb en el centro -->
+          <circle cx="80" cy="80" r="8" fill="#aaff00" opacity=".9" style="filter:drop-shadow(0 0 8px #aaff00)"/>
+          <circle cx="80" cy="80" r="22" fill="url(#rglow)"/>
+          <!-- Sweep animado -->
+          <g style="transform-origin:80px 80px;animation:spin 3s linear infinite;">
+            <line x1="80" y1="80" x2="80" y2="6" stroke="#aaff00" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            <line x1="80" y1="80" x2="138" y2="34" stroke="#aaff00" stroke-width="1" opacity=".4"/>
+          </g>
+          <!-- Puntos de señal -->
+          <circle cx="128" cy="36" r="3.5" fill="#aaff00" opacity=".9" style="filter:drop-shadow(0 0 5px #aaff00)"/>
+          <circle cx="108" cy="22" r="2.5" fill="#00ffee" opacity=".7"/>
+          <circle cx="52" cy="118" r="2" fill="#aaff00" opacity=".5"/>
+        </svg>
       </div>
-      <div class="card-desc">Ves oportunidades donde otros ven ruido.</div>
+      <p style="font-size:15px;color:var(--cyan);text-align:center;line-height:1.5;font-weight:600;letter-spacing:.5px;">¿Qué tan conectado estás con<br>lo que viene?</p>
     </div>
-
-    <!-- EUREKA MINDSET -->
-    <div class="card c3">
-      <div class="card-name" style="color:var(--c3)">Eureka Mindset</div>
-      <div class="card-range">35 – 40 puntos</div>
-      <div class="bar-wrap">
-        <div class="bar-row">
-          <div class="bar-pct" id="pct-3" style="color:var(--c3)">0%</div>
-          <div class="bar-col">
-            <div class="bar-track"><div class="bar-fill" id="bar-3" style="width:0%;background:var(--c3);box-shadow:0 0 14px var(--c3)"></div></div>
-            <div class="bar-votos" id="vot-3">0 participantes</div>
-          </div>
-        </div>
-      </div>
-      <div class="card-desc">Transformas señales en oportunidades reales.</div>
-    </div>
-
-    <!-- DONA + LEYENDA -->
-    <div class="card card-total">
-      <div class="sect-title">Distribución de perfiles</div>
-      <div class="total-content">
-        <div>
-          <div class="big-num" id="big-total">0</div>
-          <div class="big-sub">participantes</div>
-        </div>
-        <div class="donut-wrap">
-          <svg width="190" height="190" viewBox="0 0 190 190">
-            <circle cx="95" cy="95" r="72" stroke="#172017" stroke-width="22" fill="none"/>
-            <circle cx="95" cy="95" r="72" stroke="var(--c3)" stroke-width="22" fill="none"
-              stroke-dasharray="452" stroke-dashoffset="452" stroke-linecap="butt" id="do-3" style="transition:all 1s ease;"/>
-            <circle cx="95" cy="95" r="72" stroke="var(--c2)" stroke-width="22" fill="none"
-              stroke-dasharray="452" stroke-dashoffset="452" stroke-linecap="butt" id="do-2" style="transition:all 1s ease;"/>
-            <circle cx="95" cy="95" r="72" stroke="var(--c1)" stroke-width="22" fill="none"
-              stroke-dasharray="452" stroke-dashoffset="452" stroke-linecap="butt" id="do-1" style="transition:all 1s ease;"/>
-            <circle cx="95" cy="95" r="72" stroke="var(--c0)" stroke-width="22" fill="none"
-              stroke-dasharray="452" stroke-dashoffset="452" stroke-linecap="butt" id="do-0" style="transition:all 1s ease;"/>
-          </svg>
-          <div class="donut-center">
-            <div class="donut-lbl">MINDSET<br>COLECTIVO</div>
-          </div>
-        </div>
-        <div class="legend">
-          <div class="leg-row"><div class="leg-dot" style="background:var(--c0)"></div><div class="leg-name">Trend Rookie</div><div class="leg-pct" id="lpct-0" style="color:var(--c0)">0%</div></div>
-          <div class="leg-row"><div class="leg-dot" style="background:var(--c1)"></div><div class="leg-name">Culture Scanner</div><div class="leg-pct" id="lpct-1" style="color:var(--c1)">0%</div></div>
-          <div class="leg-row"><div class="leg-dot" style="background:var(--c2)"></div><div class="leg-name">Opportunity Seeker</div><div class="leg-pct" id="lpct-2" style="color:var(--c2)">0%</div></div>
-          <div class="leg-row"><div class="leg-dot" style="background:var(--c3)"></div><div class="leg-name">Eureka Mindset</div><div class="leg-pct" id="lpct-3" style="color:var(--c3)">0%</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ACTIVIDAD -->
-    <div class="card card-act">
-      <div class="act-header">
-        <div>
-          <div class="sect-title">Actividad reciente</div>
-          <div class="act-sub">Nuevas respuestas por ciclo de actualización</div>
-        </div>
-        <div class="update-txt" id="last-update">Conectando...</div>
-      </div>
-      <div class="timeline" id="timeline"></div>
-    </div>
-
   </div>
 
-  <!-- FOOTER -->
-  <div class="footer">
-    <div class="footer-txt">EUREKA 2026 · Radar Test Dashboard · Modo TV</div>
-    <div class="update-txt" id="update-txt">Actualizando cada 5 segundos</div>
+  <!-- ══ QUIZ ══ -->
+  <div class="screen" id="s-quiz">
+    <div class="progress-w">
+      <div class="pmeta">
+        <span id="ptexto">Pregunta 1 de 10</span>
+      </div>
+      <div class="ptrack"><div class="pfill" id="pfill" style="width:10%"></div></div>
+    </div>
+    <div class="question-area">
+      <div class="q-num" id="qnum">Pregunta 01</div>
+      <div class="q-text" id="qtext"></div>
+      <div class="opts" id="opts"></div>
+    </div>
+    <div class="btn-wrap">
+      <button class="btn-primary" id="btnsig" onclick="siguiente()" disabled>SIGUIENTE →</button>
+    </div>
+  </div>
+
+  <!-- ══ RESULTADO ══ -->
+  <div class="screen" id="s-result">
+    <div class="result-body">
+      <p class="res-user" id="resusr">—</p>
+      <div class="ring-wrap">
+        <svg width="188" height="188" viewBox="0 0 188 188">
+          <circle cx="94" cy="94" r="80" stroke="#1c2e1c" stroke-width="14" fill="none"/>
+          <circle cx="94" cy="94" r="80"
+            stroke="#aaff00" stroke-width="14" fill="none"
+            stroke-dasharray="502" stroke-dashoffset="502"
+            stroke-linecap="round" id="rarc" class="ring-arc"
+            style="filter:drop-shadow(0 0 10px #aaff00)"/>
+        </svg>
+        <div class="ring-label">
+          <div class="ring-score" id="rscore">0</div>
+          <div class="ring-max">DE 40 PTS</div>
+        </div>
+      </div>
+      <div class="res-profile">
+        <div class="res-pname" id="rpname">—</div>
+        <div class="res-pdesc" id="rpdesc">—</div>
+      </div>
+      <p class="save-msg" id="savemsg"></p>
+    </div>
   </div>
 
 </div>
 
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMPJzEHiXv4P1IjueKKm2IKUT-iB_2B_ysrzSZV7-AzQDJWClCDwIFyAVtN_Yjtoy_nQ/exec';
-const INTERVALO_MS = 5000;
-const CIRC = 452;
 
-let actividadBins = new Array(12).fill(0);
-let ultimoTotal   = 0;
-let demoTick      = 0;
+const PREGUNTAS = [
+  { texto:'¿Qué es "corecore"?', opciones:[{t:'Un estilo musical',p:0},{t:'Una tendencia que satiriza las tendencias',p:2},{t:'Un tipo de tenis',p:0},{t:'Un videojuego',p:0}] },
+  { texto:'¿Dónde nacen hoy muchas tendencias?', opciones:[{t:'En reportes de consultoras globales',p:2},{t:'En laboratorios de innovación de grandes corporativos',p:1},{t:'En comunidades digitales y creadores de contenido',p:4},{t:'En lanzamientos oficiales de grandes marcas',p:3}] },
+  { texto:'¿Cómo te enteras normalmente de algo nuevo?', opciones:[{t:'Noticias',p:2},{t:'Redes sociales',p:4},{t:'Amigos / colegas',p:3},{t:'No sabría decir',p:1}] },
+  { texto:'Cuando ves un producto nuevo…', opciones:[{t:'Lo observo',p:2},{t:'Lo ignoro',p:1},{t:'Lo compro / pruebo',p:4},{t:'Lo investigo',p:3}] },
+  { texto:'¿Cada cuánto pruebas algo nuevo (producto, app, experiencia)?', opciones:[{t:'Siempre estoy probando',p:4},{t:'Casi nunca',p:1},{t:'De vez en cuando',p:2},{t:'Frecuentemente',p:3}] },
+  { texto:'¿Has comprado algo solo porque lo viste en redes?', opciones:[{t:'Varias veces',p:3},{t:'Nunca',p:1},{t:'Tal vez una vez',p:2},{t:'Sí, seguido',p:4}] },
+  { texto:'Cuando viajas…', opciones:[{t:'Voy a lo seguro',p:1},{t:'Busco cosas locales',p:3},{t:'Salgo activamente a explorar tendencias',p:4},{t:'Pruebo algo diferente',p:2}] },
+  { texto:'¿Qué haces cuando ves algo interesante fuera de tu categoría?', opciones:[{t:'Lo veo como algo curioso sin aplicación',p:1},{t:'Lo guardo como referencia',p:2},{t:'Pienso si podría adaptarse',p:3},{t:'Busco activamente cómo llevarlo a mi negocio',p:4}] },
+  { texto:'Cuando escuchas una idea nueva…', opciones:[{t:'La evalúo',p:3},{t:'Busco fallas',p:1},{t:'Pienso cómo hacerla mejor',p:4},{t:'La cuestiono',p:2}] },
+  { texto:'¿Cuál describe mejor tu estilo?', opciones:[{t:'Prefiero lo probado',p:1},{t:'Me adapto',p:2},{t:'Me gusta explorar',p:3},{t:'Busco constantemente lo nuevo',p:4}] },
+];
 
-// ── Reloj ──
-function tickReloj(){
-  const n=new Date();
-  document.getElementById('clock').textContent=
-    `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
-}
-setInterval(tickReloj,1000); tickReloj();
+const PERFILES = [
+  { nombre:'TREND ROOKIE',       min:10, max:18, seg:0, color:'#64c8ff', desc:'Te mantienes informado, pero rara vez exploras activamente. Tu próximo paso: cuestionar lo que ya conoces.' },
+  { nombre:'CULTURE SCANNER',    min:19, max:28, seg:1, color:'#cc66ff', desc:'Detectas cambios, pero aún no siempre los conectas. Tienes el radar encendido — ahora úsalo con intención.' },
+  { nombre:'OPPORTUNITY SEEKER', min:29, max:34, seg:2, color:'#ffcc00', desc:'Ya ves oportunidades donde otros ven ruido. Exploras, conectas y detectas el potencial antes que la mayoría.' },
+  { nombre:'EUREKA MINDSET',     min:35, max:40, seg:3, color:'#aaff00', desc:'Exploras, conectas y transformas señales en oportunidades reales. Eres de los que construyen el futuro.' },
+];
 
-// ── Timeline ──
-function renderTimeline(){
-  const cont=document.getElementById('timeline');
-  cont.innerHTML='';
-  const maxV=Math.max(...actividadBins,1);
-  actividadBins.forEach((v,i)=>{
-    const pct=(v/maxV)*100;
-    const last=i===actividadBins.length-1;
-    const color=last?'var(--green)':'var(--border)';
-    const glow=last?'0 0 8px var(--green)':'none';
-    const w=document.createElement('div');
-    w.className='tbar-wrap';
-    w.innerHTML=`<div class="tbar" style="height:${Math.max(pct,2)}%;background:${color};box-shadow:${glow};"></div><div class="tbar-lbl">${v>0?v:''}</div>`;
-    cont.appendChild(w);
-  });
-}
+const LETRAS = ['A','B','C','D'];
+let qActual=0, respuestas=[], pregsOrden=[], nombre='';
 
-// ── Dona ──
-function actualizarDona(counts,total){
-  const circ=CIRC;
-  let deg=0;
-  [0,1,2,3].forEach(i=>{
-    const pct=total>0?counts[i]/total:0;
-    const arc=pct*circ;
-    const el=document.getElementById(`do-${i}`);
-    el.style.strokeDasharray=`${arc} ${circ}`;
-    el.style.strokeDashoffset=-(deg);
-    deg+=arc;
-  });
+function mezclar(a){return[...a].sort(()=>Math.random()-.5);}
+function mostrar(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // El header de quiz/resultado aparece solo en esas pantallas
+  document.getElementById('header-quiz').style.display = id==='s-intro' ? 'none' : '';
 }
 
-// ── UI ──
-function actualizarUI(data){
-  const counts=[
-    data['TREND ROOKIE']       ||0,
-    data['CULTURE SCANNER']    ||0,
-    data['OPPORTUNITY SEEKER'] ||0,
-    data['EUREKA MINDSET']     ||0,
-  ];
-  const total=counts.reduce((a,b)=>a+b,0);
+function iniciar(){
+  nombre=document.getElementById('nombre').value.trim()||'Participante';
+  qActual=0;
+  respuestas=new Array(10).fill(null);
+  pregsOrden=PREGUNTAS.map(p=>({...p,opciones:mezclar(p.opciones)}));
+  mostrar('s-quiz');
+  render();
+}
 
-  document.getElementById('hdr-total').textContent=total;
-  document.getElementById('big-total').textContent=total;
+function calcPts(){
+  let s=0;
+  for(let i=0;i<10;i++) if(respuestas[i]!==null) s+=pregsOrden[i].opciones[respuestas[i]].p;
+  return s;
+}
 
-  counts.forEach((v,i)=>{
-    const pct=total>0?Math.round(v/total*100):0;
-    document.getElementById(`pct-${i}`).textContent=`${pct}%`;
-    document.getElementById(`bar-${i}`).style.width=`${pct}%`;
-    document.getElementById(`vot-${i}`).textContent=`${v} participante${v!==1?'s':''}`;
-    document.getElementById(`lpct-${i}`).textContent=`${pct}%`;
+function render(){
+  const p=pregsOrden[qActual];
+  document.getElementById('qnum').textContent=`Pregunta ${String(qActual+1).padStart(2,'0')}`;
+  document.getElementById('qtext').textContent=p.texto;
+  document.getElementById('ptexto').textContent=`Pregunta ${qActual+1} de 10`;
+  document.getElementById('pfill').style.width=`${((qActual+1)/10)*100}%`;
+
+  const c=document.getElementById('opts');
+  c.innerHTML='';
+  p.opciones.forEach((op,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(respuestas[qActual]===i?' sel':'');
+    b.innerHTML=`<span class="opt-l">${LETRAS[i]}</span><span class="opt-t">${op.t}</span>`;
+    b.onclick=()=>{respuestas[qActual]=i;render();};
+    c.appendChild(b);
   });
 
-  actualizarDona(counts,total);
-
-  if(total>ultimoTotal){
-    actividadBins.push(total-ultimoTotal);
-    if(actividadBins.length>12) actividadBins.shift();
-    ultimoTotal=total;
-  }
-  renderTimeline();
-
-  const n=new Date();
-  document.getElementById('last-update').textContent=
-    `Actualizado ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+  const bs=document.getElementById('btnsig');
+  bs.disabled=respuestas[qActual]===null;
+  bs.textContent=qActual===9?'VER MI RESULTADO →':'SIGUIENTE →';
 }
 
-// ── Fetch ──
-async function fetchDatos(){
+function siguiente(){
+  if(respuestas[qActual]===null)return;
+  if(qActual<9){qActual++;render();}
+  else mostrarResultado();
+}
+
+function mostrarResultado(){
+  const total=calcPts();
+  const perfil=PERFILES.find(p=>total>=p.min&&total<=p.max)||PERFILES[3];
+
+  document.getElementById('resusr').textContent=`✦ ${nombre.toUpperCase()} ✦`;
+  document.getElementById('rscore').textContent=total;
+  document.getElementById('rscore').style.color=perfil.color;
+  document.getElementById('rpname').textContent=perfil.nombre;
+  document.getElementById('rpname').style.color=perfil.color;
+  document.getElementById('rpdesc').textContent=perfil.desc;
+
+  mostrar('s-result');
+
+  const arc=document.getElementById('rarc');
+  arc.style.stroke=perfil.color;
+  arc.style.filter=`drop-shadow(0 0 12px ${perfil.color})`;
+  setTimeout(()=>{
+    const pct=Math.max(0,(total-10)/30);
+    arc.style.strokeDashoffset=502-(pct*502);
+  },150);
+
+  guardar(nombre,total,perfil.nombre);
+}
+
+async function guardar(nombre,puntos,perfil){
+  const msg=document.getElementById('savemsg');
+  msg.textContent='';
+  msg.className='save-msg';
   try{
-    const res=await fetch(`${APPS_SCRIPT_URL}?accion=leer_radar`,{cache:'no-store'});
-    const data=await res.json();
-    actualizarUI(data);
-    document.getElementById('update-txt').textContent='Actualizando cada 5 segundos';
+    const d=JSON.parse(localStorage.getItem('eureka_radar')||'{}');
+    d[perfil]=(d[perfil]||0)+1;
+    localStorage.setItem('eureka_radar',JSON.stringify(d));
+  }catch(e){}
+  try{
+    const url=`${APPS_SCRIPT_URL}?accion=radar&nombre=${encodeURIComponent(nombre)}&puntos=${puntos}&perfil=${encodeURIComponent(perfil)}`;
+    await fetch(url,{method:'GET',mode:'no-cors'});
+    msg.textContent='';
+    msg.className='save-msg ok';
   }catch(e){
-    // Demo mode si no hay conexión
-    demoTick++;
-    actualizarUI({
-      'TREND ROOKIE':       18+Math.floor(demoTick*.3),
-      'CULTURE SCANNER':    32+Math.floor(demoTick*.8),
-      'OPPORTUNITY SEEKER': 27+Math.floor(demoTick*.6),
-      'EUREKA MINDSET':     13+Math.floor(demoTick*.2),
-    });
-    document.getElementById('update-txt').textContent='⚠ Modo demo — sin conexión al servidor';
+    msg.textContent='';
+    msg.className='save-msg';
   }
 }
 
-renderTimeline();
-fetchDatos();
-setInterval(fetchDatos,INTERVALO_MS);
+function reiniciar(){
+  document.getElementById('nombre').value='';
+  document.getElementById('rarc').style.strokeDashoffset=502;
+  mostrar('s-intro');
+}
 </script>
 </body>
 </html>
