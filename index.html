@@ -1,80 +1,649 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>excelentIA | Inteligencia artificial con esencia humana</title>
-    <style>
-        body {
-            background: #0d1117;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 60px 20px;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .content { flex: 1; }
-        h1 {
-            font-size: 40px;
-            color: white;
-        }
-        p {
-            font-size: 18px;
-            max-width: 700px;
-            margin: 20px auto;
-            line-height: 1.6;
-        }
-        button {
-            background: white;
-            border: none;
-            padding: 15px 30px;
-            margin-top: 20px;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            color: #1a3a7c;
-            transition: 0.3s;
-        }
-        button:hover {
-            background: #cfe0f5;
-            transform: scale(1.05);
-        }
-        .status-text {
-            margin-top: 25px;
-            font-style: italic;
-            opacity: 0.8;
-        }
-        footer {
-            margin-top: 50px;
-            padding: 20px;
-            border-top: 1px solid #30363d;
-        }
-        footer a {
-            color: #00f0ff;
-            text-decoration: none;
-            margin: 0 15px;
-            font-size: 14px;
-        }
-        footer a:hover { text-decoration: underline; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExcelentIA | Inteligencia Artificial con esencia humana</title>
+<meta name="description" content="Implementamos agentes de inteligencia artificial para automatizar tu negocio. Clínicas, inmobiliarias, despachos y más.">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1b3e;
+  --navy-mid:#1a3a6b;
+  --navy-light:#1e5096;
+  --accent:#4a9fd4;
+  --accent-light:#e8f0fb;
+  --bg:#f5f6f8;
+  --white:#ffffff;
+  --border:#dde1e9;
+  --card-head:#dce8f7;
+  --text-main:#1a2035;
+  --text-sub:#4a5068;
+  --text-muted:#8a90a0;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text-main);font-size:17px;line-height:1.65;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(13,27,62,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:2px solid var(--accent)}
+.nav-inner{max-width:1180px;margin:0 auto;padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:70px}
+.nav-logo-wrap{background:#fff;border-radius:12px;padding:6px 12px;display:flex;align-items:center;justify-content:center}
+.nav-logo{height:38px;width:auto;display:block}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,0.82);text-decoration:none;font-size:15px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.btn-nav{background:var(--accent);color:#fff !important;padding:.5rem 1.25rem;border-radius:8px;font-weight:700 !important;font-size:14px !important;transition:opacity .2s,transform .15s}
+.btn-nav:hover{opacity:.88;transform:translateY(-1px)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:none}
+.hamburger span{display:block;width:22px;height:2px;background:rgba(255,255,255,.85);border-radius:2px;transition:.3s}
+.mobile-menu{display:none;background:var(--navy);padding:1.25rem 5% 1.5rem;border-top:1px solid rgba(74,159,212,.2)}
+.mobile-menu.open{display:block}
+.mobile-menu a{display:block;color:rgba(255,255,255,.82);text-decoration:none;font-size:16px;font-weight:500;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.mobile-menu .btn-nav{display:inline-block;margin-top:1rem}
+
+/* HERO PARTICLES */
+.hero-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;border-radius:50%;background:rgba(74,159,212,.35);animation:floatUp linear infinite}
+@keyframes floatUp{0%{opacity:0;transform:translateY(0) scale(1)}10%{opacity:1}90%{opacity:.4}100%{opacity:0;transform:translateY(-100vh) scale(.4)}}
+/* Typing cursor en h1 */
+.cursor{display:inline-block;width:3px;height:.85em;background:var(--accent);border-radius:2px;margin-left:4px;vertical-align:middle;animation:blink .85s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* HERO */
+.hero{min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 58%,var(--navy-light) 100%);display:flex;align-items:center;padding:100px 5% 80px;position:relative;overflow:hidden}
+.hero-grid{position:absolute;inset:0;opacity:.035;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
+.hero-glow{position:absolute;right:-10%;top:10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(74,159,212,.13) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:1180px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.hero-text{animation:fadeUp .9s ease both}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(74,159,212,.15);border:1px solid rgba(74,159,212,.35);color:#fff;font-size:13px;font-weight:600;padding:.35rem .9rem;border-radius:100px;margin-bottom:1.5rem;letter-spacing:.04em;text-transform:uppercase}
+.hero-badge::before{content:'';width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+h1{font-size:clamp(2.1rem,4vw,3.2rem);font-weight:800;color:#fff;line-height:1.18;margin-bottom:1.25rem}
+h1 span{color:var(--accent)}
+.hero-sub{font-size:1.1rem;color:rgba(255,255,255,.72);line-height:1.7;margin-bottom:2.25rem;max-width:480px}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{background:var(--accent);color:#fff;padding:.85rem 1.8rem;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;transition:opacity .2s,transform .15s;display:inline-flex;align-items:center;gap:.5rem}
+.btn-primary:hover{opacity:.88;transform:translateY(-2px)}
+.btn-secondary{background:transparent;color:#fff;padding:.85rem 1.8rem;border-radius:10px;text-decoration:none;font-weight:600;font-size:16px;border:1.5px solid rgba(255,255,255,.3);transition:border-color .2s,background .2s}
+.btn-secondary:hover{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.07)}
+.hero-visual{animation:fadeUp 1.1s ease .2s both}
+.hero-card-wrap{position:relative}
+.hero-card{background:rgba(255,255,255,.07);border:1px solid rgba(74,159,212,.25);border-radius:18px;padding:2rem;backdrop-filter:blur(8px)}
+.agent-row{display:flex;align-items:center;gap:.85rem;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.agent-row:last-child{border-bottom:none;padding-bottom:0}
+.agent-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.agent-icon.blue{background:rgba(74,159,212,.2)}
+.agent-icon.green{background:rgba(74,212,130,.15)}
+.agent-icon.purple{background:rgba(150,100,220,.18)}
+.agent-icon.orange{background:rgba(255,160,60,.15)}
+.agent-info{flex:1}
+.agent-name{color:#fff;font-size:15px;font-weight:600;margin-bottom:.15rem}
+.agent-desc{color:rgba(255,255,255,.5);font-size:13px}
+.agent-status{font-size:11px;font-weight:700;padding:.25rem .65rem;border-radius:100px;white-space:nowrap}
+.status-live{background:rgba(74,212,130,.15);color:#4ad482;border:1px solid rgba(74,212,130,.3)}
+.status-soon{background:rgba(74,159,212,.13);color:var(--accent);border:1px solid rgba(74,159,212,.25)}
+.hero-card-title{color:rgba(255,255,255,.5);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem}
+
+/* SECTIONS */
+section{padding:90px 5%}
+.section-inner{max-width:1180px;margin:0 auto}
+.section-label{display:inline-block;color:var(--accent);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}
+h2{font-size:clamp(1.8rem,3vw,2.5rem);font-weight:800;color:var(--text-main);line-height:1.22;margin-bottom:1rem}
+.section-sub{font-size:1.05rem;color:var(--text-sub);max-width:580px;margin-bottom:3rem}
+
+/* PILARES */
+.pillars{background:#fff}
+.pillars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.pillar-card{border:1px solid var(--border);border-radius:14px;padding:2rem;transition:box-shadow .25s,transform .2s,background .2s}
+.pillar-card:hover{box-shadow:0 8px 32px rgba(74,159,212,.13);transform:translateY(-4px);background:var(--accent-light)}
+.pillar-icon{width:52px;height:52px;background:var(--card-head);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:1.25rem}
+.pillar-card h3{font-size:1.15rem;font-weight:700;margin-bottom:.6rem;color:var(--text-main)}
+.pillar-card p{color:var(--text-sub);font-size:15px;line-height:1.6}
+
+/* AGENTES */
+.agents-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:3rem}
+.agent-card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:box-shadow .25s,transform .2s}
+.agent-card:hover{box-shadow:0 8px 36px rgba(26,58,107,.12);transform:translateY(-4px)}
+.agent-card-head{background:var(--card-head);padding:1.5rem 1.75rem 1.25rem;display:flex;align-items:flex-start;gap:1rem}
+.agent-card-icon{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#fff;border:1px solid var(--border);flex-shrink:0}
+.agent-card-head-text h3{font-size:1.1rem;font-weight:700;color:var(--navy-mid);margin-bottom:.25rem}
+.agent-card-head-text .tag{font-size:11px;font-weight:700;padding:.2rem .65rem;border-radius:100px}
+.tag-live{background:#d4f5e2;color:#166534}
+.tag-dev{background:#dbeafe;color:#1e40af}
+.tag-dash{background:#ede9fe;color:#5b21b6}
+.agent-card-body{padding:1.5rem 1.75rem}
+.agent-card-body p{color:var(--text-sub);font-size:15px;line-height:1.65;margin-bottom:1.25rem}
+.agent-features{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+.agent-features li{font-size:14px;color:var(--text-sub);display:flex;align-items:center;gap:.5rem}
+.agent-features li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
+.agent-card-wide{grid-column:1/-1}
+
+/* SECTORES */
+.sectors{background:#fff}
+.sectors-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-top:2.5rem}
+.sector-card{border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.5rem;text-align:center;transition:background .2s,transform .2s,box-shadow .2s}
+.sector-card:hover{background:var(--accent-light);transform:translateY(-3px);box-shadow:0 6px 24px rgba(74,159,212,.1)}
+.sector-icon{font-size:2.2rem;margin-bottom:.9rem;display:block}
+.sector-card h3{font-size:1rem;font-weight:700;margin-bottom:.5rem;color:var(--text-main)}
+.sector-card p{font-size:14px;color:var(--text-sub);line-height:1.55}
+
+/* NUMEROS */
+.numbers{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);position:relative;overflow:hidden}
+.numbers::before{content:'';position:absolute;inset:0;opacity:.04;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.numbers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;position:relative}
+.number-item{text-align:center}
+.number-big{font-size:3rem;font-weight:800;color:#fff;line-height:1;margin-bottom:.4rem}
+.number-big span{color:var(--accent)}
+.number-label{font-size:14px;color:rgba(255,255,255,.6);font-weight:500;line-height:1.45}
+
+/* DASHBOARDS */
+.dashboards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2.5rem}
+.dash-item{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:.9rem;transition:background .2s,box-shadow .2s}
+.dash-item:hover{background:var(--accent-light);box-shadow:0 4px 18px rgba(74,159,212,.1)}
+.dash-emoji{font-size:1.6rem;flex-shrink:0}
+.dash-item-text strong{display:block;font-size:15px;font-weight:700;color:var(--text-main);margin-bottom:.15rem}
+.dash-item-text span{font-size:13px;color:var(--text-muted)}
+
+/* WEB */
+.web-section{background:var(--white)}
+.web-features{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.5rem}
+.web-feat{border:1px solid var(--border);border-radius:12px;padding:1.5rem;transition:background .2s}
+.web-feat:hover{background:var(--accent-light)}
+.web-feat-icon{font-size:1.6rem;margin-bottom:.75rem}
+.web-feat h4{font-size:1rem;font-weight:700;margin-bottom:.4rem;color:var(--text-main)}
+.web-feat p{font-size:14px;color:var(--text-sub);line-height:1.55}
+
+/* CTA */
+.cta-section{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);text-align:center;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;inset:0;opacity:.04;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.cta-inner{position:relative;max-width:680px;margin:0 auto}
+.cta-section h2{color:#fff;margin-bottom:1rem}
+.cta-section p{color:rgba(255,255,255,.7);margin-bottom:2.5rem;font-size:1.05rem}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-whatsapp{background:#25d366;color:#fff;padding:.9rem 2rem;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:.5rem;transition:opacity .2s,transform .15s}
+.btn-whatsapp:hover{opacity:.88;transform:translateY(-2px)}
+.contact-form{margin-top:3rem;background:rgba(255,255,255,.06);border:1px solid rgba(74,159,212,.2);border-radius:16px;padding:2rem;text-align:left}
+.contact-form h3{color:#fff;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.form-group label{color:rgba(255,255,255,.65);font-size:14px;font-weight:600}
+.form-group input,.form-group textarea{background:rgba(255,255,255,.07);border:1px solid rgba(74,159,212,.25);border-radius:8px;padding:.75rem 1rem;color:#fff;font-family:'Manrope',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(255,255,255,.3)}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group textarea{resize:vertical;min-height:110px}
+.btn-submit{background:var(--accent);color:#fff;border:none;padding:.85rem 2rem;border-radius:10px;font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.btn-submit:hover{opacity:.88}
+
+/* FOOTER */
+footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 5%}
+.footer-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
+.footer-logo-wrap{background:#fff;border-radius:10px;padding:5px 10px;display:inline-flex;align-items:center}
+.footer-logo{height:34px;width:auto}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:14px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+.footer-copy{color:rgba(255,255,255,.35);font-size:13px}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:3rem}
+  .hero-visual{display:none}
+  .pillars-grid{grid-template-columns:1fr}
+  .agents-grid{grid-template-columns:1fr}
+  .agent-card-wide{grid-column:auto}
+  .sectors-grid{grid-template-columns:repeat(2,1fr)}
+  .numbers-grid{grid-template-columns:repeat(2,1fr);gap:2.5rem}
+  .dashboards-grid{grid-template-columns:repeat(2,1fr)}
+  .web-features{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .form-row{grid-template-columns:1fr}
+  .footer-inner{flex-direction:column;align-items:flex-start;gap:1rem}
+}
+@media(max-width:600px){
+  section{padding:64px 5%}
+  .sectors-grid{grid-template-columns:1fr}
+  .numbers-grid{grid-template-columns:1fr;gap:2rem}
+  .number-big{font-size:2.4rem}
+  .dashboards-grid{grid-template-columns:1fr}
+  .cta-btns{flex-direction:column;align-items:center}
+  .hero-btns{flex-direction:column}
+  .btn-primary,.btn-secondary{text-align:center;justify-content:center}
+}
+</style>
 </head>
 <body>
-    <div class="content">
-        <h1>excelentIA</h1>
-        <p>Inteligencia artificial con esencia humana.</p>
-        <p>Implementamos automatizaciones con IA para inmobiliarias, clínicas y despachos profesionales.</p>
-        <button onclick="window.location.href='https://wa.me/525512154800'">
-            Contáctanos por WhatsApp
-        </button>
-        <p class="status-text">Página excelentia.com.mx en reestructuración</p>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo-wrap">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png"
+           alt="ExcelentIA"
+           class="nav-logo"
+           onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo%20excelentIA.png';">
     </div>
-    <footer>
-        <a href="privacidad.html">Aviso de Privacidad</a>
-        <a href="terminos.html">Términos y Condiciones</a>
-    </footer>
+    <ul class="nav-links">
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#agentes">Agentes</a></li>
+      <li><a href="#sectores">Sectores</a></li>
+      <li><a href="#dashboards">Dashboards</a></li>
+      <li><a href="#contacto" class="btn-nav">Agenda una llamada</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#servicios" onclick="closeMenu()">Servicios</a>
+    <a href="#agentes" onclick="closeMenu()">Agentes</a>
+    <a href="#sectores" onclick="closeMenu()">Sectores</a>
+    <a href="#dashboards" onclick="closeMenu()">Dashboards</a>
+    <a href="#contacto" class="btn-nav" onclick="closeMenu()">Agenda una llamada</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-particles" id="heroParticles"></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">✦ Inteligencia Artificial aplicada</div>
+      <h1>Automatizamos tu negocio con <span>Inteligencia Artificial</span><span class="cursor"></span></h1>
+      <p class="hero-sub">Implementamos agentes de IA que trabajan por ti — en WhatsApp, correo, clínicas, inmobiliarias, despachos y más. Resultados reales, sin tecnicismos.</p>
+      <div class="hero-btns">
+        <a href="https://wa.me/525512154800?text=Hola,%20me%20interesa%20saber%20más%20sobre%20ExcelentIA" class="btn-primary" target="_blank">
+          💬 Habla con nosotros
+        </a>
+        <a href="#agentes" class="btn-secondary">Ver nuestros agentes →</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-wrap">
+        <div class="hero-card">
+          <div class="hero-card-title">🤖 Agentes activos</div>
+          <div class="agent-row">
+            <div class="agent-icon green">🫀</div>
+            <div class="agent-info">
+              <div class="agent-name">Eco-IA</div>
+              <div class="agent-desc">Reportes de ecocardiograma automáticos</div>
+            </div>
+            <span class="agent-status status-live">En vivo</span>
+          </div>
+          <div class="agent-row">
+            <div class="agent-icon blue">📅</div>
+            <div class="agent-info">
+              <div class="agent-name">Agente de Citas</div>
+              <div class="agent-desc">Agendamiento por WhatsApp</div>
+            </div>
+            <span class="agent-status status-soon">Próximo</span>
+          </div>
+          <div class="agent-row">
+            <div class="agent-icon purple">📧</div>
+            <div class="agent-info">
+              <div class="agent-name">Resumen de Correos</div>
+              <div class="agent-desc">Bandeja inteligente con IA</div>
+            </div>
+            <span class="agent-status status-soon">Próximo</span>
+          </div>
+          <div class="agent-row">
+            <div class="agent-icon orange">📊</div>
+            <div class="agent-info">
+              <div class="agent-name">Dashboards IA</div>
+              <div class="agent-desc">Agenda, correos, proyectos, finanzas</div>
+            </div>
+            <span class="agent-status status-soon">Próximo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PILARES -->
+<section id="servicios" class="pillars">
+  <div class="section-inner">
+    <span class="section-label reveal">¿Por qué ExcelentIA?</span>
+    <h2 class="reveal">IA con esencia humana</h2>
+    <p class="section-sub reveal">Tecnología de clase mundial, implementada con un enfoque práctico y cercano. Sin tecnicismos, sin promesas vacías.</p>
+    <div class="pillars-grid">
+      <div class="pillar-card reveal">
+        <div class="pillar-icon">⚡</div>
+        <h3>Implementación rápida</h3>
+        <p>De la idea al agente en días, no meses. Usamos las mejores herramientas del mercado para entregar resultados ágiles y confiables.</p>
+      </div>
+      <div class="pillar-card reveal">
+        <div class="pillar-icon">🤝</div>
+        <h3>Adaptado a tu negocio</h3>
+        <p>No vendemos soluciones genéricas. Cada agente se diseña según tus procesos, tu equipo y tus clientes. Tecnología que se siente humana.</p>
+      </div>
+      <div class="pillar-card reveal">
+        <div class="pillar-icon">📈</div>
+        <h3>Resultados medibles</h3>
+        <p>Menos tiempo en tareas repetitivas, más clientes bien atendidos. Automatizaciones que generan impacto real desde el primer día.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENTES -->
+<section id="agentes">
+  <div class="section-inner">
+    <span class="section-label reveal">Productos</span>
+    <h2 class="reveal">Nuestros agentes de IA</h2>
+    <p class="section-sub reveal">Agentes especializados listos para implementarse en tu industria. Cada uno diseñado para resolver un problema real.</p>
+    <div class="agents-grid">
+
+      <div class="agent-card reveal">
+        <div class="agent-card-head">
+          <div class="agent-card-icon">🫀</div>
+          <div class="agent-card-head-text">
+            <h3>Eco-IA — Interpretador de Ecocardiograma</h3>
+            <span class="tag tag-live">✓ En producción</span>
+          </div>
+        </div>
+        <div class="agent-card-body">
+          <p>Genera reportes médicos de ecocardiograma de forma automática. El cardiólogo llena un formulario y el agente produce el documento Word listo para entregar al paciente en segundos.</p>
+          <ul class="agent-features">
+            <li>Formulario web integrado</li>
+            <li>Generación automática de reporte Word</li>
+            <li>Almacenamiento organizado en Drive por paciente</li>
+            <li>Compatible con cualquier clínica cardiológica</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="agent-card reveal">
+        <div class="agent-card-head">
+          <div class="agent-card-icon">📅</div>
+          <div class="agent-card-head-text">
+            <h3>Agente de Citas Médicas</h3>
+            <span class="tag tag-dev">En desarrollo</span>
+          </div>
+        </div>
+        <div class="agent-card-body">
+          <p>Tu asistente 24/7 por WhatsApp. El paciente escribe, el agente verifica disponibilidad, agenda en Google Calendar y confirma automáticamente — sin intervención humana.</p>
+          <ul class="agent-features">
+            <li>Atención por WhatsApp sin operador</li>
+            <li>Sincronización con Google Calendar</li>
+            <li>Confirmaciones y recordatorios automáticos</li>
+            <li>Personalizable para cualquier especialidad</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="agent-card reveal">
+        <div class="agent-card-head">
+          <div class="agent-card-icon">📧</div>
+          <div class="agent-card-head-text">
+            <h3>Agente de Resumen de Correos</h3>
+            <span class="tag tag-dev">En desarrollo</span>
+          </div>
+        </div>
+        <div class="agent-card-body">
+          <p>Convierte tu bandeja de entrada en un resumen inteligente. Conecta Gmail u Outlook y recibe cada mañana lo más importante, priorizado por IA — sin leer 80 correos.</p>
+          <ul class="agent-features">
+            <li>Compatible con Gmail, Google Workspace y Outlook</li>
+            <li>Resumen diario por email en formato visual</li>
+            <li>Priorización inteligente con IA</li>
+            <li>Configurable por palabras clave y remitentes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="agent-card reveal">
+        <div class="agent-card-head">
+          <div class="agent-card-icon">🏢</div>
+          <div class="agent-card-head-text">
+            <h3>Agentes a la Medida</h3>
+            <span class="tag tag-dev">Disponible</span>
+          </div>
+        </div>
+        <div class="agent-card-body">
+          <p>¿Tu industria no está aquí? Diseñamos e implementamos el agente que necesitas — desde captura de datos hasta atención al cliente, automatización de reportes o integración con tu sistema actual.</p>
+          <ul class="agent-features">
+            <li>Diagnóstico sin costo de tu proceso</li>
+            <li>Integración con tus herramientas existentes</li>
+            <li>Entrega en días, no meses</li>
+            <li>Soporte y mejora continua</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SECTORES -->
+<section id="sectores" class="sectors">
+  <div class="section-inner">
+    <span class="section-label reveal">Industrias</span>
+    <h2 class="reveal">¿Tu negocio está aquí?</h2>
+    <p class="section-sub reveal">Trabajamos con industrias donde la atención al cliente, la gestión de información y los procesos repetitivos consumen demasiado tiempo.</p>
+    <div class="sectors-grid">
+      <div class="sector-card reveal">
+        <span class="sector-icon">🏥</span>
+        <h3>Clínicas y médicos</h3>
+        <p>Citas, reportes, seguimiento de pacientes y automatización de documentos clínicos.</p>
+      </div>
+      <div class="sector-card reveal">
+        <span class="sector-icon">🏢</span>
+        <h3>Despachos profesionales</h3>
+        <p>Gestión de clientes, generación de reportes, seguimiento de casos y comunicación automatizada.</p>
+      </div>
+      <div class="sector-card reveal">
+        <span class="sector-icon">🏠</span>
+        <h3>Inmobiliarias</h3>
+        <p>Captura de inmuebles, búsqueda inteligente en portales, seguimiento de prospectos por WhatsApp.</p>
+      </div>
+      <div class="sector-card reveal">
+        <span class="sector-icon">🏋️</span>
+        <h3>Clubes y membresías</h3>
+        <p>Cobranza inteligente, recuperación de cartera, chatbot de horarios y atención al socio.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NÚMEROS -->
+<section class="numbers">
+  <div class="section-inner">
+    <div class="numbers-grid">
+      <div class="number-item reveal">
+        <div class="number-big">3<span>+</span></div>
+        <div class="number-label">Agentes en producción o desarrollo activo</div>
+      </div>
+      <div class="number-item reveal">
+        <div class="number-big">4</div>
+        <div class="number-label">Industrias atendidas: salud, deportes, inmobiliaria, servicios</div>
+      </div>
+      <div class="number-item reveal">
+        <div class="number-big">100<span>%</span></div>
+        <div class="number-label">Proyectos entregados a tiempo</div>
+      </div>
+      <div class="number-item reveal">
+        <div class="number-big"><span>∞</span></div>
+        <div class="number-label">Posibilidades de automatización con n8n + OpenAI + Claude</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARDS -->
+<section id="dashboards">
+  <div class="section-inner">
+    <span class="section-label reveal">Dashboards inteligentes</span>
+    <h2 class="reveal">Tu negocio, todo en un lugar</h2>
+    <p class="section-sub reveal">Dashboards personalizados con IA integrada para que tomes mejores decisiones con menos esfuerzo. Conectados a tus herramientas actuales.</p>
+    <div class="dashboards-grid">
+      <div class="dash-item reveal">
+        <span class="dash-emoji">📅</span>
+        <div class="dash-item-text"><strong>Agenda</strong><span>Citas y compromisos del día</span></div>
+      </div>
+      <div class="dash-item reveal">
+        <span class="dash-emoji">📧</span>
+        <div class="dash-item-text"><strong>Correos</strong><span>Resumen inteligente de bandeja</span></div>
+      </div>
+      <div class="dash-item reveal">
+        <span class="dash-emoji">✅</span>
+        <div class="dash-item-text"><strong>Tareas</strong><span>Pendientes y prioridades del equipo</span></div>
+      </div>
+      <div class="dash-item reveal">
+        <span class="dash-emoji">📝</span>
+        <div class="dash-item-text"><strong>Notas</strong><span>Ideas y decisiones centralizadas</span></div>
+      </div>
+      <div class="dash-item reveal">
+        <span class="dash-emoji">📰</span>
+        <div class="dash-item-text"><strong>Noticias</strong><span>Radar de tu industria con IA</span></div>
+      </div>
+      <div class="dash-item reveal">
+        <span class="dash-emoji">💰</span>
+        <div class="dash-item-text"><strong>Gastos</strong><span>Control financiero en tiempo real</span></div>
+      </div>
+      <div class="dash-item reveal">
+        <span class="dash-emoji">📁</span>
+        <div class="dash-item-text"><strong>Proyectos / Clientes</strong><span>Estado y avances por proyecto</span></div>
+      </div>
+      <div class="dash-item reveal">
+        <span class="dash-emoji">🧾</span>
+        <div class="dash-item-text"><strong>Facturas</strong><span>Seguimiento de facturación</span></div>
+      </div>
+      <div class="dash-item reveal">
+        <span class="dash-emoji">📊</span>
+        <div class="dash-item-text"><strong>Ventas</strong><span>Pipeline y métricas de conversión</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PÁGINAS WEB -->
+<section id="web" class="web-section">
+  <div class="section-inner">
+    <span class="section-label reveal">Desarrollo web</span>
+    <h2 class="reveal">Páginas web que convierten</h2>
+    <p class="section-sub reveal">Diseñamos y desarrollamos sitios web modernos, rápidos y conectados con tus automatizaciones de IA. Desde landing pages hasta portales complejos.</p>
+    <div class="web-features">
+      <div class="web-feat reveal">
+        <div class="web-feat-icon">🎨</div>
+        <h4>Diseño moderno y profesional</h4>
+        <p>Sitios con identidad de marca, optimizados para conversión y adaptados a todos los dispositivos.</p>
+      </div>
+      <div class="web-feat reveal">
+        <div class="web-feat-icon">⚙️</div>
+        <h4>Conectados con tus agentes</h4>
+        <p>Formularios, chatbots y flujos que se integran directamente con tus automatizaciones n8n.</p>
+      </div>
+      <div class="web-feat reveal">
+        <div class="web-feat-icon">🚀</div>
+        <h4>Entrega rápida</h4>
+        <p>Landing pages en días. Portales completos en semanas. Sin procesos lentos ni presupuestos inflados.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA + CONTACTO -->
+<section id="contacto" class="cta-section">
+  <div class="section-inner">
+    <div class="cta-inner">
+      <span class="section-label reveal" style="color:var(--accent)">Hablemos</span>
+      <h2 class="reveal" style="color:#fff">¿Listo para automatizar tu negocio?</h2>
+      <p class="reveal" style="color:rgba(255,255,255,.7)">Sin compromisos. Una llamada de 30 minutos para entender tu proceso y mostrarte qué se puede automatizar.</p>
+      <div class="cta-btns reveal">
+        <a href="https://wa.me/525512154800?text=Hola,%20quiero%20saber%20cómo%20ExcelentIA%20puede%20ayudar%20a%20mi%20negocio" class="btn-whatsapp" target="_blank">
+          💬 WhatsApp directo
+        </a>
+        <a href="mailto:fdavila@excelentia.com.mx" class="btn-secondary" style="color:#fff;border-color:rgba(255,255,255,.3)">
+          ✉️ Enviar un correo
+        </a>
+      </div>
+      <div class="contact-form reveal">
+        <h3>O déjanos tus datos</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" placeholder="Tu nombre completo">
+          </div>
+          <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" placeholder="tu@empresa.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="mensaje">¿Qué quieres automatizar?</label>
+          <textarea id="mensaje" placeholder="Cuéntanos brevemente tu proceso o reto..."></textarea>
+        </div>
+        <button class="btn-submit" onclick="submitForm()">Enviar mensaje →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo-wrap">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png"
+           alt="ExcelentIA"
+           class="footer-logo"
+           onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo%20excelentIA.png';">
+    </div>
+    <div class="footer-links">
+      <a href="/privacidad.html">Aviso de Privacidad</a>
+      <a href="/terminos.html">Términos y Condiciones</a>
+    </div>
+    <span class="footer-copy">© 2026 ExcelentIA. Todos los derechos reservados.</span>
+  </div>
+</footer>
+
+<script>
+// Partículas flotantes hero
+(function(){
+  var c=document.getElementById('heroParticles');
+  if(!c)return;
+  for(var i=0;i<22;i++){
+    var p=document.createElement('div');
+    p.className='particle';
+    var size=Math.random()*5+3;
+    var left=Math.random()*100;
+    var delay=Math.random()*18;
+    var dur=Math.random()*14+10;
+    p.style.cssText='width:'+size+'px;height:'+size+'px;left:'+left+'%;bottom:-20px;animation-delay:'+delay+'s;animation-duration:'+dur+'s;opacity:0';
+    c.appendChild(p);
+  }
+})();
+
+function toggleMenu(){
+  var m=document.getElementById('mobileMenu');
+  m.classList.toggle('open');
+}
+function closeMenu(){
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
+var observer=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){e.target.classList.add('visible')}
+  });
+},{threshold:0.12});
+document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el)});
+
+function submitForm(){
+  var n=document.getElementById('nombre').value.trim();
+  var e=document.getElementById('email').value.trim();
+  var m=document.getElementById('mensaje').value.trim();
+  if(!n||!e||!m){alert('Por favor completa todos los campos.');return;}
+  var wa='https://wa.me/525512154800?text='+encodeURIComponent('Hola, me contacto desde excelentia.com.mx\n\nNombre: '+n+'\nCorreo: '+e+'\nMensaje: '+m);
+  window.open(wa,'_blank');
+}
+</script>
 </body>
 </html>
