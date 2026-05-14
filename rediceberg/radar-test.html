@@ -96,73 +96,79 @@ body::before {
 
 /* ══════════════════════════════
    PANTALLA 1 — INTRO
+   Un solo bloque, todo junto, sin space-between
 ══════════════════════════════ */
 #s-intro {
   min-height: 100vh;
   min-height: 100dvh;
-  justify-content: space-between;
+  justify-content: center;   /* centra el bloque único verticalmente */
+  align-items: center;
+  padding: 20px 22px;
 }
 
-.intro-top {
-  display:flex; flex-direction:column; align-items:center;
-  padding:24px 22px 12px; gap:8px;
+.intro-inner {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;                 /* espaciado único entre todos los elementos */
 }
+
 .intro-logo-box {
-  height:120px;
-  display:flex; align-items:center; justify-content:center;
+  height: 100px;
+  display: flex; align-items: center; justify-content: center;
 }
-.intro-logo-box img { height:120px; width:auto; object-fit:contain; }
+.intro-logo-box img { height: 100px; width: auto; object-fit: contain; }
+
 .intro-radar-title {
-  font-size:52px; font-weight:700;
-  color:var(--green); letter-spacing:4px;
-  text-transform:uppercase; line-height:1.05;
-  text-align:center;
-  text-shadow:0 0 40px rgba(170,255,0,.55);
+  font-size: 52px; font-weight: 700;
+  color: var(--green); letter-spacing: 4px;
+  text-transform: uppercase; line-height: 1.05;
+  text-align: center;
+  text-shadow: 0 0 40px rgba(170,255,0,.55);
 }
 
-/* Pantallas pequeñas (iPhone SE, etc.) */
-@media (max-height: 700px) {
-  .intro-logo-box { height:90px; }
-  .intro-logo-box img { height:90px; }
-  .intro-radar-title { font-size:42px; }
-  .intro-top { padding:16px 22px 8px; gap:6px; }
-  .intro-bottom { padding:4px 22px 16px; gap:8px; }
-  .intro-bottom svg { width:110px; height:110px; }
+.intro-label {
+  font-size: 13px; color: var(--green2);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  font-weight: 700; text-align: center;
+  margin-bottom: -4px;       /* acerca el label al input */
 }
 
-.intro-form {
-  display:flex; flex-direction:column; align-items:center;
-  padding:0 22px; gap:12px;
+.intro-input {
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(170,255,0,0.4);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-family: var(--font); font-size: 16px; color: var(--text);
+  outline: none; width: 100%; text-align: center;
+  -webkit-appearance: none;
+  transition: border-color .2s, box-shadow .2s;
 }
-.intro-form label {
-  font-size:13px; color:var(--green2);
-  letter-spacing:1.5px; text-transform:uppercase;
-  font-weight:700; text-align:center;
+.intro-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(170,255,0,.15);
 }
-.intro-form input {
-  background:rgba(255,255,255,0.07);
-  border:1.5px solid rgba(170,255,0,0.4);
-  border-radius:var(--radius);
-  padding:15px 18px;
-  font-family:var(--font); font-size:16px; color:var(--text);
-  outline:none; width:100%; text-align:center;
-  -webkit-appearance:none;
-  transition:border-color .2s,box-shadow .2s;
-}
-.intro-form input:focus {
-  border-color:var(--green);
-  box-shadow:0 0 0 3px rgba(170,255,0,.15);
-}
-.intro-form input::placeholder { color:var(--cyan); opacity:.5; }
+.intro-input::placeholder { color: var(--cyan); opacity: .5; }
 
-.intro-bottom {
-  display:flex; flex-direction:column; align-items:center;
-  padding:8px 22px 24px; gap:10px;
-}
+.intro-radar-svg { flex-shrink: 0; }
+
 .intro-tagline {
-  font-size:15px; color:var(--cyan);
-  text-align:center; line-height:1.5;
-  font-weight:600; letter-spacing:.5px;
+  font-size: 14px; color: var(--cyan);
+  text-align: center; line-height: 1.5;
+  font-weight: 600; letter-spacing: .5px;
+  margin-top: -4px;          /* acerca el tagline al radar */
+}
+
+/* iPhone SE y pantallas < 670px de alto */
+@media (max-height: 670px) {
+  .intro-inner { gap: 10px; }
+  .intro-logo-box { height: 80px; }
+  .intro-logo-box img { height: 80px; }
+  .intro-radar-title { font-size: 42px; }
+  .intro-radar-svg { width: 110px !important; height: 110px !important; }
+  #s-intro { padding: 12px 22px; }
 }
 
 /* ══════════════════════════════
@@ -261,22 +267,24 @@ body::before {
 
   <!-- ══ PANTALLA 1 — INTRO ══ -->
   <div class="screen active" id="s-intro">
-    <div class="intro-top">
+    <div class="intro-inner">
+
+      <!-- Logo -->
       <div class="intro-logo-box">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/Eureka_Logo.png" alt="EÜREKa!">
       </div>
-      <div class="intro-radar-title">RADAR<br>TEST</div>
-    </div>
 
-    <div class="intro-form">
-      <label>Escribe tu nombre</label>
-      <input type="text" id="nombre" placeholder="Tu nombre aquí"
+      <!-- Título -->
+      <div class="intro-radar-title">RADAR<br>TEST</div>
+
+      <!-- Label + Input + Botón — todo junto -->
+      <p class="intro-label">Escribe tu nombre</p>
+      <input class="intro-input" type="text" id="nombre" placeholder="Tu nombre aquí"
         autocomplete="off" autocorrect="off" autocapitalize="words">
       <button class="btn-primary" onclick="iniciar()">COMENZAR</button>
-    </div>
 
-    <div class="intro-bottom">
-      <svg viewBox="0 0 160 160" width="140" height="140">
+      <!-- Radar animado -->
+      <svg class="intro-radar-svg" viewBox="0 0 160 160" width="130" height="130">
         <defs>
           <radialGradient id="rglow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stop-color="#aaff00" stop-opacity=".18"/>
@@ -299,7 +307,10 @@ body::before {
         <circle cx="108" cy="22" r="2.5" fill="#00ffee" opacity=".7"/>
         <circle cx="52"  cy="118" r="2" fill="#aaff00" opacity=".5"/>
       </svg>
-      <p class="intro-tagline">¿Qué tan conectado estás con<br>lo que viene?</p>
+
+      <!-- Tagline -->
+      <p class="intro-tagline">¿Qué tan conectado estás con lo que viene?</p>
+
     </div>
   </div>
 
