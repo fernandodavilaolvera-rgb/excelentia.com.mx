@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Focus — Eureka</title>
+<link href="https://fonts.googleapis.com/css2?family=Kodchasan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#080c08;--card:#0d120d;--border:#1a221a;
+  --green:#aaff00;--cyan:#00ffee;--yellow:#ffee00;--text:#ddeedd;
+  --c1:#ff8c00;--c2:#aaff00;--c3:#00b4ff;
+  --font:'Kodchasan',sans-serif;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(170,255,0,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(170,255,0,.015) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* WRAP */
+.wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;padding:0 0 40px;}
+
+/* HEADER */
+.topbar{padding:20px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.logo-row{display:flex;align-items:center;gap:12px;}
+.logo-eureka{height:52px;width:auto;}
+.vline{width:1px;height:28px;background:var(--border);}
+.focus-badge{font-size:11px;font-weight:700;letter-spacing:4px;color:var(--yellow);text-transform:uppercase;}
+.pregunta{font-size:17px;font-weight:700;color:var(--text);text-align:center;line-height:1.4;padding:0 10px;}
+.pregunta span{color:var(--yellow);}
+.sub-tag{font-size:11px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;opacity:.8;}
+
+/* OPCIONES */
+.opciones{display:flex;flex-direction:column;gap:16px;padding:20px 16px 0;}
+
+.opcion{border-radius:16px;overflow:hidden;border:1px solid var(--border);position:relative;display:flex;flex-direction:column;cursor:pointer;transition:transform .15s ease,border-color .3s ease;}
+.opcion:active{transform:scale(.98);}
+.opcion.c1{border-color:rgba(255,140,0,.25);}
+.opcion.c2{border-color:rgba(170,255,0,.25);}
+.opcion.c3{border-color:rgba(0,180,255,.25);}
+
+/* Imagen / placeholder */
+.opcion-img{width:100%;height:260px;object-fit:cover;object-position:top;display:block;}
+.opcion-placeholder{width:100%;height:180px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.opcion.c1 .opcion-placeholder{background:linear-gradient(135deg,#1a0a00 0%,#2d1500 40%,#1a0a00 100%);}
+.opcion.c2 .opcion-placeholder{background:linear-gradient(135deg,#061a06 0%,#0d2e0d 40%,#061a06 100%);}
+.opcion.c3 .opcion-placeholder{background:linear-gradient(135deg,#001220 0%,#002040 40%,#001220 100%);}
+.placeholder-icon{font-size:56px;opacity:.18;}
+.placeholder-grid{position:absolute;inset:0;background-image:linear-gradient(currentColor 1px,transparent 1px),linear-gradient(90deg,currentColor 1px,transparent 1px);background-size:20px 20px;opacity:.04;}
+.opcion.c1 .placeholder-grid{color:var(--c1);}
+.opcion.c2 .placeholder-grid{color:var(--c2);}
+.opcion.c3 .placeholder-grid{color:var(--c3);}
+/* Línea de color superior */
+.opcion-top{height:3px;width:100%;}
+.opcion.c1 .opcion-top{background:var(--c1);box-shadow:0 0 12px var(--c1);}
+.opcion.c2 .opcion-top{background:var(--c2);box-shadow:0 0 12px var(--c2);}
+.opcion.c3 .opcion-top{background:var(--c3);box-shadow:0 0 12px var(--c3);}
+
+/* Contenido */
+.opcion-body{padding:16px 18px 18px;background:var(--card);display:flex;flex-direction:column;gap:12px;}
+.opcion-header{display:flex;align-items:flex-start;gap:14px;}
+.opcion-num{font-size:38px;font-weight:700;line-height:1;flex-shrink:0;}
+.opcion.c1 .opcion-num{color:var(--c1);}
+.opcion.c2 .opcion-num{color:var(--c2);}
+.opcion.c3 .opcion-num{color:var(--c3);}
+.opcion-texts{}
+.opcion-title{font-size:17px;font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:1.2;}
+.opcion-subtitle{font-size:13px;margin-top:4px;opacity:.75;line-height:1.4;font-style:italic;}
+.opcion.c1 .opcion-subtitle{color:var(--c1);}
+.opcion.c2 .opcion-subtitle{color:var(--c2);}
+.opcion.c3 .opcion-subtitle{color:var(--c3);}
+
+/* Botón votar */
+.btn-votar{display:flex;align-items:center;justify-content:center;gap:10px;border:none;border-radius:10px;padding:14px;width:100%;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:opacity .2s,transform .15s;}
+.btn-votar:active{transform:scale(.97);}
+.opcion.c1 .btn-votar{background:rgba(255,140,0,.12);color:var(--c1);border:1px solid rgba(255,140,0,.3);}
+.opcion.c2 .btn-votar{background:rgba(170,255,0,.10);color:var(--c2);border:1px solid rgba(170,255,0,.3);}
+.opcion.c3 .btn-votar{background:rgba(0,180,255,.10);color:var(--c3);border:1px solid rgba(0,180,255,.3);}
+.btn-icon{font-size:18px;}
+
+/* PANTALLA GRACIAS */
+.gracias-wrap{display:none;flex-direction:column;align-items:center;gap:24px;padding:40px 20px;}
+.gracias-icon{font-size:52px;}
+.gracias-titulo{font-size:22px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;text-align:center;}
+.gracias-sub{font-size:14px;color:var(--cyan);text-align:center;opacity:.85;letter-spacing:1px;}
+
+/* Resultados */
+.resultados{width:100%;display:flex;flex-direction:column;gap:14px;margin-top:8px;}
+.res-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+.res-header{display:flex;align-items:center;gap:10px;}
+.res-num{font-size:22px;font-weight:700;line-height:1;}
+.res-name{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;flex:1;}
+.res-pct{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;}
+.res-track{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.res-fill{height:100%;border-radius:4px;width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.res-votos{font-size:11px;opacity:.6;letter-spacing:.5px;}
+
+.res-card.c1 .res-num,.res-card.c1 .res-pct{color:var(--c1);}
+.res-card.c1 .res-fill{background:var(--c1);box-shadow:0 0 10px rgba(255,140,0,.4);}
+.res-card.c2 .res-num,.res-card.c2 .res-pct{color:var(--c2);}
+.res-card.c2 .res-fill{background:var(--c2);box-shadow:0 0 10px rgba(170,255,0,.4);}
+.res-card.c3 .res-num,.res-card.c3 .res-pct{color:var(--c3);}
+.res-card.c3 .res-fill{background:var(--c3);box-shadow:0 0 10px rgba(0,180,255,.4);}
+
+.total-live{text-align:center;font-size:12px;color:var(--cyan);letter-spacing:1.5px;opacity:.7;margin-top:4px;}
+
+/* Live dot en gracias */
+.live-row{display:flex;align-items:center;gap:8px;justify-content:center;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.4s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.live-lbl{font-size:11px;color:var(--green);letter-spacing:2px;font-weight:700;text-transform:uppercase;}
+
+/* Ya votaste */
+.ya-votaste{display:none;flex-direction:column;align-items:center;gap:16px;padding:60px 20px;text-align:center;}
+.ya-votaste-icon{font-size:48px;}
+.ya-votaste-txt{font-size:18px;font-weight:700;color:var(--yellow);letter-spacing:2px;}
+.ya-votaste-sub{font-size:13px;color:var(--cyan);opacity:.8;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="logo-row">
+      <img class="logo-eureka"
+        src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/Eureka_Logo.png"
+        alt="Eureka" onerror="this.style.visibility='hidden'">
+      <div class="vline"></div>
+      <div class="focus-badge">Focus</div>
+    </div>
+    <div class="pregunta">¿QUÉ FUTURO TIENE <span>MÁS POTENCIAL</span> PARA TRANSFORMAR EL NEGOCIO?</div>
+    <div class="sub-tag">Votación en vivo · Un voto por persona</div>
+  </div>
+
+  <!-- OPCIONES -->
+  <div class="opciones" id="seccion-opciones">
+
+    <div class="opcion c1" id="op-1">
+      <div class="opcion-top"></div>
+      <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%201.png" alt="Cuerpo como Sistema">
+      <div class="opcion-body">
+        <div class="opcion-header">
+          <div class="opcion-num">01</div>
+          <div class="opcion-texts">
+            <div class="opcion-title">Cuerpo como Sistema</div>
+            <div class="opcion-subtitle">Tu cuerpo ya no es natural.</div>
+          </div>
+        </div>
+        <button class="btn-votar" onclick="votar(1)">
+          <span class="btn-icon">📱</span> Vota esta opción
+        </button>
+      </div>
+    </div>
+
+    <div class="opcion c2" id="op-2">
+      <div class="opcion-top"></div>
+      <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%202.png" alt="Sistemas Adaptativos">
+      <div class="opcion-body">
+        <div class="opcion-header">
+          <div class="opcion-num">02</div>
+          <div class="opcion-texts">
+            <div class="opcion-title">Sistemas Adaptativos</div>
+            <div class="opcion-subtitle">Tú ya no decides.</div>
+          </div>
+        </div>
+        <button class="btn-votar" onclick="votar(2)">
+          <span class="btn-icon">📱</span> Vota esta opción
+        </button>
+      </div>
+    </div>
+
+    <div class="opcion c3" id="op-3">
+      <div class="opcion-top"></div>
+      <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%203.png" alt="Realidad Sintética">
+      <div class="opcion-body">
+        <div class="opcion-header">
+          <div class="opcion-num">03</div>
+          <div class="opcion-texts">
+            <div class="opcion-title">Realidad Sintética</div>
+            <div class="opcion-subtitle">Comer deja de ser necesario.</div>
+          </div>
+        </div>
+        <button class="btn-votar" onclick="votar(3)">
+          <span class="btn-icon">📱</span> Vota esta opción
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GRACIAS + RESULTADOS -->
+  <div class="gracias-wrap" id="seccion-gracias">
+    <div class="gracias-icon">✦</div>
+    <div class="gracias-titulo">¡Voto registrado!</div>
+    <div class="gracias-sub">Así está votando el grupo en este momento</div>
+    <div class="live-row">
+      <div class="live-dot"></div>
+      <div class="live-lbl">En vivo</div>
+    </div>
+    <div class="resultados" id="resultados"></div>
+    <div class="total-live" id="total-live"></div>
+  </div>
+
+  <!-- YA VOTASTE -->
+  <div class="ya-votaste" id="seccion-ya-votaste">
+    <div class="ya-votaste-icon">🔒</div>
+    <div class="ya-votaste-txt">Ya registraste tu voto</div>
+    <div class="ya-votaste-sub">Aquí van los resultados en tiempo real</div>
+    <div class="live-row">
+      <div class="live-dot"></div>
+      <div class="live-lbl">En vivo</div>
+    </div>
+    <div class="resultados" id="resultados-ya"></div>
+    <div class="total-live" id="total-live-ya"></div>
+  </div>
+
+</div>
+
+<script>
+const APPS_URL = 'https://script.google.com/macros/s/AKfycbxHNYVVnfEygJclDO31MdVEoVfyPi-pMx53-WI2391Bif5lYIB9EhyLEXazQvVg87h7nQ/exec';
+const LS_KEY = 'eureka_focus_voto';
+const NOMBRES = ['','Cuerpo como Sistema','Sistemas Adaptativos','Realidad Sintética'];
+const CLASES  = ['','c1','c2','c3'];
+const NUMS    = ['','01','02','03'];
+
+let intervaloRes = null;
+
+// ¿Ya votó?
+const votoGuardado = localStorage.getItem(LS_KEY);
+if(votoGuardado){
+  mostrarYaVotaste();
+}
+
+function votar(opcion){
+  // Guardar en localStorage
+  localStorage.setItem(LS_KEY, opcion);
+  // Enviar al Apps Script (no-cors, silencioso)
+  fetch(`${APPS_URL}?accion=focus&opcion=${opcion}`, {mode:'no-cors'}).catch(()=>{});
+  // Mostrar pantalla gracias
+  mostrarGracias();
+}
+
+function mostrarGracias(){
+  document.getElementById('seccion-opciones').style.display = 'none';
+  document.getElementById('seccion-gracias').style.display  = 'flex';
+  cargarResultados('resultados','total-live');
+  intervaloRes = setInterval(()=>cargarResultados('resultados','total-live'), 5000);
+}
+
+function mostrarYaVotaste(){
+  document.getElementById('seccion-opciones').style.display = 'none';
+  document.getElementById('seccion-ya-votaste').style.display = 'flex';
+  cargarResultados('resultados-ya','total-live-ya');
+  intervaloRes = setInterval(()=>cargarResultados('resultados-ya','total-live-ya'), 5000);
+}
+
+async function cargarResultados(contenedorId, totalId){
+  let datos = {1:0,2:0,3:0};
+  try{
+    const res  = await fetch(`${APPS_URL}?accion=leer_focus`,{cache:'no-store'});
+    const json = await res.json();
+    datos[1] = json['CUERPO COMO SISTEMA'] || 0;
+    datos[2] = json['SISTEMAS ADAPTATIVOS'] || 0;
+    datos[3] = json['REALIDAD SINTETICA']   || 0;
+  }catch(e){
+    // Demo si no hay conexión
+    datos = {1:33, 2:42, 3:25};
+  }
+  renderResultados(datos, contenedorId, totalId);
+}
+
+function renderResultados(datos, contenedorId, totalId){
+  const cont  = document.getElementById(contenedorId);
+  const total = datos[1]+datos[2]+datos[3];
+
+  // Ordenar por votos desc
+  const orden = [1,2,3].sort((a,b)=>datos[b]-datos[a]);
+
+  cont.innerHTML = '';
+  orden.forEach(i=>{
+    const pct = total > 0 ? Math.round(datos[i]/total*100) : 0;
+    const card = document.createElement('div');
+    card.className = `res-card ${CLASES[i]}`;
+    card.innerHTML = `
+      <div class="res-header">
+        <div class="res-num">${NUMS[i]}</div>
+        <div class="res-name">${NOMBRES[i]}</div>
+        <div class="res-pct">${pct}%</div>
+      </div>
+      <div class="res-track"><div class="res-fill" id="fill-${contenedorId}-${i}"></div></div>
+      <div class="res-votos">${datos[i]} voto${datos[i]!==1?'s':''}</div>
+    `;
+    cont.appendChild(card);
+    // Animar barra con pequeño delay
+    setTimeout(()=>{
+      const fill = document.getElementById(`fill-${contenedorId}-${i}`);
+      if(fill) fill.style.width = pct+'%';
+    }, 80);
+  });
+
+  document.getElementById(totalId).textContent = `Total: ${total} voto${total!==1?'s':''}`;
+}
+</script>
+</body>
+</html>
