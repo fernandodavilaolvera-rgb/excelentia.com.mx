@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus — Dashboard | Eureka</title>
+<link href="https://fonts.googleapis.com/css2?family=Kodchasan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090a;--card:#0c110c;--border:#172017;
+  --green:#aaff00;--cyan:#00ffee;--yellow:#ffee00;--text:#ddeedd;
+  --font:'Kodchasan',sans-serif;
+  --c1:#ff8c00;--c2:#aaff00;--c3:#00b4ff;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(170,255,0,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(170,255,0,.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(170,255,0,.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;padding:20px 28px 16px;}
+
+/* HEADER */
+.topbar{
+  display:flex;align-items:center;gap:18px;
+  border-bottom:1px solid var(--border);
+  padding-bottom:14px;margin-bottom:18px;
+  height:119px;flex-shrink:0;overflow:hidden;
+}
+.logo-eureka{height:119px;width:auto;object-fit:contain;flex-shrink:0;}
+.vline{width:1px;height:44px;background:var(--border);flex-shrink:0;}
+.hcenter{flex:1;text-align:center;min-width:0;}
+.hcenter h1{font-size:28px;font-weight:700;color:var(--yellow);letter-spacing:4px;text-transform:uppercase;line-height:1;}
+.hcenter p{font-size:13px;color:var(--cyan);margin-top:4px;letter-spacing:1px;opacity:.9;}
+.live-badge{display:flex;align-items:center;gap:8px;background:rgba(170,255,0,.08);border:1px solid rgba(170,255,0,.2);border-radius:20px;padding:8px 18px;flex-shrink:0;}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0;animation:blink 1.4s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.live-txt{font-size:13px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;}
+.total-badge{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 20px;flex:0 0 110px;}
+.total-num{font-size:34px;font-weight:700;color:var(--green);line-height:1;}
+.total-lbl{font-size:11px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;font-weight:600;}
+
+/* MAIN GRID — 3 columnas, la del centro es más ancha */
+.main{
+  flex:1;
+  display:grid;
+  grid-template-columns:1fr 1.5fr 1fr;
+  gap:16px;
+  min-height:0;
+}
+
+/* CARD BASE */
+.col-card{
+  border-radius:18px;
+  overflow:hidden;
+  border:2px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  transition:border-color .8s ease;
+}
+.col-card.c1{border-color:rgba(255,140,0,.25);}
+.col-card.c2{border-color:rgba(170,255,0,.25);}
+.col-card.c3{border-color:rgba(0,180,255,.25);}
+
+/* Ganadora: borde brillante + glow */
+.col-card.ganadora.c1{border-color:rgba(255,140,0,.8);box-shadow:0 0 40px rgba(255,140,0,.2),inset 0 0 40px rgba(255,140,0,.04);}
+.col-card.ganadora.c2{border-color:rgba(170,255,0,.8);box-shadow:0 0 40px rgba(170,255,0,.2),inset 0 0 40px rgba(170,255,0,.04);}
+.col-card.ganadora.c3{border-color:rgba(0,180,255,.8);box-shadow:0 0 40px rgba(0,180,255,.2),inset 0 0 40px rgba(0,180,255,.04);}
+
+/* Badge GANANDO */
+.badge-ganando{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  padding:5px 14px;border-radius:20px;z-index:10;
+  opacity:0;transition:opacity .6s ease;white-space:nowrap;
+}
+.ganadora .badge-ganando{opacity:1;}
+.c1 .badge-ganando{background:rgba(255,140,0,.15);border:1px solid rgba(255,140,0,.5);color:var(--c1);}
+.c2 .badge-ganando{background:rgba(170,255,0,.12);border:1px solid rgba(170,255,0,.5);color:var(--c2);}
+.c3 .badge-ganando{background:rgba(0,180,255,.12);border:1px solid rgba(0,180,255,.5);color:var(--c3);}
+
+/* Imagen */
+.col-img{
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+  position:relative;
+}
+.col-img img{
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:top;
+  display:block;
+  transition:transform .8s ease;
+}
+.ganadora .col-img img{transform:scale(1.03);}
+
+/* Overlay gradiente abajo para que los datos se lean */
+.col-img::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:55%;
+  background:linear-gradient(to top,rgba(7,9,10,.98) 0%,rgba(7,9,10,.7) 50%,transparent 100%);
+  pointer-events:none;
+}
+
+/* Datos sobre la imagen */
+.col-data{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  padding:16px 20px 20px;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.col-num-nombre{display:flex;align-items:baseline;gap:10px;}
+.col-num{font-size:20px;font-weight:700;line-height:1;}
+.c1 .col-num{color:var(--c1);}
+.c2 .col-num{color:var(--c2);}
+.c3 .col-num{color:var(--c3);}
+.col-nombre{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text);opacity:.9;}
+
+/* Porcentaje grande */
+.col-pct{font-size:72px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;transition:color .8s ease;}
+.ganadora.c1 .col-pct{color:var(--c1);text-shadow:0 0 30px rgba(255,140,0,.5);}
+.ganadora.c2 .col-pct{color:var(--c2);text-shadow:0 0 30px rgba(170,255,0,.5);}
+.ganadora.c3 .col-pct{color:var(--c3);text-shadow:0 0 30px rgba(0,180,255,.5);}
+.c1 .col-pct{color:rgba(255,140,0,.7);}
+.c2 .col-pct{color:rgba(170,255,0,.7);}
+.c3 .col-pct{color:rgba(0,180,255,.7);}
+
+/* Barra de progreso */
+.col-bar-wrap{display:flex;flex-direction:column;gap:6px;}
+.col-bar-track{width:100%;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+.col-bar-fill{height:100%;border-radius:4px;width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.c1 .col-bar-fill{background:var(--c1);box-shadow:0 0 10px rgba(255,140,0,.5);}
+.c2 .col-bar-fill{background:var(--c2);box-shadow:0 0 10px rgba(170,255,0,.5);}
+.c3 .col-bar-fill{background:var(--c3);box-shadow:0 0 10px rgba(0,180,255,.5);}
+.col-votos{font-size:12px;color:var(--yellow);letter-spacing:.5px;font-weight:600;}
+
+/* Footer */
+.footer{margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.footer-txt{font-size:11px;color:var(--cyan);letter-spacing:1px;opacity:.7;}
+.update-txt{font-size:11px;color:var(--yellow);letter-spacing:.5px;font-weight:600;}
+
+/* Animación pulso ganadora */
+@keyframes pulso{0%,100%{opacity:1}50%{opacity:.75}}
+.ganadora .col-pct{animation:pulso 2.5s ease-in-out infinite;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="topbar">
+    <img class="logo-eureka"
+      src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/Eureka_Logo.png"
+      alt="Eureka" onerror="this.style.visibility='hidden'">
+    <div class="vline"></div>
+    <div class="hcenter">
+      <h1>Focus</h1>
+      <p>¿Qué futuro tiene más potencial para transformar el negocio?</p>
+    </div>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      <span class="live-txt">EN VIVO</span>
+    </div>
+    <div class="total-badge">
+      <div class="total-num" id="hdr-total">0</div>
+      <div class="total-lbl">Votos</div>
+    </div>
+  </div>
+
+  <!-- MAIN: 3 columnas — izq, centro (ganadora dinámica), der -->
+  <div class="main">
+
+    <!-- OPCIÓN 1 — Cuerpo como Sistema -->
+    <div class="col-card c1" id="card-1">
+      <div class="badge-ganando">★ GANANDO</div>
+      <div class="col-img">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%201.png" alt="Cuerpo como Sistema">
+        <div class="col-data">
+          <div class="col-num-nombre">
+            <div class="col-num">01</div>
+            <div class="col-nombre">Cuerpo como Sistema</div>
+          </div>
+          <div class="col-pct" id="pct-1">0%</div>
+          <div class="col-bar-wrap">
+            <div class="col-bar-track"><div class="col-bar-fill" id="bar-1"></div></div>
+            <div class="col-votos" id="vot-1">0 votos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 2 — Sistemas Adaptativos -->
+    <div class="col-card c2" id="card-2">
+      <div class="badge-ganando">★ GANANDO</div>
+      <div class="col-img">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%202.png" alt="Sistemas Adaptativos">
+        <div class="col-data">
+          <div class="col-num-nombre">
+            <div class="col-num">02</div>
+            <div class="col-nombre">Sistemas Adaptativos</div>
+          </div>
+          <div class="col-pct" id="pct-2">0%</div>
+          <div class="col-bar-wrap">
+            <div class="col-bar-track"><div class="col-bar-fill" id="bar-2"></div></div>
+            <div class="col-votos" id="vot-2">0 votos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPCIÓN 3 — Realidad Sintética -->
+    <div class="col-card c3" id="card-3">
+      <div class="badge-ganando">★ GANANDO</div>
+      <div class="col-img">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%203.png" alt="Realidad Sintética">
+        <div class="col-data">
+          <div class="col-num-nombre">
+            <div class="col-num">03</div>
+            <div class="col-nombre">Realidad Sintética</div>
+          </div>
+          <div class="col-pct" id="pct-3">0%</div>
+          <div class="col-bar-wrap">
+            <div class="col-bar-track"><div class="col-bar-fill" id="bar-3"></div></div>
+            <div class="col-votos" id="vot-3">0 votos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-txt">EUREKA 2026 · Focus Dashboard</div>
+    <div class="update-txt" id="update-txt"></div>
+  </div>
+
+</div>
+
+<script>
+const APPS_URL  = 'https://script.google.com/macros/s/AKfycbxk7atHWOQxNIlGXMsLJoXD8490RoQOrXA1Is5Mzh-HUL4gEYF_UbuyVtdcsAu8D-Prbg/exec';
+const INTERVALO = 5000;
+
+// Mapeo: índice JS (1,2,3) → clave del Apps Script
+const KEYS = {1:'CUERPO COMO SISTEMA', 2:'SISTEMAS ADAPTATIVOS', 3:'REALIDAD SINTETICA'};
+
+let demoTick = 0;
+
+function actualizarUI(datos){
+  const counts = {1: datos[KEYS[1]]||0, 2: datos[KEYS[2]]||0, 3: datos[KEYS[3]]||0};
+  const total  = counts[1] + counts[2] + counts[3];
+
+  document.getElementById('hdr-total').textContent = total;
+
+  // Encontrar ganadora
+  const max = Math.max(counts[1], counts[2], counts[3]);
+  const hayEmpate = [1,2,3].filter(i => counts[i] === max).length > 1;
+
+  [1,2,3].forEach(i => {
+    const pct   = total > 0 ? Math.round(counts[i] / total * 100) : 0;
+    const esGanadora = !hayEmpate && counts[i] === max && total > 0;
+
+    document.getElementById(`pct-${i}`).textContent = pct + '%';
+    document.getElementById(`vot-${i}`).textContent = counts[i] + ' voto' + (counts[i] !== 1 ? 's' : '');
+    setTimeout(() => {
+      document.getElementById(`bar-${i}`).style.width = pct + '%';
+    }, 80);
+
+    const card = document.getElementById(`card-${i}`);
+    if(esGanadora){
+      card.classList.add('ganadora');
+    } else {
+      card.classList.remove('ganadora');
+    }
+  });
+
+  // Reorganizar columnas: ganadora al centro
+  reordenarColumnas(counts, total, hayEmpate);
+
+  // Timestamp
+  const n = new Date();
+  document.getElementById('update-txt').textContent =
+    'Actualizado ' + String(n.getHours()).padStart(2,'0') + ':' +
+    String(n.getMinutes()).padStart(2,'0') + ':' +
+    String(n.getSeconds()).padStart(2,'0');
+}
+
+function reordenarColumnas(counts, total, hayEmpate){
+  const main = document.querySelector('.main');
+  if(total === 0 || hayEmpate){
+    // Sin ganadora: columnas iguales
+    main.style.gridTemplateColumns = '1fr 1fr 1fr';
+    // Orden original
+    [1,2,3].forEach(i => main.appendChild(document.getElementById(`card-${i}`)));
+    return;
+  }
+
+  // Encontrar ganadora
+  const max = Math.max(counts[1], counts[2], counts[3]);
+  const ganadora = [1,2,3].find(i => counts[i] === max);
+  const otras = [1,2,3].filter(i => i !== ganadora);
+
+  // Ganadora más ancha en centro
+  main.style.gridTemplateColumns = '1fr 1.55fr 1fr';
+
+  // Reordenar DOM: otra1, ganadora, otra2
+  main.appendChild(document.getElementById(`card-${otras[0]}`));
+  main.appendChild(document.getElementById(`card-${ganadora}`));
+  main.appendChild(document.getElementById(`card-${otras[1]}`));
+}
+
+async function fetchDatos(){
+  try{
+    const res  = await fetch(`${APPS_URL}?accion=leer_focus`, {cache:'no-store'});
+    const json = await res.json();
+    actualizarUI(json);
+  } catch(e){
+    // Modo demo
+    demoTick++;
+    actualizarUI({
+      'CUERPO COMO SISTEMA':  18 + Math.floor(demoTick * .5),
+      'SISTEMAS ADAPTATIVOS': 32 + Math.floor(demoTick * .9),
+      'REALIDAD SINTETICA':   12 + Math.floor(demoTick * .3),
+    });
+  }
+}
+
+fetchDatos();
+setInterval(fetchDatos, INTERVALO);
+</script>
+</body>
+</html>
