@@ -430,8 +430,6 @@ async function cargarConfig() {
 
 window.addEventListener('DOMContentLoaded', cargarConfig);
 
-function mezclar(a){ return [...a].sort(()=>Math.random()-.5); }
-
 function mostrar(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const el = document.getElementById(id);
@@ -451,12 +449,20 @@ function iniciar(){
 
 function calcPts(){
   let s=0;
-  for(let i=0;i<10;i++) if(respuestas[i]!==null) s += pregsOrden[i].opciones[respuestas[i]].p;
+  for(let i=0;i<10;i++){
+    if(respuestas[i]!==null){
+      const val = pregsOrden[i].opciones[respuestas[i]].p;
+      console.log(`P${i+1}: idx=${respuestas[i]} val=${val} texto="${pregsOrden[i].opciones[respuestas[i]].t}"`);
+      s += val;
+    }
+  }
+  console.log('TOTAL:', s);
   return s;
 }
 
 function render(){
   const p = pregsOrden[qActual];
+  const qEsta = qActual; // captura el índice actual para el closure
   document.getElementById('qnum').textContent   = `Pregunta ${String(qActual+1).padStart(2,'0')}`;
   document.getElementById('qtext').textContent  = p.texto;
   document.getElementById('ptexto').textContent = `Pregunta ${qActual+1} de 10`;
@@ -467,9 +473,9 @@ function render(){
   c.innerHTML = '';
   p.opciones.forEach((op,i)=>{
     const b = document.createElement('button');
-    b.className = 'opt'+(respuestas[qActual]===i?' sel':'');
+    b.className = 'opt'+(respuestas[qEsta]===i?' sel':'');
     b.innerHTML = `<span class="opt-l">${LETRAS[i]}</span><span class="opt-t">${op.t}</span>`;
-    b.onclick = ()=>{ respuestas[qActual]=i; render(); };
+    b.onclick = ()=>{ respuestas[qEsta]=i; render(); };
     c.appendChild(b);
   });
 
