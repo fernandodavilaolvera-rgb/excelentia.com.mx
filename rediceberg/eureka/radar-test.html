@@ -101,7 +101,7 @@ body::before {
 #s-intro {
   min-height: 100vh;
   min-height: 100dvh;
-  justify-content: center;   /* centra el bloque único verticalmente */
+  justify-content: flex-start;
   align-items: center;
   padding: 20px 22px;
 }
@@ -155,7 +155,7 @@ body::before {
 .intro-radar-svg { flex-shrink: 0; }
 
 .intro-tagline {
-  font-size: 13px; color: var(--cyan);
+  font-size: 15px; color: var(--cyan);
   text-align: center; line-height: 1.5;
   font-weight: 700; letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -281,7 +281,8 @@ body::before {
       <p class="intro-label">Escribe tu nombre</p>
       <input class="intro-input" type="text" id="nombre" placeholder="Tu nombre aquí"
         autocomplete="off" autocorrect="off" autocapitalize="words">
-      <button class="btn-primary" onclick="iniciar()">COMENZAR</button>
+      <p id="loading-msg" style="font-size:13px;color:var(--cyan);letter-spacing:1px;text-align:center;">Cargando preguntas...</p>
+      <button class="btn-primary" id="btn-comenzar" onclick="iniciar()" style="display:none;">COMENZAR</button>
 
       <!-- Radar animado -->
       <svg class="intro-radar-svg" viewBox="0 0 160 160" width="130" height="130">
@@ -402,30 +403,32 @@ body::before {
 
 </div>
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHNYVVnfEygJclDO31MdVEoVfyPi-pMx53-WI2391Bif5lYIB9EhyLEXazQvVg87h7nQ/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxk7atHWOQxNIlGXMsLJoXD8490RoQOrXA1Is5Mzh-HUL4gEYF_UbuyVtdcsAu8D-Prbg/exec';
 
-const PREGUNTAS = [
-  { texto:'¿Qué es "corecore"?', opciones:[{t:'Un estilo musical',p:0},{t:'Una tendencia que satiriza las tendencias',p:2},{t:'Un tipo de tenis',p:0},{t:'Un videojuego',p:0}] },
-  { texto:'¿Dónde nacen hoy muchas tendencias?', opciones:[{t:'En reportes de consultoras globales',p:2},{t:'En laboratorios de innovación de grandes corporativos',p:1},{t:'En comunidades digitales y creadores de contenido',p:4},{t:'En lanzamientos oficiales de grandes marcas',p:3}] },
-  { texto:'¿Cómo te enteras normalmente de algo nuevo?', opciones:[{t:'Noticias',p:2},{t:'Redes sociales',p:4},{t:'Amigos / colegas',p:3},{t:'No sabría decir',p:1}] },
-  { texto:'Cuando ves un producto nuevo…', opciones:[{t:'Lo observo',p:2},{t:'Lo ignoro',p:1},{t:'Lo compro / pruebo',p:4},{t:'Lo investigo',p:3}] },
-  { texto:'¿Cada cuánto pruebas algo nuevo (producto, app, experiencia)?', opciones:[{t:'Siempre estoy probando',p:4},{t:'Casi nunca',p:1},{t:'De vez en cuando',p:2},{t:'Frecuentemente',p:3}] },
-  { texto:'¿Has comprado algo solo porque lo viste en redes?', opciones:[{t:'Varias veces',p:3},{t:'Nunca',p:1},{t:'Tal vez una vez',p:2},{t:'Sí, seguido',p:4}] },
-  { texto:'Cuando viajas…', opciones:[{t:'Voy a lo seguro',p:1},{t:'Busco cosas locales',p:3},{t:'Salgo activamente a explorar tendencias',p:4},{t:'Pruebo algo diferente',p:2}] },
-  { texto:'¿Qué haces cuando ves algo interesante fuera de tu categoría?', opciones:[{t:'Lo veo como algo curioso sin aplicación',p:1},{t:'Lo guardo como referencia',p:2},{t:'Pienso si podría adaptarse',p:3},{t:'Busco activamente cómo llevarlo a mi negocio',p:4}] },
-  { texto:'Cuando escuchas una idea nueva…', opciones:[{t:'La evalúo',p:3},{t:'Busco fallas',p:1},{t:'Pienso cómo hacerla mejor',p:4},{t:'La cuestiono',p:2}] },
-  { texto:'¿Cuál describe mejor tu estilo?', opciones:[{t:'Prefiero lo probado',p:1},{t:'Me adapto',p:2},{t:'Me gusta explorar',p:3},{t:'Busco constantemente lo nuevo',p:4}] },
-];
-
-const PERFILES = [
-  { nombre:'TREND ROOKIE',       min:10, max:18, color:'#64c8ff', desc:'Te mantienes informado, pero rara vez exploras activamente. Tu próximo paso: cuestionar lo que ya conoces.' },
-  { nombre:'CULTURE SCANNER',    min:19, max:28, color:'#cc66ff', desc:'Detectas cambios, pero aún no siempre los conectas. Tienes el radar encendido — ahora úsalo con intención.' },
-  { nombre:'OPPORTUNITY SEEKER', min:29, max:34, color:'#ffcc00', desc:'Ya ves oportunidades donde otros ven ruido. Exploras, conectas y detectas el potencial antes que la mayoría.' },
-  { nombre:'EUREKA MINDSET',     min:35, max:40, color:'#aaff00', desc:'Exploras, conectas y transformas señales en oportunidades reales. Eres de los que construyen el futuro.' },
-];
+let PREGUNTAS = [];
+let PERFILES  = [];
 
 const LETRAS = ['A','B','C','D'];
 let qActual=0, respuestas=[], pregsOrden=[], nombre='';
+
+function mezclar(a){ return [...a].sort(()=>Math.random()-.5); }
+
+// ── Carga preguntas y perfiles desde el Sheet al iniciar ─────────────────────
+async function cargarConfig() {
+  try {
+    const res  = await fetch(`${APPS_SCRIPT_URL}?accion=config`);
+    const data = await res.json();
+    PREGUNTAS  = data.preguntas;
+    PERFILES   = data.perfiles;
+    // Ocultar loading, mostrar botón
+    document.getElementById('btn-comenzar').style.display = '';
+    document.getElementById('loading-msg').style.display  = 'none';
+  } catch(e) {
+    document.getElementById('loading-msg').textContent = '⚠️ Sin conexión. Recarga la página.';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', cargarConfig);
 
 function mezclar(a){ return [...a].sort(()=>Math.random()-.5); }
 
