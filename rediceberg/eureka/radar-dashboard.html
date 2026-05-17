@@ -90,13 +90,21 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .card-act{grid-column:span 2;}
 .act-header{display:flex;align-items:center;justify-content:space-between;}
 .act-sub{font-size:11px;color:var(--cyan);margin-top:2px;opacity:.8;}
-.heatmap-wrap{flex:1;display:flex;flex-direction:column;gap:8px;min-height:0;justify-content:center;}
-.heatmap-grid{display:grid;grid-template-columns:repeat(24,1fr);grid-template-rows:repeat(3,1fr);gap:4px;flex:1;min-height:0;}
-.hcell{border-radius:4px;background:rgba(170,255,0,0.06);border:1px solid rgba(170,255,0,0.08);transition:background 0.8s ease,box-shadow 0.8s ease;position:relative;cursor:default;}
-.hcell:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#0c110c;border:1px solid var(--green);color:var(--green);font-size:10px;padding:3px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:99;}
-.heatmap-leyenda{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
-.ley-boxes{display:flex;gap:4px;}
-.ley-box{width:18px;height:12px;border-radius:3px;}
+/* Signal dominante */
+.card-act{overflow:visible!important;}
+.signal-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:0;overflow:hidden;position:relative;}
+.signal-scan{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.signal-scan-icon{font-size:11px;flex-shrink:0;}
+.signal-sep{width:20px;height:1px;background:currentColor;opacity:.4;flex-shrink:0;}
+.signal-name{font-size:clamp(18px,2.8vw,36px);font-weight:700;letter-spacing:3px;text-transform:uppercase;line-height:1;text-align:center;text-shadow:0 0 30px currentColor;transition:color 1s ease,text-shadow 1s ease;white-space:nowrap;}
+.signal-pct-row{display:flex;align-items:baseline;gap:6px;}
+.signal-pct{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;opacity:.9;}
+.signal-pct-lbl{font-size:10px;letter-spacing:2px;opacity:.7;text-transform:uppercase;}
+.signal-frase{font-size:13px;color:var(--cyan);letter-spacing:1px;text-align:center;opacity:.9;font-style:italic;max-width:420px;line-height:1.3;}
+/* Scanline sutil */
+.signal-wrap::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(170,255,0,0.015) 3px,rgba(170,255,0,0.015) 4px);pointer-events:none;}
+@keyframes pulse-glow{0%,100%{opacity:1}50%{opacity:.6}}
+.signal-wrap{animation:pulse-glow 2.5s ease-in-out infinite;}
 .footer{margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .footer-txt{font-size:11px;color:var(--cyan);letter-spacing:1px;opacity:.7;}
 .update-txt{font-size:11px;color:var(--yellow);letter-spacing:.5px;font-weight:600;}
@@ -219,24 +227,25 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
     <div class="card card-act">
       <div class="act-header">
         <div>
-          <div class="sect-title">Mapa de calor temporal</div>
-          <div class="act-sub">Participación acumulada desde el inicio del evento</div>
+          <div class="sect-title">Señal detectada</div>
+          <div class="act-sub">Perfil con mayor presencia en este grupo</div>
         </div>
         <div class="update-txt" id="last-update">Conectando...</div>
       </div>
-      <div class="heatmap-wrap">
-        <div class="heatmap-grid" id="heatmap"></div>
-        <div class="heatmap-leyenda">
-          <span style="color:var(--cyan);font-size:10px;letter-spacing:1px;">MENOS</span>
-          <div class="ley-boxes">
-            <div class="ley-box" style="background:rgba(170,255,0,0.08)"></div>
-            <div class="ley-box" style="background:rgba(170,255,0,0.25)"></div>
-            <div class="ley-box" style="background:rgba(170,255,0,0.45)"></div>
-            <div class="ley-box" style="background:rgba(170,255,0,0.70)"></div>
-            <div class="ley-box" style="background:rgba(170,255,0,1.00)"></div>
-          </div>
-          <span style="color:var(--cyan);font-size:10px;letter-spacing:1px;">MÁS</span>
+      <div class="signal-wrap" id="signal-wrap">
+        <div class="signal-scan" id="signal-scan" style="color:var(--green)">
+          <span class="signal-scan-icon">⬡</span>
+          <span class="signal-sep"></span>
+          <span id="signal-scan-txt">ESCANEANDO RADARES...</span>
+          <span class="signal-sep"></span>
+          <span class="signal-scan-icon">⬡</span>
         </div>
+        <div class="signal-name" id="signal-name" style="color:var(--green)">—</div>
+        <div class="signal-pct-row">
+          <div class="signal-pct" id="signal-pct" style="color:var(--green)">—</div>
+          <div class="signal-pct-lbl" id="signal-pct-lbl" style="color:var(--green)"></div>
+        </div>
+        <div class="signal-frase" id="signal-frase"></div>
       </div>
     </div>
   </div>
@@ -250,73 +259,61 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 <script>
 const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxHNYVVnfEygJclDO31MdVEoVfyPi-pMx53-WI2391Bif5lYIB9EhyLEXazQvVg87h7nQ/exec';
 const INTERVALO_MS=5000,CIRC=352;
-// Heatmap temporal: 24 columnas × 3 filas = 72 celdas (cada celda = ~1 min si el evento dura 1h)
-const HEATMAP_COLS = 24;
-const HEATMAP_ROWS = 3;
-const HEATMAP_CELLS = HEATMAP_COLS * HEATMAP_ROWS;
-let heatmapData = new Array(HEATMAP_CELLS).fill(0);
-let heatmapUltimoTotal = 0;
-let heatmapCeldaActual = 0;
-let heatmapInicioSegmento = Date.now();
-const HEATMAP_SEGMENTO_MS = 60000; // cada celda = 1 minuto
 
-function renderHeatmap(){
-  const cont = document.getElementById('heatmap');
-  if(!cont) return;
-  const maxV = Math.max(...heatmapData, 1);
-  if(cont.children.length !== HEATMAP_CELLS){
-    cont.innerHTML = '';
-    for(let i = 0; i < HEATMAP_CELLS; i++){
-      const c = document.createElement('div');
-      c.className = 'hcell';
-      c.id = `hc-${i}`;
-      cont.appendChild(c);
-    }
-  }
-  heatmapData.forEach((v, i) => {
-    const cell = document.getElementById(`hc-${i}`);
-    if(!cell) return;
-    const intensity = v / maxV;
-    let bg, shadow;
-    if(v === 0){
-      bg = 'rgba(170,255,0,0.06)';
-      shadow = 'none';
-    } else if(intensity < 0.25){
-      bg = 'rgba(170,255,0,0.20)'; shadow = 'none';
-    } else if(intensity < 0.50){
-      bg = 'rgba(170,255,0,0.40)'; shadow = 'none';
-    } else if(intensity < 0.75){
-      bg = 'rgba(170,255,0,0.65)'; shadow = '0 0 6px rgba(170,255,0,0.4)';
-    } else {
-      bg = 'rgba(170,255,0,0.95)'; shadow = '0 0 10px rgba(170,255,0,0.7)';
-    }
-    // Celda actual parpadea levemente
-    if(i === heatmapCeldaActual){
-      cell.style.outline = '1px solid rgba(170,255,0,0.6)';
-    } else {
-      cell.style.outline = 'none';
-    }
-    cell.style.background = bg;
-    cell.style.boxShadow = shadow;
-    cell.setAttribute('data-tip', `+${v} participante${v!==1?'s':''} · min ${i+1}`);
-  });
-}
+const PERFILES=[
+  {nombre:'TREND ROOKIE',  color:'var(--c0)', frase:'El viaje acaba de comenzar.'},
+  {nombre:'CULTURE SCANNER', color:'var(--c1)', frase:'Leen el presente para anticipar lo que sigue.'},
+  {nombre:'OPPORTUNITY SEEKER', color:'var(--c2)', frase:'Ven la oportunidad antes que los demás.'},
+  {nombre:'EUREKA MINDSET',  color:'var(--c3)', frase:'Este grupo ya vive en el futuro.'},
+];
 
-function avanzarCeldaHeatmap(){
-  const ahora = Date.now();
-  if(ahora - heatmapInicioSegmento >= HEATMAP_SEGMENTO_MS){
-    if(heatmapCeldaActual < HEATMAP_CELLS - 1) heatmapCeldaActual++;
-    heatmapInicioSegmento = ahora;
-  }
-}
+function actualizarSenal(counts, total){
+  const scanTxt = document.getElementById('signal-scan-txt');
+  const nameEl  = document.getElementById('signal-name');
+  const pctEl   = document.getElementById('signal-pct');
+  const pctLbl  = document.getElementById('signal-pct-lbl');
+  const fraseEl = document.getElementById('signal-frase');
+  const scanEl  = document.getElementById('signal-scan');
 
-function actualizarHeatmap(nuevoTotal){
-  avanzarCeldaHeatmap();
-  if(nuevoTotal > heatmapUltimoTotal){
-    heatmapData[heatmapCeldaActual] += (nuevoTotal - heatmapUltimoTotal);
-    heatmapUltimoTotal = nuevoTotal;
+  if(total === 0){
+    nameEl.textContent  = '—';
+    pctEl.textContent   = '—';
+    pctLbl.textContent  = '';
+    fraseEl.textContent = '';
+    scanTxt.textContent = 'ESCANEANDO RADARES...';
+    [nameEl,pctEl,scanEl].forEach(el=>el.style.color='var(--green)');
+    return;
   }
-  renderHeatmap();
+
+  const max = Math.max(...counts);
+  const ganadores = counts.reduce((acc,v,i)=>v===max?[...acc,i]:acc,[]);
+
+  if(ganadores.length > 1){
+    // Empate
+    nameEl.textContent  = 'SEÑAL DIVIDIDA';
+    pctEl.textContent   = Math.round(max/total*100)+'%';
+    pctLbl.textContent  = 'cada uno';
+    fraseEl.textContent = 'El radar aún no encuentra su norte...';
+    scanTxt.textContent = 'SEÑAL DIVIDIDA · SIN PERFIL DOMINANTE';
+    [nameEl,pctEl,pctLbl,scanEl,fraseEl].forEach(el=>el.style.color='var(--cyan)');
+    return;
+  }
+
+  const idx = ganadores[0];
+  const p   = PERFILES[idx];
+  const pct = Math.round(max/total*100);
+
+  scanEl.style.color  = p.color;
+  nameEl.style.color  = p.color;
+  pctEl.style.color   = p.color;
+  pctLbl.style.color  = p.color;
+  fraseEl.style.color = 'var(--cyan)';
+
+  scanTxt.textContent = `⬡ ${p.nombre} LIDERA CON ${pct}% DE LOS RADARES ⬡`;
+  nameEl.textContent  = p.nombre;
+  pctEl.textContent   = pct+'%';
+  pctLbl.textContent  = 'de los radares';
+  fraseEl.textContent = p.frase;
 }
 
 function tickReloj(){
@@ -358,7 +355,7 @@ function actualizarUI(data){
     document.getElementById(`lpct-${i}`).textContent=pct+'%';
   });
   actualizarDona(counts,total);
-  actualizarHeatmap(total);
+  actualizarSenal(counts,total);
   const n=new Date();
   document.getElementById('last-update').textContent='Actualizado '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
 }
@@ -374,7 +371,7 @@ async function fetchDatos(){
     document.getElementById('update-txt').textContent='';
   }
 }
-renderHeatmap();fetchDatos();setInterval(fetchDatos,INTERVALO_MS);
+fetchDatos();setInterval(fetchDatos,INTERVALO_MS);
 
 // Radar canvas
 (function(){
