@@ -149,6 +149,11 @@ const NUMS    = ['','01','02','03'];
 
 let intervaloRes = null;
 
+// Reset si viene ?reset=1 en la URL
+if(new URLSearchParams(window.location.search).get('reset') === '1'){
+  localStorage.removeItem(LS_KEY);
+}
+
 // ¿Ya votó?
 const votoGuardado = localStorage.getItem(LS_KEY);
 if(votoGuardado){
