@@ -30,51 +30,24 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .sub-tag{font-size:11px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;opacity:.8;}
 
 /* OPCIONES */
-.opciones{display:flex;flex-direction:column;gap:16px;padding:20px 16px 0;}
+.opciones{display:flex;flex-direction:column;gap:20px;padding:20px 16px 0;}
 
-.opcion{border-radius:16px;overflow:hidden;border:1px solid var(--border);position:relative;display:flex;flex-direction:column;cursor:pointer;transition:transform .15s ease,border-color .3s ease;}
+.opcion{border-radius:16px;overflow:hidden;border:2px solid var(--border);position:relative;display:flex;flex-direction:column;cursor:pointer;transition:transform .15s ease;}
 .opcion:active{transform:scale(.98);}
-.opcion.c1{border-color:rgba(255,140,0,.25);}
-.opcion.c2{border-color:rgba(170,255,0,.25);}
-.opcion.c3{border-color:rgba(0,180,255,.25);}
+.opcion.c1{border-color:rgba(255,140,0,.5);}
+.opcion.c2{border-color:rgba(170,255,0,.5);}
+.opcion.c3{border-color:rgba(0,180,255,.5);}
 
-/* Imagen / placeholder */
-.opcion-img{width:100%;height:260px;object-fit:cover;object-position:top;display:block;}
-.opcion-placeholder{width:100%;height:180px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.opcion.c1 .opcion-placeholder{background:linear-gradient(135deg,#1a0a00 0%,#2d1500 40%,#1a0a00 100%);}
-.opcion.c2 .opcion-placeholder{background:linear-gradient(135deg,#061a06 0%,#0d2e0d 40%,#061a06 100%);}
-.opcion.c3 .opcion-placeholder{background:linear-gradient(135deg,#001220 0%,#002040 40%,#001220 100%);}
-.placeholder-icon{font-size:56px;opacity:.18;}
-.placeholder-grid{position:absolute;inset:0;background-image:linear-gradient(currentColor 1px,transparent 1px),linear-gradient(90deg,currentColor 1px,transparent 1px);background-size:20px 20px;opacity:.04;}
-.opcion.c1 .placeholder-grid{color:var(--c1);}
-.opcion.c2 .placeholder-grid{color:var(--c2);}
-.opcion.c3 .placeholder-grid{color:var(--c3);}
-/* Línea de color superior */
-.opcion-top{height:3px;width:100%;}
-.opcion.c1 .opcion-top{background:var(--c1);box-shadow:0 0 12px var(--c1);}
-.opcion.c2 .opcion-top{background:var(--c2);box-shadow:0 0 12px var(--c2);}
-.opcion.c3 .opcion-top{background:var(--c3);box-shadow:0 0 12px var(--c3);}
-
-/* Contenido */
-.opcion-body{padding:16px 18px 18px;background:var(--card);display:flex;flex-direction:column;gap:12px;}
-.opcion-header{display:flex;align-items:flex-start;gap:14px;}
-.opcion-num{font-size:38px;font-weight:700;line-height:1;flex-shrink:0;}
-.opcion.c1 .opcion-num{color:var(--c1);}
-.opcion.c2 .opcion-num{color:var(--c2);}
-.opcion.c3 .opcion-num{color:var(--c3);}
-.opcion-texts{}
-.opcion-title{font-size:17px;font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:1.2;}
-.opcion-subtitle{font-size:13px;margin-top:4px;opacity:.75;line-height:1.4;font-style:italic;}
-.opcion.c1 .opcion-subtitle{color:var(--c1);}
-.opcion.c2 .opcion-subtitle{color:var(--c2);}
-.opcion.c3 .opcion-subtitle{color:var(--c3);}
+/* Imagen completa */
+.opcion-img{width:100%;height:auto;display:block;}
 
 /* Botón votar */
-.btn-votar{display:flex;align-items:center;justify-content:center;gap:10px;border:none;border-radius:10px;padding:14px;width:100%;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:opacity .2s,transform .15s;}
+.opcion-btn-wrap{background:#0a0f0a;padding:14px 16px;}
+.btn-votar{display:flex;align-items:center;justify-content:center;gap:10px;border:none;border-radius:10px;padding:15px;width:100%;cursor:pointer;font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:opacity .2s,transform .15s;}
 .btn-votar:active{transform:scale(.97);}
-.opcion.c1 .btn-votar{background:rgba(255,140,0,.12);color:var(--c1);border:1px solid rgba(255,140,0,.3);}
-.opcion.c2 .btn-votar{background:rgba(170,255,0,.10);color:var(--c2);border:1px solid rgba(170,255,0,.3);}
-.opcion.c3 .btn-votar{background:rgba(0,180,255,.10);color:var(--c3);border:1px solid rgba(0,180,255,.3);}
+.opcion.c1 .btn-votar{background:rgba(255,140,0,.12);color:var(--c1);border:1px solid rgba(255,140,0,.4);}
+.opcion.c2 .btn-votar{background:rgba(170,255,0,.10);color:var(--c2);border:1px solid rgba(170,255,0,.4);}
+.opcion.c3 .btn-votar{background:rgba(0,180,255,.10);color:var(--c3);border:1px solid rgba(0,180,255,.4);}
 .btn-icon{font-size:18px;}
 
 /* PANTALLA GRACIAS */
@@ -135,16 +108,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   <div class="opciones" id="seccion-opciones">
 
     <div class="opcion c1" id="op-1">
-      <div class="opcion-top"></div>
       <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%201.png" alt="Cuerpo como Sistema">
-      <div class="opcion-body">
-        <div class="opcion-header">
-          <div class="opcion-num">01</div>
-          <div class="opcion-texts">
-            <div class="opcion-title">Cuerpo como Sistema</div>
-            <div class="opcion-subtitle">Tu cuerpo ya no es natural.</div>
-          </div>
-        </div>
+      <div class="opcion-btn-wrap">
         <button class="btn-votar" onclick="votar(1)">
           <span class="btn-icon">📱</span> Vota esta opción
         </button>
@@ -152,16 +117,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </div>
 
     <div class="opcion c2" id="op-2">
-      <div class="opcion-top"></div>
       <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%202.png" alt="Sistemas Adaptativos">
-      <div class="opcion-body">
-        <div class="opcion-header">
-          <div class="opcion-num">02</div>
-          <div class="opcion-texts">
-            <div class="opcion-title">Sistemas Adaptativos</div>
-            <div class="opcion-subtitle">Tú ya no decides.</div>
-          </div>
-        </div>
+      <div class="opcion-btn-wrap">
         <button class="btn-votar" onclick="votar(2)">
           <span class="btn-icon">📱</span> Vota esta opción
         </button>
@@ -169,16 +126,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </div>
 
     <div class="opcion c3" id="op-3">
-      <div class="opcion-top"></div>
       <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/eureka/Focus%203.png" alt="Realidad Sintética">
-      <div class="opcion-body">
-        <div class="opcion-header">
-          <div class="opcion-num">03</div>
-          <div class="opcion-texts">
-            <div class="opcion-title">Realidad Sintética</div>
-            <div class="opcion-subtitle">Comer deja de ser necesario.</div>
-          </div>
-        </div>
+      <div class="opcion-btn-wrap">
         <button class="btn-votar" onclick="votar(3)">
           <span class="btn-icon">📱</span> Vota esta opción
         </button>
