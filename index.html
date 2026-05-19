@@ -42,13 +42,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(13,27,62,0.9
 .mobile-menu a{display:block;color:rgba(255,255,255,.82);text-decoration:none;font-size:16px;font-weight:500;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
 .mobile-menu .btn-nav{display:inline-block;margin-top:1rem}
 
-/* HERO PARTICLES */
-.hero-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.particle{position:absolute;border-radius:50%;background:rgba(74,159,212,.35);animation:floatUp linear infinite}
-@keyframes floatUp{0%{opacity:0;transform:translateY(0) scale(1)}10%{opacity:1}90%{opacity:.4}100%{opacity:0;transform:translateY(-100vh) scale(.4)}}
-/* Typing cursor en h1 */
-.cursor{display:inline-block;width:3px;height:.85em;background:var(--accent);border-radius:2px;margin-left:4px;vertical-align:middle;animation:blink .85s step-end infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* HERO NODES CANVAS */
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 
 /* HERO */
 .hero{min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 58%,var(--navy-light) 100%);display:flex;align-items:center;padding:100px 5% 80px;position:relative;overflow:hidden}
@@ -184,7 +179,81 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
 .footer-links a:hover{color:#fff}
 .footer-copy{color:rgba(255,255,255,.35);font-size:13px}
 
-/* ANIMATIONS */
+
+/* ── MOCKUPS FLOTANTES (pilares) ── */
+.pillar-mockup{display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;background:#fff}
+.mockup-float{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);border-radius:12px 12px 0 0;padding:0 0 14px;animation:floatPillar 4s ease-in-out infinite}
+@keyframes floatPillar{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.mf-topbar{background:rgba(255,255,255,.08);padding:8px 12px;display:flex;align-items:center;gap:5px;border-radius:12px 12px 0 0;margin-bottom:12px}
+.mf-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mf-title-bar{font-size:11px;font-weight:600;color:rgba(255,255,255,.45);margin-left:6px;letter-spacing:.03em}
+.mf-body{padding:0 14px}
+/* flow nodos */
+.mf-flow{display:flex;align-items:center;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.mf-node{font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;color:#fff;white-space:nowrap}
+.mf-node-trigger{background:rgba(40,202,65,.2);border:1px solid rgba(40,202,65,.35)}
+.mf-node-ai{background:rgba(74,159,212,.25);border:1px solid rgba(74,159,212,.4)}
+.mf-node-done{background:rgba(74,159,212,.15);border:1px solid rgba(74,159,212,.3)}
+.mf-arrow{color:rgba(255,255,255,.3);font-size:12px}
+/* progress */
+.mf-progress-label{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:4px;font-weight:600}
+.mf-progress-bg{background:rgba(255,255,255,.1);border-radius:4px;height:5px;margin-bottom:8px;overflow:hidden}
+.mf-progress-fill{height:100%;background:#4a9fd4;border-radius:4px}
+/* badges */
+.mf-badge-row{display:flex;gap:5px;flex-wrap:wrap}
+.mf-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:rgba(74,159,212,.18);color:#4a9fd4;border:1px solid rgba(74,159,212,.25)}
+/* chat */
+.mf-chat-row{font-size:11px;font-weight:500;padding:4px 8px;border-radius:6px;margin-bottom:4px;line-height:1.45}
+.mf-chat-in{background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);align-self:flex-start}
+.mf-chat-out{background:rgba(74,159,212,.2);color:#fff;text-align:right}
+.mf-stat-row{display:flex;align-items:center;gap:6px;margin-top:4px}
+.mf-stat-icon{font-size:14px}
+.mf-stat-text{font-size:11px;font-weight:600;color:rgba(255,255,255,.5)}
+/* kpis */
+.mf-kpi-row{display:flex;gap:6px}
+.mf-kpi{flex:1;background:rgba(255,255,255,.08);border-radius:8px;padding:8px 4px;text-align:center}
+.mf-kpi-val{font-size:16px;font-weight:800;color:#fff;line-height:1}
+.mf-kpi-lbl{font-size:9px;color:rgba(255,255,255,.45);font-weight:600;margin-top:3px}
+/* texto bajo mockup */
+.pillar-mockup h3{font-size:1.1rem;font-weight:700;margin:1.1rem 1.5rem .5rem;color:var(--text-main)}
+.pillar-mockup p{color:var(--text-sub);font-size:15px;line-height:1.6;margin:0 1.5rem 1.5rem}
+
+/* ── SECTORS GRAD ANIMADO ── */
+.sectors-grad{background:linear-gradient(270deg,#f0f6ff,#e8f0fb,#dce8f7,#f5f6f8,#e8f0fb);background-size:500% 500%;animation:sectorsGrad 12s ease infinite}
+@keyframes sectorsGrad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.sectors-grad .sector-card{background:rgba(255,255,255,.75);backdrop-filter:blur(4px)}
+
+/* ── AGENTS CURSOR TYPING ── */
+.agents-cursor{display:inline-block;font-weight:300;color:var(--accent);animation:agCursor .75s step-end infinite;margin-left:1px}
+@keyframes agCursor{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── SCAN LINES ── */
+.scan-section{position:relative;overflow:hidden}
+.scan-overlay{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.scan-overlay::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(74,159,212,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(74,159,212,.04) 1px,transparent 1px);background-size:44px 44px}
+.scan-line-el{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(74,159,212,0) 8%,rgba(74,159,212,.55) 38%,rgba(255,255,255,.85) 50%,rgba(74,159,212,.55) 62%,rgba(74,159,212,0) 92%,transparent);animation:scanLineDown linear infinite}
+.scan-line-el:nth-child(2){animation-duration:5s;animation-delay:0s}
+.scan-line-el:nth-child(3){animation-duration:8s;animation-delay:-3s;opacity:.5}
+.scan-line-el:nth-child(4){animation-duration:13s;animation-delay:-8s;opacity:.28}
+@keyframes scanLineDown{0%{top:-2px}100%{top:100%}}
+.corner-dot{position:absolute;width:10px;height:10px;z-index:1;pointer-events:none}
+.corner-dot::before,.corner-dot::after{content:'';position:absolute;border-radius:50%;background:rgba(74,159,212,.5);animation:cdPulse 2.8s ease-out infinite}
+.corner-dot::before{width:5px;height:5px;top:2.5px;left:2.5px}
+.corner-dot::after{width:10px;height:10px;top:0;left:0;opacity:.2;animation-delay:.5s}
+@keyframes cdPulse{0%{transform:scale(1);opacity:.6}70%{transform:scale(2.5);opacity:0}100%{transform:scale(1);opacity:0}}
+.cd-tl{top:14px;left:14px}.cd-tr{top:14px;right:14px}.cd-bl{bottom:14px;left:14px}.cd-br{bottom:14px;right:14px}
+.scan-section .section-inner{position:relative;z-index:1}
+
+/* ── NODOS CANVAS ── */
+.nodes-section{position:relative;overflow:hidden}
+.nodes-section canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.nodes-section .section-inner{position:relative;z-index:1}
+
+/* ── LLUVIA CANVAS ── */
+.rain-section{position:relative;overflow:hidden}
+.rain-section canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.4}
+.rain-section .section-inner{position:relative;z-index:1}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
@@ -253,11 +322,11 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
-  <div class="hero-particles" id="heroParticles"></div>
+  <canvas id="heroCanvas"></canvas>
   <div class="hero-inner">
     <div class="hero-text">
       <div class="hero-badge">✦ Inteligencia Artificial aplicada</div>
-      <h1>Automatizamos tu negocio con <span>Inteligencia Artificial</span><span class="cursor"></span></h1>
+      <h1>Automatizamos tu negocio con <span>Inteligencia Artificial</span></h1>
       <p class="hero-sub">Implementamos agentes de IA que trabajan por ti — en WhatsApp, correo, clínicas, inmobiliarias, despachos y más. Resultados reales, sin tecnicismos.</p>
       <div class="hero-btns">
         <a href="https://wa.me/525512154800?text=Hola,%20me%20interesa%20saber%20más%20sobre%20ExcelentIA" class="btn-primary" target="_blank">
@@ -269,14 +338,13 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
     <div class="hero-visual">
       <div class="hero-card-wrap">
         <div class="hero-card">
-          <div class="hero-card-title">🤖 Agentes activos</div>
+          <div class="hero-card-title">🤖 Agentes</div>
           <div class="agent-row">
             <div class="agent-icon green">🫀</div>
             <div class="agent-info">
               <div class="agent-name">Eco-IA</div>
               <div class="agent-desc">Reportes de ecocardiograma automáticos</div>
             </div>
-            <span class="agent-status status-live">En vivo</span>
           </div>
           <div class="agent-row">
             <div class="agent-icon blue">📅</div>
@@ -284,7 +352,6 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
               <div class="agent-name">Agente de Citas</div>
               <div class="agent-desc">Agendamiento por WhatsApp</div>
             </div>
-            <span class="agent-status status-soon">Próximo</span>
           </div>
           <div class="agent-row">
             <div class="agent-icon purple">📧</div>
@@ -292,7 +359,6 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
               <div class="agent-name">Resumen de Correos</div>
               <div class="agent-desc">Bandeja inteligente con IA</div>
             </div>
-            <span class="agent-status status-soon">Próximo</span>
           </div>
           <div class="agent-row">
             <div class="agent-icon orange">📊</div>
@@ -300,7 +366,6 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
               <div class="agent-name">Dashboards IA</div>
               <div class="agent-desc">Agenda, correos, proyectos, finanzas</div>
             </div>
-            <span class="agent-status status-soon">Próximo</span>
           </div>
         </div>
       </div>
@@ -315,21 +380,99 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
     <h2 class="reveal">IA con esencia humana</h2>
     <p class="section-sub reveal">Tecnología de clase mundial, implementada con un enfoque práctico y cercano. Sin tecnicismos, sin promesas vacías.</p>
     <div class="pillars-grid">
-      <div class="pillar-card reveal">
-        <div class="pillar-icon">⚡</div>
+
+      <!-- MOCKUP 1: Implementación rápida -->
+      <div class="pillar-card pillar-mockup reveal">
+        <div class="mockup-float">
+          <div class="mf-topbar">
+            <div class="mf-dot" style="background:#ff5f57"></div>
+            <div class="mf-dot" style="background:#ffbd2e"></div>
+            <div class="mf-dot" style="background:#28ca41"></div>
+            <span class="mf-title-bar">n8n workflow</span>
+          </div>
+          <div class="mf-body">
+            <div class="mf-flow">
+              <div class="mf-node mf-node-trigger">🟢 Trigger</div>
+              <div class="mf-arrow">→</div>
+              <div class="mf-node mf-node-ai">🤖 IA</div>
+              <div class="mf-arrow">→</div>
+              <div class="mf-node mf-node-done">✅ Listo</div>
+            </div>
+            <div class="mf-progress-wrap">
+              <div class="mf-progress-label">Implementación</div>
+              <div class="mf-progress-bg"><div class="mf-progress-fill" style="width:90%"></div></div>
+            </div>
+            <div class="mf-badge-row">
+              <span class="mf-badge">n8n</span>
+              <span class="mf-badge">OpenAI</span>
+              <span class="mf-badge">Claude</span>
+            </div>
+          </div>
+        </div>
         <h3>Implementación rápida</h3>
         <p>De la idea al agente en días, no meses. Usamos las mejores herramientas del mercado para entregar resultados ágiles y confiables.</p>
       </div>
-      <div class="pillar-card reveal">
-        <div class="pillar-icon">🤝</div>
+
+      <!-- MOCKUP 2: Adaptado a tu negocio -->
+      <div class="pillar-card pillar-mockup reveal">
+        <div class="mockup-float" style="animation-delay:.4s">
+          <div class="mf-topbar">
+            <div class="mf-dot" style="background:#ff5f57"></div>
+            <div class="mf-dot" style="background:#ffbd2e"></div>
+            <div class="mf-dot" style="background:#28ca41"></div>
+            <span class="mf-title-bar">Tu negocio</span>
+          </div>
+          <div class="mf-body">
+            <div class="mf-chat-row mf-chat-in">🏥 Clínica: ¿cómo agendamos?</div>
+            <div class="mf-chat-row mf-chat-out">🤖 Diseño tu flujo personalizado</div>
+            <div class="mf-chat-row mf-chat-in">🏢 Despacho: necesito reportes</div>
+            <div class="mf-chat-row mf-chat-out">📄 Generación automática lista</div>
+            <div class="mf-stat-row">
+              <span class="mf-stat-icon">⚙️</span>
+              <span class="mf-stat-text">Adaptado a tus procesos</span>
+            </div>
+          </div>
+        </div>
         <h3>Adaptado a tu negocio</h3>
         <p>No vendemos soluciones genéricas. Cada agente se diseña según tus procesos, tu equipo y tus clientes. Tecnología que se siente humana.</p>
       </div>
-      <div class="pillar-card reveal">
-        <div class="pillar-icon">📈</div>
+
+      <!-- MOCKUP 3: Resultados medibles -->
+      <div class="pillar-card pillar-mockup reveal">
+        <div class="mockup-float" style="animation-delay:.8s">
+          <div class="mf-topbar">
+            <div class="mf-dot" style="background:#ff5f57"></div>
+            <div class="mf-dot" style="background:#ffbd2e"></div>
+            <div class="mf-dot" style="background:#28ca41"></div>
+            <span class="mf-title-bar">Resultados</span>
+          </div>
+          <div class="mf-body">
+            <div class="mf-kpi-row">
+              <div class="mf-kpi">
+                <div class="mf-kpi-val">-40%</div>
+                <div class="mf-kpi-lbl">Tiempo admin</div>
+              </div>
+              <div class="mf-kpi">
+                <div class="mf-kpi-val">24/7</div>
+                <div class="mf-kpi-lbl">Disponibilidad</div>
+              </div>
+              <div class="mf-kpi">
+                <div class="mf-kpi-val">100%</div>
+                <div class="mf-kpi-lbl">A tiempo</div>
+              </div>
+            </div>
+            <svg viewBox="0 0 200 48" style="width:100%;margin-top:8px">
+              <polyline points="0,40 40,30 80,32 110,18 145,22 175,10 200,6"
+                fill="none" stroke="#4a9fd4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="0,40 40,30 80,32 110,18 145,22 175,10 200,6 200,48 0,48"
+                fill="rgba(74,159,212,.12)" stroke="none"/>
+            </svg>
+          </div>
+        </div>
         <h3>Resultados medibles</h3>
         <p>Menos tiempo en tareas repetitivas, más clientes bien atendidos. Automatizaciones que generan impacto real desde el primer día.</p>
       </div>
+
     </div>
   </div>
 </section>
@@ -339,7 +482,7 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
   <div class="section-inner">
     <span class="section-label reveal">Productos</span>
     <h2 class="reveal">Nuestros agentes de IA</h2>
-    <p class="section-sub reveal">Agentes especializados listos para implementarse en tu industria. Cada uno diseñado para resolver un problema real.</p>
+    <p class="section-sub reveal"><span id="agents-typing"></span><span class="agents-cursor">|</span></p>
     <div class="agents-grid">
 
       <div class="agent-card reveal">
@@ -423,7 +566,14 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
 </section>
 
 <!-- SECTORES -->
-<section id="sectores" class="sectors">
+<section id="sectores" class="sectors sectors-grad scan-section">
+  <div class="corner-dot cd-tl"></div><div class="corner-dot cd-tr"></div>
+  <div class="corner-dot cd-bl"></div><div class="corner-dot cd-br"></div>
+  <div class="scan-overlay">
+    <div class="scan-line-el"></div>
+    <div class="scan-line-el"></div>
+    <div class="scan-line-el"></div>
+  </div>
   <div class="section-inner">
     <span class="section-label reveal">Industrias</span>
     <h2 class="reveal">¿Tu negocio está aquí?</h2>
@@ -454,7 +604,8 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
 </section>
 
 <!-- NÚMEROS -->
-<section class="numbers">
+<section class="numbers rain-section">
+  <canvas id="rainCanvas"></canvas>
   <div class="section-inner">
     <div class="numbers-grid">
       <div class="number-item reveal">
@@ -478,7 +629,8 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
 </section>
 
 <!-- DASHBOARDS -->
-<section id="dashboards">
+<section id="dashboards" class="nodes-section">
+  <canvas id="dashCanvas"></canvas>
   <div class="section-inner">
     <span class="section-label reveal">Dashboards inteligentes</span>
     <h2 class="reveal">Tu negocio, todo en un lugar</h2>
@@ -525,7 +677,14 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
 </section>
 
 <!-- PÁGINAS WEB -->
-<section id="web" class="web-section">
+<section id="web" class="web-section scan-section">
+  <div class="corner-dot cd-tl"></div><div class="corner-dot cd-tr"></div>
+  <div class="corner-dot cd-bl"></div><div class="corner-dot cd-br"></div>
+  <div class="scan-overlay">
+    <div class="scan-line-el"></div>
+    <div class="scan-line-el"></div>
+    <div class="scan-line-el"></div>
+  </div>
   <div class="section-inner">
     <span class="section-label reveal">Desarrollo web</span>
     <h2 class="reveal">Páginas web que convierten</h2>
@@ -551,7 +710,8 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
 </section>
 
 <!-- CTA + CONTACTO -->
-<section id="contacto" class="cta-section">
+<section id="contacto" class="cta-section nodes-section">
+  <canvas id="ctaCanvas"></canvas>
   <div class="section-inner">
     <div class="cta-inner">
       <span class="section-label reveal" style="color:var(--accent)">Hablemos</span>
@@ -597,30 +757,156 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 
            onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo%20excelentIA.png';">
     </div>
     <div class="footer-links">
-      <a href="/privacidad.html">Aviso de Privacidad</a>
-      <a href="/terminos.html">Términos y Condiciones</a>
+      <a href="/files/privacidad.html">Aviso de Privacidad</a>
+      <a href="/files/terminos.html">Términos y Condiciones</a>
     </div>
     <span class="footer-copy">© 2026 ExcelentIA. Todos los derechos reservados.</span>
   </div>
 </footer>
 
 <script>
-// Partículas flotantes hero
+// ── LLUVIA DE CÓDIGO (sección números) ──
 (function(){
-  var c=document.getElementById('heroParticles');
-  if(!c)return;
-  for(var i=0;i<22;i++){
-    var p=document.createElement('div');
-    p.className='particle';
-    var size=Math.random()*5+3;
-    var left=Math.random()*100;
-    var delay=Math.random()*18;
-    var dur=Math.random()*14+10;
-    p.style.cssText='width:'+size+'px;height:'+size+'px;left:'+left+'%;bottom:-20px;animation-delay:'+delay+'s;animation-duration:'+dur+'s;opacity:0';
-    c.appendChild(p);
+  var canvas = document.getElementById('rainCanvas');
+  if(!canvas) return;
+  var hero = canvas.parentElement;
+  var ctx = canvas.getContext('2d');
+  function resize(){ canvas.width=hero.offsetWidth; canvas.height=hero.offsetHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  var chars = 'アイウエオカキクケコ01{}[]()<>/\\|*&^%$#@!ABCDEFабвгδεφλπ∑∫≠≈'.split('');
+  var fs = 13;
+  var cols = Math.floor(canvas.width / fs);
+  var drops = Array.from({length: cols}, function(){ return Math.random() * -(canvas.height/fs); });
+  function draw(){
+    ctx.fillStyle='rgba(13,27,62,0.15)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    drops.forEach(function(y,i){
+      var ch = chars[Math.floor(Math.random()*chars.length)];
+      var a  = Math.max(0.12, Math.min(0.9, y/(canvas.height/fs)));
+      ctx.fillStyle = i%4===0 ? 'rgba(255,255,255,'+a*0.85+')' : 'rgba(74,159,212,'+a*0.7+')';
+      ctx.font = fs+'px monospace';
+      ctx.fillText(ch, i*fs, y*fs);
+      if(y*fs > canvas.height && Math.random()>.975) drops[i]=0;
+      drops[i]+=0.45;
+    });
+    requestAnimationFrame(draw);
   }
+  draw();
 })();
 
+// ── NODOS CANVAS (función reutilizable) ──
+function makeNodes(canvasId, alpha){
+  var canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  var parent = canvas.parentElement;
+  var ctx = canvas.getContext('2d');
+  var N=28, MAX=130, nodes=[];
+  function resize(){ canvas.width=parent.offsetWidth; canvas.height=parent.offsetHeight; init(); }
+  function init(){
+    nodes=[];
+    for(var i=0;i<N;i++) nodes.push({
+      x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+      vx:(Math.random()-.5)*.5, vy:(Math.random()-.5)*.5,
+      r:Math.random()*2+1.2
+    });
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    nodes.forEach(function(n){
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>canvas.width)  n.vx*=-1;
+      if(n.y<0||n.y>canvas.height) n.vy*=-1;
+    });
+    for(var i=0;i<N;i++) for(var j=i+1;j<N;j++){
+      var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+      var d=Math.sqrt(dx*dx+dy*dy);
+      if(d<MAX){
+        ctx.beginPath();
+        ctx.strokeStyle='rgba(74,159,212,'+(alpha*0.9*(1-d/MAX))+')';
+        ctx.lineWidth=.85;
+        ctx.moveTo(nodes[i].x,nodes[i].y);
+        ctx.lineTo(nodes[j].x,nodes[j].y);
+        ctx.stroke();
+      }
+    }
+    nodes.forEach(function(n){
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(74,159,212,'+alpha+')';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+makeNodes('dashCanvas', 0.45);
+makeNodes('ctaCanvas',  0.35);
+
+
+(function(){
+  var canvas = document.getElementById('heroCanvas');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var nodes = [];
+  var N = 32, MAX_DIST = 130, raf;
+
+  function resize(){
+    var hero = canvas.parentElement;
+    canvas.width  = hero.offsetWidth;
+    canvas.height = hero.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', function(){ resize(); nodes=[]; init(); });
+
+  function init(){
+    nodes = [];
+    for(var i=0;i<N;i++){
+      nodes.push({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height,
+        vx:(Math.random()-.5)*.55,
+        vy:(Math.random()-.5)*.55,
+        r: Math.random()*2.2+1.3
+      });
+    }
+  }
+  init();
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    nodes.forEach(function(n){
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>canvas.width)  n.vx*=-1;
+      if(n.y<0||n.y>canvas.height) n.vy*=-1;
+    });
+    for(var i=0;i<N;i++){
+      for(var j=i+1;j<N;j++){
+        var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+        var d=Math.sqrt(dx*dx+dy*dy);
+        if(d<MAX_DIST){
+          ctx.beginPath();
+          ctx.strokeStyle='rgba(74,159,212,'+(0.32*(1-d/MAX_DIST))+')';
+          ctx.lineWidth=.9;
+          ctx.moveTo(nodes[i].x,nodes[i].y);
+          ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(function(n){
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(74,159,212,.65)';
+      ctx.fill();
+    });
+    raf=requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── NAV ──
 function toggleMenu(){
   var m=document.getElementById('mobileMenu');
   m.classList.toggle('open');
@@ -629,6 +915,7 @@ function closeMenu(){
   document.getElementById('mobileMenu').classList.remove('open');
 }
 
+// ── REVEAL SCROLL ──
 var observer=new IntersectionObserver(function(entries){
   entries.forEach(function(e){
     if(e.isIntersecting){e.target.classList.add('visible')}
@@ -636,6 +923,37 @@ var observer=new IntersectionObserver(function(entries){
 },{threshold:0.12});
 document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el)});
 
+// ── TYPING AGENTES (sin reversa, ciclo continuo) ──
+(function(){
+  var phrases=[
+    'Agentes especializados listos para implementarse en tu industria.',
+    'Cada uno diseñado para resolver un problema real.',
+    'Tecnología de IA con resultados desde el primer día.',
+    'Sin tecnicismos. Sin promesas vacías. Solo resultados.'
+  ];
+  var el=document.getElementById('agents-typing');
+  if(!el) return;
+  var pi=0, ci=0, timer;
+
+  function typeNext(){
+    if(ci<=phrases[pi].length){
+      el.textContent=phrases[pi].slice(0,ci);
+      ci++;
+      timer=setTimeout(typeNext,52);
+    } else {
+      // pausa al final, luego siguiente frase directa
+      timer=setTimeout(function(){
+        pi=(pi+1)%phrases.length;
+        ci=0;
+        el.textContent='';
+        typeNext();
+      },2200);
+    }
+  }
+  typeNext();
+})();
+
+// ── FORMULARIO CONTACTO ──
 function submitForm(){
   var n=document.getElementById('nombre').value.trim();
   var e=document.getElementById('email').value.trim();
