@@ -22,6 +22,9 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text-main
 .header-logo{height:42px;width:auto;display:block}
 .header-back{color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;font-weight:600;display:flex;align-items:center;gap:.4rem;transition:color .2s}
 .header-back:hover{color:#fff}
+/* ── NODOS HEADER ── */
+#headerCanvas,#heroCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+
 
 /* ── SCAN LINES (solo header y hero) ── */
 .scan-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
@@ -91,9 +94,7 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2rem 5%
 <header class="site-header">
   <div class="corner-dot cd-tl"></div><div class="corner-dot cd-tr"></div>
   <div class="corner-dot cd-bl"></div><div class="corner-dot cd-br"></div>
-  <div class="scan-wrap">
-    <div class="scan-line"></div><div class="scan-line"></div><div class="scan-line"></div>
-  </div>
+  <canvas id="headerCanvas"></canvas>
   <div class="header-inner">
     <div class="header-logo-wrap">
       <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png"
@@ -105,9 +106,7 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2rem 5%
 </header>
 
 <div class="page-hero">
-  <div class="scan-wrap">
-    <div class="scan-line"></div><div class="scan-line"></div>
-  </div>
+  <canvas id="heroCanvas"></canvas>
   <div class="page-hero-inner">
     <div class="page-badge">Legal</div>
     <h1>Aviso de Privacidad</h1>
@@ -161,5 +160,55 @@ footer{background:var(--navy);border-top:2px solid var(--accent);padding:2rem 5%
   </div>
 </footer>
 
+
+<script>
+(function(){
+  ['headerCanvas','heroCanvas'].forEach(function(id){
+  var canvas = document.getElementById(id);
+  if(!canvas) return;
+  var parent = canvas.parentElement;
+  var ctx = canvas.getContext('2d');
+  var N=22, MAX=110, nodes=[];
+  function resize(){ canvas.width=parent.offsetWidth; canvas.height=parent.offsetHeight; init(); }
+  function init(){
+    nodes=[];
+    for(var i=0;i<N;i++) nodes.push({
+      x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+      vx:(Math.random()-.5)*.45, vy:(Math.random()-.5)*.45,
+      r:Math.random()*1.8+1
+    });
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    nodes.forEach(function(n){
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>canvas.width)  n.vx*=-1;
+      if(n.y<0||n.y>canvas.height) n.vy*=-1;
+    });
+    for(var i=0;i<N;i++) for(var j=i+1;j<N;j++){
+      var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+      var d=Math.sqrt(dx*dx+dy*dy);
+      if(d<MAX){
+        ctx.beginPath();
+        ctx.strokeStyle='rgba(74,159,212,'+(0.35*(1-d/MAX))+')';
+        ctx.lineWidth=.8;
+        ctx.moveTo(nodes[i].x,nodes[i].y);
+        ctx.lineTo(nodes[j].x,nodes[j].y);
+        ctx.stroke();
+      }
+    }
+    nodes.forEach(function(n){
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(74,159,212,.6)';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+  }); // end forEach
+})();
+</script>
 </body>
 </html>
