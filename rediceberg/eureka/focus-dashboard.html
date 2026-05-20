@@ -244,13 +244,24 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 </div>
 
 <script>
-const APPS_URL  = 'https://script.google.com/macros/s/AKfycbxk7atHWOQxNIlGXMsLJoXD8490RoQOrXA1Is5Mzh-HUL4gEYF_UbuyVtdcsAu8D-Prbg/exec';
+const APPS_URL  = 'https://script.google.com/macros/s/AKfycbxW6GMQ7nE4MQpsBmrgfutPlto-2YnUjIjgq-MMKc3cTu83pgnq2bMRSSi-q9i4_NmZhA/exec';
 const INTERVALO = 5000;
 
 // Mapeo: índice JS (1,2,3) → clave del Apps Script
 const KEYS = {1:'CUERPO COMO SISTEMA', 2:'SISTEMAS ADAPTATIVOS', 3:'REALIDAD SINTETICA'};
 
 let demoTick = 0;
+
+// Reloj continuo independiente del polling
+function tickReloj(){
+  const n = new Date();
+  document.getElementById('update-txt').textContent =
+    'Actualizado ' + String(n.getHours()).padStart(2,'0') + ':' +
+    String(n.getMinutes()).padStart(2,'0') + ':' +
+    String(n.getSeconds()).padStart(2,'0');
+}
+setInterval(tickReloj, 1000);
+tickReloj();
 
 function actualizarUI(datos){
   const counts = {1: datos[KEYS[1]]||0, 2: datos[KEYS[2]]||0, 3: datos[KEYS[3]]||0};
@@ -280,15 +291,8 @@ function actualizarUI(datos){
     }
   });
 
-  // Reorganizar columnas: ganadora al centro
+  // Reorganizar columnas
   reordenarColumnas(counts, total, hayEmpate);
-
-  // Timestamp
-  const n = new Date();
-  document.getElementById('update-txt').textContent =
-    'Actualizado ' + String(n.getHours()).padStart(2,'0') + ':' +
-    String(n.getMinutes()).padStart(2,'0') + ':' +
-    String(n.getSeconds()).padStart(2,'0');
 }
 
 function reordenarColumnas(counts, total, hayEmpate){
