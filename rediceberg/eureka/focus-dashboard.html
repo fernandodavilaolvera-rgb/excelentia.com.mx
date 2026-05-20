@@ -244,7 +244,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 </div>
 
 <script>
-const APPS_URL  = 'https://script.google.com/macros/s/AKfycbxW6GMQ7nE4MQpsBmrgfutPlto-2YnUjIjgq-MMKc3cTu83pgnq2bMRSSi-q9i4_NmZhA/exec';
+const APPS_URL  = 'https://script.google.com/macros/s/AKfycbxk7atHWOQxNIlGXMsLJoXD8490RoQOrXA1Is5Mzh-HUL4gEYF_UbuyVtdcsAu8D-Prbg/exec';
 const INTERVALO = 5000;
 
 // Mapeo: índice JS (1,2,3) → clave del Apps Script
@@ -293,26 +293,18 @@ function actualizarUI(datos){
 
 function reordenarColumnas(counts, total, hayEmpate){
   const main = document.querySelector('.main');
+
   if(total === 0 || hayEmpate){
-    // Sin ganadora: columnas iguales
     main.style.gridTemplateColumns = '1fr 1fr 1fr';
-    // Orden original
-    [1,2,3].forEach(i => main.appendChild(document.getElementById(`card-${i}`)));
     return;
   }
 
-  // Encontrar ganadora
   const max = Math.max(counts[1], counts[2], counts[3]);
   const ganadora = [1,2,3].find(i => counts[i] === max);
-  const otras = [1,2,3].filter(i => i !== ganadora);
 
-  // Ganadora más ancha en centro
-  main.style.gridTemplateColumns = '1fr 1.55fr 1fr';
-
-  // Reordenar DOM: otra1, ganadora, otra2
-  main.appendChild(document.getElementById(`card-${otras[0]}`));
-  main.appendChild(document.getElementById(`card-${ganadora}`));
-  main.appendChild(document.getElementById(`card-${otras[1]}`));
+  // Columnas siempre en orden 1,2,3 — solo cambia el ancho de la ganadora
+  const cols = [1,2,3].map(i => i === ganadora ? '1.55fr' : '1fr');
+  main.style.gridTemplateColumns = cols.join(' ');
 }
 
 async function fetchDatos(){
