@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wonderville · Dashboard de Ventas</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060d0b;
+    --bg2: #0a1410;
+    --card: #0d1f18;
+    --card2: #0f2920;
+    --border: #1a3d2a;
+    --neon: #00ff88;
+    --cyan: #00e5ff;
+    --magenta: #ff2d78;
+    --orange: #ff9500;
+    --yellow: #ffe600;
+    --text: #f0fff8;
+    --muted: #9dcfb5;
+    --dim: #2a4a38;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NODE ANIMATION */
+  #node-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.55;
+  }
+
+  .content { position: relative; z-index: 1; }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(6,13,11,0.9);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .header-logo {
+    height: 48px;
+    width: auto;
+    border-radius: 8px;
+  }
+
+  .header-title {
+    font-family: 'Black Ops One', cursive;
+    font-size: 1.3rem;
+    color: var(--neon);
+    text-shadow: 0 0 20px rgba(0,255,136,0.6);
+    letter-spacing: 1px;
+    line-height: 1.2;
+  }
+  .header-title span {
+    display: block;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .header-badge {
+    font-family: 'Black Ops One', cursive;
+    font-size: 0.85rem;
+    color: var(--bg);
+    background: var(--neon);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    white-space: nowrap;
+    box-shadow: 0 0 15px rgba(0,255,136,0.5);
+  }
+
+  main { padding: 2rem; max-width: 1300px; margin: 0 auto; }
+
+  .section-title {
+    font-family: 'Black Ops One', cursive;
+    font-size: 0.72rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* KPI GRID */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.4rem 1.2rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+  .kpi-card.green::before  { background: var(--neon); }
+  .kpi-card.cyan::before   { background: var(--cyan); }
+  .kpi-card.magenta::before { background: var(--magenta); }
+  .kpi-card.orange::before { background: var(--orange); }
+  .kpi-card:hover { transform: translateY(-3px); border-color: var(--dim); }
+
+  .kpi-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .kpi-value {
+    font-family: 'Black Ops One', cursive;
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .kpi-card.green  .kpi-value { color: var(--neon);    text-shadow: 0 0 20px rgba(0,255,136,0.4); }
+  .kpi-card.cyan   .kpi-value { color: var(--cyan);    text-shadow: 0 0 20px rgba(0,229,255,0.4); }
+  .kpi-card.magenta .kpi-value { color: var(--magenta); text-shadow: 0 0 20px rgba(255,45,120,0.4); }
+  .kpi-card.orange .kpi-value { color: var(--orange);  text-shadow: 0 0 20px rgba(255,149,0,0.4); }
+  .kpi-sub { font-size: 0.74rem; color: var(--muted); font-weight: 700; }
+
+  /* FULL WIDTH CHART */
+  .full-chart { margin-bottom: 2.5rem; }
+
+  /* CHART CARD */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+  .chart-card h3 {
+    font-family: 'Black Ops One', cursive;
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  /* STACKED BAR CHART */
+  .stacked-bars { display: flex; align-items: flex-end; gap: 1.2rem; height: 280px; padding-bottom: 0; }
+  .stacked-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; height: 100%; justify-content: flex-end; }
+  .stacked-bar-col {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 6px 6px 0 0;
+    overflow: hidden;
+    /* height se setea en px desde JS */
+  }
+  .bar-segment-transfer {
+    width: 100%;
+    min-height: 2px;
+    transition: height 1s ease;
+  }
+  .bar-segment-efectivo {
+    width: 100%;
+    min-height: 2px;
+    transition: height 1s ease;
+  }
+  .stacked-bar-val {
+    font-family: 'Black Ops One', cursive;
+    font-size: 0.9rem;
+    color: var(--text);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .stacked-bar-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .stacked-bar-date {
+    font-size: 0.68rem;
+    color: #5a8a72;
+    font-weight: 700;
+    text-align: center;
+  }
+  .bar-legend {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .bar-legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .bar-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .bar-legend-text { font-size: 0.68rem; font-weight: 800; color: var(--muted); }
+
+  /* PAGO PIE / SCATTER */
+  .pago-section h4 {
+    font-family: 'Black Ops One', cursive;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .pago-kpis { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+  .pago-kpi {
+    flex: 1;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    text-align: center;
+  }
+  .pago-kpi-label { font-size: 0.62rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+  .pago-kpi-val { font-family: 'Black Ops One', cursive; font-size: 1.15rem; }
+
+  /* Semana breakdown bubbles */
+  .semana-bubbles { display: flex; flex-direction: column; gap: 0.6rem; }
+  .bubble-row { display: flex; align-items: center; gap: 0.8rem; }
+  .bubble-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); width: 60px; flex-shrink: 0; letter-spacing: 1px; }
+  .bubble-bars { flex: 1; display: flex; gap: 3px; }
+  .bubble-bar { height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; min-width: 4px; transition: width 0.8s ease; }
+  .bubble-bar span { font-family: 'Black Ops One', cursive; font-size: 0.58rem; color: rgba(0,0,0,0.7); white-space: nowrap; }
+  .bubble-total { font-family: 'Black Ops One', cursive; font-size: 0.72rem; color: var(--text); width: 50px; text-align: right; flex-shrink: 0; }
+
+  /* SEMANA CARDS */
+  .semana-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+  .semana-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1rem;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .semana-card:hover { transform: translateY(-3px); border-color: var(--dim); }
+  .semana-num { font-family: 'Black Ops One', cursive; font-size: 0.62rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 0.3rem; }
+  .semana-date { font-size: 0.68rem; font-weight: 800; color: #5a8a72; margin-bottom: 0.8rem; }
+  .semana-total { font-family: 'Black Ops One', cursive; font-size: 1.5rem; color: var(--neon); text-shadow: 0 0 15px rgba(0,255,136,0.35); margin-bottom: 0.8rem; }
+  .semana-breakdown { display: flex; flex-direction: column; gap: 0.25rem; }
+  .semana-row { display: flex; justify-content: space-between; }
+  .semana-key { font-size: 0.63rem; color: var(--muted); font-weight: 700; }
+  .semana-val { font-size: 0.63rem; color: var(--text); font-weight: 800; }
+  .semana-divider { height: 1px; background: var(--border); margin: 0.4rem 0; }
+
+  /* PRODUCTOS */
+  .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; }
+  .chart-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+  .chart-card-header h3 { margin-bottom: 0; }
+  .chart-total-badge {
+    font-family: 'Black Ops One', cursive;
+    font-size: 0.85rem;
+    color: var(--neon);
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.25);
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    text-shadow: 0 0 10px rgba(0,255,136,0.4);
+    white-space: nowrap;
+  }
+
+  .prod-bars { display: flex; flex-direction: column; gap: 1rem; }
+  .prod-bar-row { display: flex; flex-direction: column; gap: 0.3rem; }
+  .prod-bar-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .prod-name { font-size: 0.74rem; font-weight: 800; color: var(--text); }
+  .prod-stats { font-size: 0.7rem; color: var(--muted); font-weight: 700; }
+  .prod-track { height: 6px; background: var(--dim); border-radius: 10px; overflow: hidden; }
+  .prod-fill { height: 100%; border-radius: 10px; }
+
+  /* PERSONAJES */
+  .char-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.8rem; margin-bottom: 2rem; }
+  .char-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 0.6rem 0.8rem;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+    overflow: hidden;
+  }
+  .char-card:hover { transform: translateY(-4px); border-color: var(--cyan); }
+  .char-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .char-img-placeholder {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    background: var(--dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  .char-name { font-size: 0.6rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
+  .char-qty { font-family: 'Black Ops One', cursive; font-size: 1.4rem; color: var(--cyan); text-shadow: 0 0 10px rgba(0,229,255,0.4); }
+  .char-monto { font-size: 0.62rem; color: #5a8a72; font-weight: 700; }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    .char-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .semana-grid { grid-template-columns: repeat(3, 1fr); }
+    .products-grid { grid-template-columns: 1fr; }
+    .char-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 600px) {
+    main { padding: 1rem; }
+    header { padding: 0.8rem 1rem; }
+    .header-title { font-size: 0.95rem; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+    .kpi-value { font-size: 1.4rem; }
+    .semana-grid { grid-template-columns: repeat(2, 1fr); }
+    .char-grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+    .stacked-bars { height: 160px; gap: 0.5rem; }
+    .stacked-bar-val { font-size: 0.65rem; }
+    .stacked-bar-label { font-size: 0.6rem; }
+    .stacked-bar-date { font-size: 0.55rem; }
+    .header-badge { display: none; }
+    .products-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="node-canvas"></canvas>
+
+<div class="content">
+<header>
+  <img src="https://excelentia.com.mx/assets/logo_ride_the_cyclone.jpg"
+       alt="Ride the Cyclone" class="header-logo"
+       onerror="this.style.display='none'">
+  <div class="header-title">
+    WONDERVILLE STORE
+    <span>Dashboard de Ventas · Ride the Cyclone</span>
+  </div>
+  <div class="header-badge">5 Funciones</div>
+</header>
+
+<main>
+
+  <!-- KPIs -->
+  <p class="section-title">Resumen General</p>
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label">Total Acumulado</div>
+      <div class="kpi-value">$49,310</div>
+      <div class="kpi-sub">5 funciones · 229 piezas</div>
+    </div>
+    <div class="kpi-card cyan">
+      <div class="kpi-label">Efectivo</div>
+      <div class="kpi-value">$32,700</div>
+      <div class="kpi-sub">66.3% del total</div>
+    </div>
+    <div class="kpi-card magenta">
+      <div class="kpi-label">Transferencia</div>
+      <div class="kpi-value">$16,610</div>
+      <div class="kpi-sub">33.7% del total</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Promedio / Función</div>
+      <div class="kpi-value">$9,862</div>
+      <div class="kpi-sub">45.8 piezas · $215 ticket</div>
+    </div>
+  </div>
+
+  <!-- Semanas -->
+  <p class="section-title">Por Función</p>
+  <div class="semana-grid">
+    <div class="semana-card">
+      <div class="semana-num">Semana 1</div>
+      <div class="semana-date">21 Abr 2026</div>
+      <div class="semana-total">$6,080</div>
+      <div class="semana-breakdown">
+        <div class="semana-row"><span class="semana-key">Efectivo</span><span class="semana-val">$5,470</span></div>
+        <div class="semana-row"><span class="semana-key">Transfer</span><span class="semana-val">$610</span></div>
+        <div class="semana-divider"></div>
+        <div class="semana-row"><span class="semana-key">Piezas</span><span class="semana-val">29</span></div>
+        <div class="semana-row"><span class="semana-key">Bolsas</span><span class="semana-val">9</span></div>
+        <div class="semana-row"><span class="semana-key">Stickers</span><span class="semana-val">6</span></div>
+        <div class="semana-row"><span class="semana-key">Oráculos</span><span class="semana-val">30</span></div>
+      </div>
+    </div>
+    <div class="semana-card">
+      <div class="semana-num">Semana 2</div>
+      <div class="semana-date">28 Abr 2026</div>
+      <div class="semana-total">$13,990</div>
+      <div class="semana-breakdown">
+        <div class="semana-row"><span class="semana-key">Efectivo</span><span class="semana-val">$8,450</span></div>
+        <div class="semana-row"><span class="semana-key">Transfer</span><span class="semana-val">$5,540</span></div>
+        <div class="semana-divider"></div>
+        <div class="semana-row"><span class="semana-key">Piezas</span><span class="semana-val">73</span></div>
+        <div class="semana-row"><span class="semana-key">Bolsas</span><span class="semana-val">6</span></div>
+        <div class="semana-row"><span class="semana-key">Stickers</span><span class="semana-val">11</span></div>
+        <div class="semana-row"><span class="semana-key">Oráculos</span><span class="semana-val">12</span></div>
+        <div class="semana-row"><span class="semana-key">Gorras</span><span class="semana-val">6</span></div>
+        <div class="semana-row"><span class="semana-key">Playeras</span><span class="semana-val">25</span></div>
+      </div>
+    </div>
+    <div class="semana-card">
+      <div class="semana-num">Semana 3</div>
+      <div class="semana-date">5 May 2026</div>
+      <div class="semana-total">$9,930</div>
+      <div class="semana-breakdown">
+        <div class="semana-row"><span class="semana-key">Efectivo</span><span class="semana-val">$7,860</span></div>
+        <div class="semana-row"><span class="semana-key">Transfer</span><span class="semana-val">$2,070</span></div>
+        <div class="semana-divider"></div>
+        <div class="semana-row"><span class="semana-key">Piezas</span><span class="semana-val">53</span></div>
+        <div class="semana-row"><span class="semana-key">Bolsas</span><span class="semana-val">4</span></div>
+        <div class="semana-row"><span class="semana-key">Stickers</span><span class="semana-val">4</span></div>
+        <div class="semana-row"><span class="semana-key">Oráculos</span><span class="semana-val">15</span></div>
+        <div class="semana-row"><span class="semana-key">Gorras</span><span class="semana-val">3</span></div>
+        <div class="semana-row"><span class="semana-key">Playeras</span><span class="semana-val">17</span></div>
+      </div>
+    </div>
+    <div class="semana-card">
+      <div class="semana-num">Semana 4</div>
+      <div class="semana-date">12 May 2026</div>
+      <div class="semana-total">$10,970</div>
+      <div class="semana-breakdown">
+        <div class="semana-row"><span class="semana-key">Efectivo</span><span class="semana-val">$6,130</span></div>
+        <div class="semana-row"><span class="semana-key">Transfer</span><span class="semana-val">$4,840</span></div>
+        <div class="semana-divider"></div>
+        <div class="semana-row"><span class="semana-key">Piezas</span><span class="semana-val">50</span></div>
+        <div class="semana-row"><span class="semana-key">Bolsas</span><span class="semana-val">6</span></div>
+        <div class="semana-row"><span class="semana-key">Stickers</span><span class="semana-val">3</span></div>
+        <div class="semana-row"><span class="semana-key">Oráculos</span><span class="semana-val">20</span></div>
+        <div class="semana-row"><span class="semana-key">Gorras</span><span class="semana-val">4</span></div>
+        <div class="semana-row"><span class="semana-key">Playeras</span><span class="semana-val">17</span></div>
+      </div>
+    </div>
+    <div class="semana-card">
+      <div class="semana-num">Semana 5</div>
+      <div class="semana-date">19 May 2026</div>
+      <div class="semana-total">$7,400</div>
+      <div class="semana-breakdown">
+        <div class="semana-row"><span class="semana-key">Efectivo</span><span class="semana-val">$3,990</span></div>
+        <div class="semana-row"><span class="semana-key">Transfer</span><span class="semana-val">$3,410</span></div>
+        <div class="semana-divider"></div>
+        <div class="semana-row"><span class="semana-key">Piezas</span><span class="semana-val">31</span></div>
+        <div class="semana-row"><span class="semana-key">Bolsas</span><span class="semana-val">0</span></div>
+        <div class="semana-row"><span class="semana-key">Stickers</span><span class="semana-val">15</span></div>
+        <div class="semana-row"><span class="semana-key">Oráculos</span><span class="semana-val">0</span></div>
+        <div class="semana-row"><span class="semana-key">Gorras</span><span class="semana-val">0</span></div>
+        <div class="semana-row"><span class="semana-key">Playeras</span><span class="semana-val">16</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRÁFICA FULL WIDTH -->
+  <div class="full-chart">
+    <div class="chart-card">
+      <h3>⚡ Ventas por función</h3>
+      <div class="bar-legend">
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--neon)"></div><span class="bar-legend-text">Efectivo</span></div>
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--cyan)"></div><span class="bar-legend-text">Transferencia</span></div>
+      </div>
+      <div class="stacked-bars" id="stackedBars"></div>
+    </div>
+  </div>
+
+  <!-- PRODUCTOS -->
+  <p class="section-title">Rendimiento por Producto</p>
+  <div class="products-grid">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3>📦 Unidades vendidas</h3>
+        <span class="chart-total-badge">229 unidades</span>
+      </div>
+      <div class="prod-bars" id="prodBars"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3>💰 Recaudación por producto</h3>
+        <span class="chart-total-badge">$48,370</span>
+      </div>
+      <div class="prod-bars" id="revBars"></div>
+    </div>
+  </div>
+
+  <!-- PERSONAJES -->
+  <p class="section-title">Playeras · Ventas por Personaje</p>
+  <div class="char-grid">
+    <div class="char-card">
+      <img class="char-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/rtc/Constance.png" alt="Constance" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="char-img-placeholder" style="display:none">💀</div>
+      <div class="char-name">Constance</div>
+      <div class="char-qty">2</div>
+      <div class="char-monto">$700</div>
+    </div>
+    <div class="char-card">
+      <img class="char-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/rtc/Jane%20Doe.png" alt="Jane Doe" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="char-img-placeholder" style="display:none">🔱</div>
+      <div class="char-name">Jane Doe</div>
+      <div class="char-qty">3</div>
+      <div class="char-monto">$1,050</div>
+    </div>
+    <div class="char-card">
+      <img class="char-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/rtc/Ocean.png" alt="Ocean" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="char-img-placeholder" style="display:none">🌊</div>
+      <div class="char-name">Ocean</div>
+      <div class="char-qty">5</div>
+      <div class="char-monto">$1,750</div>
+    </div>
+    <div class="char-card">
+      <img class="char-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/rtc/Mischa.png" alt="Mischa" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="char-img-placeholder" style="display:none">🦋</div>
+      <div class="char-name">Mischa</div>
+      <div class="char-qty">3</div>
+      <div class="char-monto">$1,050</div>
+    </div>
+    <div class="char-card">
+      <img class="char-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/rtc/Noel.png" alt="Noel" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="char-img-placeholder" style="display:none">⚡</div>
+      <div class="char-name">Noel</div>
+      <div class="char-qty">10</div>
+      <div class="char-monto">$3,500</div>
+    </div>
+    <div class="char-card">
+      <img class="char-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/rtc/Ricky.png" alt="Ricky" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="char-img-placeholder" style="display:none">🎸</div>
+      <div class="char-name">Ricky</div>
+      <div class="char-qty">17</div>
+      <div class="char-monto">$5,950</div>
+    </div>
+    <div class="char-card">
+      <img class="char-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/rtc/Karnak.png" alt="Karnak" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="char-img-placeholder" style="display:none">🏺</div>
+      <div class="char-name">Karnak</div>
+      <div class="char-qty">5</div>
+      <div class="char-monto">$1,750</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Wonderville Store · Ride the Cyclone · Powered by Ferrock · Datos al 19 May 2026
+</footer>
+</div>
+
+<script>
+// =====================
+// NODE ANIMATION (sutíl)
+// =====================
+(function(){
+  const canvas = document.getElementById('node-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const nodes = [];
+  const NODE_COUNT = 55;
+  const MAX_DIST = 130;
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize); resize();
+
+  for(let i = 0; i < NODE_COUNT; i++){
+    nodes.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      r: Math.random() * 1.5 + 0.5
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // update
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if(n.x < 0) n.x = W;
+      if(n.x > W) n.x = 0;
+      if(n.y < 0) n.y = H;
+      if(n.y > H) n.y = 0;
+    });
+    // draw lines
+    for(let i = 0; i < nodes.length; i++){
+      for(let j = i+1; j < nodes.length; j++){
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if(dist < MAX_DIST){
+          const alpha = (1 - dist/MAX_DIST) * 0.25;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(0,255,136,${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+    // draw dots
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(0,229,255,0.45)';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// =====================
+// STACKED BARS
+// =====================
+(function(){
+  const weeks = [
+    { label: 'S1', date: '21 Abr', efectivo: 5470, transfer: 610 },
+    { label: 'S2', date: '28 Abr', efectivo: 8450, transfer: 5540 },
+    { label: 'S3', date: '5 May',  efectivo: 7860, transfer: 2070 },
+    { label: 'S4', date: '12 May', efectivo: 6130, transfer: 4840 },
+    { label: 'S5', date: '19 May', efectivo: 3990, transfer: 3410 },
+  ];
+  const maxTotal = Math.max(...weeks.map(w => w.efectivo + w.transfer));
+  const MAX_PX = 220; // altura máxima en píxeles para la barra más alta
+  const container = document.getElementById('stackedBars');
+
+  weeks.forEach(w => {
+    const total = w.efectivo + w.transfer;
+    const barPx   = Math.round((total   / maxTotal) * MAX_PX);
+    const ePx     = Math.round((w.efectivo / total) * barPx);
+    const tPx     = barPx - ePx;
+
+    container.innerHTML += `
+      <div class="stacked-bar-wrap">
+        <div class="stacked-bar-val">$${(total/1000).toFixed(1)}k</div>
+        <div class="stacked-bar-col" style="height:${barPx}px;">
+          <div style="height:${tPx}px;background:var(--cyan);opacity:0.9;min-height:2px;"></div>
+          <div style="height:${ePx}px;background:var(--neon);min-height:2px;"></div>
+        </div>
+        <div class="stacked-bar-label">${w.label}</div>
+        <div class="stacked-bar-date">${w.date}</div>
+      </div>`;
+  });
+})();
+
+// =====================
+// PRODUCT BARS
+// =====================
+(function(){
+  const products = [
+    { name: 'Playeras',  qty: 75,  rev: 25750, color: 'var(--magenta)' },
+    { name: 'Oráculos',  qty: 77,  rev: 11550, color: 'var(--cyan)' },
+    { name: 'Stickers',  qty: 39,  rev: 4680,  color: 'var(--neon)' },
+    { name: 'Bolsas',    qty: 25,  rev: 5250,  color: 'var(--orange)' },
+    { name: 'Gorras',    qty: 13,  rev: 1950,  color: 'var(--yellow)' },
+  ];
+  const maxQty = Math.max(...products.map(p => p.qty));
+  const maxRev = Math.max(...products.map(p => p.rev));
+  const qtyContainer = document.getElementById('prodBars');
+  const revContainer = document.getElementById('revBars');
+
+  products.forEach(p => {
+    const qPct = (p.qty/maxQty*100).toFixed(1);
+    const rPct = (p.rev/maxRev*100).toFixed(1);
+    qtyContainer.innerHTML += `
+      <div class="prod-bar-row">
+        <div class="prod-bar-top">
+          <span class="prod-name">${p.name}</span>
+          <span class="prod-stats">${p.qty} unidades</span>
+        </div>
+        <div class="prod-track"><div class="prod-fill" style="width:${qPct}%;background:${p.color};box-shadow:0 0 6px ${p.color}66"></div></div>
+      </div>`;
+    revContainer.innerHTML += `
+      <div class="prod-bar-row">
+        <div class="prod-bar-top">
+          <span class="prod-name">${p.name}</span>
+          <span class="prod-stats">$${p.rev.toLocaleString()}</span>
+        </div>
+        <div class="prod-track"><div class="prod-fill" style="width:${rPct}%;background:${p.color};box-shadow:0 0 6px ${p.color}66"></div></div>
+      </div>`;
+  });
+})();
+</script>
+
+</body>
+</html>
