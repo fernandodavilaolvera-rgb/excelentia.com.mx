@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Ventana al Mundo</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --mg: #22C55E;
@@ -30,7 +30,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   html, body {
-    font-family: 'Barlow', sans-serif;
+    font-family: 'Manrope', sans-serif;
     background: var(--gray-bg);
     color: var(--text-dark);
     min-height: 100vh;
@@ -50,10 +50,16 @@
     display: flex; flex-direction: column; gap: 1px;
   }
   .header-logo .logo-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900; font-size: 20px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800; font-size: 18px;
     color: var(--white); letter-spacing: 0.5px;
     line-height: 1;
+  }
+  .header-logo .logo-sub {
+    font-size: 7px; font-weight: 500;
+    color: #60A5FA; letter-spacing: 1px;
+    text-transform: uppercase; max-width: 220px;
+    line-height: 1.3;
   }
   .header-logo .logo-sub {
     font-size: 8px; font-weight: 600;
@@ -64,26 +70,32 @@
     display: none;
     align-items: center; gap: 6px;
     background: none; border: none;
-    color: var(--white); font-family: 'Barlow', sans-serif;
+    color: var(--white); font-family: 'Manrope', sans-serif;
     font-size: 13px; font-weight: 600;
     cursor: pointer; padding: 6px 0;
   }
   .header-back svg { width: 16px; height: 16px; }
   .header-back.visible { display: flex; }
 
-  /* Eureka badge */
-  .eureka-badge {
-    display: flex; align-items: center; gap: 6px;
+  /* Usuario badge */
+  .user-badge {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
   }
-  .eureka-badge img {
-    height: 32px; width: auto;
+  .user-badge-label {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700; font-size: 13px;
+    color: var(--white); letter-spacing: 1px;
+    text-transform: uppercase;
   }
-  .eureka-text {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900; font-size: 18px;
-    color: var(--white);
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #3B82F6;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; border: 2px solid #60A5FA;
   }
-  .eureka-text span { color: #FBBF24; }
+  .user-avatar svg { width: 22px; height: 22px; color: white; }
+  .user-chevron { color: #9CA3AF; font-size: 11px; }
 
   /* ── SCREENS ── */
   .screen {
@@ -96,132 +108,248 @@
   /* ════════════════════════════════
      SCREEN 1 — HOME
   ════════════════════════════════ */
+
+  /* HERO — patrón halftone igual al Fondo_Main */
   #screen-home .hero {
-    background: var(--black);
-    padding: 28px 20px 24px;
+    position: relative;
+    background-color: #f4f4f6;
+    padding: 36px 24px 28px;
     text-align: center;
-    border-bottom: 1px solid #1f2937;
+    border-bottom: 1px solid #e5e7eb;
+    overflow: hidden;
   }
+  #screen-home .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle, #c8c8cc 1.2px, transparent 1.2px);
+    background-size: 18px 18px;
+    /* Máscara radial: puntos visibles en esquinas, desaparecen al centro */
+    -webkit-mask-image: radial-gradient(ellipse 90% 90% at 50% 50%,
+      transparent 30%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.85) 100%);
+    mask-image: radial-gradient(ellipse 90% 90% at 50% 50%,
+      transparent 30%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+  }
+  #screen-home .hero > * { position: relative; z-index: 1; }
   #screen-home .hero h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900; font-size: 30px;
-    color: var(--white); line-height: 1.05;
-    letter-spacing: 0.3px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800; font-size: clamp(24px, 4vw, 40px);
+    color: var(--text-dark); line-height: 1.1;
+    letter-spacing: -0.5px;
     text-transform: uppercase;
+    margin-bottom: 10px;
   }
-  #screen-home .hero h1 span { color: #60A5FA; }
   #screen-home .hero-divider {
-    width: 48px; height: 3px;
+    width: 56px; height: 3px;
     background: #3B82F6;
-    margin: 10px auto;
+    margin: 0 auto 16px;
     border-radius: 2px;
   }
   #screen-home .hero p {
-    color: #9CA3AF; font-size: 13px; line-height: 1.5;
-    max-width: 300px; margin: 0 auto 12px;
+    color: var(--text-mid); font-size: clamp(13px, 1.8vw, 15px);
+    font-weight: 400; line-height: 1.6;
+    max-width: 520px; margin: 0 auto 14px;
+  }
+  #screen-home .hero p a {
+    color: #3B82F6; font-weight: 600; text-decoration: none;
   }
   #screen-home .hero-cta {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 13px;
-    color: #60A5FA; letter-spacing: 1.5px;
-    text-transform: uppercase;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700; font-size: 14px;
+    color: #3B82F6; letter-spacing: 0.5px;
   }
 
+  /* GRID DE TERRITORIOS — desktop 4 columnas, mobile 1 columna */
   .territories-list {
-    padding: 16px 14px 100px;
-    display: flex; flex-direction: column; gap: 14px;
+    padding: 28px 24px 110px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 900px) {
+    .territories-list {
+      grid-template-columns: 1fr;
+      padding: 16px 14px 110px;
+      gap: 14px;
+    }
   }
 
+  /* TARJETA DE TERRITORIO */
   .territory-card {
-    border-radius: var(--radius);
+    border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
     position: relative;
-    min-height: 130px;
-    display: flex; align-items: center;
-    box-shadow: var(--shadow);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    active: transform 0.1s;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.15);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    min-height: 360px;
   }
+  .territory-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.2); }
   .territory-card:active { transform: scale(0.98); }
 
-  .territory-card.mg { background: linear-gradient(135deg, #16A34A 0%, #22C55E 100%); }
-  .territory-card.ns { background: linear-gradient(135deg, #EA580C 0%, #FB923C 100%); }
-  .territory-card.ii { background: linear-gradient(135deg, #5B21B6 0%, #7C3AED 100%); }
-  .territory-card.hb { background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%); }
+  .territory-card.mg { background: linear-gradient(160deg, #16A34A 0%, #22C55E 100%); }
+  .territory-card.ns { background: linear-gradient(160deg, #EA580C 0%, #FB923C 100%); }
+  .territory-card.ii { background: linear-gradient(160deg, #5B21B6 0%, #7C3AED 100%); }
+  .territory-card.hb { background: linear-gradient(160deg, #1D4ED8 0%, #3B82F6 100%); }
 
+  /* Parte superior de la tarjeta: ícono + texto */
   .territory-card .tc-content {
-    flex: 1;
-    padding: 20px 0 20px 18px;
+    padding: 24px 20px 16px;
     z-index: 2;
+    flex-shrink: 0;
   }
   .tc-icon {
-    width: 40px; height: 40px;
-    border: 2px solid rgba(255,255,255,0.6);
+    width: 52px; height: 52px;
+    border: 2px solid rgba(255,255,255,0.7);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 10px;
-    font-size: 18px;
+    margin-bottom: 14px;
+    font-size: 22px;
   }
+  /* Ícono SVG estilo outline blanco */
+  .tc-icon svg { width: 26px; height: 26px; stroke: white; fill: none; stroke-width: 1.8; }
+
   .tc-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900; font-size: 22px;
-    color: var(--white); line-height: 1;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800; font-size: 22px;
+    color: var(--white); line-height: 1.05;
     text-transform: uppercase; letter-spacing: 0.3px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
   .tc-desc {
-    font-size: 11.5px; color: rgba(255,255,255,0.85);
-    line-height: 1.35; max-width: 170px;
+    font-size: 12px; font-weight: 400;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.5; max-width: 200px;
   }
-
+  .tc-explorar {
+    margin: 0 20px 20px;
+    padding: 12px;
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.5);
+    border-radius: 50px;
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700; font-size: 13px;
+    color: var(--white);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
   .territory-card .tc-image {
-    width: 155px; height: 130px;
-    position: relative; flex-shrink: 0;
+    flex: 1;
+    position: relative;
     overflow: hidden;
+    min-height: 160px;
+    background: rgba(255,255,255,0.12);
   }
   .territory-card .tc-image img {
     width: 100%; height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center top;
+    transition: transform 0.3s ease;
   }
+  .territory-card:hover .tc-image img { transform: scale(1.04); }
+
+  /* Botón EXPLORAR */
+  .tc-explorar {
+    margin: 0 20px 20px;
+    padding: 12px;
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.5);
+    border-radius: 50px;
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800; font-size: 14px;
+    color: var(--white);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .territory-card:hover .tc-explorar {
+    background: rgba(255,255,255,0.28);
+  }
+
+  /* Mobile: tarjeta horizontal */
+  @media (max-width: 900px) {
+    .territory-card {
+      flex-direction: row;
+      min-height: 130px;
+      align-items: center;
+    }
+    .territory-card .tc-content {
+      padding: 18px 0 18px 18px;
+      flex: 1;
+    }
+    .tc-icon { width: 42px; height: 42px; font-size: 18px; margin-bottom: 10px; }
+    .tc-name { font-size: 22px; }
+    .tc-desc { font-size: 11.5px; }
+    .territory-card .tc-image {
+      width: 160px; height: 130px;
+      flex: none; min-height: unset;
+      border-radius: 0;
+    }
+    .tc-explorar { display: none; }
+    .tc-arrow { display: flex; }
+  }
+  @media (min-width: 901px) {
+    .tc-arrow { display: none; }
+  }
+
   .tc-arrow {
-    position: absolute; right: 12px; top: 50%;
+    position: absolute; right: 14px; top: 50%;
     transform: translateY(-50%);
-    width: 30px; height: 30px;
+    width: 32px; height: 32px;
     background: rgba(255,255,255,0.25);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    z-index: 3;
+    z-index: 3; flex-shrink: 0;
   }
-  .tc-arrow svg { width: 14px; height: 14px; color: white; }
+  .tc-arrow svg { width: 14px; height: 14px; stroke: white; fill: none; }
 
-  /* Bottom stats */
+  /* FOOTER STATS — fondo gris, íconos oscuros */
   .home-stats {
     position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--black);
-    border-top: 1px solid #1f2937;
-    display: flex;
-    padding: 10px 0 12px;
+    background: #f0f2f5;
+    border-top: 1px solid #d1d5db;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 10px 0 14px;
     z-index: 50;
   }
   .stat-item {
-    flex: 1;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
     padding: 0 8px;
-    border-right: 1px solid #1f2937;
+    border-right: 1px solid #d1d5db;
   }
   .stat-item:last-child { border-right: none; }
-  .stat-icon { font-size: 18px; }
+  .stat-icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stat-icon svg { width: 22px; height: 22px; stroke: #374151; fill: none; stroke-width: 1.5; }
   .stat-label {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 700; font-size: 10px;
-    color: #60A5FA; text-transform: uppercase;
-    letter-spacing: 0.8px; text-align: center;
+    color: #111827; text-transform: uppercase;
+    letter-spacing: 0.4px; text-align: center; line-height: 1.2;
   }
   .stat-desc {
-    font-size: 9px; color: #6B7280;
+    font-size: 8.5px; font-weight: 400;
+    color: #6B7280;
     text-align: center; line-height: 1.3;
+  }
+  .stat-item.highlight .stat-label { color: #374151; }
+  /* Último stat con borde y fondo sutil como en mockup */
+  .stat-item.highlight {
+    background: #e8edf3;
+    border-radius: 8px;
+    margin: 2px 6px 2px 0;
+    padding: 4px 10px;
   }
 
   /* ════════════════════════════════
@@ -233,7 +361,7 @@
     margin-bottom: 4px;
   }
   .territorio-hero h2 {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 900; font-size: 32px;
     text-transform: uppercase; letter-spacing: 0.5px;
     line-height: 1;
@@ -257,7 +385,7 @@
     font-size: 16px;
   }
   .cat-name {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 800; font-size: 16px;
     text-transform: uppercase; letter-spacing: 1px;
   }
@@ -308,7 +436,7 @@
   }
   .pc-body { padding: 10px 10px 12px; }
   .pc-brand {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 800; font-size: 12px;
     text-transform: uppercase; letter-spacing: 0.8px;
     margin-bottom: 2px;
@@ -373,14 +501,14 @@
     padding: 5px 12px;
     border-radius: 20px;
     color: white;
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 700; font-size: 11px;
     text-transform: uppercase; letter-spacing: 1px;
     margin-bottom: 12px;
   }
 
   .prod-brand {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 900; font-size: 28px;
     text-transform: uppercase;
     line-height: 1;
@@ -516,7 +644,7 @@
 <header>
   <div class="header-logo">
     <div class="logo-title">VENTANA AL MUNDO</div>
-    <div class="logo-sub">Inteligencia Accionable</div>
+    <div class="logo-sub">El sistema vivo que convierte señales en inteligencia accionable</div>
   </div>
   <button class="header-back" id="btnBack" onclick="goBack()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -524,8 +652,14 @@
     </svg>
     <span id="backLabel">Inicio</span>
   </button>
-  <div class="eureka-badge">
-    <div class="eureka-text">E<span>!</span></div>
+  <div class="user-badge">
+    <span class="user-badge-label">Usuario</span>
+    <div class="user-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    </div>
+    <span class="user-chevron">▾</span>
   </div>
 </header>
 
@@ -534,86 +668,116 @@
 ══════════════════════════════════ -->
 <div id="screen-home" class="screen active">
   <div class="hero">
-    <h1>VENTANA AL<br><span>MUNDO</span></h1>
+    <h1>BIENVENIDO A VENTANA AL MUNDO</h1>
     <div class="hero-divider"></div>
-    <p>Explora tendencias globales y productos innovadores en <strong style="color:#fff">4 territorios estratégicos</strong>.</p>
-    <div class="hero-cta">↓ Selecciona un territorio</div>
+    <p>Explora tendencias globales y descubre productos innovadores en alimentos, bebidas y otras industrias, organizados por nuestros <a href="#">4 territorios estratégicos</a>.</p>
+    <div class="hero-cta">Selecciona un territorio para comenzar</div>
   </div>
 
   <div class="territories-list">
+
+    <!-- MEXICAN GATEKEEPING -->
     <div class="territory-card mg" onclick="openTerritorio('mg')">
       <div class="tc-content">
-        <div class="tc-icon">🌶️</div>
+        <div class="tc-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 6 5 10c0 5 7 12 7 12s7-7 7-12c0-4-3-8-7-8z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        </div>
         <div class="tc-name">Mexican<br>Gatekeeping</div>
         <div class="tc-desc">Tradición que evoluciona, auténtica y con propósito.</div>
       </div>
       <div class="tc-image">
-        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/02_Un_Sabor_Auténtico_Instant_Ramen_Noodle_POZOLE.jpg" alt="Mexican Gatekeeping" onerror="this.style.opacity='0.3'; this.src='01_Indio_Agave.avif'">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/A%20Mexican%20Gatekeeping.png" alt="Mexican Gatekeeping" onerror="this.style.opacity='0.2'">
       </div>
+      <div class="tc-explorar">EXPLORAR</div>
       <div class="tc-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
     </div>
 
+    <!-- NEW SIMPLICITY -->
     <div class="territory-card ns" onclick="openTerritorio('ns')">
       <div class="tc-content">
-        <div class="tc-icon">🍃</div>
+        <div class="tc-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"/><circle cx="12" cy="12" r="1.5" fill="white" stroke="none"/></svg>
+        </div>
         <div class="tc-name">New<br>Simplicity</div>
         <div class="tc-desc">Productos honestos, funcionales y sin complicaciones.</div>
       </div>
       <div class="tc-image">
-        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/29_Bare_Cinnamon_Apple_Chips.jpg" alt="New Simplicity" onerror="this.style.opacity='0.3'; this.src='21_Amaranth_Chips_Chipotle_&_Sal_Himalaya.webp'">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/B%20New%20Simplicity.png" alt="New Simplicity" onerror="this.style.opacity='0.2'">
       </div>
+      <div class="tc-explorar">EXPLORAR</div>
       <div class="tc-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
     </div>
 
+    <!-- INFINITE INDULGENCE -->
     <div class="territory-card ii" onclick="openTerritorio('ii')">
       <div class="tc-content">
-        <div class="tc-icon">🍦</div>
+        <div class="tc-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3c-3 0-5 2.5-5 5 0 1.5.5 2.8 1.3 3.8L12 21l3.7-9.2C16.5 10.8 17 9.5 17 8c0-2.5-2-5-5-5z"/><path d="M9 8.5c0-1.7 1.3-3 3-3"/></svg>
+        </div>
         <div class="tc-name">Infinite<br>Indulgence</div>
         <div class="tc-desc">Placer sin límites, experiencias que sorprenden y deleitan.</div>
       </div>
       <div class="tc-image">
-        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/44_Like_Air_Puffcorn_Sugar_Cookie.jpg" alt="Infinite Indulgence" onerror="this.style.opacity='0.3'; this.src='52_Nerds_Gummy_Clusters.png'">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/C%20Infinite%20indulgence.png" alt="Infinite Indulgence" onerror="this.style.opacity='0.2'">
       </div>
+      <div class="tc-explorar">EXPLORAR</div>
       <div class="tc-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
     </div>
 
+    <!-- HACKING BODY -->
     <div class="territory-card hb" onclick="openTerritorio('hb')">
       <div class="tc-content">
-        <div class="tc-icon">💪</div>
+        <div class="tc-icon">
+          <svg viewBox="0 0 24 24"><path d="M6 4v6M18 4v6M3 10h18M6 14v6M18 14v6M3 14h3M18 14h3"/></svg>
+        </div>
         <div class="tc-name">Hacking<br>Body</div>
         <div class="tc-desc">Bienestar optimizado, rendimiento y cuidado consciente.</div>
       </div>
       <div class="tc-image">
-        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/68_David_Peanut_Butter_Chocolate_Chunk_Flavored_Bar.png" alt="Hacking Body" onerror="this.style.opacity='0.3'; this.src='59_QUEST_Bake_Shop_Frosted_Cookies_Chocolate_Cake.jpg'">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/D%20Hacking%20body.png" alt="Hacking Body" onerror="this.style.opacity='0.2'">
       </div>
+      <div class="tc-explorar">EXPLORAR</div>
       <div class="tc-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
     </div>
+
   </div>
 
+  <!-- FOOTER STATS -->
   <div class="home-stats">
     <div class="stat-item">
-      <div class="stat-icon">🌐</div>
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+      </div>
       <div class="stat-label">Inteligencia<br>Global</div>
+      <div class="stat-desc">Señales y tendencias<br>de todo el mundo.</div>
     </div>
     <div class="stat-item">
-      <div class="stat-icon">💡</div>
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      </div>
       <div class="stat-label">Curaduría<br>Estratégica</div>
+      <div class="stat-desc">Productos seleccionados<br>por su relevancia e impacto.</div>
     </div>
     <div class="stat-item">
-      <div class="stat-icon">🎯</div>
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
+      </div>
       <div class="stat-label">Inspiración<br>Accionable</div>
+      <div class="stat-desc">Ideas que te ayudan a innovar<br>y tomar mejores decisiones.</div>
     </div>
-    <div class="stat-item">
-      <div class="stat-icon">📦</div>
-      <div class="stat-label">129<br>Productos</div>
+    <div class="stat-item highlight">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <div class="stat-label">Repositorio en<br>constante actualización</div>
     </div>
   </div>
 </div>
