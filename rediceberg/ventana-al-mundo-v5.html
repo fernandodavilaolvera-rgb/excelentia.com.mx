@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ventana al Mundo</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mg: #22C55E;
+    --mg-dark: #16A34A;
+    --ns: #F97316;
+    --ns-dark: #EA580C;
+    --ii: #7C3AED;
+    --ii-dark: #6D28D9;
+    --hb: #3B82F6;
+    --hb-dark: #2563EB;
+    --black: #0a0a0f;
+    --gray-bg: #f0f2f5;
+    --gray-light: #e5e7eb;
+    --text-dark: #111827;
+    --text-mid: #374151;
+    --text-soft: #6B7280;
+    --white: #ffffff;
+    --header-h: 56px;
+    --radius: 18px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--gray-bg);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--black);
+    height: var(--header-h);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 2px solid #3B82F6;
+  }
+  .header-logo {
+    display: flex; flex-direction: column; gap: 1px;
+  }
+  .header-logo .logo-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 20px;
+    color: var(--white); letter-spacing: 0.5px;
+    line-height: 1;
+  }
+  .header-logo .logo-sub {
+    font-size: 8px; font-weight: 600;
+    color: #60A5FA; letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .header-back {
+    display: none;
+    align-items: center; gap: 6px;
+    background: none; border: none;
+    color: var(--white); font-family: 'Barlow', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 6px 0;
+  }
+  .header-back svg { width: 16px; height: 16px; }
+  .header-back.visible { display: flex; }
+
+  /* Eureka badge */
+  .eureka-badge {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .eureka-badge img {
+    height: 32px; width: auto;
+  }
+  .eureka-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 18px;
+    color: var(--white);
+  }
+  .eureka-text span { color: #FBBF24; }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    padding-top: var(--header-h);
+    min-height: 100vh;
+  }
+  .screen.active { display: block; }
+
+  /* ════════════════════════════════
+     SCREEN 1 — HOME
+  ════════════════════════════════ */
+  #screen-home .hero {
+    background: var(--black);
+    padding: 28px 20px 24px;
+    text-align: center;
+    border-bottom: 1px solid #1f2937;
+  }
+  #screen-home .hero h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 30px;
+    color: var(--white); line-height: 1.05;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  #screen-home .hero h1 span { color: #60A5FA; }
+  #screen-home .hero-divider {
+    width: 48px; height: 3px;
+    background: #3B82F6;
+    margin: 10px auto;
+    border-radius: 2px;
+  }
+  #screen-home .hero p {
+    color: #9CA3AF; font-size: 13px; line-height: 1.5;
+    max-width: 300px; margin: 0 auto 12px;
+  }
+  #screen-home .hero-cta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 13px;
+    color: #60A5FA; letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .territories-list {
+    padding: 16px 14px 100px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+
+  .territory-card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    min-height: 130px;
+    display: flex; align-items: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    active: transform 0.1s;
+  }
+  .territory-card:active { transform: scale(0.98); }
+
+  .territory-card.mg { background: linear-gradient(135deg, #16A34A 0%, #22C55E 100%); }
+  .territory-card.ns { background: linear-gradient(135deg, #EA580C 0%, #FB923C 100%); }
+  .territory-card.ii { background: linear-gradient(135deg, #5B21B6 0%, #7C3AED 100%); }
+  .territory-card.hb { background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%); }
+
+  .territory-card .tc-content {
+    flex: 1;
+    padding: 20px 0 20px 18px;
+    z-index: 2;
+  }
+  .tc-icon {
+    width: 40px; height: 40px;
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+  .tc-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 22px;
+    color: var(--white); line-height: 1;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+  .tc-desc {
+    font-size: 11.5px; color: rgba(255,255,255,0.85);
+    line-height: 1.35; max-width: 170px;
+  }
+
+  .territory-card .tc-image {
+    width: 155px; height: 130px;
+    position: relative; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .territory-card .tc-image img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .tc-arrow {
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    width: 30px; height: 30px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 3;
+  }
+  .tc-arrow svg { width: 14px; height: 14px; color: white; }
+
+  /* Bottom stats */
+  .home-stats {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--black);
+    border-top: 1px solid #1f2937;
+    display: flex;
+    padding: 10px 0 12px;
+    z-index: 50;
+  }
+  .stat-item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 0 8px;
+    border-right: 1px solid #1f2937;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-icon { font-size: 18px; }
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 10px;
+    color: #60A5FA; text-transform: uppercase;
+    letter-spacing: 0.8px; text-align: center;
+  }
+  .stat-desc {
+    font-size: 9px; color: #6B7280;
+    text-align: center; line-height: 1.3;
+  }
+
+  /* ════════════════════════════════
+     SCREEN 2 — TERRITORIO
+  ════════════════════════════════ */
+  #screen-territorio .territorio-hero {
+    padding: 20px 16px 16px;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .territorio-hero h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 32px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .territorio-hero p {
+    font-size: 13px; color: var(--text-soft);
+    line-height: 1.4;
+  }
+
+  /* Category section */
+  .cat-section { margin-bottom: 8px; }
+  .cat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px 10px;
+  }
+  .cat-title-wrap { display: flex; align-items: center; gap: 10px; }
+  .cat-icon-circle {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .cat-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 16px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .cat-count {
+    font-size: 11px; color: var(--text-soft);
+    font-weight: 600;
+  }
+
+  /* Carousel */
+  .carousel-wrap {
+    position: relative;
+    padding: 0 16px;
+  }
+  .carousel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 10px;
+    padding-right: 32px;
+  }
+  .carousel::-webkit-scrollbar { display: none; }
+
+  .product-card {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 150px;
+    background: var(--white);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: transform 0.15s;
+  }
+  .product-card:active { transform: scale(0.97); }
+
+  .pc-img-wrap {
+    width: 100%; height: 140px;
+    background: #f8f9fa;
+    position: relative; overflow: hidden;
+  }
+  .pc-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    padding: 8px;
+  }
+  .pc-body { padding: 10px 10px 12px; }
+  .pc-brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 2px;
+  }
+  .pc-name {
+    font-size: 11px; color: var(--text-mid);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pc-claim {
+    margin-top: 6px;
+    display: inline-block;
+    font-size: 9px; font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 20px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Carousel dots */
+  .carousel-dots {
+    display: flex; justify-content: center; gap: 5px;
+    padding: 6px 0 16px;
+  }
+  .cdot {
+    width: 6px; height: 4px;
+    border-radius: 3px;
+    background: var(--gray-light);
+    transition: all 0.2s;
+  }
+  .cdot.active { width: 18px; }
+
+  /* ════════════════════════════════
+     SCREEN 3 — PRODUCTO
+  ════════════════════════════════ */
+  #screen-producto {
+    background: var(--gray-bg);
+  }
+
+  .producto-img-section {
+    background: var(--white);
+    padding: 20px 20px 16px;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 240px;
+  }
+  .producto-img-section img {
+    max-width: 220px; max-height: 220px;
+    width: 100%; object-fit: contain;
+    border-radius: 12px;
+  }
+
+  .producto-body {
+    padding: 16px 16px 100px;
+  }
+
+  .prod-cat-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .prod-brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 28px;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .prod-name {
+    font-size: 16px; color: var(--text-mid);
+    font-weight: 500; line-height: 1.3;
+    margin-bottom: 20px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .info-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+  .info-card.full { grid-column: 1 / -1; }
+  .info-label {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    margin-bottom: 5px;
+  }
+  .info-value {
+    font-size: 13px; color: var(--text-dark);
+    font-weight: 500; line-height: 1.4;
+  }
+
+  .racional-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    border-left: 4px solid;
+  }
+  .racional-label {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .racional-text {
+    font-size: 13px; color: var(--text-mid);
+    line-height: 1.5;
+  }
+
+  /* Oportunidad card (otras industrias) */
+  .oportunidad-card {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid #BFDBFE;
+  }
+  .oportunidad-label {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: #1D4ED8;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .oportunidad-text {
+    font-size: 12px; color: #1e3a5f;
+    line-height: 1.5;
+  }
+
+  /* ── COLORES POR TERRITORIO ── */
+  .color-mg { color: var(--mg); }
+  .color-ns { color: var(--ns); }
+  .color-ii { color: var(--ii); }
+  .color-hb { color: var(--hb); }
+
+  .bg-mg { background-color: var(--mg); }
+  .bg-ns { background-color: var(--ns); }
+  .bg-ii { background-color: var(--ii); }
+  .bg-hb { background-color: var(--hb); }
+
+  .border-mg { border-color: var(--mg); }
+  .border-ns { border-color: var(--ns); }
+  .border-ii { border-color: var(--ii); }
+  .border-hb { border-color: var(--hb); }
+
+  .label-mg { color: var(--mg); }
+  .label-ns { color: var(--ns); }
+  .label-ii { color: var(--ii); }
+  .label-hb { color: var(--hb); }
+
+  /* ── ANIMACIONES ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .screen.active > * {
+    animation: fadeUp 0.3s ease both;
+  }
+  .territory-card { animation: fadeUp 0.3s ease both; }
+  .territory-card:nth-child(2) { animation-delay: 0.05s; }
+  .territory-card:nth-child(3) { animation-delay: 0.10s; }
+  .territory-card:nth-child(4) { animation-delay: 0.15s; }
+
+  /* ── LOADING IMG ── */
+  .pc-img-wrap img, .producto-img-section img {
+    transition: opacity 0.3s;
+  }
+  img.loading { opacity: 0; }
+  img.loaded { opacity: 1; }
+
+  /* ── SCROLL HINT ── */
+  .scroll-hint {
+    text-align: right;
+    padding: 0 16px 4px;
+    font-size: 10px; color: var(--text-soft);
+    display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-soft); font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-logo">
+    <div class="logo-title">VENTANA AL MUNDO</div>
+    <div class="logo-sub">Inteligencia Accionable</div>
+  </div>
+  <button class="header-back" id="btnBack" onclick="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    <span id="backLabel">Inicio</span>
+  </button>
+  <div class="eureka-badge">
+    <div class="eureka-text">E<span>!</span></div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════
+     SCREEN 1: HOME
+══════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+  <div class="hero">
+    <h1>VENTANA AL<br><span>MUNDO</span></h1>
+    <div class="hero-divider"></div>
+    <p>Explora tendencias globales y productos innovadores en <strong style="color:#fff">4 territorios estratégicos</strong>.</p>
+    <div class="hero-cta">↓ Selecciona un territorio</div>
+  </div>
+
+  <div class="territories-list">
+    <div class="territory-card mg" onclick="openTerritorio('mg')">
+      <div class="tc-content">
+        <div class="tc-icon">🌶️</div>
+        <div class="tc-name">Mexican<br>Gatekeeping</div>
+        <div class="tc-desc">Tradición que evoluciona, auténtica y con propósito.</div>
+      </div>
+      <div class="tc-image">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/02_Un_Sabor_Auténtico_Instant_Ramen_Noodle_POZOLE.jpg" alt="Mexican Gatekeeping" onerror="this.style.opacity='0.3'; this.src='01_Indio_Agave.avif'">
+      </div>
+      <div class="tc-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+
+    <div class="territory-card ns" onclick="openTerritorio('ns')">
+      <div class="tc-content">
+        <div class="tc-icon">🍃</div>
+        <div class="tc-name">New<br>Simplicity</div>
+        <div class="tc-desc">Productos honestos, funcionales y sin complicaciones.</div>
+      </div>
+      <div class="tc-image">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/29_Bare_Cinnamon_Apple_Chips.jpg" alt="New Simplicity" onerror="this.style.opacity='0.3'; this.src='21_Amaranth_Chips_Chipotle_&_Sal_Himalaya.webp'">
+      </div>
+      <div class="tc-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+
+    <div class="territory-card ii" onclick="openTerritorio('ii')">
+      <div class="tc-content">
+        <div class="tc-icon">🍦</div>
+        <div class="tc-name">Infinite<br>Indulgence</div>
+        <div class="tc-desc">Placer sin límites, experiencias que sorprenden y deleitan.</div>
+      </div>
+      <div class="tc-image">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/44_Like_Air_Puffcorn_Sugar_Cookie.jpg" alt="Infinite Indulgence" onerror="this.style.opacity='0.3'; this.src='52_Nerds_Gummy_Clusters.png'">
+      </div>
+      <div class="tc-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+
+    <div class="territory-card hb" onclick="openTerritorio('hb')">
+      <div class="tc-content">
+        <div class="tc-icon">💪</div>
+        <div class="tc-name">Hacking<br>Body</div>
+        <div class="tc-desc">Bienestar optimizado, rendimiento y cuidado consciente.</div>
+      </div>
+      <div class="tc-image">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/68_David_Peanut_Butter_Chocolate_Chunk_Flavored_Bar.png" alt="Hacking Body" onerror="this.style.opacity='0.3'; this.src='59_QUEST_Bake_Shop_Frosted_Cookies_Chocolate_Cake.jpg'">
+      </div>
+      <div class="tc-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-stats">
+    <div class="stat-item">
+      <div class="stat-icon">🌐</div>
+      <div class="stat-label">Inteligencia<br>Global</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">💡</div>
+      <div class="stat-label">Curaduría<br>Estratégica</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-label">Inspiración<br>Accionable</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">📦</div>
+      <div class="stat-label">129<br>Productos</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 2: TERRITORIO
+══════════════════════════════════ -->
+<div id="screen-territorio" class="screen">
+  <div class="territorio-hero">
+    <h2 id="territorio-title" class="color-mg">TERRITORIO</h2>
+    <p id="territorio-desc">Descripción del territorio</p>
+  </div>
+  <div id="territorio-content"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 3: PRODUCTO
+══════════════════════════════════ -->
+<div id="screen-producto" class="screen">
+  <div class="producto-img-section" id="prod-img-section">
+    <img id="prod-img" src="" alt="">
+  </div>
+  <div class="producto-body" id="prod-body"></div>
+</div>
+
+<script>
+// Helper: encode filename para URLs
+function imgUrl(filename) {
+  const base = 'https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/';
+  // Encode cada parte excepto los guiones bajos y puntos
+  return base + filename.split('').map(c => {
+    if (/[a-zA-Z0-9_.\-]/.test(c)) return c;
+    return encodeURIComponent(c);
+  }).join('');
+}
+
+// ══════════════════════════════════
+//  DATOS — 129 PRODUCTOS
+// ══════════════════════════════════
+const PRODUCTS = [
+  // ── MEXICAN GATEKEEPING ── F&B
+  {id:1,file:"01_Indio_Agave.avif",brand:"Indio",name:"Indio Agave",cat:"Bebidas alcohólicas",territory:"mg",tab:"fb",ingredient:"Agave",benefit:"Identidad mexicana premium",claim:"Edición limitada",racional:"Usa el agave como guiño aspiracional de origen mexicano dentro de una cerveza contemporánea."},
+  {id:2,file:"02_Un_Sabor_Autentico_Instant_Ramen_Noodle_POZOLE.jpg",brand:"Un Sabor Auténtico",name:"Instant Ramen Noodle POZOLE",cat:"Instant ramen",territory:"mg",tab:"fb",ingredient:"Sabor pozole",benefit:"Conveniencia cultural",claim:"Un Sabor Auténtico",racional:"Lleva un platillo tradicional mexicano a un formato global, rápido y cotidiano."},
+  {id:3,file:"03_BelAra_NaturaBef_Totopos_de_Chapulin_con_Mole.jpg",brand:"BelAra",name:"NaturaBef Totopos de Chapulín con Mole",cat:"Snacks tradicionales",territory:"mg",tab:"fb",ingredient:"Chapulín con mole",benefit:"Tradición en formato snack",claim:"Chapulín con mole",racional:"Convierte el chapulín con mole en una botana moderna sin perder su raíz gastronómica mexicana."},
+  {id:4,file:"04_Chilpines_Chapulin_Deshidratado.jpg",brand:"Chilpines",name:"Chapulín Deshidratado",cat:"Snacks tradicionales",territory:"mg",tab:"fb",ingredient:"Chapulín deshidratado",benefit:"Proteína tradicional",claim:"Chapulín deshidratado",racional:"Preserva el consumo regional de insectos comestibles en un formato práctico y listo para comer."},
+  {id:5,file:"05_ROBS_Chips_Limon_Chiltepin.avif",brand:"ROBS",name:"Chips Limón Chiltepín",cat:"Snacks picantes",territory:"mg",tab:"fb",ingredient:"Chiltepín",benefit:"Sabor regional auténtico",claim:"Limón Chiltepín",racional:"Integra ingredientes y sabores profundamente asociados a la cocina regional mexicana en un formato de botana contemporáneo."},
+  {id:6,file:"06_Cafe_Mis_Raices_VeHav_Chiapas.avif",brand:"Café Mis Raíces",name:"VeHav Chiapas",cat:"Café",territory:"mg",tab:"fb",ingredient:"Café chiapaneco",benefit:"Origen premium",claim:"100% mexicano",racional:"Eleva el origen chiapaneco como señal de autenticidad, orgullo regional y pertenencia cultural."},
+  {id:7,file:"07_Jarritos_Sabor_Tutti_Frutti.png",brand:"Jarritos",name:"Sabor Tutti Frutti",cat:"Bebidas",territory:"mg",tab:"fb",ingredient:"Sabor tutti frutti",benefit:"Nostalgia cultural",claim:"Sabor Tutti Frutti",racional:"Activa nostalgia cultural a través de una marca mexicana icónica y sabores frutales populares."},
+  {id:8,file:"08_Tepache_Mango_Chili.png",brand:"Tepache",name:"Mango Chili",cat:"Bebidas fermentadas",territory:"mg",tab:"fb",ingredient:"Tepache y mango chili",benefit:"Fermentación tradicional",claim:"Fermented beverage",racional:"Moderniza el tepache en una bebida enlatada con sabor frutal y picante de inspiración mexicana."},
+  {id:9,file:"09_Tepache_Spiced_Pineapple.png",brand:"Tepache",name:"Spiced Pineapple",cat:"Bebidas fermentadas",territory:"mg",tab:"fb",ingredient:"Tepache y piña especiada",benefit:"Fermentación natural",claim:"Spiced pineapple",racional:"Recupera el tepache tradicional con piña especiada en un formato moderno y accesible."},
+  {id:10,file:"10_Topo_Chico_Cantarito.avif",brand:"Topo Chico",name:"Cantarito",cat:"RTD bebidas alcohólicas",territory:"mg",tab:"fb",ingredient:"Sabores de cantarito",benefit:"Conveniencia cultural",claim:"Drinks Mexicanos",racional:"Reinterpreta cocteles icónicos mexicanos en formatos RTD contemporáneos."},
+  {id:11,file:"11_Topo_Chico_Paloma.avif",brand:"Topo Chico",name:"Paloma",cat:"RTD bebidas alcohólicas",territory:"mg",tab:"fb",ingredient:"Toronja / paloma",benefit:"Coctelería práctica",claim:"Drinks Mexicanos",racional:"Traduce la paloma mexicana a un hard seltzer listo para beber y socialmente actual."},
+  {id:12,file:"12_Topo_Chico_Margarita.avif",brand:"Topo Chico",name:"Margarita",cat:"RTD bebidas alcohólicas",territory:"mg",tab:"fb",ingredient:"Sabor margarita",benefit:"Conveniencia cultural",claim:"Drinks Mexicanos",racional:"Lleva la margarita a un formato portable, conectando rituales de cantina con consumo moderno."},
+  {id:13,file:"13_Mazapan_De_la_Rosa.webp",brand:"De La Rosa",name:"Mazapán",cat:"Confitería tradicional",territory:"mg",tab:"fb",ingredient:"Cacahuate",benefit:"Nostalgia cultural",claim:"Desde 1950",racional:"Mantiene viva una golosina mexicana reconocible como símbolo de nostalgia y tradición."},
+  {id:14,file:"14_Chocolate_Abuelita.jpg",brand:"Abuelita",name:"Chocolate Abuelita",cat:"Bebidas calientes",territory:"mg",tab:"fb",ingredient:"Cacao y canela",benefit:"Comfort emocional",claim:"Original",racional:"Preserva el ritual familiar del chocolate de mesa mexicano en un formato de alta recordación."},
+  {id:15,file:"15_Tajin_Clasico_Escarchador.webp",brand:"Tajín",name:"Clásico Escarchador",cat:"Condimentos",territory:"mg",tab:"fb",ingredient:"Chile y limón",benefit:"Realce de sabor",claim:"Clásico",racional:"Convierte la mezcla chile-limón en un código de sabor mexicano reconocido globalmente."},
+  {id:16,file:"16_Zaks_Galleta_Rellena_de_Mazapan.avif",brand:"Zak's",name:"Galleta Rellena de Mazapán",cat:"Snacks dulces",territory:"mg",tab:"fb",ingredient:"Mazapán",benefit:"Nostalgia dulce",claim:"Galleta rellena de mazapán",racional:"Reinterpreta el mazapán mexicano dentro de una galleta rellena indulgente y familiar."},
+  {id:17,file:"17_Jumex_Aguas_Frescas_Strawberry.webp",brand:"Jumex",name:"Aguas Frescas Strawberry",cat:"Bebidas",territory:"mg",tab:"fb",ingredient:"Fresa",benefit:"Hidratación con nostalgia",claim:"Aguas Frescas",racional:"Actualiza las aguas frescas mexicanas en lata con un sabor frutal accesible y cotidiano."},
+  {id:18,file:"18_Jumex_Aguas_Frescas_Mango.webp",brand:"Jumex",name:"Aguas Frescas Mango",cat:"Bebidas",territory:"mg",tab:"fb",ingredient:"Mango",benefit:"Conveniencia cultural",claim:"Aguas Frescas",racional:"Lleva el sabor de agua fresca de mango a un formato moderno y portátil."},
+  {id:19,file:"19_HEB_Dulce_de_Leche_Corn_Flakes.jpg",brand:"HEB",name:"Dulce de Leche Corn Flakes",cat:"Cereal",territory:"mg",tab:"fb",ingredient:"Dulce de leche",benefit:"Comfort matutino",claim:"Naturally flavored",racional:"Integra dulce de leche en un cereal cotidiano, conectando desayuno con indulgencia latinoamericana."},
+  {id:20,file:"20_Juanitas_Amaranto_Alegrias_de_Amaranto.png",brand:"Juanitas Amaranto",name:"Alegrías de Amaranto",cat:"Confitería tradicional",territory:"mg",tab:"fb",ingredient:"Amaranto",benefit:"Energía tradicional",claim:"Alegrías de amaranto",racional:"Preserva la alegría de amaranto como snack mexicano de origen ancestral y familiar."},
+  // ── MEXICAN GATEKEEPING ── Otras Industrias
+  {id:79,file:"79_Yuya_Labial_Mate_La_Sirena.png",brand:"Yuya",name:'Labial Mate "La Sirena"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial líquido mate",benefit:"Beauty con estética mexicana coleccionable",claim:"",racional:"Resignifica imaginarios mexicanos y fantásticos como objeto beauty coleccionable y culturalmente aspiracional.",oportunidad:"Ediciones limitadas de bebidas o snacks inspiradas en leyendas, personajes y sabores regionales."},
+  {id:80,file:"80_Yuya_Labial_Mate_Mi_amor.png",brand:"Yuya",name:'Labial Mate "Mi amor"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Naming emocional como driver de pertenencia",claim:"",racional:"Convierte expresiones afectivas mexicanas en códigos de color, nombre y deseo.",oportunidad:"Sabores con nombres coloquiales mexicanos que generen cariño, memoria y conversación."},
+  {id:81,file:"81_Yuya_Labial_Mate_Quedate.png",brand:"Yuya",name:'Labial Mate "Quédate"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Productos nombrados con frases culturales y emocionales",claim:"",racional:"Usa lenguaje íntimo y cotidiano para transformar un labial en pieza de identidad personal.",oportunidad:"Claims y sabores que suenen a conversación real: antojo, cariño, ritual y pertenencia."},
+  {id:82,file:"82_Yuya_Labial_Velvet_Te_quiero.png",brand:"Yuya",name:'Labial Velvet "Te quiero"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial velvet",benefit:"Beauty sensorial + lenguaje afectivo",claim:"",racional:"Lleva el lenguaje afectivo mexicano a un acabado beauty sensorial y suave.",oportunidad:"Texturas indulgentes con claims emocionales: cremoso, apapacho, cariño, ritual."},
+  {id:83,file:"83_Yuya_Labial_Mate_Chiquita.png",brand:"Yuya",name:'Labial Mate "Chiquita"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Lenguaje mexicano como equity de marca",claim:"",racional:"Reinterpreta diminutivos y expresiones mexicanas como parte de un sistema beauty aspiracional.",oportunidad:"Snacks y bebidas con nombres coloquiales que generen identificación instantánea."},
+  {id:84,file:"84_Maybelline_Super_Stay_Matte_Ink_Frida_Kahlo.jpg",brand:"Maybelline",name:"Super Stay Matte Ink Frida Kahlo",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial larga duración",benefit:"Íconos culturales convertidos en drops de consumo",claim:"",racional:"Asocia una marca global con un ícono cultural mexicano para elevar el maquillaje a statement identitario.",oportunidad:"Colabs F&B con artistas, artesanos o símbolos mexicanos reinterpretados para nuevas generaciones."},
+  {id:85,file:"85_Perfume_Frida_Kahlo.webp",brand:"Frida Kahlo",name:"Perfume Frida Kahlo",cat:"Fragancias",territory:"mg",tab:"other",ingredient:"Fragancia Frida Kahlo",benefit:"Heritage convertido en experiencia sensorial",claim:"",racional:"Transforma el legado artístico de Frida en una experiencia olfativa aspiracional.",oportunidad:"Bebidas y postres aromáticos inspirados en flores, mercados, jardines y casas icónicas mexicanas."},
+  {id:86,file:"86_Rubor_Nopal_Milta.png",brand:"Milta",name:"Rubor Nopal",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Nopal",benefit:"Botánicos mexicanos en beauty premium",claim:"",racional:"Eleva el nopal como ingrediente/ícono mexicano dentro de maquillaje natural y local.",oportunidad:"Ingredientes como nopal, tuna, cacao, maíz o agave en lanzamientos BFY o sensoriales."},
+  {id:87,file:"87_Shampoo_Huichol.jpg",brand:"Huichol",name:"Shampoo Huichol",cat:"Hair Care",territory:"mg",tab:"other",ingredient:"Arte huichol",benefit:"Packaging con códigos artesanales mexicanos",claim:"",racional:"Integra estética wixárika/huichol en cuidado personal para comunicar herencia visual mexicana.",oportunidad:"Empaques F&B con patrones regionales y narrativas de origen bien curadas."},
+  {id:88,file:"88_Juego_de_Mesa_Al_Chile.webp",brand:"Al Chile",name:'Juego de Mesa "Al Chile"',cat:"Juegos / Entretenimiento",territory:"mg",tab:"other",ingredient:"Lenguaje popular mexicano",benefit:"Lenguaje popular como plataforma de interacción",claim:"",racional:"Convierte una expresión mexicana en dinámica social, humor y conversación.",oportunidad:"Promociones o empaques con retos, preguntas y dinámicas inspiradas en humor mexicano."},
+  {id:89,file:"89_Jersey_Charly_Chapulin_Colorado.webp",brand:"Charly",name:"Jersey Chapulín Colorado",cat:"Fashion / Sportswear",territory:"mg",tab:"other",ingredient:"Nostalgia televisiva",benefit:"Nostalgia pop en productos wearable",claim:"",racional:"Fusiona cultura pop mexicana con sportswear para convertir nostalgia en pertenencia visible.",oportunidad:"Ediciones F&B con personajes o universos mexicanos reinterpretados desde cultura pop."},
+  {id:90,file:"90_Playera_Lucha_Libre.jpg",brand:"Lucha Libre",name:"Playera Lucha Libre",cat:"Fashion",territory:"mg",tab:"other",ingredient:"Gráfica lucha libre",benefit:"Lucha libre como estética urbana",claim:"",racional:"Lleva la lucha libre de espectáculo cultural a código de moda urbana.",oportunidad:"Botanas y bebidas con diseño de máscaras, duelos de sabor y ritual de arena."},
+  {id:91,file:"91_Playera_Chusma.webp",brand:"Chusma",name:"Playera Chusma",cat:"Fashion",territory:"mg",tab:"other",ingredient:"Nostalgia televisiva",benefit:"Merch nostálgico como identidad social",claim:"",racional:"Reivindica la nostalgia de la televisión mexicana como statement de moda y humor.",oportunidad:"Snacks coleccionables que rescaten frases, personajes y momentos de cultura popular."},
+  {id:92,file:"92_Gorra_Mexico_Aguila.png",brand:"México",name:"Gorra México Águila",cat:"Fashion / Accessories",territory:"mg",tab:"other",ingredient:"Símbolos nacionales",benefit:"Patriotismo cotidiano en accesorios",claim:"",racional:"Convierte símbolos patrios en accesorio streetwear de orgullo cotidiano.",oportunidad:"Lanzamientos para celebraciones mexicanas con diseño coleccionable y uso social."},
+  {id:93,file:"93_Tenis_Panam_Mistico.png",brand:"Panam",name:"Tenis Panam Místico",cat:"Footwear",territory:"mg",tab:"other",ingredient:"Lucha libre / Heritage",benefit:"Heritage local + fandom deportivo/cultural",claim:"",racional:"Une una marca mexicana clásica con referencias de lucha libre para actualizar su relevancia cultural.",oportunidad:"Colaboraciones F&B con fandoms mexicanos: fútbol, lucha, música regional y cultura popular."},
+  // ── NEW SIMPLICITY ── F&B
+  {id:21,file:"21_Amaranth_Chips_Chipotle_and_Sal_Himalaya.webp",brand:"Amaranth",name:"Chips Chipotle & Sal Himalaya",cat:"Better-for-you snacks",territory:"ns",tab:"fb",ingredient:"Amaranto",benefit:"Ingredientes funcionales",claim:"Chipotle & Sal Himalaya",racional:"Simplifica el consumo de ingredientes ancestrales y funcionales en formatos accesibles y cotidianos."},
+  {id:22,file:"22_Come_verde_Chips_de_Jicama_Enchilada.webp",brand:"Come verde",name:"Chips de Jícama Enchilada",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Jícama",benefit:"Snack vegetal",claim:"Chips de Jícama",racional:"Convierte la jícama en un chip simple, reconocible y ligero frente a botanas más procesadas."},
+  {id:23,file:"23_Come_verde_Chips_de_Camote_Enchilado.jpg",brand:"Come verde",name:"Chips de Camote Enchilado",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Camote",benefit:"Ingredientes naturales",claim:"Chips de Camote",racional:"Usa camote como base vegetal para entregar una botana sencilla con sabor familiar."},
+  {id:24,file:"24_Ligeritas_Sweet_and_Salty.avif",brand:"Ligeritas",name:"Sweet & Salty",cat:"Snacks horneados",territory:"ns",tab:"fb",ingredient:"Maíz horneado",benefit:"Ligereza",claim:"Nunca fritas",racional:"Ofrece una alternativa ligera y no frita con un perfil de sabor dulce-salado fácil de entender."},
+  {id:25,file:"25_Late_July_Organic_Chia_and_Quinoa_Chips.jpg",brand:"Late July",name:"Organic Chia & Quinoa Chips",cat:"Better-for-you snacks",territory:"ns",tab:"fb",ingredient:"Chía y quinoa",benefit:"Ingredientes simples",claim:"Organic",racional:"Combina semillas y granos reconocibles en un snack orgánico con lectura limpia."},
+  {id:26,file:"26_Late_July_Organic_Sea_Salt_and_Lime_Chips.jpg",brand:"Late July",name:"Organic Sea Salt & Lime Chips",cat:"Better-for-you snacks",territory:"ns",tab:"fb",ingredient:"Maíz orgánico y limón",benefit:"Snack limpio",claim:"Organic",racional:"Comunica sabor y simplicidad con una base orgánica y un perfil sal-limón directo."},
+  {id:27,file:"27_Xurritos_Sal_Y_Limon.avif",brand:"Xurritos",name:"Sal Y Limón",cat:"Snacks tradicionales",territory:"ns",tab:"fb",ingredient:"Maíz",benefit:"Sabor simple",claim:"Sal y Limón",racional:"Reduce la complejidad de la botana al ofrecer xurritos con sabor sal-limón claro y familiar."},
+  {id:28,file:"28_Vitali_Nopal_Con_Chile.png",brand:"Vitali",name:"Nopal Con Chile",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Nopal",benefit:"Ingrediente vegetal",claim:"Nopal con chile",racional:"Hace del nopal un snack portable que comunica origen vegetal y simplicidad funcional."},
+  {id:29,file:"29_Bare_Cinnamon_Apple_Chips.jpg",brand:"Bare",name:"Cinnamon Apple Chips",cat:"Fruit snacks",territory:"ns",tab:"fb",ingredient:"Manzana y canela",benefit:"Snack de fruta",claim:"Baked crunchy",racional:"Entrega fruta horneada con una lista corta de ingredientes y sabor reconocible."},
+  {id:30,file:"30_Bare_Simply_Banana_Chips.jpg",brand:"Bare",name:"Simply Banana Chips",cat:"Fruit snacks",territory:"ns",tab:"fb",ingredient:"Plátano",benefit:"Energía natural",claim:"Simply Banana Chips",racional:"Presenta plátano en un formato crujiente y simple, fácil de leer como alternativa snack."},
+  {id:31,file:"31_Partake_Chocolate_Chip.webp",brand:"Partake",name:"Chocolate Chip",cat:"Better-for-you cookies",territory:"ns",tab:"fb",ingredient:"Chocolate chip",benefit:"Inclusión alimentaria",claim:"Soft baked cookies",racional:"Ofrece una galleta inclusiva con formulación clara para consumidores con restricciones alimentarias."},
+  {id:32,file:"32_Partake_Ginger_Snap.webp",brand:"Partake",name:"Ginger Snap",cat:"Better-for-you cookies",territory:"ns",tab:"fb",ingredient:"Jengibre",benefit:"Indulgencia permisible",claim:"Crunchy cookies",racional:"Simplifica la indulgencia con una galleta de jengibre con ingredientes más accesibles para distintos consumidores."},
+  {id:33,file:"33_Central_Market_Veggie_Chips_Garden_Herb.webp",brand:"Central Market",name:"Veggie Chips Garden Herb",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Vegetales y garden herb",benefit:"Snack vegetal",claim:"Veggie Chips",racional:"Convierte vegetales en un snack crujiente con señal de sabor herbal y lectura más natural."},
+  {id:34,file:"34_Jacksons_Sweet_Potato_Chips_Spicy_Jalapeno.webp",brand:"Jackson's",name:"Sweet Potato Chips Spicy Jalapeño",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Camote y aceite de aguacate",benefit:"Ingredientes naturales",claim:"Avocado Oil",racional:"Usa camote y aceite de aguacate para comunicar naturalidad y mejor calidad de grasa."},
+  {id:35,file:"35_Chomps_Original_Beef_Sticks.jpg",brand:"Chomps",name:"Original Beef Sticks",cat:"Protein snacks",territory:"ns",tab:"fb",ingredient:"Carne de res grass-fed",benefit:"Proteína práctica",claim:"10g protein",racional:"Ofrece proteína práctica y limpia con una formulación directa."},
+  {id:36,file:"36_Oats_Over_Night_Chocolate_Peanut_Butter.jpg",brand:"Oats",name:"Over Night Chocolate Peanut Butter",cat:"Bebidas funcionales",territory:"ns",tab:"fb",ingredient:"Avena y cacahuate",benefit:"Saciedad práctica",claim:"15g protein",racional:"Convierte la avena nocturna en una bebida lista para tomar con nutrición clara y portable."},
+  {id:37,file:"37_Corona_Cero_00pct.webp",brand:"Corona",name:"Cero 0.0%",cat:"Bebidas sin alcohol",territory:"ns",tab:"fb",ingredient:"Cerveza 0.0%",benefit:"Consumo social sin alcohol",claim:"0.00%",racional:"Reduce la cerveza a su versión cero alcohol con el mismo ritual social y menor complejidad."},
+  {id:38,file:"38_Coronita_Cero_00pct.png",brand:"Coronita",name:"Cero 0.0%",cat:"Bebidas sin alcohol",territory:"ns",tab:"fb",ingredient:"Cerveza 0.0%",benefit:"Moderación social",claim:"0.00%",racional:"Ofrece el formato mini de cerveza cero alcohol para consumo ligero y controlado."},
+  {id:39,file:"39_3pm_Afternoon_Bites_Dark_Chocolate.webp",brand:"3pm",name:"Afternoon Bites Dark Chocolate",cat:"Functional bars",territory:"ns",tab:"fb",ingredient:"Avena y chocolate oscuro",benefit:"Energía balanceada",claim:"Balanced energy",racional:"Simplifica el snack de media tarde con energía balanceada y porciones fáciles de consumir."},
+  {id:40,file:"40_3pm_Afternoon_Bites_Cranberry.jpg",brand:"3pm",name:"Afternoon Bites Cranberry",cat:"Functional bars",territory:"ns",tab:"fb",ingredient:"Avena y cranberry",benefit:"Energía balanceada",claim:"Afternoon Bites",racional:"Entrega energía balanceada en una mordida de avena con sabor frutal cotidiano."},
+  {id:41,file:"41_Whisps_Cheddar_Cheese_Crisps.avif",brand:"Whisps",name:"Cheddar Cheese Crisps",cat:"Cheese snacks",territory:"ns",tab:"fb",ingredient:"Queso cheddar",benefit:"Proteína y crunch",claim:"Cheddar Cheese Crisps",racional:"Reduce el snack a queso crujiente con alto sabor y pocos ingredientes percibidos."},
+  {id:42,file:"42_Thats_it_Fiber_Apple_Berries.jpg",brand:"That's it",name:"Fiber Apple Berries",cat:"Fruit snacks",territory:"ns",tab:"fb",ingredient:"Manzana y berries",benefit:"Fibra práctica",claim:"7g fiber",racional:"Comunica fruta y fibra en un formato simple, directo y fácil de entender."},
+  {id:43,file:"43_Central_Market_Wicked_Thin_Cookies.webp",brand:"Central Market",name:"Wicked Thin Cookies",cat:"Snacks dulces",territory:"ns",tab:"fb",ingredient:"Almendra",benefit:"Ligereza",claim:"Wicked Thin",racional:"Ofrece galletas delgadas como indulgencia ligera y controlada."},
+  // ── NEW SIMPLICITY ── Otras Industrias
+  {id:94,file:"94_Kitsch_Nourishing_Solid_Shampoo_Castor_Oil.jpg",brand:"Kit·sch",name:"Nourishing Solid Shampoo Castor Oil",cat:"Hair Care",territory:"ns",tab:"other",ingredient:"Aceite de ricino",benefit:"Formatos sólidos y concentrados como nueva conveniencia",claim:"",racional:"Reduce la rutina capilar a un formato sólido, limpio y fácil de entender.",oportunidad:"Snacks o bebidas concentradas, refillables o de baja complejidad con ingredientes claros."},
+  {id:95,file:"95_Plink_Garbage_Disposal_Cleaner.jpg",brand:"Plink",name:"Garbage Disposal Cleaner",cat:"Home Care",territory:"ns",tab:"other",ingredient:"Formato dosificado",benefit:"Micro-soluciones de un solo uso",claim:"",racional:"Resuelve una tarea doméstica incómoda con un formato simple, visual y dosificado.",oportunidad:"F&B funcional en porciones dosificadas para necesidades concretas: energía, calma, digestión."},
+  {id:96,file:"96_OFF_Post-Bite_Patches.jpg",brand:"OFF!",name:"Post-Bite Patches",cat:"Personal Care",territory:"ns",tab:"other",ingredient:"Parches hidrocoloides",benefit:"Patchification de soluciones de cuidado personal",claim:"",racional:"Transforma el alivio de picaduras en un parche claro, portable y fácil de usar.",oportunidad:"Snacks o bebidas con formatos portables y beneficios puntuales."},
+  {id:97,file:"97_Mini_Peine_Alisador_Inalambrico.png",brand:"Safe Design",name:"Mini Peine Alisador Inalámbrico",cat:"Beauty Tech",territory:"ns",tab:"other",ingredient:"Portable beauty tech",benefit:"Beauty routines compactas y ultra-portátiles",claim:"",racional:"Simplifica el styling personal en un formato portátil y rápido.",oportunidad:"Productos funcionales grab & go y soluciones instantáneas premium."},
+  {id:98,file:"98_Mini_lavadora_portatil_plegable.png",brand:"Mini Washer",name:"Mini lavadora portátil plegable",cat:"Home Tech",territory:"ns",tab:"other",ingredient:"Mini formato",benefit:"Productos compactos para hogares mini",claim:"",racional:"Compacta una tarea doméstica en una solución portable para espacios pequeños.",oportunidad:"Formatos F&B compactos, apilables y listos para micro-rutinas en espacios pequeños."},
+  {id:99,file:"99_Dove_MenplusCare_Hydrating_Clean_Comfort.jpg",brand:"Dove Men+Care",name:"Hydrating Clean Comfort",cat:"Personal Care",territory:"ns",tab:"other",ingredient:"Hidratante masculino",benefit:"Grooming masculino más funcional y directo",claim:"",racional:"Comunica cuidado masculino con beneficios directos: limpieza, hidratación y comfort.",oportunidad:"Bebidas/snacks con claims simples para hombres: energía limpia, proteína diaria, hidratación práctica."},
+  {id:100,file:"100_Cetaphil_Sheer_Mineral_Sunscreen_Stick_SPF50.jpg",brand:"Cetaphil",name:"Sheer Mineral Sunscreen Stick SPF50",cat:"Skincare",territory:"ns",tab:"other",ingredient:"Protector solar mineral",benefit:"Skincare en formatos stick portables",claim:"",racional:"Hace la protección solar más fácil, portable y apta para piel sensible.",oportunidad:"Funcionales F&B en sticks, shots o sachets con beneficios fáciles de entender."},
+  {id:101,file:"101_Banana_Boat_Kids_Sport_Sunscreen.png",brand:"Banana Boat",name:"Kids Sport Sunscreen",cat:"Skincare",territory:"ns",tab:"other",ingredient:"SPF 50+",benefit:"Family care portable y resistente",claim:"",racional:"Vuelve la protección infantil más práctica con formato resistente y fácil de aplicar.",oportunidad:"Snacks infantiles BFY con claims claros: lunchbox ready, no mess, energy for play."},
+  {id:102,file:"102_Tide_PODS_Free_and_Gentle.png",brand:"Tide",name:"PODS Free & Gentle",cat:"Laundry Care",territory:"ns",tab:"other",ingredient:"Detergente en pods",benefit:"Pre-measured convenience",claim:"",racional:"Simplifica el lavado con dosis premedidas y fórmula libre de irritantes fuertes.",oportunidad:"Porciones F&B listas y balanceadas: no measuring, no prep, no mess."},
+  {id:103,file:"103_Rocketbook_Fusion_Notebook.png",brand:"Rocketbook",name:"Fusion Notebook",cat:"Stationery / Productivity Tech",territory:"ns",tab:"other",ingredient:"Cuaderno reutilizable",benefit:"Hybrid analog-digital tools",claim:"",racional:"Combina lo analógico y digital para ordenar productividad sin acumular papel.",oportunidad:"Packaging o experiencias F&B con QR útiles: tracker, ritual, personalización, refill reminders."},
+  {id:104,file:"104_Bala_Bangles_pink_weights.jpg",brand:"Bala",name:"Bangles Pink Weights",cat:"Fitness Accessories",territory:"ns",tab:"other",ingredient:"Pesas wearable",benefit:"Fitness como accesorio lifestyle",claim:"",racional:"Hace el fitness más simple, estético y usable dentro de la rutina diaria.",oportunidad:"Snacks funcionales para wellness suave: proteína ligera, energía diaria, belleza desde adentro."},
+  // ── INFINITE INDULGENCE ── F&B
+  {id:44,file:"44_Like_Air_Puffcorn_Sugar_Cookie.jpg",brand:"Like Air",name:"Puffcorn Sugar Cookie",cat:"Snacks dulces",territory:"ii",tab:"fb",ingredient:"Sugar cookie",benefit:"Placer permisible",claim:"50 calories per cup",racional:"Lleva un sabor de postre a una textura aérea y divertida para indulgencia ligera pero sensorial."},
+  {id:45,file:"45_GH_Cretors_Caramel_Chocolatey_Swirl.png",brand:"G.H. Cretors",name:"Caramel Chocolatey Swirl",cat:"Popcorn dulce",territory:"ii",tab:"fb",ingredient:"Caramelo y chocolate",benefit:"Comfort elevado",claim:"Caramel Chocolatey Swirl",racional:"Mezcla caramelo y chocolate para convertir popcorn en una experiencia de postre premium."},
+  {id:46,file:"46_HEB_Limited_Edition_Korean_BBQ_Ridged_Potato_Chips.webp",brand:"HEB",name:"Korean BBQ Ridged Potato Chips",cat:"Snacks salados",territory:"ii",tab:"fb",ingredient:"Korean BBQ",benefit:"Exploración de sabor",claim:"Limited Edition",racional:"Usa un sabor de cocina coreana como escape sensorial y novedad cultural en papas onduladas."},
+  {id:47,file:"47_Takis_Hot_Honey.avif",brand:"Takis",name:"Hot Honey",cat:"Snacks picantes",territory:"ii",tab:"fb",ingredient:"Hot honey",benefit:"Intensidad dulce-picante",claim:"Hot Honey",racional:"Combina picante y miel para intensificar contraste y generar una experiencia de sabor extrema."},
+  {id:48,file:"48_RITZ_Drizzled_minis_Caramel.avif",brand:"RITZ",name:"Drizzled minis Caramel",cat:"Snacks dulces",territory:"ii",tab:"fb",ingredient:"Caramelo",benefit:"Indulgencia dulce",claim:"Caramel",racional:"Transforma Ritz en un bocado dulce con drizzle de caramelo que eleva el snack clásico."},
+  {id:49,file:"49_RITZ_Drizzled_minis_Fudge.jpg",brand:"RITZ",name:"Drizzled minis Fudge",cat:"Snacks dulces",territory:"ii",tab:"fb",ingredient:"Chocolate fudge",benefit:"Comfort food",claim:"Fudge",racional:"Convierte un snack clásico en una experiencia indulgente multisensorial."},
+  {id:50,file:"50_Chips_Ahoy_Baked_Bites_Brookie.avif",brand:"Chips Ahoy!",name:"Baked Bites Brookie",cat:"Snacks dulces",territory:"ii",tab:"fb",ingredient:"Brookie",benefit:"Indulgencia híbrida",claim:"Baked Bites",racional:"Fusiona brownie y cookie en bites horneados que maximizan indulgencia y portabilidad."},
+  {id:51,file:"51_Peelerz_Sour_Sweet_Mix.webp",brand:"Peelerz",name:"Sour Sweet Mix",cat:"Fruit snacks",territory:"ii",tab:"fb",ingredient:"Gomita sour-sweet",benefit:"Diversión sensorial",claim:"Peelable gummy",racional:"Hace del pelable una experiencia lúdica, ácida y compartible más allá del sabor."},
+  {id:52,file:"52_Nerds_Gummy_Clusters.png",brand:"Nerds",name:"Gummy Clusters",cat:"Confitería",territory:"ii",tab:"fb",ingredient:"Gomita y candy crunch",benefit:"Diversión sensorial",claim:"Gummy Clusters",racional:"Maximiza textura y explosión sensorial en una experiencia candy híbrida."},
+  {id:53,file:"53_mandms_popd.png",brand:"m&m's",name:"pop'd",cat:"Confitería",territory:"ii",tab:"fb",ingredient:"Chocolate candy inflado",benefit:"Textura novedosa",claim:"pop'd",racional:"Convierte M&M's en un formato inflado y crujiente que renueva el ritual candy."},
+  {id:54,file:"54_Reeses_OREO_Miniature_Cups.png",brand:"Reese's",name:"OREO Miniature Cups",cat:"Confitería",territory:"ii",tab:"fb",ingredient:"Chocolate, peanut butter y Oreo",benefit:"Placer híbrido",claim:"OREO",racional:"Une dos marcas icónicas para crear un mashup de antojo altamente emocional."},
+  {id:55,file:"55_Strawberry_Milk_Double_Fillings_Mochi.webp",brand:"Strawberry Milk",name:"Double Fillings Mochi",cat:"Postres",territory:"ii",tab:"fb",ingredient:"Mochi y strawberry milk",benefit:"Postre experiencial",claim:"Double Fillings",racional:"Lleva el mochi a una experiencia de doble relleno con leche de fresa, visual y cremosa."},
+  {id:56,file:"56_TRUBAR_Plant_Based_Protein_Bar_Glazed_Donuts.png",brand:"TRUBAR",name:"Plant Based Protein Bar Glazed Donuts",cat:"Functional bars",territory:"ii",tab:"fb",ingredient:"Proteína vegetal y glaseado",benefit:"Indulgencia funcional",claim:"12g protein",racional:"Disfraza una barra funcional como antojo de dona glaseada para permitir indulgencia con propósito."},
+  {id:57,file:"57_Bloom_Pop_Prebiotic_Soda_Root_Beer_Float.png",brand:"Bloom Pop",name:"Prebiotic Soda Root Beer Float",cat:"Bebidas funcionales",territory:"ii",tab:"fb",ingredient:"Prebióticos y root beer float",benefit:"Digestión con indulgencia",claim:"Prebiotic Soda",racional:"Convierte una soda prebiótica en una experiencia tipo postre con sabor root beer float."},
+  {id:58,file:"58_J-Basket_Black_Tea_Instant_Boba_Kit.jpg",brand:"J-Basket",name:"Black Tea Instant Boba Kit",cat:"DIY beverage",territory:"ii",tab:"fb",ingredient:"Té negro y tapioca boba",benefit:"Experiencia DIY",claim:"Instant Boba Kit",racional:"Transforma el consumo en una experiencia interactiva y visual para preparar boba en casa."},
+  // ── INFINITE INDULGENCE ── Otras Industrias
+  {id:105,file:"105_Glow_Recipe_Watermelon_skincare.png",brand:"Glow Recipe",name:"Watermelon Skincare",cat:"Skincare",territory:"ii",tab:"other",ingredient:"Sandía / glow",benefit:"Skincare como postre sensorial",claim:"",racional:"Convierte skincare en experiencia sensorial frutal, visual y coleccionable.",oportunidad:"Bebidas y postres beauty-coded con fruta, glow, colores vibrantes y beneficios percibidos."},
+  {id:106,file:"106_MeiduGaga_Glow_in_the_Dark_Paint_Set.avif",brand:"MeiduGaga",name:"Glow in the Dark Paint Set",cat:"Kids / Creative Play",territory:"ii",tab:"other",ingredient:"Pintura neón",benefit:"Productos que brillan/cambian bajo estímulos",claim:"",racional:"Lleva el juego creativo a un nivel visual extremo con efecto glow-in-the-dark.",oportunidad:"F&B interactivo que cambia de color, brilla o reacciona al mezclar ingredientes."},
+  {id:107,file:"107_Da_Bomb_Tie_Dye_Bath_Bomb.webp",brand:"Da Bomb",name:"Tie Dye Bath Bomb",cat:"Bath & Body",territory:"ii",tab:"other",ingredient:"Bath bomb tie dye",benefit:"Bath rituals as entertainment",claim:"",racional:"Transforma el baño en un espectáculo de color y sorpresa sensorial.",oportunidad:"Bebidas o postres con mezcla visual, swirl, capas y momentos de transformación."},
+  {id:108,file:"108_Bath_and_Body_Works_Strawberry_Pound_Cake_Candle.jpg",brand:"Bath & Body Works",name:"Strawberry Pound Cake Candle",cat:"Home Fragrance",territory:"ii",tab:"other",ingredient:"Fragancia postre",benefit:"Dessertification of home scent",claim:"",racional:"Convierte un postre en atmósfera olfativa de comfort y antojo.",oportunidad:"Extender sabores de panadería y postres a bebidas, snacks, aromas y rituales de temporada."},
+  {id:109,file:"109_Vacation_Classic_Whip_Sunscreen_Mousse.jpg",brand:"Vacation",name:"Classic Whip Sunscreen Mousse",cat:"Skincare / Sun Care",territory:"ii",tab:"other",ingredient:"Mousse tipo whipped cream",benefit:"Texturas inesperadas en categorías funcionales",claim:"",racional:"Convierte el protector solar en una experiencia lúdica con textura de crema batida.",oportunidad:"F&B con texturas whipped, mousse, foam o creamy que conviertan funcionalidad en placer."},
+  {id:110,file:"110_Mega_Crush_Crocs.jpg",brand:"Crocs",name:"Mega Crush Crocs",cat:"Footwear",territory:"ii",tab:"other",ingredient:"Chunky platform",benefit:"Maximalist comfort wear",claim:"",racional:"Exagera silueta, color y volumen para hacer del calzado una declaración de personalidad.",oportunidad:"Snacks o bebidas de formatos oversized, colores intensos y personalización visual."},
+  {id:111,file:"111_Chuckle_and_Roar_Whoa_Dough_Glow.png",brand:"Chuckle & Roar",name:"Whoa Dough Glow",cat:"Kids / Sensory Play",territory:"ii",tab:"other",ingredient:"Masa sensorial glow",benefit:"Tactile sensory products",claim:"",racional:"Hace del juego táctil una experiencia sensorial con color, textura y brillo.",oportunidad:"F&B con texturas sensoriales: chewy, popping, crunchy, stretchy o mixable."},
+  {id:112,file:"112_Crest_Kids_Color_Changing_Toothpaste.png",brand:"Crest",name:"Kids Color Changing Toothpaste",cat:"Oral Care",territory:"ii",tab:"other",ingredient:"Pasta dental",benefit:"Gamified hygiene routines",claim:"",racional:"Vuelve una rutina funcional más divertida mediante cambio de color y sabor candy-like.",oportunidad:"Bebidas infantiles BFY que cambien de color o revelen beneficios al mezclarse."},
+  {id:113,file:"113_Starface_Hydro-Star_Pimple_Patches.jpg",brand:"Starface",name:"Hydro-Star Pimple Patches",cat:"Skincare",territory:"ii",tab:"other",ingredient:"Parches hidrocoloides",benefit:"Functional products as accessories",claim:"",racional:"Transforma el tratamiento de acné en accesorio visible, cute y socialmente compartible.",oportunidad:"F&B funcional con iconografía cute, formatos coleccionables y rituales visibles."},
+  {id:114,file:"114_Rhode_Phone_Case_Lip_Tint_Holder.png",brand:"Rhode",name:"Phone Case Lip Tint Holder",cat:"Beauty Accessories / Tech",territory:"ii",tab:"other",ingredient:"Funda + lip tint",benefit:"Beauty-tech accessory ecosystems",claim:"",racional:"Integra beauty y smartphone en un objeto aspiracional de rutina visible.",oportunidad:"Snacks/bebidas con accesorios, holders, charms o formatos pensados para movilidad social."},
+  {id:115,file:"115_CASETiFY_custom_phone_case.png",brand:"CASETiFY",name:"Custom Phone Case",cat:"Tech Accessories",territory:"ii",tab:"other",ingredient:"Funda personalizada",benefit:"Hyper-personalized everyday objects",claim:"",racional:"Convierte la funda del celular en lienzo de personalización y statement visual.",oportunidad:"F&B con empaques personalizables, mensajes propios, nombres, charms o skins coleccionables."},
+  {id:116,file:"116_Glade_CustomScent_Frosted_Eucalyptus_and_Waterlily.png",brand:"Glade",name:"CustomScent Frosted Eucalyptus & Waterlily",cat:"Home Fragrance",territory:"ii",tab:"other",ingredient:"Fragancias combinables",benefit:"Custom scent blending at home",claim:"",racional:"Permite crear mezclas de aroma personalizadas para diseñar atmósferas emocionales.",oportunidad:"Bebidas DIY de mezcla de sabores, boosters aromáticos o kits para crear perfiles sensoriales."},
+  // ── HACKING BODY ── F&B
+  {id:59,file:"59_QUEST_Bake_Shop_Frosted_Cookies_Chocolate_Cake.jpg",brand:"QUEST",name:"Bake Shop Frosted Cookies Chocolate Cake",cat:"Protein snacks",territory:"hb",tab:"fb",ingredient:"Proteína",benefit:"Control de macros",claim:"5g protein / 1g sugar",racional:"Transforma indulgencia de galleta pastelera en snack funcional con proteína y bajo azúcar."},
+  {id:60,file:"60_Back_To_Nature_Chocolate_Chunk.avif",brand:"Back To Nature",name:"Chocolate Chunk",cat:"Snacks dulces",territory:"hb",tab:"fb",ingredient:"Chocolate chunk",benefit:"Indulgencia más limpia",claim:"Non-GMO",racional:"Reformula una galleta clásica con una lectura más natural y menos artificial."},
+  {id:61,file:"61_BelVita_Energy_Snack_Bites.png",brand:"BelVita",name:"Energy Snack Bites",cat:"Functional snacks",territory:"hb",tab:"fb",ingredient:"Avena y semillas",benefit:"Energía sostenida",claim:"Energy Snack Bites",racional:"Integra energía sostenida en un formato snack portable de avena y semillas."},
+  {id:62,file:"62_Dose_for_immunity.jpg",brand:"Dose",name:"Dose for immunity",cat:"Bebidas funcionales",territory:"hb",tab:"fb",ingredient:"Jengibre y cítricos",benefit:"Soporte inmune",claim:"For immunity",racional:"Convierte el shot diario en soporte inmunológico práctico y de alta conveniencia."},
+  {id:63,file:"63_Dose_for_your_liver.png",brand:"Dose",name:"Dose for your liver",cat:"Bebidas funcionales",territory:"hb",tab:"fb",ingredient:"Botánicos para hígado",benefit:"Soporte hepático",claim:"For your liver",racional:"Dirige la funcionalidad hacia el cuidado del hígado en una bebida lista para tomar."},
+  {id:64,file:"64_Dose_for_cholesterol.webp",brand:"Dose",name:"Dose for cholesterol",cat:"Bebidas funcionales",territory:"hb",tab:"fb",ingredient:"Esteroles vegetales",benefit:"Soporte cardiovascular",claim:"For cholesterol",racional:"Enfoca el consumo diario en control de colesterol con una promesa funcional clara."},
+  {id:65,file:"65_OLLY_Undeniable_Beauty_Healthy_Hair_Skin_and_Nails.jpg",brand:"OLLY",name:"Undeniable Beauty Healthy Hair, Skin & Nails",cat:"Suplementos beauty",territory:"hb",tab:"fb",ingredient:"Biotina, keratina y vitaminas",benefit:"Belleza desde adentro",claim:"Healthy Hair, Skin & Nails",racional:"Traduce la belleza en nutrición funcional diaria desde gomitas fáciles de consumir."},
+  {id:66,file:"66_LesserEvil_Popcorn_Himalayan_Pink_Salt.png",brand:"LesserEvil",name:"Popcorn Himalayan Pink Salt",cat:"Better-for-you snacks",territory:"hb",tab:"fb",ingredient:"Sal rosa del Himalaya",benefit:"Snack ligero",claim:"40 calories per cup",racional:"Ofrece popcorn limpio y ligero con ingredientes simples para snackeo más balanceado."},
+  {id:67,file:"67_Natures_Bakery_Oatmeal_Crumble_Strawberry.jpg",brand:"Nature's Bakery",name:"Oatmeal Crumble Strawberry",cat:"Snacks dulces funcionales",territory:"hb",tab:"fb",ingredient:"Avena integral y fresa",benefit:"Energía portable",claim:"14g whole grains",racional:"Combina avena y fruta en una barra tipo crumble con porción controlada y energía práctica."},
+  {id:68,file:"68_David_Peanut_Butter_Chocolate_Chunk_Flavored_Bar.png",brand:"David",name:"Peanut Butter Chocolate Chunk Bar",cat:"Protein bars",territory:"hb",tab:"fb",ingredient:"Proteína y peanut butter",benefit:"Saciedad muscular",claim:"28g protein / 0g sugar",racional:"Optimiza el snack dulce con alta proteína y bajo azúcar en formato barra."},
+  {id:69,file:"69_David_Fudge_Brownie_Flavored_Bar.png",brand:"David",name:"Fudge Brownie Bar",cat:"Protein bars",territory:"hb",tab:"fb",ingredient:"Proteína y cocoa",benefit:"Saciedad funcional",claim:"28g protein / 0g sugar",racional:"Convierte el sabor brownie en una barra de alto desempeño con control de azúcar."},
+  {id:70,file:"70_David_Cinnamon_Roll_Flavored_Bar.webp",brand:"David",name:"Cinnamon Roll Bar",cat:"Protein bars",territory:"hb",tab:"fb",ingredient:"Proteína y canela",benefit:"Energía y saciedad",claim:"28g protein / 0g sugar",racional:"Lleva un sabor indulgente de cinnamon roll a una barra enfocada en macros."},
+  {id:71,file:"71_Chobani_Zero_Sugar_Greek_Yogurt_Strawberry_Cheesecake.png",brand:"Chobani",name:"Zero Sugar Greek Yogurt Strawberry Cheesecake",cat:"Yogurt funcional",territory:"hb",tab:"fb",ingredient:"Yogurt griego y fresa",benefit:"Control de azúcar",claim:"Zero Sugar",racional:"Equilibra sabor postre con cero azúcar para consumidores que buscan control sin sacrificar antojo."},
+  {id:72,file:"72_Lenny_and_Larrys_The_Complete_Chocolate_Chip.png",brand:"Lenny & Larry's",name:"The Complete Chocolate Chip",cat:"Functional cookies",territory:"hb",tab:"fb",ingredient:"Proteína vegetal",benefit:"Saciedad funcional",claim:"16g protein",racional:"Replantea la cookie como snack de nutrición plant-based con proteína y fibra."},
+  {id:73,file:"73_Organic_Marys_Gone_Crackers_SuperSeed_Seaweed_and_Black_Sesame.jpg",brand:"Mary's Gone Crackers",name:"SuperSeed Seaweed & Black Sesame",cat:"Better-for-you crackers",territory:"hb",tab:"fb",ingredient:"Semillas orgánicas",benefit:"Grasas buenas y fibra",claim:"SuperSeed",racional:"Usa semillas como base para entregar crunch funcional con perfil más nutritivo."},
+  {id:74,file:"74_OIKOS_Fusion_Muscle_plusDigestive_Health_Support_Strawberry.png",brand:"OIKOS",name:"Fusion Muscle +Digestive Health Support Strawberry",cat:"Bebidas funcionales",territory:"hb",tab:"fb",ingredient:"Proteína y probióticos",benefit:"Músculo y digestión",claim:"Muscle + Digestive Health Support",racional:"Integra proteína con beneficios digestivos y musculares en un formato bebible de alto rendimiento."},
+  {id:75,file:"75_OIKOS_PRO_23g_Protein_Mango_Pineapple.png",brand:"OIKOS",name:"PRO 23g Protein Mango Pineapple",cat:"Bebidas funcionales",territory:"hb",tab:"fb",ingredient:"23g proteína",benefit:"Recuperación muscular",claim:"23g Protein",racional:"Optimiza recuperación y proteína diaria en formato portable."},
+  {id:76,file:"76_Yogi_Honey_Lavender_Stress_Relief.jpg",brand:"Yogi",name:"Honey Lavender Stress Relief",cat:"Functional tea",territory:"hb",tab:"fb",ingredient:"Lavanda y miel",benefit:"Relajación",claim:"Stress Relief",racional:"Promueve relajación y balance mental mediante ingredientes botánicos."},
+  {id:77,file:"77_Simple_Truth_Protein_Puffs_Nacho_Cheese.png",brand:"Simple Truth",name:"Protein Puffs Nacho Cheese",cat:"Protein snacks",territory:"hb",tab:"fb",ingredient:"Proteína",benefit:"Snack alto en proteína",claim:"21g protein",racional:"Convierte un puff snack en vehículo de proteína con sabor familiar a queso nacho."},
+  {id:78,file:"78_Crisp_Power_Protein_Pretzels_Flamin_Crunch.webp",brand:"Crisp Power",name:"Protein Pretzels Flamin' Crunch",cat:"Protein snacks",territory:"hb",tab:"fb",ingredient:"Proteína",benefit:"Saciedad y crunch",claim:"26g protein",racional:"Hackea un pretzel picante con proteína para convertir una botana intensa en snack funcional."},
+  // ── HACKING BODY ── Otras Industrias
+  {id:117,file:"117_Smart_Eye_Massager.webp",brand:"Smart Eye",name:"Smart Eye Massager",cat:"Wellness Tech",territory:"hb",tab:"other",ingredient:"Masajeador ocular",benefit:"Tech recovery for daily fatigue",claim:"",racional:"Optimiza descanso visual y relajación con tecnología de masaje portable.",oportunidad:"Bebidas funcionales para screen fatigue, enfoque, descanso visual o recuperación mental."},
+  {id:118,file:"118_Smart_Health_Ring.webp",brand:"Smart Ring",name:"Smart Health Ring",cat:"Wearable Technology",territory:"hb",tab:"other",ingredient:"Anillo inteligente",benefit:"Wellness tracking invisible y continuo",claim:"",racional:"Convierte métricas corporales en información continua para mejorar hábitos diarios.",oportunidad:"F&B personalizado según sueño, energía, hidratación o recuperación diaria."},
+  {id:119,file:"119_WHOOP_Fitness_Band.webp",brand:"WHOOP",name:"Fitness Band",cat:"Wearable Technology",territory:"hb",tab:"other",ingredient:"Banda wearable",benefit:"Performance data for everyday consumers",claim:"",racional:"Transforma recuperación, sueño y esfuerzo físico en data accionable para optimizar rendimiento.",oportunidad:"Productos F&B con claims medibles: recovery, readiness, endurance, hydration score."},
+  {id:120,file:"120_Electric_Neck_Beauty_Instrument.avif",brand:"Beauty Neck",name:"Electric Neck Beauty Instrument",cat:"Beauty Tech",territory:"hb",tab:"other",ingredient:"Dispositivo eléctrico",benefit:"At-home beauty devices",claim:"",racional:"Lleva la estética facial/cuello al terreno del dispositivo de mejora corporal en casa.",oportunidad:"Bebidas beauty-from-within que acompañen rutinas de colágeno, piel y cuidado visible."},
+  {id:121,file:"121_Aroma_Diffuser_Humidifier.avif",brand:"Aroma Diffuser",name:"Aroma Diffuser Humidifier",cat:"Home Wellness Tech",territory:"hb",tab:"other",ingredient:"Difusor aromático",benefit:"Home environment as wellness interface",claim:"",racional:"Optimiza ambiente, respiración y estado de ánimo mediante aroma y humidificación.",oportunidad:"Bebidas o snacks asociados a estados de ánimo: calm, focus, sleep, reset."},
+  {id:122,file:"122_Vital_Proteins_Collagen_Peptides.jpg",brand:"Vital Proteins",name:"Collagen Peptides",cat:"Supplements",territory:"hb",tab:"other",ingredient:"Colágeno en polvo",benefit:"Daily functional powders",claim:"",racional:"Integra colágeno como herramienta diaria para belleza, articulaciones y bienestar físico.",oportunidad:"Bebidas listas con colágeno, proteína y beneficios beauty/wellness explícitos."},
+  {id:123,file:"123_Sports_Compression_Socks.png",brand:"Sports",name:"Compression Socks",cat:"Performance Apparel",territory:"hb",tab:"other",ingredient:"Calcetas compresión",benefit:"Performance apparel beyond aesthetics",claim:"",racional:"Convierte la ropa en herramienta de circulación, recuperación y soporte activo.",oportunidad:"Snacks/bebidas para circulación, recuperación muscular o soporte post-actividad."},
+  {id:124,file:"124_Chesapeake_Bay_Mind_and_Body_Candle_EscapeplusDiscover.jpg",brand:"Chesapeake Bay",name:"Mind & Body Candle Escape+Discover",cat:"Home Wellness",territory:"hb",tab:"other",ingredient:"Vela aromática",benefit:"Mood-based home wellness",claim:"",racional:"Usa aroma como herramienta de regulación emocional y ritual mental.",oportunidad:"F&B para estados emocionales: calm, focus, unwind, comfort, sleep ritual."},
+  {id:125,file:"125_Libro_Habitos_Atomicos.jpg",brand:"James Clear",name:"Libro Hábitos Atómicos",cat:"Books / Self-Optimization",territory:"hb",tab:"other",ingredient:"Hábitos",benefit:"Habit design as consumer framework",claim:"",racional:"Enmarca la mejora personal como sistema de pequeños cambios acumulativos.",oportunidad:"Productos F&B pensados como rituales diarios: morning habit, night reset, focus break."},
+  {id:126,file:"126_LetPot_Smart_Hydroponic_Garden.jpg",brand:"LetPot",name:"Smart Hydroponic Garden",cat:"Home Tech / Food Growing",territory:"hb",tab:"other",ingredient:"Jardín hidropónico",benefit:"Home-grown wellness food systems",claim:"",racional:"Permite cultivar ingredientes frescos en casa como forma de controlar nutrición y origen.",oportunidad:"Kits F&B de cultivo, ingredientes vivos, microgreens o experiencias de frescura hiperlocal."},
+  {id:127,file:"127_Lavender_Vanilla_Sleep_Spray.webp",brand:"Puretive",name:"Lavender Vanilla Sleep Spray",cat:"Sleep Care",territory:"hb",tab:"other",ingredient:"Lavanda y vainilla",benefit:"Sleep optimization rituals",claim:"",racional:"Convierte el sueño en un ritual sensorial optimizado con aromas calmantes.",oportunidad:"Bebidas nocturnas con lavanda, vainilla, magnesio o claims de relajación/restauración."},
+  {id:128,file:"128_Epielle_Hydrating_Gel_Sheet_Mask.webp",brand:"Epielle",name:"Hydrating Gel Sheet Mask",cat:"Skincare",territory:"hb",tab:"other",ingredient:"Mascarilla gel",benefit:"Instant reset skincare formats",claim:"",racional:"Entrega hidratación rápida en formato máscara para reset visible de la piel.",oportunidad:"Bebidas beauty hydration con electrolitos, colágeno o claims de glow inmediato."},
+  {id:129,file:"129_CVS_Urinary_Tract_Infection_Test_Strips.png",brand:"CVS Health",name:"Urinary Tract Infection Test Strips",cat:"Health Diagnostics",territory:"hb",tab:"other",ingredient:"Tiras diagnóstico",benefit:"At-home testing and proactive health",claim:"",racional:"Lleva el diagnóstico básico al hogar para dar control y rapidez al usuario.",oportunidad:"F&B preventivo con beneficios urinarios, hidratación, cranberry, microbiota o claims de cuidado diario."}
+];
+
+// Config territorios
+const TERRITORIES = {
+  mg: { name: "MEXICAN GATEKEEPING", desc: "Tradición que evoluciona, auténtica y con propósito.", color: "#22C55E", colorClass: "mg" },
+  ns: { name: "NEW SIMPLICITY", desc: "Productos honestos, funcionales y sin complicaciones.", color: "#F97316", colorClass: "ns" },
+  ii: { name: "INFINITE INDULGENCE", desc: "Placer sin límites, experiencias que sorprenden y deleitan.", color: "#7C3AED", colorClass: "ii" },
+  hb: { name: "HACKING BODY", desc: "Bienestar optimizado, rendimiento y cuidado consciente.", color: "#3B82F6", colorClass: "hb" }
+};
+
+// Estado
+let currentTerritory = null;
+let currentProduct = null;
+let navHistory = [];
+
+// ── NAVEGACIÓN ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function openTerritorio(key) {
+  currentTerritory = key;
+  navHistory.push('home');
+  const t = TERRITORIES[key];
+
+  // Header
+  document.getElementById('btnBack').classList.add('visible');
+  document.getElementById('backLabel').textContent = 'Inicio';
+
+  // Título
+  const title = document.getElementById('territorio-title');
+  title.textContent = t.name;
+  title.className = 'color-' + t.colorClass;
+
+  document.getElementById('territorio-desc').textContent = t.desc;
+
+  // Construir secciones
+  const content = document.getElementById('territorio-content');
+  const fbProducts = PRODUCTS.filter(p => p.territory === key && p.tab === 'fb');
+  const otherProducts = PRODUCTS.filter(p => p.territory === key && p.tab === 'other');
+
+  content.innerHTML = buildCategorySection('🍽️', 'ALIMENTOS Y BEBIDAS', fbProducts, key) +
+                      buildCategorySection('✨', 'OTRAS INDUSTRIAS', otherProducts, key);
+
+  showScreen('territorio');
+}
+
+function buildCategorySection(icon, label, products, key) {
+  if (!products.length) return '';
+  const color = TERRITORIES[key].color;
+  const cls = TERRITORIES[key].colorClass;
+  const dots = products.map((_, i) => `<div class="cdot ${i===0?'active':''}" id="dot-${label.replace(/\s/g,'-')}-${i}"></div>`).join('');
+
+  const cards = products.map(p => `
+    <div class="product-card" onclick="openProducto(${p.id})">
+      <div class="pc-img-wrap">
+        <img src="${imgUrl(p.file)}" alt="${p.brand}" loading="lazy" onerror="this.style.opacity='0.3'; this.src='placeholder.png'; this.style.padding='20px';">
+      </div>
+      <div class="pc-body">
+        <div class="pc-brand color-${cls}">${p.brand}</div>
+        <div class="pc-name">${p.name}</div>
+        ${p.claim ? `<span class="pc-claim bg-${cls}">${p.claim}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  const carouselId = 'carousel-' + label.replace(/\s/g, '-');
+
+  return `
+    <div class="cat-section">
+      <div class="cat-header">
+        <div class="cat-title-wrap">
+          <div class="cat-icon-circle bg-${cls}" style="opacity:0.15; position:relative;">
+            <span style="position:absolute; font-size:16px;">${icon}</span>
+          </div>
+          <span class="cat-name color-${cls}">${label}</span>
+        </div>
+        <span class="cat-count">${products.length} productos</span>
+      </div>
+      <div class="scroll-hint">desliza →</div>
+      <div class="carousel-wrap">
+        <div class="carousel" id="${carouselId}">${cards}</div>
+      </div>
+      <div class="carousel-dots">${dots}</div>
+    </div>
+  `;
+}
+
+function openProducto(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  currentProduct = p;
+  navHistory.push('territorio');
+
+  const t = TERRITORIES[p.territory];
+  const cls = t.colorClass;
+
+  // Header back
+  document.getElementById('backLabel').textContent = t.name.split(' ')[0] + '…';
+
+  // Imagen
+  document.getElementById('prod-img').src = imgUrl(p.file);
+  document.getElementById('prod-img').alt = p.brand + ' ' + p.name;
+  document.getElementById('prod-img-section').style.background = '#ffffff';
+
+  // Body
+  const isFb = p.tab === 'fb';
+  let html = `
+    <div class="prod-cat-badge bg-${cls}">
+      ${isFb ? '🍽️ Alimentos y Bebidas' : '✨ Otras Industrias'}
+    </div>
+    <div class="prod-brand color-${cls}">${p.brand}</div>
+    <div class="prod-name">${p.name}</div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-label label-${cls}">Categoría</div>
+        <div class="info-value">${p.cat}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label label-${cls}">Territorio</div>
+        <div class="info-value">${t.name}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label label-${cls}">Ingrediente / Base</div>
+        <div class="info-value">${p.ingredient || '—'}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label label-${cls}">Beneficio Funcional</div>
+        <div class="info-value">${p.benefit || '—'}</div>
+      </div>
+      ${p.claim ? `
+      <div class="info-card full">
+        <div class="info-label label-${cls}">Claim Principal</div>
+        <div class="info-value" style="font-weight:700; font-size:15px;">${p.claim}</div>
+      </div>` : ''}
+    </div>
+
+    <div class="racional-card border-${cls}">
+      <div class="racional-label label-${cls}">⭐ ¿Por qué está en ${t.name}?</div>
+      <div class="racional-text">${p.racional}</div>
+    </div>
+  `;
+
+  if (p.oportunidad) {
+    html += `
+      <div class="oportunidad-card">
+        <div class="oportunidad-label">💡 Oportunidad en Food & Beverage</div>
+        <div class="oportunidad-text">${p.oportunidad}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById('prod-body').innerHTML = html;
+  showScreen('producto');
+}
+
+function goBack() {
+  const prev = navHistory.pop();
+  if (prev === 'home' || !prev) {
+    document.getElementById('btnBack').classList.remove('visible');
+    showScreen('home');
+    currentTerritory = null;
+  } else if (prev === 'territorio') {
+    document.getElementById('backLabel').textContent = 'Inicio';
+    showScreen('territorio');
+    currentProduct = null;
+  }
+}
+
+// Swipe back (iOS-style)
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (dx > 80 && navHistory.length > 0) goBack();
+}, { passive: true });
+</script>
+</body>
+</html>
