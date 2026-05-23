@@ -175,25 +175,40 @@
     }
   }
 
-  /* TARJETA DE TERRITORIO */
+  /* TARJETA DE TERRITORIO — solo imagen completa */
   .territory-card {
     border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
     position: relative;
-    display: flex;
-    flex-direction: column;
     box-shadow: 0 6px 28px rgba(0,0,0,0.15);
     transition: transform 0.18s ease, box-shadow 0.18s ease;
-    min-height: 360px;
   }
   .territory-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.2); }
   .territory-card:active { transform: scale(0.98); }
 
-  .territory-card.mg { background: linear-gradient(160deg, #16A34A 0%, #22C55E 100%); }
-  .territory-card.ns { background: linear-gradient(160deg, #EA580C 0%, #FB923C 100%); }
-  .territory-card.ii { background: linear-gradient(160deg, #5B21B6 0%, #7C3AED 100%); }
-  .territory-card.hb { background: linear-gradient(160deg, #1D4ED8 0%, #3B82F6 100%); }
+  .territory-card.mg { background: #22C55E; }
+  .territory-card.ns { background: #FB923C; }
+  .territory-card.ii { background: #7C3AED; }
+  .territory-card.hb { background: #3B82F6; }
+
+  /* Imagen ocupa toda la tarjeta */
+  .tc-full-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* Mobile: altura fija para que se vea bien */
+  @media (max-width: 900px) {
+    .territory-card { min-height: 340px; }
+    .tc-full-img { object-fit: cover; object-position: top center; }
+  }
+  @media (min-width: 901px) {
+    .territory-card { aspect-ratio: 3/4; }
+  }
 
   /* Parte superior de la tarjeta: ícono + texto */
   .territory-card .tc-content {
@@ -224,54 +239,20 @@
     color: rgba(255,255,255,0.88);
     line-height: 1.5; max-width: 200px;
   }
-  .tc-explorar {
-    margin: 0 20px 20px;
-    padding: 12px;
-    background: rgba(255,255,255,0.18);
-    border: 1.5px solid rgba(255,255,255,0.5);
-    border-radius: 50px;
-    text-align: center;
-    font-family: 'Manrope', sans-serif;
-    font-weight: 700; font-size: 13px;
-    color: var(--white);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    flex-shrink: 0;
-    transition: background 0.2s;
-  }
+  /* Imagen — completa, sin recortar */
   .territory-card .tc-image {
     flex: 1;
-    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
     overflow: hidden;
-    min-height: 160px;
-    background: rgba(255,255,255,0.12);
   }
   .territory-card .tc-image img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    transition: transform 0.3s ease;
-  }
-  .territory-card:hover .tc-image img { transform: scale(1.04); }
-
-  /* Botón EXPLORAR */
-  .tc-explorar {
-    margin: 0 20px 20px;
-    padding: 12px;
-    background: rgba(255,255,255,0.18);
-    border: 1.5px solid rgba(255,255,255,0.5);
-    border-radius: 50px;
-    text-align: center;
-    font-family: 'Manrope', sans-serif;
-    font-weight: 800; font-size: 14px;
-    color: var(--white);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    flex-shrink: 0;
-    transition: background 0.2s;
-  }
-  .territory-card:hover .tc-explorar {
-    background: rgba(255,255,255,0.28);
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    object-position: bottom center;
   }
 
   /* Mobile: tarjeta horizontal */
@@ -289,11 +270,14 @@
     .tc-name { font-size: 22px; }
     .tc-desc { font-size: 11.5px; }
     .territory-card .tc-image {
-      width: 160px; height: 130px;
-      flex: none; min-height: unset;
-      border-radius: 0;
+      width: 170px; height: 150px;
+      flex: none;
     }
-    .tc-explorar { display: none; }
+    .territory-card .tc-image img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
     .tc-arrow { display: flex; }
   }
   @media (min-width: 901px) {
@@ -678,74 +662,22 @@
 
     <!-- MEXICAN GATEKEEPING -->
     <div class="territory-card mg" onclick="openTerritorio('mg')">
-      <div class="tc-content">
-        <div class="tc-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 6 5 10c0 5 7 12 7 12s7-7 7-12c0-4-3-8-7-8z"/><circle cx="12" cy="10" r="2.5"/></svg>
-        </div>
-        <div class="tc-name">Mexican<br>Gatekeeping</div>
-        <div class="tc-desc">Tradición que evoluciona, auténtica y con propósito.</div>
-      </div>
-      <div class="tc-image">
-        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/A%20Mexican%20Gatekeeping.png" alt="Mexican Gatekeeping" onerror="this.style.opacity='0.2'">
-      </div>
-      <div class="tc-explorar">EXPLORAR</div>
-      <div class="tc-arrow">
-        <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-      </div>
+      <img class="tc-full-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/A%20Mexican%20Gatekeeping.png" alt="Mexican Gatekeeping" onerror="this.style.opacity='0.3'">
     </div>
 
     <!-- NEW SIMPLICITY -->
     <div class="territory-card ns" onclick="openTerritorio('ns')">
-      <div class="tc-content">
-        <div class="tc-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"/><circle cx="12" cy="12" r="1.5" fill="white" stroke="none"/></svg>
-        </div>
-        <div class="tc-name">New<br>Simplicity</div>
-        <div class="tc-desc">Productos honestos, funcionales y sin complicaciones.</div>
-      </div>
-      <div class="tc-image">
-        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/B%20New%20Simplicity.png" alt="New Simplicity" onerror="this.style.opacity='0.2'">
-      </div>
-      <div class="tc-explorar">EXPLORAR</div>
-      <div class="tc-arrow">
-        <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-      </div>
+      <img class="tc-full-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/B%20New%20Simplicity.png" alt="New Simplicity" onerror="this.style.opacity='0.3'">
     </div>
 
     <!-- INFINITE INDULGENCE -->
     <div class="territory-card ii" onclick="openTerritorio('ii')">
-      <div class="tc-content">
-        <div class="tc-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 3c-3 0-5 2.5-5 5 0 1.5.5 2.8 1.3 3.8L12 21l3.7-9.2C16.5 10.8 17 9.5 17 8c0-2.5-2-5-5-5z"/><path d="M9 8.5c0-1.7 1.3-3 3-3"/></svg>
-        </div>
-        <div class="tc-name">Infinite<br>Indulgence</div>
-        <div class="tc-desc">Placer sin límites, experiencias que sorprenden y deleitan.</div>
-      </div>
-      <div class="tc-image">
-        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/C%20Infinite%20indulgence.png" alt="Infinite Indulgence" onerror="this.style.opacity='0.2'">
-      </div>
-      <div class="tc-explorar">EXPLORAR</div>
-      <div class="tc-arrow">
-        <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-      </div>
+      <img class="tc-full-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/C%20Infinite%20indulgence.png" alt="Infinite Indulgence" onerror="this.style.opacity='0.3'">
     </div>
 
     <!-- HACKING BODY -->
     <div class="territory-card hb" onclick="openTerritorio('hb')">
-      <div class="tc-content">
-        <div class="tc-icon">
-          <svg viewBox="0 0 24 24"><path d="M6 4v6M18 4v6M3 10h18M6 14v6M18 14v6M3 14h3M18 14h3"/></svg>
-        </div>
-        <div class="tc-name">Hacking<br>Body</div>
-        <div class="tc-desc">Bienestar optimizado, rendimiento y cuidado consciente.</div>
-      </div>
-      <div class="tc-image">
-        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/D%20Hacking%20body.png" alt="Hacking Body" onerror="this.style.opacity='0.2'">
-      </div>
-      <div class="tc-explorar">EXPLORAR</div>
-      <div class="tc-arrow">
-        <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-      </div>
+      <img class="tc-full-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/D%20Hacking%20body.png" alt="Hacking Body" onerror="this.style.opacity='0.3'">
     </div>
 
   </div>
