@@ -4,27 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Ventana al Mundo</title>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --mg: #22C55E;
-    --mg-dark: #16A34A;
-    --ns: #F97316;
-    --ns-dark: #EA580C;
-    --ii: #7C3AED;
-    --ii-dark: #6D28D9;
-    --hb: #3B82F6;
-    --hb-dark: #2563EB;
-    --black: #0a0a0f;
-    --gray-bg: #f0f2f5;
+    --mg:       #FF2D9B;
+    --mg-dark:  #d4007a;
+    --mg-light: #ffe6f5;
+    --ns:       #C8B89A;
+    --ns-dark:  #8a7460;
+    --ns-light: #f5f0e8;
+    --ii:       #7C3AED;
+    --ii-dark:  #6D28D9;
+    --ii-light: #f0ebff;
+    --hb:       #87CEEB;
+    --hb-dark:  #3a9ec4;
+    --hb-light: #e8f6fd;
+
+    --black:      #0a0a0f;
+    --gray-bg:    #f0f2f5;
     --gray-light: #e5e7eb;
-    --text-dark: #111827;
-    --text-mid: #374151;
-    --text-soft: #6B7280;
-    --white: #ffffff;
-    --header-h: 56px;
-    --radius: 18px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.12);
+    --text-dark:  #111827;
+    --text-mid:   #374151;
+    --text-soft:  #6B7280;
+    --white:      #ffffff;
+    --header-h:   60px;
+    --shadow:     0 4px 24px rgba(0,0,0,0.12);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -37,720 +41,250 @@
     overflow-x: hidden;
   }
 
-  /* ── HEADER ── */
+  /* HEADER */
   header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     background: var(--black);
     height: var(--header-h);
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 16px;
-    border-bottom: 2px solid #3B82F6;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.4s ease;
   }
-  .header-logo {
-    display: flex; flex-direction: column; gap: 1px;
+  .header-logo img {
+    height: 34px; width: auto; display: block;
   }
-  .header-logo .logo-title {
+  .header-logo-fallback {
+    display: none;
     font-family: 'Manrope', sans-serif;
-    font-weight: 800; font-size: 18px;
-    color: var(--white); letter-spacing: 0.5px;
-    line-height: 1;
-  }
-  .header-logo .logo-sub {
-    font-size: 7px; font-weight: 500;
-    color: #60A5FA; letter-spacing: 1px;
-    text-transform: uppercase; max-width: 220px;
-    line-height: 1.3;
-  }
-  .header-logo .logo-sub {
-    font-size: 8px; font-weight: 600;
-    color: #60A5FA; letter-spacing: 1.5px;
-    text-transform: uppercase;
+    font-weight: 900; font-size: 15px;
+    color: #fff; letter-spacing: 0.5px; text-transform: uppercase;
   }
   .header-back {
     display: none;
-    align-items: center; gap: 6px;
-    background: none; border: none;
-    color: var(--white); font-family: 'Manrope', sans-serif;
-    font-size: 13px; font-weight: 600;
-    cursor: pointer; padding: 6px 0;
+    align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.13);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 20px;
+    color: var(--white);
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px; font-weight: 700;
+    cursor: pointer; padding: 6px 12px 6px 9px;
+    transition: background 0.15s;
+    white-space: nowrap;
   }
-  .header-back svg { width: 16px; height: 16px; }
+  .header-back:active { background: rgba(255,255,255,0.25); }
+  .header-back svg { width: 14px; height: 14px; flex-shrink: 0; }
   .header-back.visible { display: flex; }
 
-  /* Usuario badge */
-  .user-badge {
-    display: flex; align-items: center; gap: 8px;
-    cursor: pointer;
-  }
-  .user-badge-label {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 700; font-size: 13px;
-    color: var(--white); letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .user-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: #3B82F6;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; border: 2px solid #60A5FA;
-  }
-  .user-avatar svg { width: 22px; height: 22px; color: white; }
-  .user-chevron { color: #9CA3AF; font-size: 11px; }
-
-  /* ── SCREENS ── */
-  .screen {
-    display: none;
-    padding-top: var(--header-h);
-    min-height: 100vh;
-  }
+  /* SCREENS */
+  .screen { display: none; padding-top: var(--header-h); min-height: 100vh; }
   .screen.active { display: block; }
 
-  /* ════════════════════════════════
-     SCREEN 1 — HOME
-  ════════════════════════════════ */
+  /* PANTALLA NO-TERRITORIO */
+  #screen-noterritorio {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 80px 24px; gap: 14px;
+  }
+  #screen-noterritorio .big-icon { font-size: 52px; }
+  #screen-noterritorio h2 { font-size: 20px; font-weight: 800; color: var(--text-dark); }
+  #screen-noterritorio p { font-size: 14px; color: var(--text-soft); line-height: 1.6; max-width: 280px; }
 
-  /* HERO — patrón halftone igual al Fondo_Main */
-  #screen-home .hero {
-    position: relative;
-    background-color: #f4f4f6;
-    padding: 36px 24px 28px;
-    text-align: center;
-    border-bottom: 1px solid #e5e7eb;
-    overflow: hidden;
-  }
-  #screen-home .hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      radial-gradient(circle, #c8c8cc 1.2px, transparent 1.2px);
-    background-size: 18px 18px;
-    /* Máscara radial: puntos visibles en esquinas, desaparecen al centro */
-    -webkit-mask-image: radial-gradient(ellipse 90% 90% at 50% 50%,
-      transparent 30%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.85) 100%);
-    mask-image: radial-gradient(ellipse 90% 90% at 50% 50%,
-      transparent 30%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.85) 100%);
-    pointer-events: none;
-  }
-  #screen-home .hero > * { position: relative; z-index: 1; }
-  #screen-home .hero h1 {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 800; font-size: clamp(24px, 4vw, 40px);
-    color: var(--text-dark); line-height: 1.1;
-    letter-spacing: -0.5px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  #screen-home .hero-divider {
-    width: 56px; height: 3px;
-    background: #3B82F6;
-    margin: 0 auto 16px;
-    border-radius: 2px;
-  }
-  #screen-home .hero p {
-    color: var(--text-mid); font-size: clamp(13px, 1.8vw, 15px);
-    font-weight: 400; line-height: 1.6;
-    max-width: 520px; margin: 0 auto 14px;
-  }
-  #screen-home .hero p a {
-    color: #3B82F6; font-weight: 600; text-decoration: none;
-  }
-  #screen-home .hero-cta {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 700; font-size: 14px;
-    color: #3B82F6; letter-spacing: 0.5px;
-  }
+  /* SCREEN 2 — TERRITORIO */
+  .territorio-hero-img { width: 100%; display: block; object-fit: cover; max-height: 200px; }
+  @media (min-width: 600px) { .territorio-hero-img { max-height: 280px; } }
 
-  /* GRID DE TERRITORIOS — desktop 4 columnas, mobile 1 columna */
-  .territories-list {
-    padding: 28px 24px 110px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-  }
-  @media (max-width: 900px) {
-    .territories-list {
-      grid-template-columns: 1fr;
-      padding: 16px 14px 110px;
-      gap: 14px;
-    }
-  }
-
-  /* TARJETA DE TERRITORIO — solo imagen completa */
-  .territory-card {
-    border-radius: 20px;
-    overflow: hidden;
-    cursor: pointer;
-    position: relative;
-    box-shadow: 0 6px 28px rgba(0,0,0,0.15);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-  }
-  .territory-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.2); }
-  .territory-card:active { transform: scale(0.98); }
-
-  .territory-card.mg { background: #22C55E; }
-  .territory-card.ns { background: #FB923C; }
-  .territory-card.ii { background: #7C3AED; }
-  .territory-card.hb { background: #3B82F6; }
-
-  /* Imagen ocupa toda la tarjeta */
-  .tc-full-img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    object-position: center;
-  }
-
-  /* Mobile: altura fija para que se vea bien */
-  @media (max-width: 900px) {
-    .territory-card { min-height: 340px; }
-    .tc-full-img { object-fit: cover; object-position: top center; }
-  }
-  @media (min-width: 901px) {
-    .territory-card { aspect-ratio: 3/4; }
-  }
-
-  /* Parte superior de la tarjeta: ícono + texto */
-  .territory-card .tc-content {
-    padding: 24px 20px 16px;
-    z-index: 2;
-    flex-shrink: 0;
-  }
-  .tc-icon {
-    width: 52px; height: 52px;
-    border: 2px solid rgba(255,255,255,0.7);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 14px;
-    font-size: 22px;
-  }
-  /* Ícono SVG estilo outline blanco */
-  .tc-icon svg { width: 26px; height: 26px; stroke: white; fill: none; stroke-width: 1.8; }
-
-  .tc-name {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 800; font-size: 22px;
-    color: var(--white); line-height: 1.05;
-    text-transform: uppercase; letter-spacing: 0.3px;
-    margin-bottom: 8px;
-  }
-  .tc-desc {
-    font-size: 12px; font-weight: 400;
-    color: rgba(255,255,255,0.88);
-    line-height: 1.5; max-width: 200px;
-  }
-  /* Imagen — completa, sin recortar */
-  .territory-card .tc-image {
-    flex: 1;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .territory-card .tc-image img {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: contain;
-    object-position: bottom center;
-  }
-
-  /* Mobile: tarjeta horizontal */
-  @media (max-width: 900px) {
-    .territory-card {
-      flex-direction: row;
-      min-height: 130px;
-      align-items: center;
-    }
-    .territory-card .tc-content {
-      padding: 18px 0 18px 18px;
-      flex: 1;
-    }
-    .tc-icon { width: 42px; height: 42px; font-size: 18px; margin-bottom: 10px; }
-    .tc-name { font-size: 22px; }
-    .tc-desc { font-size: 11.5px; }
-    .territory-card .tc-image {
-      width: 170px; height: 150px;
-      flex: none;
-    }
-    .territory-card .tc-image img {
-      width: 100%; height: 100%;
-      object-fit: contain;
-      object-position: center;
-    }
-    .tc-arrow { display: flex; }
-  }
-  @media (min-width: 901px) {
-    .tc-arrow { display: none; }
-  }
-
-  .tc-arrow {
-    position: absolute; right: 14px; top: 50%;
-    transform: translateY(-50%);
-    width: 32px; height: 32px;
-    background: rgba(255,255,255,0.25);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 3; flex-shrink: 0;
-  }
-  .tc-arrow svg { width: 14px; height: 14px; stroke: white; fill: none; }
-
-  /* FOOTER STATS — fondo gris, íconos oscuros */
-  .home-stats {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: #f0f2f5;
-    border-top: 1px solid #d1d5db;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    padding: 10px 0 14px;
-    z-index: 50;
-  }
-  .stat-item {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    padding: 0 8px;
-    border-right: 1px solid #d1d5db;
-  }
-  .stat-item:last-child { border-right: none; }
-  .stat-icon {
-    width: 28px; height: 28px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .stat-icon svg { width: 22px; height: 22px; stroke: #374151; fill: none; stroke-width: 1.5; }
-  .stat-label {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 700; font-size: 10px;
-    color: #111827; text-transform: uppercase;
-    letter-spacing: 0.4px; text-align: center; line-height: 1.2;
-  }
-  .stat-desc {
-    font-size: 8.5px; font-weight: 400;
-    color: #6B7280;
-    text-align: center; line-height: 1.3;
-  }
-  .stat-item.highlight .stat-label { color: #374151; }
-  /* Último stat con borde y fondo sutil como en mockup */
-  .stat-item.highlight {
-    background: #e8edf3;
-    border-radius: 8px;
-    margin: 2px 6px 2px 0;
-    padding: 4px 10px;
-  }
-
-  /* ════════════════════════════════
-     SCREEN 2 — TERRITORIO
-  ════════════════════════════════ */
-  #screen-territorio .territorio-hero {
-    padding: 20px 16px 16px;
-    text-align: center;
-    margin-bottom: 4px;
-  }
-  .territorio-hero h2 {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 900; font-size: 32px;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    line-height: 1;
-    margin-bottom: 6px;
-  }
-  .territorio-hero p {
-    font-size: 13px; color: var(--text-soft);
-    line-height: 1.4;
-  }
-
-  /* Category section */
-  .cat-section { margin-bottom: 8px; }
+  .cat-section { margin-bottom: 6px; }
   .cat-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px 10px;
+    padding: 16px 16px 10px;
   }
   .cat-title-wrap { display: flex; align-items: center; gap: 10px; }
   .cat-icon-circle {
-    width: 34px; height: 34px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
   }
   .cat-name {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 800; font-size: 16px;
-    text-transform: uppercase; letter-spacing: 1px;
+    font-weight: 800; font-size: 15px;
+    text-transform: uppercase; letter-spacing: 0.8px;
   }
-  .cat-count {
-    font-size: 11px; color: var(--text-soft);
-    font-weight: 600;
+  .cat-count { font-size: 11px; color: var(--text-soft); font-weight: 600; }
+
+  .scroll-hint {
+    text-align: right; padding: 0 16px 4px;
+    font-size: 10px; color: var(--text-soft);
   }
 
-  /* Carousel */
-  .carousel-wrap {
-    position: relative;
-    padding: 0 16px;
-  }
+  .carousel-wrap { padding: 0 16px; }
   .carousel {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 10px;
-    padding-right: 32px;
+    display: flex; gap: 10px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    padding-bottom: 10px; padding-right: 32px;
   }
   .carousel::-webkit-scrollbar { display: none; }
 
   .product-card {
-    scroll-snap-align: start;
-    flex-shrink: 0;
-    width: 150px;
-    background: var(--white);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    scroll-snap-align: start; flex-shrink: 0; width: 148px;
+    background: var(--white); border-radius: 14px; overflow: hidden;
+    cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     transition: transform 0.15s;
   }
   .product-card:active { transform: scale(0.97); }
 
-  .pc-img-wrap {
-    width: 100%; height: 140px;
-    background: #f8f9fa;
-    position: relative; overflow: hidden;
-  }
-  .pc-img-wrap img {
-    width: 100%; height: 100%;
-    object-fit: contain;
-    padding: 8px;
-  }
-  .pc-body { padding: 10px 10px 12px; }
-  .pc-brand {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 800; font-size: 12px;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    margin-bottom: 2px;
-  }
+  .pc-img-wrap { width: 100%; height: 138px; background: #f8f9fa; overflow: hidden; }
+  .pc-img-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+  .pc-body { padding: 9px 10px 12px; }
+  .pc-brand { font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 2px; }
   .pc-name {
-    font-size: 11px; color: var(--text-mid);
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-size: 11px; color: var(--text-mid); line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
   .pc-claim {
-    margin-top: 6px;
-    display: inline-block;
-    font-size: 9px; font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 20px;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-top: 5px; display: inline-block;
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
+    border-radius: 20px; color: white;
+    text-transform: uppercase; letter-spacing: 0.4px;
   }
 
-  /* Carousel dots */
-  .carousel-dots {
-    display: flex; justify-content: center; gap: 5px;
-    padding: 6px 0 16px;
-  }
-  .cdot {
-    width: 6px; height: 4px;
-    border-radius: 3px;
-    background: var(--gray-light);
-    transition: all 0.2s;
-  }
+  .carousel-dots { display: flex; justify-content: center; gap: 5px; padding: 6px 0 18px; }
+  .cdot { width: 6px; height: 4px; border-radius: 3px; background: var(--gray-light); transition: all 0.2s; }
   .cdot.active { width: 18px; }
 
-  /* ════════════════════════════════
-     SCREEN 3 — PRODUCTO
-  ════════════════════════════════ */
-  #screen-producto {
-    background: var(--gray-bg);
-  }
+  /* SCREEN 3 — PRODUCTO */
+  #screen-producto { background: var(--gray-bg); }
 
   .producto-img-section {
-    background: var(--white);
-    padding: 20px 20px 16px;
-    display: flex; justify-content: center; align-items: center;
-    min-height: 240px;
+    background: var(--white); padding: 24px 20px 18px;
+    display: flex; justify-content: center; align-items: center; min-height: 230px;
   }
-  .producto-img-section img {
-    max-width: 220px; max-height: 220px;
-    width: 100%; object-fit: contain;
-    border-radius: 12px;
-  }
+  .producto-img-section img { max-width: 210px; max-height: 210px; width: 100%; object-fit: contain; }
 
-  .producto-body {
-    padding: 16px 16px 100px;
-  }
+  .producto-body { padding: 16px 16px 100px; }
 
   .prod-cat-badge {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    color: white;
-    font-family: 'Manrope', sans-serif;
-    font-weight: 700; font-size: 11px;
-    text-transform: uppercase; letter-spacing: 1px;
+    padding: 5px 12px; border-radius: 20px; color: white;
+    font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
     margin-bottom: 12px;
   }
+  .prod-brand { font-weight: 900; font-size: 26px; text-transform: uppercase; line-height: 1; margin-bottom: 4px; }
+  .prod-name { font-size: 15px; color: var(--text-mid); font-weight: 500; line-height: 1.3; margin-bottom: 18px; }
 
-  .prod-brand {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 900; font-size: 28px;
-    text-transform: uppercase;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .prod-name {
-    font-size: 16px; color: var(--text-mid);
-    font-weight: 500; line-height: 1.3;
-    margin-bottom: 20px;
-  }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  .info-card {
-    background: var(--white);
-    border-radius: 12px;
-    padding: 12px 14px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-  }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .info-card { background: var(--white); border-radius: 12px; padding: 11px 13px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
   .info-card.full { grid-column: 1 / -1; }
-  .info-label {
-    font-size: 9px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    margin-bottom: 5px;
-  }
-  .info-value {
-    font-size: 13px; color: var(--text-dark);
-    font-weight: 500; line-height: 1.4;
-  }
+  .info-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
+  .info-value { font-size: 13px; color: var(--text-dark); font-weight: 500; line-height: 1.4; }
 
   .racional-card {
-    background: var(--white);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-    border-left: 4px solid;
+    background: var(--white); border-radius: 12px; padding: 13px 15px;
+    margin-bottom: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); border-left: 4px solid;
   }
-  .racional-label {
-    font-size: 9px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    margin-bottom: 6px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .racional-text {
-    font-size: 13px; color: var(--text-mid);
-    line-height: 1.5;
-  }
+  .racional-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 5px; }
+  .racional-text { font-size: 13px; color: var(--text-mid); line-height: 1.5; }
 
-  /* Oportunidad card (otras industrias) */
   .oportunidad-card {
     background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    border: 1px solid #BFDBFE;
+    border-radius: 12px; padding: 13px 15px; margin-bottom: 10px; border: 1px solid #BFDBFE;
   }
-  .oportunidad-label {
-    font-size: 9px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    color: #1D4ED8;
-    margin-bottom: 6px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .oportunidad-text {
-    font-size: 12px; color: #1e3a5f;
-    line-height: 1.5;
-  }
+  .oportunidad-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #1D4ED8; margin-bottom: 5px; }
+  .oportunidad-text { font-size: 12px; color: #1e3a5f; line-height: 1.5; }
 
-  /* ── COLORES POR TERRITORIO ── */
+  /* COLORES */
   .color-mg { color: var(--mg); }
-  .color-ns { color: var(--ns); }
+  .color-ns { color: var(--ns-dark); }
   .color-ii { color: var(--ii); }
-  .color-hb { color: var(--hb); }
+  .color-hb { color: var(--hb-dark); }
 
   .bg-mg { background-color: var(--mg); }
-  .bg-ns { background-color: var(--ns); }
+  .bg-ns { background-color: var(--ns-dark); }
   .bg-ii { background-color: var(--ii); }
-  .bg-hb { background-color: var(--hb); }
+  .bg-hb { background-color: var(--hb-dark); }
 
   .border-mg { border-color: var(--mg); }
-  .border-ns { border-color: var(--ns); }
+  .border-ns { border-color: var(--ns-dark); }
   .border-ii { border-color: var(--ii); }
-  .border-hb { border-color: var(--hb); }
+  .border-hb { border-color: var(--hb-dark); }
 
   .label-mg { color: var(--mg); }
-  .label-ns { color: var(--ns); }
+  .label-ns { color: var(--ns-dark); }
   .label-ii { color: var(--ii); }
-  .label-hb { color: var(--hb); }
+  .label-hb { color: var(--hb-dark); }
 
-  /* ── ANIMACIONES ── */
+  .cdot-mg.active { background: var(--mg); }
+  .cdot-ns.active { background: var(--ns-dark); }
+  .cdot-ii.active { background: var(--ii); }
+  .cdot-hb.active { background: var(--hb-dark); }
+
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
+    from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .screen.active > * {
-    animation: fadeUp 0.3s ease both;
-  }
-  .territory-card { animation: fadeUp 0.3s ease both; }
-  .territory-card:nth-child(2) { animation-delay: 0.05s; }
-  .territory-card:nth-child(3) { animation-delay: 0.10s; }
-  .territory-card:nth-child(4) { animation-delay: 0.15s; }
+  .screen.active > * { animation: fadeUp 0.28s ease both; }
 
-  /* ── LOADING IMG ── */
-  .pc-img-wrap img, .producto-img-section img {
-    transition: opacity 0.3s;
-  }
-  img.loading { opacity: 0; }
-  img.loaded { opacity: 1; }
-
-  /* ── SCROLL HINT ── */
-  .scroll-hint {
-    text-align: right;
-    padding: 0 16px 4px;
-    font-size: 10px; color: var(--text-soft);
-    display: flex; align-items: center; justify-content: flex-end; gap: 4px;
-  }
-
-  /* ── EMPTY STATE ── */
-  .empty-state {
-    text-align: center; padding: 40px 20px;
-    color: var(--text-soft); font-size: 14px;
+  @media (max-width: 600px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .info-card.full { grid-column: 1; }
+    .prod-brand { font-size: 22px; }
   }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
+<header id="mainHeader">
   <div class="header-logo">
-    <div class="logo-title">VENTANA AL MUNDO</div>
-    <div class="logo-sub">El sistema vivo que convierte señales en inteligencia accionable</div>
+    <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/logoventanablanco.png"
+         alt="Ventana al Mundo"
+         onerror="this.style.display='none'; document.querySelector('.header-logo-fallback').style.display='block';">
+    <span class="header-logo-fallback">VENTANA AL MUNDO</span>
   </div>
   <button class="header-back" id="btnBack" onclick="goBack()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <path d="M19 12H5M12 5l-7 7 7 7"/>
     </svg>
-    <span id="backLabel">Inicio</span>
+    <span id="backLabel">Regresar</span>
   </button>
-  <div class="user-badge">
-    <span class="user-badge-label">Usuario</span>
-    <div class="user-avatar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-      </svg>
-    </div>
-    <span class="user-chevron">▾</span>
-  </div>
 </header>
 
-<!-- ══════════════════════════════════
-     SCREEN 1: HOME
-══════════════════════════════════ -->
-<div id="screen-home" class="screen active">
-  <div class="hero">
-    <h1>BIENVENIDO A VENTANA AL MUNDO</h1>
-    <div class="hero-divider"></div>
-    <p>Explora tendencias globales y descubre productos innovadores en alimentos, bebidas y otras industrias, organizados por nuestros <a href="#">4 territorios estratégicos</a>.</p>
-    <div class="hero-cta">Selecciona un territorio para comenzar</div>
-  </div>
-
-  <div class="territories-list">
-
-    <!-- MEXICAN GATEKEEPING -->
-    <div class="territory-card mg" onclick="openTerritorio('mg')">
-      <img class="tc-full-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/A%20Mexican%20Gatekeeping.png" alt="Mexican Gatekeeping" onerror="this.style.opacity='0.3'">
-    </div>
-
-    <!-- NEW SIMPLICITY -->
-    <div class="territory-card ns" onclick="openTerritorio('ns')">
-      <img class="tc-full-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/B%20New%20Simplicity.png" alt="New Simplicity" onerror="this.style.opacity='0.3'">
-    </div>
-
-    <!-- INFINITE INDULGENCE -->
-    <div class="territory-card ii" onclick="openTerritorio('ii')">
-      <img class="tc-full-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/C%20Infinite%20indulgence.png" alt="Infinite Indulgence" onerror="this.style.opacity='0.3'">
-    </div>
-
-    <!-- HACKING BODY -->
-    <div class="territory-card hb" onclick="openTerritorio('hb')">
-      <img class="tc-full-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/D%20Hacking%20body.png" alt="Hacking Body" onerror="this.style.opacity='0.3'">
-    </div>
-
-  </div>
-
-  <!-- FOOTER STATS -->
-  <div class="home-stats">
-    <div class="stat-item">
-      <div class="stat-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
-      </div>
-      <div class="stat-label">Inteligencia<br>Global</div>
-      <div class="stat-desc">Señales y tendencias<br>de todo el mundo.</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
-      </div>
-      <div class="stat-label">Curaduría<br>Estratégica</div>
-      <div class="stat-desc">Productos seleccionados<br>por su relevancia e impacto.</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
-      </div>
-      <div class="stat-label">Inspiración<br>Accionable</div>
-      <div class="stat-desc">Ideas que te ayudan a innovar<br>y tomar mejores decisiones.</div>
-    </div>
-    <div class="stat-item highlight">
-      <div class="stat-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-      </div>
-      <div class="stat-label">Repositorio en<br>constante actualización</div>
-    </div>
-  </div>
+<!-- PANTALLA SIN QR VÁLIDO -->
+<div id="screen-noterritorio" class="screen active">
+  <div class="big-icon">🌐</div>
+  <h2>Ventana al Mundo</h2>
+  <p>Escanea el código QR de tu territorio para comenzar la exploración.</p>
 </div>
 
-<!-- ══════════════════════════════════
-     SCREEN 2: TERRITORIO
-══════════════════════════════════ -->
+<!-- SCREEN 2: TERRITORIO -->
 <div id="screen-territorio" class="screen">
-  <div class="territorio-hero">
-    <h2 id="territorio-title" class="color-mg">TERRITORIO</h2>
-    <p id="territorio-desc">Descripción del territorio</p>
-  </div>
+  <img id="territorio-hero-img" class="territorio-hero-img" src="" alt="">
   <div id="territorio-content"></div>
 </div>
 
-<!-- ══════════════════════════════════
-     SCREEN 3: PRODUCTO
-══════════════════════════════════ -->
+<!-- SCREEN 3: PRODUCTO -->
 <div id="screen-producto" class="screen">
-  <div class="producto-img-section" id="prod-img-section">
+  <div class="producto-img-section">
     <img id="prod-img" src="" alt="">
   </div>
   <div class="producto-body" id="prod-body"></div>
 </div>
 
 <script>
-// Helper: encode filename para URLs
-function imgUrl(filename) {
-  const base = 'https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/';
-  // Encode cada parte excepto los guiones bajos y puntos
-  return base + filename.split('').map(c => {
-    if (/[a-zA-Z0-9_.\-]/.test(c)) return c;
-    return encodeURIComponent(c);
-  }).join('');
+const IMG_BASE  = 'https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/';
+const IMG_IFACE = 'https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/';
+
+function imgUrl(f) {
+  return IMG_BASE + f.split('').map(c => /[a-zA-Z0-9_.\-]/.test(c) ? c : encodeURIComponent(c)).join('');
 }
 
-// ══════════════════════════════════
-//  DATOS — 129 PRODUCTOS
-// ══════════════════════════════════
+const TERRITORIES = {
+  mg: { name:'MEXICAN GATEKEEPING', desc:'Tradición que evoluciona, auténtica y con propósito.',       color:'#FF2D9B', colorClass:'mg', hero: IMG_IFACE + '02mexicangatekeeping.png' },
+  ns: { name:'NEW SIMPLICITY',      desc:'Productos honestos, funcionales y sin complicaciones.',       color:'#8a7460', colorClass:'ns', hero: IMG_IFACE + '03newsimplicity.png' },
+  ii: { name:'INFINITE INDULGENCE', desc:'Placer sin límites, experiencias que sorprenden y deleitan.', color:'#7C3AED', colorClass:'ii', hero: IMG_IFACE + '01infiniteindulgence.png' },
+  hb: { name:'HACKING BODY',        desc:'Bienestar optimizado, rendimiento y cuidado consciente.',    color:'#3a9ec4', colorClass:'hb', hero: IMG_IFACE + '04hackingbody.png' }
+};
+
 const PRODUCTS = [
-  // ── MEXICAN GATEKEEPING ── F&B
   {id:1,file:"01_Indio_Agave.avif",brand:"Indio",name:"Indio Agave",cat:"Bebidas alcohólicas",territory:"mg",tab:"fb",ingredient:"Agave",benefit:"Identidad mexicana premium",claim:"Edición limitada",racional:"Usa el agave como guiño aspiracional de origen mexicano dentro de una cerveza contemporánea."},
   {id:2,file:"02_Un_Sabor_Autentico_Instant_Ramen_Noodle_POZOLE.jpg",brand:"Un Sabor Auténtico",name:"Instant Ramen Noodle POZOLE",cat:"Instant ramen",territory:"mg",tab:"fb",ingredient:"Sabor pozole",benefit:"Conveniencia cultural",claim:"Un Sabor Auténtico",racional:"Lleva un platillo tradicional mexicano a un formato global, rápido y cotidiano."},
   {id:3,file:"03_BelAra_NaturaBef_Totopos_de_Chapulin_con_Mole.jpg",brand:"BelAra",name:"NaturaBef Totopos de Chapulín con Mole",cat:"Snacks tradicionales",territory:"mg",tab:"fb",ingredient:"Chapulín con mole",benefit:"Tradición en formato snack",claim:"Chapulín con mole",racional:"Convierte el chapulín con mole en una botana moderna sin perder su raíz gastronómica mexicana."},
@@ -771,23 +305,21 @@ const PRODUCTS = [
   {id:18,file:"18_Jumex_Aguas_Frescas_Mango.webp",brand:"Jumex",name:"Aguas Frescas Mango",cat:"Bebidas",territory:"mg",tab:"fb",ingredient:"Mango",benefit:"Conveniencia cultural",claim:"Aguas Frescas",racional:"Lleva el sabor de agua fresca de mango a un formato moderno y portátil."},
   {id:19,file:"19_HEB_Dulce_de_Leche_Corn_Flakes.jpg",brand:"HEB",name:"Dulce de Leche Corn Flakes",cat:"Cereal",territory:"mg",tab:"fb",ingredient:"Dulce de leche",benefit:"Comfort matutino",claim:"Naturally flavored",racional:"Integra dulce de leche en un cereal cotidiano, conectando desayuno con indulgencia latinoamericana."},
   {id:20,file:"20_Juanitas_Amaranto_Alegrias_de_Amaranto.png",brand:"Juanitas Amaranto",name:"Alegrías de Amaranto",cat:"Confitería tradicional",territory:"mg",tab:"fb",ingredient:"Amaranto",benefit:"Energía tradicional",claim:"Alegrías de amaranto",racional:"Preserva la alegría de amaranto como snack mexicano de origen ancestral y familiar."},
-  // ── MEXICAN GATEKEEPING ── Otras Industrias
-  {id:79,file:"79_Yuya_Labial_Mate_La_Sirena.png",brand:"Yuya",name:'Labial Mate "La Sirena"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial líquido mate",benefit:"Beauty con estética mexicana coleccionable",claim:"",racional:"Resignifica imaginarios mexicanos y fantásticos como objeto beauty coleccionable y culturalmente aspiracional.",oportunidad:"Ediciones limitadas de bebidas o snacks inspiradas en leyendas, personajes y sabores regionales."},
-  {id:80,file:"80_Yuya_Labial_Mate_Mi_amor.png",brand:"Yuya",name:'Labial Mate "Mi amor"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Naming emocional como driver de pertenencia",claim:"",racional:"Convierte expresiones afectivas mexicanas en códigos de color, nombre y deseo.",oportunidad:"Sabores con nombres coloquiales mexicanos que generen cariño, memoria y conversación."},
-  {id:81,file:"81_Yuya_Labial_Mate_Quedate.png",brand:"Yuya",name:'Labial Mate "Quédate"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Productos nombrados con frases culturales y emocionales",claim:"",racional:"Usa lenguaje íntimo y cotidiano para transformar un labial en pieza de identidad personal.",oportunidad:"Claims y sabores que suenen a conversación real: antojo, cariño, ritual y pertenencia."},
-  {id:82,file:"82_Yuya_Labial_Velvet_Te_quiero.png",brand:"Yuya",name:'Labial Velvet "Te quiero"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial velvet",benefit:"Beauty sensorial + lenguaje afectivo",claim:"",racional:"Lleva el lenguaje afectivo mexicano a un acabado beauty sensorial y suave.",oportunidad:"Texturas indulgentes con claims emocionales: cremoso, apapacho, cariño, ritual."},
-  {id:83,file:"83_Yuya_Labial_Mate_Chiquita.png",brand:"Yuya",name:'Labial Mate "Chiquita"',cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Lenguaje mexicano como equity de marca",claim:"",racional:"Reinterpreta diminutivos y expresiones mexicanas como parte de un sistema beauty aspiracional.",oportunidad:"Snacks y bebidas con nombres coloquiales que generen identificación instantánea."},
+  {id:79,file:"79_Yuya_Labial_Mate_La_Sirena.png",brand:"Yuya",name:"Labial Mate La Sirena",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial líquido mate",benefit:"Beauty con estética mexicana coleccionable",claim:"",racional:"Resignifica imaginarios mexicanos y fantásticos como objeto beauty coleccionable y culturalmente aspiracional.",oportunidad:"Ediciones limitadas de bebidas o snacks inspiradas en leyendas, personajes y sabores regionales."},
+  {id:80,file:"80_Yuya_Labial_Mate_Mi_amor.png",brand:"Yuya",name:"Labial Mate Mi amor",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Naming emocional como driver de pertenencia",claim:"",racional:"Convierte expresiones afectivas mexicanas en códigos de color, nombre y deseo.",oportunidad:"Sabores con nombres coloquiales mexicanos que generen cariño, memoria y conversación."},
+  {id:81,file:"81_Yuya_Labial_Mate_Quedate.png",brand:"Yuya",name:"Labial Mate Quédate",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Productos nombrados con frases culturales y emocionales",claim:"",racional:"Usa lenguaje íntimo y cotidiano para transformar un labial en pieza de identidad personal.",oportunidad:"Claims y sabores que suenen a conversación real: antojo, cariño, ritual y pertenencia."},
+  {id:82,file:"82_Yuya_Labial_Velvet_Te_quiero.png",brand:"Yuya",name:"Labial Velvet Te quiero",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial velvet",benefit:"Beauty sensorial + lenguaje afectivo",claim:"",racional:"Lleva el lenguaje afectivo mexicano a un acabado beauty sensorial y suave.",oportunidad:"Texturas indulgentes con claims emocionales: cremoso, apapacho, cariño, ritual."},
+  {id:83,file:"83_Yuya_Labial_Mate_Chiquita.png",brand:"Yuya",name:"Labial Mate Chiquita",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial mate",benefit:"Lenguaje mexicano como equity de marca",claim:"",racional:"Reinterpreta diminutivos y expresiones mexicanas como parte de un sistema beauty aspiracional.",oportunidad:"Snacks y bebidas con nombres coloquiales que generen identificación instantánea."},
   {id:84,file:"84_Maybelline_Super_Stay_Matte_Ink_Frida_Kahlo.jpg",brand:"Maybelline",name:"Super Stay Matte Ink Frida Kahlo",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Labial larga duración",benefit:"Íconos culturales convertidos en drops de consumo",claim:"",racional:"Asocia una marca global con un ícono cultural mexicano para elevar el maquillaje a statement identitario.",oportunidad:"Colabs F&B con artistas, artesanos o símbolos mexicanos reinterpretados para nuevas generaciones."},
   {id:85,file:"85_Perfume_Frida_Kahlo.webp",brand:"Frida Kahlo",name:"Perfume Frida Kahlo",cat:"Fragancias",territory:"mg",tab:"other",ingredient:"Fragancia Frida Kahlo",benefit:"Heritage convertido en experiencia sensorial",claim:"",racional:"Transforma el legado artístico de Frida en una experiencia olfativa aspiracional.",oportunidad:"Bebidas y postres aromáticos inspirados en flores, mercados, jardines y casas icónicas mexicanas."},
   {id:86,file:"86_Rubor_Nopal_Milta.png",brand:"Milta",name:"Rubor Nopal",cat:"Beauty",territory:"mg",tab:"other",ingredient:"Nopal",benefit:"Botánicos mexicanos en beauty premium",claim:"",racional:"Eleva el nopal como ingrediente/ícono mexicano dentro de maquillaje natural y local.",oportunidad:"Ingredientes como nopal, tuna, cacao, maíz o agave en lanzamientos BFY o sensoriales."},
   {id:87,file:"87_Shampoo_Huichol.jpg",brand:"Huichol",name:"Shampoo Huichol",cat:"Hair Care",territory:"mg",tab:"other",ingredient:"Arte huichol",benefit:"Packaging con códigos artesanales mexicanos",claim:"",racional:"Integra estética wixárika/huichol en cuidado personal para comunicar herencia visual mexicana.",oportunidad:"Empaques F&B con patrones regionales y narrativas de origen bien curadas."},
-  {id:88,file:"88_Juego_de_Mesa_Al_Chile.webp",brand:"Al Chile",name:'Juego de Mesa "Al Chile"',cat:"Juegos / Entretenimiento",territory:"mg",tab:"other",ingredient:"Lenguaje popular mexicano",benefit:"Lenguaje popular como plataforma de interacción",claim:"",racional:"Convierte una expresión mexicana en dinámica social, humor y conversación.",oportunidad:"Promociones o empaques con retos, preguntas y dinámicas inspiradas en humor mexicano."},
+  {id:88,file:"88_Juego_de_Mesa_Al_Chile.webp",brand:"Al Chile",name:"Juego de Mesa Al Chile",cat:"Juegos / Entretenimiento",territory:"mg",tab:"other",ingredient:"Lenguaje popular mexicano",benefit:"Lenguaje popular como plataforma de interacción",claim:"",racional:"Convierte una expresión mexicana en dinámica social, humor y conversación.",oportunidad:"Promociones o empaques con retos, preguntas y dinámicas inspiradas en humor mexicano."},
   {id:89,file:"89_Jersey_Charly_Chapulin_Colorado.webp",brand:"Charly",name:"Jersey Chapulín Colorado",cat:"Fashion / Sportswear",territory:"mg",tab:"other",ingredient:"Nostalgia televisiva",benefit:"Nostalgia pop en productos wearable",claim:"",racional:"Fusiona cultura pop mexicana con sportswear para convertir nostalgia en pertenencia visible.",oportunidad:"Ediciones F&B con personajes o universos mexicanos reinterpretados desde cultura pop."},
   {id:90,file:"90_Playera_Lucha_Libre.jpg",brand:"Lucha Libre",name:"Playera Lucha Libre",cat:"Fashion",territory:"mg",tab:"other",ingredient:"Gráfica lucha libre",benefit:"Lucha libre como estética urbana",claim:"",racional:"Lleva la lucha libre de espectáculo cultural a código de moda urbana.",oportunidad:"Botanas y bebidas con diseño de máscaras, duelos de sabor y ritual de arena."},
   {id:91,file:"91_Playera_Chusma.webp",brand:"Chusma",name:"Playera Chusma",cat:"Fashion",territory:"mg",tab:"other",ingredient:"Nostalgia televisiva",benefit:"Merch nostálgico como identidad social",claim:"",racional:"Reivindica la nostalgia de la televisión mexicana como statement de moda y humor.",oportunidad:"Snacks coleccionables que rescaten frases, personajes y momentos de cultura popular."},
   {id:92,file:"92_Gorra_Mexico_Aguila.png",brand:"México",name:"Gorra México Águila",cat:"Fashion / Accessories",territory:"mg",tab:"other",ingredient:"Símbolos nacionales",benefit:"Patriotismo cotidiano en accesorios",claim:"",racional:"Convierte símbolos patrios en accesorio streetwear de orgullo cotidiano.",oportunidad:"Lanzamientos para celebraciones mexicanas con diseño coleccionable y uso social."},
   {id:93,file:"93_Tenis_Panam_Mistico.png",brand:"Panam",name:"Tenis Panam Místico",cat:"Footwear",territory:"mg",tab:"other",ingredient:"Lucha libre / Heritage",benefit:"Heritage local + fandom deportivo/cultural",claim:"",racional:"Une una marca mexicana clásica con referencias de lucha libre para actualizar su relevancia cultural.",oportunidad:"Colaboraciones F&B con fandoms mexicanos: fútbol, lucha, música regional y cultura popular."},
-  // ── NEW SIMPLICITY ── F&B
   {id:21,file:"21_Amaranth_Chips_Chipotle_and_Sal_Himalaya.webp",brand:"Amaranth",name:"Chips Chipotle & Sal Himalaya",cat:"Better-for-you snacks",territory:"ns",tab:"fb",ingredient:"Amaranto",benefit:"Ingredientes funcionales",claim:"Chipotle & Sal Himalaya",racional:"Simplifica el consumo de ingredientes ancestrales y funcionales en formatos accesibles y cotidianos."},
   {id:22,file:"22_Come_verde_Chips_de_Jicama_Enchilada.webp",brand:"Come verde",name:"Chips de Jícama Enchilada",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Jícama",benefit:"Snack vegetal",claim:"Chips de Jícama",racional:"Convierte la jícama en un chip simple, reconocible y ligero frente a botanas más procesadas."},
   {id:23,file:"23_Come_verde_Chips_de_Camote_Enchilado.jpg",brand:"Come verde",name:"Chips de Camote Enchilado",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Camote",benefit:"Ingredientes naturales",claim:"Chips de Camote",racional:"Usa camote como base vegetal para entregar una botana sencilla con sabor familiar."},
@@ -799,7 +331,7 @@ const PRODUCTS = [
   {id:29,file:"29_Bare_Cinnamon_Apple_Chips.jpg",brand:"Bare",name:"Cinnamon Apple Chips",cat:"Fruit snacks",territory:"ns",tab:"fb",ingredient:"Manzana y canela",benefit:"Snack de fruta",claim:"Baked crunchy",racional:"Entrega fruta horneada con una lista corta de ingredientes y sabor reconocible."},
   {id:30,file:"30_Bare_Simply_Banana_Chips.jpg",brand:"Bare",name:"Simply Banana Chips",cat:"Fruit snacks",territory:"ns",tab:"fb",ingredient:"Plátano",benefit:"Energía natural",claim:"Simply Banana Chips",racional:"Presenta plátano en un formato crujiente y simple, fácil de leer como alternativa snack."},
   {id:31,file:"31_Partake_Chocolate_Chip.webp",brand:"Partake",name:"Chocolate Chip",cat:"Better-for-you cookies",territory:"ns",tab:"fb",ingredient:"Chocolate chip",benefit:"Inclusión alimentaria",claim:"Soft baked cookies",racional:"Ofrece una galleta inclusiva con formulación clara para consumidores con restricciones alimentarias."},
-  {id:32,file:"32_Partake_Ginger_Snap.webp",brand:"Partake",name:"Ginger Snap",cat:"Better-for-you cookies",territory:"ns",tab:"fb",ingredient:"Jengibre",benefit:"Indulgencia permisible",claim:"Crunchy cookies",racional:"Simplifica la indulgencia con una galleta de jengibre con ingredientes más accesibles para distintos consumidores."},
+  {id:32,file:"32_Partake_Ginger_Snap.webp",brand:"Partake",name:"Ginger Snap",cat:"Better-for-you cookies",territory:"ns",tab:"fb",ingredient:"Jengibre",benefit:"Indulgencia permisible",claim:"Crunchy cookies",racional:"Simplifica la indulgencia con una galleta de jengibre con ingredientes más accesibles."},
   {id:33,file:"33_Central_Market_Veggie_Chips_Garden_Herb.webp",brand:"Central Market",name:"Veggie Chips Garden Herb",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Vegetales y garden herb",benefit:"Snack vegetal",claim:"Veggie Chips",racional:"Convierte vegetales en un snack crujiente con señal de sabor herbal y lectura más natural."},
   {id:34,file:"34_Jacksons_Sweet_Potato_Chips_Spicy_Jalapeno.webp",brand:"Jackson's",name:"Sweet Potato Chips Spicy Jalapeño",cat:"Snacks vegetales",territory:"ns",tab:"fb",ingredient:"Camote y aceite de aguacate",benefit:"Ingredientes naturales",claim:"Avocado Oil",racional:"Usa camote y aceite de aguacate para comunicar naturalidad y mejor calidad de grasa."},
   {id:35,file:"35_Chomps_Original_Beef_Sticks.jpg",brand:"Chomps",name:"Original Beef Sticks",cat:"Protein snacks",territory:"ns",tab:"fb",ingredient:"Carne de res grass-fed",benefit:"Proteína práctica",claim:"10g protein",racional:"Ofrece proteína práctica y limpia con una formulación directa."},
@@ -811,7 +343,6 @@ const PRODUCTS = [
   {id:41,file:"41_Whisps_Cheddar_Cheese_Crisps.avif",brand:"Whisps",name:"Cheddar Cheese Crisps",cat:"Cheese snacks",territory:"ns",tab:"fb",ingredient:"Queso cheddar",benefit:"Proteína y crunch",claim:"Cheddar Cheese Crisps",racional:"Reduce el snack a queso crujiente con alto sabor y pocos ingredientes percibidos."},
   {id:42,file:"42_Thats_it_Fiber_Apple_Berries.jpg",brand:"That's it",name:"Fiber Apple Berries",cat:"Fruit snacks",territory:"ns",tab:"fb",ingredient:"Manzana y berries",benefit:"Fibra práctica",claim:"7g fiber",racional:"Comunica fruta y fibra en un formato simple, directo y fácil de entender."},
   {id:43,file:"43_Central_Market_Wicked_Thin_Cookies.webp",brand:"Central Market",name:"Wicked Thin Cookies",cat:"Snacks dulces",territory:"ns",tab:"fb",ingredient:"Almendra",benefit:"Ligereza",claim:"Wicked Thin",racional:"Ofrece galletas delgadas como indulgencia ligera y controlada."},
-  // ── NEW SIMPLICITY ── Otras Industrias
   {id:94,file:"94_Kitsch_Nourishing_Solid_Shampoo_Castor_Oil.jpg",brand:"Kit·sch",name:"Nourishing Solid Shampoo Castor Oil",cat:"Hair Care",territory:"ns",tab:"other",ingredient:"Aceite de ricino",benefit:"Formatos sólidos y concentrados como nueva conveniencia",claim:"",racional:"Reduce la rutina capilar a un formato sólido, limpio y fácil de entender.",oportunidad:"Snacks o bebidas concentradas, refillables o de baja complejidad con ingredientes claros."},
   {id:95,file:"95_Plink_Garbage_Disposal_Cleaner.jpg",brand:"Plink",name:"Garbage Disposal Cleaner",cat:"Home Care",territory:"ns",tab:"other",ingredient:"Formato dosificado",benefit:"Micro-soluciones de un solo uso",claim:"",racional:"Resuelve una tarea doméstica incómoda con un formato simple, visual y dosificado.",oportunidad:"F&B funcional en porciones dosificadas para necesidades concretas: energía, calma, digestión."},
   {id:96,file:"96_OFF_Post-Bite_Patches.jpg",brand:"OFF!",name:"Post-Bite Patches",cat:"Personal Care",territory:"ns",tab:"other",ingredient:"Parches hidrocoloides",benefit:"Patchification de soluciones de cuidado personal",claim:"",racional:"Transforma el alivio de picaduras en un parche claro, portable y fácil de usar.",oportunidad:"Snacks o bebidas con formatos portables y beneficios puntuales."},
@@ -823,7 +354,6 @@ const PRODUCTS = [
   {id:102,file:"102_Tide_PODS_Free_and_Gentle.png",brand:"Tide",name:"PODS Free & Gentle",cat:"Laundry Care",territory:"ns",tab:"other",ingredient:"Detergente en pods",benefit:"Pre-measured convenience",claim:"",racional:"Simplifica el lavado con dosis premedidas y fórmula libre de irritantes fuertes.",oportunidad:"Porciones F&B listas y balanceadas: no measuring, no prep, no mess."},
   {id:103,file:"103_Rocketbook_Fusion_Notebook.png",brand:"Rocketbook",name:"Fusion Notebook",cat:"Stationery / Productivity Tech",territory:"ns",tab:"other",ingredient:"Cuaderno reutilizable",benefit:"Hybrid analog-digital tools",claim:"",racional:"Combina lo analógico y digital para ordenar productividad sin acumular papel.",oportunidad:"Packaging o experiencias F&B con QR útiles: tracker, ritual, personalización, refill reminders."},
   {id:104,file:"104_Bala_Bangles_pink_weights.jpg",brand:"Bala",name:"Bangles Pink Weights",cat:"Fitness Accessories",territory:"ns",tab:"other",ingredient:"Pesas wearable",benefit:"Fitness como accesorio lifestyle",claim:"",racional:"Hace el fitness más simple, estético y usable dentro de la rutina diaria.",oportunidad:"Snacks funcionales para wellness suave: proteína ligera, energía diaria, belleza desde adentro."},
-  // ── INFINITE INDULGENCE ── F&B
   {id:44,file:"44_Like_Air_Puffcorn_Sugar_Cookie.jpg",brand:"Like Air",name:"Puffcorn Sugar Cookie",cat:"Snacks dulces",territory:"ii",tab:"fb",ingredient:"Sugar cookie",benefit:"Placer permisible",claim:"50 calories per cup",racional:"Lleva un sabor de postre a una textura aérea y divertida para indulgencia ligera pero sensorial."},
   {id:45,file:"45_GH_Cretors_Caramel_Chocolatey_Swirl.png",brand:"G.H. Cretors",name:"Caramel Chocolatey Swirl",cat:"Popcorn dulce",territory:"ii",tab:"fb",ingredient:"Caramelo y chocolate",benefit:"Comfort elevado",claim:"Caramel Chocolatey Swirl",racional:"Mezcla caramelo y chocolate para convertir popcorn en una experiencia de postre premium."},
   {id:46,file:"46_HEB_Limited_Edition_Korean_BBQ_Ridged_Potato_Chips.webp",brand:"HEB",name:"Korean BBQ Ridged Potato Chips",cat:"Snacks salados",territory:"ii",tab:"fb",ingredient:"Korean BBQ",benefit:"Exploración de sabor",claim:"Limited Edition",racional:"Usa un sabor de cocina coreana como escape sensorial y novedad cultural en papas onduladas."},
@@ -839,7 +369,6 @@ const PRODUCTS = [
   {id:56,file:"56_TRUBAR_Plant_Based_Protein_Bar_Glazed_Donuts.png",brand:"TRUBAR",name:"Plant Based Protein Bar Glazed Donuts",cat:"Functional bars",territory:"ii",tab:"fb",ingredient:"Proteína vegetal y glaseado",benefit:"Indulgencia funcional",claim:"12g protein",racional:"Disfraza una barra funcional como antojo de dona glaseada para permitir indulgencia con propósito."},
   {id:57,file:"57_Bloom_Pop_Prebiotic_Soda_Root_Beer_Float.png",brand:"Bloom Pop",name:"Prebiotic Soda Root Beer Float",cat:"Bebidas funcionales",territory:"ii",tab:"fb",ingredient:"Prebióticos y root beer float",benefit:"Digestión con indulgencia",claim:"Prebiotic Soda",racional:"Convierte una soda prebiótica en una experiencia tipo postre con sabor root beer float."},
   {id:58,file:"58_J-Basket_Black_Tea_Instant_Boba_Kit.jpg",brand:"J-Basket",name:"Black Tea Instant Boba Kit",cat:"DIY beverage",territory:"ii",tab:"fb",ingredient:"Té negro y tapioca boba",benefit:"Experiencia DIY",claim:"Instant Boba Kit",racional:"Transforma el consumo en una experiencia interactiva y visual para preparar boba en casa."},
-  // ── INFINITE INDULGENCE ── Otras Industrias
   {id:105,file:"105_Glow_Recipe_Watermelon_skincare.png",brand:"Glow Recipe",name:"Watermelon Skincare",cat:"Skincare",territory:"ii",tab:"other",ingredient:"Sandía / glow",benefit:"Skincare como postre sensorial",claim:"",racional:"Convierte skincare en experiencia sensorial frutal, visual y coleccionable.",oportunidad:"Bebidas y postres beauty-coded con fruta, glow, colores vibrantes y beneficios percibidos."},
   {id:106,file:"106_MeiduGaga_Glow_in_the_Dark_Paint_Set.avif",brand:"MeiduGaga",name:"Glow in the Dark Paint Set",cat:"Kids / Creative Play",territory:"ii",tab:"other",ingredient:"Pintura neón",benefit:"Productos que brillan/cambian bajo estímulos",claim:"",racional:"Lleva el juego creativo a un nivel visual extremo con efecto glow-in-the-dark.",oportunidad:"F&B interactivo que cambia de color, brilla o reacciona al mezclar ingredientes."},
   {id:107,file:"107_Da_Bomb_Tie_Dye_Bath_Bomb.webp",brand:"Da Bomb",name:"Tie Dye Bath Bomb",cat:"Bath & Body",territory:"ii",tab:"other",ingredient:"Bath bomb tie dye",benefit:"Bath rituals as entertainment",claim:"",racional:"Transforma el baño en un espectáculo de color y sorpresa sensorial.",oportunidad:"Bebidas o postres con mezcla visual, swirl, capas y momentos de transformación."},
@@ -852,7 +381,6 @@ const PRODUCTS = [
   {id:114,file:"114_Rhode_Phone_Case_Lip_Tint_Holder.png",brand:"Rhode",name:"Phone Case Lip Tint Holder",cat:"Beauty Accessories / Tech",territory:"ii",tab:"other",ingredient:"Funda + lip tint",benefit:"Beauty-tech accessory ecosystems",claim:"",racional:"Integra beauty y smartphone en un objeto aspiracional de rutina visible.",oportunidad:"Snacks/bebidas con accesorios, holders, charms o formatos pensados para movilidad social."},
   {id:115,file:"115_CASETiFY_custom_phone_case.png",brand:"CASETiFY",name:"Custom Phone Case",cat:"Tech Accessories",territory:"ii",tab:"other",ingredient:"Funda personalizada",benefit:"Hyper-personalized everyday objects",claim:"",racional:"Convierte la funda del celular en lienzo de personalización y statement visual.",oportunidad:"F&B con empaques personalizables, mensajes propios, nombres, charms o skins coleccionables."},
   {id:116,file:"116_Glade_CustomScent_Frosted_Eucalyptus_and_Waterlily.png",brand:"Glade",name:"CustomScent Frosted Eucalyptus & Waterlily",cat:"Home Fragrance",territory:"ii",tab:"other",ingredient:"Fragancias combinables",benefit:"Custom scent blending at home",claim:"",racional:"Permite crear mezclas de aroma personalizadas para diseñar atmósferas emocionales.",oportunidad:"Bebidas DIY de mezcla de sabores, boosters aromáticos o kits para crear perfiles sensoriales."},
-  // ── HACKING BODY ── F&B
   {id:59,file:"59_QUEST_Bake_Shop_Frosted_Cookies_Chocolate_Cake.jpg",brand:"QUEST",name:"Bake Shop Frosted Cookies Chocolate Cake",cat:"Protein snacks",territory:"hb",tab:"fb",ingredient:"Proteína",benefit:"Control de macros",claim:"5g protein / 1g sugar",racional:"Transforma indulgencia de galleta pastelera en snack funcional con proteína y bajo azúcar."},
   {id:60,file:"60_Back_To_Nature_Chocolate_Chunk.avif",brand:"Back To Nature",name:"Chocolate Chunk",cat:"Snacks dulces",territory:"hb",tab:"fb",ingredient:"Chocolate chunk",benefit:"Indulgencia más limpia",claim:"Non-GMO",racional:"Reformula una galleta clásica con una lectura más natural y menos artificial."},
   {id:61,file:"61_BelVita_Energy_Snack_Bites.png",brand:"BelVita",name:"Energy Snack Bites",cat:"Functional snacks",territory:"hb",tab:"fb",ingredient:"Avena y semillas",benefit:"Energía sostenida",claim:"Energy Snack Bites",racional:"Integra energía sostenida en un formato snack portable de avena y semillas."},
@@ -873,7 +401,6 @@ const PRODUCTS = [
   {id:76,file:"76_Yogi_Honey_Lavender_Stress_Relief.jpg",brand:"Yogi",name:"Honey Lavender Stress Relief",cat:"Functional tea",territory:"hb",tab:"fb",ingredient:"Lavanda y miel",benefit:"Relajación",claim:"Stress Relief",racional:"Promueve relajación y balance mental mediante ingredientes botánicos."},
   {id:77,file:"77_Simple_Truth_Protein_Puffs_Nacho_Cheese.png",brand:"Simple Truth",name:"Protein Puffs Nacho Cheese",cat:"Protein snacks",territory:"hb",tab:"fb",ingredient:"Proteína",benefit:"Snack alto en proteína",claim:"21g protein",racional:"Convierte un puff snack en vehículo de proteína con sabor familiar a queso nacho."},
   {id:78,file:"78_Crisp_Power_Protein_Pretzels_Flamin_Crunch.webp",brand:"Crisp Power",name:"Protein Pretzels Flamin' Crunch",cat:"Protein snacks",territory:"hb",tab:"fb",ingredient:"Proteína",benefit:"Saciedad y crunch",claim:"26g protein",racional:"Hackea un pretzel picante con proteína para convertir una botana intensa en snack funcional."},
-  // ── HACKING BODY ── Otras Industrias
   {id:117,file:"117_Smart_Eye_Massager.webp",brand:"Smart Eye",name:"Smart Eye Massager",cat:"Wellness Tech",territory:"hb",tab:"other",ingredient:"Masajeador ocular",benefit:"Tech recovery for daily fatigue",claim:"",racional:"Optimiza descanso visual y relajación con tecnología de masaje portable.",oportunidad:"Bebidas funcionales para screen fatigue, enfoque, descanso visual o recuperación mental."},
   {id:118,file:"118_Smart_Health_Ring.webp",brand:"Smart Ring",name:"Smart Health Ring",cat:"Wearable Technology",territory:"hb",tab:"other",ingredient:"Anillo inteligente",benefit:"Wellness tracking invisible y continuo",claim:"",racional:"Convierte métricas corporales en información continua para mejorar hábitos diarios.",oportunidad:"F&B personalizado según sueño, energía, hidratación o recuperación diaria."},
   {id:119,file:"119_WHOOP_Fitness_Band.webp",brand:"WHOOP",name:"Fitness Band",cat:"Wearable Technology",territory:"hb",tab:"other",ingredient:"Banda wearable",benefit:"Performance data for everyday consumers",claim:"",racional:"Transforma recuperación, sueño y esfuerzo físico en data accionable para optimizar rendimiento.",oportunidad:"Productos F&B con claims medibles: recovery, readiness, endurance, hydration score."},
@@ -889,20 +416,18 @@ const PRODUCTS = [
   {id:129,file:"129_CVS_Urinary_Tract_Infection_Test_Strips.png",brand:"CVS Health",name:"Urinary Tract Infection Test Strips",cat:"Health Diagnostics",territory:"hb",tab:"other",ingredient:"Tiras diagnóstico",benefit:"At-home testing and proactive health",claim:"",racional:"Lleva el diagnóstico básico al hogar para dar control y rapidez al usuario.",oportunidad:"F&B preventivo con beneficios urinarios, hidratación, cranberry, microbiota o claims de cuidado diario."}
 ];
 
-// Config territorios
-const TERRITORIES = {
-  mg: { name: "MEXICAN GATEKEEPING", desc: "Tradición que evoluciona, auténtica y con propósito.", color: "#22C55E", colorClass: "mg" },
-  ns: { name: "NEW SIMPLICITY", desc: "Productos honestos, funcionales y sin complicaciones.", color: "#F97316", colorClass: "ns" },
-  ii: { name: "INFINITE INDULGENCE", desc: "Placer sin límites, experiencias que sorprenden y deleitan.", color: "#7C3AED", colorClass: "ii" },
-  hb: { name: "HACKING BODY", desc: "Bienestar optimizado, rendimiento y cuidado consciente.", color: "#3B82F6", colorClass: "hb" }
-};
-
-// Estado
 let currentTerritory = null;
-let currentProduct = null;
 let navHistory = [];
 
-// ── NAVEGACIÓN ──
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  const t = params.get('t');
+  if (t && TERRITORIES[t]) {
+    openTerritorio(t);
+  }
+  // Si no hay parámetro, queda la pantalla de instrucción activa
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
@@ -911,135 +436,111 @@ function showScreen(id) {
 
 function openTerritorio(key) {
   currentTerritory = key;
-  navHistory.push('home');
   const t = TERRITORIES[key];
 
-  // Header
-  document.getElementById('btnBack').classList.add('visible');
-  document.getElementById('backLabel').textContent = 'Inicio';
+  // Color del borde del header
+  document.getElementById('mainHeader').style.borderBottomColor = t.color;
 
-  // Título
-  const title = document.getElementById('territorio-title');
-  title.textContent = t.name;
-  title.className = 'color-' + t.colorClass;
+  // Hero
+  const hero = document.getElementById('territorio-hero-img');
+  hero.src = t.hero;
+  hero.alt = t.name;
 
-  document.getElementById('territorio-desc').textContent = t.desc;
+  // Ocultar botón back (solo aparece en producto)
+  document.getElementById('btnBack').classList.remove('visible');
 
-  // Construir secciones
-  const content = document.getElementById('territorio-content');
-  const fbProducts = PRODUCTS.filter(p => p.territory === key && p.tab === 'fb');
-  const otherProducts = PRODUCTS.filter(p => p.territory === key && p.tab === 'other');
+  // Productos
+  const fbProds    = PRODUCTS.filter(p => p.territory === key && p.tab === 'fb');
+  const otherProds = PRODUCTS.filter(p => p.territory === key && p.tab === 'other');
 
-  content.innerHTML = buildCategorySection('🍽️', 'ALIMENTOS Y BEBIDAS', fbProducts, key) +
-                      buildCategorySection('✨', 'OTRAS INDUSTRIAS', otherProducts, key);
+  document.getElementById('territorio-content').innerHTML =
+    buildSection('🍽️', 'ALIMENTOS Y BEBIDAS', fbProds, key) +
+    buildSection('✨', 'OTRAS INDUSTRIAS', otherProds, key);
 
   showScreen('territorio');
 }
 
-function buildCategorySection(icon, label, products, key) {
+function buildSection(icon, label, products, key) {
   if (!products.length) return '';
-  const color = TERRITORIES[key].color;
-  const cls = TERRITORIES[key].colorClass;
-  const dots = products.map((_, i) => `<div class="cdot ${i===0?'active':''}" id="dot-${label.replace(/\s/g,'-')}-${i}"></div>`).join('');
+  const t = TERRITORIES[key];
+  const cls = t.colorClass;
+  const sid = label.replace(/\s/g,'-');
 
+  const dots  = products.map((_,i) => `<div class="cdot cdot-${cls}${i===0?' active':''}"></div>`).join('');
   const cards = products.map(p => `
     <div class="product-card" onclick="openProducto(${p.id})">
       <div class="pc-img-wrap">
-        <img src="${imgUrl(p.file)}" alt="${p.brand}" loading="lazy" onerror="this.style.opacity='0.3'; this.src='placeholder.png'; this.style.padding='20px';">
+        <img src="${imgUrl(p.file)}" alt="${p.brand}" loading="lazy" onerror="this.style.opacity='.2'">
       </div>
       <div class="pc-body">
         <div class="pc-brand color-${cls}">${p.brand}</div>
         <div class="pc-name">${p.name}</div>
         ${p.claim ? `<span class="pc-claim bg-${cls}">${p.claim}</span>` : ''}
       </div>
-    </div>
-  `).join('');
-
-  const carouselId = 'carousel-' + label.replace(/\s/g, '-');
+    </div>`).join('');
 
   return `
     <div class="cat-section">
       <div class="cat-header">
         <div class="cat-title-wrap">
-          <div class="cat-icon-circle bg-${cls}" style="opacity:0.15; position:relative;">
-            <span style="position:absolute; font-size:16px;">${icon}</span>
-          </div>
+          <div class="cat-icon-circle" style="background:${t.color}22">${icon}</div>
           <span class="cat-name color-${cls}">${label}</span>
         </div>
         <span class="cat-count">${products.length} productos</span>
       </div>
       <div class="scroll-hint">desliza →</div>
       <div class="carousel-wrap">
-        <div class="carousel" id="${carouselId}">${cards}</div>
+        <div class="carousel" id="car-${sid}">${cards}</div>
       </div>
       <div class="carousel-dots">${dots}</div>
-    </div>
-  `;
+    </div>`;
 }
 
 function openProducto(id) {
   const p = PRODUCTS.find(x => x.id === id);
   if (!p) return;
-  currentProduct = p;
   navHistory.push('territorio');
 
-  const t = TERRITORIES[p.territory];
+  const t   = TERRITORIES[p.territory];
   const cls = t.colorClass;
 
-  // Header back
-  document.getElementById('backLabel').textContent = t.name.split(' ')[0] + '…';
+  document.getElementById('btnBack').classList.add('visible');
+  document.getElementById('backLabel').textContent = t.name;
 
-  // Imagen
   document.getElementById('prod-img').src = imgUrl(p.file);
-  document.getElementById('prod-img').alt = p.brand + ' ' + p.name;
-  document.getElementById('prod-img-section').style.background = '#ffffff';
+  document.getElementById('prod-img').alt = `${p.brand} ${p.name}`;
 
-  // Body
   const isFb = p.tab === 'fb';
   let html = `
-    <div class="prod-cat-badge bg-${cls}">
-      ${isFb ? '🍽️ Alimentos y Bebidas' : '✨ Otras Industrias'}
-    </div>
+    <div class="prod-cat-badge bg-${cls}">${isFb ? '🍽️ Alimentos y Bebidas' : '✨ Otras Industrias'}</div>
     <div class="prod-brand color-${cls}">${p.brand}</div>
     <div class="prod-name">${p.name}</div>
-
     <div class="info-grid">
       <div class="info-card">
         <div class="info-label label-${cls}">Categoría</div>
         <div class="info-value">${p.cat}</div>
       </div>
       <div class="info-card">
-        <div class="info-label label-${cls}">Territorio</div>
-        <div class="info-value">${t.name}</div>
-      </div>
-      <div class="info-card">
         <div class="info-label label-${cls}">Ingrediente / Base</div>
         <div class="info-value">${p.ingredient || '—'}</div>
       </div>
-      <div class="info-card">
+      <div class="info-card full">
         <div class="info-label label-${cls}">Beneficio Funcional</div>
         <div class="info-value">${p.benefit || '—'}</div>
       </div>
-      ${p.claim ? `
-      <div class="info-card full">
-        <div class="info-label label-${cls}">Claim Principal</div>
-        <div class="info-value" style="font-weight:700; font-size:15px;">${p.claim}</div>
-      </div>` : ''}
+      ${p.claim ? `<div class="info-card full"><div class="info-label label-${cls}">Claim Principal</div><div class="info-value" style="font-weight:700;font-size:15px;">${p.claim}</div></div>` : ''}
     </div>
-
     <div class="racional-card border-${cls}">
       <div class="racional-label label-${cls}">⭐ ¿Por qué está en ${t.name}?</div>
       <div class="racional-text">${p.racional}</div>
-    </div>
-  `;
+    </div>`;
 
   if (p.oportunidad) {
     html += `
-      <div class="oportunidad-card">
-        <div class="oportunidad-label">💡 Oportunidad en Food & Beverage</div>
-        <div class="oportunidad-text">${p.oportunidad}</div>
-      </div>
-    `;
+    <div class="oportunidad-card">
+      <div class="oportunidad-label">💡 Oportunidad en Food & Beverage</div>
+      <div class="oportunidad-text">${p.oportunidad}</div>
+    </div>`;
   }
 
   document.getElementById('prod-body').innerHTML = html;
@@ -1048,24 +549,20 @@ function openProducto(id) {
 
 function goBack() {
   const prev = navHistory.pop();
-  if (prev === 'home' || !prev) {
+  if (prev === 'territorio') {
     document.getElementById('btnBack').classList.remove('visible');
-    showScreen('home');
-    currentTerritory = null;
-  } else if (prev === 'territorio') {
-    document.getElementById('backLabel').textContent = 'Inicio';
     showScreen('territorio');
-    currentProduct = null;
   }
 }
 
-// Swipe back (iOS-style)
-let touchStartX = 0;
-document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-document.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  if (dx > 80 && navHistory.length > 0) goBack();
+// Swipe iOS-style
+let txStart = 0;
+document.addEventListener('touchstart', e => { txStart = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend',   e => {
+  if (e.changedTouches[0].clientX - txStart > 80 && navHistory.length) goBack();
 }, { passive: true });
+
+init();
 </script>
 </body>
 </html>
