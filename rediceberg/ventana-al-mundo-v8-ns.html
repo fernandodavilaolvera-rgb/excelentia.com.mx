@@ -248,15 +248,8 @@
   </button>
 </header>
 
-<!-- PANTALLA SIN QR VÁLIDO -->
-<div id="screen-noterritorio" class="screen">
-  <div class="big-icon">🌐</div>
-  <h2>Ventana al Mundo</h2>
-  <p>Escanea el código QR de tu territorio para comenzar la exploración.</p>
-</div>
-
 <!-- SCREEN 2: TERRITORIO -->
-<div id="screen-territorio" class="screen">
+<div id="screen-territorio" class="screen active">
   <img id="territorio-hero-img" class="territorio-hero-img" src="" alt="">
   <div id="territorio-content"></div>
 </div>
@@ -562,7 +555,7 @@ document.addEventListener('touchend',   e => {
   if (e.changedTouches[0].clientX - txStart > 80 && navHistory.length) goBack();
 }, { passive: true });
 
-(function_disabled() {
+(function() {
   const t = new URLSearchParams(window.location.search).get('t');
   if (t && ['mg','ns','ii','hb'].includes(t)) {
     document.addEventListener('DOMContentLoaded', function(){ openTerritorio(t); });
