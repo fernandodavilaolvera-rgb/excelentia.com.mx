@@ -419,7 +419,7 @@ const PRODUCTS = [
 let currentTerritory = null;
 let navHistory = [];
 
-function init() {
+function init() { openTerritorio('ns'); return; //
   const params = new URLSearchParams(window.location.search);
   const t = params.get('t');
   if (t && TERRITORIES[t]) {
@@ -562,7 +562,7 @@ document.addEventListener('touchend',   e => {
   if (e.changedTouches[0].clientX - txStart > 80 && navHistory.length) goBack();
 }, { passive: true });
 
-(function() {
+(function_disabled() {
   const t = new URLSearchParams(window.location.search).get('t');
   if (t && ['mg','ns','ii','hb'].includes(t)) {
     document.addEventListener('DOMContentLoaded', function(){ openTerritorio(t); });
