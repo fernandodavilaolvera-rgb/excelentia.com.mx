@@ -120,16 +120,16 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
 .btn-toggle-seg{padding:7px 16px;border-radius:20px;border:2px solid var(--naranja);background:transparent;color:var(--naranja);font-family:'Montserrat',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
 .btn-toggle-seg:hover,.btn-toggle-seg.open{background:var(--naranja);color:#fff}
 .seg-activo-panel{background:var(--blanco);border:1px solid var(--gray-mid);border-radius:10px;overflow:hidden;margin-bottom:8px;border-top:3px solid var(--naranja)}
-.seg-activo-panel .obs-card{display:grid;grid-template-columns:200px 1fr 260px;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--gray-light)}
+.seg-activo-panel .obs-card{display:flex;flex-wrap:nowrap;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--gray-light)}
 .seg-activo-panel .obs-card:last-child{border-bottom:none}
 .seg-activo-panel .obs-card:hover{background:#fff8f5}
-.obs-card-info{flex:1;min-width:200px}
+.obs-card-info{width:185px;min-width:185px;flex-shrink:0}
 .obs-card-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:.82rem;color:var(--negro);margin-bottom:4px}
 .obs-card-meta{font-size:.7rem;color:var(--gray-text);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .obs-card-nota{background:#fff8f5;border:1px solid #fcd9cc;border-radius:8px;padding:8px 12px;font-size:.75rem;color:var(--negro);font-style:italic;line-height:1.5;width:100%}
 .obs-card-acciones{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .seg-activo-empty{text-align:center;padding:32px;color:var(--gray-text);font-size:.82rem}
-.obs-card-acciones{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:nowrap;width:260px;justify-content:flex-end}
+.obs-card-acciones{display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:nowrap;width:252px;min-width:252px;justify-content:flex-end}
 .btn-obs-edit{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:5px 0;width:76px;background:#e0eaff;color:#1e40af;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:.15s;flex-shrink:0}
 .btn-obs-edit:hover{background:#c7d9ff}
 .btn-obs-del{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:5px 0;width:72px;background:#fee2e2;color:#dc2626;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:.15s;flex-shrink:0}
@@ -738,7 +738,7 @@ function renderSegActivo(){
           ${d.ac>0?'<span class="pill pill-ok">Vino Abr.</span>':'<span class="pill pill-s4">No vino</span>'}
         </div>
       </div>
-      <div style="flex:2;min-width:180px">
+      <div style="flex:1;min-width:0">
         <div class="obs-card-nota" id="obs-nota-${d.m}">"${esc(obs)}"</div>
         <textarea class="obs-edit-area" id="obs-edit-${d.m}" rows="2">${esc(obs)}</textarea>
         <div>
@@ -747,8 +747,8 @@ function renderSegActivo(){
         </div>
       </div>
       <div class="obs-card-acciones">
-        ${d.tel?`<a class="btn-wa" href="https://wa.me/52${d.tel.replace(/\D/g,'')}?text=${encodeURIComponent('Hola '+d.n.split(' ')[0]+', le habla el Club Berimbau. ¿En qué podemos apoyarle con su cuenta?')}" target="_blank" style="width:58px;justify-content:center">📱 WA</a>`:`<span style="width:58px;display:inline-block"></span>`}
-        ${d.cor?`<a class="btn-mail" href="mailto:${esc(d.cor)}?subject=${encodeURIComponent('Club Berimbau — Su cuenta')}" target="_blank" style="width:66px;justify-content:center">✉ Email</a>`:`<span style="width:66px;display:inline-block"></span>`}
+        ${d.tel?`<a class="btn-wa" href="https://wa.me/52${d.tel.replace(/\D/g,'')}?text=${encodeURIComponent('Hola '+d.n.split(' ')[0]+', le habla el Club Berimbau. ¿En qué podemos apoyarle con su cuenta?')}" target="_blank" style="width:54px;min-width:54px;justify-content:center;flex-shrink:0">📱 WA</a>`:`<span style="width:54px;min-width:54px;display:inline-block;flex-shrink:0"></span>`}
+        ${d.cor?`<a class="btn-mail" href="mailto:${esc(d.cor)}?subject=${encodeURIComponent('Club Berimbau — Su cuenta')}" target="_blank" style="width:68px;min-width:68px;justify-content:center;flex-shrink:0">✉ Email</a>`:`<span style="width:68px;min-width:68px;display:inline-block;flex-shrink:0"></span>`}
         <button class="btn-obs-edit" onclick="activarEdit(${d.m})">✏️ Editar</button>
         <button class="btn-obs-del" onclick="confirmarBorrar(${d.m},'${esc(d.n)}')">🗑 Borrar</button>
       </div>
