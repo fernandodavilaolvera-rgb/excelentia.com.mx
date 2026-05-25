@@ -120,19 +120,19 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
 .btn-toggle-seg{padding:7px 16px;border-radius:20px;border:2px solid var(--naranja);background:transparent;color:var(--naranja);font-family:'Montserrat',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
 .btn-toggle-seg:hover,.btn-toggle-seg.open{background:var(--naranja);color:#fff}
 .seg-activo-panel{background:var(--blanco);border:1px solid var(--gray-mid);border-radius:10px;overflow:hidden;margin-bottom:8px;border-top:3px solid var(--naranja)}
-.seg-activo-panel .obs-card{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid var(--gray-light)}
+.seg-activo-panel .obs-card{display:grid;grid-template-columns:200px 1fr 260px;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--gray-light)}
 .seg-activo-panel .obs-card:last-child{border-bottom:none}
 .seg-activo-panel .obs-card:hover{background:#fff8f5}
 .obs-card-info{flex:1;min-width:200px}
 .obs-card-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:.82rem;color:var(--negro);margin-bottom:4px}
 .obs-card-meta{font-size:.7rem;color:var(--gray-text);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.obs-card-nota{flex:2;min-width:200px;background:#fff8f5;border:1px solid #fcd9cc;border-radius:8px;padding:8px 12px;font-size:.75rem;color:var(--negro);font-style:italic;line-height:1.5}
+.obs-card-nota{background:#fff8f5;border:1px solid #fcd9cc;border-radius:8px;padding:8px 12px;font-size:.75rem;color:var(--negro);font-style:italic;line-height:1.5;width:100%}
 .obs-card-acciones{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .seg-activo-empty{text-align:center;padding:32px;color:var(--gray-text);font-size:.82rem}
-.obs-card-acciones{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap}
-.btn-obs-edit{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:#e0eaff;color:#1e40af;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:.15s}
+.obs-card-acciones{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:nowrap;width:260px;justify-content:flex-end}
+.btn-obs-edit{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:5px 0;width:76px;background:#e0eaff;color:#1e40af;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:.15s;flex-shrink:0}
 .btn-obs-edit:hover{background:#c7d9ff}
-.btn-obs-del{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:#fee2e2;color:#dc2626;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:.15s}
+.btn-obs-del{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:5px 0;width:72px;background:#fee2e2;color:#dc2626;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:.15s;flex-shrink:0}
 .btn-obs-del:hover{background:#fecaca}
 .obs-edit-area{width:100%;padding:6px 10px;border:1.5px solid var(--verde);border-radius:8px;font-size:.78rem;font-family:'Open Sans',sans-serif;color:var(--negro);background:var(--blanco);resize:none;outline:none;margin-top:8px;display:none}
 .btn-obs-save{display:none;padding:5px 14px;background:var(--verde);color:#fff;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;margin-top:6px}
@@ -179,13 +179,13 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
 
 <div class="main">
   <div class="tabs">
-    <button class="tab active" onclick="showTab('directorio',this)">📋 Directorio <span class="badge" id="badge-dir">506</span></button>
+    <button class="tab" onclick="showTab('directorio',this)">📋 Directorio <span class="badge" id="badge-dir">506</span></button>
     <button class="tab" onclick="showTab('accesos',this)">🏃 Accesos Abril <span class="badge" id="badge-acc">103K</span></button>
-    <button class="tab" onclick="showTab('cobranza',this)">💰 Cobranza <span class="badge" id="badge-cob"></span></button>
+    <button class="tab active" onclick="showTab('cobranza',this)">💰 Cobranza <span class="badge" id="badge-cob"></span></button>
   </div>
 
   <!-- ===== DIRECTORIO ===== -->
-  <div id="panel-directorio" class="panel active">
+  <div id="panel-directorio" class="panel">
     <div class="filters">
       <div class="filter-group"><label>Buscar socio</label><input type="text" id="buscar-dir" placeholder="Nombre, membresía, correo..." oninput="renderDir()"></div>
       <div class="filter-group"><label>Tipo membresía</label>
@@ -250,7 +250,7 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
   </div>
 
   <!-- ===== COBRANZA (fusionada con Seguimiento) ===== -->
-  <div id="panel-cobranza" class="panel">
+  <div id="panel-cobranza" class="panel active">
     <!-- KPIs — todos clickables -->
     <div class="kpi-grid" id="kpi-cob"></div>
     <!-- Segmentos de adeudo -->
@@ -747,7 +747,8 @@ function renderSegActivo(){
         </div>
       </div>
       <div class="obs-card-acciones">
-        ${wa}${mail}
+        ${d.tel?`<a class="btn-wa" href="https://wa.me/52${d.tel.replace(/\D/g,'')}?text=${encodeURIComponent('Hola '+d.n.split(' ')[0]+', le habla el Club Berimbau. ¿En qué podemos apoyarle con su cuenta?')}" target="_blank" style="width:58px;justify-content:center">📱 WA</a>`:`<span style="width:58px;display:inline-block"></span>`}
+        ${d.cor?`<a class="btn-mail" href="mailto:${esc(d.cor)}?subject=${encodeURIComponent('Club Berimbau — Su cuenta')}" target="_blank" style="width:66px;justify-content:center">✉ Email</a>`:`<span style="width:66px;display:inline-block"></span>`}
         <button class="btn-obs-edit" onclick="activarEdit(${d.m})">✏️ Editar</button>
         <button class="btn-obs-del" onclick="confirmarBorrar(${d.m},'${esc(d.n)}')">🗑 Borrar</button>
       </div>
@@ -822,12 +823,8 @@ async function borrarObs(m){
 }
 
 // ===== START =====
+cargarObservaciones().then(()=>{ initCob(); renderCob(); renderObsBadge(); });
 renderDir();
-cargarObservaciones().then(()=>{
-  if(document.getElementById('panel-cobranza').classList.contains('active')){
-    renderCob(); renderObsBadge();
-  }
-});
 </script>
 </body>
 </html>
