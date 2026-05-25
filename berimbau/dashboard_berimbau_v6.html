@@ -317,8 +317,25 @@ const SEG_CONFIG={
   s4:{label:'+90 días',emoji:'⛔',cls:'seg-s4',pillCls:'pill-s4',desc:'Posible abandono'},
 };
 
-function getObs(m){try{return localStorage.getItem('obs_'+m)||'';}catch(e){return '';}}
-function setObs(m,v){try{localStorage.setItem('obs_'+m,v);}catch(e){}}
+const URL_GUARDAR = 'https://excelentia.app.n8n.cloud/webhook/berimbau-obs-guardar';
+const URL_CARGAR  = 'https://excelentia.app.n8n.cloud/webhook/berimbau-obs-cargar';
+
+let obsCache = {};
+
+async function cargarObservaciones(){
+  try{
+    const r = await fetch(URL_CARGAR);
+    const data = await r.json();
+    if(data.ok && data.observaciones){
+      obsCache = {};
+      data.observaciones.forEach(o=>{ if(o.Membresia) obsCache[String(o.Membresia)] = o.Observacion||''; });
+    }
+  }catch(e){ console.warn('No se pudo cargar observaciones del Sheet',e); }
+}
+
+function getObs(m){ return obsCache[String(m)]||''; }
+
+function setObs(m,v){ obsCache[String(m)]=v; }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function fmtFnac(f){if(!f)return'—';try{const d=new Date(f+'T00:00:00');return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return f;}}
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
@@ -353,7 +370,7 @@ function showTab(tab,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('panel-'+tab).classList.add('active');
-  if(tab==='cobranza'){initCob();renderCob();renderObsBadge();}
+  if(tab==='cobranza'){cargarObservaciones().then(()=>{initCob();renderCob();renderObsBadge();});}
   if(tab==='accesos'){initAccesos();renderAcc();}
   if(tab==='directorio') renderDir();
 }
@@ -615,7 +632,35 @@ function limpiarCob(){
   document.querySelectorAll('#kpi-cob .kpi').forEach(k=>k.classList.remove('kpi-selected'));
   renderCob();
 }
-function guardarObs(input){setObs(input.dataset.memb,input.value);input.classList.add('obs-saved');showToast('✅ Guardado');renderObsBadge();if(segActivoOpen)renderSegActivo();}
+async function guardarObs(input){
+  const memb = input.dataset.memb;
+  const obs = input.value;
+  const d = DATA.find(x=>String(x.m)===String(memb))||{};
+  setObs(memb, obs);
+  input.classList.add('obs-saved');
+  showToast('💾 Guardando...');
+  try{
+    await fetch(URL_GUARDAR,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        membresia: memb,
+        nombre: d.n||'',
+        observacion: obs,
+        segmento: d.sg||'',
+        meses_adeudo: d.ma||0,
+        telefono: d.tel||'',
+        correo: d.cor||''
+      })
+    });
+    showToast('✅ Guardado en Sheet');
+  }catch(e){
+    showToast('⚠️ Sin conexión — guardado local');
+    console.warn('Error guardando en Sheet',e);
+  }
+  renderObsBadge();
+  if(segActivoOpen) renderSegActivo();
+}
 function marcarObs(input){input.classList.toggle('obs-saved',!!input.value);}
 
 // ===== SEGUIMIENTO ACTIVO =====
@@ -665,6 +710,11 @@ function renderSegActivo(){
 
 // ===== START =====
 renderDir();
+cargarObservaciones().then(()=>{
+  if(document.getElementById('panel-cobranza').classList.contains('active')){
+    renderCob(); renderObsBadge();
+  }
+});
 </script>
 </body>
 </html>
