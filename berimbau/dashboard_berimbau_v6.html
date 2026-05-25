@@ -129,6 +129,22 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
 .obs-card-nota{flex:2;min-width:200px;background:#fff8f5;border:1px solid #fcd9cc;border-radius:8px;padding:8px 12px;font-size:.75rem;color:var(--negro);font-style:italic;line-height:1.5}
 .obs-card-acciones{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .seg-activo-empty{text-align:center;padding:32px;color:var(--gray-text);font-size:.82rem}
+.obs-card-acciones{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.btn-obs-edit{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:#e0eaff;color:#1e40af;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:.15s}
+.btn-obs-edit:hover{background:#c7d9ff}
+.btn-obs-del{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:#fee2e2;color:#dc2626;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:.15s}
+.btn-obs-del:hover{background:#fecaca}
+.obs-edit-area{width:100%;padding:6px 10px;border:1.5px solid var(--verde);border-radius:8px;font-size:.78rem;font-family:'Open Sans',sans-serif;color:var(--negro);background:var(--blanco);resize:none;outline:none;margin-top:8px;display:none}
+.btn-obs-save{display:none;padding:5px 14px;background:var(--verde);color:#fff;border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;margin-top:6px}
+.btn-obs-cancel{display:none;padding:5px 12px;background:var(--gray-mid);color:var(--gray-text);border:none;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;margin-top:6px;margin-left:4px}
+/* Modal confirm */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;display:flex;align-items:center;justify-content:center}
+.modal-box{background:var(--blanco);border-radius:14px;padding:28px 28px 20px;max-width:360px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.18);text-align:center}
+.modal-box h3{font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:700;color:var(--negro);margin-bottom:10px}
+.modal-box p{font-size:.82rem;color:var(--gray-text);margin-bottom:20px;line-height:1.5}
+.modal-btns{display:flex;gap:10px;justify-content:center}
+.modal-btn-cancel{padding:8px 20px;border-radius:20px;border:1px solid var(--gray-mid);background:var(--gray-light);color:var(--gray-text);font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer}
+.modal-btn-del{padding:8px 20px;border-radius:20px;border:none;background:#dc2626;color:#fff;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer}
 .seg-activo-empty span{font-size:1.8rem;display:block;margin-bottom:8px;opacity:.4}
 /* Divider entre secciones de Cobranza fusionada */
 .section-divider{display:flex;align-items:center;gap:12px;margin:24px 0 16px}
@@ -317,7 +333,8 @@ const SEG_CONFIG={
   s4:{label:'+90 días',emoji:'⛔',cls:'seg-s4',pillCls:'pill-s4',desc:'Posible abandono'},
 };
 
-const URL_GUARDAR = 'https://excelentia.app.n8n.cloud/webhook/berimbau-obs-guardar';
+const URL_GUARDAR  = 'https://excelentia.app.n8n.cloud/webhook/berimbau-obs-guardar';
+const URL_BORRAR   = 'https://excelentia.app.n8n.cloud/webhook/berimbau-obs-borrar';
 const URL_CARGAR  = 'https://excelentia.app.n8n.cloud/webhook/berimbau-obs-cargar';
 
 let obsCache = {};
@@ -693,7 +710,7 @@ function renderSegActivo(){
     const waMsg = encodeURIComponent('Hola '+d.n.split(' ')[0]+', le habla el Club Berimbau. ¿En qué podemos apoyarle con su cuenta?');
     const wa = d.tel ? `<a class="btn-wa" href="https://wa.me/52${d.tel.replace(/\D/g,'')}?text=${waMsg}" target="_blank">📱 WA</a>` : '';
     const mail = d.cor ? `<a class="btn-mail" href="mailto:${esc(d.cor)}?subject=${encodeURIComponent('Club Berimbau — Su cuenta')}" target="_blank">✉ Email</a>` : '';
-    return `<div class="obs-card">
+    return `<div class="obs-card" id="obscard-${d.m}">
       <div class="obs-card-info">
         <div class="obs-card-name">${d.n} <span class="memb-num" style="font-size:.7rem">·${d.m}</span></div>
         <div class="obs-card-meta">
@@ -702,10 +719,87 @@ function renderSegActivo(){
           ${d.ac>0?'<span class="pill pill-ok">Vino Abr.</span>':'<span class="pill pill-s4">No vino</span>'}
         </div>
       </div>
-      <div class="obs-card-nota">"${esc(obs)}"</div>
-      <div class="obs-card-acciones">${wa}${mail}</div>
+      <div style="flex:2;min-width:180px">
+        <div class="obs-card-nota" id="obs-nota-${d.m}">"${esc(obs)}"</div>
+        <textarea class="obs-edit-area" id="obs-edit-${d.m}" rows="2">${esc(obs)}</textarea>
+        <div>
+          <button class="btn-obs-save" id="obs-save-${d.m}" onclick="guardarObsEdit(${d.m})">✓ Guardar</button>
+          <button class="btn-obs-cancel" id="obs-cancel-${d.m}" onclick="cancelarEdit(${d.m})">✕ Cancelar</button>
+        </div>
+      </div>
+      <div class="obs-card-acciones">
+        ${wa}${mail}
+        <button class="btn-obs-edit" onclick="activarEdit(${d.m})">✏️ Editar</button>
+        <button class="btn-obs-del" onclick="confirmarBorrar(${d.m},'${esc(d.n)}')">🗑 Borrar</button>
+      </div>
     </div>`;
   }).join('');
+}
+
+function activarEdit(m){
+  document.getElementById('obs-nota-'+m).style.display='none';
+  const ta=document.getElementById('obs-edit-'+m);
+  ta.style.display='block'; ta.focus();
+  document.getElementById('obs-save-'+m).style.display='inline-flex';
+  document.getElementById('obs-cancel-'+m).style.display='inline-flex';
+}
+function cancelarEdit(m){
+  document.getElementById('obs-nota-'+m).style.display='block';
+  document.getElementById('obs-edit-'+m).style.display='none';
+  document.getElementById('obs-save-'+m).style.display='none';
+  document.getElementById('obs-cancel-'+m).style.display='none';
+}
+async function guardarObsEdit(m){
+  const ta=document.getElementById('obs-edit-'+m);
+  const val=ta.value.trim();
+  const d=DATA.find(x=>String(x.m)===String(m))||{};
+  setObs(m,val);
+  // update display
+  document.getElementById('obs-nota-'+m).textContent='"'+val+'"';
+  cancelarEdit(m);
+  showToast('💾 Guardando...');
+  try{
+    await fetch(URL_GUARDAR,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({membresia:m,nombre:d.n||'',observacion:val,segmento:d.sg||'',meses_adeudo:d.ma||0,telefono:d.tel||'',correo:d.cor||''})
+    });
+    showToast('✅ Observación actualizada');
+  }catch(e){ showToast('⚠️ Sin conexión — guardado local'); }
+  renderObsBadge();
+  // also refresh input in cobranza table if visible
+  const inp=document.querySelector('.obs-input[data-memb="'+m+'"]');
+  if(inp){inp.value=val;inp.classList.toggle('obs-saved',!!val);}
+}
+
+function confirmarBorrar(m, nombre){
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.id='modal-borrar';
+  overlay.innerHTML=`<div class="modal-box">
+    <h3>¿Borrar observación?</h3>
+    <p>Se eliminará la nota de <strong>${nombre.split(' ').slice(0,2).join(' ')}</strong> del Sheet.<br>Esta acción no se puede deshacer.</p>
+    <div class="modal-btns">
+      <button class="modal-btn-cancel" onclick="document.getElementById('modal-borrar').remove()">Cancelar</button>
+      <button class="modal-btn-del" onclick="borrarObs(${m})">Sí, borrar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function borrarObs(m){
+  document.getElementById('modal-borrar')?.remove();
+  setObs(m,'');
+  showToast('🗑 Borrando...');
+  try{
+    await fetch(URL_BORRAR,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({membresia:m})
+    });
+    showToast('✅ Observación eliminada');
+  }catch(e){ showToast('⚠️ Sin conexión — eliminado local'); }
+  // clear input in cobranza table if visible
+  const inp=document.querySelector('.obs-input[data-memb="'+m+'"]');
+  if(inp){inp.value='';inp.classList.remove('obs-saved');}
+  renderObsBadge();
+  renderSegActivo();
 }
 
 // ===== START =====
