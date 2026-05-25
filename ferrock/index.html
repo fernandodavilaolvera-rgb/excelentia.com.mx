@@ -108,9 +108,12 @@ nav{background:var(--header-grad);border-bottom:2px solid var(--header-accent);p
 
 /* FOLDER TAB FILTERS */
 .folder-tabs{display:flex;gap:4px;margin-left:auto;margin-right:8px;}
-.ftab{font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--accent-dark);cursor:pointer;transition:all .15s;white-space:nowrap;user-select:none;}
+.ftab{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;padding:4px 2px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--accent-dark);cursor:pointer;transition:all .15s;user-select:none;line-height:1;}
+.ftab-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;opacity:.75;}
+.ftab-num{font-size:13px;font-weight:800;margin-top:1px;}
 .ftab:hover{background:var(--hover-bg);border-color:var(--accent);}
 .ftab.active{background:var(--accent-dark);color:#fff;border-color:var(--accent-dark);}
+.ftab.active .ftab-label{opacity:.7;}
 .ftab.zero{opacity:0.35;pointer-events:none;}
 .status-wrap{padding:48px 24px;text-align:center;color:var(--text3);grid-column:1/-1;}
 .spinner{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
@@ -287,14 +290,24 @@ function uid() { return 'id' + (++_uid); }
 
 /* Filtra y re-renderiza los archivos dentro de una carpeta abierta */
 function applyFolderTab(btn, bodyId) {
-  const tab = btn.dataset.tab;
+  const tab    = btn.dataset.tab;
+  const body   = document.getElementById(bodyId);
+  const head   = body.previousElementSibling;
+  const isOpen   = body.classList.contains('open');
+  const isActive = btn.classList.contains('active');
+
+  /* Si el tab ya estaba activo y la carpeta está abierta → cerrar */
+  if (isActive && isOpen) {
+    body.classList.remove('open');
+    head.classList.remove('open');
+    return;
+  }
+
   btn.closest('.folder-tabs').querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 
   /* Abrir la carpeta si está colapsada */
-  const body = document.getElementById(bodyId);
-  const head = body.previousElementSibling;
-  if (!body.classList.contains('open')) {
+  if (!isOpen) {
     body.classList.add('open');
     head.classList.add('open');
   }
@@ -329,10 +342,24 @@ function renderAll(q = '') {
   const folderKeys = Object.keys(folderMap);
   if (!folderKeys.length) return;
 
+  const PINNED = ['', 'assets']; // siempre arriba, en ese orden
   const allKeys = [...new Set([...Object.keys(FOLDER_CFG), ...folderKeys])].filter(k => folderMap[k]);
+
+  // Separar: pinned en orden fijo, el resto ordenado alfabético con números al final
+  const pinned = PINNED.filter(k => allKeys.includes(k));
+  const rest   = allKeys
+    .filter(k => !PINNED.includes(k))
+    .sort((a, b) => {
+      const aNum = /^\d/.test(a);
+      const bNum = /^\d/.test(b);
+      if (aNum && !bNum) return 1;
+      if (!aNum && bNum) return -1;
+      return a.localeCompare(b, 'es', { sensitivity: 'base' });
+    });
+  const sortedKeys = [...pinned, ...rest];
   const cards = [];
 
-  allKeys.forEach(folder => {
+  sortedKeys.forEach(folder => {
     const files = folderMap[folder] || [];
     const filtered = files.filter(f => {
       const name = f.path.split('/').pop();
@@ -373,10 +400,10 @@ function renderAll(q = '') {
             <div class="folder-path">${c.cfg.desc}</div>
           </div>
           <div class="folder-tabs" onclick="event.stopPropagation()">
-            <span class="ftab active" data-tab="all"   onclick="applyFolderTab(this,'${bodyId}')">Todo&nbsp;${c.count}</span>
-            <span class="ftab${c.tabHtml}"  data-tab="html"  onclick="applyFolderTab(this,'${bodyId}')">HTML&nbsp;${c.html.length}</span>
-            <span class="ftab${c.tabImg}"   data-tab="img"   onclick="applyFolderTab(this,'${bodyId}')">Img&nbsp;${c.imgs.length}</span>
-            <span class="ftab${c.tabOther}" data-tab="other" onclick="applyFolderTab(this,'${bodyId}')">Otros&nbsp;${c.others.length}</span>
+            <span class="ftab active" data-tab="all"   onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">Todo</span><span class="ftab-num">${c.count}</span></span>
+            <span class="ftab${c.tabHtml}"  data-tab="html"  onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">HTML</span><span class="ftab-num">${c.html.length}</span></span>
+            <span class="ftab${c.tabImg}"   data-tab="img"   onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">IMG</span><span class="ftab-num">${c.imgs.length}</span></span>
+            <span class="ftab${c.tabOther}" data-tab="other" onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">Otros</span><span class="ftab-num">${c.others.length}</span></span>
           </div>
           <span class="chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
         </div>
