@@ -263,6 +263,7 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
       <button class="ppill" onclick="filtrarPeriodo('Mensual Cargo Automático',this)">🏦 Domiciliado</button>
       <button class="ppill" onclick="filtrarPeriodo('Trimestral',this)">📆 Trimestral</button>
       <button class="ppill" onclick="filtrarPeriodo('Semestral',this)">🗓 Semestral</button>
+      <button class="ppill" style="margin-left:auto;background:#EF4B1F;color:#fff;border-color:#EF4B1F" onclick="abrirObservaciones()">📝 Observaciones <span id="badge-obs-pill" style="background:rgba(255,255,255,.3);border-radius:10px;padding:1px 7px;font-size:.68rem;margin-left:2px">0</span></button>
     </div>
 
     <!-- Filtros -->
@@ -307,8 +308,8 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
 
     <!-- PANEL SEGUIMIENTO ACTIVO -->
     <div class="seg-activo-bar">
-      <h3>📝 Seguimiento activo <span class="badge-count" id="badge-obs">0</span></h3>
-      <button class="btn-toggle-seg" id="btn-seg-activo" onclick="toggleSegActivo()">👁 Ver seguimiento activo</button>
+      <h3>📝 Observaciones <span class="badge-count" id="badge-obs">0</span></h3>
+      <button class="btn-toggle-seg" id="btn-seg-activo" onclick="toggleSegActivo()">📝 Observaciones</button>
     </div>
     <div class="seg-activo-panel" id="panel-seg-activo" style="display:none">
       <div id="obs-cards-container"></div>
@@ -682,9 +683,27 @@ function marcarObs(input){input.classList.toggle('obs-saved',!!input.value);}
 
 // ===== SEGUIMIENTO ACTIVO =====
 let segActivoOpen = false;
+function abrirObservaciones(){
+  if(!segActivoOpen){
+    segActivoOpen=true;
+    const panel=document.getElementById('panel-seg-activo');
+    const btn=document.getElementById('btn-seg-activo');
+    panel.style.display='block';
+    btn.classList.add('open');
+    btn.textContent='✕ Cerrar Observaciones';
+    renderSegActivo();
+  }
+  setTimeout(()=>{
+    document.getElementById('panel-seg-activo').scrollIntoView({behavior:'smooth',block:'start'});
+  },100);
+}
+
 function renderObsBadge(){
   const con = EN_ADEUDO.filter(d=>getObs(d.m).trim()!=='');
-  document.getElementById('badge-obs').textContent = con.length;
+  const n = con.length;
+  document.getElementById('badge-obs').textContent = n;
+  const pill = document.getElementById('badge-obs-pill');
+  if(pill) pill.textContent = n;
   return con;
 }
 function toggleSegActivo(){
@@ -693,7 +712,7 @@ function toggleSegActivo(){
   const btn = document.getElementById('btn-seg-activo');
   panel.style.display = segActivoOpen ? 'block' : 'none';
   btn.classList.toggle('open', segActivoOpen);
-  btn.textContent = segActivoOpen ? '✕ Cerrar seguimiento' : '👁 Ver seguimiento activo';
+  btn.textContent = segActivoOpen ? '✕ Cerrar Observaciones' : '📝 Observaciones';
   if(segActivoOpen) renderSegActivo();
 }
 function renderSegActivo(){
