@@ -106,7 +106,12 @@ nav{background:var(--header-grad);border-bottom:2px solid var(--header-accent);p
 .file-open{font-size:12px;color:var(--text3);opacity:0;transition:opacity .12s;flex-shrink:0;}
 .file-item:hover .file-open{opacity:1;}
 
-/* STATUS / EMPTY */
+/* FOLDER TAB FILTERS */
+.folder-tabs{display:flex;gap:4px;margin-left:auto;margin-right:8px;}
+.ftab{font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--accent-dark);cursor:pointer;transition:all .15s;white-space:nowrap;user-select:none;}
+.ftab:hover{background:var(--hover-bg);border-color:var(--accent);}
+.ftab.active{background:var(--accent-dark);color:#fff;border-color:var(--accent-dark);}
+.ftab.zero{opacity:0.35;pointer-events:none;}
 .status-wrap{padding:48px 24px;text-align:center;color:var(--text3);grid-column:1/-1;}
 .spinner{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -189,18 +194,19 @@ footer{border-top:1px solid var(--border);padding:14px 24px;display:flex;align-i
 const REPO   = 'fernandodavilaolvera-rgb/excelentia.com.mx';
 const BRANCH = 'main';
 const BASE   = 'https://excelentia.com.mx';
-const EXCLUDE = ['ferrock', '.git', 'node_modules'];
+const EXCLUDE = ['.git', 'node_modules'];
 const IMG_EXTS = ['png','jpg','jpeg','gif','svg','webp','ico'];
 
 const FOLDER_CFG = {
-  '':           { label:'Raíz del sitio',      icon:'🌐', desc:'/' },
-  'assets':     { label:'Assets / Imágenes',   icon:'🖼️', desc:'/assets/' },
-  'agentes':    { label:'Agentes IA',           icon:'🤖', desc:'/agentes/' },
-  'clientes':   { label:'Clientes',             icon:'🏢', desc:'/clientes/' },
-  'rediceberg': { label:'Ventana al Mundo',     icon:'🪟', desc:'/rediceberg/' },
-  'herramientas':{ label:'Herramientas',        icon:'🛠️', desc:'/herramientas/' },
-  'legal':      { label:'Legal',                icon:'📄', desc:'/legal/' },
-  'forms':      { label:'Formularios',          icon:'📋', desc:'/forms/' },
+  '':            { label:'Raíz del sitio',      icon:'🌐', desc:'/' },
+  'assets':      { label:'Assets / Imágenes',   icon:'🖼️', desc:'/assets/' },
+  'agentes':     { label:'Agentes IA',           icon:'🤖', desc:'/agentes/' },
+  'clientes':    { label:'Clientes',             icon:'🏢', desc:'/clientes/' },
+  'rediceberg':  { label:'Ventana al Mundo',     icon:'🪟', desc:'/rediceberg/' },
+  'herramientas':{ label:'Herramientas',         icon:'🛠️', desc:'/herramientas/' },
+  'ferrock':     { label:'Ferrock',              icon:'📁', desc:'/ferrock/' },
+  'legal':       { label:'Legal',                icon:'📄', desc:'/legal/' },
+  'forms':       { label:'Formularios',          icon:'📋', desc:'/forms/' },
 };
 
 let allFiles  = [];
@@ -279,29 +285,42 @@ function groupBySubtype(files) {
 let _uid = 0;
 function uid() { return 'id' + (++_uid); }
 
-function renderSubgroup(label, icon, files, startOpen) {
-  if (!files.length) return '';
-  const id = uid();
-  let items = '';
-  files.forEach(f => {
+/* Filtra y re-renderiza los archivos dentro de una carpeta abierta */
+function applyFolderTab(btn, bodyId) {
+  const tab = btn.dataset.tab;
+  btn.closest('.folder-tabs').querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  /* Abrir la carpeta si está colapsada */
+  const body = document.getElementById(bodyId);
+  const head = body.previousElementSibling;
+  if (!body.classList.contains('open')) {
+    body.classList.add('open');
+    head.classList.add('open');
+  }
+
+  body.querySelectorAll('.file-item').forEach(item => {
+    const ext = item.dataset.ext || '';
+    let show = false;
+    if (tab === 'all')   show = true;
+    if (tab === 'html')  show = ext === 'html';
+    if (tab === 'img')   show = IMG_EXTS.includes(ext);
+    if (tab === 'other') show = ext !== 'html' && !IMG_EXTS.includes(ext);
+    item.style.display = show ? '' : 'none';
+  });
+}
+
+function renderFileList(files) {
+  return files.map(f => {
     const name = f.path.split('/').pop();
     const ext  = getExt(name);
     const url  = fileUrl(f.path);
-    items += `<a class="file-item" href="${url}" target="_blank" rel="noopener">
+    return `<a class="file-item" href="${url}" target="_blank" rel="noopener" data-ext="${ext}">
       <span class="ext-badge ${extClass(ext)}">${ext || 'file'}</span>
       <span class="file-name">${name}</span>
       <span class="file-open"><i class="ti ti-external-link" aria-hidden="true"></i></span>
     </a>`;
-  });
-  return `<div class="subgroup">
-    <div class="subgroup-head${startOpen ? ' open' : ''}" onclick="toggleSub(this,'${id}')">
-      <span class="subgroup-ico"><i class="ti ti-${icon}" aria-hidden="true"></i></span>
-      <span class="subgroup-label">${label}</span>
-      <span class="subgroup-cnt">${files.length}</span>
-      <span class="sub-chev"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
-    </div>
-    <div class="subgroup-files${startOpen ? ' open' : ''}" id="${id}">${items}</div>
-  </div>`;
+  }).join('');
 }
 
 function renderAll(q = '') {
@@ -325,12 +344,13 @@ function renderAll(q = '') {
 
     const cfg = FOLDER_CFG[folder] || { label: folder || 'Raíz', icon: '📁', desc: `/${folder}/` };
     const { html, imgs, others } = groupBySubtype(filtered);
-    const many = filtered.length > 5;
-    let body = '';
-    body += renderSubgroup('Páginas HTML', 'file-type-html', html, !many || html.length <= 3);
-    body += renderSubgroup('Imágenes',     'photo',           imgs,   !many || imgs.length  <= 3);
-    body += renderSubgroup('Otros archivos','file',           others, !many || others.length <= 3);
-    cards.push({ cfg, body, count: filtered.length });
+
+    /* Tabs: solo mostrar los que tienen archivos */
+    const tabHtml  = html.length   ? '' : ' zero';
+    const tabImg   = imgs.length   ? '' : ' zero';
+    const tabOther = others.length ? '' : ' zero';
+
+    cards.push({ cfg, files: filtered, html, imgs, others, count: filtered.length, tabHtml, tabImg, tabOther });
   });
 
   if (!cards.length) {
@@ -343,20 +363,26 @@ function renderAll(q = '') {
 
   function colHTML(cards) {
     return cards.map(c => {
-      const id = uid();
+      const headId = uid();
+      const bodyId = uid();
       return `<div class="folder-card">
-        <div class="folder-head" onclick="toggleFolder(this,'${id}')">
+        <div class="folder-head" id="${headId}" onclick="toggleFolder(this,'${bodyId}')">
           <div class="folder-ico">${c.cfg.icon}</div>
           <div class="folder-info">
             <div class="folder-name">${c.cfg.label}</div>
             <div class="folder-path">${c.cfg.desc}</div>
           </div>
-          <div class="folder-meta">
-            <span class="folder-count">${c.count}</span>
-            <span class="chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+          <div class="folder-tabs" onclick="event.stopPropagation()">
+            <span class="ftab active" data-tab="all"   onclick="applyFolderTab(this,'${bodyId}')">Todo&nbsp;${c.count}</span>
+            <span class="ftab${c.tabHtml}"  data-tab="html"  onclick="applyFolderTab(this,'${bodyId}')">HTML&nbsp;${c.html.length}</span>
+            <span class="ftab${c.tabImg}"   data-tab="img"   onclick="applyFolderTab(this,'${bodyId}')">Img&nbsp;${c.imgs.length}</span>
+            <span class="ftab${c.tabOther}" data-tab="other" onclick="applyFolderTab(this,'${bodyId}')">Otros&nbsp;${c.others.length}</span>
           </div>
+          <span class="chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
         </div>
-        <div class="folder-body" id="${id}">${c.body}</div>
+        <div class="folder-body" id="${bodyId}">
+          <div style="padding:6px 10px 10px;">${renderFileList(c.files)}</div>
+        </div>
       </div>`;
     }).join('');
   }
@@ -371,10 +397,6 @@ function toggleFolder(head, id) {
   head.classList.toggle('open');
   document.getElementById(id).classList.toggle('open');
 }
-function toggleSub(head, id) {
-  head.classList.toggle('open');
-  document.getElementById(id).classList.toggle('open');
-}
 
 async function loadRepo() {
   try {
@@ -385,15 +407,15 @@ async function loadRepo() {
     document.getElementById('statusEl').style.display = 'none';
 
     const visible = allFiles.filter(f => f.type === 'blob' && !EXCLUDE.some(e => f.path.startsWith(e)));
-    const totalFiles  = visible.length;
-    const totalHTML   = visible.filter(f => getExt(f.path.split('/').pop()) === 'html').length;
-    const folderMap   = buildFolderMap(allFiles);
+    const totalFiles   = visible.length;
+    const totalHTML    = visible.filter(f => getExt(f.path.split('/').pop()) === 'html').length;
+    const folderMap    = buildFolderMap(allFiles);
     const totalFolders = Object.keys(folderMap).filter(k => k !== '').length;
 
-    document.getElementById('sTotal').textContent   = totalFiles;
-    document.getElementById('sHtml').textContent    = totalHTML;
+    document.getElementById('sTotal').textContent    = totalFiles;
+    document.getElementById('sHtml').textContent     = totalHTML;
     document.getElementById('sCarpetas').textContent = totalFolders;
-    document.getElementById('sHora').textContent    = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('sHora').textContent     = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 
     renderAll();
   } catch (e) {
