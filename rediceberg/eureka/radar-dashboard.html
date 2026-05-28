@@ -341,7 +341,6 @@ function actualizarDona(counts,total){
   });
 }
 
-let demoTick=0;
 function actualizarUI(data){
   const counts=[data['TREND ROOKIE']||0,data['CULTURE SCANNER']||0,data['OPPORTUNITY SEEKER']||0,data['EUREKA MINDSET']||0];
   const total=counts.reduce((a,b)=>a+b,0);
@@ -366,9 +365,8 @@ async function fetchDatos(){
     actualizarUI(await res.json());
     document.getElementById('update-txt').textContent='';
   }catch(e){
-    demoTick++;
-    actualizarUI({'TREND ROOKIE':18+Math.floor(demoTick*.3),'CULTURE SCANNER':32+Math.floor(demoTick*.8),'OPPORTUNITY SEEKER':27+Math.floor(demoTick*.6),'EUREKA MINDSET':13+Math.floor(demoTick*.2)});
-    document.getElementById('update-txt').textContent='';
+    // Sin conexión: datos congelados, solo mostrar aviso discreto
+    document.getElementById('update-txt').textContent='⚠ Reconectando...';
   }
 }
 fetchDatos();setInterval(fetchDatos,INTERVALO_MS);
