@@ -362,6 +362,42 @@
     color: var(--blue);
   }
 
+  /* ── ACORDEÓN DESCRIPCIONES ── */
+  .plat-accordion { border: 1px solid var(--alert-border); border-radius: 9px; overflow: hidden; margin-bottom: .45rem; }
+  .plat-accordion summary {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .6rem .9rem;
+    cursor: pointer;
+    background: var(--alert-bg);
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--text);
+    list-style: none;
+    user-select: none;
+    transition: background .15s;
+  }
+  .plat-accordion summary::-webkit-details-marker { display: none; }
+  .plat-accordion summary:hover { background: #e4eefb; }
+  .plat-accordion[open] summary { background: #dce8f7; border-bottom: 1px solid var(--alert-border); }
+  .plat-accordion-chevron {
+    margin-left: auto;
+    font-size: .7rem;
+    color: var(--text-gray);
+    transition: transform .25s;
+  }
+  .plat-accordion[open] .plat-accordion-chevron { transform: rotate(180deg); }
+  .plat-accordion-body {
+    padding: .7rem 1rem .7rem 2.35rem;
+    font-size: .75rem;
+    color: var(--text-sec);
+    line-height: 1.6;
+    background: #fff;
+  }
+  .plat-accordion-body .rw-title { font-size: .78rem; font-weight: 900; color: var(--blue); margin: .5rem 0 .3rem; display: flex; align-items: center; gap: .4rem; }
+  .plat-accordion-body code { background: #eef4fc; border-radius: 4px; padding: .05rem .35rem; font-size: .72rem; color: var(--blue); }
+
   /* ── FOOTER ── */
   .footer {
     text-align: center;
@@ -460,12 +496,6 @@
     </div>
   </div>
 
-  <!-- SOCIOS -->
-  <div class="section-title">👥 Gasto por Socio</div>
-  <div class="socios-grid" id="socios-grid">
-    <div class="socio-card"><div class="socio-body" style="padding:1.5rem;text-align:center;color:var(--text-gray)">Cargando…</div></div>
-  </div>
-
   <!-- ══ GASTOS DEL MES (NUEVA SECCIÓN) ══ -->
   <div class="section-title">📅 Plataformas Requeridas Este Mes</div>
   <div class="mes-section">
@@ -507,6 +537,12 @@
       <div class="mes-desc-title">🔍 ¿Para qué sirve cada plataforma?</div>
       <div id="mes-descripciones"></div>
     </div>
+  </div>
+
+  <!-- SOCIOS -->
+  <div class="section-title">👥 Gasto por Socio</div>
+  <div class="socios-grid" id="socios-grid">
+    <div class="socio-card"><div class="socio-body" style="padding:1.5rem;text-align:center;color:var(--text-gray)">Cargando…</div></div>
   </div>
 
   <!-- GRÁFICOS -->
@@ -905,35 +941,33 @@ function processMes(rows) {
     </tr>`;
   }
 
-  // Render descripciones
+  // Render descripciones como acordeón
   const descDiv = document.getElementById('mes-descripciones');
   descDiv.innerHTML = platsMes.map(p => {
     const info = Object.entries(DESC_PLATAFORMAS).find(([k]) => p.plat.toLowerCase().includes(k.toLowerCase()));
     const d = info ? info[1] : null;
     const icon = d ? d.icon : '🔧';
     const desc = d ? d.desc : 'Plataforma utilizada en las operaciones de ExcelentIA.';
+    const col = platColor(p.plat);
 
-    if (d && d.railway) {
-      return `<div class="plat-desc-item">
-        <div class="plat-icon">${icon}</div>
-        <div>
-          <strong>${p.plat}</strong>
-          <p>${desc}</p>
-          <div class="railway-box" style="margin-top:.5rem">
-            <div class="rw-title">🚂 Railway y el Agente Eco-IA <span class="rw-tag">CLAVE</span></div>
-            <p>${d.railwayDetalle}</p>
-          </div>
-        </div>
-      </div>`;
-    }
+    const extraHTML = (d && d.railway) ? `
+      <div style="margin-top:.5rem">
+        <div class="rw-title">🚂 Railway y el Agente Eco-IA <span class="rw-tag">CLAVE</span></div>
+        <p>${d.railwayDetalle}</p>
+      </div>` : '';
 
-    return `<div class="plat-desc-item">
-      <div class="plat-icon">${icon}</div>
-      <div>
+    return `<details class="plat-accordion">
+      <summary>
+        <span style="font-size:1rem">${icon}</span>
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></span>
         <strong>${p.plat}</strong>
+        <span class="plat-accordion-chevron">▼</span>
+      </summary>
+      <div class="plat-accordion-body">
         <p>${desc}</p>
+        ${extraHTML}
       </div>
-    </div>`;
+    </details>`;
   }).join('');
 }
 
