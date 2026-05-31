@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual — Gestión de Acceso al Formulario Eco IA | ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #dde1e9;
+    --header-grad: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 60%, #1e5096 100%);
+    --header-line: #4a9fd4;
+    --hover-card: #e8f0fb;
+    --card-head: #dce8f7;
+    --alert-bg: #f0f6ff;
+    --alert-border: #c8d9f0;
+    --accent: #4a9fd4;
+    --note-bg: #eef4fc;
+    --note-dark: #1a3a6b;
+    --text: #1a2035;
+    --text-sec: #4a5068;
+    --text-gray: #8a90a0;
+    --success-bg: #dcfce7;
+    --success-text: #15803d;
+    --warn-bg: #fef9c3;
+    --warn-text: #92400e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header {
+    background: var(--header-grad);
+    border-bottom: 3px solid var(--header-line);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .header-left { display: flex; align-items: center; gap: 1.25rem; }
+  .logo-box {
+    background: #fff; border-radius: 10px; padding: .4rem .75rem;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 80px; min-height: 52px; flex-shrink: 0;
+  }
+  .logo-box img { height: 40px; width: auto; display: block; }
+  .logo-fallback { font-size:15px; font-weight:800; color:#1a3a6b; display:none; }
+  .header-titles h1 { font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -.01em; line-height: 1.15; }
+  .header-titles p { font-size: .8rem; color: #a8c4e0; font-weight: 500; margin-top: .2rem; }
+  .header-badge {
+    background: rgba(74,159,212,.18); border: 1px solid rgba(74,159,212,.4);
+    border-radius: 8px; padding: .5rem 1rem; text-align: right; flex-shrink: 0;
+  }
+  .header-badge .badge-label { font-size: .75rem; font-weight: 700; color: var(--header-line); text-transform: uppercase; letter-spacing: .05em; }
+  .header-badge .badge-val { font-size: 1rem; font-weight: 800; color: #fff; margin-top: .1rem; }
+
+  .main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 3rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .card-head {
+    background: var(--card-head); border-bottom: 1px solid var(--border);
+    padding: .85rem 1.25rem; display: flex; align-items: center; gap: .65rem;
+  }
+  .card-head .icon { font-size: 1.15rem; line-height: 1; }
+  .card-head h2 { font-size: .9rem; font-weight: 800; color: var(--note-dark); text-transform: uppercase; letter-spacing: .04em; }
+  .card-body { padding: 1.25rem; }
+
+  /* INTRO */
+  .intro-box {
+    background: var(--alert-bg); border: 1px solid var(--alert-border);
+    border-left: 4px solid var(--accent); border-radius: 10px;
+    padding: 1rem 1.15rem; font-size: .95rem; font-weight: 500;
+    color: var(--text-sec); line-height: 1.7;
+  }
+  .intro-box strong { color: var(--note-dark); }
+
+  /* LISTA DE CORREOS */
+  .emails-list { display: flex; flex-direction: column; gap: .5rem; margin-top: .25rem; }
+  .email-row {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .6rem .9rem; background: #fafbfd;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: .88rem; font-weight: 600; color: var(--note-dark);
+    font-family: 'Manrope', monospace;
+  }
+  .email-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* PASOS */
+  .steps { display: flex; flex-direction: column; gap: 1.1rem; }
+  .step { display: flex; gap: 1rem; align-items: flex-start; }
+  .step-num {
+    flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--header-grad); color: #fff;
+    font-size: .82rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; margin-top: .05rem;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .35rem; }
+  .step-desc { font-size: .88rem; color: var(--text-sec); font-weight: 500; line-height: 1.6; }
+  .step-desc strong { color: var(--text); font-weight: 700; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: #0d1b3e; border-radius: 8px;
+    padding: .85rem 1rem; margin-top: .65rem;
+    font-family: 'Courier New', monospace; font-size: .84rem;
+    line-height: 1.7; overflow-x: auto;
+  }
+  .code-block .c-gray { color: #8a90a0; }
+  .code-block .c-blue { color: #4a9fd4; }
+  .code-block .c-green { color: #4ade80; }
+  .code-block .c-yellow { color: #fde047; }
+  .code-block .c-white { color: #f1f5f9; }
+
+  /* HIGHLIGHT */
+  .highlight-add {
+    background: rgba(74,222,128,.12);
+    border-left: 3px solid #4ade80;
+    padding: .1rem .4rem;
+    border-radius: 0 4px 4px 0;
+    display: inline-block;
+    width: 100%;
+  }
+  .highlight-remove {
+    background: rgba(248,113,113,.12);
+    border-left: 3px solid #f87171;
+    padding: .1rem .4rem;
+    border-radius: 0 4px 4px 0;
+    display: inline-block;
+    width: 100%;
+    text-decoration: line-through;
+    opacity: .6;
+  }
+
+  /* NOTE BOX */
+  .note-box {
+    background: var(--note-bg); border: 1px solid var(--alert-border);
+    border-left: 4px solid var(--note-dark); border-radius: 8px;
+    padding: .85rem 1rem; margin-top: .75rem;
+    font-size: .85rem; color: var(--text-sec); font-weight: 500; line-height: 1.6;
+  }
+  .note-box strong { color: var(--note-dark); }
+
+  .warn-box {
+    background: var(--warn-bg); border: 1px solid #fde68a;
+    border-left: 4px solid #f59e0b; border-radius: 8px;
+    padding: .85rem 1rem; margin-top: .75rem;
+    font-size: .85rem; color: var(--warn-text); font-weight: 500; line-height: 1.6;
+  }
+
+  .success-box {
+    background: var(--success-bg); border: 1px solid #86efac;
+    border-left: 4px solid #22c55e; border-radius: 8px;
+    padding: .85rem 1rem; margin-top: .75rem;
+    font-size: .85rem; color: var(--success-text); font-weight: 500; line-height: 1.6;
+  }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px dashed var(--border); margin: 1.1rem 0; }
+
+  /* TAG */
+  .tag {
+    display: inline-block; font-size: .72rem; font-weight: 800;
+    padding: .2rem .6rem; border-radius: 20px; text-transform: uppercase;
+    letter-spacing: .04em; margin-bottom: .5rem;
+  }
+  .tag-add { background: var(--success-bg); color: var(--success-text); }
+  .tag-remove { background: #fee2e2; color: #991b1b; }
+  .tag-commit { background: var(--note-bg); color: var(--note-dark); }
+
+  /* TABLA CORREOS ACTUALES */
+  .correos-table { width: 100%; border-collapse: collapse; margin-top: .5rem; }
+  .correos-table th {
+    background: var(--note-dark); color: #fff; font-size: .76rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: .6rem .9rem; text-align: left;
+  }
+  .correos-table th:first-child { border-radius: 8px 0 0 0; }
+  .correos-table th:last-child { border-radius: 0 8px 0 0; }
+  .correos-table td {
+    padding: .65rem .9rem; font-size: .87rem; font-weight: 500;
+    color: var(--text-sec); border-bottom: 1px solid var(--border);
+    font-family: 'Courier New', monospace;
+  }
+  .correos-table tr:last-child td { border-bottom: none; }
+  .correos-table tr:hover td { background: var(--hover-card); }
+  .badge-active { display: inline-block; background: var(--success-bg); color: var(--success-text); font-size: .72rem; font-weight: 800; padding: .15rem .5rem; border-radius: 20px; font-family: 'Manrope', sans-serif; }
+
+  /* PDF */
+  .pdf-wrap { max-width: 860px; margin: 0 auto; padding: 0 1.5rem 2.5rem; display: flex; justify-content: center; }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: .6rem;
+    background: var(--header-grad); color: #fff; font-family: 'Manrope', sans-serif;
+    font-size: .9rem; font-weight: 700; padding: .85rem 2rem; border-radius: 10px;
+    border: none; cursor: pointer; letter-spacing: .02em;
+    box-shadow: 0 4px 16px rgba(13,27,62,.18); transition: opacity .2s, transform .15s;
+  }
+  .btn-pdf:hover { opacity: .92; transform: translateY(-1px); }
+  .footer { text-align: center; padding: 1rem 1.5rem 2rem; font-size: .78rem; color: var(--text-gray); font-weight: 600; }
+
+  @media print {
+    .btn-pdf, .pdf-wrap { display: none !important; }
+    body { background: #fff; }
+    .main { padding: 1rem; }
+    .card { break-inside: avoid; }
+  }
+  @media (max-width: 600px) {
+    .header { flex-direction: column; align-items: flex-start; padding: 1.25rem 1rem; }
+    .header-badge { text-align: left; width: 100%; }
+    .main { padding: 1rem .85rem 2rem; gap: 1rem; }
+    .code-block { font-size: .76rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <div class="header-titles">
+      <h1>Manual — Gestión de Acceso</h1>
+      <p>Formulario Eco Interpretador · Eco IA</p>
+    </div>
+  </div>
+  <div class="header-badge">
+    <div class="badge-label">Versión</div>
+    <div class="badge-val">1.0 · Mayo 2026</div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- INTRO -->
+  <div class="card">
+    <div class="card-head"><span class="icon">📖</span><h2>¿Cómo funciona el control de acceso?</h2></div>
+    <div class="card-body">
+      <div class="intro-box">
+        El formulario <strong>Eco Interpretador</strong> usa una lista de correos autorizados dentro del propio archivo HTML. Cuando alguien inicia sesión con Google, el sistema verifica si su correo está en esa lista. Si está → accede al formulario. Si no está → ve una pantalla de acceso bloqueado.<br><br>
+        Para agregar o quitar usuarios solo hay que <strong>editar una línea del archivo</strong> <code style="background:#dce8f7;padding:2px 6px;border-radius:4px;font-size:.85rem;">interpretacion.html</code> y publicar el cambio en GitHub.
+      </div>
+    </div>
+  </div>
+
+  <!-- CORREOS ACTUALES -->
+  <div class="card">
+    <div class="card-head"><span class="icon">✅</span><h2>Correos autorizados actualmente</h2></div>
+    <div class="card-body" style="padding:0;">
+      <table class="correos-table">
+        <thead><tr><th>#</th><th>Correo autorizado</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--text-gray);font-family:'Manrope',sans-serif;">1</td><td>fernando.davila.olvera@gmail.com</td><td><span class="badge-active">Activo</span></td></tr>
+          <tr><td style="color:var(--text-gray);font-family:'Manrope',sans-serif;">2</td><td>fdavila@excelentia.com.mx</td><td><span class="badge-active">Activo</span></td></tr>
+          <tr><td style="color:var(--text-gray);font-family:'Manrope',sans-serif;">3</td><td>acabrera@excelentia.com.mx</td><td><span class="badge-active">Activo</span></td></tr>
+          <tr><td style="color:var(--text-gray);font-family:'Manrope',sans-serif;">4</td><td>jjcabrera@excelentia.com.mx</td><td><span class="badge-active">Activo</span></td></tr>
+          <tr><td style="color:var(--text-gray);font-family:'Manrope',sans-serif;">5</td><td>ecointerpretador@gmail.com</td><td><span class="badge-active">Activo</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- AGREGAR USUARIO -->
+  <div class="card">
+    <div class="card-head"><span class="icon">➕</span><h2>Cómo agregar un nuevo usuario</h2></div>
+    <div class="card-body">
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Abre el archivo en VS Code</div>
+            <div class="step-desc">En tu proyecto de GitHub Pages, abre el archivo <strong>interpretacion.html</strong> que está en la carpeta raíz del sitio (<code style="background:#dce8f7;padding:1px 5px;border-radius:4px;">excelentia.com.mx/interpretacion.html</code>).</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Busca la línea de correos autorizados</div>
+            <div class="step-desc">Usa <strong>Cmd + F</strong> (Mac) o <strong>Ctrl + F</strong> (Windows) y busca exactamente:</div>
+            <div class="code-block">
+              <span class="c-yellow">ALLOWED_EMAILS</span>
+            </div>
+            <div class="step-desc" style="margin-top:.5rem;">Vas a encontrar una línea que se ve así:</div>
+            <div class="code-block">
+              <span class="c-gray">const </span><span class="c-yellow">ALLOWED_EMAILS</span><span class="c-white">=[</span><span class="c-green">'fernando.davila.olvera@gmail.com'</span><span class="c-white">,</span><span class="c-green">'fdavila@excelentia.com.mx'</span><span class="c-white">,...];</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Agrega el nuevo correo</div>
+            <div class="step-desc">Dentro de los corchetes <code style="background:#dce8f7;padding:1px 5px;border-radius:4px;">[ ]</code>, añade el nuevo correo entre comillas simples seguido de una coma. Ejemplo: quieres agregar a <strong>doctor.nuevo@gmail.com</strong>:</div>
+            <div class="code-block">
+              <span class="c-gray">// ANTES:</span><br>
+              <span class="c-gray">const </span><span class="c-yellow">ALLOWED_EMAILS</span><span class="c-white">=[</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'fernando.davila.olvera@gmail.com'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'fdavila@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'acabrera@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'jjcabrera@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'ecointerpretador@gmail.com'</span><br>
+              <span class="c-white">];</span><br><br>
+              <span class="c-gray">// DESPUÉS:</span><br>
+              <span class="c-gray">const </span><span class="c-yellow">ALLOWED_EMAILS</span><span class="c-white">=[</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'fernando.davila.olvera@gmail.com'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'fdavila@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'acabrera@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'jjcabrera@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'ecointerpretador@gmail.com'</span><span class="c-white">,</span><br>
+              <span class="highlight-add">&nbsp;&nbsp;<span class="c-green">'doctor.nuevo@gmail.com'</span></span><br>
+              <span class="c-white">];</span>
+            </div>
+            <div class="note-box">
+              <strong>⚠️ Importante:</strong> el correo debe ir en minúsculas, exactamente como el usuario lo tiene registrado en Google. Una mayúscula o un espacio de más bloquea el acceso.
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Guarda el archivo</div>
+            <div class="step-desc">Guarda con <strong>Cmd + S</strong> (Mac) o <strong>Ctrl + S</strong> (Windows).</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <div class="step-title">Publica el cambio en GitHub</div>
+            <div class="step-desc">En la terminal de VS Code ejecuta estos tres comandos uno por uno:</div>
+            <div class="code-block">
+              <span class="c-blue">git</span><span class="c-white"> add interpretacion.html</span><br>
+              <span class="c-blue">git</span><span class="c-white"> commit -m </span><span class="c-green">"Agrega acceso a doctor.nuevo@gmail.com"</span><br>
+              <span class="c-blue">git</span><span class="c-white"> push</span>
+            </div>
+            <div class="success-box">
+              ✅ En menos de 60 segundos el cambio estará en producción. El nuevo usuario ya puede entrar al formulario.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- QUITAR USUARIO -->
+  <div class="card">
+    <div class="card-head"><span class="icon">➖</span><h2>Cómo quitar el acceso a un usuario</h2></div>
+    <div class="card-body">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Sigue los pasos 1 y 2 de la sección anterior</div>
+            <div class="step-desc">Abre el archivo y busca <code style="background:#dce8f7;padding:1px 5px;border-radius:4px;">ALLOWED_EMAILS</code>.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Elimina la línea del correo que quieres bloquear</div>
+            <div class="step-desc">Borra toda la línea con ese correo, incluyendo la coma del final. Ejemplo: quitar a <strong>doctor.nuevo@gmail.com</strong>:</div>
+            <div class="code-block">
+              <span class="c-gray">const </span><span class="c-yellow">ALLOWED_EMAILS</span><span class="c-white">=[</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'fernando.davila.olvera@gmail.com'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'fdavila@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'acabrera@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'jjcabrera@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-white">&nbsp;&nbsp;</span><span class="c-green">'ecointerpretador@gmail.com'</span><span class="c-white">,</span><br>
+              <span class="highlight-remove">&nbsp;&nbsp;<span class="c-green">'doctor.nuevo@gmail.com'</span></span><br>
+              <span class="c-white">];</span>
+            </div>
+            <div class="warn-box">
+              ⚠️ Asegúrate de que el correo anterior a la línea eliminada <strong>no quede con coma al final si es el último</strong>. El último correo de la lista no lleva coma.
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Guarda y publica</div>
+            <div class="step-desc">Igual que antes:</div>
+            <div class="code-block">
+              <span class="c-blue">git</span><span class="c-white"> add interpretacion.html</span><br>
+              <span class="c-blue">git</span><span class="c-white"> commit -m </span><span class="c-green">"Revoca acceso a doctor.nuevo@gmail.com"</span><br>
+              <span class="c-blue">git</span><span class="c-white"> push</span>
+            </div>
+            <div class="success-box">
+              ✅ El usuario verá la pantalla de "Acceso no autorizado" la próxima vez que intente entrar.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERRORES COMUNES -->
+  <div class="card">
+    <div class="card-head"><span class="icon">⚠️</span><h2>Errores comunes y cómo evitarlos</h2></div>
+    <div class="card-body">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:#f59e0b;">!</div>
+          <div class="step-content">
+            <div class="step-title">El correo tiene mayúsculas</div>
+            <div class="step-desc">Siempre escribe el correo en <strong>minúsculas</strong>. Aunque Google lo muestre con mayúsculas, el sistema siempre compara en minúsculas.</div>
+            <div class="code-block">
+              <span class="c-gray">// ❌ Mal:</span><br>
+              <span class="c-white">'Doctor.Nuevo@Gmail.com'</span><br><br>
+              <span class="c-gray">// ✅ Bien:</span><br>
+              <span class="c-green">'doctor.nuevo@gmail.com'</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:#f59e0b;">!</div>
+          <div class="step-content">
+            <div class="step-title">Falta o sobra una coma</div>
+            <div class="step-desc">Cada correo —excepto el último— necesita una coma al final. Si falta una coma, o si el último correo tiene coma, el formulario dejará de funcionar para todos.</div>
+            <div class="code-block">
+              <span class="c-gray">// ❌ Mal (falta coma en la segunda línea):</span><br>
+              <span class="c-white">'fdavila@excelentia.com.mx'</span><br>
+              <span class="c-white">'acabrera@excelentia.com.mx'</span><span class="c-white">,</span><br><br>
+              <span class="c-gray">// ✅ Bien:</span><br>
+              <span class="c-green">'fdavila@excelentia.com.mx'</span><span class="c-white">,</span><br>
+              <span class="c-green">'acabrera@excelentia.com.mx'</span><span class="c-white">,</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:#f59e0b;">!</div>
+          <div class="step-content">
+            <div class="step-title">El usuario no cierra sesión antes de probar</div>
+            <div class="step-desc">Si acabas de agregar a alguien y dice que sigue bloqueado, pídele que <strong>cierre el navegador completamente</strong> y vuelva a entrar. El token de Google se queda en caché unos minutos.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN RÁPIDO -->
+  <div class="card">
+    <div class="card-head"><span class="icon">⚡</span><h2>Resumen rápido — cheat sheet</h2></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="background:var(--success-bg);border:1px solid #86efac;border-radius:10px;padding:1rem;">
+          <div style="font-size:.8rem;font-weight:800;color:var(--success-text);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem;">➕ Agregar usuario</div>
+          <div style="font-size:.84rem;color:#166534;font-weight:500;line-height:1.6;">
+            1. Abre <code style="background:rgba(0,0,0,.07);padding:1px 4px;border-radius:3px;">interpretacion.html</code><br>
+            2. Busca <code style="background:rgba(0,0,0,.07);padding:1px 4px;border-radius:3px;">ALLOWED_EMAILS</code><br>
+            3. Agrega el correo en minúsculas con coma<br>
+            4. Guarda → <code style="background:rgba(0,0,0,.07);padding:1px 4px;border-radius:3px;">git add → commit → push</code>
+          </div>
+        </div>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:1rem;">
+          <div style="font-size:.8rem;font-weight:800;color:#991b1b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem;">➖ Quitar usuario</div>
+          <div style="font-size:.84rem;color:#7f1d1d;font-weight:500;line-height:1.6;">
+            1. Abre <code style="background:rgba(0,0,0,.07);padding:1px 4px;border-radius:3px;">interpretacion.html</code><br>
+            2. Busca <code style="background:rgba(0,0,0,.07);padding:1px 4px;border-radius:3px;">ALLOWED_EMAILS</code><br>
+            3. Borra la línea del correo<br>
+            4. Guarda → <code style="background:rgba(0,0,0,.07);padding:1px 4px;border-radius:3px;">git add → commit → push</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="pdf-wrap">
+  <button class="btn-pdf" onclick="window.print()">🖨️ Guardar como PDF</button>
+</div>
+
+<div class="footer">ECO IA · ExcelentIA © 2026 · Manual de Gestión de Acceso v1.0</div>
+
+</body>
+</html>
