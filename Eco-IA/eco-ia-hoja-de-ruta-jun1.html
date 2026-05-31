@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO IA — Hoja de Ruta v3 | ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #dde1e9;
+    --header-grad: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 60%, #1e5096 100%);
+    --header-line: #4a9fd4;
+    --hover-card: #e8f0fb;
+    --card-head: #dce8f7;
+    --alert-bg: #f0f6ff;
+    --alert-border: #c8d9f0;
+    --accent: #4a9fd4;
+    --note-bg: #eef4fc;
+    --note-dark: #1a3a6b;
+    --text: #1a2035;
+    --text-sec: #4a5068;
+    --text-gray: #8a90a0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: var(--header-grad);
+    border-bottom: 3px solid var(--header-line);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .header-left { display: flex; align-items: center; gap: 1.25rem; }
+  .logo-box {
+    background: #fff; border-radius: 10px; padding: .4rem .75rem;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 80px; min-height: 52px; flex-shrink: 0;
+  }
+  .logo-box img { height: 40px; width: auto; display: block; }
+  .logo-fallback { font-family:'Manrope',sans-serif; font-size:15px; font-weight:800; color:#1a3a6b; display:none; }
+  .header-titles h1 { font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: -.01em; line-height: 1.1; }
+  .header-titles p { font-size: .8rem; color: #a8c4e0; font-weight: 500; margin-top: .2rem; }
+  .header-badge {
+    background: rgba(74,159,212,.18); border: 1px solid rgba(74,159,212,.4);
+    border-radius: 8px; padding: .5rem 1rem; text-align: right; flex-shrink: 0;
+  }
+  .header-badge .badge-date { font-size: .78rem; font-weight: 700; color: var(--header-line); text-transform: uppercase; letter-spacing: .05em; }
+  .header-badge .badge-hour { font-size: 1.1rem; font-weight: 800; color: #fff; margin-top: .1rem; }
+
+  /* MAIN */
+  .main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 3rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  /* CARD BASE */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .card-head {
+    background: var(--card-head); border-bottom: 1px solid var(--border);
+    padding: .85rem 1.25rem; display: flex; align-items: center; gap: .6rem;
+  }
+  .card-head .icon { font-size: 1.1rem; line-height: 1; }
+  .card-head h2 { font-size: .9rem; font-weight: 800; color: var(--note-dark); text-transform: uppercase; letter-spacing: .04em; }
+  .card-body { padding: 1.25rem; }
+
+  /* QUÉ ES */
+  .que-es-text {
+    font-size: 1.05rem; font-weight: 500; color: var(--text); line-height: 1.7;
+    border-left: 4px solid var(--accent); padding-left: 1rem;
+  }
+  .que-es-text strong { color: var(--note-dark); font-weight: 800; }
+
+  /* PASOS */
+  .steps { display: flex; flex-direction: column; gap: .75rem; }
+  .step {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: .85rem 1rem; border-radius: 10px;
+    border: 1px solid var(--border); background: #fafbfd;
+    transition: background .2s, border-color .2s;
+  }
+  .step:hover { background: var(--hover-card); border-color: var(--accent); }
+  .step-num {
+    flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--header-grad); color: #fff;
+    font-size: .78rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; margin-top: .05rem;
+  }
+  .step-text { font-size: .9rem; color: var(--text-sec); font-weight: 500; line-height: 1.55; }
+  .step-text strong { color: var(--text); font-weight: 700; }
+
+  /* ESTADO */
+  .status-grid { display: flex; flex-direction: column; gap: .5rem; }
+  .status-row {
+    display: flex; align-items: flex-start; gap: .75rem;
+    padding: .65rem .85rem; border-radius: 8px;
+    border: 1px solid var(--border); background: #fafbfd;
+  }
+  .status-dot { font-size: 1rem; line-height: 1; flex-shrink: 0; margin-top: .1rem; }
+  .status-label { font-size: .88rem; font-weight: 500; color: var(--text-sec); flex: 1; line-height: 1.4; }
+  .status-tag {
+    font-size: .72rem; font-weight: 800; padding: .2rem .55rem;
+    border-radius: 20px; text-transform: uppercase; letter-spacing: .04em; flex-shrink: 0;
+  }
+  .tag-ok  { background: #dcfce7; color: #15803d; }
+  .tag-pen { background: #fef9c3; color: #92400e; }
+  .tag-blue { background: #dbeafe; color: #1d4ed8; }
+  .tag-warn { background: #fff7ed; color: #c2410c; }
+
+  /* CASOS */
+  .cases-table { width: 100%; border-collapse: collapse; }
+  .cases-table th {
+    background: var(--card-head); font-size: .78rem; font-weight: 800;
+    color: var(--note-dark); text-transform: uppercase; letter-spacing: .04em;
+    padding: .65rem 1rem; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .cases-table td {
+    padding: .7rem 1rem; font-size: .88rem; font-weight: 500;
+    color: var(--text-sec); border-bottom: 1px solid var(--border);
+  }
+  .cases-table tr:last-child td { border-bottom: none; }
+  .cases-table tr:hover td { background: var(--hover-card); }
+  .result-badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-size: .8rem; font-weight: 700;
+    border-radius: 20px; padding: .2rem .65rem;
+  }
+  .badge-100 { color: #15803d; background: #dcfce7; }
+  .badge-95  { color: #15803d; background: #dcfce7; }
+  .badge-88  { color: #92400e; background: #fef9c3; }
+  .badge-85  { color: #92400e; background: #fef9c3; }
+
+  /* AGENDA */
+  .agenda-items { display: flex; flex-direction: column; gap: .85rem; }
+  .agenda-item { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .agenda-item-head {
+    display: flex; align-items: center; gap: .75rem;
+    background: var(--card-head); border-bottom: 1px solid var(--border); padding: .75rem 1rem;
+  }
+  .agenda-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--note-dark); color: #fff;
+    font-size: .75rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .agenda-title { font-size: .88rem; font-weight: 800; color: var(--note-dark); }
+  .agenda-item-body { padding: .9rem 1rem; font-size: .87rem; color: var(--text-sec); font-weight: 500; line-height: 1.6; }
+
+  /* PREGUNTAS */
+  .pregunta-list { display: flex; flex-direction: column; gap: .75rem; }
+  .pregunta {
+    border: 1px solid var(--alert-border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: .9rem 1rem;
+    background: var(--alert-bg);
+  }
+  .pregunta-tag {
+    font-size: .72rem; font-weight: 800; color: var(--accent);
+    text-transform: uppercase; letter-spacing: .05em; margin-bottom: .4rem;
+  }
+  .pregunta-texto { font-size: .87rem; color: var(--text-sec); font-weight: 500; line-height: 1.6; }
+  .pregunta-nota {
+    font-size: .77rem; color: var(--text-gray); font-weight: 600;
+    margin-top: .4rem; font-style: italic;
+  }
+  .check-wrap-pre { margin-top: .6rem; display: flex; align-items: center; gap: .4rem; }
+  .check-wrap-pre input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--note-dark); cursor: pointer; }
+  .check-wrap-pre label { font-size: .78rem; font-weight: 700; color: var(--text-sec); cursor: pointer; }
+
+  /* UMBRALES */
+  .umbral-contexto {
+    background: var(--alert-bg); border: 1px solid var(--alert-border);
+    border-left: 4px solid var(--accent); border-radius: 8px;
+    padding: .85rem 1rem; font-size: .86rem; color: var(--text-sec);
+    font-weight: 500; line-height: 1.6; margin-bottom: 1rem;
+  }
+  .umbral-table { width: 100%; border-collapse: collapse; margin-top: .5rem; }
+  .umbral-table thead th {
+    background: var(--note-dark); color: #fff; font-size: .75rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: .6rem .85rem; text-align: left;
+  }
+  .umbral-table thead th:first-child { border-radius: 8px 0 0 0; }
+  .umbral-table thead th:last-child { border-radius: 0 8px 0 0; }
+  .umbral-table tbody tr { border-bottom: 1px solid var(--border); }
+  .umbral-table tbody tr:last-child { border-bottom: none; }
+  .umbral-table tbody tr:hover td { background: var(--hover-card); }
+  .umbral-table td { padding: .7rem .85rem; vertical-align: middle; font-size: .85rem; }
+  .umbral-param { font-weight: 700; color: var(--text); }
+  .umbral-default {
+    font-size: .8rem; font-weight: 600; color: var(--note-dark);
+    background: var(--note-bg); padding: .2rem .55rem; border-radius: 20px; white-space: nowrap;
+  }
+  .check-wrap { display: flex; align-items: center; justify-content: center; }
+  .check-wrap input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--note-dark); cursor: pointer; }
+  .check-label { font-size: .72rem; color: var(--text-gray); font-weight: 600; margin-left: .35rem; white-space: nowrap; }
+  .input-ajuste {
+    width: 100%; font-family: 'Manrope', sans-serif; font-size: .82rem; font-weight: 500;
+    color: var(--text); background: #fafbfd; border: 1px solid var(--border);
+    border-radius: 6px; padding: .4rem .65rem; resize: none; transition: border-color .2s, background .2s; min-height: 34px;
+  }
+  .input-ajuste:focus { outline: none; border-color: var(--accent); background: #fff; }
+  .input-ajuste::placeholder { color: var(--text-gray); font-style: italic; }
+
+  /* MEJORAS FUTURAS */
+  .mejora-list { display: flex; flex-direction: column; gap: .65rem; }
+  .mejora {
+    border: 1px solid var(--border); border-left: 4px solid var(--text-gray);
+    border-radius: 8px; padding: .85rem 1rem; background: #fafbfd;
+  }
+  .mejora-tag { font-size: .72rem; font-weight: 800; color: var(--text-gray); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
+  .mejora-titulo { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: .3rem; }
+  .mejora-desc { font-size: .84rem; color: var(--text-sec); font-weight: 500; line-height: 1.55; }
+  .mejora-nueva { border-left-color: var(--accent); background: var(--alert-bg); }
+  .mejora-nueva .mejora-tag { color: var(--accent); }
+
+  /* TAPSE */
+  .tapse-contexto {
+    background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b;
+    border-radius: 8px; padding: .85rem 1rem; font-size: .86rem;
+    color: var(--text-sec); font-weight: 500; line-height: 1.6; margin-bottom: 1rem;
+  }
+  .tapse-opciones { display: flex; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .tapse-opcion {
+    flex: 1; min-width: 140px; border: 2px solid var(--border); border-radius: 10px;
+    padding: .75rem 1rem; cursor: pointer; transition: border-color .2s, background .2s;
+    background: #fafbfd; display: flex; align-items: center; gap: .6rem;
+  }
+  .tapse-opcion input[type="radio"] { accent-color: var(--note-dark); width: 17px; height: 17px; flex-shrink: 0; cursor: pointer; }
+  .tapse-opcion:has(input:checked) { border-color: var(--note-dark); background: var(--note-bg); }
+  .tapse-opcion-label { font-size: .85rem; font-weight: 700; color: var(--text); }
+  .tapse-opcion-sub { font-size: .75rem; color: var(--text-gray); font-weight: 500; }
+  .tapse-comentario-label { font-size: .78rem; font-weight: 700; color: var(--text-sec); margin-bottom: .35rem; display: block; }
+  .textarea-comentario {
+    width: 100%; font-family: 'Manrope', sans-serif; font-size: .84rem; font-weight: 500;
+    color: var(--text); background: #fafbfd; border: 1px solid var(--border);
+    border-radius: 8px; padding: .65rem .85rem; resize: vertical; min-height: 80px;
+    transition: border-color .2s, background .2s;
+  }
+  .textarea-comentario:focus { outline: none; border-color: var(--accent); background: #fff; }
+  .textarea-comentario::placeholder { color: var(--text-gray); font-style: italic; }
+
+  /* PDF / FOOTER */
+  .pdf-wrap { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 2.5rem; display: flex; justify-content: center; }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: .6rem;
+    background: var(--header-grad); color: #fff; font-family: 'Manrope', sans-serif;
+    font-size: .9rem; font-weight: 700; padding: .85rem 2rem; border-radius: 10px;
+    border: none; cursor: pointer; letter-spacing: .02em;
+    box-shadow: 0 4px 16px rgba(13,27,62,.18); transition: opacity .2s, transform .15s;
+  }
+  .btn-pdf:hover { opacity: .92; transform: translateY(-1px); }
+  .btn-pdf:active { transform: translateY(0); }
+  .footer { text-align: center; padding: 1rem 1.5rem 2rem; font-size: .78rem; color: var(--text-gray); font-weight: 600; letter-spacing: .02em; }
+
+  @media print {
+    .btn-pdf, .pdf-wrap { display: none !important; }
+    body { background: #fff; }
+    .main { padding: 1rem; }
+    .card { break-inside: avoid; }
+    .input-ajuste, .textarea-comentario { border: 1px solid #ccc; background: #fff; }
+  }
+
+  @media (max-width: 600px) {
+    .header { flex-direction: column; align-items: flex-start; padding: 1.25rem 1rem; }
+    .header-badge { text-align: left; width: 100%; }
+    .header-titles h1 { font-size: 1.25rem; }
+    .main { padding: 1rem .85rem 2rem; gap: 1rem; }
+    .cases-table { display: block; overflow-x: auto; }
+    .umbral-table { display: block; overflow-x: auto; }
+    .tapse-opciones { flex-direction: column; }
+    .pdf-wrap { padding: 0 .85rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <div class="header-titles">
+      <h1>ECO IA — Hoja de Ruta</h1>
+      <p>Dr. Andrés Pérez Bañuelos · Global Cardio</p>
+    </div>
+  </div>
+  <div class="header-badge">
+    <div class="badge-date">Lunes 1 junio 2026</div>
+    <div class="badge-hour">12:00 pm</div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- QUÉ ES -->
+  <div class="card">
+    <div class="card-head"><span class="icon">🫀</span><h2>¿Qué es Eco IA?</h2></div>
+    <div class="card-body">
+      <p class="que-es-text">
+        <strong>Plataforma de Inteligencia Artificial de ExcelentIA</strong> que transforma automáticamente las imágenes de un ecocardiograma en un reporte clínico Word completo, listo para revisar y firmar — sin captura manual de datos, sin errores de transcripción, en segundos.
+      </p>
+    </div>
+  </div>
+
+  <!-- CÓMO FUNCIONA -->
+  <div class="card">
+    <div class="card-head"><span class="icon">⚙️</span><h2>¿Cómo funciona?</h2></div>
+    <div class="card-body">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">El Dr. proporciona una cuenta de correo Gmail para que <strong>ExcelentIA configure su acceso y permisos</strong> al formulario Eco Interpretador.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">El Dr. descarga las imágenes del primer bloque del estudio en <strong>Horos</strong> en formato JPEG.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">El Dr. ingresa al formulario <strong>Eco Interpretador</strong> con autenticación OAuth, captura los datos generales del paciente, agrega las imágenes descargadas y envía la petición.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">La IA analiza cada imagen y <strong>extrae automáticamente todos los valores numéricos</strong>.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Mediante procesos detallados con Inteligencia Artificial, el agente <strong>interpreta los datos numéricos</strong> extraídos de las imágenes para generar un reporte.</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-text">El <strong>sistema de alertas</strong> revisa valores fuera de rango e imágenes faltantes y las integra al reporte para revisión del Dr.</div></div>
+        <div class="step"><div class="step-num">7</div><div class="step-text">Se genera el <strong>reporte Word con el formato del Dr.</strong> y se guarda automáticamente en Google Drive.</div></div>
+        <div class="step"><div class="step-num">8</div><div class="step-text">El Dr. consulta las alertas (si se presentan) y el reporte en general como una <strong>última revisión</strong> antes de entregar al paciente.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENDA -->
+  <div class="card">
+    <div class="card-head"><span class="icon">📋</span><h2>Agenda de esta junta</h2></div>
+    <div class="card-body">
+      <div class="agenda-items">
+
+        <!-- 1. DEMO -->
+        <div class="agenda-item">
+          <div class="agenda-item-head"><div class="agenda-num">1</div><div class="agenda-title">Demo en vivo</div></div>
+          <div class="agenda-item-body">
+            Ejercicio real realizado por el Dr. Andrés: sube sus imágenes, envía la petición y revisa el Word generado.
+          </div>
+        </div>
+
+        <!-- PÁRRAFO INTRODUCTORIO PUNTOS 2 Y 3 -->
+        <div style="background:var(--alert-bg);border:1px solid var(--alert-border);border-left:4px solid var(--accent);border-radius:8px;padding:.85rem 1.1rem;margin:.25rem 0;">
+          <p style="font-size:.85rem;color:var(--text-sec);font-weight:600;line-height:1.6;">
+            Los siguientes puntos requieren la participación activa del Dr. Andrés. Sus respuestas permitirán calibrar los criterios clínicos del agente Eco IA — haciendo los reportes generados más precisos, consistentes y alineados a su práctica médica. Una vez respondidas las preguntas de la agenda, se actualizan los umbrales y criterios en el código del agente. Se espera subir el score promedio de 88–95% a 97–100%.
+          </p>
+        </div>
+
+        <!-- 2. UMBRALES -->
+        <div class="agenda-item">
+          <div class="agenda-item-head"><div class="agenda-num">2</div><div class="agenda-title">Definición de umbrales de alertas clínicas</div></div>
+          <div class="agenda-item-body">
+            <div class="umbral-contexto">
+              El sistema ya tiene implementada una sección de alertas que aparece en el reporte cuando detecta valores que podrían requerir atención. Se requiere que el Dr. defina exactamente cuándo quiere que se dispare cada alerta. A continuación los valores por default — si el parámetro es correcto, marque ✓; si requiere ajuste, indique el nuevo valor.
+            </div>
+            <table class="umbral-table">
+              <thead>
+                <tr><th>Parámetro</th><th>Default actual</th><th style="text-align:center;">✓ OK</th><th>Ajuste / Comentario</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="umbral-param">FE sistólica</span></td>
+                  <td><span class="umbral-default">&lt; 50%</span></td>
+                  <td><div class="check-wrap"><input type="checkbox" title="Confirmar"><span class="check-label">Correcto</span></div></td>
+                  <td><input class="input-ajuste" type="text" placeholder="ej. < 45% o < 55%…"></td>
+                </tr>
+                <tr>
+                  <td><span class="umbral-param">PSAP</span></td>
+                  <td><span class="umbral-default">&gt; 35 mmHg</span></td>
+                  <td><div class="check-wrap"><input type="checkbox" title="Confirmar"><span class="check-label">Correcto</span></div></td>
+                  <td><input class="input-ajuste" type="text" placeholder="ej. > 40 mmHg…"></td>
+                </tr>
+                <tr>
+                  <td><span class="umbral-param">SLG</span></td>
+                  <td><span class="umbral-default">&gt; -16%</span></td>
+                  <td><div class="check-wrap"><input type="checkbox" title="Confirmar"><span class="check-label">Correcto</span></div></td>
+                  <td><input class="input-ajuste" type="text" placeholder="ej. > -18% o > -14%…"></td>
+                </tr>
+                <tr>
+                  <td><span class="umbral-param">Índice de masa VI</span></td>
+                  <td><span class="umbral-default">&gt; 95 g/m²</span></td>
+                  <td><div class="check-wrap"><input type="checkbox" title="Confirmar"><span class="check-label">Correcto</span></div></td>
+                  <td><input class="input-ajuste" type="text" placeholder="ej. diferente por sexo…"></td>
+                </tr>
+                <tr>
+                  <td><span class="umbral-param">TAPSE</span></td>
+                  <td><span class="umbral-default">&lt; 17 mm</span></td>
+                  <td><div class="check-wrap"><input type="checkbox" title="Confirmar"><span class="check-label">Correcto</span></div></td>
+                  <td><input class="input-ajuste" type="text" placeholder="ej. < 16 mm o < 18 mm…"></td>
+                </tr>
+                <tr>
+                  <td><span class="umbral-param">E/e' promedio</span></td>
+                  <td><span class="umbral-default">&gt; 14</span></td>
+                  <td><div class="check-wrap"><input type="checkbox" title="Confirmar"><span class="check-label">Correcto</span></div></td>
+                  <td><input class="input-ajuste" type="text" placeholder="ej. > 12 o > 15…"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. PREGUNTAS -->
+        <div class="agenda-item">
+          <div class="agenda-item-head"><div class="agenda-num">3</div><div class="agenda-title">Confirmación de criterios del reporte</div></div>
+          <div class="agenda-item-body">
+            <div class="pregunta-list">
+
+              <div class="pregunta">
+                <div class="pregunta-tag">1. Geometría del corazón</div>
+                <div class="pregunta-texto">Cuando el grosor relativo de la pared (GPR) es exactamente 0.4, ¿usted lo reporta como "geometría normal" o como "remodelado concéntrico"? El sistema actualmente pone "remodelado concéntrico" con GPR mayor a 0.36, pero en los estudios de Laura García y Ana María Santiesteban usted usó "normal" con GPR 0.4. ¿Cuál es el umbral que usa usted?</div>
+                <div class="pregunta-nota">Afecta: Laura García Flores #3066 y Ana María Santiesteban #3067</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. Uso remodelado concéntrico solo cuando GPR > 0.42…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p1"><label for="p1">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">2. Función diastólica en pacientes jóvenes</div>
+                <div class="pregunta-texto">En Ana María Santiesteban (23 años) la relación E/A fue 1.7. El sistema lo clasificó como disfunción diastólica tipo II, pero usted lo reportó como función diastólica normal. En personas jóvenes ese valor puede ser completamente normal. ¿El sistema debe considerar la edad del paciente para hacer ese diagnóstico, o hay otro criterio que usted usa además del E/A?</div>
+                <div class="pregunta-nota">Afecta: Ana María Santiesteban Portilla #3067</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. En menores de 30 años E/A hasta 2.0 puede ser normal…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p2"><label for="p2">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">3. Tiempo de aceleración pulmonar en conclusiones</div>
+                <div class="pregunta-texto">En los reportes de Laura García y Ana María, el tiempo de aceleración de la arteria pulmonar (TAcc) aparece en el cuerpo del reporte pero no quedó en las conclusiones. ¿Quiere que ese dato aparezca siempre en las conclusiones cuando está disponible, o solo en casos específicos?</div>
+                <div class="pregunta-nota">Afecta: Laura García Flores #3066 y Ana María Santiesteban #3067</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. Siempre incluirlo / Solo cuando TAcc < 100 ms…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p3"><label for="p3">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">4. Línea de válvula aórtica en conclusiones</div>
+                <div class="pregunta-texto">En el reporte de Laura García usted agregó en las conclusiones una línea que dice que la válvula aórtica abre y cierra bien y no tiene problemas. El sistema solo incluye esa línea cuando detecta insuficiencia. ¿Quiere que siempre aparezca esa línea en las conclusiones aunque la válvula esté normal?</div>
+                <div class="pregunta-nota">Afecta: Laura García Flores #3066</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. Sí, siempre incluirla / Solo cuando hay patología…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p4"><label for="p4">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">5. SLG con decimal — ¿trunca o redondea?</div>
+                <div class="pregunta-texto">Cuando el Strain longitudinal tiene decimal, ¿usted siempre corta el número sin redondear? Por ejemplo si sale -18.7%, ¿usted pone -18% o -19%? El sistema actualmente corta sin redondear (pone -18%).</div>
+                <div class="pregunta-nota">Detectado en: Sabu Shakruka #3065</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. Siempre trunco / Redondeo al entero más cercano…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p5"><label for="p5">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">6. Válvula mitral con puntos de calcio</div>
+                <div class="pregunta-texto">En el reporte de Ana María usted escribió que la válvula mitral tiene "puntos de calcio". Eso es algo que usted ve directamente en el estudio. ¿Hay alguna forma de que el sistema lo detecte automáticamente en la imagen, o prefiere que quede un campo en el formulario donde usted lo marque antes de enviar?</div>
+                <div class="pregunta-nota">Afecta: Ana María Santiesteban Portilla #3067</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. Prefiero un campo en el formulario para marcarlo manualmente…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p6"><label for="p6">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">7. Presión de aurícula derecha por defecto</div>
+                <div class="pregunta-texto">Para calcular la presión de la arteria pulmonar, cuando no hay imagen de la vena cava inferior el sistema usa 3 mmHg como presión de la aurícula derecha por defecto. ¿Ese valor está bien, o prefiere que use 5 mmHg?</div>
+                <div class="pregunta-nota">Aplicable cuando falta imagen de VCI</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. 3 mmHg está bien / Prefiero 5 mmHg…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p7"><label for="p7">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">8. Imágenes dentro del Word — criterio de selección</div>
+                <div class="pregunta-texto">El sistema puede insertar automáticamente al final del Word todas las imágenes que se subieron al formulario. El Dr. puede borrar las que no quiera directamente en el documento. ¿Le parece bien ese flujo, o prefiere seleccionar cuáles incluir antes de que se genere el Word? Adicionalmente: si quisiera agregar imágenes adicionales desde Horos que no formaron parte del análisis, ¿cuántos campos extra necesitaría en el formulario para subir esas imágenes?</div>
+                <div class="pregunta-nota">Define el flujo de implementación de imágenes en el Word</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. Me parece bien recibirlas todas y borrar / Necesito 4 campos extra…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p8"><label for="p8">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">9. Tabla de parámetros escaneados</div>
+                <div class="pregunta-texto">Antes del cuerpo del reporte, el sistema puede incluir una tabla con todos los valores numéricos que la IA leyó de cada imagen — sin interpretación, solo los números crudos. El Dr. la revisa rápidamente para confirmar que todo está bien, y la borra antes de entregar al paciente. ¿Prefiere esa tabla al inicio o al final del Word? ¿Solo los valores que sí se capturaron, o también los que quedaron vacíos?</div>
+                <div class="pregunta-nota">Mejora de trazabilidad — facilita validación del Dr. antes de firmar</div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. Al inicio / Al final. Solo los capturados / Todos incluyendo vacíos…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p9"><label for="p9">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">10. TAPSE con múltiples imágenes</div>
+                <div class="pregunta-texto">En algunos estudios aparecen dos imágenes del TAPSE con valores distintos. El sistema actualmente toma el valor mayor. ¿Tiene algún criterio para saber cuál imagen del TAPSE es la válida cuando hay más de una?</div>
+                <div class="pregunta-nota">Aplicable cuando el estudio incluye más de una captura de TAPSE</div>
+                <div class="tapse-opciones" style="margin-top:.65rem;">
+                  <label class="tapse-opcion"><input type="radio" name="tapse" value="mayor"><div><div class="tapse-opcion-label">El mayor</div><div class="tapse-opcion-sub">Criterio actual</div></div></label>
+                  <label class="tapse-opcion"><input type="radio" name="tapse" value="menor"><div><div class="tapse-opcion-label">El menor</div><div class="tapse-opcion-sub">Más conservador</div></div></label>
+                  <label class="tapse-opcion"><input type="radio" name="tapse" value="criterio"><div><div class="tapse-opcion-label">Depende</div><div class="tapse-opcion-sub">Ver comentarios</div></div></label>
+                </div>
+                <span class="tapse-comentario-label">Respuesta / criterio del Dr.:</span>
+                <textarea class="textarea-comentario" placeholder="Ej. Siempre la primera imagen capturada, la de mejor calidad de señal, o la del eje que prefiera…"></textarea>
+                <div class="check-wrap-pre"><input type="checkbox" id="p10"><label for="p10">Respondida</label></div>
+              </div>
+
+              <div class="pregunta">
+                <div class="pregunta-tag">11. Configuración Gmail OAuth del Dr.</div>
+                <div class="pregunta-texto">Conectar el correo del Dr. para que el reporte Word llegue automáticamente a su bandeja al generarse, además de guardarse en Drive. Se necesita que el Dr. autorice el acceso durante la junta.</div>
+                <div class="pregunta-nota">Requiere que el Dr. autorice el acceso en esta junta</div>
+                <span class="tapse-comentario-label">Correo a conectar:</span>
+                <input class="input-ajuste" type="email" placeholder="correo@gmail.com" style="max-width:320px; margin-bottom:.65rem;">
+                <div class="check-wrap-pre"><input type="checkbox" id="p11"><label for="p11">Configurado</label></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTADO ACTUAL -->
+  <div class="card">
+    <div class="card-head"><span class="icon">📊</span><h2>Estado actual del proyecto</h2></div>
+    <div class="card-body">
+      <div class="status-grid">
+        <div class="status-row"><span class="status-dot">✅</span><span class="status-label">Formulario Eco Interpretador operativo (con autenticación OAuth)</span><span class="status-tag tag-ok">Listo</span></div>
+        <div class="status-row"><span class="status-dot">✅</span><span class="status-label">Extracción automática de valores por IA — procesa una imagen a la vez para garantizar precisión</span><span class="status-tag tag-ok">Listo</span></div>
+        <div class="status-row"><span class="status-dot">✅</span><span class="status-label">Generación del reporte Word con el formato del Dr.</span><span class="status-tag tag-ok">Listo</span></div>
+        <div class="status-row"><span class="status-dot">✅</span><span class="status-label">Guardado automático en Google Drive</span><span class="status-tag tag-ok">Listo</span></div>
+        <div class="status-row"><span class="status-dot">✅</span><span class="status-label">Sistema de alertas implementado — avisa imágenes faltantes y valores fuera de rango</span><span class="status-tag tag-ok">Listo</span></div>
+        <div class="status-row"><span class="status-dot">✅</span><span class="status-label">Corrección automática de valores del ventrículo derecho y aorta reportados en cm en vez de mm</span><span class="status-tag tag-ok">Listo</span></div>
+        <div class="status-row"><span class="status-dot">🟡</span><span class="status-label">Confirmación de umbrales clínicos y criterios del reporte (se definen en esta junta)</span><span class="status-tag tag-pen">En junta</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÚLTIMOS CASOS PROBADOS -->
+  <div class="card">
+    <div class="card-head"><span class="icon">🧪</span><h2>Últimos 5 casos probados</h2></div>
+    <div class="card-body" style="padding:0;">
+      <table class="cases-table">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>ID</th>
+            <th>Resultado</th>
+            <th>Notas principales</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Eduardo Delgadillo</strong></td>
+            <td style="color:var(--text-gray);font-size:.82rem;">#3037</td>
+            <td><span class="result-badge badge-100">✅ 100%</span></td>
+            <td style="font-size:.82rem;color:var(--text-gray);">Caso de referencia base</td>
+          </tr>
+          <tr>
+            <td><strong>Vivian Siegal Yidovich</strong></td>
+            <td style="color:var(--text-gray);font-size:.82rem;">#3059</td>
+            <td><span class="result-badge badge-95">✅ 97%</span></td>
+            <td style="font-size:.82rem;color:var(--text-gray);">Diferencias mínimas de lectura de imagen</td>
+          </tr>
+          <tr>
+            <td><strong>Sabu Shakruka</strong></td>
+            <td style="color:var(--text-gray);font-size:.82rem;">#3065</td>
+            <td><span class="result-badge badge-95">✅ 95%+</span></td>
+            <td style="font-size:.82rem;color:var(--text-gray);">Primer estudio con ambos fixes aplicados</td>
+          </tr>
+          <tr>
+            <td><strong>Laura García Flores</strong></td>
+            <td style="color:var(--text-gray);font-size:.82rem;">#3066</td>
+            <td><span class="result-badge badge-88">🟡 88%</span></td>
+            <td style="font-size:.82rem;color:var(--text-gray);">GPR 0.4, TAcc ausente, línea aórtica en conclusiones</td>
+          </tr>
+          <tr>
+            <td><strong>Ana María Santiesteban Portilla</strong></td>
+            <td style="color:var(--text-gray);font-size:.82rem;">#3067</td>
+            <td><span class="result-badge badge-85">🟡 85%</span></td>
+            <td style="font-size:.82rem;color:var(--text-gray);">GPR 0.4, diastólica E/A 1.7 en paciente joven, mitral con calcio</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MEJORAS FUTURAS -->
+  <div class="card">
+    <div class="card-head"><span class="icon">🚀</span><h2>Mejoras en desarrollo</h2></div>
+    <div class="card-body">
+      <div class="mejora-list">
+
+        <div class="mejora mejora-nueva">
+          <div class="mejora-tag">💡 Idea nueva — por aprobar en junta</div>
+          <div class="mejora-titulo">Tabla de verificación de parámetros escaneados</div>
+          <div class="mejora-desc">Agregar al Word una tabla con todos los valores numéricos que el sistema leyó de cada imagen, sin interpretación. El Dr. la revisa en 30 segundos para validar que todo esté correcto, y la borra antes de entregar al paciente. Como un "recibo de ingredientes" antes del platillo final.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="pdf-wrap">
+  <button class="btn-pdf" onclick="window.print()">🖨️ Guardar como PDF</button>
+</div>
+
+<div class="footer">ECO IA · ExcelentIA © 2026 · v3 — Actualizado 31 mayo 2026</div>
+
+</body>
+</html>
