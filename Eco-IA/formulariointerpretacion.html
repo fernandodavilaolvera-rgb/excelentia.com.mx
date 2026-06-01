@@ -11,7 +11,11 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
     header{background:linear-gradient(135deg,var(--primary-dk) 0%,var(--primary) 60%,var(--accent) 100%);padding:14px 36px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(26,58,124,0.25)}
-    .logo-img{height:46px;object-fit:contain}
+    .logo-box{background:#fff;border-radius:10px;padding:.35rem .65rem;display:flex;align-items:center;justify-content:center;min-width:72px;min-height:48px;flex-shrink:0}
+    .logo-box img{height:36px;width:auto;display:block}
+    .logo-box-lg{background:#fff;border-radius:12px;padding:.5rem .9rem;display:flex;align-items:center;justify-content:center;min-width:88px;min-height:60px;margin:0 auto 28px}
+    .logo-box-lg img{height:48px;width:auto;display:block}
+    .logo-fallback{font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:#1a3a6b;display:none}
     .header-sub{font-family:'Nunito',sans-serif;font-size:.75rem;color:rgba(255,255,255,.6);font-weight:300;letter-spacing:.1em;text-transform:uppercase}
     main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px}
     #login-section{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:52px 48px;max-width:420px;width:100%;text-align:center;border:1px solid var(--border)}
@@ -77,12 +81,18 @@
 </head>
 <body>
 <header>
-  <img class="logo-img" src="../assets/logo%20excelentIA.png" alt="ExcelentIA" />
+  <div class="logo-box">
+    <img src="../assets/logo%20excelentIA.png" alt="ExcelentIA" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+  </div>
   <div class="header-sub">Reportes de Ecocardiograma</div>
 </header>
 <main>
   <div id="login-section">
-    <img class="login-logo" src="../assets/logo%20excelentIA.png" alt="ExcelentIA" />
+    <div class="logo-box-lg">
+      <img src="../assets/logo%20excelentIA.png" alt="ExcelentIA" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
     <div class="login-divider"></div>
     <h1>Acceso al sistema</h1>
     <p>Inicia sesión con tu cuenta de Google autorizada para acceder al formulario de interpretación de ecocardiogramas.</p>
@@ -98,7 +108,10 @@
   </div>
 
   <div id="access-denied" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;text-align:center;padding:2.5rem 1.5rem;">
-    <img class="login-logo" src="../assets/logo%20excelentIA.png" alt="ExcelentIA" />
+    <div class="logo-box-lg">
+      <img src="../assets/logo%20excelentIA.png" alt="ExcelentIA" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
     <div style="font-size:2.5rem;">🚫</div>
     <h1 style="font-size:1.4rem;color:#0d1b3e;">Acceso no autorizado</h1>
     <p style="color:#1a3a6b;max-width:340px;line-height:1.6;">Esta cuenta de Google no tiene permiso para acceder al sistema. Contacta a ExcelentIA para solicitar acceso.</p>
@@ -113,7 +126,10 @@
           <h2>Nuevo estudio</h2>
           <p>Complete los datos del paciente y adjunte las imágenes del ecocardiograma</p>
         </div>
-        <img class="form-logo" src="../assets/logo%20excelentIA.png" alt="ExcelentIA" />
+        <div class="logo-box">
+          <img src="../assets/logo%20excelentIA.png" alt="ExcelentIA" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+          <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+        </div>
       </div>
       <div class="user-pill">
         <div class="user-avatar-placeholder" id="user-initials">—</div>
