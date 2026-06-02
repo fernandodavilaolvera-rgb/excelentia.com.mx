@@ -1458,12 +1458,53 @@ function renderStatusBar(){
 
 function guardarToggle(seg,val){avisosConfig.toggles[seg]=val;renderStatusBar();showToast('💾 Configuración guardada');}
 
-function guardarProg(){
+async function guardarProg(){
   avisosConfig.dia=parseInt(document.getElementById('av-dia-envio').value||6);
   avisosConfig.hora=document.getElementById('av-hora-envio').value||'09:00';
   avisosConfig.remitente=document.getElementById('av-remitente').value;
   calcNextSend();
-  showToast('✅ Programación guardada');
+
+  // Detectar segmento activo (primer segmento con toggle ON)
+  const segmentos = ['s1','s2','s3','s4'];
+  let segmentoActivo = 's2';
+  for(const seg of segmentos){
+    const toggle = document.getElementById('toggle-'+seg);
+    if(toggle && toggle.checked){ segmentoActivo = seg; break; }
+  }
+
+  // Leer asunto y cuerpo del segmento activo
+  const asunto = document.getElementById('asunto-'+segmentoActivo)?.value || 'Aviso Club Berimbau';
+  const cuerpo = document.getElementById('cuerpo-'+segmentoActivo)?.value || 'Hola {{nombre}}, te contactamos por tu membresía {{membresia}}.';
+
+  const payload = {
+    dia: avisosConfig.dia,
+    hora: avisosConfig.hora,
+    segmento: segmentoActivo,
+    asunto,
+    cuerpo,
+    remitente: avisosConfig.remitente
+  };
+
+  const btn = document.querySelector('.btn-av-save');
+  const textoOriginal = btn ? btn.innerHTML : '';
+  if(btn){ btn.innerHTML = '⏳ Programando...'; btn.disabled = true; }
+
+  try {
+    const resp = await fetch('https://excelentia.app.n8n.cloud/webhook/berimbau-programar-envio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if(resp.ok){
+      showToast('✅ Envío programado para las ' + avisosConfig.hora + ' — segmento ' + segmentoActivo.toUpperCase());
+    } else {
+      showToast('⚠️ Error al programar: ' + resp.status);
+    }
+  } catch(e) {
+    showToast('❌ No se pudo conectar con n8n');
+  } finally {
+    if(btn){ btn.innerHTML = textoOriginal; btn.disabled = false; }
+  }
 }
 
 function guardarPlantilla(seg){
