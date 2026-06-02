@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orden del Día — Club Berimbau / ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul-dark:   #0d1b3e;
+    --azul-mid:    #1a3a6b;
+    --azul-light:  #1e5096;
+    --azul-accent: #4a9fd4;
+    --verde:       #3AAA35;
+    --naranja:     #EF4B1F;
+    --fondo:       #f5f6f8;
+    --card:        #ffffff;
+    --borde:       #dde1e9;
+    --texto:       #1a2035;
+    --secundario:  #4a5068;
+    --gris:        #8a90a0;
+    --hover:       #e8f0fb;
+    --cab-card:    #dce8f7;
+  }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    min-height: 100vh;
+    padding: 0 0 60px 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--azul-dark) 0%, var(--azul-mid) 60%, var(--azul-light) 100%);
+    border-bottom: 3px solid var(--azul-accent);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .logo-box {
+    background: #fff;
+    border-radius: 10px;
+    padding: .4rem .75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    min-height: 52px;
+    flex-shrink: 0;
+  }
+  .logo-box img { height: 40px; width: auto; display: block; }
+  .logo-fallback { font-family:'Manrope',sans-serif; font-size:15px; font-weight:800; color:#1a3a6b; display:none; }
+
+  .logo-berimbau {
+    background: #fff;
+    border-radius: 10px;
+    padding: .4rem .75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    min-height: 52px;
+    flex-shrink: 0;
+  }
+  .logo-berimbau img { height: 40px; width: auto; display: block; }
+  .logo-berimbau-fallback {
+    font-family:'Manrope',sans-serif; font-size:13px; font-weight:800;
+    color: var(--verde); display:none; letter-spacing: -0.5px;
+  }
+
+  .divider-logos {
+    width: 1px; height: 44px;
+    background: rgba(255,255,255,0.25);
+    flex-shrink: 0;
+  }
+
+  .header-titles { color: #fff; }
+  .header-titles h1 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+  .header-titles p {
+    font-size: .78rem;
+    color: rgba(255,255,255,0.65);
+    margin-top: 3px;
+    font-weight: 500;
+  }
+
+  .header-meta {
+    text-align: right;
+    color: rgba(255,255,255,0.85);
+    flex-shrink: 0;
+  }
+  .header-meta .fecha {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .header-meta .hora {
+    font-size: .8rem;
+    color: var(--azul-accent);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .header-meta .lugar {
+    font-size: .72rem;
+    color: rgba(255,255,255,0.5);
+    margin-top: 3px;
+    font-weight: 500;
+  }
+
+  /* ── CONTENIDO ── */
+  .container {
+    max-width: 860px;
+    margin: 36px auto 0;
+    padding: 0 24px;
+  }
+
+  /* ── INTRO CARD ── */
+  .intro-card {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-left: 4px solid var(--azul-accent);
+  }
+  .intro-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .intro-text { font-size: .82rem; color: var(--secundario); line-height: 1.6; font-weight: 500; }
+  .intro-text strong { color: var(--texto); }
+
+  /* ── PUNTOS ── */
+  .punto {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .punto:hover { box-shadow: 0 4px 18px rgba(74,159,212,0.10); }
+
+  .punto-header {
+    background: var(--cab-card);
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .punto-num {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--azul-mid), var(--azul-light));
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(26,58,107,.25);
+  }
+
+  .punto-titulo {
+    font-size: .97rem;
+    font-weight: 800;
+    color: var(--azul-mid);
+    line-height: 1.2;
+  }
+  .punto-titulo span.emoji { margin-right: 4px; }
+
+  .punto-body {
+    padding: 18px 22px;
+  }
+
+  .punto-body p {
+    font-size: .83rem;
+    color: var(--secundario);
+    line-height: 1.75;
+    font-weight: 500;
+  }
+
+  /* Archivos list */
+  .archivos-list {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .archivo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+    border-radius: 9px;
+    padding: 11px 14px;
+  }
+  .archivo-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .archivo-info strong {
+    display: block;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--texto);
+    line-height: 1.3;
+  }
+  .archivo-info span {
+    font-size: .76rem;
+    color: var(--gris);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  /* Sub-items dashboard */
+  .dashboard-items {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .dash-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+    border-radius: 9px;
+    font-size: .82rem;
+  }
+  .dash-item .d-emoji { font-size: 1rem; width: 22px; flex-shrink: 0; text-align: center; }
+  .dash-item .d-nombre { font-weight: 700; color: var(--texto); min-width: 100px; }
+  .dash-item .d-desc { color: var(--gris); font-weight: 500; font-size: .77rem; }
+
+  /* Demo badge */
+  .demo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, var(--verde), #2d8a29);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 14px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    max-width: 860px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .footer-note {
+    font-size: .73rem;
+    color: var(--gris);
+    font-weight: 500;
+  }
+  .footer-confidencial {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .72rem;
+    color: var(--gris);
+    font-weight: 600;
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 20px;
+    padding: 5px 12px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 20px 18px 18px; flex-direction: column; align-items: flex-start; }
+    .header-meta { text-align: left; }
+    .container { padding: 0 14px; }
+    .punto-header { padding: 14px 16px; }
+    .punto-body { padding: 14px 16px; }
+    footer { padding: 0 14px; }
+    .dash-item .d-desc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <div class="divider-logos"></div>
+    <div class="logo-berimbau">
+      <img src="https://fernandodavilaolvera-rgb.github.io/excelentia.com.mx/berimbau/logo_club_berimbau.png" alt=""
+           style="height:40px;width:auto;display:block;"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <span class="logo-berimbau-fallback" style="display:none;">Club<br>Berimbau</span>
+    </div>
+    <div class="divider-logos"></div>
+    <div class="header-titles">
+      <h1>Orden del Día</h1>
+      <p>Sesión de trabajo — Plataforma IA</p>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div class="fecha">Martes 10 de junio de 2026</div>
+    <div class="hora">🕦 11:30 h</div>
+    <div class="lugar">Club Berimbau · Estado de México</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="intro-card">
+    <div class="intro-icon">📋</div>
+    <div class="intro-text">
+      Esta sesión tiene como objetivo presentar la <strong>Plataforma de Inteligencia Artificial</strong> desarrollada para el Club Berimbau, revisar los avances de implementación y realizar una demostración en vivo del sistema de avisos por correo electrónico.
+    </div>
+  </div>
+
+  <!-- PUNTO 1 -->
+  <div class="punto">
+    <div class="punto-header">
+      <div class="punto-num">1</div>
+      <div class="punto-titulo">🖥️ Presentación del Dashboard Berimbau</div>
+    </div>
+    <div class="punto-body">
+      <p>
+        Presentación de la plataforma de inteligencia artificial desarrollada por ExcelentIA para el Club Berimbau. La herramienta centraliza la información del club en un solo lugar, permitiendo visualizar en tiempo real el estado de membresías, adeudos, accesos y comunicaciones.
+      </p>
+      <p style="margin-top:10px">
+        Entre sus características principales destacan: segmentación automática de socios por antigüedad de adeudo, sistema de avisos por correo electrónico con plantillas personalizables, envío manual y programado, y registro histórico de comunicaciones. En etapas siguientes, la plataforma incorporará avisos automáticos por WhatsApp, un agente conversacional para atención a socios, y conexión en tiempo real con la base de datos del Club Berimbau.
+      </p>
+    </div>
+  </div>
+
+  <!-- PUNTO 2 -->
+  <div class="punto">
+    <div class="punto-header">
+      <div class="punto-num">2</div>
+      <div class="punto-titulo">🗂️ Bases de datos proporcionadas por el equipo Berimbau</div>
+    </div>
+    <div class="punto-body">
+      <p>Revisión de los archivos entregados como insumo para el desarrollo de la plataforma:</p>
+      <div class="archivos-list">
+        <div class="archivo-item">
+          <div class="archivo-icon">📊</div>
+          <div class="archivo-info">
+            <strong>Información IA 2026</strong>
+            <span>Padrón de 506 socios con datos de membresía, periodos de pago, contacto y antigüedad.</span>
+          </div>
+        </div>
+        <div class="archivo-item">
+          <div class="archivo-icon">🏃</div>
+          <div class="archivo-info">
+            <strong>Registro de Accesos</strong>
+            <span>Conteo de entradas por membresía para el periodo analizado.</span>
+          </div>
+        </div>
+        <div class="archivo-item">
+          <div class="archivo-icon">📁</div>
+          <div class="archivo-info">
+            <strong>Cartera Nancy</strong>
+            <span>Archivo CSV que utiliza Nancy del área de Cobranza, al cual aplica filtros manualmente para detectar los casos que requieren atención y seguimiento.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUNTO 3 -->
+  <div class="punto">
+    <div class="punto-header">
+      <div class="punto-num">3</div>
+      <div class="punto-titulo">🗺️ Hoja de Ruta — Plataforma IA</div>
+    </div>
+    <div class="punto-body">
+      <p>
+        Revisión del plan de implementación por fases: etapas completadas, etapas en proceso y próximos pasos, para tener claridad del proceso completo y los tiempos estimados.
+      </p>
+    </div>
+  </div>
+
+  <!-- PUNTO 4 -->
+  <div class="punto">
+    <div class="punto-header">
+      <div class="punto-num">4</div>
+      <div class="punto-titulo">🔍 Revisión del Dashboard</div>
+    </div>
+    <div class="punto-body">
+      <p>Recorrido funcional por las secciones de la herramienta en el siguiente orden:</p>
+      <div class="dashboard-items">
+        <div class="dash-item">
+          <div class="d-emoji">📋</div>
+          <div class="d-nombre">Directorio</div>
+          <div class="d-desc">Padrón completo de socios con búsqueda y filtros</div>
+        </div>
+        <div class="dash-item">
+          <div class="d-emoji">🏃</div>
+          <div class="d-nombre">Accesos</div>
+          <div class="d-desc">Análisis de asistencia al club por periodo</div>
+        </div>
+        <div class="dash-item">
+          <div class="d-emoji">💰</div>
+          <div class="d-nombre">Cobranza</div>
+          <div class="d-desc">Cartera de socios en adeudo segmentada por antigüedad</div>
+        </div>
+        <div class="dash-item">
+          <div class="d-emoji">✉️📱</div>
+          <div class="d-nombre">Avisos</div>
+          <div class="d-desc">Sistema de comunicación por correo electrónico y en siguiente etapa por WhatsApp</div>
+        </div>
+        <div class="dash-item">
+          <div class="d-emoji">📊</div>
+          <div class="d-nombre">Gráfica</div>
+          <div class="d-desc">Visualización ejecutiva del estado general de membresías</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUNTO 5 -->
+  <div class="punto">
+    <div class="punto-header">
+      <div class="punto-num">5</div>
+      <div class="punto-titulo">🚀 Ejercicio en vivo — Envío de correos</div>
+    </div>
+    <div class="punto-body">
+      <p>
+        Demostración práctica del sistema de avisos: envío a socios del segmento activo con cuentas de correo sustituidas para fines de la prueba, para validar el funcionamiento de la herramienta en tiempo real.
+      </p>
+      <div class="demo-badge">✅ Demo en vivo</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-note">ExcelentIA © 2026 · excelentia.com.mx</div>
+  <div class="footer-confidencial">🔒 Documento confidencial</div>
+</footer>
+
+</body>
+</html>
