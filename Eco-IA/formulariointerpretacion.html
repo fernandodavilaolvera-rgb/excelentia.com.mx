@@ -48,7 +48,7 @@
     .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
     .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#f8fafd;position:relative}
     .upload-zone:hover,.upload-zone.drag-over,.upload-zone.paste-active{border-color:var(--accent);background:var(--accent-lt)}
-    .upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-zone input[type="file"]{display:none}
     .upload-icon{width:44px;height:44px;background:var(--accent-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
     .upload-icon svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.8}
     .upload-zone h3{font-size:.92rem;font-weight:700;color:var(--primary);margin-bottom:3px}
@@ -191,13 +191,18 @@
       </div>
       <div class="section-label">Imágenes del estudio</div>
       <div class="upload-zone" id="upload-zone">
-        <input type="file" id="file-input" accept="image/jpeg,image/png" multiple webkitdirectory />
+        <input type="file" id="file-input" accept="image/jpeg,image/png" multiple style="display:none;" />
+        <input type="file" id="folder-input" accept="image/jpeg,image/png" multiple webkitdirectory style="display:none;" />
         <div class="upload-icon">
           <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
         </div>
         <h3>Arrastra imágenes o una carpeta aquí</h3>
-        <p>o haz clic para seleccionar archivos · o arrastra la carpeta completa desde Horos</p>
-        <p class="hint">JPG / PNG · Máximo 32 imágenes</p>
+        <p>JPG / PNG · Máximo 40 imágenes</p>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+          <label for="file-input" style="cursor:pointer;padding:7px 16px;background:#fff;border:1.5px solid #2e7bcf;border-radius:7px;font-size:.82rem;font-weight:700;color:#2e7bcf;">🖼 Seleccionar imágenes</label>
+          <label for="folder-input" style="cursor:pointer;padding:7px 16px;background:#fff;border:1.5px solid #1e9fc4;border-radius:7px;font-size:.82rem;font-weight:700;color:#1e9fc4;">📁 Seleccionar carpeta</label>
+        </div>
+        <p class="hint">JPG / PNG · Máximo 40 imágenes</p>
       </div>
       <div id="preview-grid"></div>
       <p id="file-count"></p>
@@ -216,7 +221,7 @@
 <script>
   const CLIENT_ID='225295370714-iboaslggsvgtbjfenjg71ml8i97gk9ap.apps.googleusercontent.com';
   const WEBHOOK_URL='https://excelentia.app.n8n.cloud/webhook/e4c4b6e9-eb20-4a11-b43e-be5c73181852';
-  const MAX_FILES=32;
+  const MAX_FILES=40;
   let currentUser=null,selectedFiles=[];
 
   function signInWithGoogle(){google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:'openid email profile',callback:(t)=>{if(!t.error)fetchUserInfo(t.access_token)}}).requestAccessToken()}
@@ -237,12 +242,13 @@
   }
   function signOut(){google.accounts.id.disableAutoSelect();currentUser=null;selectedFiles=[];document.getElementById('preview-grid').innerHTML='';document.getElementById('file-count').textContent='';document.getElementById('form-section').style.display='none';document.getElementById('login-section').style.display='block'}
 
-  const fileInput=document.getElementById('file-input'),previewGrid=document.getElementById('preview-grid'),fileCount=document.getElementById('file-count'),uploadZone=document.getElementById('upload-zone');
+  const fileInput=document.getElementById('file-input'),folderInput=document.getElementById('folder-input'),previewGrid=document.getElementById('preview-grid'),fileCount=document.getElementById('file-count'),uploadZone=document.getElementById('upload-zone');
 
   fileInput.addEventListener('change',e=>handleFiles(Array.from(e.target.files)));
+  folderInput.addEventListener('change',e=>handleFiles(Array.from(e.target.files)));
   uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('drag-over')});
   uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('drag-over'));
-  uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.classList.remove('drag-over');handleFiles(Array.from(e.dataTransfer.files))});
+  uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.classList.remove('drag-over');handleFiles(Array.from(e.dataTransfer.files));});
 
   // ── Paste con Cmd+V ──
   document.addEventListener('paste',e=>{
