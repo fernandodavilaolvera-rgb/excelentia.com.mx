@@ -191,12 +191,12 @@
       </div>
       <div class="section-label">Imágenes del estudio</div>
       <div class="upload-zone" id="upload-zone">
-        <input type="file" id="file-input" accept="image/jpeg,image/png" multiple />
+        <input type="file" id="file-input" accept="image/jpeg,image/png" multiple webkitdirectory />
         <div class="upload-icon">
           <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
         </div>
-        <h3>Arrastra las imágenes aquí</h3>
-        <p>o haz clic para seleccionarlas · o pega con <strong>⌘V</strong></p>
+        <h3>Arrastra imágenes o una carpeta aquí</h3>
+        <p>o haz clic para seleccionar archivos · o arrastra la carpeta completa desde Horos</p>
         <p class="hint">JPG / PNG · Máximo 32 imágenes</p>
       </div>
       <div id="preview-grid"></div>
@@ -221,7 +221,7 @@
 
   function signInWithGoogle(){google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:'openid email profile',callback:(t)=>{if(!t.error)fetchUserInfo(t.access_token)}}).requestAccessToken()}
   function fetchUserInfo(t){fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then(u=>{currentUser=u;showForm(u)})}
-  const ALLOWED_EMAILS=['fernando.davila.olvera@gmail.com','drandresperezb@gmail.com','fdavila@excelentia.com.mx','acabrera@excelentia.com.mx','jjcabrera@excelentia.com.mx','ecointerpretador@gmail.com'];
+  const ALLOWED_EMAILS=['fernando.davila.olvera@gmail.com','fdavila@excelentia.com.mx','acabrera@excelentia.com.mx','jjcabrera@excelentia.com.mx','ecointerpretador@gmail.com','drandresperezb@gmail.com'];
   function showForm(u){
     if(!ALLOWED_EMAILS.includes((u.email||'').toLowerCase())){
       document.getElementById('login-section').style.display='none';
