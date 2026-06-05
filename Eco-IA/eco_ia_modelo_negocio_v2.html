@@ -355,6 +355,7 @@ footer {
     <div class="nav-title">Eco IA <span>Modelo de Negocio</span></div>
   </div>
   <div class="nav-links">
+    <a href="#parametros">Parámetros</a>
     <a href="#stack">Stack</a>
     <a href="#calculadora">Calculadora</a>
     <a href="#modelos">Modelos</a>
@@ -375,7 +376,7 @@ footer {
   </div>
   <div class="hero-stats">
     <div class="hero-stat">
-      <div class="hero-stat-val">~$0.42</div>
+      <div class="hero-stat-val" id="display-hero-costo">~$0.58</div>
       <div class="hero-stat-label">USD por estudio completo</div>
     </div>
     <div class="hero-stat">
@@ -414,7 +415,7 @@ footer {
           </div>
           <div class="stack-val">~22k tokens entrada<br>~3.5k tokens salida</div>
           <div class="stack-val">$2.50 / 1M input<br>$10.00 / 1M output</div>
-          <div class="stack-cost cost-green">~$0.30 USD</div>
+          <div class="stack-cost cost-green" id="display-openai">~$0.50 USD</div>
         </div>
         <div class="stack-row">
           <div>
@@ -432,7 +433,7 @@ footer {
           </div>
           <div class="stack-val">Always-on<br>$5 USD/mes fijo</div>
           <div class="stack-val">$5 / mes</div>
-          <div class="stack-cost cost-muted">$0.05–$0.17 USD*</div>
+          <div class="stack-cost cost-muted" id="display-railway">$0.05–$0.17 USD*</div>
         </div>
         <div class="stack-row">
           <div>
@@ -458,7 +459,47 @@ footer {
             <div class="stack-sub">* Costo fijo por estudio baja a mayor volumen mensual</div>
           </div>
           <div></div><div></div>
-          <div class="stack-cost cost-green" style="font-size:1rem;">~$0.42–0.67 USD</div>
+          <div class="stack-cost cost-green" style="font-size:1rem;" id="display-total">~$0.57–0.87 USD</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARÁMETROS DE COSTO CONFIGURABLES -->
+  <div class="card" id="parametros">
+    <div class="card-head"><span class="icon">🎚️</span><h2>Parámetros de costo — ajusta con las barras</h2></div>
+    <div class="card-body" style="padding:0;">
+      <div class="calc-wrap" style="border:none;border-radius:0;">
+        <div class="calc-top">
+          <div class="calc-title">Costos variables por estudio</div>
+          <div class="calc-sub">Mueve las barras — la tabla de stack y la calculadora se actualizan al instante</div>
+        </div>
+        <div class="calc-sliders">
+
+          <div class="slider-group">
+            <label>OpenAI GPT-4o — costo por estudio <span id="lbl-openai">$0.50 USD</span></label>
+            <input type="range" id="param-openai" min="0.10" max="2.00" value="0.50" step="0.01" oninput="actualizarParametros()">
+          </div>
+
+          <div class="slider-group">
+            <label>Railway — costo fijo mensual <span id="lbl-railway">$5 USD/mes</span></label>
+            <input type="range" id="param-railway" min="0" max="50" value="5" step="1" oninput="actualizarParametros()">
+          </div>
+
+          <div class="slider-group">
+            <label>n8n Cloud — costo fijo mensual <span id="lbl-n8n">$35 USD/mes</span></label>
+            <input type="range" id="param-n8n" min="0" max="100" value="35" step="5" oninput="actualizarParametros()">
+          </div>
+
+          <div class="slider-group">
+            <label>Claude Haiku 4.5 — costo por estudio <span id="lbl-haiku">$0.001 USD</span></label>
+            <input type="range" id="param-haiku" min="0.000" max="0.050" value="0.001" step="0.001" oninput="actualizarParametros()">
+          </div>
+
+        </div>
+        <div style="padding:1rem 1.25rem;background:var(--green-bg);border-top:1px solid #86efac;display:flex;align-items:center;gap:.75rem;">
+          <span style="font-size:1rem;">✅</span>
+          <span style="font-size:.84rem;font-weight:600;color:var(--green);">Costo variable por estudio: <strong id="resumen-total" style="font-size:1rem;">$0.501 USD</strong> &nbsp;·&nbsp; Fijos mensuales: <strong id="resumen-fijos">$40 USD/mes</strong></span>
         </div>
       </div>
     </div>
@@ -701,56 +742,102 @@ const fecha = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: '
 document.getElementById('fecha-footer').textContent = fecha;
 document.getElementById('fecha-nota').textContent = fecha;
 
+// ── Leer parámetros desde los sliders ──────────────────────────
+function getParams() {
+  return {
+    openai:  parseFloat(document.getElementById('param-openai').value)  || 0,
+    railway: parseFloat(document.getElementById('param-railway').value) || 0,
+    n8n:     parseFloat(document.getElementById('param-n8n').value)     || 0,
+    haiku:   parseFloat(document.getElementById('param-haiku').value)   || 0,
+  };
+}
+
+// ── Actualizar tabla de stack y hero cuando cambian sliders ────
+function actualizarParametros() {
+  const p = getParams();
+  const varUSD = p.openai + p.haiku;
+  const fijoUSD = p.railway + p.n8n;
+
+  // Labels de los sliders de parámetros
+  document.getElementById('lbl-openai').textContent  = '$' + p.openai.toFixed(2) + ' USD';
+  document.getElementById('lbl-railway').textContent = '$' + p.railway.toFixed(0) + ' USD/mes';
+  document.getElementById('lbl-n8n').textContent     = '$' + p.n8n.toFixed(0) + ' USD/mes';
+  document.getElementById('lbl-haiku').textContent   = '$' + p.haiku.toFixed(3) + ' USD';
+
+  // Resumen verde
+  document.getElementById('resumen-total').textContent = '$' + varUSD.toFixed(3) + ' USD';
+  document.getElementById('resumen-fijos').textContent = '$' + fijoUSD.toFixed(0) + ' USD/mes';
+
+  // Tabla de stack
+  document.getElementById('display-openai').textContent  = '~$' + p.openai.toFixed(2) + ' USD';
+  document.getElementById('display-railway').textContent = '$' + p.railway.toFixed(0) + ' USD/mes fijo*';
+  document.getElementById('display-total').textContent   = '~$' + varUSD.toFixed(2) + ' USD + fijos';
+
+  // Hero
+  document.getElementById('display-hero-costo').textContent = '~$' + varUSD.toFixed(2);
+
+  // Recalcular calculadora
+  calcular();
+}
+
+// ── Calculadora ───────────────────────────────────────────────
 function calcular() {
-  const estudios = parseInt(document.getElementById('sl-estudios').value);
-  const precioMXN = parseInt(document.getElementById('sl-precio').value);
-  const tc = parseFloat(document.getElementById('sl-tc').value);
-  const ahorro = parseInt(document.getElementById('sl-ahorro').value);
+  const p          = getParams();
+  const estudios   = parseInt(document.getElementById('sl-estudios').value);
+  const precioMXN  = parseInt(document.getElementById('sl-precio').value);
+  const tc         = parseFloat(document.getElementById('sl-tc').value);
+  const ahorro     = parseInt(document.getElementById('sl-ahorro').value);
 
   document.getElementById('lbl-estudios').textContent = estudios;
-  document.getElementById('lbl-precio').textContent = '$' + precioMXN.toLocaleString('es-MX');
-  document.getElementById('lbl-tc').textContent = '$' + tc.toFixed(2);
-  document.getElementById('lbl-ahorro').textContent = ahorro + '%';
+  document.getElementById('lbl-precio').textContent   = '$' + precioMXN.toLocaleString('es-MX');
+  document.getElementById('lbl-tc').textContent       = '$' + tc.toFixed(2);
+  document.getElementById('lbl-ahorro').textContent   = ahorro + '%';
 
-  const costoUSD = (estudios * 0.30) + 5 + 35;
-  const costoMXN = Math.round(costoUSD * tc);
-  const ingresoMXN = estudios * precioMXN;
-  const utilidad = ingresoMXN - costoMXN;
-  const margen = Math.round((utilidad / ingresoMXN) * 100);
-  const tiempoHrs = Math.round(estudios * 15 * (ahorro / 100) / 60);
-  const unitario = Math.round(costoMXN / estudios);
+  // Costo variable por estudio + fijos mensuales
+  const costoVarUSD   = (p.openai + p.haiku) * estudios;
+  const costoFijoUSD  = p.railway + p.n8n;
+  const costoTotalUSD = costoVarUSD + costoFijoUSD;
+  const costoMXN      = Math.round(costoTotalUSD * tc);
+  const ingresoMXN    = estudios * precioMXN;
+  const utilidad      = ingresoMXN - costoMXN;
+  const margen        = ingresoMXN > 0 ? Math.round((utilidad / ingresoMXN) * 100) : 0;
+  const tiempoHrs     = Math.round(estudios * 15 * (ahorro / 100) / 60);
+  const unitario      = estudios > 0 ? Math.round(costoMXN / estudios) : 0;
 
   const ingresoInput = document.getElementById('r-ingreso');
   if (!ingresoInput.dataset.manual) {
     ingresoInput.value = '$' + ingresoMXN.toLocaleString('es-MX');
   }
-  document.getElementById('r-costo').textContent = '$' + costoMXN.toLocaleString('es-MX');
-  document.getElementById('r-margen').textContent = margen + '%';
+  document.getElementById('r-costo').textContent    = '$' + costoMXN.toLocaleString('es-MX');
+  document.getElementById('r-margen').textContent   = margen + '%';
   document.getElementById('r-utilidad').textContent = '$' + utilidad.toLocaleString('es-MX');
   document.getElementById('r-unitario').textContent = '$' + unitario + ' MXN';
-  document.getElementById('r-tiempo').textContent = tiempoHrs + ' hrs';
+  document.getElementById('r-tiempo').textContent   = tiempoHrs + ' hrs';
 }
-calcular();
 
 function recalcularDesdeIngreso() {
-  const input = document.getElementById('r-ingreso');
+  const p         = getParams();
+  const input     = document.getElementById('r-ingreso');
   input.dataset.manual = '1';
-  const raw = input.value.replace(/[^0-9]/g, '');
+  const raw       = input.value.replace(/[^0-9]/g, '');
   const ingresoMXN = parseInt(raw) || 0;
-  const tc = parseFloat(document.getElementById('sl-tc').value);
-  const estudios = parseInt(document.getElementById('sl-estudios').value);
-  const ahorro = parseInt(document.getElementById('sl-ahorro').value);
-  const costoUSD = (estudios * 0.30) + 5 + 35;
-  const costoMXN = Math.round(costoUSD * tc);
-  const utilidad = ingresoMXN - costoMXN;
-  const margen = ingresoMXN > 0 ? Math.round((utilidad / ingresoMXN) * 100) : 0;
-  const tiempoHrs = Math.round(estudios * 15 * (ahorro / 100) / 60);
-  const unitario = estudios > 0 ? Math.round(costoMXN / estudios) : 0;
-  document.getElementById('r-costo').textContent = '$' + costoMXN.toLocaleString('es-MX');
-  document.getElementById('r-margen').textContent = margen + '%';
+  const tc        = parseFloat(document.getElementById('sl-tc').value);
+  const estudios  = parseInt(document.getElementById('sl-estudios').value);
+  const ahorro    = parseInt(document.getElementById('sl-ahorro').value);
+
+  const costoVarUSD   = (p.openai + p.haiku) * estudios;
+  const costoFijoUSD  = p.railway + p.n8n;
+  const costoMXN      = Math.round((costoVarUSD + costoFijoUSD) * tc);
+  const utilidad      = ingresoMXN - costoMXN;
+  const margen        = ingresoMXN > 0 ? Math.round((utilidad / ingresoMXN) * 100) : 0;
+  const tiempoHrs     = Math.round(estudios * 15 * (ahorro / 100) / 60);
+  const unitario      = estudios > 0 ? Math.round(costoMXN / estudios) : 0;
+
+  document.getElementById('r-costo').textContent    = '$' + costoMXN.toLocaleString('es-MX');
+  document.getElementById('r-margen').textContent   = margen + '%';
   document.getElementById('r-utilidad').textContent = '$' + utilidad.toLocaleString('es-MX');
   document.getElementById('r-unitario').textContent = '$' + unitario + ' MXN';
-  document.getElementById('r-tiempo').textContent = tiempoHrs + ' hrs';
+  document.getElementById('r-tiempo').textContent   = tiempoHrs + ' hrs';
 }
 
 document.querySelectorAll('input[type=range]').forEach(sl => {
@@ -758,6 +845,9 @@ document.querySelectorAll('input[type=range]').forEach(sl => {
     delete document.getElementById('r-ingreso').dataset.manual;
   });
 });
+
+// Arranque
+actualizarParametros();
 </script>
 </body>
 </html>
