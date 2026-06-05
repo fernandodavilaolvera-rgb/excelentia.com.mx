@@ -467,71 +467,40 @@ footer {
 
   <!-- PARÁMETROS DE COSTO CONFIGURABLES -->
   <div class="card" id="parametros">
-    <div class="card-head"><span class="icon">⚙️</span><h2>Parámetros de costo — edita aquí</h2></div>
-    <div class="card-body">
-      <p style="font-size:.84rem;color:var(--text-sec);font-weight:500;margin-bottom:1.25rem;">Cambia cualquier valor y toda la calculadora y la tabla de stack se actualizan automáticamente.</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
-
-        <div style="background:var(--alert-bg);border:1px solid var(--alert-border);border-left:4px solid var(--accent);border-radius:10px;padding:1rem;">
-          <div style="font-size:.7rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">OpenAI GPT-4o</div>
-          <div style="font-size:.8rem;color:var(--text-sec);font-weight:500;margin-bottom:.6rem;">Costo por estudio (USD)</div>
-          <div style="display:flex;align-items:center;gap:.4rem;">
-            <span style="font-weight:700;color:var(--text-sec);">$</span>
-            <input type="number" id="param-openai" value="0.50" min="0" step="0.01"
-              style="font-family:'Manrope',sans-serif;font-size:1.3rem;font-weight:900;color:var(--note-dark);
-                     border:none;border-bottom:2px solid var(--accent);background:transparent;
-                     width:80px;outline:none;padding:2px 0;"
-              oninput="actualizarParametros()">
-            <span style="font-size:.75rem;color:var(--text-gray);font-weight:600;">USD</span>
-          </div>
+    <div class="card-head"><span class="icon">🎚️</span><h2>Parámetros de costo — ajusta con las barras</h2></div>
+    <div class="card-body" style="padding:0;">
+      <div class="calc-wrap" style="border:none;border-radius:0;">
+        <div class="calc-top">
+          <div class="calc-title">Costos variables por estudio</div>
+          <div class="calc-sub">Mueve las barras — la tabla de stack y la calculadora se actualizan al instante</div>
         </div>
+        <div class="calc-sliders">
 
-        <div style="background:var(--alert-bg);border:1px solid var(--alert-border);border-left:4px solid var(--accent);border-radius:10px;padding:1rem;">
-          <div style="font-size:.7rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Railway</div>
-          <div style="font-size:.8rem;color:var(--text-sec);font-weight:500;margin-bottom:.6rem;">Costo fijo mensual (USD)</div>
-          <div style="display:flex;align-items:center;gap:.4rem;">
-            <span style="font-weight:700;color:var(--text-sec);">$</span>
-            <input type="number" id="param-railway" value="5" min="0" step="1"
-              style="font-family:'Manrope',sans-serif;font-size:1.3rem;font-weight:900;color:var(--note-dark);
-                     border:none;border-bottom:2px solid var(--accent);background:transparent;
-                     width:80px;outline:none;padding:2px 0;"
-              oninput="actualizarParametros()">
-            <span style="font-size:.75rem;color:var(--text-gray);font-weight:600;">USD/mes</span>
+          <div class="slider-group">
+            <label>OpenAI GPT-4o — costo por estudio <span id="lbl-openai">$0.50 USD</span></label>
+            <input type="range" id="param-openai" min="0.10" max="2.00" value="0.50" step="0.01" oninput="actualizarParametros()">
           </div>
-        </div>
 
-        <div style="background:var(--alert-bg);border:1px solid var(--alert-border);border-left:4px solid var(--accent);border-radius:10px;padding:1rem;">
-          <div style="font-size:.7rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">n8n Cloud</div>
-          <div style="font-size:.8rem;color:var(--text-sec);font-weight:500;margin-bottom:.6rem;">Costo fijo mensual (USD)</div>
-          <div style="display:flex;align-items:center;gap:.4rem;">
-            <span style="font-weight:700;color:var(--text-sec);">$</span>
-            <input type="number" id="param-n8n" value="35" min="0" step="1"
-              style="font-family:'Manrope',sans-serif;font-size:1.3rem;font-weight:900;color:var(--note-dark);
-                     border:none;border-bottom:2px solid var(--accent);background:transparent;
-                     width:80px;outline:none;padding:2px 0;"
-              oninput="actualizarParametros()">
-            <span style="font-size:.75rem;color:var(--text-gray);font-weight:600;">USD/mes</span>
+          <div class="slider-group">
+            <label>Railway — costo fijo mensual <span id="lbl-railway">$5 USD/mes</span></label>
+            <input type="range" id="param-railway" min="0" max="50" value="5" step="1" oninput="actualizarParametros()">
           </div>
-        </div>
 
-        <div style="background:var(--note-bg);border:1px solid var(--border);border-left:4px solid var(--note-dark);border-radius:10px;padding:1rem;">
-          <div style="font-size:.7rem;font-weight:800;color:var(--note-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Claude Haiku 4.5</div>
-          <div style="font-size:.8rem;color:var(--text-sec);font-weight:500;margin-bottom:.6rem;">Costo por estudio (USD)</div>
-          <div style="display:flex;align-items:center;gap:.4rem;">
-            <span style="font-weight:700;color:var(--text-sec);">$</span>
-            <input type="number" id="param-haiku" value="0.001" min="0" step="0.001"
-              style="font-family:'Manrope',sans-serif;font-size:1.3rem;font-weight:900;color:var(--note-dark);
-                     border:none;border-bottom:2px solid var(--border);background:transparent;
-                     width:80px;outline:none;padding:2px 0;"
-              oninput="actualizarParametros()">
-            <span style="font-size:.75rem;color:var(--text-gray);font-weight:600;">USD</span>
+          <div class="slider-group">
+            <label>n8n Cloud — costo fijo mensual <span id="lbl-n8n">$35 USD/mes</span></label>
+            <input type="range" id="param-n8n" min="0" max="100" value="35" step="5" oninput="actualizarParametros()">
           </div>
-        </div>
 
-      </div>
-      <div style="margin-top:1rem;padding:.65rem 1rem;background:var(--green-bg);border:1px solid #86efac;border-radius:8px;display:flex;align-items:center;gap:.75rem;">
-        <span style="font-size:1rem;">✅</span>
-        <span style="font-size:.82rem;font-weight:600;color:var(--green);">Costo total estimado por estudio: <strong id="resumen-total" style="font-size:.95rem;">~$0.50 USD</strong> variable + fijos prorrateados según volumen</span>
+          <div class="slider-group">
+            <label>Claude Haiku 4.5 — costo por estudio <span id="lbl-haiku">$0.001 USD</span></label>
+            <input type="range" id="param-haiku" min="0.000" max="0.050" value="0.001" step="0.001" oninput="actualizarParametros()">
+          </div>
+
+        </div>
+        <div style="padding:1rem 1.25rem;background:var(--green-bg);border-top:1px solid #86efac;display:flex;align-items:center;gap:.75rem;">
+          <span style="font-size:1rem;">✅</span>
+          <span style="font-size:.84rem;font-weight:600;color:var(--green);">Costo variable por estudio: <strong id="resumen-total" style="font-size:1rem;">$0.501 USD</strong> &nbsp;·&nbsp; Fijos mensuales: <strong id="resumen-fijos">$40 USD/mes</strong></span>
+        </div>
       </div>
     </div>
   </div>
@@ -773,7 +742,7 @@ const fecha = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: '
 document.getElementById('fecha-footer').textContent = fecha;
 document.getElementById('fecha-nota').textContent = fecha;
 
-// ── Leer parámetros desde los inputs ──────────────────────────
+// ── Leer parámetros desde los sliders ──────────────────────────
 function getParams() {
   return {
     openai:  parseFloat(document.getElementById('param-openai').value)  || 0,
@@ -783,25 +752,31 @@ function getParams() {
   };
 }
 
-// ── Actualizar tabla de stack y hero cuando cambian parámetros ─
+// ── Actualizar tabla de stack y hero cuando cambian sliders ────
 function actualizarParametros() {
   const p = getParams();
-  const varUSD    = p.openai + p.haiku;
-  const fijoMin   = 0.05;  // Railway mín por estudio (referencial)
-  const fijoMax   = 0.17;
+  const varUSD = p.openai + p.haiku;
+  const fijoUSD = p.railway + p.n8n;
 
-  document.getElementById('display-openai').textContent =
-    '~$' + p.openai.toFixed(2) + ' USD';
-  document.getElementById('display-railway').textContent =
-    '$' + p.railway.toFixed(0) + ' USD/mes fijo*';
-  document.getElementById('display-total').textContent =
-    '~$' + varUSD.toFixed(2) + ' USD + fijos';
-  document.getElementById('display-hero-costo').textContent =
-    '~$' + varUSD.toFixed(2);
-  document.getElementById('resumen-total').textContent =
-    '~$' + varUSD.toFixed(3) + ' USD';
+  // Labels de los sliders de parámetros
+  document.getElementById('lbl-openai').textContent  = '$' + p.openai.toFixed(2) + ' USD';
+  document.getElementById('lbl-railway').textContent = '$' + p.railway.toFixed(0) + ' USD/mes';
+  document.getElementById('lbl-n8n').textContent     = '$' + p.n8n.toFixed(0) + ' USD/mes';
+  document.getElementById('lbl-haiku').textContent   = '$' + p.haiku.toFixed(3) + ' USD';
 
-  // Recalcular calculadora con nuevos parámetros
+  // Resumen verde
+  document.getElementById('resumen-total').textContent = '$' + varUSD.toFixed(3) + ' USD';
+  document.getElementById('resumen-fijos').textContent = '$' + fijoUSD.toFixed(0) + ' USD/mes';
+
+  // Tabla de stack
+  document.getElementById('display-openai').textContent  = '~$' + p.openai.toFixed(2) + ' USD';
+  document.getElementById('display-railway').textContent = '$' + p.railway.toFixed(0) + ' USD/mes fijo*';
+  document.getElementById('display-total').textContent   = '~$' + varUSD.toFixed(2) + ' USD + fijos';
+
+  // Hero
+  document.getElementById('display-hero-costo').textContent = '~$' + varUSD.toFixed(2);
+
+  // Recalcular calculadora
   calcular();
 }
 
