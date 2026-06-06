@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco IA — Onboarding Interno ExcelentIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:       #0d1b3e;
+  --navy-mid:   #1a3a6b;
+  --navy-light: #1e5096;
+  --accent:     #4a9fd4;
+  --accent-bg:  #e8f0fb;
+  --bg:         #f5f6f8;
+  --card:       #ffffff;
+  --card-head:  #dce8f7;
+  --border:     #dde1e9;
+  --text:       #1a2035;
+  --muted:      #4a5068;
+  --hint:       #8a90a0;
+  --green:      #1D9E75;
+  --green-bg:   #E1F5EE;
+  --green-dark: #085041;
+  --note-bg:    #f0f6ff;
+  --warn-bg:    #fff8ec;
+  --warn-text:  #7a5a00;
+  --warn-border:#f5c542;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 1.5rem 1rem 3rem;
+}
+.wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+  border-radius: 16px;
+  padding: 1.75rem 1.75rem 1.5rem;
+  border-bottom: 3px solid var(--accent);
+}
+.logo-box {
+  background: #fff; border-radius: 10px;
+  padding: .4rem .75rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 80px; min-height: 44px; margin-bottom: 1.1rem;
+}
+.logo-box img { height: 36px; width: auto; display: block; }
+.logo-fallback { font-size: 15px; font-weight: 800; color: var(--navy-mid); display: none; }
+.logo-fallback em { font-style: normal; color: var(--accent); }
+.header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.header h1 { color: #fff; font-size: 21px; font-weight: 800; margin-bottom: .35rem; letter-spacing: -.3px; }
+.header p  { color: #b5d4f4; font-size: 14px; line-height: 1.7; }
+.badge-interno {
+  background: rgba(74,159,212,.25);
+  border: 1px solid rgba(74,159,212,.5);
+  border-radius: 20px; padding: 4px 14px;
+  font-size: 12px; font-weight: 800; color: #b5d4f4;
+  white-space: nowrap; flex-shrink: 0; margin-top: 4px;
+}
+
+/* FASES STRIP */
+.fases-strip {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex; flex-wrap: wrap; gap: 8px;
+  align-items: center;
+}
+.fase-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--accent-bg);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 12px; font-weight: 800; color: var(--navy-mid);
+}
+.fase-pill-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--navy-mid); color: #fff;
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* CARD */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.card-head {
+  background: var(--card-head);
+  padding: 1rem 1.25rem;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.fase-label {
+  background: var(--navy-mid); color: #fff;
+  font-size: 11px; font-weight: 800;
+  padding: 3px 10px; border-radius: 20px;
+  margin-left: auto; flex-shrink: 0;
+}
+.card-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.card-head h2 { font-size: 16px; font-weight: 800; color: var(--navy-mid); margin-bottom: 2px; }
+.card-head p  { font-size: 12px; color: var(--muted); font-weight: 500; }
+.card-body { padding: 1.25rem; }
+.card-desc { font-size: 14px; color: var(--muted); line-height: 1.75; margin-bottom: 1.1rem; }
+
+/* STEP LIST */
+.step-list { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 1rem; }
+.step-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+.snum {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent-bg); color: var(--navy-mid);
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+
+/* CHECKLIST */
+.checklist { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 1rem; }
+.checklist li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14px; color: var(--muted); line-height: 1.6;
+  cursor: pointer; user-select: none;
+}
+.chk-box {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 5px;
+  border: 1.5px solid var(--border); background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 2px; transition: all .18s;
+}
+.chk-box.checked { background: var(--green); border-color: var(--green); }
+.chk-box svg { display: none; }
+.chk-box.checked svg { display: block; }
+.checklist li.done-item > span { text-decoration: line-through; color: var(--hint); }
+
+/* NOTA / WARN */
+.nota {
+  background: var(--note-bg);
+  border-left: 3px solid var(--accent);
+  padding: .8rem 1rem; font-size: 13px; color: var(--navy-mid);
+  line-height: 1.65; margin-top: 1rem; border-radius: 0;
+}
+.warn {
+  background: var(--warn-bg);
+  border-left: 3px solid var(--warn-border);
+  padding: .8rem 1rem; font-size: 13px; color: var(--warn-text);
+  line-height: 1.65; margin-top: 1rem; border-radius: 0;
+}
+.nota strong, .warn strong { font-weight: 800; }
+
+/* INFO BOX */
+.info-box {
+  margin-top: 1rem; padding: 1rem;
+  background: var(--bg); border-radius: 10px; border: 1px solid var(--border);
+}
+.info-box-title { font-size: 11px; font-weight: 800; color: var(--hint); text-transform: uppercase; letter-spacing: .5px; margin-bottom: .6rem; }
+.info-row { display: flex; flex-direction: column; gap: 7px; }
+.info-item { display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 1.6; }
+.info-label { font-size: 12px; font-weight: 800; color: var(--accent); white-space: nowrap; min-width: 120px; }
+.info-val { color: var(--muted); }
+.info-val code {
+  background: var(--accent-bg); color: var(--navy-mid);
+  font-size: 12px; font-weight: 700; padding: 2px 8px;
+  border-radius: 5px; font-family: 'Manrope', monospace;
+}
+li code {
+  background: var(--accent-bg); color: var(--navy-mid);
+  font-size: 12px; font-weight: 700; padding: 2px 7px;
+  border-radius: 5px; font-family: 'Manrope', monospace;
+}
+
+/* FINAL CARD */
+.final-card {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: 16px; padding: 1.75rem;
+  display: flex; flex-direction: column; gap: .75rem;
+}
+.final-card h2 { color: #fff; font-size: 18px; font-weight: 800; }
+.final-card p  { color: #b5d4f4; font-size: 14px; line-height: 1.7; }
+.final-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.final-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); color: #fff;
+  padding: .55rem 1.1rem; border-radius: 10px;
+  font-size: 13px; font-weight: 700; text-decoration: none;
+  font-family: 'Manrope', sans-serif; cursor: pointer; transition: background .2s;
+}
+.final-link:hover { background: rgba(255,255,255,.2); }
+
+/* PDF */
+.pdf-btn-wrap { display: flex; justify-content: center; padding: .5rem 0 1rem; }
+.pdf-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--navy-mid); color: #fff;
+  padding: .75rem 2rem; border-radius: 12px;
+  font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 800;
+  border: none; cursor: pointer; transition: background .2s;
+}
+.pdf-btn:hover { background: var(--navy); }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .pdf-btn-wrap { display: none; }
+  .card { break-inside: avoid; }
+}
+@media (max-width: 480px) {
+  .header { padding: 1.4rem 1.25rem 1.25rem; }
+  .card-body { padding: 1rem; }
+  .header h1 { font-size: 18px; }
+  .info-label { min-width: 90px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<em>IA</em></span>
+    </div>
+    <div class="header-top">
+      <div>
+        <h1>Onboarding de Doctor — Eco IA</h1>
+        <p>Procedimiento paso a paso para dar de alta a un nuevo doctor en el sistema.</p>
+      </div>
+      <span class="badge-interno">Uso interno</span>
+    </div>
+  </div>
+
+  <!-- FASES STRIP -->
+  <div class="fases-strip">
+    <div class="fase-pill"><span class="fase-pill-num">1</span>Comercial</div>
+    <div class="fase-pill"><span class="fase-pill-num">2</span>Assets</div>
+    <div class="fase-pill"><span class="fase-pill-num">3A</span>Sheets</div>
+    <div class="fase-pill"><span class="fase-pill-num">3B</span>Drive</div>
+    <div class="fase-pill"><span class="fase-pill-num">3C</span>GitHub</div>
+    <div class="fase-pill"><span class="fase-pill-num">3D</span>Formulario</div>
+    <div class="fase-pill"><span class="fase-pill-num">3E</span>Prueba</div>
+    <div class="fase-pill"><span class="fase-pill-num">4</span>Entrega</div>
+  </div>
+
+  <!-- FASE 1 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon" style="background:#fbeaf0">
+        <svg width="20" height="20" fill="none" stroke="#993556" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div>
+        <h2>Fase 1 — Acuerdo comercial</h2>
+        <p>Antes de tocar cualquier sistema</p>
+      </div>
+      <span class="fase-label">Fase 1</span>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Esta fase se completa antes de hacer cualquier configuración técnica. Sin contrato firmado, no se inicia el proceso.</p>
+      <ul class="checklist">
+        <li id="li-c1" onclick="toggleCheck('c1')">
+          <div class="chk-box" id="box-c1"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Contrato de servicio firmado por el doctor</span>
+        </li>
+        <li id="li-c2" onclick="toggleCheck('c2')">
+          <div class="chk-box" id="box-c2"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Plan y costo mensual acordado y documentado</span>
+        </li>
+        <li id="li-c3" onclick="toggleCheck('c3')">
+          <div class="chk-box" id="box-c3"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Datos fiscales recibidos para facturación</span>
+        </li>
+      </ul>
+      <div class="warn"><strong>No avanzar a la Fase 2</strong> hasta tener el contrato firmado y los datos fiscales completos.</div>
+    </div>
+  </div>
+
+  <!-- FASE 2 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon" style="background:#e8f0fb">
+        <svg width="20" height="20" fill="none" stroke="#0C447C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <div>
+        <h2>Fase 2 — Recolección de assets</h2>
+        <p>Lo que le pedimos al doctor antes de configurar sistemas</p>
+      </div>
+      <span class="fase-label">Fase 2</span>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Solicitar al doctor toda la información y archivos necesarios. Todo debe estar listo antes de iniciar la Fase 3.</p>
+      <ul class="checklist">
+        <li id="li-c4" onclick="toggleCheck('c4')">
+          <div class="chk-box" id="box-c4"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Nombre completo con título (ej: Dr. Juan García Pérez)</span>
+        </li>
+        <li id="li-c5" onclick="toggleCheck('c5')">
+          <div class="chk-box" id="box-c5"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Especialidad exacta (ej: Cardiología / Ecocardiografía)</span>
+        </li>
+        <li id="li-c6" onclick="toggleCheck('c6')">
+          <div class="chk-box" id="box-c6"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Correo autorizado para subir estudios — solo uno</span>
+        </li>
+        <li id="li-c7" onclick="toggleCheck('c7')">
+          <div class="chk-box" id="box-c7"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Logo en PNG — fondo transparente o blanco, alta resolución</span>
+        </li>
+        <li id="li-c8" onclick="toggleCheck('c8')">
+          <div class="chk-box" id="box-c8"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Firma en PNG — fondo blanco o transparente</span>
+        </li>
+        <li id="li-c9" onclick="toggleCheck('c9')">
+          <div class="chk-box" id="box-c9"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Formato de reporte: ¿usa Global Cardio o necesita formato propio?</span>
+        </li>
+      </ul>
+      <div class="info-box">
+        <div class="info-box-title">Cédulas — solo si el doctor lo solicita</div>
+        <div class="info-row">
+          <div class="info-item"><span class="info-label">Ced. profesional</span><span class="info-val">Número de 7-8 dígitos</span></div>
+          <div class="info-item"><span class="info-label">Ced. especialidad</span><span class="info-val">Número de 7-8 dígitos</span></div>
+          <div class="info-item"><span class="info-label">CMC</span><span class="info-val">Número de 4 dígitos</span></div>
+        </div>
+      </div>
+      <div class="nota">El <strong>footer_banner.png</strong> lo genera ExcelentIA con los datos del doctor — no se lo pedimos a él.</div>
+    </div>
+  </div>
+
+  <!-- FASE 3A -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon" style="background:#E1F5EE">
+        <svg width="20" height="20" fill="none" stroke="#085041" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <div>
+        <h2>Fase 3A — Google Sheets</h2>
+        <p>Registrar al doctor en la base de datos</p>
+      </div>
+      <span class="fase-label">Fase 3A</span>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Este registro es el que el workflow n8n consulta para saber a qué carpeta guardar, qué sub-workflow usar y con qué assets generar el Word.</p>
+      <ul class="step-list">
+        <li><span class="snum">1</span><span>Abrir el Sheet: <strong>00 🩺 Base de Datos — Doctores Eco IA</strong> en Drive</span></li>
+        <li><span class="snum">2</span><span>Agregar una fila nueva al final de la tabla</span></li>
+        <li><span class="snum">3</span><span>Completar las columnas con los datos recibidos en la Fase 2</span></li>
+        <li><span class="snum">4</span><span>En <code>doctor_id</code> usar formato <code>dr-apellido</code> — minúsculas, sin acentos (ej: <code>dr-garcia</code>)</span></li>
+        <li><span class="snum">5</span><span>En <code>estado</code> poner <code>onboarding</code> hasta confirmar la prueba de producción</span></li>
+      </ul>
+      <div class="info-box">
+        <div class="info-box-title">Valores clave en el Sheet</div>
+        <div class="info-row">
+          <div class="info-item"><span class="info-label">doctor_id</span><span class="info-val"><code>dr-apellido</code> (minúsculas, sin acentos)</span></div>
+          <div class="info-item"><span class="info-label">sub_workflow</span><span class="info-val"><code>global-cardio</code> (o el formato acordado)</span></div>
+          <div class="info-item"><span class="info-label">assets_github</span><span class="info-val"><code>dr-apellido</code> (mismo que doctor_id)</span></div>
+          <div class="info-item"><span class="info-label">estado inicial</span><span class="info-val"><code>onboarding</code></span></div>
+        </div>
+      </div>
+      <div class="nota">El campo <code>id_carpeta_drive</code> se llena en la Fase 3B, después de crear la carpeta del doctor en Drive.</div>
+    </div>
+  </div>
+
+  <!-- FASE 3B -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon" style="background:#FAEEDA">
+        <svg width="20" height="20" fill="none" stroke="#633806" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div>
+        <h2>Fase 3B — Google Drive</h2>
+        <p>Carpeta de reportes del doctor</p>
+      </div>
+      <span class="fase-label">Fase 3B</span>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Crear la carpeta donde se guardarán todos los reportes del doctor y compartirla con él como Lector.</p>
+      <ul class="step-list">
+        <li><span class="snum">1</span><span>Abrir Drive: <strong>BASES DE DATOS ExcelentIA › 02 Reportes Ecocardiograma</strong></span></li>
+        <li><span class="snum">2</span><span>Crear nueva carpeta con el nombre completo del doctor (ej: <strong>Dr. Juan García Pérez</strong>)</span></li>
+        <li><span class="snum">3</span><span>Clic derecho → Compartir → agregar el correo del doctor con permiso de <strong>Lector</strong></span></li>
+        <li><span class="snum">4</span><span>Copiar el ID de la carpeta desde la URL (la cadena larga después de <code>/folders/</code>)</span></li>
+        <li><span class="snum">5</span><span>Pegar ese ID en la columna <code>id_carpeta_drive</code> del Sheet</span></li>
+      </ul>
+      <div class="nota">Permiso <strong>Lector</strong> — el doctor puede ver y descargar pero no puede borrar ni mover reportes.</div>
+    </div>
+  </div>
+
+  <!-- FASE 3C -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon" style="background:#f5f6f8">
+        <svg width="20" height="20" fill="none" stroke="#1a2035" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      </div>
+      <div>
+        <h2>Fase 3C — GitHub</h2>
+        <p>Assets visuales del reporte Word</p>
+      </div>
+      <span class="fase-label">Fase 3C</span>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Subir los archivos del doctor al repositorio eco-reporte-server. El servidor Railway los usa para construir el header, la firma y el footer del Word.</p>
+      <ul class="step-list">
+        <li><span class="snum">1</span><span>Abrir repo: <strong>github.com/fernandodavilaolvera-rgb/eco-reporte-server</strong> → carpeta <code>assets/</code></span></li>
+        <li><span class="snum">2</span><span>Crear subcarpeta con el <code>doctor_id</code> exacto del Sheet (ej: <code>assets/dr-garcia/</code>)</span></li>
+        <li><span class="snum">3</span><span>Subir <code>logo.png</code> — logo del doctor, fondo transparente</span></li>
+        <li><span class="snum">4</span><span>Subir <code>firma.png</code> — firma del doctor, fondo blanco o transparente</span></li>
+        <li><span class="snum">5</span><span>Generar y subir <code>footer_banner.png</code> — imagen 1800×150px con nombre, especialidad y cédulas</span></li>
+        <li><span class="snum">6</span><span>Commit: <code>git commit -m "Add assets dr-garcia"</code></span></li>
+      </ul>
+      <div class="warn">Los nombres de archivo deben ser <strong>exactamente</strong> <code>logo.png</code>, <code>firma.png</code> y <code>footer_banner.png</code> — el servidor los busca por nombre exacto.</div>
+    </div>
+  </div>
+
+  <!-- FASE 3D -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon" style="background:#e8f0fb">
+        <svg width="20" height="20" fill="none" stroke="#0C447C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      </div>
+      <div>
+        <h2>Fase 3D — Formulario web</h2>
+        <p>El punto de entrada del doctor al sistema</p>
+      </div>
+      <span class="fase-label">Fase 3D</span>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Generar el formulario personalizado del doctor. Cada doctor tiene su propia URL con su correo autorizado y su carpeta de Drive configurados.</p>
+      <ul class="step-list">
+        <li><span class="snum">1</span><span>Abrir el formulario base en GitHub: <code>Eco-IA/formulariointerpretacion/index.html</code></span></li>
+        <li><span class="snum">2</span><span>Duplicar el archivo en la subcarpeta del doctor (ej: <code>Eco-IA/dr-garcia/index.html</code>)</span></li>
+        <li><span class="snum">3</span><span>Actualizar <code>CORREO_AUTORIZADO</code> con el correo del doctor</span></li>
+        <li><span class="snum">4</span><span>Actualizar <code>FOLDER_ID</code> con el ID de su carpeta Drive (Fase 3B)</span></li>
+        <li><span class="snum">5</span><span>Actualizar <code>DOCTOR_ID</code> con el <code>doctor_id</code> del Sheet</span></li>
+        <li><span class="snum">6</span><span>Commit y push — GitHub Pages publica automáticamente</span></li>
+      </ul>
+      <div class="nota">La URL del formulario será <code>excelentia.com.mx/Eco-IA/dr-garcia</code> — esa es la URL que le compartes al doctor.</div>
+    </div>
+  </div>
+
+  <!-- FASE 3E -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon" style="background:#E1F5EE">
+        <svg width="20" height="20" fill="none" stroke="#085041" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div>
+        <h2>Fase 3E — Prueba de producción</h2>
+        <p>Verificar todo antes de entregar al doctor</p>
+      </div>
+      <span class="fase-label">Fase 3E</span>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Subir un estudio de prueba usando el formulario del doctor y verificar que el reporte Word se genere correctamente con sus datos y assets.</p>
+      <ul class="checklist">
+        <li id="li-p1" onclick="toggleCheck('p1')">
+          <div class="chk-box" id="box-p1"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Formulario del doctor abre correctamente desde el navegador</span>
+        </li>
+        <li id="li-p2" onclick="toggleCheck('p2')">
+          <div class="chk-box" id="box-p2"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Estudio de prueba subido y proceso completado sin errores</span>
+        </li>
+        <li id="li-p3" onclick="toggleCheck('p3')">
+          <div class="chk-box" id="box-p3"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Logo del doctor aparece correctamente en el header del Word</span>
+        </li>
+        <li id="li-p4" onclick="toggleCheck('p4')">
+          <div class="chk-box" id="box-p4"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Firma del doctor aparece correctamente en el reporte</span>
+        </li>
+        <li id="li-p5" onclick="toggleCheck('p5')">
+          <div class="chk-box" id="box-p5"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Footer banner correcto con nombre, especialidad y cédulas</span>
+        </li>
+        <li id="li-p6" onclick="toggleCheck('p6')">
+          <div class="chk-box" id="box-p6"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Reporte guardado correctamente en la carpeta del doctor en Drive</span>
+        </li>
+        <li id="li-p7" onclick="toggleCheck('p7')">
+          <div class="chk-box" id="box-p7"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>El doctor puede ver su carpeta de Drive con el acceso compartido</span>
+        </li>
+      </ul>
+      <div class="warn"><strong>No entregar al doctor</strong> si algún punto falla. Revisar assets en GitHub, ID de carpeta en Sheet y configuración del formulario.</div>
+    </div>
+  </div>
+
+  <!-- FASE 4 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon" style="background:#fbeaf0">
+        <svg width="20" height="20" fill="none" stroke="#993556" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+      </div>
+      <div>
+        <h2>Fase 4 — Entrega y cierre</h2>
+        <p>El doctor entra en productivo</p>
+      </div>
+      <span class="fase-label">Fase 4</span>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Con la prueba de producción al 100%, se hace la entrega formal y se actualiza el Sheet.</p>
+      <ul class="step-list">
+        <li><span class="snum">1</span><span>Enviar al doctor el link de su formulario personal</span></li>
+        <li><span class="snum">2</span><span>Enviar el link de la guía: <code>excelentia.com.mx/Eco-IA/onboarding-doctor-eco-ia</code></span></li>
+        <li><span class="snum">3</span><span>Confirmar que el doctor puede acceder a su carpeta de Drive</span></li>
+        <li><span class="snum">4</span><span>Actualizar estado en Sheet: <code>onboarding</code> → <code>activo</code></span></li>
+        <li><span class="snum">5</span><span>Registrar <code>fecha_alta</code> con la fecha de hoy en formato DD/MM/AAAA</span></li>
+        <li><span class="snum">6</span><span>Archivar el expediente del doctor: contrato, assets originales y datos fiscales</span></li>
+      </ul>
+      <div class="nota"><strong>Tiempo estimado total:</strong> 45–90 minutos si todos los assets e información llegan completos desde la Fase 2.</div>
+    </div>
+  </div>
+
+  <!-- FINAL -->
+  <div class="final-card">
+    <h2>Doctor en productivo</h2>
+    <p>El onboarding está completo. No olvides actualizar el estado en el Sheet y compartir la guía con el doctor.</p>
+    <div class="final-links">
+      <a class="final-link" href="https://docs.google.com/spreadsheets/d/1gb1P_U1cugWeUYVaFyCTcJcDu1JbcFMrD3hbfmAhBvk/edit" target="_blank">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Sheet de doctores
+      </a>
+      <a class="final-link" href="https://excelentia.com.mx/Eco-IA/onboarding-doctor-eco-ia" target="_blank">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Guía del doctor
+      </a>
+    </div>
+  </div>
+
+  <!-- PDF BUTTON -->
+  <div class="pdf-btn-wrap">
+    <button class="pdf-btn" onclick="window.print()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Guardar como PDF
+    </button>
+  </div>
+
+</div>
+<script>
+function toggleCheck(id) {
+  const box = document.getElementById('box-' + id);
+  const li  = document.getElementById('li-'  + id);
+  const isChecked = box.classList.toggle('checked');
+  li.classList.toggle('done-item', isChecked);
+}
+</script>
+</body>
+</html>
