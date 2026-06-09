@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía WhatsApp — Club Berimbau · ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --verde:#3AAA35;--naranja:#EF4B1F;
+  --azul-dark:#0d1b3e;--azul-mid:#1a3a6b;--azul-light:#1e5096;--azul-acc:#4a9fd4;
+  --bg:#f5f6f8;--white:#fff;--border:#dde1e9;
+  --text:#1a2035;--text2:#4a5068;--text3:#8a90a0;
+  --card-head:#dce8f7;--card-hover:#e8f0fb;
+  --s1:#1a8a6e;--s2:#c8a84b;--s3:#EF4B1F;--s4:#c0392b;
+}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--azul-dark) 0%,var(--azul-mid) 60%,var(--azul-light) 100%);border-bottom:3px solid var(--azul-acc);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px}
+.logo-box img{height:40px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.header-info{color:#fff}
+.header-info h1{font-size:1.15rem;font-weight:800;letter-spacing:.2px}
+.header-info p{font-size:.75rem;color:rgba(255,255,255,.65);margin-top:3px}
+.header-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:6px 16px;color:#fff;font-size:.72rem;font-weight:700;text-align:right}
+.header-badge strong{color:#25D366;display:block;font-size:.85rem}
+
+/* MAIN */
+.main{max-width:960px;margin:0 auto;padding:28px 20px 60px}
+
+/* SECCIÓN */
+.section{margin-bottom:32px}
+.section-label{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.section-num{width:32px;height:32px;border-radius:50%;background:var(--azul-mid);color:#fff;font-size:.82rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-size:1.05rem;font-weight:800;color:var(--text)}
+.section-sub{font-size:.78rem;color:var(--text2);margin-top:2px;font-weight:500}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.card-head{background:var(--card-head);padding:12px 18px;font-size:.78rem;font-weight:700;color:var(--azul-mid);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.card-body{padding:16px 18px}
+.card-body p{font-size:.82rem;color:var(--text2);line-height:1.65;margin-bottom:10px}
+.card-body p:last-child{margin-bottom:0}
+.card-body strong{color:var(--text);font-weight:700}
+
+/* HIGHLIGHT BOX */
+.highlight{background:#e8f7f0;border:1px solid #b6e8c9;border-left:4px solid var(--verde);border-radius:8px;padding:12px 16px;font-size:.8rem;color:#14532d;line-height:1.6;margin:10px 0}
+.highlight.azul{background:#e8f0fb;border-color:#c8d9f0;border-left-color:var(--azul-acc);color:#1a3a6b}
+.highlight.naranja{background:#fff4ee;border-color:#fcd9cc;border-left-color:var(--naranja);color:#7c2d12}
+.highlight.amarillo{background:#fdf8ec;border-color:#f0dfa0;border-left-color:#c8a84b;color:#78350f}
+
+/* GRID 2 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+.mini-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.mini-card-icon{font-size:1.6rem;margin-bottom:6px}
+.mini-card-title{font-size:.8rem;font-weight:800;color:var(--text);margin-bottom:5px}
+.mini-card-desc{font-size:.75rem;color:var(--text2);line-height:1.55}
+.mini-card.verde{border-top:3px solid var(--verde)}
+.mini-card.naranja{border-top:3px solid var(--naranja)}
+.mini-card.azul{border-top:3px solid var(--azul-acc)}
+.mini-card.gris{border-top:3px solid #8a90a0;opacity:.7}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.78rem;margin:10px 0}
+.tbl th{background:#f0f4ff;padding:9px 12px;text-align:left;font-weight:700;color:var(--text2);font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--border)}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--bg);vertical-align:top;color:var(--text);line-height:1.5}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#f8faff}
+.pill{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:.68rem;font-weight:700}
+.pill-verde{background:#dcfce7;color:#15803d}
+.pill-gris{background:#f1f5f9;color:#64748b}
+.pill-naranja{background:#fff4ee;color:#c2410c}
+.pill-azul{background:#e0eaff;color:#1e40af}
+
+/* FLUJO */
+.flow{display:flex;align-items:flex-start;gap:0;margin:14px 0;flex-wrap:wrap}
+.flow-step{flex:1;min-width:120px;text-align:center;position:relative}
+.flow-step:not(:last-child)::after{content:'→';position:absolute;right:-12px;top:20px;font-size:1.1rem;color:var(--azul-acc);font-weight:800}
+.flow-icon{width:44px;height:44px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2px solid var(--border)}
+.flow-icon.verde{background:#dcfce7;border-color:#86efac}
+.flow-icon.azul{background:#e0eaff;border-color:#93c5fd}
+.flow-icon.naranja{background:#fff4ee;border-color:#fcd9cc}
+.flow-icon.wa{background:#dcfce7;border-color:#25D366}
+.flow-label{font-size:.7rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.flow-sub{font-size:.65rem;color:var(--text2);line-height:1.4}
+
+/* PLAN CARDS */
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+.plan-card{border:2px solid var(--border);border-radius:12px;padding:16px;text-align:center;position:relative}
+.plan-card.recomendado{border-color:var(--verde);box-shadow:0 0 0 3px rgba(58,170,53,.12)}
+.plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--verde);color:#fff;border-radius:20px;padding:2px 14px;font-size:.68rem;font-weight:800;white-space:nowrap}
+.plan-name{font-size:.85rem;font-weight:800;color:var(--text);margin-bottom:4px}
+.plan-price{font-size:1.5rem;font-weight:900;color:var(--azul-mid);line-height:1;margin-bottom:2px}
+.plan-price span{font-size:.72rem;font-weight:500;color:var(--text2)}
+.plan-desc{font-size:.7rem;color:var(--text2);margin-bottom:10px;line-height:1.4}
+.plan-feature{font-size:.72rem;color:var(--text);text-align:left;padding:3px 0;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:6px}
+.plan-feature:last-child{border-bottom:none}
+.plan-feature .ok{color:var(--verde);font-weight:800}
+.plan-feature .no{color:#ccc}
+
+/* PENDIENTES */
+.pendientes{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.pendiente-row{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--bg)}
+.pendiente-row:last-child{border-bottom:none}
+.pendiente-icon{font-size:1.1rem;width:32px;text-align:center;flex-shrink:0}
+.pendiente-txt{flex:1}
+.pendiente-who{font-size:.7rem;font-weight:700;color:var(--azul-acc)}
+.pendiente-desc{font-size:.78rem;color:var(--text);font-weight:600}
+
+/* STEP BY STEP */
+.steps{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--azul-mid);color:#fff;font-size:.75rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body{flex:1}
+.step-title{font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:3px}
+.step-desc{font-size:.76rem;color:var(--text2);line-height:1.55}
+.step-link{font-size:.72rem;color:var(--azul-acc);font-weight:600;text-decoration:none}
+.step-link:hover{text-decoration:underline}
+
+/* FOOTER */
+.footer{background:var(--azul-dark);border-top:3px solid var(--azul-acc);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:40px}
+.footer-logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:70px;min-height:44px}
+.footer-logo-box img{height:32px;width:auto}
+.footer-tagline{color:rgba(255,255,255,.65);font-size:.72rem;margin-top:4px}
+.footer-tagline strong{color:#fff;display:block;font-size:.78rem}
+.footer-powered{color:rgba(255,255,255,.4);font-size:.65rem;font-weight:700;letter-spacing:.5px}
+.footer-powered span{color:var(--azul-acc)}
+
+@media(max-width:640px){
+  .grid2{grid-template-columns:1fr}
+  .plan-grid{grid-template-columns:1fr}
+  .flow{gap:12px}
+  .flow-step:not(:last-child)::after{display:none}
+  .header{padding:14px 16px}
+  .main{padding:20px 14px 40px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <div class="header-info">
+      <h1>WhatsApp para Club Berimbau</h1>
+      <p>Guía completa · Opciones · Costos · Pasos a seguir</p>
+    </div>
+  </div>
+  <div class="header-badge">
+    <strong>📱 WhatsApp Business API</strong>
+    Documento de referencia · Junio 2026
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ===== 1. QUÉ QUEREMOS LOGRAR ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">¿Qué queremos lograr exactamente?</div>
+        <div class="section-sub">El objetivo del club, explicado simple</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">🎯 La necesidad del club</div>
+      <div class="card-body">
+        <p>El club quiere que <strong>la plataforma (el dashboard de ExcelentIA) envíe avisos automáticos por WhatsApp y correo</strong> a los socios: recordatorios de pago, cumpleaños, vencimiento de membresía, etc.</p>
+        <p>Al mismo tiempo, las <strong>2 personas responsables</strong> (Nancy y quien corresponda) deben poder:</p>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="mini-card verde">
+        <div class="mini-card-icon">👁️</div>
+        <div class="mini-card-title">Ver todas las conversaciones</div>
+        <div class="mini-card-desc">Desde un panel compartido, Nancy y la otra persona pueden ver qué mensajes se enviaron, cuáles respondieron los socios y cómo va cada conversación.</div>
+      </div>
+      <div class="mini-card naranja">
+        <div class="mini-card-icon">🤝</div>
+        <div class="mini-card-title">Tomar el control en cualquier momento</div>
+        <div class="mini-card-desc">Si un socio responde con algo que requiere atención humana, cualquiera de las dos puede "agarrar" esa conversación y responder personalmente desde el mismo sistema.</div>
+      </div>
+    </div>
+    <div class="highlight azul">
+      💡 <strong>Buena noticia:</strong> YCloud está diseñado exactamente para esto. Su función "Inbox" (bandeja compartida de equipo) permite que varios agentes vean y tomen conversaciones. Es lo que usa el club de Citas Médicas también.
+    </div>
+  </div>
+
+  <!-- ===== 2. CÓMO FUNCIONA EL SISTEMA ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">¿Cómo funciona todo junto?</div>
+        <div class="section-sub">El flujo completo de un aviso automático</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">🔄 Flujo de un aviso automático</div>
+      <div class="card-body">
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-icon azul">📊</div>
+            <div class="flow-label">Dashboard</div>
+            <div class="flow-sub">El dashboard detecta el evento (vence membresía, cumpleaños, etc.)</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon azul">⚙️</div>
+            <div class="flow-label">n8n</div>
+            <div class="flow-sub">El workflow automático se activa y prepara el mensaje</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon wa">📱</div>
+            <div class="flow-label">YCloud</div>
+            <div class="flow-sub">YCloud envía el WhatsApp al número del socio</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon verde">👤</div>
+            <div class="flow-label">Socio</div>
+            <div class="flow-sub">Recibe el mensaje en su WhatsApp normal</div>
+          </div>
+        </div>
+        <div style="height:1px;background:var(--border);margin:16px 0"></div>
+        <p style="font-size:.78rem;color:var(--text2)"><strong>Cuando el socio responde:</strong></p>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-icon verde">💬</div>
+            <div class="flow-label">Socio responde</div>
+            <div class="flow-sub">El socio escribe de vuelta</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon wa">📥</div>
+            <div class="flow-label">YCloud Inbox</div>
+            <div class="flow-sub">Llega a la bandeja compartida del club</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon naranja">👩‍💼</div>
+            <div class="flow-label">Nancy / Responsable</div>
+            <div class="flow-sub">Ve la respuesta y puede tomar el control y contestar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 3. QUÉ ES YCLOUD ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">¿Qué es YCloud y qué les da exactamente?</div>
+        <div class="section-sub">Sin tecnicismos — lo que importa para el club</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">🏗️ YCloud es el "puente" entre n8n y WhatsApp</div>
+      <div class="card-body">
+        <p>WhatsApp no permite que cualquier sistema le mande mensajes a sus usuarios a granel. Para hacerlo de manera oficial y no ser bloqueados, se necesita acceder a la <strong>WhatsApp Business API</strong> — y YCloud es quien da ese acceso.</p>
+        <p>Piénsalo así: <strong>YCloud es como el operador telefónico</strong> — tú pagas su servicio y a través de ellos puedes enviar mensajes de WhatsApp de forma masiva y profesional.</p>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="mini-card azul">
+        <div class="mini-card-icon">📤</div>
+        <div class="mini-card-title">Envíos masivos oficiales</div>
+        <div class="mini-card-desc">Enviar WhatsApp a decenas o cientos de socios al mismo tiempo, sin riesgo de que bloqueen el número del club.</div>
+      </div>
+      <div class="mini-card azul">
+        <div class="mini-card-icon">📥</div>
+        <div class="mini-card-title">Bandeja compartida (Inbox)</div>
+        <div class="mini-card-desc">Nancy y la otra responsable ven TODAS las conversaciones en un solo lugar. Cualquiera puede responder o tomar control.</div>
+      </div>
+      <div class="mini-card verde">
+        <div class="mini-card-icon">🤖</div>
+        <div class="mini-card-title">Conexión con n8n</div>
+        <div class="mini-card-desc">Se conecta directamente a los workflows de n8n que ya conocemos. Es el mismo sistema que usamos en Citas Médicas.</div>
+      </div>
+      <div class="mini-card verde">
+        <div class="mini-card-icon">📊</div>
+        <div class="mini-card-title">Reportes y estadísticas</div>
+        <div class="mini-card-desc">Cuántos mensajes se enviaron, cuántos se leyeron, cuántos respondieron. Todo medible.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4. PLANES ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title">¿Cuánto cuesta?</div>
+        <div class="section-sub">Planes de YCloud + costo por mensaje (son cosas distintas)</div>
+      </div>
+    </div>
+
+    <div class="highlight amarillo">
+      ⚠️ <strong>Importante entender:</strong> YCloud cobra DOS cosas por separado — la <strong>suscripción mensual</strong> (acceso a la plataforma) y el <strong>costo por mensaje</strong> (lo que cobra Meta/WhatsApp por cada mensaje enviado). Son independientes.
+    </div>
+
+    <div class="plan-grid" style="margin-top:16px">
+      <div class="plan-card">
+        <div class="plan-name">🆓 Free</div>
+        <div class="plan-price">$0 <span>/mes</span></div>
+        <div class="plan-desc">Para probar la plataforma y hacer demos</div>
+        <div class="plan-feature"><span class="ok">✓</span> 1 usuario</div>
+        <div class="plan-feature"><span class="ok">✓</span> 2 canales (números)</div>
+        <div class="plan-feature"><span class="ok">✓</span> API completa</div>
+        <div class="plan-feature"><span class="no">✗</span> Inbox de equipo limitado</div>
+        <div class="plan-feature"><span class="no">✗</span> Soporte básico</div>
+      </div>
+      <div class="plan-card recomendado">
+        <div class="plan-badge">⭐ Recomendado</div>
+        <div class="plan-name">📈 Growth</div>
+        <div class="plan-price">$39 <span>USD/mes</span></div>
+        <div class="plan-desc">Para el club en producción</div>
+        <div class="plan-feature"><span class="ok">✓</span> 2 usuarios (Nancy + 1)</div>
+        <div class="plan-feature"><span class="ok">✓</span> 3 canales (números WA)</div>
+        <div class="plan-feature"><span class="ok">✓</span> Inbox compartido equipo</div>
+        <div class="plan-feature"><span class="ok">✓</span> API completa + n8n</div>
+        <div class="plan-feature"><span class="ok">✓</span> Soporte por email</div>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">🚀 Pro</div>
+        <div class="plan-price">$89 <span>USD/mes</span></div>
+        <div class="plan-desc">Para cuando el club crezca mucho</div>
+        <div class="plan-feature"><span class="ok">✓</span> 6 usuarios</div>
+        <div class="plan-feature"><span class="ok">✓</span> 8 canales</div>
+        <div class="plan-feature"><span class="ok">✓</span> Todo Growth +</div>
+        <div class="plan-feature"><span class="ok">✓</span> Manager dedicado</div>
+        <div class="plan-feature"><span class="ok">✓</span> Asistente de onboarding</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-head">💬 ¿Cuánto cuesta cada mensaje?</div>
+      <div class="card-body">
+        <p>Meta cobra por cada mensaje que el club envía a un socio. En México los costos son muy bajos:</p>
+        <table class="tbl">
+          <thead><tr><th>Tipo de mensaje</th><th>Costo aprox. por mensaje</th><th>Ejemplo Berimbau (500 socios)</th></tr></thead>
+          <tbody>
+            <tr><td>📋 Utilidad (avisos de pago, recordatorios)</td><td>~$0.02 – $0.04 USD</td><td>$10 – $20 USD por envío masivo</td></tr>
+            <tr><td>🎉 Marketing (cumpleaños, promociones)</td><td>~$0.05 – $0.08 USD</td><td>$25 – $40 USD por envío masivo</td></tr>
+            <tr><td>💬 Servicio (el socio escribe primero)</td><td>Gratis por 24 hrs</td><td>$0</td></tr>
+          </tbody>
+        </table>
+        <div class="highlight">
+          ✅ <strong>Estimado real para Berimbau:</strong> Con ~500 socios y envíos mensuales de avisos de cobranza + cumpleaños, el costo total de mensajes estaría entre <strong>$30 – $60 USD/mes</strong>. Sumado al plan Growth ($39), el costo total sería de <strong>~$70 – $100 USD/mes</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 5. NÚMERO ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">5</div>
+      <div>
+        <div class="section-title">¿Qué número usar? — La decisión más importante</div>
+        <div class="section-sub">Entendiendo la diferencia entre App y API, y qué pasa con el número</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📱 Primero hay que entender: hay DOS formas de conectar WhatsApp a YCloud</div>
+      <div class="card-body">
+        <p>No es lo mismo conectar la <strong>app de WhatsApp</strong> a YCloud que conectar el número directamente a la <strong>API de WhatsApp</strong>. Son dos modalidades distintas con consecuencias distintas para el número:</p>
+        <table class="tbl" style="margin-top:10px">
+          <thead>
+            <tr>
+              <th></th>
+              <th>📱 WhatsApp Business App<br><span style="font-weight:400;color:var(--text3)">"Coexistence"</span></th>
+              <th>🔌 WhatsApp Business API<br><span style="font-weight:400;color:var(--text3)">Conexión directa</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>¿Sigues usando la app en tu cel?</strong></td><td><span class="pill pill-verde">✅ Sí</span></td><td><span class="pill pill-naranja">❌ No</span></td></tr>
+            <tr><td><strong>¿Envíos masivos a cientos de socios?</strong></td><td><span class="pill pill-gris">⚠️ Limitados</span></td><td><span class="pill pill-verde">✅ Ilimitados</span></td></tr>
+            <tr><td><strong>¿Bandeja compartida Nancy + Evelyn?</strong></td><td><span class="pill pill-gris">⚠️ Básica</span></td><td><span class="pill pill-verde">✅ Completa</span></td></tr>
+            <tr><td><strong>¿Plantillas aprobadas por Meta?</strong></td><td><span class="pill pill-gris">No requeridas</span></td><td><span class="pill pill-naranja">Obligatorias</span></td></tr>
+            <tr><td><strong>¿Caso actual de Fernando (Citas)?</strong></td><td><span class="pill pill-azul">✅ Así está Fernando</span></td><td></td></tr>
+            <tr><td><strong>¿Lo que necesita Berimbau?</strong></td><td></td><td><span class="pill pill-azul">✅ Este es el correcto</span></td></tr>
+          </tbody>
+        </table>
+        <div class="highlight amarillo" style="margin-top:14px">
+          ⚠️ <strong>¿Por qué Fernando sí puede usar la app en su cel si está conectado a YCloud?</strong><br>
+          Porque Fernando usa la modalidad <em>App Coexistence</em> — la app convive con YCloud sin problema. Pero esta modalidad tiene limitaciones de volumen, por eso para Berimbau (500 socios) necesitamos la <strong>API completa</strong>, donde el número queda exclusivo para la plataforma.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">🔢 Entonces, ¿qué pasa exactamente con el número cuando usamos la API completa?</div>
+      <div class="card-body">
+        <p>Cuando conectas un número a la <strong>WhatsApp Business API</strong>, Meta registra ese número como "número de empresa en la nube". Consecuencia directa:</p>
+        <p>❌ Ese número <strong>ya no puede tener la app de WhatsApp instalada en ningún teléfono</strong> — ni la app normal ni WhatsApp Business. Meta no lo permite.</p>
+        <p>✅ Pero Nancy y Evelyn <strong>sí pueden ver y responder todas las conversaciones</strong> — desde el <strong>Inbox de YCloud</strong> (que tiene versión web y app móvil). La experiencia es muy similar a WhatsApp, solo que desde otra plataforma.</p>
+        <div class="highlight">
+          💡 <strong>Analogía:</strong> Es como si el número "viviera" en la plataforma de YCloud en lugar de vivir en un teléfono. Nancy y Evelyn acceden a él desde YCloud, no desde WhatsApp. El socio recibe y responde normalmente desde su WhatsApp — él no nota ninguna diferencia.
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:14px">
+      <div class="mini-card naranja">
+        <div class="mini-card-icon">⚠️</div>
+        <div class="mini-card-title">Usar el número actual del club</div>
+        <div class="mini-card-desc">
+          <strong>Ventaja:</strong> Los socios ya lo tienen guardado, confían en él.<br><br>
+          <strong>Problema:</strong> Nancy y Evelyn dejarían de usarlo en su teléfono como WhatsApp. Tendrían que gestionar todo desde el Inbox de YCloud. Requiere un cambio de hábito operativo.
+        </div>
+      </div>
+      <div class="mini-card verde">
+        <div class="mini-card-icon">✅</div>
+        <div class="mini-card-title">Número nuevo dedicado para avisos</div>
+        <div class="mini-card-desc">
+          <strong>Ventaja:</strong> Nancy y Evelyn siguen usando su número de siempre sin cambios. El número nuevo es exclusivo para la plataforma de avisos.<br><br>
+          <strong>Presentación:</strong> "Club Berimbau Avisos" — perfil verificado. Los socios aprenden a identificarlo rápidamente.
+        </div>
+      </div>
+    </div>
+    <div class="highlight azul">
+      💡 <strong>Recomendación ExcelentIA:</strong> Número nuevo dedicado para avisos. Es más limpio, no interrumpe las operaciones actuales del club y es la práctica estándar. A mediano plazo se puede evaluar migrar el número principal si el club lo decide.
+    </div>
+  </div>
+
+  <!-- ===== 6. DEMO FERNANDO ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">6</div>
+      <div>
+        <div class="section-title">Paso a paso — Configurar el demo de Fernando</div>
+        <div class="section-sub">Para mostrarle al club cómo funciona en vivo, usando tu número personal</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">🛠️ Configuración de cuenta demo (número personal de Fernando)</div>
+      <div class="card-body">
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Crear cuenta en YCloud</div>
+              <div class="step-desc">Ir a <a href="https://www.ycloud.com" class="step-link" target="_blank">ycloud.com</a> → "Free Trial" → registrarse con el correo de ExcelentIA (fdavila@excelentia.com.mx). El plan Free es suficiente para el demo.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Crear una cuenta de Meta Business (si no tienes)</div>
+              <div class="step-desc">Ir a <a href="https://business.facebook.com" class="step-link" target="_blank">business.facebook.com</a> → crear cuenta de empresa "ExcelentIA Demo". Es gratuito y toma 10 minutos.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Conectar un número de WhatsApp en YCloud</div>
+              <div class="step-desc">En YCloud → Channels → Add Channel → WhatsApp. Te pedirá conectar tu cuenta Meta Business. Aquí registras tu número personal (o uno nuevo con SIM). YCloud te da el código de verificación.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">⚠️ Advertencia sobre tu número personal</div>
+              <div class="step-desc"><strong>Si usas tu número personal:</strong> ese número dejará de funcionar en WhatsApp normal en tu teléfono. Para el demo, lo ideal es usar una SIM de prepago barata (~$50 pesos) dedicada solo a esto. Así proteges tu número principal.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Crear plantillas de mensaje en YCloud</div>
+              <div class="step-desc">WhatsApp exige que los mensajes masivos usen "plantillas aprobadas". En YCloud → Templates → New Template. Ejemplo: "Hola {{nombre}}, tu membresía vence el {{fecha}}." Meta las aprueba en 24-48 hrs.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-title">Conectar YCloud con n8n</div>
+              <div class="step-desc">En n8n, el nodo de YCloud ya existe (lo usas en Citas Médicas). Solo hay que crear nuevas credenciales con el API Key de la cuenta nueva de Berimbau. En YCloud → Settings → API Key → copiar y pegar en n8n.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">7</div>
+            <div class="step-body">
+              <div class="step-title">¡Listo para el demo!</div>
+              <div class="step-desc">Con esto puedes mostrarle al club cómo llega un aviso de cobranza por WhatsApp, cómo Nancy lo ve en el Inbox de YCloud y cómo puede responder. Es la misma experiencia que tendrán en producción.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 7. PLANTILLAS META ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">7</div>
+      <div>
+        <div class="section-title">Plantillas de mensaje — Aprobación de Meta</div>
+        <div class="section-sub">Qué son, por qué son obligatorias y cómo se aprueban</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📋 ¿Qué es una plantilla y por qué la exige Meta?</div>
+      <div class="card-body">
+        <p>Cuando el club quiere enviar un mensaje a un socio que <strong>no ha escrito primero</strong> (por ejemplo un aviso de cobranza, un recordatorio de vencimiento o una felicitación de cumpleaños), WhatsApp <strong>no permite mensajes libres</strong>. Exige usar una <strong>plantilla previamente aprobada por Meta</strong>.</p>
+        <p>Es una medida de Meta para evitar spam. Cada plantilla es revisada por sus equipos antes de que pueda usarse. Una vez aprobada, se puede usar tantas veces como se quiera.</p>
+        <div class="highlight amarillo">
+          ⚠️ <strong>Importante:</strong> Si intentas enviar un mensaje que no sigue exactamente el texto de la plantilla aprobada, WhatsApp lo bloquea. Por eso los mensajes automáticos del dashboard deben estar basados en plantillas aprobadas.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">✍️ ¿Cómo se ve una plantilla? — Ejemplos para Berimbau</div>
+      <div class="card-body">
+        <p>Las plantillas tienen texto fijo y variables (datos que cambian por socio). Las variables van entre dobles llaves: <strong>{{nombre}}</strong>, <strong>{{fecha}}</strong>, etc.</p>
+        <table class="tbl">
+          <thead><tr><th>Tipo de aviso</th><th>Ejemplo de plantilla</th><th>Categoría Meta</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>📅 Vencimiento anual</td>
+              <td><em>"Hola {{nombre}}, tu membresía en Club Berimbau vence el {{fecha}}. Renuévala a tiempo para seguir disfrutando. ¿Necesitas ayuda? Contáctanos."</em></td>
+              <td><span class="pill pill-azul">Utilidad</span></td>
+            </tr>
+            <tr>
+              <td>🏦 Aviso domiciliado</td>
+              <td><em>"Hola {{nombre}}, en los próximos días realizaremos el cargo automático de tu membresía. Asegúrate de tener fondos disponibles. Gracias."</em></td>
+              <td><span class="pill pill-azul">Utilidad</span></td>
+            </tr>
+            <tr>
+              <td>🏦❌ Cargo fallido</td>
+              <td><em>"Hola {{nombre}}, el cobro automático de tu membresía no pudo procesarse. Por favor contáctanos para regularizar tu situación."</em></td>
+              <td><span class="pill pill-azul">Utilidad</span></td>
+            </tr>
+            <tr>
+              <td>🎂 Cumpleaños</td>
+              <td><em>"¡Feliz cumpleaños {{nombre}}! Todo el equipo de Club Berimbau te desea un excelente día. 🎉 ¡Te esperamos en el club!"</em></td>
+              <td><span class="pill pill-naranja">Marketing</span></td>
+            </tr>
+            <tr>
+              <td>🔔 Alerta 26 años</td>
+              <td><em>"Hola {{nombre}}, queremos informarte que {{integrante}} cumplirá 26 años el {{fecha}}. A partir de esa fecha su cuota cambia. Contáctanos para más información."</em></td>
+              <td><span class="pill pill-azul">Utilidad</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="highlight">
+          💡 <strong>Categoría importa para el costo:</strong> Los mensajes de <strong>Utilidad</strong> (avisos, recordatorios) son más baratos que los de <strong>Marketing</strong> (promociones, felicitaciones). Por eso clasificar bien cada plantilla desde el inicio es importante.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">🛠️ Proceso de aprobación — paso a paso</div>
+      <div class="card-body">
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Redactar la plantilla en YCloud</div>
+              <div class="step-desc">En YCloud → <strong>Templates → New Template</strong>. Escribes el texto del mensaje, defines el nombre de la plantilla (ej. "berimbau_vencimiento_anual"), seleccionas el idioma (Español) y la categoría (Utilidad o Marketing).</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Agregar variables y botones (opcional)</div>
+              <div class="step-desc">Defines las variables del mensaje: {{1}} = nombre del socio, {{2}} = fecha, etc. También puedes agregar botones de acción como "Llamar al club" o "Ver mi estado de cuenta" — esto lo decide el club.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Enviar a revisión de Meta</div>
+              <div class="step-desc">Con un clic en "Submit for Review", YCloud envía la plantilla directamente a Meta para su revisión. No tienes que hacer nada más en este paso.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Esperar la respuesta de Meta</div>
+              <div class="step-desc">Meta revisa la plantilla normalmente en <strong>24 a 48 horas</strong>. El resultado puede ser:<br>
+              ✅ <strong>Aprobada</strong> → lista para usar de inmediato<br>
+              ❌ <strong>Rechazada</strong> → Meta indica el motivo (lenguaje prohibido, falta de claridad, etc.) y hay que corregirla y reenviar</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">¿Por qué Meta rechaza una plantilla?</div>
+              <div class="step-desc">Los motivos más comunes son: lenguaje demasiado promocional en categoría Utilidad, mensajes que podrían confundirse con spam, variables mal definidas, o mencionar precios/descuentos sin contexto claro. La solución es siempre ajustar el texto y reenviar.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-title">Conectar la plantilla aprobada al workflow de n8n</div>
+              <div class="step-desc">Una vez aprobada, en n8n se usa el nodo de YCloud con el nombre exacto de la plantilla y se mapean las variables ({{1}} = campo "Nombre" de la base de datos, etc.). A partir de ahí el envío es 100% automático.</div>
+            </div>
+          </div>
+        </div>
+        <div class="highlight azul" style="margin-top:12px">
+          📌 <strong>Plan de plantillas para Berimbau:</strong> Necesitamos crear y aprobar <strong>5 plantillas</strong> — una por cada tipo de aviso (vencimiento anual, domiciliado previo, cargo fallido, cumpleaños y alerta 26 años). Lo ideal es enviarlas todas a revisión al mismo tiempo para no perder días esperando aprobaciones individuales.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 8. RESUMEN DECISIONES ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">8</div>
+      <div>
+        <div class="section-title">Resumen de decisiones y pendientes</div>
+        <div class="section-sub">Lo que ya decidimos y lo que falta definir</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">✅ Ya decidido</div>
+      <div class="card-body">
+        <table class="tbl">
+          <thead><tr><th>Decisión</th><th>Opción elegida</th></tr></thead>
+          <tbody>
+            <tr><td>Proveedor WhatsApp API</td><td><span class="pill pill-verde">YCloud</span></td></tr>
+            <tr><td>Plan para el demo</td><td><span class="pill pill-azul">Free (mientras se prueba)</span></td></tr>
+            <tr><td>Plan para producción</td><td><span class="pill pill-verde">Growth · $39 USD/mes</span></td></tr>
+            <tr><td>Número para demo</td><td><span class="pill pill-azul">SIM prepago de Fernando</span></td></tr>
+            <tr><td>Usuarios con acceso al Inbox</td><td><span class="pill pill-verde">Nancy + Evelyn</span></td></tr>
+            <tr><td>Integración con n8n</td><td><span class="pill pill-verde">Sí, mismo método que Citas Médicas</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="card-head">⏳ Pendiente — del lado del club</div>
+      <div class="card-body">
+        <div class="pendientes">
+          <div class="pendiente-row">
+            <div class="pendiente-icon">📱</div>
+            <div class="pendiente-txt">
+              <div class="pendiente-desc">Definir qué número usará el club en producción (nuevo vs actual)</div>
+              <div class="pendiente-who">👤 Enrique / Dirección</div>
+            </div>
+            <span class="pill pill-naranja">Urgente</span>
+          </div>
+          <div class="pendiente-row">
+            <div class="pendiente-icon">📅</div>
+            <div class="pendiente-txt">
+              <div class="pendiente-desc">¿Qué día del mes cobra el banco a los domiciliados?</div>
+              <div class="pendiente-who">👤 Nancy / Evelyn / Tesorería</div>
+            </div>
+            <span class="pill pill-naranja">Importante</span>
+          </div>
+          <div class="pendiente-row">
+            <div class="pendiente-icon">🗄️</div>
+            <div class="pendiente-txt">
+              <div class="pendiente-desc">Columna en BD cPanel para identificar familias mixtas (anual + mensual)</div>
+              <div class="pendiente-who">👤 IT del club</div>
+            </div>
+            <span class="pill pill-gris">Puede esperar</span>
+          </div>
+          <div class="pendiente-row">
+            <div class="pendiente-icon">🔔</div>
+            <div class="pendiente-txt">
+              <div class="pendiente-desc">Confirmar si el aviso de 26 años también va al integrante además del titular</div>
+              <div class="pendiente-who">👤 Enrique / Dirección</div>
+            </div>
+            <span class="pill pill-gris">Puede esperar</span>
+          </div>
+          <div class="pendiente-row">
+            <div class="pendiente-icon">🔑</div>
+            <div class="pendiente-txt">
+              <div class="pendiente-desc">Acceso a cPanel del club para sincronización de base de datos</div>
+              <div class="pendiente-who">👤 IT del club</div>
+            </div>
+            <span class="pill pill-azul">Mediano plazo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 9. PRÓXIMOS PASOS ===== -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num">9</div>
+      <div>
+        <div class="section-title">¿Qué hacemos ahora?</div>
+        <div class="section-sub">Orden de trabajo recomendado</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="mini-card verde">
+        <div class="mini-card-icon">1️⃣</div>
+        <div class="mini-card-title">Ahora → Dashboard v10</div>
+        <div class="mini-card-desc">Agregar en el dashboard todos los nuevos módulos de envío: anual, domiciliados, cargo fallido, cumpleaños y alerta 26 años — con estructura lista para correo Y WhatsApp (WA con badge "próximamente").</div>
+      </div>
+      <div class="mini-card azul">
+        <div class="mini-card-icon">2️⃣</div>
+        <div class="mini-card-title">Esta semana → Demo YCloud</div>
+        <div class="mini-card-desc">Fernando consigue SIM prepago, crea cuenta YCloud y conecta el número demo. Se configura 1 plantilla de prueba y se hace el primer envío de demostración al club.</div>
+      </div>
+      <div class="mini-card naranja">
+        <div class="mini-card-icon">3️⃣</div>
+        <div class="mini-card-title">Con el club → Decisión número</div>
+        <div class="mini-card-desc">Presentar al club la demo en vivo. Que decidan si quieren número nuevo o migrar el actual. Con esa decisión se configura la cuenta de producción de Berimbau.</div>
+      </div>
+      <div class="mini-card gris">
+        <div class="mini-card-icon">4️⃣</div>
+        <div class="mini-card-title">Después → Workflows n8n WA</div>
+        <div class="mini-card-desc">Con número de producción listo, construir los workflows de n8n para cada tipo de aviso por WhatsApp, usando las plantillas aprobadas por Meta.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="footer-logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span style="font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;color:#1a3a6b;display:none">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <div>
+      <div class="footer-tagline"><strong>Guía WhatsApp — Club Berimbau</strong>Automatización e IA · excelentia.com.mx</div>
+    </div>
+  </div>
+  <div class="footer-powered">POWERED BY <span>ExcelentIA</span> · © 2026</div>
+</div>
+
+</body>
+</html>
