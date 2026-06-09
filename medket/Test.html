@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de Negocio — Club Berimbau · ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --azul-dark:   #0d1b3e;
+  --azul-mid:    #1a3a6b;
+  --azul-light:  #1e5096;
+  --azul-accent: #4a9fd4;
+  --verde:       #3AAA35;
+  --verde-bg:    #eaf7ea;
+  --naranja:     #EF4B1F;
+  --naranja-bg:  #fff4ee;
+  --fondo:       #f5f6f8;
+  --card:        #ffffff;
+  --borde:       #dde1e9;
+  --texto:       #1a2035;
+  --secundario:  #4a5068;
+  --gris:        #8a90a0;
+  --cab-card:    #dce8f7;
+  --hover:       #e8f0fb;
+  --amber:       #c8a84b;
+  --amber-bg:    #fdf8ec;
+  --rojo:        #c0392b;
+  --rojo-bg:     #fef2f2;
+}
+
+body { font-family:'Manrope',sans-serif; background:var(--fondo); color:var(--texto); min-height:100vh; padding-bottom:60px; }
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(135deg, var(--azul-dark) 0%, var(--azul-mid) 60%, var(--azul-light) 100%);
+  border-bottom: 3px solid var(--azul-accent);
+  padding: 24px 40px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+}
+.header-left { display:flex; align-items:center; gap:16px; }
+.logo-box {
+  background:#fff; border-radius:10px; padding:.4rem .75rem;
+  display:flex; align-items:center; justify-content:center;
+  min-width:80px; min-height:52px; flex-shrink:0;
+}
+.logo-box img { height:40px; width:auto; display:block; }
+.logo-fallback { font-family:'Manrope',sans-serif; font-size:15px; font-weight:800; color:#1a3a6b; display:none; }
+.divider { width:1px; height:44px; background:rgba(255,255,255,.25); flex-shrink:0; }
+.header-titles { color:#fff; }
+.header-titles h1 { font-size:1.2rem; font-weight:800; line-height:1.2; }
+.header-titles p { font-size:.75rem; color:rgba(255,255,255,.6); margin-top:3px; font-weight:500; }
+.confidencial-badge {
+  display:flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+  border-radius:20px; padding:6px 14px;
+  color:rgba(255,255,255,.8); font-size:.72rem; font-weight:700; letter-spacing:.5px;
+  flex-shrink:0;
+}
+
+/* ── CONTAINER ── */
+.container { max-width:920px; margin:32px auto 0; padding:0 24px; }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-size:.7rem; font-weight:800; letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--azul-accent); margin-bottom:14px; margin-top:32px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-title::after { content:''; flex:1; height:1px; background:var(--borde); }
+
+/* ── MERCADO CARDS ── */
+.mercado-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:8px; }
+.mercado-card {
+  background:var(--card); border:1px solid var(--borde); border-radius:12px;
+  padding:16px; border-top:3px solid var(--azul-accent);
+}
+.mercado-card .m-label { font-size:.7rem; font-weight:700; color:var(--gris); text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; }
+.mercado-card .m-val { font-size:1rem; font-weight:800; color:var(--azul-mid); line-height:1.3; }
+.mercado-card .m-src { font-size:.68rem; color:var(--gris); margin-top:5px; font-weight:500; }
+
+/* ── COSTOS TABLA ── */
+.tabla-card {
+  background:var(--card); border:1px solid var(--borde); border-radius:14px; overflow:hidden; margin-bottom:18px;
+}
+.tabla-header {
+  background:var(--cab-card); padding:14px 20px; border-bottom:1px solid var(--borde);
+  font-size:.85rem; font-weight:800; color:var(--azul-mid);
+  display:flex; align-items:center; gap:8px;
+}
+table { width:100%; border-collapse:collapse; }
+th { background:var(--fondo); padding:10px 16px; text-align:left; font-size:.72rem; font-weight:700; color:var(--gris); text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid var(--borde); }
+td { padding:11px 16px; font-size:.82rem; font-weight:500; color:var(--secundario); border-bottom:1px solid var(--borde); }
+td:last-child { text-align:right; }
+tr:last-child td { border-bottom:none; }
+.td-bold { font-weight:800; color:var(--texto); }
+.td-green { font-weight:800; color:var(--verde); }
+.td-blue { font-weight:800; color:var(--azul-accent); }
+.td-amber { font-weight:800; color:var(--amber); }
+.total-row td { background:var(--hover); font-weight:800; color:var(--azul-mid); border-top:2px solid var(--azul-accent); }
+
+/* ── CALCULADORA ── */
+.calc-card {
+  background:var(--card); border:1.5px solid var(--azul-accent); border-radius:16px; overflow:hidden; margin-bottom:24px;
+  box-shadow: 0 4px 24px rgba(74,159,212,.12);
+}
+.calc-header {
+  background:linear-gradient(135deg, var(--azul-dark), var(--azul-mid));
+  padding:18px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.calc-header-title { color:#fff; font-size:1rem; font-weight:800; }
+.calc-header-sub { color:rgba(255,255,255,.6); font-size:.75rem; margin-top:2px; font-weight:500; }
+.tc-badge {
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  border-radius:8px; padding:6px 12px; color:#fff; font-size:.75rem; font-weight:700;
+}
+
+/* Sliders zona */
+.calc-sliders { padding:20px 24px; background:#fafbfd; border-bottom:1px solid var(--borde); display:flex; flex-direction:column; gap:18px; }
+.slider-group label { display:flex; justify-content:space-between; align-items:center; font-size:.78rem; font-weight:600; color:var(--secundario); margin-bottom:8px; }
+.slider-group label span { font-weight:800; color:var(--azul-mid); font-size:.88rem; }
+
+input[type=range] {
+  width:100%; -webkit-appearance:none; height:5px; border-radius:5px;
+  background:linear-gradient(to right, var(--azul-accent) 0%, var(--azul-accent) 50%, #dde1e9 50%, #dde1e9 100%);
+  outline:none; cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+  background:var(--azul-mid); border:3px solid #fff;
+  box-shadow:0 2px 6px rgba(26,58,107,.3); cursor:pointer; transition:box-shadow .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { box-shadow:0 0 0 7px rgba(74,159,212,.2); }
+
+/* Sliders grid 2 col */
+.sliders-2col { display:grid; grid-template-columns:1fr 1fr; gap:18px 28px; }
+
+/* Resultados */
+.calc-results { display:grid; grid-template-columns:repeat(4,1fr); }
+.result-cell { padding:18px 16px; text-align:center; border-right:1px solid var(--borde); }
+.result-cell:last-child { border-right:none; }
+.result-label { font-size:.68rem; font-weight:700; color:var(--gris); text-transform:uppercase; letter-spacing:.7px; margin-bottom:8px; }
+.result-val { font-size:1.3rem; font-weight:800; line-height:1.1; }
+.val-green { color:var(--verde); }
+.val-blue { color:var(--azul-accent); }
+.val-amber { color:var(--amber); }
+.val-red { color:var(--rojo); }
+.result-sub { font-size:.68rem; color:var(--gris); margin-top:4px; font-weight:500; }
+
+/* Fases sliders */
+.fases-sliders { padding:20px 24px; border-bottom:1px solid var(--borde); background:var(--card); }
+.fase-slider-item { margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--borde); }
+.fase-slider-item:last-child { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+.fase-slider-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.fase-slug { font-size:.72rem; font-weight:700; color:var(--gris); text-transform:uppercase; letter-spacing:.6px; }
+.fase-prices { display:flex; gap:16px; align-items:center; }
+.fase-precio-val { font-size:.82rem; font-weight:800; color:var(--azul-mid); }
+.fase-costo-val { font-size:.78rem; font-weight:600; color:var(--gris); }
+.fase-margen-pill {
+  font-size:.68rem; font-weight:800; padding:2px 8px; border-radius:10px;
+  background:var(--verde-bg); color:var(--verde);
+}
+
+/* Renta card */
+.renta-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:20px 24px; background:var(--fondo); border-bottom:1px solid var(--borde); }
+.renta-item { background:var(--card); border:1px solid var(--borde); border-radius:10px; padding:14px 16px; }
+.renta-label { font-size:.7rem; font-weight:700; color:var(--gris); text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; }
+.renta-val { font-size:1.1rem; font-weight:800; color:var(--azul-mid); }
+.renta-sub { font-size:.72rem; color:var(--gris); margin-top:3px; font-weight:500; }
+
+/* Tabla resumen fases */
+.fases-tabla { padding:0; }
+.fase-row {
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr 80px;
+  padding:12px 20px; border-bottom:1px solid var(--borde); align-items:center; gap:8px;
+}
+.fase-row:last-child { border-bottom:none; }
+.fase-row.header { background:var(--fondo); padding:9px 20px; }
+.fase-row.header span { font-size:.69rem; font-weight:700; color:var(--gris); text-transform:uppercase; letter-spacing:.6px; }
+.fase-row.total-fase { background:var(--hover); border-top:2px solid var(--azul-accent); }
+.fase-nombre { font-size:.8rem; font-weight:700; color:var(--texto); line-height:1.3; }
+.fase-num { font-size:.82rem; font-weight:700; color:var(--secundario); }
+.fase-num.green { color:var(--verde); }
+.fase-num.blue { color:var(--azul-accent); }
+.margen-pill {
+  font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:12px; text-align:center; display:inline-block;
+}
+.pill-green { background:var(--verde-bg); color:var(--verde); }
+.pill-amber { background:var(--amber-bg); color:var(--amber); }
+.pill-blue { background:var(--hover); color:var(--azul-mid); }
+
+/* Escenario recomendado */
+.escenario-card {
+  background:var(--card); border:1px solid var(--borde); border-radius:14px; overflow:hidden; margin-bottom:24px;
+  border-left:4px solid var(--verde);
+}
+.escenario-header { background:var(--verde-bg); padding:14px 20px; border-bottom:1px solid var(--borde); }
+.escenario-header h3 { font-size:.9rem; font-weight:800; color:var(--verde); }
+.escenario-body { padding:18px 20px; display:flex; flex-direction:column; gap:12px; }
+.escenario-item { display:flex; gap:12px; align-items:flex-start; }
+.escenario-num {
+  width:26px; height:26px; border-radius:50%; background:var(--azul-mid); color:#fff;
+  font-size:.72rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.escenario-text { font-size:.82rem; color:var(--secundario); line-height:1.6; font-weight:500; }
+.escenario-text strong { color:var(--texto); }
+
+/* ROI card */
+.roi-card {
+  background:linear-gradient(135deg, var(--azul-dark), var(--azul-mid));
+  border-radius:14px; padding:22px 24px; margin-bottom:24px; color:#fff;
+}
+.roi-title { font-size:.95rem; font-weight:800; margin-bottom:14px; }
+.roi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.roi-item { background:rgba(255,255,255,.08); border-radius:10px; padding:14px; text-align:center; }
+.roi-val { font-size:1.4rem; font-weight:800; color:var(--azul-accent); }
+.roi-label { font-size:.68rem; color:rgba(255,255,255,.6); margin-top:4px; font-weight:500; }
+
+/* Footer */
+footer { max-width:920px; margin:20px auto 0; padding:0 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+.footer-note { font-size:.72rem; color:var(--gris); font-weight:500; }
+.footer-badge { font-size:.7rem; color:var(--gris); font-weight:700; background:var(--card); border:1px solid var(--borde); border-radius:20px; padding:4px 12px; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  header { padding:18px 16px; flex-direction:column; align-items:flex-start; }
+  .container { padding:0 14px; }
+  .mercado-grid { grid-template-columns:1fr; }
+  .sliders-2col { grid-template-columns:1fr; }
+  .calc-results { grid-template-columns:repeat(2,1fr); }
+  .result-cell:nth-child(2) { border-right:none; }
+  .renta-grid { grid-template-columns:1fr; }
+  .roi-grid { grid-template-columns:1fr; }
+  .fase-row { grid-template-columns:2fr 1fr 1fr; }
+  .fase-row > *:nth-child(4), .fase-row > *:nth-child(5) { display:none; }
+  footer { padding:0 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <div class="divider"></div>
+    <div class="header-titles">
+      <h1>Modelo de Negocio — Club Berimbau</h1>
+      <p>Documento interno · Proyección financiera y pricing por fases</p>
+    </div>
+  </div>
+  <div class="confidencial-badge">🔒 CONFIDENCIAL EXCELENTIA</div>
+</header>
+
+<div class="container">
+
+  <!-- REFERENCIAS DE MERCADO -->
+  <div class="section-title">📊 Referencias de mercado 2026</div>
+  <div class="mercado-grid">
+    <div class="mercado-card">
+      <div class="m-label">Sistema productizado (cobranza/dashboard)</div>
+      <div class="m-val">$30,000 – $80,000 MXN</div>
+      <div class="m-src">gabrielneuman.com · scope cerrado</div>
+    </div>
+    <div class="mercado-card">
+      <div class="m-label">Proyecto a medida con IA + integraciones</div>
+      <div class="m-val">$80,000 – $250,000 MXN</div>
+      <div class="m-src">duotach.com · mercado México 2026</div>
+    </div>
+    <div class="mercado-card">
+      <div class="m-label">Renta mensual plataforma SaaS automatización</div>
+      <div class="m-val">$500 – $2,500 MXN/mes</div>
+      <div class="m-src">noticiasdelicias.mx · referencia PyME</div>
+    </div>
+  </div>
+
+  <!-- COSTOS OPERATIVOS -->
+  <div class="section-title">💸 Costos operativos ExcelentIA</div>
+  <div class="tabla-card">
+    <div class="tabla-header">🔧 Licencias y herramientas mensuales</div>
+    <table>
+      <thead>
+        <tr><th>Herramienta</th><th>Uso</th><th>Costo USD</th><th>Costo MXN*</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-bold">n8n Cloud</td><td>Automatizaciones y workflows</td><td>$50 USD</td><td id="t-n8n">$1,000</td></tr>
+        <tr><td class="td-bold">Claude API (Haiku)</td><td>Procesamiento IA / agentes</td><td>$30 USD</td><td id="t-claude">$600</td></tr>
+        <tr><td class="td-bold">YCloud WhatsApp</td><td>Avisos y agente WA (Fase 7+)</td><td>$40 USD</td><td id="t-ycloud">$800</td></tr>
+        <tr><td class="td-bold">Google Workspace</td><td>Gmail, Drive, Sheets</td><td>Incluido</td><td>—</td></tr>
+        <tr class="total-row"><td>Total operativo mensual</td><td></td><td class="td-green">$120 USD</td><td class="td-green" id="t-total">$2,400</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tabla-card">
+    <div class="tabla-header">⏱️ Horas de desarrollo estimadas</div>
+    <table>
+      <thead>
+        <tr><th>Fase</th><th>Descripción</th><th>Horas est.</th><th>Costo int.*</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-bold">Fases 1–2</td><td>Dashboard v1 + datos iniciales</td><td>40 hrs</td><td id="h-12">$32,000</td></tr>
+        <tr><td class="td-bold">Fases 3–4</td><td>Conexión BD + sincronización</td><td>25 hrs</td><td id="h-34">$20,000</td></tr>
+        <tr><td class="td-bold">Fases 5–6</td><td>Correo corporativo + puesta en marcha</td><td>20 hrs</td><td id="h-56">$16,000</td></tr>
+        <tr><td class="td-bold">Fases 7–8</td><td>WhatsApp avisos automáticos</td><td>30 hrs</td><td id="h-78">$24,000</td></tr>
+        <tr><td class="td-bold">Fase 9</td><td>Agente conversacional WhatsApp</td><td>35 hrs</td><td id="h-9">$28,000</td></tr>
+        <tr class="total-row"><td>Total</td><td></td><td>150 hrs</td><td id="h-total">$120,000</td></tr>
+      </tbody>
+    </table>
+    <div style="padding:10px 16px;font-size:.7rem;color:var(--gris);font-weight:500;background:var(--fondo);">
+      * Costo hora interno ajustable en la calculadora
+    </div>
+  </div>
+
+  <!-- CALCULADORA -->
+  <div class="section-title">🧮 Calculadora de rentabilidad</div>
+  <div class="calc-card">
+    <div class="calc-header">
+      <div>
+        <div class="calc-header-title">🧮 Proyección interactiva — Club Berimbau</div>
+        <div class="calc-header-sub">Ajusta los sliders para explorar escenarios de precio y margen</div>
+      </div>
+      <div class="tc-badge">TC: $<span id="lbl-tc-badge">20.00</span> MXN/USD</div>
+    </div>
+
+    <!-- Sliders globales -->
+    <div class="calc-sliders">
+      <div class="sliders-2col">
+        <div class="slider-group">
+          <label>Tipo de cambio MXN/USD <span id="lbl-tc">$20.00</span></label>
+          <input type="range" min="17" max="22" value="20" step="0.5" id="sl-tc" oninput="calcular()">
+        </div>
+        <div class="slider-group">
+          <label>Costo hora interno (MXN) <span id="lbl-hr">$800</span></label>
+          <input type="range" min="400" max="1500" value="800" step="50" id="sl-hr" oninput="calcular()">
+        </div>
+        <div class="slider-group">
+          <label>Markup implementación <span id="lbl-markup">120%</span></label>
+          <input type="range" min="40" max="300" value="120" step="5" id="sl-markup" oninput="calcular()">
+        </div>
+        <div class="slider-group">
+          <label>Renta mensual básica (MXN) <span id="lbl-renta">$4,500</span></label>
+          <input type="range" min="1500" max="12000" value="4500" step="250" id="sl-renta" oninput="calcular()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados globales -->
+    <div class="calc-results">
+      <div class="result-cell">
+        <div class="result-label">Ingreso total implementación</div>
+        <div class="result-val val-blue" id="r-ingreso-total">$0</div>
+        <div class="result-sub">Todas las fases</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Costo total nuestro</div>
+        <div class="result-val val-red" id="r-costo-total">$0</div>
+        <div class="result-sub">Horas + operativo</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Utilidad implementación</div>
+        <div class="result-val val-green" id="r-utilidad">$0</div>
+        <div class="result-sub">MXN bruto</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Margen bruto</div>
+        <div class="result-val val-amber" id="r-margen">0%</div>
+        <div class="result-sub">Sobre precio cliente</div>
+      </div>
+    </div>
+
+    <!-- Sliders por fase -->
+    <div class="fases-sliders">
+      <div style="font-size:.78rem;font-weight:800;color:var(--azul-mid);margin-bottom:16px;">Precio por fase al cliente (ajustable)</div>
+
+      <div class="fase-slider-item">
+        <div class="fase-slider-header">
+          <span class="fase-slug">Fases 1–2 · Dashboard v1 + datos</span>
+          <div class="fase-prices">
+            <span class="fase-precio-val" id="fp-12">$35,000</span>
+            <span class="fase-costo-val" id="fc-12">costo: $16,000</span>
+            <span class="fase-margen-pill" id="fm-12">54%</span>
+          </div>
+        </div>
+        <input type="range" min="15000" max="80000" value="35000" step="1000" id="sl-f12" oninput="calcular()">
+      </div>
+
+      <div class="fase-slider-item">
+        <div class="fase-slider-header">
+          <span class="fase-slug">Fases 3–4 · Conexión BD + sincronización</span>
+          <div class="fase-prices">
+            <span class="fase-precio-val" id="fp-34">$25,000</span>
+            <span class="fase-costo-val" id="fc-34">costo: $10,000</span>
+            <span class="fase-margen-pill" id="fm-34">60%</span>
+          </div>
+        </div>
+        <input type="range" min="10000" max="60000" value="25000" step="1000" id="sl-f34" oninput="calcular()">
+      </div>
+
+      <div class="fase-slider-item">
+        <div class="fase-slider-header">
+          <span class="fase-slug">Fases 5–6 · Correo corporativo + puesta en marcha</span>
+          <div class="fase-prices">
+            <span class="fase-precio-val" id="fp-56">$15,000</span>
+            <span class="fase-costo-val" id="fc-56">costo: $6,400</span>
+            <span class="fase-margen-pill" id="fm-56">57%</span>
+          </div>
+        </div>
+        <input type="range" min="8000" max="40000" value="15000" step="1000" id="sl-f56" oninput="calcular()">
+      </div>
+
+      <div class="fase-slider-item">
+        <div class="fase-slider-header">
+          <span class="fase-slug">Fases 7–8 · WhatsApp avisos automáticos</span>
+          <div class="fase-prices">
+            <span class="fase-precio-val" id="fp-78">$30,000</span>
+            <span class="fase-costo-val" id="fc-78">costo: $12,000</span>
+            <span class="fase-margen-pill" id="fm-78">60%</span>
+          </div>
+        </div>
+        <input type="range" min="15000" max="80000" value="30000" step="1000" id="sl-f78" oninput="calcular()">
+      </div>
+
+      <div class="fase-slider-item">
+        <div class="fase-slider-header">
+          <span class="fase-slug">Fase 9 · Agente conversacional WhatsApp</span>
+          <div class="fase-prices">
+            <span class="fase-precio-val" id="fp-9">$40,000</span>
+            <span class="fase-costo-val" id="fc-9">costo: $14,000</span>
+            <span class="fase-margen-pill" id="fm-9">65%</span>
+          </div>
+        </div>
+        <input type="range" min="20000" max="100000" value="40000" step="1000" id="sl-f9" oninput="calcular()">
+      </div>
+    </div>
+
+    <!-- Renta mensual -->
+    <div class="renta-grid">
+      <div class="renta-item">
+        <div class="renta-label">📬 Paquete Básico (Fases 1–6)</div>
+        <div class="renta-val" id="r-renta-basica">$4,500 MXN/mes</div>
+        <div class="renta-sub" id="r-renta-basica-sub">Margen: $2,100 | 47%</div>
+      </div>
+      <div class="renta-item">
+        <div class="renta-label">🚀 Paquete Completo (todas las fases)</div>
+        <div class="renta-val" id="r-renta-completa">$8,500 MXN/mes</div>
+        <div class="renta-sub" id="r-renta-completa-sub">Margen: $4,700 | 55%</div>
+      </div>
+    </div>
+
+    <!-- Tabla resumen por fase -->
+    <div class="fases-tabla">
+      <div class="fase-row header">
+        <span>Fase</span><span>Precio cliente</span><span>Costo nuestro</span><span>Utilidad</span><span>Margen</span>
+      </div>
+      <div class="fase-row" id="fr-12">
+        <div class="fase-nombre">Fases 1–2 · Dashboard v1 + datos</div>
+        <div class="fase-num blue" id="frt-p12">$35,000</div>
+        <div class="fase-num" id="frt-c12">$16,000</div>
+        <div class="fase-num green" id="frt-u12">$19,000</div>
+        <div><span class="margen-pill pill-green" id="frt-m12">54%</span></div>
+      </div>
+      <div class="fase-row" id="fr-34">
+        <div class="fase-nombre">Fases 3–4 · Conexión BD + sincronización</div>
+        <div class="fase-num blue" id="frt-p34">$25,000</div>
+        <div class="fase-num" id="frt-c34">$10,000</div>
+        <div class="fase-num green" id="frt-u34">$15,000</div>
+        <div><span class="margen-pill pill-green" id="frt-m34">60%</span></div>
+      </div>
+      <div class="fase-row" id="fr-56">
+        <div class="fase-nombre">Fases 5–6 · Correo + puesta en marcha</div>
+        <div class="fase-num blue" id="frt-p56">$15,000</div>
+        <div class="fase-num" id="frt-c56">$6,400</div>
+        <div class="fase-num green" id="frt-u56">$8,600</div>
+        <div><span class="margen-pill pill-green" id="frt-m56">57%</span></div>
+      </div>
+      <div class="fase-row" id="fr-78">
+        <div class="fase-nombre">Fases 7–8 · WhatsApp avisos automáticos</div>
+        <div class="fase-num blue" id="frt-p78">$30,000</div>
+        <div class="fase-num" id="frt-c78">$12,000</div>
+        <div class="fase-num green" id="frt-u78">$18,000</div>
+        <div><span class="margen-pill pill-green" id="frt-m78">60%</span></div>
+      </div>
+      <div class="fase-row" id="fr-9">
+        <div class="fase-nombre">Fase 9 · Agente conversacional WhatsApp</div>
+        <div class="fase-num blue" id="frt-p9">$40,000</div>
+        <div class="fase-num" id="frt-c9">$14,000</div>
+        <div class="fase-num green" id="frt-u9">$26,000</div>
+        <div><span class="margen-pill pill-green" id="frt-m9">65%</span></div>
+      </div>
+      <div class="fase-row total-fase">
+        <div class="fase-nombre td-bold">TOTAL IMPLEMENTACIÓN</div>
+        <div class="fase-num" style="color:var(--azul-accent);font-size:.9rem" id="frt-ptotal">$145,000</div>
+        <div class="fase-num" id="frt-ctotal">$58,400</div>
+        <div class="fase-num" style="color:var(--verde);font-size:.9rem" id="frt-utotal">$86,600</div>
+        <div><span class="margen-pill pill-blue" id="frt-mtotal">60%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESCENARIO RECOMENDADO -->
+  <div class="section-title">🎯 Escenario recomendado para Berimbau</div>
+  <div class="escenario-card">
+    <div class="escenario-header"><h3>🎯 Estrategia de cierre — Piloto → Expansión</h3></div>
+    <div class="escenario-body">
+      <div class="escenario-item">
+        <div class="escenario-num">1</div>
+        <div class="escenario-text"><strong>Cobro inmediato Fases 1–2:</strong> $25,000–$30,000 MXN como precio piloto. Descuento por ser primer cliente de la plataforma. Ya están prácticamente entregadas — se formaliza como "entrega inicial" al firmar contrato.</div>
+      </div>
+      <div class="escenario-item">
+        <div class="escenario-num">2</div>
+        <div class="escenario-text"><strong>Renta mensual desde mes 2:</strong> $4,500 MXN/mes paquete básico. Incluye plataforma activa, soporte, ajustes menores y licencias de herramientas.</div>
+      </div>
+      <div class="escenario-item">
+        <div class="escenario-num">3</div>
+        <div class="escenario-text"><strong>Upgrade por fases:</strong> conforme el club valide resultados y amplíe el alcance, se van sumando fases al contrato. Cada fase tiene precio fijo acordado desde el inicio.</div>
+      </div>
+      <div class="escenario-item">
+        <div class="escenario-num">4</div>
+        <div class="escenario-text"><strong>Argumento ROI:</strong> Si Nancy dedica 20 hrs/mes filtrando Excel y haciendo seguimiento manual, al costo de $100 MXN/hr = <strong>$2,000 MXN/mes en ineficiencia</strong>, sin contar lo que el club deja de recuperar por adeudos no gestionados a tiempo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROI PROYECTADO -->
+  <div class="roi-card">
+    <div class="roi-title">📈 Proyección de ingresos ExcelentIA — Berimbau</div>
+    <div class="roi-grid">
+      <div class="roi-item">
+        <div class="roi-val" id="roi-ano1">$0</div>
+        <div class="roi-label">Año 1 (Fases 1–6 + 10 meses renta básica)</div>
+      </div>
+      <div class="roi-item">
+        <div class="roi-val" id="roi-ano2">$0</div>
+        <div class="roi-label">Año 2 (Fases 7–9 + 12 meses renta completa)</div>
+      </div>
+      <div class="roi-item">
+        <div class="roi-val" id="roi-total">$0</div>
+        <div class="roi-label">Total acumulado a 24 meses</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-note">ExcelentIA © 2026 · excelentia.com.mx · Documento interno</div>
+  <div class="footer-badge">🔒 Uso exclusivo ExcelentIA</div>
+</footer>
+
+<script>
+function fmt(n){ return '$' + Math.round(n).toLocaleString('es-MX'); }
+function pct(n){ return Math.round(n) + '%'; }
+
+function setSliderFill(el){
+  const min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
+  const pct = ((val - min) / (max - min)) * 100;
+  el.style.background = `linear-gradient(to right, var(--azul-accent) 0%, var(--azul-accent) ${pct}%, #dde1e9 ${pct}%, #dde1e9 100%)`;
+}
+
+// Costos de horas por fase
+const HORAS = { f12: 40, f34: 25, f56: 20, f78: 30, f9: 35 };
+// Costos fijos USD
+const COSTOS_USD = { n8n: 50, claude: 30, ycloud: 40 };
+
+function calcular(){
+  const tc = parseFloat(document.getElementById('sl-tc').value);
+  const hr = parseFloat(document.getElementById('sl-hr').value);
+  const markup = parseFloat(document.getElementById('sl-markup').value);
+  const renta = parseFloat(document.getElementById('sl-renta').value);
+  const rentaCompleta = renta * 1.89; // ratio fijo completa/basica
+
+  // Actualizar labels globales
+  document.getElementById('lbl-tc').textContent = '$' + tc.toFixed(2);
+  document.getElementById('lbl-tc-badge').textContent = tc.toFixed(2);
+  document.getElementById('lbl-hr').textContent = fmt(hr);
+  document.getElementById('lbl-markup').textContent = markup + '%';
+  document.getElementById('lbl-renta').textContent = fmt(renta);
+
+  // Actualizar tabla costos operativos
+  document.getElementById('t-n8n').textContent = fmt(COSTOS_USD.n8n * tc);
+  document.getElementById('t-claude').textContent = fmt(COSTOS_USD.claude * tc);
+  document.getElementById('t-ycloud').textContent = fmt(COSTOS_USD.ycloud * tc);
+  const totalUSD = COSTOS_USD.n8n + COSTOS_USD.claude + COSTOS_USD.ycloud;
+  document.getElementById('t-total').textContent = fmt(totalUSD * tc);
+
+  // Actualizar tabla horas
+  const costoOpMensual = totalUSD * tc;
+  document.getElementById('h-12').textContent = fmt(HORAS.f12 * hr);
+  document.getElementById('h-34').textContent = fmt(HORAS.f34 * hr);
+  document.getElementById('h-56').textContent = fmt(HORAS.f56 * hr);
+  document.getElementById('h-78').textContent = fmt(HORAS.f78 * hr);
+  document.getElementById('h-9').textContent = fmt(HORAS.f9 * hr);
+  const totalHrs = Object.values(HORAS).reduce((a,b)=>a+b,0);
+  document.getElementById('h-total').textContent = fmt(totalHrs * hr);
+
+  // Precios de cada fase (slider)
+  const precios = {
+    f12: parseFloat(document.getElementById('sl-f12').value),
+    f34: parseFloat(document.getElementById('sl-f34').value),
+    f56: parseFloat(document.getElementById('sl-f56').value),
+    f78: parseFloat(document.getElementById('sl-f78').value),
+    f9:  parseFloat(document.getElementById('sl-f9').value),
+  };
+
+  // Costos de cada fase = horas * costo/hr
+  const costos = {};
+  Object.keys(HORAS).forEach(k => { costos[k] = HORAS[k] * hr; });
+
+  // Actualizar sliders de fases
+  const faseKeys = ['f12','f34','f56','f78','f9'];
+  const faseIds  = ['12','34','56','78','9'];
+  faseKeys.forEach((k, i) => {
+    const id = faseIds[i];
+    const precio = precios[k];
+    const costo  = costos[k];
+    const util   = precio - costo;
+    const margen = precio > 0 ? (util / precio) * 100 : 0;
+    document.getElementById('fp-'+id).textContent = fmt(precio);
+    document.getElementById('fc-'+id).textContent = 'costo: ' + fmt(costo);
+    document.getElementById('fm-'+id).textContent = pct(margen);
+    // tabla resumen
+    document.getElementById('frt-p'+id).textContent = fmt(precio);
+    document.getElementById('frt-c'+id).textContent = fmt(costo);
+    document.getElementById('frt-u'+id).textContent = fmt(util);
+    const pill = document.getElementById('frt-m'+id);
+    pill.textContent = pct(margen);
+    pill.className = 'margen-pill ' + (margen >= 55 ? 'pill-green' : margen >= 40 ? 'pill-amber' : 'pill-blue');
+  });
+
+  // Totales
+  const precioTotal = Object.values(precios).reduce((a,b)=>a+b,0);
+  const costoTotal  = Object.values(costos).reduce((a,b)=>a+b,0);
+  const utilTotal   = precioTotal - costoTotal;
+  const margenTotal = precioTotal > 0 ? (utilTotal / precioTotal) * 100 : 0;
+
+  document.getElementById('frt-ptotal').textContent = fmt(precioTotal);
+  document.getElementById('frt-ctotal').textContent = fmt(costoTotal);
+  document.getElementById('frt-utotal').textContent = fmt(utilTotal);
+  document.getElementById('frt-mtotal').textContent = pct(margenTotal);
+
+  // Resultados globales calculadora
+  document.getElementById('r-ingreso-total').textContent = fmt(precioTotal);
+  document.getElementById('r-costo-total').textContent = fmt(costoTotal);
+  document.getElementById('r-utilidad').textContent = fmt(utilTotal);
+  document.getElementById('r-margen').textContent = pct(margenTotal);
+
+  // Renta mensual
+  const costoRentaBasica = costoOpMensual * 0.6 + 500; // op parcial + soporte
+  const costoRentaCompleta = costoOpMensual + 800;
+  const margenRentaB = ((renta - costoRentaBasica) / renta) * 100;
+  const rentaC = Math.round(renta * 1.89 / 250) * 250;
+  const margenRentaC = ((rentaC - costoRentaCompleta) / rentaC) * 100;
+
+  document.getElementById('r-renta-basica').textContent = fmt(renta) + ' MXN/mes';
+  document.getElementById('r-renta-basica-sub').textContent = `Margen: ${fmt(renta - costoRentaBasica)} | ${pct(margenRentaB)}`;
+  document.getElementById('r-renta-completa').textContent = fmt(rentaC) + ' MXN/mes';
+  document.getElementById('r-renta-completa-sub').textContent = `Margen: ${fmt(rentaC - costoRentaCompleta)} | ${pct(margenRentaC)}`;
+
+  // ROI proyectado
+  const fases126 = precios.f12 + precios.f34 + precios.f56;
+  const ano1 = fases126 + (renta * 10);
+  const fases789 = precios.f78 + precios.f9;
+  const ano2 = fases789 + (rentaC * 12);
+  document.getElementById('roi-ano1').textContent = fmt(ano1);
+  document.getElementById('roi-ano2').textContent = fmt(ano2);
+  document.getElementById('roi-total').textContent = fmt(ano1 + ano2);
+
+  // Fill sliders
+  document.querySelectorAll('input[type=range]').forEach(setSliderFill);
+}
+
+// Init
+calcular();
+</script>
+</body>
+</html>
