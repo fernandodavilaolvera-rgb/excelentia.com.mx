@@ -35,8 +35,6 @@ nav{background:var(--header-grad);border-bottom:2px solid var(--header-accent);p
 .nav-link{font-size:12px;font-weight:500;color:rgba(255,255,255,0.75);text-decoration:none;padding:7px 12px;border-radius:7px;transition:background .15s;}
 .nav-link:hover{background:rgba(255,255,255,0.12);color:#fff;}
 
-
-
 /* STATS */
 .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-bottom:1px solid var(--border);}
 .stat{padding:16px 20px;border-right:1px solid var(--border);text-align:center;}
@@ -60,7 +58,7 @@ nav{background:var(--header-grad);border-bottom:2px solid var(--header-accent);p
 .main{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 24px 40px;}
 .col{display:flex;flex-direction:column;gap:12px;}
 
-/* FOLDER CARD */
+/* FOLDER CARD (top-level) */
 .folder-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:box-shadow .15s;}
 .folder-card:hover{box-shadow:0 2px 14px rgba(26,58,107,0.09);}
 .folder-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--card-head);cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:background .12s;}
@@ -70,26 +68,24 @@ nav{background:var(--header-grad);border-bottom:2px solid var(--header-accent);p
 .folder-info{flex:1;min-width:0;}
 .folder-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .folder-path{font-size:10px;color:var(--text3);font-weight:500;margin-top:1px;font-family:monospace;}
-.folder-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.folder-count{font-size:10px;font-weight:700;background:var(--accent-dark);color:#fff;padding:3px 9px;border-radius:12px;}
-.chevron{font-size:15px;color:var(--text3);transition:transform .2s;}
+.chevron{font-size:15px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
 .folder-head.open .chevron{transform:rotate(180deg);}
-
 .folder-body{display:none;}
 .folder-body.open{display:block;}
+.folder-body-inner{padding:6px 10px 10px;}
 
-/* SUBGROUPS */
-.subgroup{border-bottom:1px solid var(--border);}
-.subgroup:last-child{border-bottom:none;}
-.subgroup-head{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;background:transparent;transition:background .12s;user-select:none;}
-.subgroup-head:hover{background:var(--bg);}
-.subgroup-ico{font-size:14px;color:var(--accent);}
-.subgroup-label{font-size:10px;font-weight:700;color:var(--text2);flex:1;text-transform:uppercase;letter-spacing:.07em;}
-.subgroup-cnt{font-size:10px;color:var(--text3);background:var(--bg);border:1px solid var(--border);padding:1px 7px;border-radius:10px;font-weight:600;}
-.sub-chev{font-size:13px;color:var(--text3);transition:transform .2s;}
-.subgroup-head.open .sub-chev{transform:rotate(180deg);}
-.subgroup-files{display:none;padding:4px 10px 10px;}
-.subgroup-files.open{display:block;}
+/* ── SUBCARPETAS ────────────────────────────────── */
+.sub-folder{margin:3px 0;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+.sub-folder-head{display:flex;align-items:center;gap:8px;padding:7px 11px;background:#eef3fb;cursor:pointer;transition:background .12s;user-select:none;}
+.sub-folder-head:hover{background:var(--hover-bg);}
+.sub-folder-head.open{background:var(--hover-bg);}
+.sub-folder-icon{font-size:14px;color:var(--accent);flex-shrink:0;}
+.sub-folder-name{font-size:11px;font-weight:700;flex:1;color:var(--text);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sub-folder-cnt{font-size:10px;color:var(--text3);background:var(--bg);border:1px solid var(--border);padding:1px 7px;border-radius:10px;font-weight:600;flex-shrink:0;}
+.sub-folder-chev{font-size:12px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+.sub-folder-head.open .sub-folder-chev{transform:rotate(90deg);}
+.sub-folder-body{display:none;padding:5px 6px 6px 14px;border-top:1px solid var(--border);background:rgba(74,159,212,0.02);}
+.sub-folder-body.open{display:block;}
 
 /* FILE ITEMS */
 .file-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;cursor:pointer;text-decoration:none;transition:background .12s;border:1px solid transparent;}
@@ -115,6 +111,7 @@ nav{background:var(--header-grad);border-bottom:2px solid var(--header-accent);p
 .ftab.active{background:var(--accent-dark);color:#fff;border-color:var(--accent-dark);}
 .ftab.active .ftab-label{opacity:.7;}
 .ftab.zero{opacity:0.35;pointer-events:none;}
+
 .status-wrap{padding:48px 24px;text-align:center;color:var(--text3);grid-column:1/-1;}
 .spinner{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -131,10 +128,6 @@ footer{border-top:1px solid var(--border);padding:14px 24px;display:flex;align-i
 @media(max-width:640px){
   nav,footer{padding:0 14px;}
   nav{height:52px;}
-  .logo-box{min-height:44px;min-width:68px;}
-  .logo-box img{height:30px;}
-  .hero{padding:20px 16px 24px;}
-  .hero-title{font-size:20px;}
   .stats-strip{grid-template-columns:repeat(2,1fr);}
   .stat:nth-child(2){border-right:none;}
   .stat:nth-child(3){border-top:1px solid var(--border);}
@@ -143,6 +136,8 @@ footer{border-top:1px solid var(--border);padding:14px 24px;display:flex;align-i
   .filter-pills{display:none;}
   .main{grid-template-columns:1fr;padding:12px 14px 32px;}
   footer{padding:12px 14px;flex-direction:column;gap:6px;text-align:center;}
+  .folder-tabs{gap:3px;}
+  .ftab{width:40px;}
 }
 </style>
 </head>
@@ -158,8 +153,6 @@ footer{border-top:1px solid var(--border);padding:14px 24px;display:flex;align-i
     <a class="nav-link" href="https://github.com/fernandodavilaolvera-rgb/excelentia.com.mx" target="_blank">GitHub</a>
   </div>
 </nav>
-
-
 
 <div class="stats-strip">
   <div class="stat"><div class="stat-num" id="sTotal">—</div><div class="stat-label">Archivos</div></div>
@@ -194,27 +187,28 @@ footer{border-top:1px solid var(--border);padding:14px 24px;display:flex;align-i
 </footer>
 
 <script>
-const REPO   = 'fernandodavilaolvera-rgb/excelentia.com.mx';
-const BRANCH = 'main';
-const BASE   = 'https://excelentia.com.mx';
+const REPO    = 'fernandodavilaolvera-rgb/excelentia.com.mx';
+const BRANCH  = 'main';
+const BASE    = 'https://excelentia.com.mx';
 const EXCLUDE = ['.git', 'node_modules'];
 const IMG_EXTS = ['png','jpg','jpeg','gif','svg','webp','ico'];
 
 const FOLDER_CFG = {
-  '':            { label:'Raíz del sitio',      icon:'🌐', desc:'/' },
-  'assets':      { label:'Assets / Imágenes',   icon:'🖼️', desc:'/assets/' },
-  'agentes':     { label:'Agentes IA',           icon:'🤖', desc:'/agentes/' },
-  'clientes':    { label:'Clientes',             icon:'🏢', desc:'/clientes/' },
-  'rediceberg':  { label:'Ventana al Mundo',     icon:'🪟', desc:'/rediceberg/' },
-  'herramientas':{ label:'Herramientas',         icon:'🛠️', desc:'/herramientas/' },
-  'ferrock':     { label:'Ferrock',              icon:'📁', desc:'/ferrock/' },
-  'legal':       { label:'Legal',                icon:'📄', desc:'/legal/' },
-  'forms':       { label:'Formularios',          icon:'📋', desc:'/forms/' },
+  '':             { label:'Raíz del sitio',   icon:'🌐', desc:'/' },
+  'assets':       { label:'Assets / Imágenes',icon:'🖼️', desc:'/assets/' },
+  'agentes':      { label:'Agentes IA',        icon:'🤖', desc:'/agentes/' },
+  'clientes':     { label:'Clientes',          icon:'🏢', desc:'/clientes/' },
+  'rediceberg':   { label:'Ventana al Mundo',  icon:'🪟', desc:'/rediceberg/' },
+  'herramientas': { label:'Herramientas',      icon:'🛠️', desc:'/herramientas/' },
+  'ferrock':      { label:'Ferrock',           icon:'📁', desc:'/ferrock/' },
+  'legal':        { label:'Legal',             icon:'📄', desc:'/legal/' },
+  'forms':        { label:'Formularios',       icon:'📋', desc:'/forms/' },
 };
 
 let allFiles  = [];
 let activeExt = 'all';
 
+/* ── UTILIDADES ─────────────────────────────────── */
 function getExt(name) {
   const p = name.split('.');
   return p.length > 1 ? p.pop().toLowerCase() : '';
@@ -239,7 +233,6 @@ function fileUrl(path) {
   }
   return folder ? `${BASE}/${folder}/${name}` : `${BASE}/${name}`;
 }
-
 function matchExt(ext) {
   if (activeExt === 'all')   return true;
   if (activeExt === 'html')  return ext === 'html';
@@ -248,18 +241,22 @@ function matchExt(ext) {
   return true;
 }
 
+let _uid = 0;
+function uid() { return 'fid' + (++_uid); }
+
+/* ── FILTROS GLOBALES ───────────────────────────── */
 function setExt(el) {
   document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   activeExt = el.dataset.ext;
   doFilter();
 }
-
 function doFilter() {
   const q = document.getElementById('search').value.trim().toLowerCase();
   renderAll(q);
 }
 
+/* ── MAPA DE CARPETAS TOP-LEVEL ─────────────────── */
 function buildFolderMap(files) {
   const map = {};
   files.forEach(f => {
@@ -273,57 +270,36 @@ function buildFolderMap(files) {
   return map;
 }
 
-function groupBySubtype(files) {
-  const html = [], imgs = [], others = [];
+/* ── ÁRBOL RECURSIVO ────────────────────────────── */
+/*
+ * buildNestedTree: dado un arreglo de archivos y un prefijo de ruta,
+ * separa los archivos que viven DIRECTAMENTE en esa ruta de los que
+ * están en subcarpetas, agrupando los segundos por nombre de subcarpeta.
+ *
+ * Ejemplo con prefix = 'agentes/eco-ia':
+ *   'agentes/eco-ia/index.html'              → tree.files
+ *   'agentes/eco-ia/assets/logo.png'         → tree.folders['assets']
+ *   'agentes/eco-ia/doctores/dr-andres/x.html'→ tree.folders['doctores']
+ */
+function buildNestedTree(files, prefix) {
+  const tree = { files: [], folders: {} };
   files.forEach(f => {
-    const name = f.path.split('/').pop();
-    const ext  = getExt(name);
-    if (ext === 'html')   html.push(f);
-    else if (isImg(ext))  imgs.push(f);
-    else                  others.push(f);
+    const relPath = prefix ? f.path.slice(prefix.length + 1) : f.path;
+    const parts   = relPath.split('/');
+    if (parts.length === 1) {
+      tree.files.push(f);
+    } else {
+      const sub = parts[0];
+      if (!tree.folders[sub]) tree.folders[sub] = [];
+      tree.folders[sub].push(f);
+    }
   });
-  return { html, imgs, others };
+  return tree;
 }
 
-let _uid = 0;
-function uid() { return 'id' + (++_uid); }
-
-/* Filtra y re-renderiza los archivos dentro de una carpeta abierta */
-function applyFolderTab(btn, bodyId) {
-  const tab    = btn.dataset.tab;
-  const body   = document.getElementById(bodyId);
-  const head   = body.previousElementSibling;
-  const isOpen   = body.classList.contains('open');
-  const isActive = btn.classList.contains('active');
-
-  /* Si el tab ya estaba activo y la carpeta está abierta → cerrar */
-  if (isActive && isOpen) {
-    body.classList.remove('open');
-    head.classList.remove('open');
-    return;
-  }
-
-  btn.closest('.folder-tabs').querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  /* Abrir la carpeta si está colapsada */
-  if (!isOpen) {
-    body.classList.add('open');
-    head.classList.add('open');
-  }
-
-  body.querySelectorAll('.file-item').forEach(item => {
-    const ext = item.dataset.ext || '';
-    let show = false;
-    if (tab === 'all')   show = true;
-    if (tab === 'html')  show = ext === 'html';
-    if (tab === 'img')   show = IMG_EXTS.includes(ext);
-    if (tab === 'other') show = ext !== 'html' && !IMG_EXTS.includes(ext);
-    item.style.display = show ? '' : 'none';
-  });
-}
-
+/* renderFileList: lista plana de archivos (hojas del árbol) */
 function renderFileList(files) {
+  if (!files.length) return '';
   return files.map(f => {
     const name = f.path.split('/').pop();
     const ext  = getExt(name);
@@ -336,18 +312,98 @@ function renderFileList(files) {
   }).join('');
 }
 
+/*
+ * renderTree: renderiza recursivamente el árbol de una carpeta.
+ * Primero muestra subcarpetas (expandibles), luego archivos directos.
+ */
+function renderTree(files, prefix) {
+  const tree = buildNestedTree(files, prefix);
+  let html   = '';
+
+  // ── Subcarpetas ordenadas alfabéticamente
+  Object.keys(tree.folders).sort().forEach(folderName => {
+    const subFiles  = tree.folders[folderName];
+    const subPrefix = prefix ? `${prefix}/${folderName}` : folderName;
+    const bodyId    = uid();
+    const totalSub  = subFiles.length;
+
+    html += `
+      <div class="sub-folder">
+        <div class="sub-folder-head" onclick="toggleSubfolder(this,'${bodyId}')">
+          <i class="ti ti-folder sub-folder-icon" aria-hidden="true"></i>
+          <span class="sub-folder-name">${folderName}/</span>
+          <span class="sub-folder-cnt">${totalSub}</span>
+          <i class="ti ti-chevron-right sub-folder-chev" aria-hidden="true"></i>
+        </div>
+        <div class="sub-folder-body" id="${bodyId}">
+          ${renderTree(subFiles, subPrefix)}
+        </div>
+      </div>`;
+  });
+
+  // ── Archivos directos en esta ruta
+  html += renderFileList(tree.files);
+  return html;
+}
+
+/* ── TOGGLE SUBCARPETA ──────────────────────────── */
+function toggleSubfolder(head, id) {
+  head.classList.toggle('open');
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ── TAB FILTER POR TIPO ────────────────────────── */
+function applyFolderTab(btn, bodyId) {
+  const tab    = btn.dataset.tab;
+  const body   = document.getElementById(bodyId);
+  const head   = body.previousElementSibling;
+  const isOpen   = body.classList.contains('open');
+  const isActive = btn.classList.contains('active');
+
+  // Si el tab ya activo se vuelve a clicar → cerrar la carpeta
+  if (isActive && isOpen) {
+    body.classList.remove('open');
+    head.classList.remove('open');
+    return;
+  }
+
+  btn.closest('.folder-tabs').querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (!isOpen) {
+    body.classList.add('open');
+    head.classList.add('open');
+  }
+
+  // Mostrar/ocultar archivos individuales
+  body.querySelectorAll('.file-item').forEach(item => {
+    const ext = item.dataset.ext || '';
+    let show = false;
+    if (tab === 'all')   show = true;
+    if (tab === 'html')  show = ext === 'html';
+    if (tab === 'img')   show = IMG_EXTS.includes(ext);
+    if (tab === 'other') show = ext !== 'html' && !IMG_EXTS.includes(ext);
+    item.style.display = show ? '' : 'none';
+  });
+
+  // Ocultar subcarpetas que queden vacías después del filtro
+  body.querySelectorAll('.sub-folder').forEach(sf => {
+    const hasVisible = [...sf.querySelectorAll('.file-item')].some(i => i.style.display !== 'none');
+    sf.style.display = hasVisible ? '' : 'none';
+  });
+}
+
+/* ── RENDER PRINCIPAL ───────────────────────────── */
 function renderAll(q = '') {
-  const grid = document.getElementById('mainGrid');
+  const grid      = document.getElementById('mainGrid');
   const folderMap = buildFolderMap(allFiles);
   const folderKeys = Object.keys(folderMap);
   if (!folderKeys.length) return;
 
-  const PINNED = ['', 'assets']; // siempre arriba, en ese orden
+  const PINNED  = ['', 'assets'];
   const allKeys = [...new Set([...Object.keys(FOLDER_CFG), ...folderKeys])].filter(k => folderMap[k]);
-
-  // Separar: pinned en orden fijo, el resto ordenado alfabético con números al final
-  const pinned = PINNED.filter(k => allKeys.includes(k));
-  const rest   = allKeys
+  const pinned  = PINNED.filter(k => allKeys.includes(k));
+  const rest    = allKeys
     .filter(k => !PINNED.includes(k))
     .sort((a, b) => {
       const aNum = /^\d/.test(a);
@@ -360,36 +416,54 @@ function renderAll(q = '') {
   const cards = [];
 
   sortedKeys.forEach(folder => {
-    const files = folderMap[folder] || [];
+    const files    = folderMap[folder] || [];
     const filtered = files.filter(f => {
       const name = f.path.split('/').pop();
       const ext  = getExt(name);
-      const matchQ = !q || name.toLowerCase().includes(q) || folder.toLowerCase().includes(q);
+      // Buscar en la ruta completa (captura nombres de subcarpetas también)
+      const matchQ = !q || f.path.toLowerCase().includes(q) || folder.toLowerCase().includes(q);
       return matchQ && matchExt(ext);
     });
     if (!filtered.length) return;
 
     const cfg = FOLDER_CFG[folder] || { label: folder || 'Raíz', icon: '📁', desc: `/${folder}/` };
-    const { html, imgs, others } = groupBySubtype(filtered);
 
-    /* Tabs: solo mostrar los que tienen archivos */
-    const tabHtml  = html.length   ? '' : ' zero';
-    const tabImg   = imgs.length   ? '' : ' zero';
-    const tabOther = others.length ? '' : ' zero';
+    // Contar tipos para los tabs
+    let htmlCnt = 0, imgCnt = 0, otherCnt = 0;
+    filtered.forEach(f => {
+      const ext = getExt(f.path.split('/').pop());
+      if (ext === 'html')   htmlCnt++;
+      else if (isImg(ext))  imgCnt++;
+      else                  otherCnt++;
+    });
 
-    cards.push({ cfg, files: filtered, html, imgs, others, count: filtered.length, tabHtml, tabImg, tabOther });
+    cards.push({
+      folder,
+      cfg,
+      files: filtered,
+      count: filtered.length,
+      htmlCnt,
+      imgCnt,
+      otherCnt,
+      tabHtml:  htmlCnt  ? '' : ' zero',
+      tabImg:   imgCnt   ? '' : ' zero',
+      tabOther: otherCnt ? '' : ' zero',
+    });
   });
 
   if (!cards.length) {
-    grid.innerHTML = `<div class="empty-state"><i class="ti ti-search-off" style="font-size:28px;display:block;margin-bottom:8px;" aria-hidden="true"></i>Sin resultados para "<strong>${q}</strong>"</div>`;
+    grid.innerHTML = `<div class="empty-state">
+      <i class="ti ti-search-off" style="font-size:28px;display:block;margin-bottom:8px;" aria-hidden="true"></i>
+      Sin resultados para "<strong>${q}</strong>"
+    </div>`;
     return;
   }
 
   const colA = [], colB = [];
   cards.forEach((c, i) => (i % 2 === 0 ? colA : colB).push(c));
 
-  function colHTML(cards) {
-    return cards.map(c => {
+  function colHTML(cs) {
+    return cs.map(c => {
       const headId = uid();
       const bodyId = uid();
       return `<div class="folder-card">
@@ -401,14 +475,14 @@ function renderAll(q = '') {
           </div>
           <div class="folder-tabs" onclick="event.stopPropagation()">
             <span class="ftab active" data-tab="all"   onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">Todo</span><span class="ftab-num">${c.count}</span></span>
-            <span class="ftab${c.tabHtml}"  data-tab="html"  onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">HTML</span><span class="ftab-num">${c.html.length}</span></span>
-            <span class="ftab${c.tabImg}"   data-tab="img"   onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">IMG</span><span class="ftab-num">${c.imgs.length}</span></span>
-            <span class="ftab${c.tabOther}" data-tab="other" onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">Otros</span><span class="ftab-num">${c.others.length}</span></span>
+            <span class="ftab${c.tabHtml}"  data-tab="html"  onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">HTML</span><span class="ftab-num">${c.htmlCnt}</span></span>
+            <span class="ftab${c.tabImg}"   data-tab="img"   onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">IMG</span><span class="ftab-num">${c.imgCnt}</span></span>
+            <span class="ftab${c.tabOther}" data-tab="other" onclick="applyFolderTab(this,'${bodyId}')"><span class="ftab-label">Otros</span><span class="ftab-num">${c.otherCnt}</span></span>
           </div>
           <span class="chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
         </div>
         <div class="folder-body" id="${bodyId}">
-          <div style="padding:6px 10px 10px;">${renderFileList(c.files)}</div>
+          <div class="folder-body-inner">${renderTree(c.files, c.folder)}</div>
         </div>
       </div>`;
     }).join('');
@@ -425,15 +499,16 @@ function toggleFolder(head, id) {
   document.getElementById(id).classList.toggle('open');
 }
 
+/* ── CARGA INICIAL ──────────────────────────────── */
 async function loadRepo() {
   try {
     const r = await fetch(`https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1`);
     if (!r.ok) throw new Error('GitHub API error ' + r.status);
-    const d = await r.json();
+    const d  = await r.json();
     allFiles = d.tree || [];
     document.getElementById('statusEl').style.display = 'none';
 
-    const visible = allFiles.filter(f => f.type === 'blob' && !EXCLUDE.some(e => f.path.startsWith(e)));
+    const visible      = allFiles.filter(f => f.type === 'blob' && !EXCLUDE.some(e => f.path.startsWith(e)));
     const totalFiles   = visible.length;
     const totalHTML    = visible.filter(f => getExt(f.path.split('/').pop()) === 'html').length;
     const folderMap    = buildFolderMap(allFiles);
