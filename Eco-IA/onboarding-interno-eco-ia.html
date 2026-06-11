@@ -116,6 +116,26 @@ body {
 .card-body { padding: 1.25rem; }
 .card-desc { font-size: 14px; color: var(--muted); line-height: 1.75; margin-bottom: 1.1rem; }
 
+
+/* CAMPOS DE CAPTURA */
+.campo-captura {
+  display: block;
+  width: 100%;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy-mid);
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: .55rem .8rem;
+  margin-top: .4rem;
+  outline: none;
+  transition: border-color .2s;
+}
+.campo-captura:focus { border-color: var(--accent); }
+.campo-captura::placeholder { color: var(--hint); font-weight: 500; }
+
 /* STEP LIST */
 .step-list { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 1rem; }
 .step-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 14px; color: var(--muted); line-height: 1.6; }
@@ -302,15 +322,21 @@ li code {
       <ul class="checklist">
         <li id="li-c4" onclick="toggleCheck('c4')">
           <div class="chk-box" id="box-c4"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <span>Nombre completo con título (ej: Dr. Juan García Pérez)</span>
+          <span style="flex:1">Nombre completo con título (ej: Dr. Juan García Pérez)
+            <input class="campo-captura" type="text" placeholder="Dr. ..." onclick="event.stopPropagation()">
+          </span>
         </li>
         <li id="li-c5" onclick="toggleCheck('c5')">
           <div class="chk-box" id="box-c5"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <span>Especialidad exacta (ej: Cardiología / Ecocardiografía)</span>
+          <span style="flex:1">Especialidad exacta (ej: Cardiología / Ecocardiografía)
+            <input class="campo-captura" type="text" placeholder="Especialidad..." onclick="event.stopPropagation()">
+          </span>
         </li>
         <li id="li-c6" onclick="toggleCheck('c6')">
           <div class="chk-box" id="box-c6"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <span>Correo autorizado para subir estudios — solo uno</span>
+          <span style="flex:1">Correo autorizado para subir estudios — solo uno
+            <input class="campo-captura" type="email" placeholder="correo@ejemplo.com" onclick="event.stopPropagation()">
+          </span>
         </li>
         <li id="li-c7" onclick="toggleCheck('c7')">
           <div class="chk-box" id="box-c7"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -328,9 +354,9 @@ li code {
       <div class="info-box">
         <div class="info-box-title">Cédulas — solo si el doctor lo solicita</div>
         <div class="info-row">
-          <div class="info-item"><span class="info-label">Ced. profesional</span><span class="info-val">Número de 7-8 dígitos</span></div>
-          <div class="info-item"><span class="info-label">Ced. especialidad</span><span class="info-val">Número de 7-8 dígitos</span></div>
-          <div class="info-item"><span class="info-label">CMC</span><span class="info-val">Número de 4 dígitos</span></div>
+          <div class="info-item"><span class="info-label">Ced. profesional (7-8 dígitos)</span><input class="campo-captura" type="text" placeholder="00000000"></div>
+          <div class="info-item"><span class="info-label">Ced. especialidad (7-8 dígitos)</span><input class="campo-captura" type="text" placeholder="00000000"></div>
+          <div class="info-item"><span class="info-label">CMC (4 dígitos)</span><input class="campo-captura" type="text" placeholder="0000"></div>
         </div>
       </div>
       <div class="nota">El <strong>footer_banner.png</strong> lo genera ExcelentIA con los datos del doctor — no se lo pedimos a él.</div>
@@ -351,12 +377,29 @@ li code {
     </div>
     <div class="card-body">
       <p class="card-desc">Este registro es el que el workflow n8n consulta para saber a qué carpeta guardar, qué sub-workflow usar y con qué assets generar el Word.</p>
-      <ul class="step-list">
-        <li><span class="snum">1</span><span>Abrir el Sheet: <strong>00 🩺 Base de Datos — Doctores Eco IA</strong> en Drive</span></li>
-        <li><span class="snum">2</span><span>Agregar una fila nueva al final de la tabla</span></li>
-        <li><span class="snum">3</span><span>Completar las columnas con los datos recibidos en la Fase 2</span></li>
-        <li><span class="snum">4</span><span>En <code>doctor_id</code> usar formato <code>dr-apellido</code> — minúsculas, sin acentos (ej: <code>dr-garcia</code>)</span></li>
-        <li><span class="snum">5</span><span>En <code>estado</code> poner <code>onboarding</code> hasta confirmar la prueba de producción</span></li>
+      <ul class="checklist">
+        <li id="li-a1" onclick="toggleCheck('a1')">
+          <div class="chk-box" id="box-a1"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Abrir el Sheet: <strong>00 🩺 Base de Datos — Doctores Eco IA</strong> en Drive</span>
+        </li>
+        <li id="li-a2" onclick="toggleCheck('a2')">
+          <div class="chk-box" id="box-a2"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Agregar una fila nueva al final de la tabla</span>
+        </li>
+        <li id="li-a3" onclick="toggleCheck('a3')">
+          <div class="chk-box" id="box-a3"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Completar las columnas con los datos recibidos en la Fase 2</span>
+        </li>
+        <li id="li-a4" onclick="toggleCheck('a4')">
+          <div class="chk-box" id="box-a4"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span style="flex:1">En <code>doctor_id</code> usar formato <code>dr-apellido</code> — minúsculas, sin acentos (ej: <code>dr-garcia</code>)
+            <input class="campo-captura" type="text" placeholder="dr-apellido" onclick="event.stopPropagation()">
+          </span>
+        </li>
+        <li id="li-a5" onclick="toggleCheck('a5')">
+          <div class="chk-box" id="box-a5"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>En <code>estado</code> poner <code>onboarding</code> hasta confirmar la prueba de producción</span>
+        </li>
       </ul>
       <div class="info-box">
         <div class="info-box-title">Valores clave en el Sheet</div>
@@ -385,14 +428,31 @@ li code {
     </div>
     <div class="card-body">
       <p class="card-desc">Crear la carpeta donde se guardarán todos los reportes del doctor y compartirla con él como Lector.</p>
-      <ul class="step-list">
-        <li><span class="snum">1</span><span>Abrir Drive: <strong>BASES DE DATOS ExcelentIA › 02 Reportes Ecocardiograma</strong></span></li>
-        <li><span class="snum">2</span><span>Crear nueva carpeta con el nombre completo del doctor (ej: <strong>Dr. Juan García Pérez</strong>)</span></li>
-        <li><span class="snum">3</span><span>Clic derecho → Compartir → agregar el correo del doctor con permiso de <strong>Lector</strong></span></li>
-        <li><span class="snum">4</span><span>Copiar el ID de la carpeta desde la URL (la cadena larga después de <code>/folders/</code>)</span></li>
-        <li><span class="snum">5</span><span>Pegar ese ID en la columna <code>id_carpeta_drive</code> del Sheet</span></li>
+      <ul class="checklist">
+        <li id="li-b1" onclick="toggleCheck('b1')">
+          <div class="chk-box" id="box-b1"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Abrir Drive: <strong>BASES DE DATOS ExcelentIA › 02 Reportes Ecocardiograma › doctores</strong></span>
+        </li>
+        <li id="li-b2" onclick="toggleCheck('b2')">
+          <div class="chk-box" id="box-b2"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Crear nueva carpeta con el nombre completo del doctor (ej: <strong>Dr. Juan García Pérez</strong>)</span>
+        </li>
+        <li id="li-b3" onclick="toggleCheck('b3')">
+          <div class="chk-box" id="box-b3"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Clic derecho → Compartir → agregar el correo del doctor con permiso de <strong>Editor</strong></span>
+        </li>
+        <li id="li-b4" onclick="toggleCheck('b4')">
+          <div class="chk-box" id="box-b4"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span style="flex:1">Copiar el ID de la carpeta desde la URL (la cadena larga después de <code>/folders/</code>)
+            <input class="campo-captura" type="text" placeholder="ID de la carpeta Drive" onclick="event.stopPropagation()">
+          </span>
+        </li>
+        <li id="li-b5" onclick="toggleCheck('b5')">
+          <div class="chk-box" id="box-b5"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Pegar ese ID en la columna <code>id_carpeta_drive</code> del Sheet</span>
+        </li>
       </ul>
-      <div class="nota">Permiso <strong>Lector</strong> — el doctor puede ver y descargar pero no puede borrar ni mover reportes.</div>
+      <div class="nota">Permiso <strong>Editor</strong> — el doctor necesita poder corregir valores del reporte directamente en Drive antes de firmarlo.</div>
     </div>
   </div>
 
@@ -410,13 +470,31 @@ li code {
     </div>
     <div class="card-body">
       <p class="card-desc">Subir los archivos del doctor al repositorio eco-reporte-server. El servidor Railway los usa para construir el header, la firma y el footer del Word.</p>
-      <ul class="step-list">
-        <li><span class="snum">1</span><span>Abrir repo: <strong>github.com/fernandodavilaolvera-rgb/eco-reporte-server</strong> → carpeta <code>assets/</code></span></li>
-        <li><span class="snum">2</span><span>Crear subcarpeta con el <code>doctor_id</code> exacto del Sheet (ej: <code>assets/dr-garcia/</code>)</span></li>
-        <li><span class="snum">3</span><span>Subir <code>logo.png</code> — logo del doctor, fondo transparente</span></li>
-        <li><span class="snum">4</span><span>Subir <code>firma.png</code> — firma del doctor, fondo blanco o transparente</span></li>
-        <li><span class="snum">5</span><span>Generar y subir <code>footer_banner.png</code> — imagen 1800×150px con nombre, especialidad y cédulas</span></li>
-        <li><span class="snum">6</span><span>Commit: <code>git commit -m "Add assets dr-garcia"</code></span></li>
+      <ul class="checklist">
+        <li id="li-g1" onclick="toggleCheck('g1')">
+          <div class="chk-box" id="box-g1"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Abrir repo: <strong>github.com/fernandodavilaolvera-rgb/eco-reporte-server</strong> → carpeta <code>assets/</code></span>
+        </li>
+        <li id="li-g2" onclick="toggleCheck('g2')">
+          <div class="chk-box" id="box-g2"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Crear subcarpeta con el <code>doctor_id</code> exacto del Sheet (ej: <code>assets/dr-garcia/</code>)</span>
+        </li>
+        <li id="li-g3" onclick="toggleCheck('g3')">
+          <div class="chk-box" id="box-g3"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Subir <code>logo.png</code> — logo del doctor, fondo transparente</span>
+        </li>
+        <li id="li-g4" onclick="toggleCheck('g4')">
+          <div class="chk-box" id="box-g4"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Subir <code>firma.png</code> — firma del doctor, fondo blanco o transparente</span>
+        </li>
+        <li id="li-g5" onclick="toggleCheck('g5')">
+          <div class="chk-box" id="box-g5"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Generar y subir <code>footer_banner.png</code> — imagen 1800×150px con nombre, especialidad y cédulas</span>
+        </li>
+        <li id="li-g6" onclick="toggleCheck('g6')">
+          <div class="chk-box" id="box-g6"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Commit: <code>git commit -m "Add assets dr-garcia"</code></span>
+        </li>
       </ul>
       <div class="warn">Los nombres de archivo deben ser <strong>exactamente</strong> <code>logo.png</code>, <code>firma.png</code> y <code>footer_banner.png</code> — el servidor los busca por nombre exacto.</div>
     </div>
@@ -436,15 +514,37 @@ li code {
     </div>
     <div class="card-body">
       <p class="card-desc">Generar el formulario personalizado del doctor. Cada doctor tiene su propia URL con su correo autorizado y su carpeta de Drive configurados.</p>
-      <ul class="step-list">
-        <li><span class="snum">1</span><span>Abrir el formulario base en GitHub: <code>Eco-IA/formulariointerpretacion/index.html</code></span></li>
-        <li><span class="snum">2</span><span>Duplicar el archivo en la subcarpeta del doctor (ej: <code>Eco-IA/dr-garcia/index.html</code>)</span></li>
-        <li><span class="snum">3</span><span>Actualizar <code>CORREO_AUTORIZADO</code> con el correo del doctor</span></li>
-        <li><span class="snum">4</span><span>Actualizar <code>FOLDER_ID</code> con el ID de su carpeta Drive (Fase 3B)</span></li>
-        <li><span class="snum">5</span><span>Actualizar <code>DOCTOR_ID</code> con el <code>doctor_id</code> del Sheet</span></li>
-        <li><span class="snum">6</span><span>Commit y push — GitHub Pages publica automáticamente</span></li>
+      <ul class="checklist">
+        <li id="li-f1" onclick="toggleCheck('f1')">
+          <div class="chk-box" id="box-f1"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Abrir el formulario base en GitHub: <code>Eco-IA/formulariointerpretacion/index.html</code></span>
+        </li>
+        <li id="li-f2" onclick="toggleCheck('f2')">
+          <div class="chk-box" id="box-f2"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Duplicar el archivo en la subcarpeta del doctor (ej: <code>Eco-IA/doctores/dr-garcia/index.html</code>)</span>
+        </li>
+        <li id="li-f3" onclick="toggleCheck('f3')">
+          <div class="chk-box" id="box-f3"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span><strong>Habilitar el correo del doctor</strong> — agregar su correo al array <code>ALLOWED_EMAILS</code> del formulario. Sin este paso el doctor verá "Acceso no autorizado" al iniciar sesión</span>
+        </li>
+        <li id="li-f4" onclick="toggleCheck('f4')">
+          <div class="chk-box" id="box-f4"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Actualizar los datos del header con nombre y especialidad del doctor, y la URL del logo en Railway</span>
+        </li>
+        <li id="li-f5" onclick="toggleCheck('f5')">
+          <div class="chk-box" id="box-f5"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Actualizar el botón "Ver mis reportes" con el link de su carpeta Drive (Fase 3B)</span>
+        </li>
+        <li id="li-f6" onclick="toggleCheck('f6')">
+          <div class="chk-box" id="box-f6"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Actualizar en el FormData: <code>doctor_id</code> e <code>id_carpeta_drive</code> con los valores del Sheet</span>
+        </li>
+        <li id="li-f7" onclick="toggleCheck('f7')">
+          <div class="chk-box" id="box-f7"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Commit y push — GitHub Pages publica automáticamente</span>
+        </li>
       </ul>
-      <div class="nota">La URL del formulario será <code>excelentia.com.mx/Eco-IA/dr-garcia</code> — esa es la URL que le compartes al doctor.</div>
+      <div class="nota">La URL del formulario será <code>excelentia.com.mx/Eco-IA/doctores/dr-garcia</code> — esa es la URL que le compartes al doctor.</div>
     </div>
   </div>
 
@@ -510,13 +610,31 @@ li code {
     </div>
     <div class="card-body">
       <p class="card-desc">Con la prueba de producción al 100%, se hace la entrega formal y se actualiza el Sheet.</p>
-      <ul class="step-list">
-        <li><span class="snum">1</span><span>Enviar al doctor el link de su formulario personal</span></li>
-        <li><span class="snum">2</span><span>Enviar el link de la guía: <code>excelentia.com.mx/Eco-IA/onboarding-doctor-eco-ia</code></span></li>
-        <li><span class="snum">3</span><span>Confirmar que el doctor puede acceder a su carpeta de Drive</span></li>
-        <li><span class="snum">4</span><span>Actualizar estado en Sheet: <code>onboarding</code> → <code>activo</code></span></li>
-        <li><span class="snum">5</span><span>Registrar <code>fecha_alta</code> con la fecha de hoy en formato DD/MM/AAAA</span></li>
-        <li><span class="snum">6</span><span>Archivar el expediente del doctor: contrato, assets originales y datos fiscales</span></li>
+      <ul class="checklist">
+        <li id="li-e1" onclick="toggleCheck('e1')">
+          <div class="chk-box" id="box-e1"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Enviar al doctor el link de su formulario personal</span>
+        </li>
+        <li id="li-e2" onclick="toggleCheck('e2')">
+          <div class="chk-box" id="box-e2"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Enviar el link de la guía: <code>excelentia.com.mx/Eco-IA/onboarding-doctor-eco-ia</code></span>
+        </li>
+        <li id="li-e3" onclick="toggleCheck('e3')">
+          <div class="chk-box" id="box-e3"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Confirmar que el doctor puede acceder a su carpeta de Drive</span>
+        </li>
+        <li id="li-e4" onclick="toggleCheck('e4')">
+          <div class="chk-box" id="box-e4"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Actualizar estado en Sheet: <code>onboarding</code> → <code>activo</code></span>
+        </li>
+        <li id="li-e5" onclick="toggleCheck('e5')">
+          <div class="chk-box" id="box-e5"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Registrar <code>fecha_alta</code> con la fecha de hoy en formato DD/MM/AAAA</span>
+        </li>
+        <li id="li-e6" onclick="toggleCheck('e6')">
+          <div class="chk-box" id="box-e6"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span>Archivar el expediente del doctor: contrato, assets originales y datos fiscales</span>
+        </li>
       </ul>
       <div class="nota"><strong>Tiempo estimado total:</strong> 45–90 minutos si todos los assets e información llegan completos desde la Fase 2.</div>
     </div>
