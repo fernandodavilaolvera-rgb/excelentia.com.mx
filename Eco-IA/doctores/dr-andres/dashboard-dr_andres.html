@@ -463,21 +463,53 @@ let todosLosReportes = [];
 /* ══════════════════════════════════════════
    CARGA DE DATOS
 ══════════════════════════════════════════ */
+function parsearRespuesta(data) {
+  if (Array.isArray(data))              return data;
+  if (Array.isArray(data.data))         return data.data;
+  if (Array.isArray(data.rows))         return data.rows;
+  if (Array.isArray(data.records))      return data.records;
+  if (Array.isArray(data.logs))         return data.logs;
+  if (Array.isArray(data.reportes))     return data.reportes;
+  if (Array.isArray(data.results))      return data.results;
+  if (Array.isArray(data.log))          return data.log;
+  if (Array.isArray(data.items))        return data.items;
+  return null;
+}
+
 async function cargarDatos() {
   mostrarCargando();
   try {
-    const url = `${APPS_SCRIPT_URL}?action=doctor&id=${DOCTOR_ID}`;
-    const res  = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    // Intentar los endpoints en orden hasta encontrar datos
+    const endpoints = [
+      APPS_SCRIPT_URL + '?action=doctor&id=' + DOCTOR_ID,
+      APPS_SCRIPT_URL + '?action=dashboard',
+      APPS_SCRIPT_URL
+    ];
 
-    // Normalizar respuesta — puede llegar como array directo o envuelto
-    let filas = [];
-    if (Array.isArray(data))              filas = data;
-    else if (Array.isArray(data.data))    filas = data.data;
-    else if (Array.isArray(data.rows))    filas = data.rows;
-    else if (Array.isArray(data.records)) filas = data.records;
-    else throw new Error('Formato de respuesta inesperado');
+    let filas = null;
+    let rawResp = null;
+
+    for (const ep of endpoints) {
+      try {
+        const res = await fetch(ep);
+        if (!res.ok) continue;
+        const data = await res.json();
+        rawResp = data;
+        filas = parsearRespuesta(data);
+        if (filas !== null) break;
+      } catch(e) { continue; }
+    }
+
+    if (filas === null) {
+      const raw = rawResp
+        ? JSON.stringify(rawResp, null, 2).substring(0, 600)
+        : 'Sin respuesta del servidor';
+      throw new Error(
+        'Formato de datos desconocido.\n\n' +
+        'Respuesta del servidor:\n' + raw + '\n\n' +
+        'Comparte este mensaje con ExcelentIA para ajustar el dashboard.'
+      );
+    }
 
     todosLosReportes = filas;
     renderDashboard(filas);
