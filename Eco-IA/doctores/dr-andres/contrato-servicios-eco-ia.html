@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contrato de Servicios SaaS — ExcelentIA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #f5f6f8;
+      --card:      #ffffff;
+      --border:    #dde1e9;
+      --grad:      linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 60%, #1e5096 100%);
+      --accent:    #4a9fd4;
+      --card-head: #dce8f7;
+      --alert-bg:  #f0f6ff;
+      --note-bg:   #eef4fc;
+      --text:      #1a2035;
+      --muted:     #4a5068;
+      --gray:      #8a90a0;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    .header {
+      background: var(--grad);
+      border-bottom: 3px solid var(--accent);
+      padding: 1.5rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    .logo-box {
+      background: #fff; border-radius: 10px; padding: .4rem .75rem;
+      display: flex; align-items: center; justify-content: center;
+      min-width: 80px; min-height: 52px; flex-shrink: 0;
+    }
+    .logo-box img { height: 40px; width: auto; display: block; }
+    .logo-fallback { font-family:'Manrope',sans-serif; font-size:15px; font-weight:800; color:#1a3a6b; display:none; }
+    .header-info { color: #fff; }
+    .header-info h1 { font-size: 1.1rem; font-weight: 800; line-height: 1.3; }
+    .header-info p { font-size: .75rem; color: rgba(255,255,255,.6); margin-top: .2rem; letter-spacing: .04em; text-transform: uppercase; }
+    .badge-conf {
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; font-size: .72rem; font-weight: 700;
+      padding: .3rem .85rem; border-radius: 20px; white-space: nowrap;
+    }
+
+    /* CONTAINER */
+    .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    /* SECCIÓN */
+    .seccion { margin-bottom: 1.75rem; }
+    .seccion-titulo {
+      font-size: .72rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--accent);
+      display: flex; align-items: center; gap: .75rem;
+      margin-bottom: 1rem;
+    }
+    .seccion-titulo::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    /* CARD */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 1.25rem; overflow: hidden; }
+    .card-head {
+      background: var(--card-head); padding: .875rem 1.5rem;
+      display: flex; align-items: center; gap: .6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-head h2 { font-size: .9rem; font-weight: 800; color: #1a3a6b; }
+    .card-head .clausula-num {
+      font-size: .72rem; font-weight: 800; text-transform: uppercase;
+      color: var(--accent); margin-left: auto; white-space: nowrap;
+    }
+    .card-body { padding: 1.5rem; }
+    .card-body p { font-size: .88rem; color: var(--muted); line-height: 1.75; margin-bottom: .9rem; }
+    .card-body p:last-child { margin-bottom: 0; }
+    .card-body strong { color: var(--text); }
+
+    /* DECLARACIONES TABLE */
+    .decl-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    .decl-table tr { border-bottom: 1px solid #f0f2f5; }
+    .decl-table tr:last-child { border-bottom: none; }
+    .decl-table td { padding: .75rem 1rem; vertical-align: top; }
+    .decl-table td:first-child {
+      font-weight: 700; color: var(--muted); width: 35%;
+      font-size: .78rem; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .decl-table td:last-child { color: var(--text); }
+
+    /* SLA TABLE */
+    .sla-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .sla-table thead tr { background: #f8fafd; border-bottom: 2px solid var(--border); }
+    .sla-table th { padding: .65rem .9rem; text-align: left; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--gray); white-space: nowrap; }
+    .sla-table td { padding: .7rem .9rem; color: var(--muted); border-bottom: 1px solid #f0f2f5; vertical-align: top; }
+    .sla-table tbody tr:last-child td { border-bottom: none; }
+    .sev { display: inline-block; font-size: .7rem; font-weight: 800; padding: .2rem .6rem; border-radius: 20px; white-space: nowrap; }
+    .sev1 { background: #fdf0ef; color: #c0392b; border: 1px solid #f5c6c2; }
+    .sev2 { background: #fff5ec; color: #d35400; border: 1px solid #fcdcb8; }
+    .sev3 { background: #fefce8; color: #856404; border: 1px solid #fde68a; }
+    .sev4 { background: var(--alert-bg); color: #1a3a6b; border: 1px solid var(--border); }
+    .table-wrap { overflow-x: auto; }
+
+    /* CAMPOS EDITABLES */
+    .campo {
+      display: block; width: 100%;
+      font-family: 'Manrope', sans-serif; font-size: .88rem;
+      color: var(--text); font-weight: 600;
+      background: var(--alert-bg);
+      border: 1.5px dashed var(--accent);
+      border-radius: 8px; padding: .55rem .85rem;
+      outline: none; transition: border-color .2s, background .2s;
+    }
+    .campo:focus { border-color: #1a3a6b; background: #fff; border-style: solid; }
+    .campo::placeholder { color: var(--gray); font-weight: 500; font-style: italic; }
+    .campo-sm { font-size: .82rem; padding: .4rem .7rem; }
+    .campo-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: .3rem; display: block; }
+
+    /* IMPORTE CON IVA */
+    .importe-wrap { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: .5rem; }
+    .importe-box { background: #f8fafd; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+    .importe-box .lbl { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--gray); }
+    .importe-box .val { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-top: .3rem; }
+    .importe-box.total .val { color: #1a3a6b; }
+
+    /* ALERT */
+    .alert-warn {
+      background: #fff8ec; border: 1px solid #fde68a;
+      border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0;
+      padding: .85rem 1rem; font-size: .84rem; color: #78350f; line-height: 1.6;
+      margin: .75rem 0;
+    }
+    .alert-info {
+      background: var(--alert-bg); border: 1px solid var(--border);
+      border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+      padding: .85rem 1rem; font-size: .84rem; color: var(--muted); line-height: 1.6;
+      margin: .75rem 0;
+    }
+    .alert-info strong, .alert-warn strong { color: #1a2035; }
+
+    /* LISTA NUMERADA */
+    .lista-contrato { padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: .75rem; }
+    .lista-contrato li { display: flex; gap: .75rem; font-size: .88rem; color: var(--muted); line-height: 1.7; }
+    .lista-contrato li .num { flex-shrink: 0; font-weight: 800; color: var(--accent); min-width: 1.25rem; }
+
+    /* FIRMAS */
+    .firmas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 1rem; }
+    .firma-box { display: flex; flex-direction: column; gap: .75rem; }
+    .firma-espacio {
+      height: 160px;
+      border: 1.5px dashed #bcc8da;
+      border-radius: 8px;
+      background: #fafbfd;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: .6rem;
+      color: #c8d0dc; font-size: .72rem; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .firma-box strong { font-size: .88rem; color: var(--text); }
+
+    /* ANEXO */
+    .anexo-head {
+      background: var(--grad); color: #fff;
+      padding: .875rem 1.5rem; border-radius: 12px 12px 0 0;
+      font-size: .88rem; font-weight: 800;
+    }
+    .anexo-body { background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 12px 12px; padding: 1.5rem; margin-bottom: 1.25rem; }
+    .anexo-body p { font-size: .88rem; color: var(--muted); line-height: 1.75; margin-bottom: .9rem; }
+    .anexo-body p:last-child { margin-bottom: 0; }
+    .anexo-body strong { color: var(--text); }
+
+    /* NOTE FOOTER */
+    .note-footer {
+      background: var(--note-bg); border-left: 4px solid #1a3a6b;
+      border-radius: 0 8px 8px 0; padding: .85rem 1.25rem;
+      font-size: .8rem; color: var(--muted); margin-top: 2rem;
+      display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+    }
+
+    /* PDF BUTTON */
+    .pdf-wrap { display: flex; justify-content: center; margin-top: 2.5rem; }
+    .pdf-btn {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: var(--grad); color: #fff;
+      font-family: 'Manrope', sans-serif; font-size: 1rem; font-weight: 800;
+      padding: .9rem 2.5rem; border-radius: 12px; border: none; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(26,58,107,.3); transition: opacity .2s, transform .2s;
+    }
+    .pdf-btn:hover { opacity: .9; transform: translateY(-2px); }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .banco-grid { grid-template-columns: 1fr !important; }
+    }
+      .header { padding: 1rem; flex-wrap: wrap; }
+      .container { padding: 1.5rem 1rem; }
+      .importe-wrap { grid-template-columns: 1fr; }
+      .firmas-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .sla-table { font-size: .75rem; }
+      .decl-table td:first-child { width: 40%; }
+    }
+
+    /* PRINT */
+    @media print {
+      body { background: #fff; }
+      .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; border-radius: 0; }
+      .pdf-wrap { display: none; }
+      .campo { border-style: solid; border-color: #ccc; background: #fff; }
+      .container { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20ExcelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <div class="header-info">
+      <h1>Contrato de Prestación de Servicios SaaS</h1>
+      <p>ExcelentIA — Consultoría Tecnológica y Sistemas Avanzados de IA</p>
+      <p style="font-size:.68rem;color:rgba(255,255,255,.5);margin-top:.1rem;letter-spacing:.03em;text-transform:none;">Powered by Micacku · Servicio Técnico Computacional Micacku, S.A. de C.V. · RFC: STC2208085Y7 · Contacto: acabrera@excelentia.mx</p>
+    </div>
+  </div>
+  <span class="badge-conf">🔒 Documento Confidencial</span>
+</header>
+
+<main class="container">
+
+  <!-- PARTES -->
+  <div class="seccion">
+    <div class="seccion-titulo">Declaraciones — Cuadro de Identificación</div>
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <table class="decl-table">
+          <tr>
+            <td>Prestador</td>
+            <td><strong>ExcelentIA</strong> — Consultoría Tecnológica y Sistemas Avanzados de IA<br>Powered by Micacku · Servicio Técnico Computacional Micacku, S.A. de C.V.<br>RFC: STC2208085Y7 · Contacto: acabrera@excelentia.mx</td>
+          </tr>
+          <tr>
+            <td>Cliente / Razón Social</td>
+            <td><input class="campo campo-sm" id="f-cliente" type="text" placeholder="Nombre completo o razón social del cliente"></td>
+          </tr>
+          <tr>
+            <td>RFC del Cliente</td>
+            <td><input class="campo campo-sm" id="f-rfc" type="text" placeholder="RFC del cliente"></td>
+          </tr>
+          <tr>
+            <td>Descripción del Servicio</td>
+            <td><strong>Eco IA</strong> — Sistema de agente de inteligencia artificial para la generación automatizada de reportes de ecocardiograma (detalle en Anexo A)</td>
+          </tr>
+          <tr>
+            <td>Esquema Económico Mensual</td>
+            <td>Ver Anexo B</td>
+          </tr>
+          <tr>
+            <td>Condición y Plazo de Pago</td>
+            <td>Por mes <strong>adelantado</strong>, dentro de los primeros cinco (5) días hábiles de cada mes corriente.</td>
+          </tr>
+          <tr>
+            <td>Fecha de Inicio de Operaciones</td>
+            <td><input class="campo campo-sm" id="f-fecha-inicio" type="text" placeholder="DD / MM / AAAA"></td>
+          </tr>
+          <tr>
+            <td>Vigencia Forzosa</td>
+            <td>Doce (12) meses forzosos, con renovación y prórroga automática sucesiva.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLÁUSULAS -->
+  <div class="seccion">
+    <div class="seccion-titulo">Cláusulas del Contrato</div>
+
+    <!-- PRIMERA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Objeto del Contrato y Modalidad SaaS</h2>
+        <span class="clausula-num">Cláusula Primera</span>
+      </div>
+      <div class="card-body">
+        <p>El Prestador se obliga a otorgar el acceso lógico, soporte y aprovisionamiento telemático a favor del Cliente de la plataforma tecnológica y sistemas basados en Inteligencia Artificial descritos en las Declaraciones. Las partes reconocen expresamente que el servicio se prestará única y exclusivamente bajo la modalidad de <strong>Software as a Service (SaaS)</strong>.</p>
+        <p>Por consiguiente, <strong>ExcelentIA no realiza venta de licencias perpetuas</strong>, ni transmisión física o entrega de código fuente, limitándose a conceder un derecho de uso temporal, revocable, personal, no exclusivo y no transferible para que el Cliente explote la solución en la nube durante el tiempo que dure el Contrato, de acuerdo con lo descrito en el Anexo A. "Descripción y Alcance del Servicio Contratado" y Anexo B. "Precio y Condiciones Comerciales".</p>
+      </div>
+    </div>
+
+    <!-- SEGUNDA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Reserva Absoluta de Propiedad Intelectual</h2>
+        <span class="clausula-num">Cláusula Segunda</span>
+      </div>
+      <div class="card-body">
+        <p>En virtud de operar bajo la modalidad SaaS, las partes pactan que en todos los casos y sin excepción alguna, la <strong>propiedad intelectual e industrial del sistema pertenece y pertenecerá perpetuamente de forma exclusiva a ExcelentIA</strong>. Esto incluye, de forma enunciativa mas no limitativa: todo el código fuente, código objeto, algoritmos predictivos, redes neuronales ajustadas, agentes inteligentes desarrollados, flujos lógicos de razonamiento, prompts (instrucciones de sistema o ingeniería de prompts), interfaces gráficas, documentación técnica, métodos de entrenamiento de datos y actualizaciones del sistema.</p>
+        <p>El Cliente reconoce que no adquiere derecho de propiedad alguno sobre dichos elementos lógicos y se obliga a no realizar extracción de prompts o copia directa del entorno de software, bajo pena de rescisión inmediata y reclamación judicial de daños.</p>
+      </div>
+    </div>
+
+    <!-- TERCERA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Obligaciones de ExcelentIA y Niveles de Servicio (SLA)</h2>
+        <span class="clausula-num">Cláusula Tercera</span>
+      </div>
+      <div class="card-body">
+        <p>El Prestador se obliga a mantener la disponibilidad técnica del entorno SaaS y a proporcionar soporte técnico calificado para atender las incidencias que afecten la operación regular del sistema de IA, conforme a la siguiente matriz de Service Level Agreements:</p>
+        <div class="table-wrap" style="margin-top:.75rem;">
+          <table class="sla-table">
+            <thead>
+              <tr>
+                <th>Nivel</th><th>Definición</th><th>Respuesta</th><th>Resolución</th><th>Escalamiento</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="sev sev1">Severidad 1</span></td>
+                <td>Plataforma SaaS completamente caída. El sistema de IA no responde a ninguna petición.</td>
+                <td>&lt; 2 horas</td>
+                <td>&lt; 4 horas</td>
+                <td>Ingeniero N1 → Director de Tecnología</td>
+              </tr>
+              <tr>
+                <td><span class="sev sev2">Severidad 2</span></td>
+                <td>Degradación severa. Funciones secundarias caídas o lentitud extrema inaplicable.</td>
+                <td>&lt; 4 horas</td>
+                <td>&lt; 24 h hábiles</td>
+                <td>Escala a Gerente de Infraestructura a las 12 h</td>
+              </tr>
+              <tr>
+                <td><span class="sev sev3">Severidad 3</span></td>
+                <td>Fallas operativas parciales con alternativa viable de operación.</td>
+                <td>&lt; 8 h hábiles</td>
+                <td>&lt; 5 días hábiles</td>
+                <td>Ingeniero de Desarrollo N2</td>
+              </tr>
+              <tr>
+                <td><span class="sev sev4">Severidad 4</span></td>
+                <td>Consultas generales de uso o solicitudes de nuevas capacidades.</td>
+                <td>&lt; 24 h hábiles</td>
+                <td>N/A</td>
+                <td>Mesa de control para evaluación</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUARTA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Obligaciones del Cliente y Validación Humana</h2>
+        <span class="clausula-num">Cláusula Cuarta</span>
+      </div>
+      <div class="card-body">
+        <p>Para asegurar la continuidad operativa del entorno SaaS, el Cliente asume las siguientes obligaciones contractuales:</p>
+        <ol class="lista-contrato">
+          <li><span class="num">1.</span><span>Proveer los datos de entrada autorizados e indispensables para la interacción con los agentes de IA.</span></li>
+          <li><span class="num">2.</span><span><strong>Garantía sobre Contenidos:</strong> Declarar que posee todos los derechos lícitos de explotación sobre los datos suministrados, asumiendo cualquier responsabilidad legal si estos violan propiedad de terceros.</span></li>
+          <li><span class="num">3.</span><span><strong>Supervisión Humana Obligatoria:</strong> El Cliente reconoce expresamente que los modelos de IA generan respuestas de carácter probabilístico. Por tanto, el Cliente se obliga a mantener personal capacitado para revisar de forma humana y validar críticamente todas las respuestas o entregables lógicos automatizados generados por el sistema SaaS antes de su uso o integración comercial final.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- QUINTA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Confidencialidad (NDA Bidireccional)</h2>
+        <span class="clausula-num">Cláusula Quinta</span>
+      </div>
+      <div class="card-body">
+        <p>Ambas partes se obligan de manera recíproca a resguardar bajo el más estricto secreto comercial e industrial toda la "Información Confidencial" que se revelen mutuamente durante la ejecución del servicio (parámetros algorítmicos, datos financieros, planes de negocio y métricas internas).</p>
+        <p>Esta obligación de confidencialidad bidireccional exige la implementación de medidas de resguardo lógico y físico robustas. Ninguna parte podrá hacer uso comercial ni divulgar la información confidencial de la contraparte a terceros no autorizados.</p>
+        <div class="alert-info">
+          <strong>Vigencia post-contractual:</strong> La obligación de confidencialidad establecida en esta cláusula <strong>permanecerá en plena vigencia durante dos (2) años adicionales</strong> contados a partir de la fecha de terminación del presente Contrato, independientemente de la causa que origine dicha terminación.
+        </div>
+      </div>
+    </div>
+
+    <!-- SEXTA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Protección de Datos Personales (LFPDPPP)</h2>
+        <span class="clausula-num">Cláusula Sexta</span>
+      </div>
+      <div class="card-body">
+        <p>Las partes se obligan a dar estricto cumplimiento a las disposiciones de la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento en México. ExcelentIA actuará estrictamente bajo la figura de Encargado del Tratamiento, procesando datos personales únicamente bajo las directrices expresas del Cliente (Responsable del Tratamiento).</p>
+        <p><strong>Prohibición Crítica de Entrenamiento Público:</strong> ExcelentIA garantiza de forma absoluta que los datos personales, prompts informados, documentos o interacciones lógicas cargadas por el Cliente en el entorno SaaS no serán indexados en bases de datos públicas, ni utilizados para el entrenamiento cruzado o mejora de modelos de Inteligencia Artificial generales o de uso libre de terceros.</p>
+      </div>
+    </div>
+
+    <!-- SÉPTIMA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Condiciones Económicas, Pago y Suspensión Automática</h2>
+        <span class="clausula-num">Cláusula Séptima</span>
+      </div>
+      <div class="card-body">
+        <p>Como contraprestación por el acceso al entorno SaaS y soporte, el Cliente pagará de forma puntual a ExcelentIA la tarifa mensual pactada en el Anexo B. Las partes aceptan el siguiente esquema de liquidación y cobranza:</p>
+        <ol class="lista-contrato">
+          <li><span class="num">1.</span><span><strong>Pago Mensual por Anticipado:</strong> El Cliente se obliga a realizar el pago del mes corriente de manera anticipada dentro de los primeros cinco (5) días hábiles de cada mes calendario aplicable.</span></li>
+          <li><span class="num">2.</span><span><strong>Interés Moratorio Contractual:</strong> Si el Cliente incurre en mora, se generará de forma automática un interés moratorio equivalente al <strong>2.5% mensual</strong> sobre los saldos insolutos, calculado diariamente hasta su total liquidación.</span></li>
+          <li><span class="num">3.</span><span><strong>Periodo Máximo de Continuidad y Suspensión:</strong> ExcelentIA continuará otorgando acceso regular a la plataforma SaaS únicamente hasta el día diez (10) natural del mes en curso. Si para el día 10 natural el pago no se encuentra efectivamente reflejado, el Prestador queda contractualmente facultado para realizar la suspensión automática del acceso a partir del día once (11) natural.</span></li>
+          <li><span class="num">4.</span><span><strong>Mecanismo de Notificación:</strong> ExcelentIA enviará notificación electrónica el día seis (6) natural de impago y aviso de advertencia final el día nueve (9) natural. El servicio se reactivará dentro de las 24 horas siguientes al pago total del adeudo más los intereses moratorios generados.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- OCTAVA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Vigencia, Prórroga y Penalización por Terminación Anticipada</h2>
+        <span class="clausula-num">Cláusula Octava</span>
+      </div>
+      <div class="card-body">
+        <p>El presente Contrato tendrá una <strong>vigencia forzosa inicial de doce (12) meses</strong> contados a partir de su firma. Al concluir dicho periodo, el Contrato se renovará de forma automática por periodos sucesivos idénticos de 12 meses, a menos que una de las partes notifique por escrito su voluntad de no prorrogarlo con al menos <strong>treinta (30) días naturales de anticipación</strong>.</p>
+        <p><strong>Pena Convencional por Terminación Anticipada:</strong> Si el Cliente decidiera dar por terminado el Contrato de manera anticipada sin causa justificable imputable al Prestador, el Cliente se obliga incondicionalmente a pagar a favor de ExcelentIA una cantidad líquida equivalente al <strong>50% del total de las mensualidades restantes</strong> hasta cumplir la vigencia forzosa de los doce (12) meses, debiendo liquidar dicho importe en una sola exhibición dentro de los 5 días naturales posteriores a su notificación de terminación.</p>
+      </div>
+    </div>
+
+    <!-- NOVENA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Limitación de Responsabilidad Civil</h2>
+        <span class="clausula-num">Cláusula Novena</span>
+      </div>
+      <div class="card-body">
+        <p>Las partes acuerdan que los sistemas de software basados en Inteligencia Artificial poseen un comportamiento intrínsecamente probabilístico que depende de los datos provistos. En consecuencia:</p>
+        <ol class="lista-contrato">
+          <li><span class="num">1.</span><span>La responsabilidad de ExcelentIA quedará circunscrita única y exclusivamente al resarcimiento por <strong>daños directos materiales efectivamente causados</strong> al Cliente. Quedan expresamente excluidos los perjuicios, lucro cesante, pérdidas comerciales, daños morales, incidentales, punitivos o consecuenciales.</span></li>
+          <li><span class="num">2.</span><span>ExcelentIA únicamente responderá económicamente en supuestos donde exista <strong>dolo o negligencia grave debidamente probada</strong> mediante sentencia firme dictada por autoridad judicial competente en la Ciudad de México.</span></li>
+          <li><span class="num">3.</span><span>La cuantía acumulada exigible a ExcelentIA no podrá exceder del importe neto equivalente a <strong>tres (3) mensualidades pagadas</strong> bajo este contrato.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- DÉCIMA: FUERZA MAYOR -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Caso Fortuito y Fuerza Mayor</h2>
+        <span class="clausula-num">Cláusula Décima</span>
+      </div>
+      <div class="card-body">
+        <p>Ninguna de las partes será considerada responsable por el incumplimiento total o parcial de sus obligaciones contractuales cuando dicho incumplimiento sea consecuencia directa de un evento de <strong>caso fortuito o fuerza mayor</strong> que se encuentre fuera del control razonable de la parte afectada y que no haya podido preverse o, habiéndose previsto, no haya podido evitarse.</p>
+        <p>Para efectos del presente instrumento, se considerarán causas de fuerza mayor, de forma enunciativa mas no limitativa: desastres naturales, actos de autoridad gubernamental, fallas generalizadas de infraestructura de Internet, actualizaciones obligatorias de plataformas tecnológicas de terceros proveedores de nube o de modelos de inteligencia artificial que afecten el funcionamiento del sistema, pandemia, sabotaje informático externo o cualquier otro evento de naturaleza análoga.</p>
+        <div class="alert-info">
+          La parte afectada por un evento de fuerza mayor deberá notificar a la otra parte por escrito o correo electrónico dentro de las <strong>48 horas siguientes</strong> de conocido el evento, indicando su naturaleza y duración estimada. Las obligaciones afectadas quedarán suspendidas durante el tiempo que persista el evento, sin que ello genere penalización, mora ni responsabilidad alguna.
+        </div>
+      </div>
+    </div>
+
+    <!-- DÉCIMA PRIMERA -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Jurisdicción y Competencia Judicial</h2>
+        <span class="clausula-num">Cláusula Décima Primera</span>
+      </div>
+      <div class="card-body">
+        <p>Para la interpretación, cumplimiento y ejecución del presente Contrato, así como para resolver cualquier controversia que se suscite con motivo del mismo, las Partes se someten expresamente a las <strong>Leyes Federales aplicables de los Estados Unidos Mexicanos</strong> y a la jurisdicción de los <strong>Tribunales competentes de la Ciudad de México</strong>, renunciando de manera irrevocable a cualquier otro fuero que por razón de sus domicilios presentes o futuros o por cualquier otra causa pudiera corresponderles.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIRMAS -->
+  <div class="seccion">
+    <div class="seccion-titulo">Firmas</div>
+    <div class="card">
+      <div class="card-body">
+        <p style="margin-bottom:1.5rem;">Enteradas las Partes de la validez jurídica, fuerza y alcances legales de este instrumento, lo firman por duplicado y de plena conformidad en la fecha citada en el encabezado.</p>
+        <div class="firmas-grid">
+
+          <!-- PRESTADOR -->
+          <div class="firma-box">
+            <div class="firma-espacio">Espacio para firma autógrafa</div>
+            <strong>POR EL PRESTADOR (ExcelentIA)</strong>
+            <div>
+              <label class="campo-label">Nombre del firmante</label>
+              <input class="campo campo-sm" type="text" placeholder="Nombre completo del representante legal">
+            </div>
+            <div>
+              <label class="campo-label">Cargo</label>
+              <input class="campo campo-sm" type="text" placeholder="Director General / Representante Legal">
+            </div>
+            <div>
+              <label class="campo-label">Fecha de firma</label>
+              <input class="campo campo-sm" type="text" placeholder="DD / MM / AAAA">
+            </div>
+          </div>
+
+          <!-- CLIENTE -->
+          <div class="firma-box">
+            <div class="firma-espacio">Espacio para firma autógrafa</div>
+            <strong>POR EL CLIENTE</strong>
+            <div>
+              <label class="campo-label">Nombre del firmante</label>
+              <input class="campo campo-sm" type="text" placeholder="Nombre completo del firmante">
+            </div>
+            <div>
+              <label class="campo-label">Cargo o representación</label>
+              <input class="campo campo-sm" type="text" placeholder="Cargo o en representación de...">
+            </div>
+            <div>
+              <label class="campo-label">Fecha de firma</label>
+              <input class="campo campo-sm" type="text" placeholder="DD / MM / AAAA">
+            </div>
+          </div>
+
+        </div>
+        <p style="font-size:.75rem;color:var(--gray);margin-top:1.5rem;text-align:center;">Página 1 de 1 · Documento Confidencial Corporativo de ExcelentIA · RFC: STC2208085Y7</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANEXO A -->
+  <div class="seccion">
+    <div class="seccion-titulo">Anexo A — Descripción y Alcance del Servicio</div>
+    <div class="anexo-head">Anexo A · Descripción del Servicio Eco IA</div>
+    <div class="anexo-body">
+      <p><strong>Eco IA</strong> es un sistema de agente de inteligencia artificial desarrollado por ExcelentIA, diseñado específicamente para la generación automatizada de reportes de ecocardiograma. El sistema realiza el siguiente proceso de forma íntegra y automática:</p>
+      <ol class="lista-contrato">
+        <li><span class="num">1.</span><span>El Cliente carga las imágenes del estudio ecocardiográfico a través de un formulario web seguro y personalizado, accesible desde cualquier dispositivo con conexión a Internet.</span></li>
+        <li><span class="num">2.</span><span>El agente de inteligencia artificial analiza cada imagen del estudio, identifica los planos ecocardiográficos y extrae de forma automática los parámetros clínicos relevantes: medidas de cavidades, función sistólica y diastólica, valoración valvular, grandes vasos y pericardio, entre otros.</span></li>
+        <li><span class="num">3.</span><span>El sistema genera automáticamente un reporte Word estructurado bajo el formato clínico estándar, incluyendo los hallazgos en modo M, bidimensional, Doppler color, pulsado y tisular, así como las conclusiones diagnósticas correspondientes.</span></li>
+        <li><span class="num">4.</span><span>El documento generado incorpora de forma automática el nombre, especialidad, cédulas profesionales, firma y logo del médico titular. El reporte queda disponible en la carpeta privada del Cliente en la nube en un plazo estimado de <strong>3 a 5 minutos</strong> por estudio.</span></li>
+        <li><span class="num">5.</span><span>El Cliente tiene acceso a un <strong>dashboard de actividad</strong> desde donde puede consultar el historial completo de reportes generados y acceder a cada documento.</span></li>
+      </ol>
+      <div class="alert-warn" style="margin-top:1rem;">
+        <strong>Nota clínica importante:</strong> El reporte generado por el sistema de IA constituye un borrador de apoyo diagnóstico. El Cliente, en su calidad de profesional de la salud, asume la responsabilidad exclusiva de revisar, validar, corregir y autorizar cada reporte antes de su uso clínico o entrega al paciente. El sistema es un asistente de productividad, no un sustituto del criterio médico profesional.
+      </div>
+    </div>
+  </div>
+
+  <!-- ANEXO B -->
+  <div class="seccion">
+    <div class="seccion-titulo">Anexo B — Precio y Condiciones Comerciales</div>
+    <div class="anexo-head">Anexo B · Precio y Condiciones Comerciales</div>
+    <div class="anexo-body">
+
+      <p>Las condiciones económicas del servicio Eco IA para el Cliente son las siguientes:</p>
+
+      <div style="margin: 1.25rem 0;">
+        <span class="campo-label">Importe mensual del servicio (M.N. — Pesos Mexicanos, sin IVA)</span>
+        <input class="campo" id="f-importe" type="number" min="0" step="1" placeholder="Ingresa el importe mensual sin IVA (ej: 2500)" oninput="calcIVA()">
+      </div>
+
+      <div class="importe-wrap" id="desglose" style="display:none;">
+        <div class="importe-box">
+          <div class="lbl">Subtotal (sin IVA)</div>
+          <div class="val" id="r-subtotal">$0</div>
+        </div>
+        <div class="importe-box">
+          <div class="lbl">IVA (16%)</div>
+          <div class="val" id="r-iva">$0</div>
+        </div>
+        <div class="importe-box total">
+          <div class="lbl">Total mensual</div>
+          <div class="val" id="r-total">$0</div>
+        </div>
+      </div>
+
+      <p style="margin-top:1.25rem;">Las condiciones de pago son las siguientes:</p>
+      <ol class="lista-contrato">
+        <li><span class="num">1.</span><span><strong>Periodicidad:</strong> El servicio se cobra de forma mensual anticipada.</span></li>
+        <li><span class="num">2.</span><span><strong>Moneda:</strong> Todos los importes se expresan y deben liquidarse en Pesos Mexicanos (M.N.).</span></li>
+        <li><span class="num">3.</span><span><strong>IVA:</strong> Al importe mensual pactado se adicionará el Impuesto al Valor Agregado (IVA) correspondiente a la tasa vigente del 16%, siendo el Cliente responsable de su pago total.</span></li>
+        <li>
+            <span class="num">4.</span>
+            <span style="flex:1;display:flex;flex-direction:column;gap:.5rem;">
+              <span><strong>Forma de pago:</strong> Transferencia bancaria (SPEI) a la siguiente cuenta de ExcelentIA:</span>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;max-width:500px;" class="banco-grid">
+                <div>
+                  <label class="campo-label">Banco</label>
+                  <input class="campo campo-sm" type="text" value="Bankaool" readonly style="background:#f8fafd;color:#1a2035;font-weight:700;">
+                </div>
+                <div>
+                  <label class="campo-label">CLABE interbancaria (18 dígitos)</label>
+                  <input class="campo campo-sm" type="text" maxlength="18" value="147152000000435017" readonly style="background:#f8fafd;color:#1a2035;font-weight:700;">
+                </div>
+              </div>
+            </span>
+          </li>
+        <li><span class="num">5.</span><span><strong>Facturación:</strong> ExcelentIA emitirá el CFDI correspondiente a más tardar el segundo día hábil posterior a la confirmación del pago recibido.</span></li>
+        <li><span class="num">6.</span><span><strong>Ajuste anual:</strong> Al inicio de cada periodo de renovación automática, ExcelentIA podrá ajustar la tarifa mensual informando al Cliente con al menos treinta (30) días naturales de anticipación. Si el Cliente no acepta el nuevo importe, podrá notificar la no renovación conforme a la Cláusula Octava.</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="note-footer">
+    <strong>ExcelentIA</strong> · Powered by Micacku · RFC: STC2208085Y7 · acabrera@excelentia.mx
+    <span style="margin-left:auto;font-size:.75rem;">Documento Confidencial · Generado por ExcelentIA</span>
+  </div>
+
+  <!-- BOTÓN PDF -->
+  <div class="pdf-wrap">
+    <button class="pdf-btn" onclick="window.print()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Guardar como PDF
+    </button>
+  </div>
+
+</main>
+
+<script>
+function calcIVA() {
+  const val = parseFloat(document.getElementById('f-importe').value);
+  const desglose = document.getElementById('desglose');
+  if (!val || val <= 0) { desglose.style.display = 'none'; return; }
+  const iva   = val * 0.16;
+  const total = val + iva;
+  const fmt   = n => '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('r-subtotal').textContent = fmt(val);
+  document.getElementById('r-iva').textContent      = fmt(iva);
+  document.getElementById('r-total').textContent    = fmt(total);
+  desglose.style.display = 'grid';
+}
+</script>
+</body>
+</html>
