@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Pruebas — Sistema IA Club Berimbau</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#3AAA35;
+  --naranja:#EF4B1F;
+  --azul:#1a3a6b;
+  --azul-mid:#4a9fd4;
+  --negro:#1a1a18;
+  --fondo:#f5f6f8;
+  --card:#ffffff;
+  --borde:#dde1e9;
+  --texto:#1a2035;
+  --gris:#4a5068;
+  --gris-claro:#8a90a0;
+  --s1:#1a8a6e; --s1-bg:#e8f7f0;
+  --s2:#c8a84b; --s2-bg:#fdf8ec;
+  --s3:#EF4B1F; --s3-bg:#fff4ee;
+  --s4:#c0392b; --s4-bg:#fef2f2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:var(--fondo);color:var(--texto);font-size:14px;line-height:1.6}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:40px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-beri{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;min-height:52px}
+.logo-beri img{height:40px;width:auto;display:block}
+.header-center{flex:1;text-align:center;padding:0 12px}
+.header-title{font-size:1.15rem;font-weight:800;color:#fff;letter-spacing:.02em}
+.header-sub{font-size:.75rem;color:rgba(255,255,255,.7);margin-top:3px}
+.badge-version{display:inline-block;background:var(--verde);color:#fff;font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:5px;letter-spacing:.05em}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#e8f7f0,#f0f6ff);border-bottom:1px solid var(--borde);padding:28px 32px;text-align:center}
+.hero h1{font-size:1.5rem;font-weight:800;color:var(--azul);margin-bottom:8px}
+.hero p{color:var(--gris);font-size:.9rem;max-width:600px;margin:0 auto 16px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{padding:5px 14px;border-radius:20px;font-size:.72rem;font-weight:700;border:1.5px solid}
+.chip-ok{background:#e8f7f0;color:var(--s1);border-color:var(--s1)}
+.chip-warn{background:#fff4ee;color:var(--naranja);border-color:var(--naranja)}
+.chip-info{background:#e8f0fb;color:var(--azul);border-color:var(--azul-mid)}
+
+/* CONTAINER */
+.container{max-width:960px;margin:0 auto;padding:28px 20px 48px}
+
+/* SECCIONES */
+.section{margin-bottom:28px}
+.section-title{font-size:1rem;font-weight:800;color:var(--azul);margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:2px solid var(--borde)}
+.section-title .icon{font-size:1.1rem}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--borde);border-radius:12px;padding:20px;margin-bottom:14px}
+.card-header{font-size:.85rem;font-weight:700;color:var(--azul);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+/* ACCESO */
+.url-box{background:#f0f6ff;border:1.5px solid var(--azul-mid);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.url-label{font-size:.72rem;color:var(--gris-claro);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.url-link{font-size:.92rem;font-weight:700;color:var(--azul);word-break:break-all}
+.url-link a{color:var(--azul-mid);text-decoration:none}
+.url-link a:hover{text-decoration:underline}
+.copy-btn{background:var(--azul-mid);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:.73rem;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;transition:.15s;white-space:nowrap}
+.copy-btn:hover{background:var(--azul)}
+
+/* TABLA PRUEBAS */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+thead tr{background:linear-gradient(90deg,#dce8f7,#e8f0fb)}
+th{padding:10px 12px;text-align:left;font-weight:700;color:var(--azul);font-size:.75rem;white-space:nowrap;border-bottom:2px solid var(--azul-mid)}
+td{padding:9px 12px;border-bottom:1px solid var(--borde);vertical-align:top}
+tr:hover td{background:#f8faff}
+.status-ok{display:inline-flex;align-items:center;gap:4px;background:#e8f7f0;color:var(--s1);font-weight:700;font-size:.72rem;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.status-pend{display:inline-flex;align-items:center;gap:4px;background:#fff4ee;color:var(--naranja);font-weight:700;font-size:.72rem;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.status-warn{display:inline-flex;align-items:center;gap:4px;background:#fdf8ec;color:var(--s2);font-weight:700;font-size:.72rem;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.num-badge{display:inline-block;background:var(--azul);color:#fff;font-weight:800;font-size:.72rem;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px}
+td .note{font-size:.68rem;color:var(--gris-claro);margin-top:3px}
+
+/* PASOS */
+.steps{list-style:none;counter-reset:step-count}
+.steps li{counter-increment:step-count;padding:10px 0 10px 44px;position:relative;border-bottom:1px dashed var(--borde);font-size:.84rem}
+.steps li:last-child{border-bottom:none}
+.steps li::before{content:counter(step-count);position:absolute;left:0;top:10px;background:var(--verde);color:#fff;font-weight:800;font-size:.72rem;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.steps li strong{color:var(--azul);font-weight:700}
+
+/* MÓDULOS GRID */
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.mod-card{background:var(--card);border:1px solid var(--borde);border-radius:10px;padding:14px;border-left:4px solid var(--verde)}
+.mod-card.naranja{border-left-color:var(--naranja)}
+.mod-card.azul{border-left-color:var(--azul-mid)}
+.mod-icon{font-size:1.4rem;margin-bottom:6px}
+.mod-name{font-weight:800;font-size:.85rem;color:var(--azul);margin-bottom:4px}
+.mod-desc{font-size:.75rem;color:var(--gris);line-height:1.5}
+.mod-status{font-size:.68rem;font-weight:700;margin-top:8px;display:inline-block;padding:2px 8px;border-radius:20px}
+.ms-ok{background:#e8f7f0;color:var(--s1)}
+.ms-pend{background:#fff4ee;color:var(--naranja)}
+
+/* SEMÁFORO */
+.semaforo{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.seg-pill{border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.seg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.seg-info{flex:1}
+.seg-name{font-weight:800;font-size:.8rem}
+.seg-sub{font-size:.7rem;color:var(--gris)}
+
+/* ALERTA */
+.alerta{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid var(--azul-mid);border-radius:8px;padding:12px 16px;font-size:.82rem;color:var(--azul);margin-top:10px}
+.alerta-warn{background:#fff4ee;border-color:#f4c4aa;border-left-color:var(--naranja);color:#7a3010}
+
+/* CONTACTO */
+.contacto{display:flex;flex-wrap:wrap;gap:12px}
+.ctc-card{background:var(--card);border:1px solid var(--borde);border-radius:10px;padding:14px 18px;flex:1;min-width:220px}
+.ctc-name{font-weight:800;font-size:.88rem;color:var(--azul);margin-bottom:2px}
+.ctc-rol{font-size:.72rem;color:var(--gris-claro);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.ctc-mail{font-size:.8rem;color:var(--azul-mid);margin-top:5px}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px;font-size:.72rem;color:var(--gris-claro);border-top:1px solid var(--borde);margin-top:10px}
+.footer strong{color:var(--azul)}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .header{padding:16px;flex-direction:column;align-items:flex-start;gap:10px}
+  .header-center{text-align:left;padding:0}
+  .container{padding:18px 14px 40px}
+  .semaforo{grid-template-columns:1fr}
+  .mod-grid{grid-template-columns:1fr}
+  th,td{padding:8px 8px;font-size:.75rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-box">
+    <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+  </div>
+  <div class="header-center">
+    <div class="header-title">Manual de Pruebas — Sistema IA</div>
+    <div class="header-sub">Club Deportivo Berimbau · Dashboard Inteligente</div>
+    <div class="badge-version">v11 · Junio 2026</div>
+  </div>
+  <div class="logo-beri">
+    <img src="https://excelentia.com.mx/logo_club_berimbau.png" alt="Club Berimbau"
+         onerror="this.style.display='none'">
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>📋 Manual de Pruebas del Sistema IA</h1>
+  <p>Documento de validación técnica — registro de todas las pruebas realizadas el 12 de junio de 2026 con el equipo de ExcelentIA.</p>
+  <div class="hero-chips">
+    <span class="chip chip-ok">✅ 9/9 Pruebas exitosas</span>
+    <span class="chip chip-ok">✅ Correos entregados</span>
+    <span class="chip chip-ok">✅ WhatsApp validado</span>
+    <span class="chip chip-warn">⏳ Plantillas Meta en revisión</span>
+    <span class="chip chip-info">Etapa: Pruebas internas</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ACCESO -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔗</span> Acceso al Dashboard</div>
+    <div class="card">
+      <div class="url-box">
+        <div>
+          <div class="url-label">URL del sistema</div>
+          <div class="url-link"><a href="https://app.clubberimbau.com.mx/index.php" target="_blank">app.clubberimbau.com.mx/index.php</a></div>
+        </div>
+        <button class="copy-btn" onclick="copiar('https://app.clubberimbau.com.mx/index.php')">📋 Copiar URL</button>
+      </div>
+      <div class="alerta">
+        <strong>📝 Nota de acceso (etapa de pruebas):</strong> El dashboard se abre directamente en el navegador — no requiere usuario ni contraseña. Es un archivo HTML inteligente que contiene los datos de los 506 socios. En producción se añadirá autenticación.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🖥️ Pestañas del dashboard</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
+        <div style="background:#f8faff;border:1px solid var(--borde);border-radius:8px;padding:10px 12px;font-size:.8rem">
+          <div style="font-weight:700;color:var(--azul)">📋 Directorio</div>
+          <div style="color:var(--gris);font-size:.72rem;margin-top:3px">Lista completa de los 506 socios con búsqueda</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid var(--borde);border-radius:8px;padding:10px 12px;font-size:.8rem">
+          <div style="font-weight:700;color:var(--azul)">🚦 Accesos Abril</div>
+          <div style="color:var(--gris);font-size:.72rem;margin-top:3px">Registro de entradas al club por socio</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid var(--borde);border-radius:8px;padding:10px 12px;font-size:.8rem;border-left:3px solid var(--naranja)">
+          <div style="font-weight:700;color:var(--azul)">💰 Cobranza</div>
+          <div style="color:var(--gris);font-size:.72rem;margin-top:3px"><strong style="color:var(--naranja)">Pestaña principal.</strong> Socios con adeudo por segmento</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid var(--borde);border-radius:8px;padding:10px 12px;font-size:.8rem">
+          <div style="font-weight:700;color:var(--azul)">✉️ Avisos Correo</div>
+          <div style="color:var(--gris);font-size:.72rem;margin-top:3px">Envío manual y programado de correos</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid var(--borde);border-radius:8px;padding:10px 12px;font-size:.8rem">
+          <div style="font-weight:700;color:var(--azul)">📊 Gráficas</div>
+          <div style="color:var(--gris);font-size:.72rem;margin-top:3px">Estadísticas visuales de cobranza y membresías</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMÁFORO DE ADEUDOS -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🚦</span> Semáforo de adeudos</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--gris);margin-bottom:14px">El sistema clasifica automáticamente a los socios con adeudo en 4 segmentos según los días transcurridos desde su fecha de vencimiento:</p>
+      <div class="semaforo">
+        <div class="seg-pill" style="background:var(--s1-bg)">
+          <div class="seg-dot" style="background:var(--s1)"></div>
+          <div class="seg-info">
+            <div class="seg-name" style="color:var(--s1)">🟢 0 – 30 días</div>
+            <div class="seg-sub">Olvido o descuido — mensaje amable y recordatorio</div>
+          </div>
+        </div>
+        <div class="seg-pill" style="background:var(--s2-bg)">
+          <div class="seg-dot" style="background:var(--s2)"></div>
+          <div class="seg-info">
+            <div class="seg-name" style="color:var(--s2)">🟡 31 – 60 días</div>
+            <div class="seg-sub">Problema temporal — seguimiento personalizado</div>
+          </div>
+        </div>
+        <div class="seg-pill" style="background:var(--s3-bg)">
+          <div class="seg-dot" style="background:var(--s3)"></div>
+          <div class="seg-info">
+            <div class="seg-name" style="color:var(--s3)">🔴 61 – 90 días</div>
+            <div class="seg-sub">Riesgo alto — intervención urgente recomendada</div>
+          </div>
+        </div>
+        <div class="seg-pill" style="background:var(--s4-bg)">
+          <div class="seg-dot" style="background:var(--s4-color,#c0392b)"></div>
+          <div class="seg-info">
+            <div class="seg-name" style="color:#c0392b">⛔ +90 días</div>
+            <div class="seg-sub">Posible abandono — oferta de reactivación</div>
+          </div>
+        </div>
+      </div>
+      <div class="alerta" style="margin-top:14px">
+        <strong>Regla del día 6:</strong> Los primeros 5 días del mes son de gracia. A partir del día 6, Aspel registra el mes como adeudo. El sistema calcula automáticamente los intereses al 2.5% mensual.
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADOS DE PRUEBAS -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🧪</span> Resultados del Plan de Pruebas — 12 de junio 2026</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--gris);margin-bottom:14px">Todas las pruebas se realizaron con datos y contactos internos. <strong>Ningún correo ni mensaje fue enviado a socios reales.</strong></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Prueba</th>
+              <th>¿Qué hace?</th>
+              <th>Correo</th>
+              <th>WhatsApp</th>
+              <th>Notas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="num-badge">1</span></td>
+              <td><strong>Cumpleaños</strong></td>
+              <td>Felicita a socios que cumplen años hoy</td>
+              <td><span class="status-ok">✅ 1/1</span></td>
+              <td><span class="status-pend">⏳ Meta</span></td>
+              <td class="note">Probado noche 11-jun</td>
+            </tr>
+            <tr>
+              <td><span class="num-badge">2</span></td>
+              <td><strong>Pago Anual</strong></td>
+              <td>Avisa 30, 15 y 7 días antes del vencimiento anual</td>
+              <td><span class="status-ok">✅ 3/3</span></td>
+              <td><span class="status-pend">⏳ Meta</span></td>
+              <td class="note">Los 3 correos de la cadena: 30d, 15d y 7d</td>
+            </tr>
+            <tr>
+              <td><span class="num-badge">3</span></td>
+              <td><strong>Domiciliados</strong></td>
+              <td>Avisa al socio antes de que el banco haga el cargo</td>
+              <td><span class="status-ok">✅ 2/2</span></td>
+              <td><span class="status-pend">⏳ Meta</span></td>
+              <td class="note">7 días antes del cargo bancario</td>
+            </tr>
+            <tr>
+              <td><span class="num-badge">4</span></td>
+              <td><strong>Alerta 26 Años</strong></td>
+              <td>Alerta cuando un dependiente cumple 26 años (sale de membresía familiar)</td>
+              <td><span class="status-ok">✅ 1/1</span></td>
+              <td><span class="status-pend">⏳ Meta</span></td>
+              <td class="note">Alerta enviada al titular y a Nancy</td>
+            </tr>
+            <tr>
+              <td><span class="num-badge">5</span></td>
+              <td><strong>Cargo Fallido</strong></td>
+              <td>Notifica al socio cuando un cargo bancario domiciliado falla</td>
+              <td><span class="status-ok">✅ 1/1</span></td>
+              <td><span class="status-pend">⏳ Meta</span></td>
+              <td class="note">Envío manual desde dashboard</td>
+            </tr>
+            <tr>
+              <td><span class="num-badge">6A</span></td>
+              <td><strong>Observaciones</strong></td>
+              <td>Guarda notas del equipo por socio en Google Sheets</td>
+              <td><span class="status-ok">✅ OK</span></td>
+              <td>—</td>
+              <td class="note">Registro en hoja Observaciones</td>
+            </tr>
+            <tr>
+              <td><span class="num-badge">6B</span></td>
+              <td><strong>Plantillas</strong></td>
+              <td>Guarda plantillas de correo en la Biblioteca</td>
+              <td><span class="status-warn">⚠️ Fix pendiente</span></td>
+              <td>—</td>
+              <td class="note">Falta agregar encabezados al Sheet "Plantillas"</td>
+            </tr>
+            <tr>
+              <td><span class="num-badge">7</span></td>
+              <td><strong>Historial de Envíos</strong></td>
+              <td>Registra cada correo enviado con fecha y destinatario</td>
+              <td><span class="status-ok">✅ OK</span></td>
+              <td>—</td>
+              <td class="note">Hoja Historial_Envios en Sheets</td>
+            </tr>
+            <tr>
+              <td><span class="num-badge">8</span></td>
+              <td><strong>WA Modo Sesión</strong></td>
+              <td>Mensaje de texto libre por WhatsApp (sin plantilla)</td>
+              <td>—</td>
+              <td><span class="status-ok">✅ Entregado</span></td>
+              <td class="note">Llegó a número de prueba (525512154800)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alerta-warn alerta" style="margin-top:14px">
+        <strong>⚠️ WhatsApp con plantillas (pruebas 1–5):</strong> Las 5 plantillas enviadas a Meta están "En revisión" desde el 11 de junio. Una vez aprobadas, se realizará la prueba completa con mensajes de WhatsApp usando plantillas oficiales.
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULOS ESPECIALES -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🆕</span> Módulos especiales de avisos</div>
+    <div class="mod-grid">
+      <div class="mod-card">
+        <div class="mod-icon">📅</div>
+        <div class="mod-name">Pago Anual</div>
+        <div class="mod-desc">Cadena automática de 3 avisos: 30, 15 y 7 días antes del vencimiento. Con checkboxes para activar cada aviso por separado.</div>
+        <span class="mod-status ms-ok">✅ Probado</span>
+      </div>
+      <div class="mod-card azul">
+        <div class="mod-icon">🏦</div>
+        <div class="mod-name">Domiciliados — Aviso Previo</div>
+        <div class="mod-desc">Calcula automáticamente el día de aviso restando 7 días al día de cargo bancario. Solo configura una vez.</div>
+        <span class="mod-status ms-ok">✅ Probado</span>
+      </div>
+      <div class="mod-card naranja">
+        <div class="mod-icon">🏦❌</div>
+        <div class="mod-name">Cargo Fallido</div>
+        <div class="mod-desc">Envío manual desde el dashboard. Nancy selecciona al socio domiciliado y envía el aviso con un clic.</div>
+        <span class="mod-status ms-ok">✅ Probado</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">🎂</div>
+        <div class="mod-name">Cumpleaños</div>
+        <div class="mod-desc">Felicita automáticamente a los socios. Configurable para el día anterior, el día exacto, o ambos. Tabla de próximos 30 días.</div>
+        <span class="mod-status ms-ok">✅ Probado</span>
+      </div>
+      <div class="mod-card naranja">
+        <div class="mod-icon">🔔</div>
+        <div class="mod-name">Alerta 26 Años</div>
+        <div class="mod-desc">Detecta dependientes próximos a cumplir 26 años y alerta al titular + al equipo de cobranza con 90 días de anticipación.</div>
+        <span class="mod-status ms-ok">✅ Probado</span>
+      </div>
+      <div class="mod-card azul">
+        <div class="mod-icon">📚</div>
+        <div class="mod-name">Biblioteca de Plantillas</div>
+        <div class="mod-desc">Guarda y reutiliza plantillas de correo. Carga instantánea en el editor de envío con pre-selección de segmento.</div>
+        <span class="mod-status ms-pend">⚠️ Fix aplicado v11</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CÓMO ENVIAR UN AVISO -->
+  <div class="section">
+    <div class="section-title"><span class="icon">✉️</span> Cómo enviar un aviso de cobranza</div>
+    <div class="card">
+      <div class="card-header">📤 Envío manual (paso a paso)</div>
+      <ol class="steps">
+        <li>Ir a la pestaña <strong>✉️ Avisos Correo</strong></li>
+        <li>En la columna <strong>"Plantillas por segmento"</strong>, localizar el segmento correspondiente (0–30, 31–60, 61–90 o +90 días)</li>
+        <li>Escribir o editar el <strong>Asunto</strong> y el <strong>Cuerpo</strong> del correo. Puedes usar variables: <code style="background:#f0f6ff;padding:1px 6px;border-radius:4px;font-size:.78rem">{{nombre}}</code> <code style="background:#f0f6ff;padding:1px 6px;border-radius:4px;font-size:.78rem">{{membresia}}</code> <code style="background:#f0f6ff;padding:1px 6px;border-radius:4px;font-size:.78rem">{{meses}}</code></li>
+        <li>Hacer clic en <strong>💾 Guardar</strong> para almacenar la plantilla del segmento</li>
+        <li>En el panel derecho <strong>"Envío Manual"</strong>, seleccionar el segmento en el menú desplegable</li>
+        <li>Revisar la lista de destinatarios (con checkboxes para incluir/excluir socios)</li>
+        <li>Hacer clic en <strong>👁 Vista Previa</strong> para ver el correo antes de enviarlo</li>
+        <li>Confirmar y hacer clic en <strong>✉️ Enviar correos</strong></li>
+      </ol>
+    </div>
+    <div class="card">
+      <div class="card-header">📚 Usar la Biblioteca de Plantillas</div>
+      <ol class="steps">
+        <li>Bajar al final de la pestaña <strong>✉️ Avisos Correo</strong> — sección <em>"Biblioteca de Plantillas"</em></li>
+        <li>Hacer clic en <strong>+ Nueva plantilla</strong> para crear una o elegir una existente</li>
+        <li>Hacer clic en <strong>⚡ Usar plantilla</strong> en la tarjeta deseada</li>
+        <li>Elegir el destino: <em>Envío manual</em> o un segmento específico</li>
+        <li>El sistema <strong>pre-selecciona automáticamente el segmento</strong> y carga los destinatarios correspondientes <span style="background:#e8f7f0;color:var(--s1);font-size:.7rem;padding:2px 7px;border-radius:10px;font-weight:700">🆕 v11</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ACCIONES PENDIENTES -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📋</span> Acciones pendientes antes de producción</div>
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fef2f2;border-radius:8px;border:1px solid #f4c4c4">
+          <span style="font-size:1rem;flex-shrink:0">🔴</span>
+          <div>
+            <div style="font-weight:700;font-size:.84rem;color:#c0392b">Definir número de WhatsApp de producción</div>
+            <div style="font-size:.76rem;color:var(--gris);margin-top:2px">Pendiente: Enrique — seleccionar la línea oficial del club para los avisos masivos</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fff4ee;border-radius:8px;border:1px solid #f4c4aa">
+          <span style="font-size:1rem;flex-shrink:0">🟠</span>
+          <div>
+            <div style="font-weight:700;font-size:.84rem;color:var(--naranja)">Confirmar día de cobro bancario (domiciliados)</div>
+            <div style="font-size:.76rem;color:var(--gris);margin-top:2px">Pendiente: Nancy / Tesorería — actualmente configurado como día 19 (temporal)</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fdf8ec;border-radius:8px;border:1px solid #e8d48a">
+          <span style="font-size:1rem;flex-shrink:0">🟡</span>
+          <div>
+            <div style="font-weight:700;font-size:.84rem;color:var(--s2)">Alta de Nancy y Evelyn en Inbox de YCloud</div>
+            <div style="font-size:.76rem;color:var(--gris);margin-top:2px">Una vez definido el número de producción — acceso al inbox de WhatsApp del club</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#e8f7f0;border-radius:8px;border:1px solid #a8dcc0">
+          <span style="font-size:1rem;flex-shrink:0">🟢</span>
+          <div>
+            <div style="font-weight:700;font-size:.84rem;color:var(--s1)">Agregar encabezados a la hoja "Plantillas" del Sheet</div>
+            <div style="font-size:.76rem;color:var(--gris);margin-top:2px">Fila 1: <code style="background:#e8f7f0;padding:1px 5px;border-radius:4px">ID | Nombre | Asunto | Cuerpo | Fecha_Actualizacion</code> — 2 minutos de trabajo</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#e8f0fb;border-radius:8px;border:1px solid #c0d0e8">
+          <span style="font-size:1rem;flex-shrink:0">🔵</span>
+          <div>
+            <div style="font-weight:700;font-size:.84rem;color:var(--azul)">Nancy y Evelyn validan las 4 plantillas de correo por segmento</div>
+            <div style="font-size:.76rem;color:var(--gris);margin-top:2px">Revisar tono y contenido de los correos antes del arranque oficial</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#e8f0fb;border-radius:8px;border:1px solid #c0d0e8">
+          <span style="font-size:1rem;flex-shrink:0">🔵</span>
+          <div>
+            <div style="font-weight:700;font-size:.84rem;color:var(--azul)">Correo cobranza@clubberimbau.com.mx con configuración DKIM/SPF</div>
+            <div style="font-size:.76rem;color:var(--gris);margin-top:2px">Pendiente: IT del club — evita que los correos lleguen a spam en producción</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACTO -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📞</span> Contacto del equipo ExcelentIA</div>
+    <div class="contacto">
+      <div class="ctc-card">
+        <div class="ctc-name">Fernando Dávila</div>
+        <div class="ctc-rol">Director · ExcelentIA</div>
+        <div class="ctc-mail">fdavila@excelentia.com.mx</div>
+      </div>
+      <div class="ctc-card">
+        <div class="ctc-name">Juan José García</div>
+        <div class="ctc-rol">Implementación · ExcelentIA</div>
+        <div class="ctc-mail">jjgarcia@excelentia.com.mx</div>
+      </div>
+      <div class="ctc-card" style="background:linear-gradient(135deg,#e8f7f0,#f0fff8)">
+        <div class="ctc-name" style="color:var(--verde)">🌐 excelentia.com.mx</div>
+        <div class="ctc-rol">Agencia de automatizaciones e IA</div>
+        <div class="ctc-mail" style="margin-top:8px">
+          <a href="https://excelentia.com.mx" target="_blank" style="color:var(--verde);font-weight:700;text-decoration:none">→ Visitar sitio web</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="footer">
+  Documento generado por <strong>ExcelentIA</strong> · Sistema IA Club Berimbau · Dashboard Inteligente v11 · Junio 2026<br>
+  <span style="color:var(--borde)">Para uso interno — datos de socios protegidos</span>
+</div>
+
+<script>
+function copiar(texto){
+  navigator.clipboard.writeText(texto).then(()=>{
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = '✅ Copiado';
+    btn.style.background = 'var(--verde)';
+    setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; }, 2000);
+  }).catch(()=>{ alert('URL: ' + texto); });
+}
+</script>
+</body>
+</html>
