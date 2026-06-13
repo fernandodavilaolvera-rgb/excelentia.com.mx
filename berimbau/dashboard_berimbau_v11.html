@@ -2465,8 +2465,18 @@ async function cargarBiblioteca(){
     const res = await fetch(URL_BIB_CARGAR, {method:'GET'});
     if(res.ok){
       const data = await res.json();
-      // n8n devuelve array [{id,nombre,asunto,cuerpo,fecha}]
-      bibliotecaPlantillas = Array.isArray(data) ? data : (data.plantillas||[]);
+      // n8n devuelve array con keys en mayúsculas (del Sheet): ID, Nombre, Asunto, Cuerpo, Fecha_Actualizacion
+      // Normalizar a minúsculas y filtrar las marcadas como ELIMINADA
+      const raw = Array.isArray(data) ? data : (data.plantillas||[]);
+      bibliotecaPlantillas = raw
+        .map(p => ({
+          id:     p.id || p.ID || p.Id || '',
+          nombre: p.nombre || p.Nombre || '',
+          asunto: p.asunto || p.Asunto || '',
+          cuerpo: p.cuerpo || p.Cuerpo || '',
+          fecha:  p.fecha || p.Fecha_Actualizacion || p.Fecha || ''
+        }))
+        .filter(p => p.id && p.nombre !== 'ELIMINADA');
     }
   } catch(e){
     // Sin conexión: intentar localStorage como fallback
