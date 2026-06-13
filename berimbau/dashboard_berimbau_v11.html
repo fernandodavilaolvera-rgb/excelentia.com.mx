@@ -2751,9 +2751,20 @@ function toggleChannel(mod, canal){
 }
 
 // Toggle status del módulo
+// ===== MÓDULOS v11: TOGGLE REAL + GUARDAR + CARGAR =====
+const MOD_MAP = {
+  anual:    { toggle:'toggle-anual',    label:'toggle-anual-label',    status:'mod-anual-status' },
+  domiprev: { toggle:'toggle-domiprev', label:'toggle-domiprev-label', status:'mod-domiprev-status' },
+  domifail: { toggle:'toggle-domifail', label:'toggle-domifail-label', status:'mod-domifail-status' },
+  cumple:   { toggle:'toggle-cumple',   label:'toggle-cumple-label',   status:'mod-cumple-status' },
+  m26:      { toggle:'toggle-26',       label:'toggle-26-label',       status:'mod-26-status' }
+};
+
 function toggleModuleStatus(mod, el){
-  const statusEl = document.getElementById('mod-'+mod+'-status');
-  const labelEl = document.getElementById('toggle-'+mod+'-label');
+  const cfg = MOD_MAP[mod];
+  if(!cfg) return;
+  const statusEl = document.getElementById(cfg.status);
+  const labelEl  = document.getElementById(cfg.label);
   if(el.checked){
     if(statusEl){ statusEl.textContent='✅ Activo'; statusEl.className='av-module-status av-status-on'; }
     if(labelEl){ labelEl.textContent='ACTIVO'; labelEl.style.color='var(--verde)'; }
@@ -2761,11 +2772,117 @@ function toggleModuleStatus(mod, el){
     if(statusEl){ statusEl.textContent='⏸ Pausado'; statusEl.className='av-module-status av-status-off'; }
     if(labelEl){ labelEl.textContent='PAUSADO'; labelEl.style.color='#ccc'; }
   }
+  guardarEstadoModulo(mod, el.checked);
 }
 
-// Guardar módulo (stub — conectar a n8n en próxima fase)
-function saveModule(mod){
-  showToast('✅ Configuración de módulo guardada (demo)');
+async function guardarEstadoModulo(mod, activo){
+  try{
+    const res = await fetch(URL_AV_GUARDAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ segmento:'mod_'+mod, activo:String(activo), asunto:'', cuerpo:'', dia_envio:'', remitente:'' })
+    });
+    if(res.ok) showToast(activo ? '✅ Módulo activado' : '⏸ Módulo pausado');
+    else showToast('⚠️ Error al guardar estado del módulo');
+  }catch(e){ showToast('⚠️ Sin conexión — estado no guardado'); }
+}
+
+async function saveModule(mod){
+  const cfg = MOD_MAP[mod];
+  if(!cfg){ showToast('⚠️ Módulo no reconocido'); return; }
+  const activo = String(document.getElementById(cfg.toggle)?.checked || false);
+  let asunto='', cuerpo='', dia_envio='', remitente='';
+
+  if(mod==='anual'){
+    asunto = document.getElementById('anual-asunto-30')?.value||'';
+    cuerpo = JSON.stringify({
+      a30: document.getElementById('anual-asunto-30')?.value||'',
+      c30: document.getElementById('anual-cuerpo-30')?.value||'',
+      a15: document.getElementById('anual-asunto-15')?.value||'',
+      c15: document.getElementById('anual-cuerpo-15')?.value||'',
+      a7:  document.getElementById('anual-asunto-7')?.value||'',
+      c7:  document.getElementById('anual-cuerpo-7')?.value||''
+    });
+  } else if(mod==='domiprev'){
+    asunto    = document.getElementById('domiprev-asunto')?.value||'';
+    cuerpo    = document.getElementById('domiprev-cuerpo')?.value||'';
+    dia_envio = document.getElementById('domi-dia-cargo')?.value||'';
+  } else if(mod==='domifail'){
+    asunto = document.getElementById('domifail-asunto')?.value||'';
+    cuerpo = document.getElementById('domifail-cuerpo')?.value||'';
+  } else if(mod==='cumple'){
+    asunto = document.getElementById('cumple-asunto')?.value||'';
+    const cuando = document.querySelector('input[name="cumple-when"]:checked')?.value||'antes';
+    cuerpo = JSON.stringify({ cuerpo: document.getElementById('cumple-cuerpo')?.value||'', cuando });
+  } else if(mod==='m26'){
+    asunto    = document.getElementById('av26-asunto-titular')?.value||'';
+    cuerpo    = document.getElementById('av26-cuerpo-titular')?.value||'';
+    remitente = document.getElementById('av26-correo-nancy')?.value||'';
+  }
+
+  try{
+    const res = await fetch(URL_AV_GUARDAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ segmento:'mod_'+mod, activo, asunto, cuerpo, dia_envio, remitente })
+    });
+    if(res.ok) showToast('💾 Configuración guardada correctamente');
+    else showToast('⚠️ Error al guardar configuración');
+  }catch(e){ showToast('⚠️ Sin conexión al guardar'); }
+}
+
+async function cargarModulos(){
+  try{
+    const res = await fetch(URL_AV_CARGAR);
+    if(!res.ok) return;
+    const data = await res.json();
+    const config = Array.isArray(data.config) ? data.config : [];
+    config.forEach(row=>{
+      const seg = (row.Segmento||row.segmento||'').trim();
+      if(!seg.startsWith('mod_')) return;
+      const mod = seg.replace('mod_','');
+      const cfg = MOD_MAP[mod];
+      if(!cfg) return;
+      const activo = row.Activo==='true' || row.Activo===true;
+      // Restaurar toggle + label + status badge
+      const t=document.getElementById(cfg.toggle);
+      const l=document.getElementById(cfg.label);
+      const s=document.getElementById(cfg.status);
+      if(t) t.checked=activo;
+      if(l){ l.textContent=activo?'ACTIVO':'PAUSADO'; l.style.color=activo?'var(--verde)':'#ccc'; }
+      if(s){ s.textContent=activo?'✅ Activo':'⏸ Pausado'; s.className='av-module-status '+(activo?'av-status-on':'av-status-off'); }
+      // Restaurar campos de plantilla
+      const asunto=row.Asunto||row.asunto||'';
+      const cuerpo=row.Cuerpo||row.cuerpo||'';
+      const diaEnvio=row.Dia_Envio||row.dia_envio||'';
+      const remitente=row.Remitente||row.remitente||'';
+      if(mod==='anual'&&cuerpo){
+        try{ const c=JSON.parse(cuerpo);
+          if(c.a30){const el=document.getElementById('anual-asunto-30');if(el)el.value=c.a30;}
+          if(c.c30){const el=document.getElementById('anual-cuerpo-30');if(el)el.value=c.c30;}
+          if(c.a15){const el=document.getElementById('anual-asunto-15');if(el)el.value=c.a15;}
+          if(c.c15){const el=document.getElementById('anual-cuerpo-15');if(el)el.value=c.c15;}
+          if(c.a7) {const el=document.getElementById('anual-asunto-7'); if(el)el.value=c.a7;}
+          if(c.c7) {const el=document.getElementById('anual-cuerpo-7'); if(el)el.value=c.c7;}
+        }catch(e){}
+      } else if(mod==='domiprev'){
+        if(asunto){const el=document.getElementById('domiprev-asunto');if(el)el.value=asunto;}
+        if(cuerpo){const el=document.getElementById('domiprev-cuerpo');if(el)el.value=cuerpo;}
+        if(diaEnvio){const el=document.getElementById('domi-dia-cargo');if(el){el.value=diaEnvio;const av=document.getElementById('domi-dia-aviso');if(av)av.textContent=Math.max(1,parseInt(diaEnvio)-7);}}
+      } else if(mod==='domifail'){
+        if(asunto){const el=document.getElementById('domifail-asunto');if(el)el.value=asunto;}
+        if(cuerpo){const el=document.getElementById('domifail-cuerpo');if(el)el.value=cuerpo;}
+      } else if(mod==='cumple'){
+        if(asunto){const el=document.getElementById('cumple-asunto');if(el)el.value=asunto;}
+        if(cuerpo){try{const c=JSON.parse(cuerpo);
+          if(c.cuerpo){const el=document.getElementById('cumple-cuerpo');if(el)el.value=c.cuerpo;}
+          if(c.cuando){const r=document.querySelector('input[name="cumple-when"][value="'+c.cuando+'"]');if(r)r.checked=true;}
+        }catch(e){const el=document.getElementById('cumple-cuerpo');if(el&&cuerpo)el.value=cuerpo;}}
+      } else if(mod==='m26'){
+        if(asunto){const el=document.getElementById('av26-asunto-titular');if(el)el.value=asunto;}
+        if(cuerpo){const el=document.getElementById('av26-cuerpo-titular');if(el)el.value=cuerpo;}
+        if(remitente){const el=document.getElementById('av26-correo-nancy');if(el)el.value=remitente;}
+      }
+    });
+  }catch(e){ console.warn('cargarModulos error:',e); }
 }
 
 // Enviar cargo fallido
@@ -2777,6 +2894,9 @@ function enviarCargoFallido(){
 
 // Calcular datos para los módulos
 function initModulesV10(){
+  // Restaurar estado de toggles y plantillas desde el Sheet
+  cargarModulos();
+
   const hoy = new Date();
 
   // --- Pago anual ---
