@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>⏱ Tracker de Horas — ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;min-height:100vh}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.toast{animation:fadeDown .25s ease}
+
+/* 5-col grid responsive */
+.proj-grid{display:grid;gap:10px;grid-template-columns:repeat(5,1fr)}
+@media(max-width:1100px){.proj-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:860px) {.proj-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px) {.proj-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px) {.proj-grid{grid-template-columns:1fr}}
+
+/* 2-col charts */
+.chart-grid{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+@media(max-width:700px){.chart-grid{grid-template-columns:1fr}}
+
+.tab{border:none;background:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:11px 14px;white-space:nowrap;border-bottom:3px solid transparent;color:#8a90a0;transition:color .15s}
+.tab.active{color:#1a3a6b;border-bottom-color:#4a9fd4}
+.tab:hover{color:#1a3a6b}
+.card{background:#fff;border-radius:12px;padding:13px;border:1px solid #dde1e9;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:box-shadow .2s,border .2s}
+.card:hover{box-shadow:0 4px 16px rgba(26,58,107,.1)}
+.btn{font-family:'Manrope',sans-serif;font-weight:700;cursor:pointer;border:none;border-radius:7px;font-size:12px;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.85}.btn:active{transform:scale(.96)}
+.act-btn{background:none;border:none;width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
+input,select{font-family:'Manrope',sans-serif;font-size:13px;border:1px solid #dde1e9;border-radius:8px;padding:9px 12px;width:100%;color:#1a2035;background:#fff;outline:none}
+input:focus,select:focus{border-color:#4a9fd4}
+.bar-track{background:#f0f4f8;border-radius:5px;height:6px;overflow:hidden}
+.bar-fill{height:6px;border-radius:5px;transition:width .5s ease}
+.emoji-opt{cursor:pointer;font-size:19px;width:36px;height:36px;border-radius:7px;border:2px solid transparent;display:inline-flex;align-items:center;justify-content:center;transition:background .12s}
+.emoji-opt:hover{background:#e8f0fb}
+.emoji-opt.sel{border-color:#4a9fd4;background:#e8f0fb}
+.color-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s;flex-shrink:0}
+.color-dot:hover{transform:scale(1.2)}
+.color-dot.sel{border-color:#1a2035;transform:scale(1.1)}
+.toggle{width:40px;height:22px;border-radius:11px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+@media(max-width:560px){
+  .stat-grid{grid-template-columns:1fr 1fr!important}
+  .row3{grid-template-columns:1fr 1fr!important}
+  .btn-row{flex-direction:column!important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ── Constants ────────────────────────────────────────────────
+const DEFAULT_PROJECTS=[
+  {id:'citas',       name:'Citas Médicas',   full:'Agente de Citas Médicas', emoji:'🗓️',color:'#4a9fd4',isDefault:true},
+  {id:'eco',         name:'Eco-IA',           full:'Eco-IA',                  emoji:'🫀', color:'#1a3a6b',isDefault:true},
+  {id:'correos',     name:'Correos',          full:'Resumen de Correos',       emoji:'📧', color:'#2d6aa0',isDefault:true},
+  {id:'berimbau',    name:'Berimbau',         full:'Club Berimbau',            emoji:'⚽', color:'#3AAA35',isDefault:true},
+  {id:'ventana',     name:'Ventana al Mundo', full:'Ventana al Mundo',         emoji:'🌍', color:'#e67e22',isDefault:true},
+  {id:'inmobiliaria',name:'Inmobiliarios',    full:'Agentes Inmobiliarios',    emoji:'🏠', color:'#8e44ad',isDefault:true},
+];
+const EMOJIS=['🚀','💼','🎯','⚡','🌟','💡','🔧','📊','🎨','🏗️','🤖','💬','🔑','📚','🌐','🏆','📱','🎵','✍️','🧩','🔔','🌈','💰','🧪','📸','🌿','🎸','🏋️','🎭','🖥️'];
+const COLORS=['#4a9fd4','#1a3a6b','#2d6aa0','#3AAA35','#e67e22','#8e44ad','#ef4b1f','#e74c3c','#16a085','#f39c12','#2980b9','#27ae60','#d35400','#c0392b','#1abc9c','#7f8c8d','#e91e63','#795548'];
+const SK ='tracker:sessions-v4';
+const PK ='tracker:projects-v2';
+const CFG='tracker:config-v1';
+
+// ── State ─────────────────────────────────────────────────────
+let sessions   = JSON.parse(localStorage.getItem(SK)||'[]');
+let projects   = JSON.parse(localStorage.getItem(PK)||'null') || DEFAULT_PROJECTS.map(p=>({...p}));
+let cfg        = JSON.parse(localStorage.getItem(CFG)||'{}');
+let sheetsUrl  = cfg.sheetsUrl||'';
+let sheetsOn   = cfg.sheetsOn||false;
+let activeTimer= null;
+let elapsed    = 0;
+let tickIntvl  = null;
+let view       = 'tracker';
+let showManual = false;
+let syncing    = false;
+let toast      = null;
+let toastTimer = null;
+let newProj    = {name:'',emoji:'🚀',color:'#4a9fd4'};
+let mData      = {projectId:projects[0]?.id||'',hours:'',minutes:'',date:td(),notes:''};
+let editingProject = null;  // {id,name,full,emoji,color}
+
+// ── Persistence ───────────────────────────────────────────────
+function saveSess(){localStorage.setItem(SK,JSON.stringify(sessions));}
+function saveProj(){localStorage.setItem(PK,JSON.stringify(projects));}
+function saveCfg(){localStorage.setItem(CFG,JSON.stringify({sheetsUrl,sheetsOn}));}
+
+// ── Helpers ───────────────────────────────────────────────────
+function td(){return new Date().toISOString().split('T')[0];}
+function fmtTime(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return[h,m,sc].map(v=>String(v).padStart(2,'0')).join(':');}
+function fmtHrs(h){
+  if(!h||h<0.008)return'—';
+  const hh=Math.floor(h),mm=Math.round((h-hh)*60);
+  if(mm===60)return`${hh+1}h`;if(hh===0)return`${mm}min`;if(mm===0)return`${hh}h`;return`${hh}h ${mm}min`;
+}
+function fmtDate(iso){if(!iso)return'';return new Date(iso+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDateShort(iso){
+  if(!iso)return null;
+  return new Date(iso+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+}
+function getTotals(){
+  return projects.map(p=>{
+    const ps=sessions.filter(s=>s.projectId===p.id);
+    const total=ps.reduce((a,s)=>a+s.duration,0);
+    const startDate=ps.length>0?[...ps].map(s=>s.date).sort()[0]:null;
+    return{...p,total,startDate};
+  });
+}
+function grandTotal(t){return t.reduce((a,p)=>a+p.total,0);}
+function pendingCount(){return sessions.filter(s=>!s.synced).length;}
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg){
+  toast=msg;render();clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{toast=null;render();},3000);
+}
+
+// ── Timer ─────────────────────────────────────────────────────
+function startTimer(pid){
+  if(activeTimer)stopTimer(false);
+  activeTimer={projectId:pid,startTime:Date.now()};elapsed=0;
+  tickIntvl=setInterval(()=>{elapsed=Math.floor((Date.now()-activeTimer.startTime)/1000);renderBanner();},1000);
+  render();
+}
+async function stopTimer(notify=true){
+  if(!activeTimer)return;
+  clearInterval(tickIntvl);tickIntvl=null;
+  const dur=(Date.now()-activeTimer.startTime)/3600000;
+  if(dur>=0.005){
+    const s={id:Date.now(),projectId:activeTimer.projectId,date:td(),duration:dur,notes:'',type:'timer',synced:false};
+    sessions.unshift(s);saveSess();
+    if(notify)showToast('✅ Sesión de '+fmtHrs(dur)+' guardada');
+    syncOne(s);
+  }
+  activeTimer=null;elapsed=0;render();
+}
+async function saveManual(){
+  const dur=parseFloat(mData.hours||0)+parseFloat(mData.minutes||0)/60;
+  if(dur<=0)return;
+  const s={id:Date.now(),projectId:mData.projectId,date:mData.date,duration:dur,notes:mData.notes,type:'manual',synced:false};
+  sessions.unshift(s);saveSess();
+  showToast('✅ '+fmtHrs(dur)+' registradas');
+  mData={projectId:mData.projectId,hours:'',minutes:'',date:td(),notes:''};
+  showManual=false;syncOne(s);render();
+}
+function delSession(id){sessions=sessions.filter(s=>s.id!==id);saveSess();render();}
+function delAll(){if(confirm('¿Borrar todo el historial?')){sessions=[];saveSess();render();}}
+
+// ── Projects ──────────────────────────────────────────────────
+function addProject(){
+  const name=newProj.name.trim();
+  if(!name){showToast('⚠️ Escribe un nombre');return;}
+  projects.push({id:'p_'+Date.now(),name,full:name,emoji:newProj.emoji,color:newProj.color,isDefault:false});
+  saveProj();showToast('✅ "'+name+'" creado');
+  newProj={name:'',emoji:'🚀',color:'#4a9fd4'};render();
+}
+function editProject(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  editingProject={id,name:p.name,full:p.full,emoji:p.emoji,color:p.color};render();
+}
+function saveEdit(){
+  const name=editingProject.name.trim();
+  if(!name){showToast('⚠️ El nombre no puede estar vacío');return;}
+  const idx=projects.findIndex(p=>p.id===editingProject.id);
+  if(idx>=0){
+    projects[idx]={...projects[idx],name,full:name,emoji:editingProject.emoji,color:editingProject.color};
+    saveProj();showToast('✅ Proyecto actualizado');
+  }
+  editingProject=null;render();
+}
+function closeEdit(){editingProject=null;render();}
+function resetProject(id){
+  const proj=projects.find(p=>p.id===id);
+  const cnt=sessions.filter(s=>s.projectId===id).length;
+  if(cnt===0){showToast('ℹ️ No hay sesiones que reiniciar');return;}
+  if(!confirm(`¿Reiniciar "${proj?.full}"?\nSe borrarán ${cnt} sesión(es) y el contador vuelve a 0.`))return;
+  sessions=sessions.filter(s=>s.projectId!==id);
+  saveSess();showToast('🔄 "'+proj?.name+'" reiniciado');render();
+}
+function deleteProject(id){
+  const proj=projects.find(p=>p.id===id);
+  const cnt=sessions.filter(s=>s.projectId===id).length;
+  let msg=`¿Eliminar "${proj?.full}"?`;
+  if(cnt>0)msg+=`\nSe borrarán ${cnt} sesión(es).`;
+  if(!confirm(msg))return;
+  projects=projects.filter(p=>p.id!==id);
+  sessions=sessions.filter(s=>s.projectId!==id);
+  saveSess();saveProj();showToast('🗑 "'+proj?.name+'" eliminado');render();
+}
+
+// ── Sheets ────────────────────────────────────────────────────
+async function syncOne(session){
+  if(!sheetsOn||!sheetsUrl)return;
+  try{
+    const proj=projects.find(p=>p.id===session.projectId);
+    await fetch(sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify({
+      id:String(session.id),projectName:proj?.full||'—',date:session.date,
+      duration:Math.round(session.duration*1000)/1000,
+      durationFormatted:fmtHrs(session.duration),
+      notes:session.notes||'',type:session.type
+    })});
+    session.synced=true;saveSess();render();
+  }catch(e){}
+}
+async function syncPending(){
+  if(syncing||!sheetsOn||!sheetsUrl)return;
+  const pending=sessions.filter(s=>!s.synced);
+  if(!pending.length){showToast('✅ Todo ya está sincronizado');return;}
+  syncing=true;showToast('⏳ Sincronizando '+pending.length+' sesión(es)…');render();
+  for(const s of pending)await syncOne(s);
+  syncing=false;render();showToast('☁️ Sesiones enviadas a Google Sheets');
+}
+async function testConn(){
+  if(!sheetsUrl){showToast('⚠️ Primero pega la URL');return;}
+  showToast('🔄 Probando conexión…');
+  try{await fetch(sheetsUrl,{mode:'no-cors'});showToast('✅ URL válida — conexión lista');}
+  catch(e){showToast('❌ No se pudo conectar — revisa la URL');}
+}
+
+// ── SVG Donut ─────────────────────────────────────────────────
+function svgDonut(totals,gt){
+  const R=72,CX=120,CY=120,r=44,circ=2*Math.PI*R;
+  const slices=totals.filter(p=>p.total>0);
+  if(!slices.length)return`<text x="${CX}" y="${CY+5}" text-anchor="middle" fill="#8a90a0" font-family="Manrope" font-size="12">Sin datos</text>`;
+  let offset=0,paths='';
+  slices.forEach(p=>{
+    const pct=p.total/gt,dash=pct*circ;
+    paths+=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${p.color}" stroke-width="26" stroke-dasharray="${dash} ${circ-dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${CX} ${CY})"/>`;
+    if(pct>0.07){const ang=(offset+dash/2)/circ*2*Math.PI-Math.PI/2;const lx=CX+Math.cos(ang)*(R+16),ly=CY+Math.sin(ang)*(R+16);paths+=`<text x="${lx}" y="${ly+4}" text-anchor="middle" fill="#fff" font-family="Manrope" font-size="9" font-weight="700">${Math.round(pct*100)}%</text>`;}
+    offset+=dash;
+  });
+  paths+=`<circle cx="${CX}" cy="${CY}" r="${r}" fill="white"/>`;
+  paths+=`<text x="${CX}" y="${CY-5}" text-anchor="middle" fill="#1a2035" font-family="Manrope" font-size="11" font-weight="700">Total</text>`;
+  paths+=`<text x="${CX}" y="${CY+13}" text-anchor="middle" fill="#1a3a6b" font-family="Manrope" font-size="14" font-weight="800">${fmtHrs(gt)}</text>`;
+  return paths;
+}
+
+function renderBanner(){
+  const b=document.getElementById('banner');if(!b)return;
+  if(!activeTimer){b.style.display='none';return;}
+  b.style.display='flex';
+  const te=document.getElementById('elapsed');if(te)te.textContent=fmtTime(elapsed);
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render(){
+  const totals=getTotals(),gt=grandTotal(totals),ap=activeTimer?projects.find(p=>p.id===activeTimer.projectId):null;
+  const pieData=[...totals].filter(p=>p.total>0).sort((a,b)=>b.total-a.total);
+  const pending=pendingCount();
+  const customN=projects.filter(p=>!p.isDefault).length;
+
+  // ── Edit modal HTML ────────────────────────────────────────
+  const editModal = editingProject ? `
+  <div class="modal-bg" onclick="if(event.target===this)closeEdit()">
+    <div class="modal-box">
+      <div style="font-weight:800;font-size:16px;color:#1a2035;margin-bottom:3px">✏️ Editar proyecto</div>
+      <div style="color:#8a90a0;font-size:12px;margin-bottom:18px">Modifica nombre, emoji o color</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Nombre</label>
+          <input type="text" value="${editingProject.name}" oninput="editingProject.name=this.value;document.getElementById('ep').textContent=this.value||'Nombre del proyecto'">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:8px">Emoji</label>
+          <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">
+            ${EMOJIS.map(e=>`<span class="emoji-opt ${editingProject.emoji===e?'sel':''}" onclick="editingProject.emoji='${e}';document.getElementById('epv').textContent='${e}';document.querySelectorAll('.emoji-opt').forEach(x=>x.classList.remove('sel'));this.classList.add('sel')">${e}</span>`).join('')}
+          </div>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:8px">Color</label>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:10px">
+            ${COLORS.map(c=>`<div class="color-dot ${editingProject.color===c?'sel':''}" style="background:${c}" onclick="editingProject.color='${c}';document.getElementById('epbox').style.background='${c}';document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('sel'));this.classList.add('sel')"></div>`).join('')}
+            <input type="color" value="${editingProject.color}" oninput="editingProject.color=this.value;document.getElementById('epbox').style.background=this.value" style="width:24px;height:24px;border-radius:50%;padding:0;border:2px solid #dde1e9;cursor:pointer">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:#f5f6f8;padding:10px;border-radius:10px">
+            <div id="epbox" style="width:36px;height:36px;border-radius:9px;background:${editingProject.color};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0"><span id="epv">${editingProject.emoji}</span></div>
+            <div id="ep" style="font-weight:700;font-size:13px;color:#1a2035">${editingProject.name||'Nombre del proyecto'}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn" onclick="closeEdit()" style="flex:1;background:#f0f4f8;color:#4a5068;padding:11px">Cancelar</button>
+          <button class="btn" onclick="saveEdit()" style="flex:2;background:#1a3a6b;color:#fff;padding:11px">✓ Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>` : '';
+
+  document.getElementById('app').innerHTML = editModal + `
+  ${toast?`<div class="toast" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#0d1b3e;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.28);white-space:nowrap">${toast}</div>`:''}
+
+  <!-- HEADER -->
+  <div style="background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:16px 20px 18px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div style="background:#fff;border-radius:10px;padding:5px 13px;display:flex;align-items:center;justify-content:center;min-width:76px;min-height:44px;flex-shrink:0">
+        <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" style="height:34px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <span style="display:none;font-weight:800;font-size:13px;color:#1a3a6b">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <div>
+        <div style="color:#fff;font-weight:800;font-size:18px">⏱ Tracker de Horas</div>
+        <div style="display:flex;align-items:center;gap:7px;margin-top:2px">
+          <div style="color:#7ab3d4;font-size:11px">Seguimiento por proyecto</div>
+          ${sheetsOn?`<div style="background:#3AAA35;color:#fff;font-size:9px;font-weight:700;border-radius:20px;padding:2px 7px">☁️ Sheets activo</div>`:''}
+        </div>
+      </div>
+    </div>
+    <div class="stat-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${[['Total acumulado',gt>0?fmtHrs(gt):'—'],['Sesiones',sessions.length],['Proyectos',projects.length]].map(([l,v])=>`
+      <div style="background:rgba(255,255,255,.11);border-radius:8px;padding:9px 12px">
+        <div style="color:#7ab3d4;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">${l}</div>
+        <div style="color:#fff;font-weight:800;font-size:16px;margin-top:2px">${v}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- ACTIVE TIMER BANNER -->
+  <div id="banner" style="display:${activeTimer?'flex':'none'};background:#0d1b3e;padding:10px 20px;align-items:center;justify-content:space-between;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:8px;height:8px;border-radius:50%;background:#3AAA35;animation:blink 1.4s ease-in-out infinite;flex-shrink:0"></div>
+      <div>
+        <div style="color:#7ab3d4;font-size:9px;font-weight:700;text-transform:uppercase">Trabajando en</div>
+        <div style="color:#fff;font-weight:700;font-size:13px;margin-top:1px">${ap?.emoji} ${ap?.full}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div id="elapsed" style="color:#4a9fd4;font-weight:800;font-size:22px;font-variant-numeric:tabular-nums">${fmtTime(elapsed)}</div>
+      <button class="btn" onclick="stopTimer()" style="background:#ef4b1f;color:#fff;padding:7px 14px">⏹ Stop</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div style="display:flex;background:#fff;border-bottom:1px solid #dde1e9;overflow-x:auto">
+    ${[
+      ['tracker','⏱ Timer'],
+      ['chart','📊 Gráfica'],
+      ['history',`📋 Historial${pending>0&&sheetsOn?` <span style="background:#ef4b1f;color:#fff;border-radius:10px;font-size:9px;padding:1px 5px">${pending}</span>`:''}` ],
+      ['projects','⚙ Proyectos'+(customN>0?` (${customN})`:'')],
+      ['sheets',`☁️ Sheets${sheetsOn?' ✅':''}`]
+    ].map(([v,l])=>`<button class="tab ${view===v?'active':''}" onclick="setView('${v}')">${l}</button>`).join('')}
+  </div>
+
+  <div style="padding:16px;max-width:1400px;margin:0 auto">
+
+  <!-- ══ TIMER ══ -->
+  ${view==='tracker'?`
+  <div class="proj-grid">
+    ${totals.map(p=>{
+      const isA=activeTimer?.projectId===p.id;
+      const pct=gt>0?(p.total/gt)*100:0;
+      return`<div class="card" style="${isA?`border:2px solid ${p.color};box-shadow:0 0 0 3px ${p.color}20;`:''}">
+        <!-- Emoji + name + start/stop -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:8px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:20px;line-height:1;margin-bottom:3px">${p.emoji}</div>
+            <div style="font-weight:700;font-size:11.5px;color:#1a2035;line-height:1.3">${p.full}</div>
+          </div>
+          <button class="btn" onclick="${isA?`stopTimer()`:`startTimer('${p.id}')`}"
+            style="flex-shrink:0;background:${isA?'#ef4b1f':p.color};color:#fff;padding:5px 9px;font-size:11px;font-weight:700">
+            ${isA?'⏹ Stop':'▶ Start'}
+          </button>
+        </div>
+        <!-- Hours + % -->
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+          <span style="color:${p.color};font-weight:800;font-size:16px">${fmtHrs(p.total)}</span>
+          <span style="color:#8a90a0;font-size:10px">${pct>0?Math.round(pct)+'%':''}</span>
+        </div>
+        <!-- Progress bar -->
+        <div class="bar-track"><div class="bar-fill" style="background:${p.color};width:${pct}%"></div></div>
+        <!-- Start date -->
+        <div style="font-size:10px;margin-top:5px;${p.startDate?'color:#4a9fd4':'color:#c8cdd5'}">
+          ${p.startDate?`📅 Desde: ${fmtDateShort(p.startDate)}`:'Sin sesiones aún'}
+        </div>
+        <!-- Action bar -->
+        <div style="display:flex;gap:3px;align-items:center;margin-top:8px;padding-top:7px;border-top:1px solid #f0f4f8">
+          <button class="act-btn" onclick="editProject('${p.id}')" title="Editar" style="background:#e8f0fb;color:#2d6aa0">✏️</button>
+          <button class="act-btn" onclick="resetProject('${p.id}')" title="Reiniciar" style="background:#fff3e0;color:#e67e22">🔄</button>
+          <button class="act-btn" onclick="deleteProject('${p.id}')" title="Eliminar" style="background:#fde8e8;color:#e74c3c">🗑️</button>
+          ${sheetsOn?`<div style="margin-left:auto;font-size:13px" title="${p.synced?'Sincronizado':'Pendiente'}">${sessions.some(s=>s.projectId===p.id&&!s.synced)?'⏳':sessions.some(s=>s.projectId===p.id)?'☁️':''}</div>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <button class="btn" onclick="toggleManual()" style="display:block;width:100%;margin-top:12px;background:${showManual?'#f0f4f8':'#1a3a6b'};color:${showManual?'#4a5068':'#fff'};border:1px solid #dde1e9;padding:12px">
+    ${showManual?'✕  Cancelar':'+ Registrar horas manualmente'}
+  </button>
+
+  ${showManual?`<div class="card" style="margin-top:8px">
+    <div style="font-weight:700;font-size:14px;color:#1a2035;margin-bottom:14px">📝 Añadir sesión pasada</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Proyecto</label>
+        <select onchange="mData.projectId=this.value">${projects.map(p=>`<option value="${p.id}" ${mData.projectId===p.id?'selected':''}>${p.emoji} ${p.full}</option>`).join('')}</select></div>
+      <div class="row3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div><label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Horas</label>
+          <input type="number" min="0" max="24" placeholder="0" value="${mData.hours}" oninput="mData.hours=this.value"></div>
+        <div><label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Minutos</label>
+          <input type="number" min="0" max="59" placeholder="0" value="${mData.minutes}" oninput="mData.minutes=this.value"></div>
+        <div><label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Fecha</label>
+          <input type="date" value="${mData.date}" oninput="mData.date=this.value"></div>
+      </div>
+      <div><label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Notas (opcional)</label>
+        <input type="text" placeholder="¿En qué trabajaste?" value="${mData.notes}" oninput="mData.notes=this.value"></div>
+      <button class="btn" onclick="saveManual()" style="background:#3AAA35;color:#fff;padding:12px;font-size:14px">✓ Guardar sesión</button>
+    </div></div>`:''}
+  `:''}
+
+  <!-- ══ GRÁFICA ══ -->
+  ${view==='chart'?`
+  ${gt===0?`<div style="text-align:center;padding:70px 20px;color:#8a90a0"><div style="font-size:52px;margin-bottom:14px">📊</div><div style="font-weight:700;font-size:16px;color:#1a2035">Aún no hay datos</div><div style="font-size:13px;margin-top:6px">Ve al Timer y empieza a registrar</div></div>`:`
+  <div class="chart-grid">
+    <!-- Donut -->
+    <div class="card">
+      <div style="font-weight:700;font-size:14px;color:#1a2035">Distribución de tiempo</div>
+      <div style="color:#8a90a0;font-size:12px;margin-top:2px;margin-bottom:10px">Total: <strong style="color:#1a2035">${fmtHrs(gt)}</strong></div>
+      <svg viewBox="0 0 240 240" style="width:100%;max-width:240px;display:block;margin:0 auto">${svgDonut(totals,gt)}</svg>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;justify-content:center">
+        ${pieData.map(p=>`<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#4a5068"><div style="width:8px;height:8px;border-radius:50%;background:${p.color};flex-shrink:0"></div>${p.emoji} ${p.name}</div>`).join('')}
+      </div>
+    </div>
+    <!-- Bars -->
+    <div class="card">
+      <div style="font-weight:700;font-size:14px;color:#1a2035;margin-bottom:16px">Desglose por proyecto</div>
+      ${pieData.map(p=>`<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-size:12px;font-weight:600;color:#1a2035">${p.emoji} ${p.full}</span>
+          <span style="font-size:12px;font-weight:800;color:${p.color};flex-shrink:0;margin-left:8px">${fmtHrs(p.total)}</span>
+        </div>
+        <div class="bar-track" style="height:8px"><div class="bar-fill" style="background:${p.color};width:${Math.round((p.total/gt)*100)}%"></div></div>
+        <div style="color:#8a90a0;font-size:10px;margin-top:3px">${Math.round((p.total/gt)*100)}% · ${p.startDate?`Desde ${fmtDateShort(p.startDate)}`:'—'}</div>
+      </div>`).join('')}
+    </div>
+  </div>`}
+  `:''}
+
+  <!-- ══ HISTORIAL ══ -->
+  ${view==='history'?`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:12px;color:#8a90a0">${sessions.length} sesión(es) · ${pending} pendiente(s)</div>
+    <div class="btn-row" style="display:flex;gap:8px">
+      ${sheetsOn&&pending>0?`<button class="btn" onclick="syncPending()" style="background:#3AAA35;color:#fff;padding:6px 14px">☁️ Sync ${pending}</button>`:''}
+      ${sessions.length>0?`<button class="btn" onclick="delAll()" style="background:none;border:1px solid #dde1e9;color:#8a90a0;padding:6px 14px">🗑 Borrar todo</button>`:''}
+    </div>
+  </div>
+  ${sessions.length===0?`<div style="text-align:center;padding:70px 20px;color:#8a90a0"><div style="font-size:52px;margin-bottom:14px">📋</div><div style="font-weight:700;font-size:16px;color:#1a2035">Sin sesiones</div></div>`:
+  `<div style="display:flex;flex-direction:column;gap:7px">
+    ${sessions.map(s=>{
+      const p=projects.find(x=>x.id===s.projectId)||{emoji:'❓',full:'Proyecto eliminado',color:'#ccc'};
+      return`<div style="background:#fff;border-radius:10px;padding:11px 13px;border:1px solid #dde1e9;display:flex;align-items:center;gap:10px">
+        <div style="width:4px;align-self:stretch;border-radius:4px;background:${p.color};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px;color:#1a2035">${p.emoji} ${p.full}</div>
+          ${s.notes?`<div style="font-size:12px;color:#8a90a0;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.notes}</div>`:''}
+          <div style="font-size:11px;color:#8a90a0;margin-top:2px">${fmtDate(s.date)} · ${s.type==='manual'?'✏️ Manual':'⏱ Timer'}</div>
+        </div>
+        <div style="font-weight:800;font-size:13px;color:${p.color};flex-shrink:0">${fmtHrs(s.duration)}</div>
+        ${sheetsOn?`<div style="font-size:14px;flex-shrink:0" title="${s.synced?'En Sheets':'Pendiente'}">${s.synced?'☁️':'⏳'}</div>`:''}
+        <button onclick="delSession(${s.id})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 4px">✕</button>
+      </div>`;}).join('')}
+  </div>`}
+  `:''}
+
+  <!-- ══ PROYECTOS ══ -->
+  ${view==='projects'?`
+  <div class="card" style="margin-bottom:14px;border-left:4px solid #4a9fd4">
+    <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">➕ Nuevo proyecto</div>
+    <div style="color:#8a90a0;font-size:12px;margin-bottom:14px">Aparecerá en el Timer automáticamente</div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div><label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Nombre</label>
+        <input type="text" placeholder="Ej: Sitio web, App móvil…" value="${newProj.name}" oninput="newProj.name=this.value"></div>
+      <div><label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:7px">Emoji</label>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">
+          ${EMOJIS.map(e=>`<span class="emoji-opt ${newProj.emoji===e?'sel':''}" onclick="newProj.emoji='${e}';render()">${e}</span>`).join('')}
+          <input type="text" maxlength="2" placeholder="✏️" oninput="newProj.emoji=this.value||'🚀';render()" style="width:38px;height:36px;text-align:center;font-size:17px;padding:4px;flex-shrink:0">
+        </div>
+      </div>
+      <div><label style="font-size:12px;font-weight:700;color:#4a5068;display:block;margin-bottom:7px">Color</label>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:10px">
+          ${COLORS.map(c=>`<div class="color-dot ${newProj.color===c?'sel':''}" style="background:${c}" onclick="newProj.color='${c}';render()"></div>`).join('')}
+          <input type="color" value="${newProj.color}" oninput="newProj.color=this.value;render()" style="width:24px;height:24px;border-radius:50%;padding:0;border:2px solid #dde1e9;cursor:pointer">
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:9px;background:${newProj.color};display:flex;align-items:center;justify-content:center;font-size:20px">${newProj.emoji}</div>
+          <div><div style="font-weight:700;font-size:13px;color:#1a2035">${newProj.name||'Nombre del proyecto'}</div><div style="font-size:11px;color:#8a90a0">Vista previa</div></div>
+        </div>
+      </div>
+      <button class="btn" onclick="addProject()" style="background:#1a3a6b;color:#fff;padding:12px;font-size:14px">✓ Crear proyecto</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">Todos los proyectos</div>
+    <div style="color:#8a90a0;font-size:12px;margin-bottom:14px">${projects.length} en total</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${getTotals().map(p=>{
+        const cnt=sessions.filter(s=>s.projectId===p.id).length;
+        return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid #dde1e9">
+          <div style="width:36px;height:36px;border-radius:9px;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">${p.emoji}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:13px;color:#1a2035">${p.full}</div>
+            <div style="font-size:11px;color:#8a90a0;margin-top:2px">
+              ${cnt} sesión${cnt!==1?'es':''} · ${fmtHrs(p.total)||'Sin horas'}
+              ${p.startDate?` · 📅 ${fmtDateShort(p.startDate)}`:''}
+              · <span style="background:${p.isDefault?'#e8f0fb':'#eef4fc'};color:${p.isDefault?'#2d6aa0':'#4a9fd4'};border-radius:20px;padding:1px 6px;font-weight:700;font-size:10px">${p.isDefault?'Predefinido':'Personalizado'}</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="act-btn" onclick="editProject('${p.id}')" title="Editar" style="background:#e8f0fb;color:#2d6aa0">✏️</button>
+            <button class="act-btn" onclick="resetProject('${p.id}')" title="Reiniciar" style="background:#fff3e0;color:#e67e22">🔄</button>
+            <button class="act-btn" onclick="deleteProject('${p.id}')" title="Eliminar" style="background:#fde8e8;color:#e74c3c">🗑️</button>
+          </div>
+        </div>`;}).join('')}
+    </div>
+  </div>
+  `:''}
+
+  <!-- ══ SHEETS ══ -->
+  ${view==='sheets'?`
+  <div class="card" style="margin-bottom:14px;border-left:4px solid ${sheetsOn?'#3AAA35':'#dde1e9'}">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div>
+        <div style="font-weight:800;font-size:15px;color:#1a2035">☁️ Sincronización con Google Sheets</div>
+        <div style="color:#8a90a0;font-size:12px;margin-top:3px">Cada sesión se guarda automáticamente en tu hoja</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-size:12px;font-weight:700;color:${sheetsOn?'#3AAA35':'#8a90a0'}">${sheetsOn?'Activo':'Inactivo'}</span>
+        <button class="toggle" style="background:${sheetsOn?'#3AAA35':'#dde1e9'}" onclick="sheetsOn=!sheetsOn;saveCfg();render()">
+          <div class="toggle-knob" style="left:${sheetsOn?'20px':'2px'}"></div>
+        </button>
+      </div>
+    </div>
+    ${sheetsOn&&sessions.length>0?`
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid #f0f4f8;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div>
+        <span style="font-size:13px;font-weight:700;color:#1a2035">${sessions.filter(s=>s.synced).length}</span><span style="font-size:12px;color:#8a90a0"> sincronizadas  ·  </span>
+        <span style="font-size:13px;font-weight:700;color:${pending>0?'#ef4b1f':'#3AAA35'}">${pending}</span><span style="font-size:12px;color:#8a90a0"> pendientes</span>
+      </div>
+      ${pending>0?`<button class="btn" onclick="syncPending()" style="background:#3AAA35;color:#fff;padding:8px 16px">☁️ Sincronizar ${pending}</button>`:`<span style="font-size:12px;color:#3AAA35;font-weight:700">✅ Todo sincronizado</span>`}
+    </div>`:''}
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div style="font-weight:700;font-size:14px;color:#1a2035;margin-bottom:3px">🔗 URL del Web App</div>
+    <div style="font-size:12px;color:#8a90a0;margin-bottom:12px">La encuentras al desplegar el Apps Script (ver instrucciones)</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${sheetsUrl}" oninput="sheetsUrl=this.value">
+      <div class="btn-row" style="display:flex;gap:8px">
+        <button class="btn" onclick="testConn()" style="background:#f0f6ff;color:#2d6aa0;border:1px solid #c8d9f0;padding:10px;flex:1">🔌 Probar URL</button>
+        <button class="btn" onclick="saveCfg();showToast('✅ URL guardada')" style="background:#1a3a6b;color:#fff;padding:10px;flex:1">💾 Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:700;font-size:14px;color:#1a2035;margin-bottom:14px">📋 Cómo conectarlo — 4 pasos</div>
+    ${[
+      ['1','Crea o abre tu hoja','Ve a <strong>sheets.google.com</strong> y abre la hoja donde quieres guardar los datos (la que configuraste antes, pestaña "Sesiones").'],
+      ['2','Abre el editor de scripts','Menú arriba: <strong>Extensiones → Apps Script</strong>.'],
+      ['3','Pega el código','Borra todo y pega el código que aparece abajo. Guarda con 💾.'],
+      ['4','Despliega como Web App','<strong>Implementar → Nueva implementación</strong> · Tipo: Web App · Ejecutar como: Yo · Acceso: Cualquier persona · Copia la URL y pégala arriba.'],
+    ].map(([n,t,d])=>`<div style="display:flex;gap:12px;margin-bottom:15px;align-items:flex-start">
+      <div style="width:26px;height:26px;border-radius:50%;background:#1a3a6b;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${n}</div>
+      <div><div style="font-weight:700;font-size:13px;color:#1a2035;margin-bottom:2px">${t}</div><div style="font-size:12px;color:#4a5068;line-height:1.5">${d}</div></div>
+    </div>`).join('')}
+    <div style="background:#0d1b3e;border-radius:10px;padding:14px;margin-top:4px">
+      <div style="color:#7ab3d4;font-size:10px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Código Apps Script — igual que antes, no cambió</div>
+      <pre style="color:#a8d8f0;font-size:10.5px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;font-family:monospace">${escCode()}</pre>
+    </div>
+  </div>
+  `:''}
+
+  </div>`;
+}
+
+function escCode(){return`function doPost(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName('Sesiones');
+    if (!sheet) {
+      sheet = ss.insertSheet('Sesiones');
+      sheet.appendRow(['ID','Proyecto','Fecha',
+        'Horas','Duración','Notas','Tipo','Registrado']);
+      sheet.getRange(1,1,1,8)
+           .setFontWeight('bold')
+           .setBackground('#1a3a6b')
+           .setFontColor('#ffffff');
+    }
+    const d = JSON.parse(e.postData.contents);
+    const last = sheet.getLastRow();
+    if (last &gt; 1) {
+      const ids = sheet.getRange(2,1,last-1,1)
+                       .getValues().flat().map(String);
+      if (ids.includes(d.id)) return ok('duplicate');
+    }
+    sheet.appendRow([
+      d.id, d.projectName, d.date,
+      Math.round(d.duration*100)/100,
+      d.durationFormatted, d.notes||'',
+      d.type==='timer'?'Timer':'Manual',
+      new Date().toLocaleString('es-MX',
+        {timeZone:'America/Mexico_City'})
+    ]);
+    return ok('saved');
+  } catch(err){ return ok('error:'+err); }
+}
+function ok(note){
+  return ContentService
+    .createTextOutput(JSON.stringify({success:true,note}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function doGet(){ return ok('Tracker ExcelentIA activo'); }`;}
+
+function setView(v){view=v;render();}
+function toggleManual(){showManual=!showManual;render();}
+
+render();
+</script>
+</body>
+</html>
