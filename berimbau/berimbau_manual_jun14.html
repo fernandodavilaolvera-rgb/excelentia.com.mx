@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema IA de Socios — Club Berimbau</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#3AAA35;--verde-d:#2a8226;--naranja:#EF4B1F;
+  --azul:#1a3a6b;--azul-m:#4a9fd4;--azul-l:#e8f0fb;
+  --negro:#1a2035;--fondo:#f5f6f8;--card:#fff;--borde:#dde1e9;
+  --texto:#1a2035;--gris:#4a5068;--gc:#8a90a0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:var(--fondo);color:var(--texto);font-size:15px;line-height:1.65}
+
+/* ─── HEADER ─── */
+.hdr{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid var(--azul-m);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.logo-box{background:#fff;border-radius:10px;padding:.35rem .7rem;display:flex;align-items:center;min-height:48px;min-width:76px;flex-shrink:0}
+.logo-box img{height:38px;width:auto;display:block}
+.logo-fallback{font-size:14px;font-weight:800;color:#1a3a6b;display:none}
+.hdr-center{flex:1;text-align:center}
+.hdr-title{font-size:.95rem;font-weight:800;color:#fff}
+.hdr-sub{font-size:.68rem;color:rgba(255,255,255,.55);margin-top:1px}
+.hdr-version{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 12px;font-size:.65rem;font-weight:800;color:#fff;white-space:nowrap}
+
+/* ─── HERO ─── */
+.hero{background:linear-gradient(150deg,#0a1228 0%,#1a3a6b 50%,#1e5096 100%);padding:56px 28px 52px;text-align:center;overflow:hidden;position:relative}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(58,170,53,.14) 0%,transparent 60%)}
+.hero-logos{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:30px;position:relative}
+.hero-club-logo{background:#fff;border-radius:12px;padding:.6rem 1rem;display:inline-flex;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.hero-club-logo img{height:44px;width:auto}
+.hero-divider{width:2px;height:36px;background:rgba(255,255,255,.25);border-radius:2px}
+.hero-xia-logo{background:#fff;border-radius:12px;padding:.6rem 1rem;display:inline-flex;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.hero-xia-logo img{height:44px;width:auto}
+.hero h1{font-size:2rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:12px;position:relative}
+.hero h1 em{color:var(--azul-m);font-style:normal}
+.hero-desc{font-size:.9rem;color:rgba(255,255,255,.68);max-width:540px;margin:0 auto 32px;line-height:1.75;position:relative}
+.hero-kpis{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;position:relative}
+.kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px 20px;min-width:110px;text-align:center}
+.kpi-n{font-size:1.6rem;font-weight:800;color:#fff;line-height:1}
+.kpi-l{font-size:.68rem;color:rgba(255,255,255,.56);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.kpi.verde .kpi-n{color:#6de868}
+.kpi.azul .kpi-n{color:var(--azul-m)}
+.kpi.naranja .kpi-n{color:#f97c5a}
+
+/* ─── NAVEGACIÓN INTERNA ─── */
+.nav-interna{background:#fff;border-bottom:2px solid var(--borde);padding:0 28px;display:flex;gap:0;overflow-x:auto;position:sticky;top:72px;z-index:99}
+.nav-btn{padding:13px 18px;font-size:.75rem;font-weight:700;color:var(--gc);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:.15s;font-family:'Manrope',sans-serif}
+.nav-btn:hover{color:var(--azul);border-color:var(--azul-m)}
+.nav-btn.active{color:var(--azul);border-color:var(--azul)}
+
+/* ─── CONTENEDOR ─── */
+.wrap{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+
+/* ─── SECCIONES ─── */
+.sec{margin-bottom:44px;scroll-margin-top:130px}
+.sec-eyebrow{font-size:.65rem;font-weight:800;color:var(--azul-m);text-transform:uppercase;letter-spacing:.14em;margin-bottom:5px}
+.sec-h{font-size:1.25rem;font-weight:800;color:var(--azul);margin-bottom:8px}
+.sec-lead{font-size:.88rem;color:var(--gris);margin-bottom:22px;line-height:1.75}
+.sec-bar{height:3px;width:48px;background:var(--verde);border-radius:2px;margin-bottom:24px}
+
+/* ─── CARDS ─── */
+.card{background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:22px 24px;margin-bottom:16px}
+.card-title{font-size:.88rem;font-weight:800;color:var(--azul);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card p{font-size:.84rem;color:var(--gris);line-height:1.7;margin-bottom:10px}
+.card p:last-child{margin-bottom:0}
+
+/* ─── BENEFIT STRIP ─── */
+.benefit{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);border-radius:14px;padding:22px 26px;margin-bottom:18px;display:flex;gap:16px;align-items:flex-start}
+.benefit-ico{font-size:1.8rem;flex-shrink:0;margin-top:2px}
+.benefit-h{font-size:.95rem;font-weight:800;color:#fff;margin-bottom:5px}
+.benefit-p{font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.65}
+
+/* ─── ACORDEÓN ─── */
+.acord{background:var(--card);border:1px solid var(--borde);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.acord-header{padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.15s;user-select:none}
+.acord-header:hover{background:#f8faff}
+.acord-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.acord-ico.azul{background:var(--azul-l)}
+.acord-ico.verde{background:#e8f7e8}
+.acord-ico.naranja{background:#fff4f0}
+.acord-ico.teal{background:#e6f7f5}
+.acord-ico.gold{background:#fdf7e3}
+.acord-info{flex:1}
+.acord-title{font-size:.9rem;font-weight:800;color:var(--negro)}
+.acord-sub{font-size:.74rem;color:var(--gc);margin-top:2px}
+.acord-arrow{font-size:.75rem;color:var(--gc);transition:.25s;flex-shrink:0}
+.acord-body{padding:0 20px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s}
+.acord-body.open{max-height:4000px;padding:0 20px 20px}
+
+/* ─── STEPS ─── */
+.steps{list-style:none;margin:14px 0}
+.step-item{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f5f6f8}
+.step-item:last-child{border-bottom:none}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--azul);color:#fff;font-size:.65rem;font-weight:800;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.step-num.verde{background:var(--verde)}
+.step-num.naranja{background:var(--naranja)}
+.step-body{font-size:.82rem;color:var(--negro);line-height:1.6}
+.step-body strong{color:var(--azul)}
+.step-body .sub{font-size:.74rem;color:var(--gris);margin-top:3px}
+
+/* ─── INFO / ALERTA / NOTA ─── */
+.info-box{background:var(--azul-l);border:1px solid #c8d9f0;border-left:4px solid var(--azul-m);border-radius:8px;padding:12px 16px;margin:10px 0;font-size:.8rem;color:var(--azul);line-height:1.65}
+.info-box strong{color:var(--azul);font-weight:800}
+.alerta-box{background:#fff8f0;border:1px solid #f5c6b0;border-left:4px solid var(--naranja);border-radius:8px;padding:12px 16px;margin:10px 0;font-size:.8rem;color:#7a2010;line-height:1.65}
+.alerta-box strong{color:var(--naranja);font-weight:800}
+.verde-box{background:#f0faf0;border:1px solid #a3d9a0;border-left:4px solid var(--verde);border-radius:8px;padding:12px 16px;margin:10px 0;font-size:.8rem;color:#1a4a1a;line-height:1.65}
+.verde-box strong{color:var(--verde-d);font-weight:800}
+
+/* ─── TABLA ─── */
+.tbl-wrap{overflow-x:auto;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{background:#eef4fc;color:var(--azul);font-weight:800;padding:8px 12px;text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid #c8d9f0}
+td{padding:8px 12px;border-bottom:1px solid var(--borde);color:var(--gris)}
+tr:hover td{background:#fafbff}
+.badge-si{background:#dcfce7;color:#15803d;border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:800}
+.badge-no{background:#fee2e2;color:#991b1b;border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:800}
+.badge-prox{background:#fef9c3;color:#854d0e;border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:800}
+
+/* ─── MÓDULO CARD ─── */
+.mod-card{background:var(--card);border:1px solid var(--borde);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.mod-header{padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.15s}
+.mod-header:hover{background:#f8faff}
+.mod-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.mod-info{flex:1}
+.mod-title{font-size:.9rem;font-weight:800;color:var(--negro)}
+.mod-sub{font-size:.72rem;color:var(--gc);margin-top:2px}
+.mod-badge{font-size:.65rem;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.mod-badge.auto{background:#dcfce7;color:#15803d}
+.mod-badge.manual{background:var(--azul-l);color:var(--azul)}
+.mod-badge.prox{background:#fef9c3;color:#854d0e}
+.mod-arrow{font-size:.75rem;color:var(--gc);transition:.25s;flex-shrink:0}
+.mod-body{padding:0 20px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s}
+.mod-body.open{max-height:3000px;padding:0 20px 20px}
+
+/* ─── CHANNELS ─── */
+.canal-row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.canal{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:.72rem;font-weight:700}
+.canal.activo{background:#e8f7e8;border:1px solid #a3d9a0;color:#15803d}
+.canal.prox{background:#f5f6f8;border:1px solid var(--borde);color:var(--gc)}
+
+/* ─── WA SECTION ─── */
+.wa-option{background:var(--card);border:2px solid var(--borde);border-radius:14px;padding:20px 22px;margin-bottom:14px;transition:.15s}
+.wa-option:hover{border-color:var(--azul-m)}
+.wa-option-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.wa-option-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#fff;flex-shrink:0}
+.wa-option-num.a{background:var(--verde)}
+.wa-option-num.b{background:var(--azul)}
+.wa-option-title{font-size:.92rem;font-weight:800;color:var(--negro)}
+.wa-pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.pros{background:#f0faf0;border-radius:10px;padding:12px 14px}
+.cons{background:#fff8f5;border-radius:10px;padding:12px 14px}
+.pros strong,.cons strong{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px}
+.pros strong{color:var(--verde-d)}
+.cons strong{color:var(--naranja)}
+.pros ul,.cons ul{list-style:none;font-size:.78rem;line-height:1.7}
+.pros li::before{content:'✔ ';color:var(--verde)}
+.cons li::before{content:'✖ ';color:var(--naranja)}
+
+/* ─── PRUEBAS ─── */
+.prueba-row{background:var(--card);border:1px solid var(--borde);border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+.prueba-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--borde);flex-shrink:0;cursor:pointer;margin-top:2px;accent-color:var(--verde)}
+.prueba-body{flex:1}
+.prueba-num{font-size:.65rem;font-weight:800;color:var(--gc);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.prueba-title{font-size:.85rem;font-weight:700;color:var(--negro);margin-bottom:4px}
+.prueba-pasos{font-size:.78rem;color:var(--gris);line-height:1.7}
+.prueba-espera{font-size:.74rem;color:var(--verde-d);font-weight:700;margin-top:4px}
+.prueba-espera::before{content:'✅ Espera ver: '}
+
+/* ─── FOOTER ─── */
+.footer{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:rgba(255,255,255,.55);text-align:center;padding:28px;font-size:.72rem;line-height:2}
+.footer strong{color:#fff}
+
+/* ─── PROGRESO DE PRUEBAS ─── */
+.prog-wrap{background:var(--card);border:1px solid var(--borde);border-radius:12px;padding:16px 20px;margin-bottom:20px}
+.prog-bar{background:#e8e9ed;border-radius:10px;height:10px;overflow:hidden;margin:8px 0 4px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--verde),var(--azul-m));border-radius:10px;transition:.3s;width:0%}
+.prog-txt{font-size:.72rem;font-weight:700;color:var(--gc)}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:600px){
+  .wrap{padding:24px 12px 60px}
+  .hero{padding:36px 16px 32px}
+  .hero h1{font-size:1.4rem}
+  .wa-pros-cons{grid-template-columns:1fr}
+  .nav-interna{top:60px}
+  .hdr{padding:10px 14px}
+  .hdr-center{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ HEADER ══════════════════════════ -->
+<div class="hdr">
+  <div class="logo-box">
+    <img src="https://excelentia.com.mx/berimbau/logo_club_berimbau.png" alt="Club Berimbau"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span class="logo-fallback" style="color:#1a3a6b;font-weight:800">Club<br>Berimbau</span>
+  </div>
+  <div class="hdr-center">
+    <div class="hdr-title">Sistema de Comunicación Inteligente para Socios</div>
+    <div class="hdr-sub">Manual completo de uso · Club Berimbau</div>
+  </div>
+  <div class="hdr-version">v18 · Jun 2026</div>
+</div>
+
+<!-- ══════════════════════════ NAVEGACIÓN ══════════════════════════ -->
+<nav class="nav-interna">
+  <button class="nav-btn active" onclick="irA('que-es')">¿Qué es?</button>
+  <button class="nav-btn" onclick="irA('el-dashboard')">El Dashboard</button>
+  <button class="nav-btn" onclick="irA('las-pestanas')">Las 5 Pestañas</button>
+  <button class="nav-btn" onclick="irA('modulos')">Módulos de Avisos</button>
+  <button class="nav-btn" onclick="irA('whatsapp')">WhatsApp</button>
+  <button class="nav-btn" onclick="irA('pruebas')">Pruebas</button>
+</nav>
+
+<!-- ══════════════════════════ HERO ══════════════════════════ -->
+<div class="hero">
+  <div class="hero-logos">
+    <div class="hero-club-logo">
+      <img src="https://excelentia.com.mx/berimbau/logo_club_berimbau.png" alt="Club Berimbau"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span style="font-weight:800;color:#1a3a6b;font-size:14px;display:none">Club Berimbau</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-xia-logo">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span style="font-weight:800;color:#1a3a6b;font-size:12px;display:none">ExcelentIA</span>
+    </div>
+  </div>
+  <h1>Su club ahora <em>se comunica solo</em></h1>
+  <p class="hero-desc">Un sistema que avisa, recuerda y mantiene el contacto con cada socio de forma automática — para que el equipo se concentre en lo que importa.</p>
+  <div class="hero-kpis">
+    <div class="kpi verde"><div class="kpi-n">✦</div><div class="kpi-l">Socios activos</div></div>
+    <div class="kpi azul"><div class="kpi-n">5</div><div class="kpi-l">Módulos automáticos</div></div>
+    <div class="kpi naranja"><div class="kpi-n">✉️+📱</div><div class="kpi-l">Correo y WhatsApp</div></div>
+    <div class="kpi"><div class="kpi-n">0</div><div class="kpi-l">Instalaciones</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ CONTENIDO ══════════════════════════ -->
+<div class="wrap">
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PARTE 1: ¿QUÉ ES?                          -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="sec" id="que-es">
+    <div class="sec-eyebrow">Parte 1</div>
+    <div class="sec-h">¿Qué es este sistema y para qué sirve?</div>
+    <div class="sec-bar"></div>
+
+    <div class="card">
+      <p>El <strong>Sistema de Comunicación Inteligente</strong> es una herramienta creada específicamente para Club Berimbau que permite al equipo administrativo ver el estado de cada socio en tiempo real y enviar comunicados de forma automática — sin depender de listas en papel, llamadas manuales ni recordatorios de memoria.</p>
+      <p>Se abre en el navegador (Chrome o Edge), no requiere instalación y toda la información está actualizada con los datos reales del club.</p>
+    </div>
+
+    <div class="benefit">
+      <div class="benefit-ico">💰</div>
+      <div>
+        <div class="benefit-h">Recuperación de cartera sin esfuerzo adicional</div>
+        <div class="benefit-p">El sistema identifica automáticamente a los socios con adeudo, los clasifica por urgencia y envía los correos y mensajes de WhatsApp por usted. El equipo solo revisa resultados y atiende a quien responde.</div>
+      </div>
+    </div>
+
+    <div class="benefit">
+      <div class="benefit-ico">📋</div>
+      <div>
+        <div class="benefit-h">Visibilidad total de los socios en una pantalla</div>
+        <div class="benefit-p">Directorio completo, historial de visitas de abril, estado de pago, tipo de membresía, teléfono, correo y observaciones del equipo — todo en un solo lugar, sin necesidad de abrir Aspel o buscar en hojas de cálculo.</div>
+      </div>
+    </div>
+
+    <div class="benefit">
+      <div class="benefit-ico">📬</div>
+      <div>
+        <div class="benefit-h">Avisos de cobranza automáticos y manuales por segmento</div>
+        <div class="benefit-p">El sistema envía correos y mensajes de WhatsApp a los socios en adeudo, clasificados en 4 grupos según el tiempo sin pago:<br><br>
+        <strong style="color:#6de868">· S1 — 0 a 30 días:</strong> Recordatorio amable (olvido o descuido)<br>
+        <strong style="color:#f9a85a">· S2 — 31 a 60 días:</strong> Aviso con mayor urgencia (problema temporal)<br>
+        <strong style="color:#f97c5a">· S3 — 61 a 90 días:</strong> Mensaje de riesgo alto<br>
+        <strong style="color:#e05050">· S4 — más de 90 días:</strong> Aviso de posible abandono<br><br>
+        Estos avisos se pueden programar para que salgan automáticamente cada mes en el día y hora que el club defina, o enviarse manualmente en cualquier momento con un solo clic.</div>
+      </div>
+    </div>
+
+    <div class="benefit">
+      <div class="benefit-ico">🔔</div>
+      <div>
+        <div class="benefit-h">5 módulos de avisos especiales automáticos</div>
+        <div class="benefit-p">Además de los avisos de cobranza, el sistema tiene 5 módulos especiales que se activan solos según las reglas del club:<br><br>
+        <strong style="color:#6de868">· Vencimiento anual:</strong> Avisa al socio 30, 15 y 7 días antes de que expire su membresía anual<br>
+        <strong style="color:#6de868">· Cargo bancario próximo:</strong> Recuerda al socio domiciliado que pronto se realizará su cargo automático<br>
+        <strong style="color:#6de868">· Cargo rechazado:</strong> Avisa de inmediato cuando el banco no puede procesar el cobro<br>
+        <strong style="color:#6de868">· Cumpleaños:</strong> Felicitación automática el día del cumpleaños de cada socio<br>
+        <strong style="color:#6de868">· Alerta 26 años:</strong> Avisa al titular cuando un dependiente está por cumplir 26 años<br><br>
+        Una vez configurados, el sistema los envía sin que nadie tenga que recordarlo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PARTE 2: EL DASHBOARD                      -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="sec" id="el-dashboard">
+    <div class="sec-eyebrow">Parte 2</div>
+    <div class="sec-h">Cómo abrir el dashboard</div>
+    <div class="sec-bar"></div>
+
+    <div class="card">
+      <div class="card-title">📂 La plataforma</div>
+      <p>El sistema se llama <strong>Dashboard Inteligente Berimbau</strong>. Se accede directamente desde un navegador web — no requiere instalar ningún programa.</p>
+      <ul class="steps">
+        <li class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">Solicitar al administrador del sistema el enlace o acceso a la plataforma.</div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">Abrir <strong>Chrome o Edge</strong> y acceder al enlace proporcionado.
+            <div class="sub">Si se abre en otro navegador, copiar el enlace y pegarlo en Chrome o Edge.</div>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">Esperar unos segundos mientras la plataforma carga. Aparecerá la pantalla principal con las 5 secciones en la parte superior.</div>
+        </li>
+      </ul>
+      <div class="info-box" style="margin-top:12px">
+        <strong>Recomendación:</strong> Usar siempre Chrome o Edge para la mejor experiencia. La plataforma requiere conexión a internet para enviar correos y WhatsApp.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PARTE 3: LAS 5 PESTAÑAS                    -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="sec" id="las-pestanas">
+    <div class="sec-eyebrow">Parte 3</div>
+    <div class="sec-h">Las 5 pestañas del dashboard</div>
+    <div class="sec-bar"></div>
+    <p class="sec-lead">En la parte superior de la pantalla hay 5 pestañas. Cada una es una sección distinta del sistema. Hacer clic en cualquiera de ellas cambia la vista.</p>
+
+    <!-- PESTAÑA 1: Directorio -->
+    <div class="acord" id="acord-dir">
+      <div class="acord-header" onclick="toggleAcord('acord-dir')">
+        <div class="acord-ico azul">📋</div>
+        <div class="acord-info">
+          <div class="acord-title">📋 Directorio — Los socios</div>
+          <div class="acord-sub">Consulta, búsqueda y filtros del directorio completo</div>
+        </div>
+        <span class="acord-arrow" id="arr-acord-dir">▼</span>
+      </div>
+      <div class="acord-body" id="body-acord-dir">
+        <p style="font-size:.84rem;color:var(--gris);margin-bottom:14px">El directorio muestra a todos los socios activos del club con su información completa. Es una consulta de referencia — aquí no se envía nada, solo se busca y revisa.</p>
+        <div class="card-title" style="margin-bottom:8px">¿Qué se puede ver aquí?</div>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>Columna</th><th>Qué significa</th></tr>
+            <tr><td><strong>Memb.</strong></td><td>Número de membresía del socio</td></tr>
+            <tr><td><strong>Nombre</strong></td><td>Nombre completo</td></tr>
+            <tr><td><strong>Tipo</strong></td><td>Individual, Pareja, Familiar, Ind. Menor</td></tr>
+            <tr><td><strong>Periodo</strong></td><td>Cómo paga: Mensual, Trimestral, Domiciliado, Sin Interés</td></tr>
+            <tr><td><strong>Edad</strong></td><td>Edad actual del socio</td></tr>
+            <tr><td><strong>F. Nacimiento</strong></td><td>Fecha de nacimiento</td></tr>
+            <tr><td><strong>Teléfono</strong></td><td>Número registrado en el sistema</td></tr>
+            <tr><td><strong>Correo</strong></td><td>Correo electrónico registrado</td></tr>
+            <tr><td><strong>Visitas Abr.</strong></td><td>Cuántas veces vino al club en abril 2026</td></tr>
+          </table>
+        </div>
+        <div class="card-title" style="margin:14px 0 8px">Cómo buscar y filtrar</div>
+        <ul class="steps">
+          <li class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body"><strong>Buscador:</strong> Escribir el nombre o número de membresía del socio. La tabla se filtra al instante.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body"><strong>Filtro Tipo membresía:</strong> Elegir Individual, Pareja, Familiar o todos juntos.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body"><strong>Filtro Periodo pago:</strong> Ver solo los de cargo automático, solo los trimestrales, etc.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-body"><strong>Ordenar columnas:</strong> Hacer clic en el encabezado de cualquier columna para ordenar de mayor a menor o de A a Z.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">5</div>
+            <div class="step-body"><strong>Botón ✕ Limpiar:</strong> Quita todos los filtros y muestra los socios de nuevo.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 2: Accesos -->
+    <div class="acord" id="acord-acc">
+      <div class="acord-header" onclick="toggleAcord('acord-acc')">
+        <div class="acord-ico teal">🏃</div>
+        <div class="acord-info">
+          <div class="acord-title">🏃 Accesos Abril — Visitas al club</div>
+          <div class="acord-sub">¿Quién viene y quién dejó de venir? Combinado con el estado de pago</div>
+        </div>
+        <span class="acord-arrow" id="arr-acord-acc">▼</span>
+      </div>
+      <div class="acord-body" id="body-acord-acc">
+        <p style="font-size:.84rem;color:var(--gris);margin-bottom:14px">Esta pestaña muestra cuántas veces visitó el club cada socio durante abril 2026. Es muy útil para cruzar dos datos: ¿el socio que debe dinero, sigue viniendo al club?</p>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>Nivel de actividad</th><th>Cuántas visitas</th><th>¿Qué significa?</th></tr>
+            <tr><td>Alta</td><td>Más de 60 visitas</td><td>Socio muy activo — alta probabilidad de pago si se le contacta</td></tr>
+            <tr><td>Media</td><td>20 a 59 visitas</td><td>Visita regularmente — sigue comprometido con el club</td></tr>
+            <tr><td>Baja</td><td>1 a 19 visitas</td><td>Viene poco — señal de posible desenganche</td></tr>
+            <tr><td>Sin visitas</td><td>0 visitas</td><td>No vino en abril — prioridad de contacto</td></tr>
+          </table>
+        </div>
+        <div class="verde-box" style="margin-top:10px">
+          <strong>Tip de uso:</strong> Filtrar "Sin visitas" + "En adeudo" identifica a los socios de mayor riesgo de abandono. Son los que más necesitan atención inmediata.
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 3: Cobranza -->
+    <div class="acord" id="acord-cob">
+      <div class="acord-header" onclick="toggleAcord('acord-cob')">
+        <div class="acord-ico naranja">💰</div>
+        <div class="acord-info">
+          <div class="acord-title">💰 Cobranza — El corazón del sistema</div>
+          <div class="acord-sub">Vista completa de socios en adeudo, segmentos, filtros y observaciones</div>
+        </div>
+        <span class="acord-arrow" id="arr-acord-cob">▼</span>
+      </div>
+      <div class="acord-body" id="body-acord-cob">
+        <p style="font-size:.84rem;color:var(--gris);margin-bottom:14px">Esta es la pestaña principal para el equipo de cobranza. Muestra solo a los socios con adeudo, ordenados por urgencia. Los números en la parte superior (KPIs) se actualizan según los filtros activos.</p>
+
+        <div class="card-title" style="margin-bottom:10px">Los 4 segmentos de adeudo</div>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>Segmento</th><th>Tiempo sin pago</th><th>Perfil del socio</th><th>Acción sugerida</th></tr>
+            <tr><td><strong style="color:#b8941a">0–30 días</strong></td><td>Hasta 1 mes</td><td>Olvido o descuido — buena fe</td><td>Recordatorio amable</td></tr>
+            <tr><td><strong style="color:#c94010">31–60 días</strong></td><td>1 a 2 meses</td><td>Problema temporal — responde al contacto</td><td>Recordatorio con urgencia</td></tr>
+            <tr><td><strong style="color:#c0392b">61–90 días</strong></td><td>2 a 3 meses</td><td>Riesgo alto — requiere seguimiento personal</td><td>Llamada directa + correo</td></tr>
+            <tr><td><strong style="color:#8b0000">+90 días</strong></td><td>Más de 3 meses</td><td>Posible abandono — acción inmediata</td><td>Contacto de recuperación urgente</td></tr>
+          </table>
+        </div>
+
+        <div class="card-title" style="margin:16px 0 10px">Los filtros rápidos (pastillas)</div>
+        <p style="font-size:.82rem;color:var(--gris);margin-bottom:10px">Debajo de los KPIs hay una fila de botones de color que filtran la tabla al instante:</p>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>Botón</th><th>Qué filtra</th></tr>
+            <tr><td>📋 Todos</td><td>Muestra todos los socios en adeudo sin filtro</td></tr>
+            <tr><td>📅 Mensual</td><td>Solo socios con pago mensual sin interés</td></tr>
+            <tr><td>🏦 Domiciliado</td><td>Solo socios con cargo bancario automático</td></tr>
+            <tr><td>🏦❌ Cargo Fallido</td><td>Socios cuyo cargo automático fue rechazado — <strong>atención inmediata</strong></td></tr>
+            <tr><td>📆 Trimestral</td><td>Solo socios con pago trimestral</td></tr>
+            <tr><td>🏅 Anual</td><td>Solo socios con membresía anual</td></tr>
+            <tr><td style="background:#fff4f0">📝 Observaciones</td><td>Ver todas las notas que el equipo ha dejado sobre socios</td></tr>
+          </table>
+        </div>
+
+        <div class="card-title" style="margin:16px 0 10px">Observaciones del equipo</div>
+        <p style="font-size:.82rem;color:var(--gris);margin-bottom:10px">En la tabla de cobranza, cada socio tiene una columna de <strong>Observaciones</strong>. Al hacer clic en el ícono de ese socio, se puede dejar una nota interna visible para todo el equipo.</p>
+        <div class="verde-box">
+          <strong>Ejemplo:</strong> "Acordó pago el viernes 20 — no enviar más correos esta semana." El equipo entero lo ve al día siguiente sin necesidad de comunicarse entre sí.
+        </div>
+        <div class="info-box" style="margin-top:8px">
+          El botón naranja <strong>📝 Observaciones</strong> en la fila de pastillas muestra un panel con todas las notas activas del equipo, con la fecha y nombre del socio.
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 4: Avisos Correo -->
+    <div class="acord" id="acord-avi">
+      <div class="acord-header" onclick="toggleAcord('acord-avi')">
+        <div class="acord-ico verde">✉️</div>
+        <div class="acord-info">
+          <div class="acord-title">✉️ Avisos Correo — El centro de comunicaciones</div>
+          <div class="acord-sub">Plantillas, envío manual, programación automática y 5 módulos especiales</div>
+        </div>
+        <span class="acord-arrow" id="arr-acord-avi">▼</span>
+      </div>
+      <div class="acord-body" id="body-acord-avi">
+        <p style="font-size:.84rem;color:var(--gris);margin-bottom:16px">Esta pestaña tiene todo lo relacionado con las comunicaciones. Se divide en 4 partes: la programación automática mensual, las plantillas de mensaje por segmento, el envío manual y los módulos de avisos especiales.</p>
+
+        <!-- Sub-sección: Programación mensual -->
+        <div class="card-title" style="margin-bottom:10px">📅 Programación Automática Mensual</div>
+        <p style="font-size:.82rem;color:var(--gris);margin-bottom:10px">Aquí se configura el día y la hora del mes en que el sistema enviará correos automáticamente a todos los segmentos activos. Solo se configura una vez.</p>
+        <ul class="steps">
+          <li class="step-item">
+            <div class="step-num verde">1</div>
+            <div class="step-body">Ingresar el <strong>Día de envío</strong> (ej: 10 para que se envíe el día 10 de cada mes).</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num verde">2</div>
+            <div class="step-body">Ingresar la <strong>Hora de envío</strong> (ej: 09:00).</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num verde">3</div>
+            <div class="step-body">Activar el <strong>toggle ACTIVO</strong> (debe quedar en verde).</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num verde">4</div>
+            <div class="step-body">Hacer clic en <strong>"📅 Programar envío"</strong>. El sistema confirmará la próxima fecha de envío.</div>
+          </li>
+        </ul>
+        <div class="alerta-box" style="margin-top:8px">
+          <strong>Importante:</strong> Si el toggle está en PAUSADO (gris), el sistema no enviará correos automáticos aunque esté configurado. Siempre verificar que esté en ACTIVO (verde).
+        </div>
+
+        <!-- Sub-sección: Plantillas -->
+        <div class="card-title" style="margin:18px 0 10px">📝 Plantillas por segmento</div>
+        <p style="font-size:.82rem;color:var(--gris);margin-bottom:10px">En la columna izquierda hay 4 tarjetas, una por segmento. Cada una contiene el mensaje que se enviará a ese grupo. Se puede modificar el texto cuando se desee.</p>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>Tarjeta</th><th>¿A quién va?</th><th>Toggle individual</th></tr>
+            <tr><td>0–30 días · Olvido / Descuido</td><td>Socios con 1 mes de adeudo</td><td>Activar o pausar este segmento individualmente</td></tr>
+            <tr><td>31–60 días · Problema temporal</td><td>Socios con 2 meses de adeudo</td><td>Activar o pausar este segmento individualmente</td></tr>
+            <tr><td>61–90 días · Riesgo alto</td><td>Socios con 3 meses de adeudo</td><td>Activar o pausar este segmento individualmente</td></tr>
+            <tr><td>+90 días · Posible abandono</td><td>Socios con más de 3 meses</td><td>Activar o pausar este segmento individualmente</td></tr>
+          </table>
+        </div>
+        <div class="info-box" style="margin-top:8px">
+          En cada tarjeta hay variables que se sustituyen automáticamente: <code>{{nombre}}</code> → nombre del socio · <code>{{mes}}</code> → mes actual · <code>{{meses}}</code> → meses de adeudo · <code>{{membresia}}</code> → número de membresía. No borrarlas.
+        </div>
+
+        <!-- Sub-sección: Envío manual -->
+        <div class="card-title" style="margin:18px 0 10px">🚀 Envío Manual</div>
+        <p style="font-size:.82rem;color:var(--gris);margin-bottom:10px">En la columna derecha se puede enviar correos en cualquier momento, sin esperar la programación automática.</p>
+        <ul class="steps">
+          <li class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">En el selector <strong>"Segmento destino"</strong>, elegir el grupo al que se quiere enviar (ej: 31–60 días).</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body">El sistema cargará automáticamente la plantilla de ese segmento y la lista de destinatarios con su correo. Se puede revisar y editar el mensaje antes de enviar.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body"><strong>Gestionar destinatarios:</strong> Hacer clic en la barra de destinatarios para desplegarla. Hay checkboxes para incluir o excluir socios específicos del envío.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-body"><strong>Correos adicionales:</strong> En la sección "➕ Correos adicionales" se puede agregar correos que no están en la base de datos (ej: directivos, gerencia).</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">5</div>
+            <div class="step-body">Opcional: hacer clic en <strong>"👁 Vista previa"</strong> para ver exactamente cómo llegará el correo al primer destinatario antes de enviarlo.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">6</div>
+            <div class="step-body">Hacer clic en <strong>"✉️ Enviar a X socios"</strong>. Aparecerá una notificación en pantalla confirmando el envío.</div>
+          </li>
+        </ul>
+        <div class="verde-box" style="margin-top:8px">
+          <strong>📱 Enviar también por WhatsApp:</strong> Junto al botón de envío aparece un interruptor verde con esa opción. Al activarlo, el sistema enviará también un mensaje de WhatsApp a cada socio que tenga teléfono registrado. Ver la sección de WhatsApp para más detalles.
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 5: Gráficas -->
+    <div class="acord" id="acord-graf">
+      <div class="acord-header" onclick="toggleAcord('acord-graf')">
+        <div class="acord-ico gold">📊</div>
+        <div class="acord-info">
+          <div class="acord-title">📊 Gráficas — Análisis visual de la cartera</div>
+          <div class="acord-sub">Distribución, segmentos, top morosos, tipos de membresía y semáforo</div>
+        </div>
+        <span class="acord-arrow" id="arr-acord-graf">▼</span>
+      </div>
+      <div class="acord-body" id="body-acord-graf">
+        <p style="font-size:.84rem;color:var(--gris);margin-bottom:14px">Esta pestaña transforma los números en gráficas visuales para entender de un vistazo la situación de la cartera. No requiere ninguna acción — se genera automáticamente.</p>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>Gráfica</th><th>Qué muestra</th><th>Útil para</th></tr>
+            <tr><td>🍩 Distribución de cartera</td><td>Porcentaje de socios al corriente vs en adeudo</td><td>Panorama general rápido</td></tr>
+            <tr><td>📊 Socios por segmento</td><td>Cuántos socios hay en cada segmento (s1/s2/s3/s4), con y sin correo</td><td>Planear la campaña del mes</td></tr>
+            <tr><td>⚠️ Top 10 mayor antigüedad</td><td>Los 10 socios con más meses sin pagar</td><td>Casos de atención prioritaria</td></tr>
+            <tr><td>👥 Adeudos por tipo</td><td>Cuántos individuales, parejas, familiares deben</td><td>Identificar qué perfil presenta más morosidad</td></tr>
+            <tr><td>🎂 Adeudos por edad</td><td>Grupos de edad con mayor morosidad</td><td>Personalizar el mensaje según generación</td></tr>
+            <tr><td>🚦 Semáforo del mes</td><td>Verde / Amarillo / Rojo según avance de recuperación</td><td>Reportes a gerencia</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+        <div class="info-box" style="margin-top:12px">
+          <strong>📊 Las gráficas se pueden personalizar:</strong> Todas las visualizaciones de esta sección pueden adaptarse a las necesidades específicas del Club Berimbau — agregar nuevos indicadores, cambiar rangos de tiempo, incluir comparativos mensuales o ajustar los colores del semáforo. Cualquier personalización se coordina con el equipo de ExcelentIA.
+        </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PARTE 4: MÓDULOS DE AVISOS                 -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="sec" id="modulos">
+    <div class="sec-eyebrow">Parte 4</div>
+    <div class="sec-h">Los 5 módulos de avisos especiales</div>
+    <div class="sec-bar"></div>
+    <p class="sec-lead">Dentro de la pestaña ✉️ Avisos Correo, en la parte inferior, están los módulos de avisos especiales. Cada uno se ocupa de una situación distinta. Se accede a ellos desde los botones de acceso rápido en la parte superior de la pestaña, o bajando la pantalla.</p>
+
+    <div class="info-box" style="margin-bottom:20px">
+      <strong>¿Cómo funcionan todos?</strong> Cada módulo tiene un interruptor (toggle) al fondo con las opciones ACTIVO o PAUSADO. Cuando está ACTIVO, el sistema envía el aviso automáticamente en el momento correcto. Cuando está PAUSADO, no envía nada. Todos los cambios se guardan con el botón <strong>💾 Guardar configuración</strong>.
+    </div>
+
+    <!-- MÓDULO 1: Pago Anual -->
+    <div class="mod-card" id="mod-anual-sec">
+      <div class="mod-header" onclick="toggleMod('mod-anual-sec')">
+        <div class="mod-ico" style="background:#e8f0fb">📅</div>
+        <div class="mod-info">
+          <div class="mod-title">Pago Anual — Aviso de Vencimiento</div>
+          <div class="mod-sub">Cadena de 3 correos automáticos: 30, 15 y 7 días antes del vencimiento</div>
+        </div>
+        <span class="mod-badge auto">Automático</span>
+        <span class="mod-arrow" id="arr-mod-anual-sec">▼</span>
+      </div>
+      <div class="mod-body" id="body-mod-anual-sec">
+        <div class="canal-row">
+          <span class="canal activo">✉️ Correo activo</span>
+          <span class="canal activo">📱 WhatsApp activo</span>
+        </div>
+        <p style="font-size:.83rem;color:var(--gris);margin-bottom:12px">Los socios con membresía anual reciben automáticamente tres recordatorios antes de que su membresía expire. No hace falta que el equipo recuerde hacerlo.</p>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>Cuándo se envía</th><th>Mensaje</th><th>Se puede desactivar</th></tr>
+            <tr><td>30 días antes</td><td>Aviso anticipado de renovación</td><td>Sí, con su propio checkbox</td></tr>
+            <tr><td>15 días antes</td><td>Recordatorio más urgente</td><td>Sí, con su propio checkbox</td></tr>
+            <tr><td>7 días antes</td><td>Último aviso — renovar ya</td><td>Sí, con su propio checkbox</td></tr>
+          </table>
+        </div>
+        <div class="card-title" style="margin:14px 0 8px">Cómo configurar</div>
+        <ul class="steps">
+          <li class="step-item">
+            <div class="step-num verde">1</div>
+            <div class="step-body">Hacer clic en el encabezado del módulo <strong>"📅 Pago Anual"</strong> para expandirlo.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num verde">2</div>
+            <div class="step-body">Revisar y editar los 3 mensajes (30, 15 y 7 días). Asegurarse de que el asunto y el cuerpo tengan el tono del club.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num verde">3</div>
+            <div class="step-body">Marcar los checkboxes de los envíos que se quieren activar (los 3 están activos por defecto).</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num verde">4</div>
+            <div class="step-body">Activar el toggle a <strong>ACTIVO</strong> y hacer clic en <strong>"💾 Guardar configuración"</strong>.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- MÓDULO 2: Domiciliados Aviso Previo -->
+    <div class="mod-card" id="mod-domi-sec">
+      <div class="mod-header" onclick="toggleMod('mod-domi-sec')">
+        <div class="mod-ico" style="background:#e8f0fb">🏦</div>
+        <div class="mod-info">
+          <div class="mod-title">Domiciliados — Aviso Previo</div>
+          <div class="mod-sub">Recordatorio automático 7 días antes del cargo bancario mensual</div>
+        </div>
+        <span class="mod-badge auto">Automático</span>
+        <span class="mod-arrow" id="arr-mod-domi-sec">▼</span>
+      </div>
+      <div class="mod-body" id="body-mod-domi-sec">
+        <div class="canal-row">
+          <span class="canal activo">✉️ Correo activo</span>
+          <span class="canal activo">📱 WhatsApp activo</span>
+        </div>
+        <p style="font-size:.83rem;color:var(--gris);margin-bottom:12px">Los socios con cargo bancario domiciliado reciben un correo de aviso unos días antes de que el banco realice el cobro automático. Así tienen tiempo de verificar que su cuenta tenga fondos.</p>
+        <div class="alerta-box">
+          <strong>Dato pendiente del club:</strong> Para activar este módulo, el equipo de tesorería debe confirmar qué día del mes realiza el banco el cargo automático. Una vez informado, el sistema enviará el aviso 7 días antes de esa fecha automáticamente.
+        </div>
+        <div class="card-title" style="margin:14px 0 8px">Cómo configurar</div>
+        <ul class="steps">
+          <li class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">Expandir el módulo <strong>"🏦 Domiciliados — Aviso Previo"</strong>.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body">En el campo <strong>"Día del mes que cobra el banco"</strong>, ingresar el número (ej: 15 si el banco cobra el día 15).</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body">El sistema mostrará automáticamente el día en que se enviará el aviso (7 días antes).</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-body">Revisar y editar el mensaje de la plantilla. Activar el toggle a <strong>ACTIVO</strong> y guardar.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- MÓDULO 3: Cargo Fallido -->
+    <div class="mod-card" id="mod-cf-sec">
+      <div class="mod-header" onclick="toggleMod('mod-cf-sec')">
+        <div class="mod-ico" style="background:#fff4f0">🏦❌</div>
+        <div class="mod-info">
+          <div class="mod-title">Domiciliados — Cargo Fallido</div>
+          <div class="mod-sub">Aviso inmediato cuando el banco rechaza el cargo de un socio</div>
+        </div>
+        <span class="mod-badge manual">Manual + Correo + WhatsApp</span>
+        <span class="mod-arrow" id="arr-mod-cf-sec">▼</span>
+      </div>
+      <div class="mod-body" id="body-mod-cf-sec">
+        <div class="canal-row">
+          <span class="canal activo">✉️ Correo activo</span>
+          <span class="canal activo">📱 WhatsApp activo</span>
+        </div>
+        <p style="font-size:.83rem;color:var(--gris);margin-bottom:12px">Cuando el banco informa que no pudo realizar el cargo de un socio domiciliado, el equipo puede enviar un aviso inmediato desde aquí con un solo clic. El socio recibe el mensaje por correo Y por WhatsApp al mismo tiempo.</p>
+        <div class="card-title" style="margin-bottom:10px">Cómo enviar el aviso de cargo fallido</div>
+        <ul class="steps">
+          <li class="step-item">
+            <div class="step-num naranja">1</div>
+            <div class="step-body">Ir a la pestaña <strong>✉️ Avisos Correo</strong>.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num naranja">2</div>
+            <div class="step-body">Hacer clic en el botón de acceso rápido <strong>"🏦❌ Cargo Fallido"</strong> que aparece en la barra superior de la pestaña.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num naranja">3</div>
+            <div class="step-body">Expandir el módulo haciendo clic en su encabezado.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num naranja">4</div>
+            <div class="step-body">En el selector <strong>"Socio domiciliado"</strong>, buscar y seleccionar al socio cuyo cargo fue rechazado.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num naranja">5</div>
+            <div class="step-body">Hacer clic en el botón naranja <strong>"🏦❌ Enviar aviso ahora"</strong>.</div>
+          </li>
+          <li class="step-item">
+            <div class="step-num naranja">6</div>
+            <div class="step-body">Aparecerá una notificación en pantalla confirmando que el correo y el WhatsApp fueron enviados.</div>
+          </li>
+        </ul>
+        <div class="verde-box">
+          <strong>✅ Resultado:</strong> El socio recibe el correo de aviso y un mensaje de WhatsApp informando que su cargo no pudo procesarse y que debe regularizar su situación a la brevedad.
+        </div>
+      </div>
+    </div>
+
+    <!-- MÓDULO 4: Cumpleaños -->
+    <div class="mod-card" id="mod-cum-sec">
+      <div class="mod-header" onclick="toggleMod('mod-cum-sec')">
+        <div class="mod-ico" style="background:#fff9e6">🎂</div>
+        <div class="mod-info">
+          <div class="mod-title">Cumpleaños</div>
+          <div class="mod-sub">Felicitación automática el día del cumpleaños de cada socio</div>
+        </div>
+        <span class="mod-badge auto">Automático</span>
+        <span class="mod-arrow" id="arr-mod-cum-sec">▼</span>
+      </div>
+      <div class="mod-body" id="body-mod-cum-sec">
+        <div class="canal-row">
+          <span class="canal activo">✉️ Correo activo</span>
+          <span class="canal activo">📱 WhatsApp activo</span>
+        </div>
+        <p style="font-size:.83rem;color:var(--gris);margin-bottom:12px">El sistema detecta cada día los socios que cumplen años y les envía automáticamente un correo de felicitación. No requiere que nadie revise un calendario ni recuerde fechas.</p>
+        <div class="card-title" style="margin-bottom:10px">Opciones de configuración</div>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>Opción</th><th>Cuándo llega el correo al socio</th></tr>
+            <tr><td>Día anterior</td><td>El día antes del cumpleaños</td></tr>
+            <tr><td>Día exacto</td><td>El mismo día del cumpleaños</td></tr>
+            <tr><td>Ambos</td><td>Un correo el día anterior y otro el mismo día</td></tr>
+          </table>
+        </div>
+        <div class="info-box" style="margin-top:8px">
+          El número de socios con cumpleaños en los próximos 30 días aparece en el encabezado del módulo para que el equipo sepa cuántos envíos aproximados habrá este mes.
+        </div>
+      </div>
+    </div>
+
+    <!-- MÓDULO 5: Alerta 26 años -->
+    <div class="mod-card" id="mod-26-sec">
+      <div class="mod-header" onclick="toggleMod('mod-26-sec')">
+        <div class="mod-ico" style="background:#f0faf0">🔔</div>
+        <div class="mod-info">
+          <div class="mod-title">Alerta 26 años</div>
+          <div class="mod-sub">Aviso al titular cuando un dependiente está por cumplir 26 años</div>
+        </div>
+        <span class="mod-badge auto">Automático</span>
+        <span class="mod-arrow" id="arr-mod-26-sec">▼</span>
+      </div>
+      <div class="mod-body" id="body-mod-26-sec">
+        <div class="canal-row">
+          <span class="canal activo">✉️ Correo activo</span>
+          <span class="canal activo">📱 WhatsApp activo</span>
+        </div>
+        <p style="font-size:.83rem;color:var(--gris);margin-bottom:12px">Las membresías familiares permiten a los dependientes (hijos, etc.) usar el club hasta los 26 años de edad. Cuando un dependiente está próximo a cumplirlos, el sistema alerta al titular con anticipación para que pueda actuar antes de que el acceso quede suspendido automáticamente.</p>
+        <div class="verde-box">
+          <strong>¿Por qué es importante?</strong> Muchas veces la familia no recuerda exactamente la edad del dependiente registrado. Este aviso evita sorpresas desagradables y abre la conversación con el titular para que cambie el tipo de membresía o tome las medidas necesarias con tiempo.
+        </div>
+        <div class="info-box" style="margin-top:8px">
+          El sistema envía el aviso con <strong>30 días de anticipación</strong> al cumpleaños número 26 del dependiente. Puede modificarse en la configuración del módulo.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PARTE 5: WHATSAPP                          -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="sec" id="whatsapp">
+    <div class="sec-eyebrow">Parte 5</div>
+    <div class="sec-h">WhatsApp: una decisión importante del club</div>
+    <div class="sec-bar"></div>
+    <p class="sec-lead">El sistema puede enviar mensajes de WhatsApp a los socios de forma automática. Para hacerlo, necesita usar un número de teléfono registrado como línea oficial del club. El club debe decidir cuál número usar: la línea actual de atención o una línea nueva dedicada.</p>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">📱 ¿Cómo funciona WhatsApp en el sistema?</div>
+      <p>Los mensajes de WhatsApp no se escriben a mano — son plantillas aprobadas por Meta (la empresa de WhatsApp) con un formato fijo. El sistema los envía de forma automática usando esa plantilla, substituyendo el nombre del socio, número de membresía y otros datos personalizados.</p>
+      <p>El socio recibe el mensaje desde el número oficial del club, igual que si el equipo lo hubiera enviado manualmente, pero lo hace el sistema solo.</p>
+    </div>
+
+    <div class="wa-option">
+      <div class="wa-option-header">
+        <div class="wa-option-num a">A</div>
+        <div>
+          <div class="wa-option-title">Usar la línea actual de atención a clientes</div>
+          <div style="font-size:.74rem;color:var(--gc);margin-top:2px">El mismo número que el equipo ya usa para atender socios por WhatsApp</div>
+        </div>
+      </div>
+      <p style="font-size:.82rem;color:var(--gris);margin-bottom:12px">El club ya tiene un número de WhatsApp que usan para comunicarse con socios. Esta opción registra ese mismo número en el sistema para que también envíe los mensajes automáticos.</p>
+      <div class="wa-pros-cons">
+        <div class="pros">
+          <strong>Ventajas</strong>
+          <ul>
+            <li>Los socios ya tienen guardado ese número</li>
+            <li>No hay que comunicar un número nuevo</li>
+            <li>Sin costo adicional de línea</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <strong>Consideraciones</strong>
+          <ul>
+            <li>Los mensajes automáticos y las conversaciones del equipo se mezclan en la misma bandeja</li>
+            <li>Si el teléfono cambia, hay que re-registrar el número</li>
+            <li>El equipo puede confundir un mensaje automático con uno escrito por ellos</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="wa-option">
+      <div class="wa-option-header">
+        <div class="wa-option-num b">B</div>
+        <div>
+          <div class="wa-option-title">Crear una línea nueva dedicada solo al sistema</div>
+          <div style="font-size:.74rem;color:var(--gc);margin-top:2px">Un número de teléfono exclusivo para los mensajes automáticos del club</div>
+        </div>
+      </div>
+      <p style="font-size:.82rem;color:var(--gris);margin-bottom:12px">Se adquiere una nueva línea (o SIM) que se registra en el sistema y sirve exclusivamente para los mensajes automáticos. El equipo mantiene su línea actual para la atención personalizada.</p>
+      <div class="wa-pros-cons">
+        <div class="pros">
+          <strong>Ventajas</strong>
+          <ul>
+            <li>Los mensajes automáticos y la atención humana están separados</li>
+            <li>El equipo sabe exactamente qué canal es cuál</li>
+            <li>El socio distingue el aviso automático del mensaje personal</li>
+            <li>Sin riesgo de mezcla entre conversaciones</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <strong>Consideraciones</strong>
+          <ul>
+            <li>Costo de la nueva línea (~$200-300 MXN/mes)</li>
+            <li>Los socios deben guardar el nuevo número</li>
+            <li>Requiere un proceso de registro en Meta (1-3 días)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="alerta-box">
+      <strong>⚠️ Acción requerida por el club:</strong> Esta decisión debe tomarla el equipo directivo antes de activar el canal de WhatsApp masivo. Ambas opciones son válidas. La recomendación técnica es la Opción B para tener orden y claridad en las comunicaciones — pero la decisión final es del club.
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">¿Qué funciona hoy con WhatsApp?</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Módulo</th><th>WhatsApp hoy</th></tr>
+          <tr><td>🏦❌ Cargo Fallido</td><td><span class="badge-si">✅ Activo</span> — Funciona desde el primer día</td></tr>
+          <tr><td>🎂 Cumpleaños</td><td><span class="badge-si">✅ Activo</span></td></tr>
+          <tr><td>📅 Pago Anual</td><td><span class="badge-si">✅ Activo</span></td></tr>
+          <tr><td>🏦 Domiciliados Previo</td><td><span class="badge-si">✅ Activo</span></td></tr>
+          <tr><td>🔔 Alerta 26 años</td><td><span class="badge-si">✅ Activo</span></td></tr>
+          <tr><td>✉️ Envío masivo por segmento (s1/s2/s3/s4)</td><td><span class="badge-prox">⏳ Próximamente</span> — Requiere aprobación de plantillas en Meta</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PARTE 6: MATRIZ DE PRUEBAS                 -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="sec" id="pruebas">
+    <div class="sec-eyebrow">Parte 6</div>
+    <div class="sec-h">Pruebas del sistema</div>
+    <div class="sec-bar"></div>
+    <p class="sec-lead">Antes de activar el sistema con los socios reales, se realizan pruebas con correos y teléfonos del equipo de ExcelentIA. Esto garantiza que cada aviso llega correctamente y con el mensaje adecuado, sin que ningún socio real reciba comunicaciones de prueba.</p>
+
+    <div class="info-box" style="margin-bottom:16px">
+      <strong>¿Cómo funcionan las pruebas?</strong> El sistema está configurado para enviar únicamente a contactos internos durante esta etapa. Cuando el equipo del club confirme que todo funciona correctamente, se activa el sistema completo para los socios reales.
+    </div>
+
+    <!-- Tabla de socios demo -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-title">🧪 Socios demo asignados para las pruebas</div>
+      <p style="font-size:.82rem;color:var(--gris);margin-bottom:14px">Para realizar las pruebas sin afectar a ningún socio real, se seleccionaron socios del club y se les asignaron temporalmente los correos y teléfonos del equipo de ExcelentIA. Esto permite recibir los mensajes de prueba y verificar que todo funciona correctamente. Una vez concluidas las pruebas, estos datos se restauran a los originales.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Categoría de prueba</th><th>Socio usado (ficticio)</th><th>Membresía</th><th>Correo de prueba</th><th>WhatsApp de prueba</th></tr>
+          <tr><td><strong>Cargo Fallido</strong></td><td>Fidel Martinez Carmona</td><td>#7225</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td></tr>
+          <tr><td><strong>Cobranza s2 (1)</strong></td><td>Guillermo Cerecedo Fuerte</td><td>#3411</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td></tr>
+          <tr><td><strong>Cobranza s2 (2)</strong></td><td>Veronica Estrada Bastida</td><td>#5097</td><td>sistemas@berimbau.com.mx</td><td>5562228110</td></tr>
+          <tr><td><strong>Cobranza s2 (3)</strong></td><td>Hector Hugo Castillo</td><td>#5873</td><td>acabrera@excelentia.com.mx</td><td>5543614898</td></tr>
+          <tr><td><strong>Cobranza s2 (4)</strong></td><td>Nataly Elizabeth Mayo</td><td>#6718</td><td>asiscobranza@berimbau.mx</td><td>5546973912</td></tr>
+          <tr><td><strong>Vencimiento Anual (1)</strong></td><td>Ma. Felicitas Lopez Pesquera</td><td>#701</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td></tr>
+          <tr><td><strong>Vencimiento Anual (2)</strong></td><td>William Guillermo Ugarte</td><td>#1056</td><td>sistemas@berimbau.com.mx</td><td>5562228110</td></tr>
+          <tr><td><strong>Vencimiento Anual (3)</strong></td><td>Felipe Guadarrama Sanchez</td><td>#1798</td><td>acabrera@excelentia.com.mx</td><td>5543614898</td></tr>
+          <tr><td><strong>Vencimiento Anual (4)</strong></td><td>Aline Alejandra Rojo Cavada</td><td>#2576</td><td>asiscobranza@berimbau.mx</td><td>5546973912</td></tr>
+          <tr><td><strong>Cumpleaños (1)</strong></td><td>Montserrat Galindo Fuguemann</td><td>#8645</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td></tr>
+          <tr><td><strong>Cumpleaños (2)</strong></td><td>Juan Jose Carlos Gonzalez</td><td>#7364</td><td>sistemas@berimbau.com.mx</td><td>5562228110</td></tr>
+          <tr><td><strong>Cumpleaños (3)</strong></td><td>Daniela Castañon Rodriguez</td><td>#285</td><td>asiscobranza@berimbau.mx</td><td>5546973912</td></tr>
+          <tr><td><strong>Cumpleaños (4)</strong></td><td>Enrique Verduzco Merino</td><td>#7856</td><td>acabrera@excelentia.com.mx</td><td>5543614898</td></tr>
+          <tr><td><strong>Alerta 26 años (1)</strong></td><td>Francisco Nuñez Martinez</td><td>#8787</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td></tr>
+          <tr><td><strong>Alerta 26 años (2)</strong></td><td>Israel Iniestra Rivera</td><td>#8796</td><td>sistemas@berimbau.com.mx</td><td>5562228110</td></tr>
+          <tr><td><strong>Alerta 26 años (3)</strong></td><td>Leonardo Paz Miranda</td><td>#8804</td><td>acabrera@excelentia.com.mx</td><td>5543614898</td></tr>
+          <tr><td><strong>Alerta 26 años (4)</strong></td><td>Alejandro Trujillo Cortazar</td><td>#8632</td><td>asiscobranza@berimbau.mx</td><td>5546973912</td></tr>
+        </table>
+      </div>
+      <div class="alerta-box" style="margin-top:12px">
+        <strong>⚠️ Nota importante:</strong> Los datos de correo y WhatsApp de esta tabla son temporales y pertenecen al equipo de ExcelentIA, no a los socios reales. Esta configuración existe únicamente para la etapa de pruebas. Ningún socio real recibirá mensajes durante este periodo.
+      </div>
+    </div>
+
+    <!-- Progreso -->
+    <div class="prog-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.78rem;font-weight:800;color:var(--azul)">Progreso de validación</span>
+        <span class="prog-txt" id="prog-txt-v2">0 de 12 pruebas completadas</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill-v2"></div></div>
+    </div>
+
+    <!-- Prueba 1 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 1 — Cargo Fallido: Correo + WhatsApp</div>
+        <div class="prueba-title">🏦❌ Avisar a un socio que su cargo bancario no se procesó</div>
+        <div class="prueba-pasos">
+          1. Abrir la pestaña <strong>✉️ Avisos Correo</strong><br>
+          2. Hacer clic en el botón <strong>🏦❌ Cargo Fallido</strong> en la barra superior<br>
+          3. Expandir el módulo haciendo clic en su encabezado<br>
+          4. En el selector <strong>"Socio domiciliado"</strong>, elegir: <em>#7225 — Fidel Martinez Carmona</em><br>
+          5. Hacer clic en <strong>"🏦❌ Enviar aviso ahora"</strong>
+        </div>
+        <div class="prueba-espera">Aparece notificación "✅ Aviso enviado a Fidel Martinez Carmona". El correo y el WhatsApp llegan al contacto de prueba asignado.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 2 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 2 — Envío Manual de correo a un segmento</div>
+        <div class="prueba-title">✉️ Enviar correo de cobranza al segmento 31–60 días</div>
+        <div class="prueba-pasos">
+          1. Abrir la pestaña <strong>✉️ Avisos Correo</strong><br>
+          2. En la sección <strong>Envío Manual</strong>, hacer clic en el selector <strong>"Segmento destino"</strong><br>
+          3. Elegir <strong>🟠 31–60 días (temporal)</strong><br>
+          4. Verificar que aparece la lista de destinatarios y el mensaje cargado<br>
+          5. Hacer clic en <strong>"👁 Vista previa"</strong> para revisar el mensaje<br>
+          6. Hacer clic en <strong>"✉️ Enviar a X socios"</strong>
+        </div>
+        <div class="prueba-espera">Notificación "✅ ¡X correos enviados!". El historial de envíos en la parte inferior se actualiza con la fecha y segmento.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 3 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 3 — Envío Manual de un socio específico</div>
+        <div class="prueba-title">✏️ Enviar correo personalizado a un solo socio seleccionado manualmente</div>
+        <div class="prueba-pasos">
+          1. En la sección <strong>Envío Manual</strong>, elegir <strong>✏️ Selección manual de destinatarios</strong><br>
+          2. Buscar al socio por nombre o membresía en el buscador<br>
+          3. Marcar su checkbox para seleccionarlo<br>
+          4. Escribir el asunto y el mensaje en el editor<br>
+          5. Hacer clic en <strong>"✉️ Enviar a 1 socio"</strong>
+        </div>
+        <div class="prueba-espera">Notificación de correo enviado. El socio seleccionado recibe el mensaje con sus datos personales sustituidos correctamente.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 4 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 4 — Guardar plantilla de correo</div>
+        <div class="prueba-title">💾 Modificar y guardar el mensaje del segmento 0–30 días</div>
+        <div class="prueba-pasos">
+          1. En <strong>✉️ Avisos Correo</strong>, localizar la tarjeta <strong>0–30 días · Olvido / Descuido</strong><br>
+          2. Modificar el asunto o el cuerpo del mensaje con el texto del club<br>
+          3. Hacer clic en <strong>"💾 Guardar"</strong>
+        </div>
+        <div class="prueba-espera">Aparece notificación de guardado. Al recargar la página, el mensaje guardado sigue ahí.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 5 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 5 — Programación mensual automática</div>
+        <div class="prueba-title">📅 Configurar el día y hora de envío automático del mes</div>
+        <div class="prueba-pasos">
+          1. En la sección <strong>Programación Automática Mensual</strong>, ingresar el día (ej: 10)<br>
+          2. Ingresar la hora (ej: 09:00)<br>
+          3. Activar el toggle a <strong>ACTIVO</strong><br>
+          4. Hacer clic en <strong>"📅 Programar envío"</strong>
+        </div>
+        <div class="prueba-espera">La fecha del próximo envío se actualiza correctamente. El toggle queda en verde ACTIVO.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 6 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 6 — Módulo Cumpleaños</div>
+        <div class="prueba-title">🎂 Activar el aviso automático de cumpleaños</div>
+        <div class="prueba-pasos">
+          1. Hacer clic en el botón <strong>🎂 Cumpleaños</strong> en la barra de acceso rápido<br>
+          2. Revisar el número de socios con cumpleaños en los próximos 30 días<br>
+          3. Elegir cuándo enviar: día anterior, día exacto o ambos<br>
+          4. Revisar y editar el mensaje de felicitación<br>
+          5. Activar el toggle a <strong>ACTIVO</strong> y hacer clic en <strong>"💾 Guardar configuración"</strong>
+        </div>
+        <div class="prueba-espera">Módulo queda en estado ACTIVO. El sistema enviará felicitaciones automáticamente en la fecha configurada.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 7 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 7 — Observaciones en Cobranza</div>
+        <div class="prueba-title">📝 Dejar una nota interna sobre un socio en la tabla de cobranza</div>
+        <div class="prueba-pasos">
+          1. Ir a la pestaña <strong>💰 Cobranza</strong><br>
+          2. Buscar un socio en la tabla<br>
+          3. Hacer clic en el ícono de la columna <strong>Observaciones</strong> de ese socio<br>
+          4. Escribir una nota (ej: "Prometió pagar el viernes 20")<br>
+          5. Guardar la nota
+        </div>
+        <div class="prueba-espera">La nota queda guardada. El botón naranja <strong>📝 Observaciones</strong> en la barra de filtros muestra el contador incrementado. Al hacer clic ahí, la nota aparece en el panel lateral.</div>
+      </div>
+    </div>
+
+    <!-- Divisor módulos -->
+    <div style="display:flex;align-items:center;gap:10px;margin:24px 0 16px">
+      <div style="flex:1;height:1px;background:var(--borde)"></div>
+      <span style="font-size:.72rem;font-weight:800;color:var(--gc);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap">Pruebas de módulos de avisos especiales</span>
+      <div style="flex:1;height:1px;background:var(--borde)"></div>
+    </div>
+
+    <!-- Prueba 8 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 8 — Módulo Cargo Fallido (Correo + WhatsApp)</div>
+        <div class="prueba-title">🏦❌ Enviar aviso cuando el banco no puede cobrar a un socio domiciliado</div>
+        <div class="prueba-pasos">
+          1. Ir a la pestaña <strong>✉️ Avisos Correo</strong><br>
+          2. Hacer clic en el botón de acceso rápido <strong>🏦❌ Cargo Fallido</strong><br>
+          3. Expandir el módulo haciendo clic en su encabezado<br>
+          4. En el selector <strong>"Socio domiciliado"</strong>, elegir: <em>#7225 — Fidel Martinez Carmona</em><br>
+          5. Hacer clic en <strong>"🏦❌ Enviar aviso ahora"</strong>
+        </div>
+        <div class="prueba-espera">Notificación en pantalla: "✅ Aviso enviado a Fidel Martinez Carmona". Llega correo Y WhatsApp al contacto de prueba asignado.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 9 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 9 — Módulo Pago Anual</div>
+        <div class="prueba-title">📅 Verificar que los socios con membresía anual próxima a vencer reciben el aviso</div>
+        <div class="prueba-pasos">
+          1. Ir a <strong>✉️ Avisos Correo</strong> → botón de acceso rápido <strong>📅 Pago Anual</strong><br>
+          2. Expandir el módulo y revisar el número de socios detectados con vencimiento próximo<br>
+          3. Revisar que los 3 mensajes (30, 15 y 7 días) tienen el texto correcto<br>
+          4. Activar el toggle a <strong>ACTIVO</strong><br>
+          5. Hacer clic en <strong>"💾 Guardar configuración"</strong><br>
+          6. Confirmar con el equipo de ExcelentIA que el scheduler ejecutó el workflow y llegaron los correos a los contactos de prueba
+        </div>
+        <div class="prueba-espera">El módulo queda en estado ACTIVO. Los correos llegan a los 4 contactos de prueba asignados a esta categoría (membresías que vencen el 30 de junio).</div>
+      </div>
+    </div>
+
+    <!-- Prueba 10 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 10 — Módulo Domiciliados Aviso Previo</div>
+        <div class="prueba-title">🏦 Verificar que los socios domiciliados reciben aviso antes del cargo bancario</div>
+        <div class="prueba-pasos">
+          1. Ir a <strong>✉️ Avisos Correo</strong> → botón de acceso rápido <strong>🏦 Domiciliados</strong><br>
+          2. Expandir el módulo<br>
+          3. Ingresar el día del mes en que el banco realiza el cargo (confirmarlo con Tesorería)<br>
+          4. Verificar que el sistema calcula correctamente el día de envío (7 días antes)<br>
+          5. Revisar el mensaje de la plantilla<br>
+          6. Activar el toggle a <strong>ACTIVO</strong> y guardar
+        </div>
+        <div class="prueba-espera">El módulo queda ACTIVO. En la fecha calculada, llegan correos a los 4 contactos de prueba asignados a esta categoría.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 11 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 11 — Módulo Cumpleaños</div>
+        <div class="prueba-title">🎂 Verificar que los socios reciben felicitación automática en su cumpleaños</div>
+        <div class="prueba-pasos">
+          1. Ir a <strong>✉️ Avisos Correo</strong> → botón de acceso rápido <strong>🎂 Cumpleaños</strong><br>
+          2. Expandir el módulo y revisar cuántos socios cumplen años en los próximos 30 días<br>
+          3. Seleccionar cuándo se envía: día anterior, día exacto, o ambos<br>
+          4. Revisar el mensaje de felicitación<br>
+          5. Activar el toggle a <strong>ACTIVO</strong> y guardar<br>
+          6. Confirmar con el equipo de ExcelentIA que llegaron los correos a los contactos de prueba con cumpleaños próximos (17, 24, 25 y 30 de junio)
+        </div>
+        <div class="prueba-espera">Los 4 contactos de prueba asignados reciben la felicitación en la fecha configurada con el nombre del socio en el saludo.</div>
+      </div>
+    </div>
+
+    <!-- Prueba 12 -->
+    <div class="prueba-row">
+      <input type="checkbox" class="prueba-check" onchange="actualizarProg2()">
+      <div class="prueba-body">
+        <div class="prueba-num">Prueba 12 — Módulo Alerta 26 Años</div>
+        <div class="prueba-title">🔔 Verificar que el titular recibe alerta cuando un dependiente está por cumplir 26 años</div>
+        <div class="prueba-pasos">
+          1. Ir a <strong>✉️ Avisos Correo</strong> → botón de acceso rápido <strong>🔔 Alerta 26 años</strong><br>
+          2. Expandir el módulo y revisar cuántos dependientes están próximos a cumplir 26 años<br>
+          3. Revisar el mensaje de alerta al titular<br>
+          4. Activar el toggle a <strong>ACTIVO</strong> y guardar<br>
+          5. Confirmar con el equipo de ExcelentIA que llegaron los correos a los contactos de prueba asignados
+        </div>
+        <div class="prueba-espera">Los 4 contactos de prueba reciben el aviso indicando que un dependiente cumplirá 26 años en los próximos días, con el nombre del socio y la fecha de cumpleaños.</div>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:2px solid var(--verde);border-radius:14px;padding:22px;margin-top:20px;text-align:center" id="exito-msg" style="display:none">
+      <div style="font-size:2rem;margin-bottom:8px">🎉</div>
+      <div style="font-weight:800;color:var(--verde-d);font-size:.95rem;margin-bottom:6px">🎉 ¡Sistema validado y listo para activarse con los socios reales!</div>
+      <div style="font-size:.8rem;color:var(--gris)">Las 12 pruebas están completas. El sistema está operativo. El siguiente paso es restaurar los datos originales de los socios demo y activar el sistema para todos los socios del club.</div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- ══════════════════════════ FOOTER ══════════════════════════ -->
+<div class="footer">
+  <strong>Sistema de Comunicación Inteligente — Club Berimbau</strong><br>
+  Desarrollado por ExcelentIA · excelentia.com.mx · fdavila@excelentia.com.mx<br>
+  Documento de uso interno · Versión 18 · Junio 2026
+</div>
+
+<script>
+// Navegación interna
+function irA(id){
+  document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// Acordeones de pestañas
+function toggleAcord(id){
+  const body = document.getElementById('body-'+id);
+  const arr = document.getElementById('arr-'+id);
+  if(!body) return;
+  const open = body.classList.contains('open');
+  body.classList.toggle('open');
+  if(arr) arr.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+// Módulos
+function toggleMod(id){
+  const body = document.getElementById('body-'+id);
+  const arr = document.getElementById('arr-'+id);
+  if(!body) return;
+  const open = body.classList.contains('open');
+  body.classList.toggle('open');
+  if(arr) arr.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+// Progreso de pruebas
+function actualizarProg2(){
+  const checks = document.querySelectorAll('.prueba-check');
+  const total = checks.length;
+  const done = [...checks].filter(c=>c.checked).length;
+  const pct = Math.round(done/total*100);
+  document.getElementById('prog-fill-v2').style.width = pct+'%';
+  document.getElementById('prog-txt-v2').textContent = done+' de '+total+' pruebas completadas';
+  const msg = document.getElementById('exito-msg');
+  if(msg) msg.style.display = done===total ? 'block' : 'none';
+}
+
+// Nav activa al hacer scroll
+const secs = ['que-es','el-dashboard','las-pestanas','modulos','whatsapp','pruebas'];
+const navBtns = document.querySelectorAll('.nav-btn');
+window.addEventListener('scroll',()=>{
+  let current = '';
+  secs.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el && window.scrollY >= el.offsetTop - 160) current = id;
+  });
+  navBtns.forEach((b,i)=>{
+    b.classList.toggle('active', secs[i]===current);
+  });
+});
+</script>
+
+</body>
+</html>
