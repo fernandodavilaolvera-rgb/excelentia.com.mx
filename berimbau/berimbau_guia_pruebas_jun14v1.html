@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía de Pruebas — Dashboard Berimbau v18</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size:14px}
+  .header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:16px 24px;display:flex;align-items:center;gap:16px}
+  .logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+  .logo-box img{height:40px;width:auto;display:block}
+  .logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+  .header-title{color:#fff}
+  .header-title h1{font-size:1.15rem;font-weight:800;margin-bottom:2px}
+  .header-title p{font-size:.75rem;opacity:.7}
+  .container{max-width:900px;margin:28px auto;padding:0 16px 40px}
+  .intro-card{background:#fff;border-radius:14px;border:1px solid #dde1e9;padding:20px 24px;margin-bottom:24px}
+  .intro-card h2{font-size:1rem;font-weight:800;color:#1a3a6b;margin-bottom:8px}
+  .intro-card p{color:#4a5068;font-size:.82rem;line-height:1.6}
+  .seccion{margin-bottom:28px}
+  .seccion-title{font-size:.72rem;font-weight:800;color:#8a90a0;letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .seccion-title::after{content:'';flex:1;height:1px;background:#dde1e9}
+  .prueba{background:#fff;border-radius:12px;border:1px solid #dde1e9;overflow:hidden;margin-bottom:14px}
+  .prueba-header{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#fff;transition:.15s}
+  .prueba-header:hover{background:#f5f8ff}
+  .prueba-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;flex-shrink:0;color:#fff}
+  .prueba-num.verde{background:#3AAA35}
+  .prueba-num.azul{background:#1a3a6b}
+  .prueba-num.naranja{background:#EF4B1F}
+  .prueba-num.teal{background:#1a8a6e}
+  .prueba-num.gold{background:#c8a84b}
+  .prueba-info{flex:1}
+  .prueba-info h3{font-size:.88rem;font-weight:700;color:#1a2035;margin-bottom:2px}
+  .prueba-info p{font-size:.75rem;color:#4a5068}
+  .prueba-status{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:10px;white-space:nowrap}
+  .status-pending{background:#f0f6ff;color:#1a3a6b;border:1px solid #c8d9f0}
+  .status-ok{background:#dcfce7;color:#15803d}
+  .prueba-body{padding:0 18px 16px;border-top:1px solid #f0f2f6;display:none}
+  .prueba-body.open{display:block}
+  .step-list{list-style:none;margin:14px 0}
+  .step-list li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f5f6f8;font-size:.8rem;color:#1a2035;line-height:1.5}
+  .step-list li:last-child{border-bottom:none}
+  .step-num{width:22px;height:22px;border-radius:50%;background:#1a3a6b;color:#fff;font-size:.65rem;font-weight:800;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .step-check{width:22px;height:22px;border-radius:6px;border:2px solid #dde1e9;flex-shrink:0;cursor:pointer;transition:.15s}
+  .step-check:checked{accent-color:#3AAA35}
+  .resultado-esperado{background:#f0faf0;border:1px solid #a3d9a0;border-left:4px solid #3AAA35;border-radius:8px;padding:10px 14px;margin-top:10px}
+  .resultado-esperado strong{font-size:.72rem;font-weight:800;color:#15803d;display:block;margin-bottom:4px}
+  .resultado-esperado p{font-size:.78rem;color:#1a4a1a;line-height:1.5}
+  .alerta{background:#fff4ee;border:1px solid #f5c6b0;border-left:4px solid #EF4B1F;border-radius:8px;padding:10px 14px;margin-top:10px}
+  .alerta strong{font-size:.72rem;font-weight:800;color:#a33010;display:block;margin-bottom:4px}
+  .alerta p{font-size:.78rem;color:#7a2010;line-height:1.5}
+  .dato-demo{background:#eef4fc;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:12px 14px;margin-top:10px}
+  .dato-demo strong{font-size:.72rem;font-weight:800;color:#1a3a6b;display:block;margin-bottom:6px}
+  .dato-demo table{width:100%;border-collapse:collapse}
+  .dato-demo table td{font-size:.76rem;padding:4px 8px;color:#1a3a6b}
+  .dato-demo table tr:nth-child(even) td{background:rgba(74,159,212,.07)}
+  .dato-demo table th{font-size:.68rem;font-weight:800;color:#8a90a0;padding:4px 8px;text-align:left;letter-spacing:.4px;text-transform:uppercase}
+  .toggle-prueba{background:none;border:none;font-size:.72rem;font-weight:700;color:#4a9fd4;cursor:pointer;padding:4px 10px;border-radius:8px;transition:.15s;margin-left:auto}
+  .toggle-prueba:hover{background:#f0f6ff}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #dde1e9}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;color:#4a5068}
+  .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .progreso-bar{background:#e8e9ed;border-radius:10px;height:8px;margin:8px 0 4px;overflow:hidden}
+  .progreso-fill{height:100%;background:linear-gradient(90deg,#3AAA35,#4a9fd4);border-radius:10px;transition:.3s;width:0%}
+  .progreso-txt{font-size:.7rem;color:#4a5068;font-weight:700}
+  @media(max-width:600px){
+    .container{padding:0 10px 30px}
+    .prueba-header{padding:12px 14px}
+    .dato-demo table td,.dato-demo table th{font-size:.68rem;padding:3px 5px}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-box">
+    <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+  </div>
+  <div class="header-title">
+    <h1>Guía de Pruebas — Club Berimbau v18</h1>
+    <p>ExcelentIA · Protocolo interno de validación · Junio 2026</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="intro-card">
+    <h2>🎯 Objetivo de esta guía</h2>
+    <p>Verificar que el sistema funciona de principio a fin <strong>sin enviar ningún mensaje a socios reales</strong>. Todas las pruebas van a correos y WhatsApp del equipo interno. Cuando todas las pruebas estén en verde, el sistema está listo para entregarlo al Club.</p>
+  </div>
+
+  <!-- Progreso -->
+  <div style="background:#fff;border-radius:12px;border:1px solid #dde1e9;padding:16px 20px;margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:.78rem;font-weight:800;color:#1a3a6b">Progreso de pruebas</span>
+      <span class="progreso-txt" id="progreso-txt">0 / 21 completadas</span>
+    </div>
+    <div class="progreso-bar"><div class="progreso-fill" id="progreso-fill"></div></div>
+  </div>
+
+  <!-- Leyenda de socios demo -->
+  <div class="dato-demo" style="margin-bottom:24px">
+    <strong>📋 Socios demo asignados (NUNCA enviar a socios reales)</strong>
+    <table>
+      <tr><th>Persona</th><th>Correo demo</th><th>WhatsApp demo</th><th>Categoría</th></tr>
+      <tr><td>Fernando (Fer)</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td><td>s2 + Domi + Anual + Cumple + 26 años</td></tr>
+      <tr><td>Carlos (Evelyn/Sistemas)</td><td>sistemas@berimbau.com.mx</td><td>5562228110</td><td>s2 + Domi + Anual + Cumple + 26 años</td></tr>
+      <tr><td>Nancy (Cobranza)</td><td>asiscobranza@berimbau.mx</td><td>5546973912</td><td>s2 + Domi + Anual + Cumple + 26 años</td></tr>
+      <tr><td>Adolfo Cabrera</td><td>acabrera@excelentia.com.mx</td><td>5543614898</td><td>s2 + Domi + Anual + Cumple + 26 años</td></tr>
+      <tr><td>Fernando (Fidel demo)</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td><td>Cargo Fallido (m=7225)</td></tr>
+    </table>
+  </div>
+
+  <!-- ===== BLOQUE A: COBRANZA ===== -->
+  <div class="seccion">
+    <div class="seccion-title">🔴 A — Cobranza por Correo (s1–s4)</div>
+
+    <!-- PRUEBA 1 -->
+    <div class="prueba" id="p1">
+      <div class="prueba-header" onclick="togglePrueba('p1')">
+        <div class="prueba-num azul">1</div>
+        <div class="prueba-info">
+          <h3>Correo segmento s2 (31–60 días) — 4 destinatarios demo</h3>
+          <p>Valida que el correo llega a los 4 contactos internos del segmento s2</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p1">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p1">
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span><strong>Abrir</strong> dashboard_berimbau_v18.html en el navegador</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Ir a la pestaña <strong>💰 Cobranza</strong> → sección <em>Avisos Automáticos</em></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En el select <strong>"Selecciona segmento"</strong>, elegir <strong>31–60 días (s2)</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que aparecen <strong>4 socios</strong> con los correos demo en la lista de destinatarios</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que el asunto y cuerpo se cargan desde la plantilla guardada en Sheet</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Hacer clic en <strong>"✉️ Enviar a 4 socios"</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Confirmar que aparece el toast de <em>"✅ ¡4 correos enviados!"</em></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Revisar bandeja de entrada de los 4 correos demo</span></li>
+        </ul>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>Los 4 contactos internos (Fer, Carlos, Nancy, Adolfo) reciben el correo de cobranza s2. El asunto y cuerpo coinciden con lo que está en el Sheet. El historial de envíos en el dashboard muestra "31–60 días — 4 envíos ✉️".</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p1')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRUEBA 2 -->
+    <div class="prueba" id="p2">
+      <div class="prueba-header" onclick="togglePrueba('p2')">
+        <div class="prueba-num azul">2</div>
+        <div class="prueba-info">
+          <h3>WhatsApp segmento s2 — Toggle activado</h3>
+          <p>Valida que el WA llega a los socios con teléfono en s2 cuando el toggle está activo</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p2">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p2">
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En el mismo panel s2, activar el toggle <strong>"📱 Enviar también por WhatsApp"</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que el toggle queda en verde con el checkmark activo</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Hacer clic en <strong>"✉️ Enviar a 4 socios"</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Esperar el toast de correos enviados y luego el de WA: <em>"📱 WA: X enviados"</em></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar WhatsApp en los teléfonos de los 4 contactos demo</span></li>
+        </ul>
+        <div class="dato-demo">
+          <strong>📱 Números que recibirán WA (socios s2 con tel demo):</strong>
+          <table>
+            <tr><th>Socio (ficticio)</th><th>Teléfono demo</th><th>Persona real</th></tr>
+            <tr><td>Guillermo Cerecedo (m=3411)</td><td>5512154800</td><td>Fernando</td></tr>
+            <tr><td>Veronica Estrada (m=5097)</td><td>5562228110</td><td>Carlos</td></tr>
+            <tr><td>Hector Castillo (m=5873)</td><td>5543614898</td><td>Adolfo</td></tr>
+            <tr><td>Nataly Mayo (m=6718)</td><td>5546973912</td><td>Nancy</td></tr>
+          </table>
+        </div>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>Los 4 teléfonos demo reciben el WA de cobranza. El historial muestra "31–60 días — 4 envíos ✉️ + 📱". Si algún número no recibe, revisar plantilla Meta en YCloud.</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p2')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /BLOQUE A -->
+
+  <!-- ===== BLOQUE B: CARGO FALLIDO ===== -->
+  <div class="seccion">
+    <div class="seccion-title">🏦 B — Cargo Fallido (Correo + WA)</div>
+
+    <!-- PRUEBA 3 -->
+    <div class="prueba" id="p3">
+      <div class="prueba-header" onclick="togglePrueba('p3')">
+        <div class="prueba-num naranja">3</div>
+        <div class="prueba-info">
+          <h3>Cargo Fallido — Correo + WhatsApp a Fidel demo (m=7225)</h3>
+          <p>Aviso manual de cargo rechazado con Fidel Martinez como domiciliado demo de Fernando</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p3">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p3">
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En la pestaña 💰 Cobranza → módulo <strong>"🏦 Cargo Fallido"</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En el select <strong>"Socio domiciliado"</strong>, buscar y elegir <strong>FIDEL MARTINEZ CARMONA (m=7225)</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que el correo mostrado es <em>fernando.davila.olvera@gmail.com</em> y el teléfono <em>5512154800</em></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Hacer clic en <strong>"🏦❌ Enviar aviso ahora"</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Esperar el toast de confirmación</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Revisar que llega correo a <em>fernando.davila.olvera@gmail.com</em></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Revisar que llega WA al teléfono <em>5512154800</em></span></li>
+        </ul>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>Fernando recibe correo de cargo fallido con su nombre (de Fidel) y membresía #7225. También recibe WA con plantilla <em>berimbau_cargo_fallido</em>.</p>
+        </div>
+        <div class="alerta">
+          <strong>⚠️ Si el correo es rechazado (whitelist)</strong>
+          <p>El workflow Cargo Fallido valida que el correo esté en la whitelist. Solo aceptará los 5 correos aprobados. Si intentas con un correo de socio real, el workflow lo bloqueará con un error — eso es correcto.</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p3')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRUEBA 4: Otros domiciliados demo -->
+    <div class="prueba" id="p4">
+      <div class="prueba-header" onclick="togglePrueba('p4')">
+        <div class="prueba-num naranja">4</div>
+        <div class="prueba-info">
+          <h3>Cargo Fallido — Los 4 domiciliados demo (Carlos, Nancy, Adolfo)</h3>
+          <p>Repetir la prueba con los otros 3 domiciliados demo asignados</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p4">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p4">
+        <div class="dato-demo">
+          <strong>📋 Domiciliados demo disponibles en el select:</strong>
+          <table>
+            <tr><th>Socio (ficticio)</th><th>M.</th><th>Correo demo</th><th>Tel demo</th></tr>
+            <tr><td>FIDEL MARTINEZ CARMONA</td><td>7225</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td></tr>
+            <tr><td>RAMON NUALART VILLALPANDO</td><td>1163</td><td>fernando.davila.olvera@gmail.com</td><td>5512154800</td></tr>
+            <tr><td>GUILLERMO CUEVAS MARIN</td><td>4105</td><td>sistemas@berimbau.com.mx</td><td>5562228110</td></tr>
+            <tr><td>HUMBERTO ARGUELLO CRUZ</td><td>6134</td><td>acabrera@excelentia.com.mx</td><td>5543614898</td></tr>
+            <tr><td>JUAN RODRIGO CRISTERNA</td><td>6660</td><td>asiscobranza@berimbau.mx</td><td>5546973912</td></tr>
+          </table>
+        </div>
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Probar con <strong>GUILLERMO CUEVAS</strong> (m=4105) — correo va a Carlos/Evelyn</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Probar con <strong>HUMBERTO ARGUELLO</strong> (m=6134) — correo va a Adolfo</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Probar con <strong>JUAN RODRIGO CRISTERNA</strong> (m=6660) — correo va a Nancy</span></li>
+        </ul>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>Cada contacto interno recibe su correo + WA correspondiente. El nombre del socio en el mensaje es el ficticio (Guillermo, Humberto, Juan Rodrigo), pero llega al correo/WA real del equipo.</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p4')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /BLOQUE B -->
+
+  <!-- ===== BLOQUE C: MÓDULOS AUTOMÁTICOS ===== -->
+  <div class="seccion">
+    <div class="seccion-title">🔔 C — Módulos Automáticos (Activar y ejecutar)</div>
+
+    <!-- PRUEBA 5: Cumpleaños -->
+    <div class="prueba" id="p5">
+      <div class="prueba-header" onclick="togglePrueba('p5')">
+        <div class="prueba-num verde">5</div>
+        <div class="prueba-info">
+          <h3>Módulo Cumpleaños — 4 socios con cumpleaños próximos</h3>
+          <p>Verificar que el aviso llega a los 4 contactos con cumpleaños en junio-julio</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p5">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p5">
+        <div class="dato-demo">
+          <strong>🎂 Socios demo asignados (cumpleaños próximos):</strong>
+          <table>
+            <tr><th>Socio (ficticio)</th><th>M.</th><th>Cumpleaños real</th><th>Correo demo → Va a:</th></tr>
+            <tr><td>MONTSERRAT GALINDO</td><td>8645</td><td>17 jun</td><td>fernando.davila.olvera@gmail.com → Fer</td></tr>
+            <tr><td>JUAN JOSE CARLOS GONZALEZ</td><td>7364</td><td>24 jun</td><td>sistemas@berimbau.com.mx → Carlos</td></tr>
+            <tr><td>DANIELA CASTAÑON</td><td>285</td><td>25 jun</td><td>asiscobranza@berimbau.mx → Nancy</td></tr>
+            <tr><td>ENRIQUE VERDUZCO</td><td>7856</td><td>30 jun</td><td>acabrera@excelentia.com.mx → Adolfo</td></tr>
+          </table>
+        </div>
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En n8n, abrir el workflow <strong>Berimbau — Avisos Cumpleaños</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Activar temporalmente el workflow (toggle ON) para poder ejecutarlo manualmente</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Hacer clic en <strong>"Test workflow"</strong> para ejecutar manualmente</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que el nodo filtra correctamente los 4 socios demo con cumpleaños próximos</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que llegan 4 correos de felicitación a los 4 contactos internos</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Desactivar el workflow de nuevo (toggle OFF) para no enviar en horario real todavía</span></li>
+        </ul>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>Llegan 4 correos de cumpleaños. Los nombres en el correo son los de los socios ficticios (Montserrat, Juan Jose, Daniela, Enrique), pero llegan a los correos del equipo.</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p5')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRUEBA 6: Vencimiento Anual -->
+    <div class="prueba" id="p6">
+      <div class="prueba-header" onclick="togglePrueba('p6')">
+        <div class="prueba-num verde">6</div>
+        <div class="prueba-info">
+          <h3>Módulo Vencimiento Anual — 4 socios que vencen 30 jun</h3>
+          <p>Verificar que el aviso de renovación llega antes del vencimiento</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p6">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p6">
+        <div class="dato-demo">
+          <strong>📅 Socios demo asignados (fp = 2026-06-30):</strong>
+          <table>
+            <tr><th>Socio (ficticio)</th><th>M.</th><th>Vence</th><th>Va a:</th></tr>
+            <tr><td>MA. FELICITAS LOPEZ PESQUERA</td><td>701</td><td>30 jun</td><td>Fer (fernando.davila.olvera@gmail.com)</td></tr>
+            <tr><td>WILLIAM GUILLERMO UGARTE</td><td>1056</td><td>30 jun</td><td>Carlos (sistemas@berimbau.com.mx)</td></tr>
+            <tr><td>FELIPE GUADARRAMA SANCHEZ</td><td>1798</td><td>30 jun</td><td>Adolfo (acabrera@excelentia.com.mx)</td></tr>
+            <tr><td>ALINE ALEJANDRA ROJO CAVADA</td><td>2576</td><td>30 jun</td><td>Nancy (asiscobranza@berimbau.mx)</td></tr>
+          </table>
+        </div>
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En n8n, abrir <strong>Berimbau — Avisos Vencimiento Anual</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Activar y ejecutar manualmente → verificar que filtra los 4 socios con fp=2026-06-30</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que llegan 4 correos de aviso de renovación</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Desactivar el workflow</span></li>
+        </ul>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>Los 4 contactos reciben el correo de renovación. El mensaje menciona que la membresía vence pronto y los anima a renovar.</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p6')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRUEBA 7: Domiciliados Aviso Previo -->
+    <div class="prueba" id="p7">
+      <div class="prueba-header" onclick="togglePrueba('p7')">
+        <div class="prueba-num teal">7</div>
+        <div class="prueba-info">
+          <h3>Módulo Domiciliados Previo — 5 socios demo al corriente</h3>
+          <p>Aviso 7 días antes del cargo bancario automático</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p7">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p7">
+        <div class="dato-demo">
+          <strong>📋 Domiciliados demo (pb = Mensual Cargo Automático):</strong>
+          <table>
+            <tr><th>Socio (ficticio)</th><th>M.</th><th>Va a:</th></tr>
+            <tr><td>FIDEL MARTINEZ CARMONA</td><td>7225</td><td>Fer</td></tr>
+            <tr><td>RAMON NUALART VILLALPANDO</td><td>1163</td><td>Fer</td></tr>
+            <tr><td>GUILLERMO CUEVAS MARIN</td><td>4105</td><td>Carlos</td></tr>
+            <tr><td>HUMBERTO ARGUELLO CRUZ</td><td>6134</td><td>Adolfo</td></tr>
+            <tr><td>JUAN RODRIGO CRISTERNA</td><td>6660</td><td>Nancy</td></tr>
+          </table>
+        </div>
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En n8n, abrir <strong>Berimbau — Domiciliados Aviso Previo</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Activar y ejecutar manualmente → verificar que filtra los 5 domiciliados demo</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar correos llegados a los 4 contactos (Fer recibe 2 por Fidel + Ramon)</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Desactivar el workflow</span></li>
+        </ul>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>El equipo recibe avisos de que "el día 15 se realizará el cargo automático". Fernando recibe 2 (Fidel y Ramon). Carlos, Adolfo y Nancy reciben 1 cada uno.</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p7')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRUEBA 8: 26 Años -->
+    <div class="prueba" id="p8">
+      <div class="prueba-header" onclick="togglePrueba('p8')">
+        <div class="prueba-num gold">8</div>
+        <div class="prueba-info">
+          <h3>Alerta 26 Años — 4 socios con cumpleaños en próximos 30 días (ajustados)</h3>
+          <p>Aviso al titular de que un dependiente está por cumplir 26 años</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p8">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p8">
+        <div class="dato-demo">
+          <strong>👤 Socios 26 años demo (fnac ajustado en DATA del dashboard):</strong>
+          <table>
+            <tr><th>Socio (ficticio)</th><th>M.</th><th>fnac ajustado</th><th>Cumple 26 en</th><th>Va a:</th></tr>
+            <tr><td>FRANCISCO NUÑEZ MARTINEZ</td><td>8787</td><td>2000-06-20</td><td>7 días</td><td>Fer</td></tr>
+            <tr><td>ISRAEL INIESTRA RIVERA</td><td>8796</td><td>2000-06-27</td><td>14 días</td><td>Carlos</td></tr>
+            <tr><td>LEONARDO PAZ MIRANDA</td><td>8804</td><td>2000-07-04</td><td>21 días</td><td>Adolfo</td></tr>
+            <tr><td>ALEJANDRO TRUJILLO CORTAZAR</td><td>8632</td><td>2000-07-11</td><td>28 días</td><td>Nancy</td></tr>
+          </table>
+        </div>
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En n8n, abrir <strong>Berimbau — Alerta 26 Años</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Activar y ejecutar manualmente → verificar que detecta los 4 socios con fnac en próximos 30 días</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que llegan 4 correos de alerta (uno a cada contacto interno)</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Desactivar el workflow</span></li>
+        </ul>
+        <div class="alerta">
+          <strong>⚠️ Nota sobre los fnac ajustados</strong>
+          <p>Las fechas de nacimiento de estos 4 socios se ajustaron en el DATA del dashboard (solo para demo). Los datos reales de Aspel no se modificaron. Esta es únicamente una simulación para verificar que el workflow funciona.</p>
+        </div>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>El equipo recibe el aviso: "El dependiente [nombre] cumplirá 26 años en X días. Por favor notifique al titular para que actualice su membresía."</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p8')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /BLOQUE C -->
+
+  <!-- ===== BLOQUE D: SCHEDULER ===== -->
+  <div class="seccion">
+    <div class="seccion-title">📅 D — Scheduler (Envío Programado desde Dashboard)</div>
+
+    <div class="prueba" id="p9">
+      <div class="prueba-header" onclick="togglePrueba('p9')">
+        <div class="prueba-num azul">9</div>
+        <div class="prueba-info">
+          <h3>Programar envío automático desde el dashboard</h3>
+          <p>Configura día, hora y activa el scheduler desde la pestaña de Avisos</p>
+        </div>
+        <span class="prueba-status status-pending" id="status-p9">Pendiente</span>
+        <button class="toggle-prueba">▼</button>
+      </div>
+      <div class="prueba-body" id="body-p9">
+        <ul class="step-list">
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>En la sección de avisos, llenar el campo <strong>Día de envío</strong> y <strong>Hora de envío</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Activar el <strong>Toggle global</strong> (ACTIVO)</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Hacer clic en <strong>"📅 Programar envío"</strong></span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Verificar que el <strong>Próximo envío</strong> muestra la fecha correcta</span></li>
+          <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Opcionalmente: en n8n, verificar que el Scheduler recibió la configuración (execution log)</span></li>
+        </ul>
+        <div class="resultado-esperado">
+          <strong>✅ RESULTADO ESPERADO</strong>
+          <p>El scheduler queda configurado. La fecha de próximo envío se actualiza correctamente. El toggle global queda en verde "ACTIVO".</p>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="marcarPrueba('p9')" style="background:#3AAA35;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer">✅ Marcar como exitosa</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /BLOQUE D -->
+
+  <!-- Resumen final -->
+  <div style="background:#fff;border-radius:14px;border:1px solid #dde1e9;padding:20px 24px;margin-top:8px">
+    <h2 style="font-size:.95rem;font-weight:800;color:#1a3a6b;margin-bottom:12px">🏁 Checklist de entrega al Club</h2>
+    <ul class="step-list">
+      <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Todas las pruebas A–D completadas en verde</span></li>
+      <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Nancy y Evelyn validaron los mensajes de las 4 plantillas de cobranza</span></li>
+      <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Enrique aprobó el número de WhatsApp de producción</span></li>
+      <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Alta de Nancy y Evelyn en Inbox de YCloud completada</span></li>
+      <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>IT del club confirmó el día de cargo bancario (actualmente día 15)</span></li>
+      <li><input type="checkbox" class="step-check" onchange="actualizarProgreso()"><span>Dashboards v18 y Manual v4 enviados a Nancy, Evelyn y Enrique</span></li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+function togglePrueba(id){
+  const body=document.getElementById('body-'+id);
+  if(!body) return;
+  body.classList.toggle('open');
+}
+
+function marcarPrueba(id){
+  const status=document.getElementById('status-'+id);
+  if(status){
+    status.textContent='✅ Exitosa';
+    status.className='prueba-status status-ok';
+  }
+}
+
+function actualizarProgreso(){
+  const checks=document.querySelectorAll('.step-check');
+  const total=checks.length;
+  const checked=[...checks].filter(c=>c.checked).length;
+  const pct=Math.round(checked/total*100);
+  document.getElementById('progreso-fill').style.width=pct+'%';
+  document.getElementById('progreso-txt').textContent=checked+' / '+total+' pasos completados';
+}
+</script>
+
+</body>
+</html>
