@@ -17,7 +17,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;min-height:100vh}
 @media(max-width:380px) {.proj-grid{grid-template-columns:1fr}}
 .tab{border:none;background:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:11px 14px;white-space:nowrap;border-bottom:3px solid transparent;color:#8a90a0;transition:color .15s}
 .tab.active{color:#1a3a6b;border-bottom-color:#4a9fd4}.tab:hover{color:#1a3a6b}
-.card{background:#fff;border-radius:12px;padding:13px;border:1px solid #dde1e9;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:box-shadow .2s,border .2s}
+.card{background:#fff;border-radius:12px;padding:13px;border:1px solid #dde1e9;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:box-shadow .2s}
 .card:hover{box-shadow:0 4px 16px rgba(26,58,107,.1)}
 .btn{font-family:'Manrope',sans-serif;font-weight:700;cursor:pointer;border:none;border-radius:7px;font-size:12px;transition:opacity .15s,transform .1s}
 .btn:hover{opacity:.85}.btn:active{transform:scale(.96)}
@@ -33,18 +33,25 @@ input:focus,select:focus{border-color:#4a9fd4}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal-box{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:500px;max-height:94vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .slabel{font-size:10px;font-weight:700;color:#8a90a0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;display:block}
-.fchip{padding:5px 11px;border-radius:20px;font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:1px solid #dde1e9;background:#fff;color:#4a5068;transition:all .15s}
+.fchip{padding:5px 11px;border-radius:20px;font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:1px solid #dde1e9;background:#fff;color:#4a5068}
 .fchip.on{background:#1a3a6b;border-color:#1a3a6b;color:#fff}
 .timer-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:10px;padding:8px 12px;flex-shrink:0}
-@media(max-width:600px){.header-row{flex-direction:column!important;align-items:flex-start!important}.hstats{display:grid;grid-template-columns:1fr 1fr 1fr;width:100%!important}.row3{grid-template-columns:1fr 1fr!important}}
+@media(max-width:600px){
+  .header-row{flex-direction:column!important;align-items:flex-start!important}
+  .hstats{display:grid!important;grid-template-columns:1fr 1fr 1fr;width:100%!important;gap:6px!important}
+  .row3{grid-template-columns:1fr 1fr!important}
+}
 </style>
 </head>
 <body>
 
-<!-- ① BANNER: fuera de #app — persiste entre renders -->
+<!-- ① HEADER — persistente, nunca destruido -->
+<div id="header_div"></div>
+
+<!-- ② BANNER — persistente, debajo del header -->
 <div id="banner_div"></div>
 
-<!-- ② EDIT MODAL: fuera de #app — sin scroll jump -->
+<!-- ③ EDIT MODAL — fuera del ciclo de render -->
 <div id="edit_modal" style="display:none" class="modal-bg" onclick="if(event.target===this)closeEdit()">
   <div class="modal-box">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -54,7 +61,6 @@ input:focus,select:focus{border-color:#4a9fd4}
       </div>
       <button onclick="closeEdit()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#ccc">✕</button>
     </div>
-
     <!-- Identidad -->
     <div style="margin-bottom:14px">
       <span class="slabel">Nombre</span>
@@ -72,10 +78,8 @@ input:focus,select:focus{border-color:#4a9fd4}
         <div id="em_pname" style="font-weight:700;font-size:13px;color:#1a2035"></div>
       </div>
     </div>
-
     <div style="border-top:2px dashed #dde1e9;margin:14px 0"></div>
-
-    <!-- Registrar sesión (nuevo) -->
+    <!-- Registrar sesión -->
     <div style="margin-bottom:12px">
       <span class="slabel">➕ Registrar sesión</span>
       <div id="em_cur" style="background:#f0f6ff;border:1px solid #c8d9f0;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:12px;color:#2d6aa0"></div>
@@ -87,9 +91,7 @@ input:focus,select:focus{border-color:#4a9fd4}
       <input id="em_m_n" type="text" placeholder="Notas (opcional)" style="margin-bottom:8px">
       <button onclick="addManualToProject()" class="btn" style="width:100%;background:#3AAA35;color:#fff;padding:10px;font-size:13px">➕ Agregar sesión</button>
     </div>
-
     <div style="border-top:2px dashed #dde1e9;margin:14px 0"></div>
-
     <!-- Ajustar totales -->
     <div style="margin-bottom:14px">
       <span class="slabel">🔧 Ajustar totales (reemplaza historial)</span>
@@ -102,7 +104,6 @@ input:focus,select:focus{border-color:#4a9fd4}
         <span>⚠️</span><span>Esto <strong>reemplazará</strong> todas las sesiones existentes con una sola de ajuste.</span>
       </div>
     </div>
-
     <div style="display:flex;gap:8px">
       <button class="btn" onclick="closeEdit()" style="flex:1;background:#f0f4f8;color:#4a5068;padding:11px">Cancelar</button>
       <button class="btn" onclick="saveEdit()" style="flex:2;background:#1a3a6b;color:#fff;padding:11px">✓ Guardar proyecto</button>
@@ -110,7 +111,7 @@ input:focus,select:focus{border-color:#4a9fd4}
   </div>
 </div>
 
-<!-- ③ APP -->
+<!-- ④ APP — solo pestañas + contenido -->
 <div id="app"></div>
 
 <script>
@@ -128,11 +129,7 @@ const SK='tracker:sessions-v4',PK='tracker:projects-v2';
 
 let sessions = JSON.parse(localStorage.getItem(SK)||'[]');
 let projects = JSON.parse(localStorage.getItem(PK)||'null')||DEFAULT_PROJECTS.map(p=>({...p}));
-
-// Multi-timer
 let activeTimers={}, tickIntvl=null;
-
-// UI state
 let view='timer';
 let filterDate='all', filterDateStart='', filterDateEnd='', filterProject='all';
 let toast=null, toastTimer=null;
@@ -151,7 +148,6 @@ function fmtHrs(h){
 function fmtDate(iso){if(!iso)return'';return new Date(iso+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});}
 function activeCount(){return Object.keys(activeTimers).length;}
 
-// Filtered sessions
 function getFiltered(withProject=false){
   let s=[...sessions];
   const now=new Date();
@@ -168,25 +164,24 @@ function getFiltered(withProject=false){
   if(withProject&&filterProject!=='all') s=s.filter(x=>x.projectId===filterProject);
   return s;
 }
-
-function getTotals(filteredSessions){
-  const s=filteredSessions||sessions;
+function getTotals(src){
   return projects.map(p=>{
-    const ps=s.filter(x=>x.projectId===p.id);
+    const ps=(src||sessions).filter(x=>x.projectId===p.id);
     const total=ps.reduce((a,x)=>a+x.duration,0);
     const startDate=sessions.filter(x=>x.projectId===p.id).length>0?[...sessions.filter(x=>x.projectId===p.id)].map(x=>x.date).sort()[0]:null;
     return{...p,total,startDate};
   });
 }
-function grandTotal(totals){return totals.reduce((a,p)=>a+p.total,0);}
+function grandTotal(t){return t.reduce((a,p)=>a+p.total,0);}
 
-// Toast
 function showToast(msg){
-  toast=msg;render();clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{toast=null;render();},3000);
+  toast=msg;
+  const t=document.getElementById('toast_div');
+  if(t)t.innerHTML=`<div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#0d1b3e;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.28);white-space:nowrap;animation:fadeDown .25s ease">${msg}</div>`;
+  clearTimeout(toast._t);
+  toast._t=setTimeout(()=>{const t=document.getElementById('toast_div');if(t)t.innerHTML='';},3000);
 }
 
-// CSV Export
 function exportCSV(){
   if(!sessions.length){showToast('⚠️ No hay sesiones para exportar');return;}
   const rows=sessions.map(s=>{
@@ -203,11 +198,40 @@ function exportCSV(){
   showToast('✅ CSV descargado ('+sessions.length+' sesiones)');
 }
 
-// ── BANNER ────────────────────────────────────────────────────
+// ── RENDER HEADER (persistente) ───────────────────────────────
+function renderHeader(){
+  const allTotals=getTotals();
+  const allGT=grandTotal(allTotals);
+  const nActive=activeCount();
+  document.getElementById('header_div').innerHTML=`
+  <div style="background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:14px 20px">
+    <div class="header-row" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="background:#fff;border-radius:10px;padding:5px 12px;display:flex;align-items:center;justify-content:center;min-width:70px;min-height:42px;flex-shrink:0">
+        <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" style="height:32px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <span style="display:none;font-weight:800;font-size:12px;color:#1a3a6b">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <div style="flex:1;min-width:160px">
+        <div style="color:#fff;font-weight:800;font-size:16px;line-height:1.2">⏱ Tracker de horas por proyecto</div>
+        ${nActive>0
+          ?`<div style="margin-top:4px"><span style="background:#ef4b1f;color:#fff;font-size:9px;font-weight:700;border-radius:20px;padding:2px 8px">⏱ ${nActive} corriendo</span></div>`
+          :`<div style="margin-top:4px;color:#7ab3d4;font-size:11px">Seguimiento por proyecto</div>`}
+      </div>
+      <div class="hstats" style="display:flex;gap:8px;flex-shrink:0">
+        ${[['Total',allGT>0?fmtHrs(allGT):'—'],['Sesiones',sessions.length],['Proyectos',projects.length]].map(([l,v])=>`
+        <div style="background:rgba(255,255,255,.11);border-radius:8px;padding:7px 11px;text-align:center;min-width:72px">
+          <div style="color:#7ab3d4;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">${l}</div>
+          <div style="color:#fff;font-weight:800;font-size:15px;margin-top:1px">${v}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── RENDER BANNER (persistente, debajo del header) ────────────
 function renderBanner(){
   const b=document.getElementById('banner_div');if(!b)return;
   const now=Date.now(),pids=Object.keys(activeTimers);
-  if(!pids.length){b.innerHTML='';return;}
+  if(!pids.length){b.innerHTML='';renderHeader();return;}
   const chips=pids.map(pid=>{
     const p=projects.find(x=>x.id===pid);
     const secs=Math.floor((now-activeTimers[pid])/1000);
@@ -228,6 +252,7 @@ function renderBanner(){
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>
   </div>`;
+  renderHeader(); // actualiza el badge "N corriendo"
 }
 
 // ── TIMER ─────────────────────────────────────────────────────
@@ -245,10 +270,11 @@ async function stopTimer(pid,notify=true){
   if(!Object.keys(activeTimers).length){clearInterval(tickIntvl);tickIntvl=null;}
   renderBanner();
   if(dur>=0.005){
-    const s={id:Date.now(),projectId:pid,date:td(),duration:dur,notes:'',type:'timer'};
-    sessions.unshift(s);saveSess();
+    sessions.unshift({id:Date.now(),projectId:pid,date:td(),duration:dur,notes:'',type:'timer'});
+    saveSess();
     if(notify)showToast('✅ '+fmtHrs(dur)+' — '+(projects.find(p=>p.id===pid)?.name||''));
-  }else{render();}
+  }
+  render();
 }
 async function stopAll(){
   const pids=Object.keys(activeTimers);
@@ -265,7 +291,6 @@ function addProject(){
   newProj={name:'',emoji:'🚀',color:'#4a9fd4'};render();
 }
 
-// ── EDIT MODAL ────────────────────────────────────────────────
 function buildCurInfo(){
   if(!EP)return'';
   const ps=sessions.filter(x=>x.projectId===EP.id);
@@ -282,15 +307,12 @@ function editProject(id){
   EP={id,name:p.name,full:p.full,emoji:p.emoji,color:p.color,
     editHours:Math.floor(total),editMinutes:Math.round((total-Math.floor(total))*60),
     editStartDate:sd,origTotal:total,
-    origStartDate:ps.length>0?[...ps].map(s=>s.date).sort()[0]:null,sessionCount:ps.length};
-
+    origStartDate:ps.length>0?[...ps].map(s=>s.date).sort()[0]:null};
   document.getElementById('em_sub').textContent=p.full;
   document.getElementById('em_name').value=EP.name;
   document.getElementById('em_cur').innerHTML=buildCurInfo();
-  document.getElementById('em_m_h').value='';
-  document.getElementById('em_m_m').value='';
-  document.getElementById('em_m_d').value=td();
-  document.getElementById('em_m_n').value='';
+  document.getElementById('em_m_h').value='';document.getElementById('em_m_m').value='';
+  document.getElementById('em_m_d').value=td();document.getElementById('em_m_n').value='';
   document.getElementById('em_hours').value=EP.editHours;
   document.getElementById('em_mins').value=EP.editMinutes;
   document.getElementById('em_date').value=EP.editStartDate;
@@ -318,9 +340,7 @@ function addManualToProject(){
   sessions.unshift({id:Date.now(),projectId:EP.id,date,duration:dur,notes,type:'manual'});
   saveSess();
   document.getElementById('em_cur').innerHTML=buildCurInfo();
-  document.getElementById('em_m_h').value='';
-  document.getElementById('em_m_m').value='';
-  document.getElementById('em_m_n').value='';
+  document.getElementById('em_m_h').value='';document.getElementById('em_m_m').value='';document.getElementById('em_m_n').value='';
   showToast('✅ '+fmtHrs(dur)+' agregadas');
 }
 
@@ -329,25 +349,21 @@ function pickColor(c){if(!EP)return;EP.color=c;document.getElementById('em_pbox'
 function updWarn(){
   if(!EP)return;
   const nd=parseFloat(document.getElementById('em_hours').value||0)+parseFloat(document.getElementById('em_mins').value||0)/60;
-  EP.editHours=document.getElementById('em_hours').value;
-  EP.editMinutes=document.getElementById('em_mins').value;
-  EP.editStartDate=document.getElementById('em_date').value;
+  EP.editHours=document.getElementById('em_hours').value;EP.editMinutes=document.getElementById('em_mins').value;EP.editStartDate=document.getElementById('em_date').value;
   const w=document.getElementById('em_warn');
   if(w)w.style.display=(Math.abs(nd-(EP.origTotal||0))>0.008||EP.editStartDate!==EP.origStartDate)?'flex':'none';
 }
 function saveEdit(){
-  if(!EP)return;
-  const name=EP.name.trim();if(!name){showToast('⚠️ Nombre vacío');return;}
+  if(!EP)return;const name=EP.name.trim();if(!name){showToast('⚠️ Nombre vacío');return;}
   const idx=projects.findIndex(p=>p.id===EP.id);
   if(idx>=0){projects[idx]={...projects[idx],name,full:name,emoji:EP.emoji,color:EP.color};saveProj();}
   const nd=parseFloat(EP.editHours||0)+parseFloat(EP.editMinutes||0)/60;
   if(Math.abs(nd-(EP.origTotal||0))>0.008||EP.editStartDate!==EP.origStartDate){
     sessions=sessions.filter(s=>s.projectId!==EP.id);
-    if(nd>0) sessions.unshift({id:Date.now(),projectId:EP.id,date:EP.editStartDate||td(),duration:nd,notes:'✏️ Ajuste',type:'manual'});
+    if(nd>0)sessions.unshift({id:Date.now(),projectId:EP.id,date:EP.editStartDate||td(),duration:nd,notes:'✏️ Ajuste',type:'manual'});
     saveSess();
   }
-  document.getElementById('edit_modal').style.display='none';EP=null;
-  showToast('✅ Proyecto actualizado');render();
+  document.getElementById('edit_modal').style.display='none';EP=null;showToast('✅ Proyecto actualizado');render();
 }
 function closeEdit(){document.getElementById('edit_modal').style.display='none';EP=null;}
 function resetProject(id){
@@ -365,34 +381,29 @@ function deleteProject(id){
   projects=projects.filter(p=>p.id!==id);sessions=sessions.filter(s=>s.projectId!==id);
   saveSess();saveProj();showToast('🗑 Eliminado');render();
 }
+function delSession(id){sessions=sessions.filter(s=>s.id!==id);saveSess();render();}
 
 // ── CHARTS ────────────────────────────────────────────────────
 function verticalBarChart(filteredSessions){
   const data=projects.map(p=>({
     ...p,total:filteredSessions.filter(s=>s.projectId===p.id).reduce((a,s)=>a+s.duration,0)
   })).filter(p=>p.total>0).sort((a,b)=>b.total-a.total);
-
-  if(!data.length)return`<div style="text-align:center;padding:40px 20px;color:#8a90a0;font-size:13px">Sin datos en este período</div>`;
-  const gt=data.reduce((a,p)=>a+p.total,0);
-  const maxV=data[0].total,maxH=200;
-
+  if(!data.length)return`<div style="text-align:center;padding:40px;color:#8a90a0;font-size:13px">Sin datos en este período</div>`;
+  const gt=data.reduce((a,p)=>a+p.total,0),maxV=data[0].total,maxH=200;
   return`<div style="display:flex;align-items:flex-end;gap:6px;height:${maxH}px;border-bottom:2px solid #f0f4f8;padding:0 4px">
     ${data.map(p=>{
-      const bh=Math.max(6,Math.round((p.total/maxV)*maxH));
-      const pct=Math.round((p.total/gt)*100);
+      const bh=Math.max(6,Math.round((p.total/maxV)*maxH)),pct=Math.round((p.total/gt)*100);
       return`<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px">
         <div style="font-size:10px;font-weight:800;color:${p.color};text-align:center;white-space:nowrap">${fmtHrs(p.total)}</div>
-        <div style="font-size:9px;color:#8a90a0;text-align:center">${pct}%</div>
+        <div style="font-size:9px;color:#8a90a0">${pct}%</div>
         <div style="width:clamp(16px,70%,56px);background:${p.color};border-radius:5px 5px 0 0;height:${bh}px;flex-shrink:0"></div>
-      </div>`;
-    }).join('')}
+      </div>`;}).join('')}
   </div>
   <div style="display:flex;gap:6px;padding:8px 4px 0">
     ${data.map(p=>`<div style="flex:1;min-width:0;text-align:center;font-size:10px;color:#4a5068;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.full}">${p.emoji} ${p.name}</div>`).join('')}
   </div>`;
 }
 
-// ── FILTER BAR ────────────────────────────────────────────────
 function filterBar(showProject){
   const chips=[['all','Todo'],['week','Esta sem.'],['month','Este mes'],['year','Este año'],['custom','Personalizado']];
   return`<div style="margin-bottom:${showProject?'8':'12'}px">
@@ -400,13 +411,13 @@ function filterBar(showProject){
       <span style="font-size:11px;font-weight:700;color:#4a5068;flex-shrink:0">Período:</span>
       ${chips.map(([v,l])=>`<button class="fchip ${filterDate===v?'on':''}" onclick="filterDate='${v}';render()">${l}</button>`).join('')}
     </div>
-    ${filterDate==='custom'?`<div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+    ${filterDate==='custom'?`<div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
       <input type="date" value="${filterDateStart}" oninput="filterDateStart=this.value;render()" style="width:auto;font-size:12px;padding:5px 8px">
-      <span style="color:#8a90a0;font-size:13px">—</span>
+      <span style="color:#8a90a0">—</span>
       <input type="date" value="${filterDateEnd}" oninput="filterDateEnd=this.value;render()" style="width:auto;font-size:12px;padding:5px 8px">
     </div>`:''}
   </div>
-  ${showProject?`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+  ${showProject?`<div style="display:flex;gap:6px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
     <span style="font-size:11px;font-weight:700;color:#4a5068;flex-shrink:0">Proyecto:</span>
     <select onchange="filterProject=this.value;render()" style="width:auto;font-size:12px;padding:5px 10px">
       <option value="all" ${filterProject==='all'?'selected':''}>Todos</option>
@@ -415,52 +426,29 @@ function filterBar(showProject){
   </div>`:''}`;
 }
 
-// ── RENDER ────────────────────────────────────────────────────
+// ── RENDER PRINCIPAL (#app = tabs + contenido) ────────────────
 function render(){
+  renderHeader(); // actualiza header con últimos datos
+
   const allTotals=getTotals();
   const allGT=grandTotal(allTotals);
-  const nActive=activeCount();
   const filtAll=getFiltered(false);
   const filtProj=getFiltered(true);
   const filtTotals=getTotals(filtAll);
   const filtGT=grandTotal(filtTotals);
 
   document.getElementById('app').innerHTML=`
-  ${toast?`<div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#0d1b3e;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.28);white-space:nowrap;animation:fadeDown .25s ease">${toast}</div>`:''}
+  <div id="toast_div"></div>
 
-  <!-- HEADER compacto -->
-  <div style="background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:14px 20px">
-    <div class="header-row" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <!-- Logo -->
-      <div style="background:#fff;border-radius:10px;padding:5px 12px;display:flex;align-items:center;justify-content:center;min-width:70px;min-height:42px;flex-shrink:0">
-        <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" style="height:32px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-        <span style="display:none;font-weight:800;font-size:12px;color:#1a3a6b">Excelent<span style="color:#4a9fd4">IA</span></span>
-      </div>
-      <!-- Título + badge -->
-      <div style="flex:1;min-width:160px">
-        <div style="color:#fff;font-weight:800;font-size:16px;line-height:1.2">⏱ Tracker de horas por proyecto</div>
-        ${nActive>0?`<div style="margin-top:4px"><span style="background:#ef4b1f;color:#fff;font-size:9px;font-weight:700;border-radius:20px;padding:2px 8px">⏱ ${nActive} corriendo</span></div>`:'<div style="margin-top:4px;color:#7ab3d4;font-size:11px">Seguimiento por proyecto</div>'}
-      </div>
-      <!-- Stats mini -->
-      <div class="hstats" style="display:flex;gap:8px;flex-shrink:0">
-        ${[['Total',allGT>0?fmtHrs(allGT):'—'],['Sesiones',sessions.length],['Proyectos',projects.length]].map(([l,v])=>`
-        <div style="background:rgba(255,255,255,.11);border-radius:8px;padding:7px 11px;text-align:center;min-width:72px">
-          <div style="color:#7ab3d4;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">${l}</div>
-          <div style="color:#fff;font-weight:800;font-size:15px;margin-top:1px">${v}</div>
-        </div>`).join('')}
-      </div>
-    </div>
-  </div>
-
-  <!-- TABS: Historial | Estadísticas | Proyectos | Timer -->
+  <!-- TABS: Historial | Proyectos | Estadísticas | Timer -->
   <div style="display:flex;background:#fff;border-bottom:1px solid #dde1e9;overflow-x:auto">
-    ${[['history','📋 Historial'],['stats','📊 Estadísticas'],['projects','⚙ Proyectos'],['timer','⏱ Timer']].map(([v,l])=>`
+    ${[['history','📋 Historial'],['projects','⚙ Proyectos'],['stats','📊 Estadísticas'],['timer','⏱ Timer']].map(([v,l])=>`
     <button class="tab ${view===v?'active':''}" onclick="setView('${v}')">${l}</button>`).join('')}
   </div>
 
   <div style="padding:16px;max-width:1400px;margin:0 auto">
 
-  <!-- ══ TIMER ══ -->
+  <!-- TIMER -->
   ${view==='timer'?`
   <div class="proj-grid">
     ${allTotals.map(p=>{
@@ -487,59 +475,49 @@ function render(){
           <button class="act-btn" onclick="deleteProject('${p.id}')" title="Eliminar" style="background:#fde8e8;color:#e74c3c">🗑️</button>
         </div>
       </div>`;}).join('')}
-  </div>
-  `:''}
+  </div>`:''}
 
-  <!-- ══ ESTADÍSTICAS ══ -->
+  <!-- ESTADÍSTICAS -->
   ${view==='stats'?`
   <div class="card">
     ${filterBar(false)}
-    <!-- Mini stats del período -->
     <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
-      <div style="background:#f0f6ff;border:1px solid #c8d9f0;border-radius:9px;padding:10px 16px;flex:1;min-width:120px">
-        <div style="font-size:10px;font-weight:700;color:#2d6aa0;text-transform:uppercase;letter-spacing:.05em">Total período</div>
-        <div style="font-size:20px;font-weight:800;color:#1a3a6b;margin-top:2px">${fmtGT(filtGT)}</div>
-      </div>
-      <div style="background:#f0f6ff;border:1px solid #c8d9f0;border-radius:9px;padding:10px 16px;flex:1;min-width:120px">
-        <div style="font-size:10px;font-weight:700;color:#2d6aa0;text-transform:uppercase;letter-spacing:.05em">Sesiones</div>
-        <div style="font-size:20px;font-weight:800;color:#1a3a6b;margin-top:2px">${filtAll.length}</div>
-      </div>
-      <div style="background:#f0f6ff;border:1px solid #c8d9f0;border-radius:9px;padding:10px 16px;flex:1;min-width:120px">
-        <div style="font-size:10px;font-weight:700;color:#2d6aa0;text-transform:uppercase;letter-spacing:.05em">Proyectos activos</div>
-        <div style="font-size:20px;font-weight:800;color:#1a3a6b;margin-top:2px">${filtTotals.filter(p=>p.total>0).length}</div>
-      </div>
+      ${[['Total período',filtGT>0?fmtHrs(filtGT):'—'],['Sesiones',''+filtAll.length],['Con registros',''+filtTotals.filter(p=>p.total>0).length]].map(([l,v])=>`
+      <div style="background:#f0f6ff;border:1px solid #c8d9f0;border-radius:9px;padding:10px 16px;flex:1;min-width:110px">
+        <div style="font-size:10px;font-weight:700;color:#2d6aa0;text-transform:uppercase;letter-spacing:.05em">${l}</div>
+        <div style="font-size:20px;font-weight:800;color:#1a3a6b;margin-top:2px">${v}</div>
+      </div>`).join('')}
     </div>
-    <!-- Barras verticales -->
     ${verticalBarChart(filtAll)}
-  </div>
-  `:''}
+  </div>`:''}
 
-  <!-- ══ HISTORIAL ══ -->
+  <!-- HISTORIAL -->
   ${view==='history'?`
   <div class="card" style="margin-bottom:12px">
     ${filterBar(true)}
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-      <div style="font-size:12px;color:#8a90a0">${filtProj.length} sesión(es) filtradas · ${fmtGT(filtProj.reduce((a,s)=>a+s.duration,0))} total</div>
+      <div style="font-size:12px;color:#8a90a0">${filtProj.length} sesión(es) · ${filtProj.reduce((a,s)=>a+s.duration,0)>0?fmtHrs(filtProj.reduce((a,s)=>a+s.duration,0)):'0h'} total</div>
       <button class="btn" onclick="exportCSV()" style="background:#1a3a6b;color:#fff;padding:7px 14px;font-size:12px">⬇️ Exportar CSV</button>
     </div>
   </div>
-  ${filtProj.length===0?`<div style="text-align:center;padding:60px 20px;color:#8a90a0"><div style="font-size:48px;margin-bottom:12px">📋</div><div style="font-weight:700;font-size:16px;color:#1a2035">Sin sesiones en este período</div></div>`:
-  `<div style="display:flex;flex-direction:column;gap:7px">
-    ${filtProj.map(s=>{const p=projects.find(x=>x.id===s.projectId)||{emoji:'❓',full:'Eliminado',color:'#ccc'};
-    return`<div style="background:#fff;border-radius:10px;padding:11px 13px;border:1px solid #dde1e9;display:flex;align-items:center;gap:10px">
-      <div style="width:4px;align-self:stretch;border-radius:4px;background:${p.color};flex-shrink:0"></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px;color:#1a2035">${p.emoji} ${p.full}</div>
-        ${s.notes?`<div style="font-size:12px;color:#8a90a0;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.notes}</div>`:''}
-        <div style="font-size:11px;color:#8a90a0;margin-top:2px">${fmtDate(s.date)} · ${s.type==='manual'?'✏️ Manual':'⏱ Timer'}</div>
-      </div>
-      <div style="font-weight:800;font-size:13px;color:${p.color};flex-shrink:0">${fmtHrs(s.duration)}</div>
-      <button onclick="delSession(${s.id})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 4px">✕</button>
-    </div>`}).join('')}
-  </div>`}
+  ${filtProj.length===0
+    ?`<div style="text-align:center;padding:60px 20px;color:#8a90a0"><div style="font-size:48px;margin-bottom:12px">📋</div><div style="font-weight:700;font-size:16px;color:#1a2035">Sin sesiones en este período</div></div>`
+    :`<div style="display:flex;flex-direction:column;gap:7px">
+      ${filtProj.map(s=>{const p=projects.find(x=>x.id===s.projectId)||{emoji:'❓',full:'Eliminado',color:'#ccc'};
+      return`<div style="background:#fff;border-radius:10px;padding:11px 13px;border:1px solid #dde1e9;display:flex;align-items:center;gap:10px">
+        <div style="width:4px;align-self:stretch;border-radius:4px;background:${p.color};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px;color:#1a2035">${p.emoji} ${p.full}</div>
+          ${s.notes?`<div style="font-size:12px;color:#8a90a0;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.notes}</div>`:''}
+          <div style="font-size:11px;color:#8a90a0;margin-top:2px">${fmtDate(s.date)} · ${s.type==='manual'?'✏️ Manual':'⏱ Timer'}</div>
+        </div>
+        <div style="font-weight:800;font-size:13px;color:${p.color};flex-shrink:0">${fmtHrs(s.duration)}</div>
+        <button onclick="delSession(${s.id})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 4px">✕</button>
+      </div>`;}).join('')}
+    </div>`}
   `:''}
 
-  <!-- ══ PROYECTOS ══ -->
+  <!-- PROYECTOS -->
   ${view==='projects'?`
   <div class="card" style="margin-bottom:14px;border-left:4px solid #4a9fd4">
     <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">➕ Nuevo proyecto</div>
@@ -566,31 +544,27 @@ function render(){
       <button class="btn" onclick="addProject()" style="background:#1a3a6b;color:#fff;padding:12px;font-size:14px">✓ Crear proyecto</button>
     </div>
   </div>
-
   <div class="card" style="margin-bottom:14px">
     <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">Proyectos (${projects.length})</div>
     <div style="color:#8a90a0;font-size:12px;margin-bottom:14px">Usa ✏️ para editar, agregar horas o ajustar totales</div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      ${getTotals().map(p=>{
-        const cnt=sessions.filter(s=>s.projectId===p.id).length,isA=p.id in activeTimers;
-        return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid ${isA?p.color:'#dde1e9'}">
-          <div style="width:34px;height:34px;border-radius:9px;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${p.emoji}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:700;font-size:13px;color:#1a2035">${p.full}${isA?' <span style="background:#3AAA35;color:#fff;border-radius:10px;font-size:9px;padding:1px 6px">▶ corriendo</span>':''}</div>
-            <div style="font-size:11px;color:#8a90a0;margin-top:2px">${cnt} sesión${cnt!==1?'es':''} · ${fmtHrs(p.total)||'Sin horas'}${p.startDate?` · 📅 ${fmtDate(p.startDate)}`:''}
-              · <span style="background:${p.isDefault?'#e8f0fb':'#eef4fc'};color:${p.isDefault?'#2d6aa0':'#4a9fd4'};border-radius:20px;padding:1px 6px;font-weight:700;font-size:10px">${p.isDefault?'Predefinido':'Personalizado'}</span>
-            </div>
+      ${getTotals().map(p=>{const cnt=sessions.filter(s=>s.projectId===p.id).length,isA=p.id in activeTimers;
+      return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid ${isA?p.color:'#dde1e9'}">
+        <div style="width:34px;height:34px;border-radius:9px;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${p.emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px;color:#1a2035">${p.full}${isA?' <span style="background:#3AAA35;color:#fff;border-radius:10px;font-size:9px;padding:1px 6px">▶ corriendo</span>':''}</div>
+          <div style="font-size:11px;color:#8a90a0;margin-top:2px">${cnt} sesión${cnt!==1?'es':''} · ${fmtHrs(p.total)||'Sin horas'}${p.startDate?` · 📅 ${fmtDate(p.startDate)}`:''}
+            · <span style="background:${p.isDefault?'#e8f0fb':'#eef4fc'};color:${p.isDefault?'#2d6aa0':'#4a9fd4'};border-radius:20px;padding:1px 6px;font-weight:700;font-size:10px">${p.isDefault?'Predefinido':'Personalizado'}</span>
           </div>
-          <div style="display:flex;gap:4px;flex-shrink:0">
-            <button class="act-btn" onclick="editProject('${p.id}')" title="Editar" style="background:#e8f0fb;color:#2d6aa0">✏️</button>
-            <button class="act-btn" onclick="resetProject('${p.id}')" title="Reiniciar" style="background:#fff3e0;color:#e67e22">🔄</button>
-            <button class="act-btn" onclick="deleteProject('${p.id}')" title="Eliminar" style="background:#fde8e8;color:#e74c3c">🗑️</button>
-          </div>
-        </div>`;}).join('')}
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="act-btn" onclick="editProject('${p.id}')" title="Editar" style="background:#e8f0fb;color:#2d6aa0">✏️</button>
+          <button class="act-btn" onclick="resetProject('${p.id}')" title="Reiniciar" style="background:#fff3e0;color:#e67e22">🔄</button>
+          <button class="act-btn" onclick="deleteProject('${p.id}')" title="Eliminar" style="background:#fde8e8;color:#e74c3c">🗑️</button>
+        </div>
+      </div>`;}).join('')}
     </div>
   </div>
-
-  <!-- Link al Sheet -->
   <div style="text-align:center;padding:4px 0 8px">
     <a href="https://docs.google.com/spreadsheets/d/1vZ3maVtNn23aGFl31HxI4fn7tWDnwDV-hD7XK6tNOFo/edit" target="_blank"
       style="display:inline-flex;align-items:center;gap:8px;background:#f0f6ff;border:1px solid #c8d9f0;color:#2d6aa0;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;text-decoration:none">
@@ -602,8 +576,6 @@ function render(){
   </div>`;
 }
 
-function fmtGT(v){return v>0?fmtHrs(v):'—';}
-function delSession(id){sessions=sessions.filter(s=>s.id!==id);saveSess();render();}
 function setView(v){view=v;render();}
 render();
 </script>
