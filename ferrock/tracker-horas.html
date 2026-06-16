@@ -37,15 +37,16 @@ input:focus,select:focus{border-color:#4a9fd4}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal-box{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .slabel{font-size:10px;font-weight:700;color:#8a90a0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:block}
-/* Timer chip en el banner */
 .timer-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:10px;padding:8px 12px;flex-shrink:0}
 @media(max-width:560px){.stat-grid{grid-template-columns:1fr 1fr!important}.row3{grid-template-columns:1fr 1fr!important}.btn-row{flex-direction:column!important}}
 </style>
 </head>
 <body>
-<div id="app"></div>
 
-<!-- EDIT MODAL fuera del render para evitar scroll jump -->
+<!-- ① BANNER — fuera de #app, nunca se destruye con render() -->
+<div id="banner_div"></div>
+
+<!-- ② EDIT MODAL — fuera de #app, sin scroll jump -->
 <div id="edit_modal" style="display:none" class="modal-bg" onclick="if(event.target===this)closeEdit()">
   <div class="modal-box">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -93,8 +94,7 @@ input:focus,select:focus{border-color:#4a9fd4}
       </div>
     </div>
     <div id="em_warn" style="display:none;background:#fff3e0;border:1px solid #ffe0b2;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#e65100;gap:8px">
-      <span>⚠️</span>
-      <span>Cambiar horas o fecha <strong>consolidará</strong> el historial en una sesión de ajuste. Las sesiones anteriores se reemplazarán.</span>
+      <span>⚠️</span><span>Cambiar horas o fecha <strong>consolidará</strong> el historial en una sesión de ajuste.</span>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px">
       <button class="btn" onclick="closeEdit()" style="flex:1;background:#f0f4f8;color:#4a5068;padding:12px;font-size:13px">Cancelar</button>
@@ -102,6 +102,9 @@ input:focus,select:focus{border-color:#4a9fd4}
     </div>
   </div>
 </div>
+
+<!-- ③ APP — se reconstruye en cada render() -->
+<div id="app"></div>
 
 <script>
 const DEFAULT_PROJECTS=[
@@ -122,9 +125,8 @@ let cfg       = JSON.parse(localStorage.getItem(CFG)||'{}');
 let sheetsUrl = cfg.sheetsUrl||'';
 let sheetsOn  = cfg.sheetsOn||false;
 
-// ── MULTI-TIMER — objeto {projectId: startTime} ───────────────
-let activeTimers = {};   // {pid: Date.now()}
-let elapsedMap   = {};   // {pid: seconds}
+// Multi-timer state
+let activeTimers = {};  // {pid: startTimestamp}
 let tickIntvl    = null;
 
 let view='tracker', showManual=false, syncing=false;
@@ -161,53 +163,85 @@ function showToast(msg){
   toastTimer=setTimeout(()=>{toast=null;render();},3000);
 }
 
-// ── MULTI-TIMER functions ─────────────────────────────────────
+// ── BANNER (vive fuera de #app — nunca se destruye) ───────────
+// Se llama cada segundo desde el tick Y cuando cambia el estado
+function renderBanner(){
+  const b=document.getElementById('banner_div');
+  if(!b)return;
+  const now=Date.now();
+  const pids=Object.keys(activeTimers);
 
+  if(pids.length===0){b.innerHTML='';return;}
+
+  // Calcula elapsed actualizado en cada llamada
+  const chips=pids.map(pid=>{
+    const p=projects.find(x=>x.id===pid);
+    const secs=Math.floor((now-activeTimers[pid])/1000);
+    const col=p?.color||'#4a9fd4';
+    return`<div class="timer-chip" style="border:1px solid ${col}40">
+      <span style="font-size:16px">${p?.emoji||'⏱'}</span>
+      <div>
+        <div style="color:#fff;font-weight:700;font-size:12px;line-height:1.2">${p?.name||pid}</div>
+        <div style="color:${col};font-weight:800;font-size:18px;font-variant-numeric:tabular-nums;line-height:1">${fmtTime(secs)}</div>
+      </div>
+      <button onclick="stopTimer('${pid}')" class="btn" style="background:${col};color:#fff;padding:5px 10px;font-size:11px;flex-shrink:0">⏹ Stop</button>
+    </div>`;
+  }).join('');
+
+  b.innerHTML=`
+  <div style="background:#0d1b3e;padding:10px 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#3AAA35;animation:blink 1.4s ease-in-out infinite"></div>
+        <span style="color:#7ab3d4;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">${pids.length} activo${pids.length!==1?'s':''}</span>
+      </div>
+      ${pids.length>1?`<button onclick="stopAll()" class="btn" style="background:rgba(239,75,31,.8);color:#fff;padding:5px 12px;font-size:11px">⏹ Detener todos</button>`:''}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>
+  </div>`;
+}
+
+// ── TIMER ─────────────────────────────────────────────────────
 function startTimer(pid){
-  // Toggle: si ya está corriendo, lo detiene
+  // Toggle: si ya corre, lo detiene
   if(pid in activeTimers){stopTimer(pid);return;}
 
   activeTimers[pid]=Date.now();
-  elapsedMap[pid]=0;
+  renderBanner(); // actualiza el banner inmediatamente
 
-  // Inicia el tick global si no estaba corriendo
   if(!tickIntvl){
-    tickIntvl=setInterval(()=>{
-      const now=Date.now();
-      Object.keys(activeTimers).forEach(id=>{
-        elapsedMap[id]=Math.floor((now-activeTimers[id])/1000);
-      });
-      renderBanner();
-    },1000);
+    // Un solo intervalo global que actualiza el banner cada segundo
+    tickIntvl=setInterval(renderBanner, 1000);
   }
-  render();
+  render(); // actualiza las tarjetas (colores, botones)
 }
 
 async function stopTimer(pid, notify=true){
   if(!(pid in activeTimers))return;
   const dur=(Date.now()-activeTimers[pid])/3600000;
   delete activeTimers[pid];
-  delete elapsedMap[pid];
 
-  // Detiene el tick si ya no hay timers activos
   if(Object.keys(activeTimers).length===0){
     clearInterval(tickIntvl);tickIntvl=null;
   }
 
+  renderBanner(); // actualiza banner inmediatamente
+
   if(dur>=0.005){
     const s={id:Date.now(),projectId:pid,date:td(),duration:dur,notes:'',type:'timer',synced:false};
     sessions.unshift(s);saveSess();
-    if(notify)showToast('✅ '+fmtHrs(dur)+' guardadas — '+(projects.find(p=>p.id===pid)?.name||''));
+    if(notify)showToast('✅ '+fmtHrs(dur)+' — '+(projects.find(p=>p.id===pid)?.name||''));
     syncOne(s);
+  } else {
+    render();
   }
-  render();
 }
 
 async function stopAll(){
   const pids=Object.keys(activeTimers);
   if(!pids.length)return;
   for(const pid of pids) await stopTimer(pid,false);
-  showToast('✅ '+pids.length+' cronómetro(s) detenidos');
+  showToast('✅ '+pids.length+' cronómetro'+(pids.length!==1?'s':'')+' detenido'+(pids.length!==1?'s':''));
 }
 
 async function saveManual(){
@@ -248,7 +282,7 @@ function editProject(id){
   document.getElementById('em_date').value=EP.editStartDate;
   document.getElementById('em_prev_name').textContent=EP.name;
   document.getElementById('em_warn').style.display='none';
-  const box=document.getElementById('em_prev_box');box.style.background=EP.color;
+  document.getElementById('em_prev_box').style.background=EP.color;
   document.getElementById('em_prev_emoji').textContent=EP.emoji;
   document.getElementById('em_emojis').innerHTML=EMOJIS.map(e=>
     `<span class="emoji-opt${EP.emoji===e?' sel':''}" onclick="pickEmoji('${e}')">${e}</span>`).join('')+
@@ -259,7 +293,7 @@ function editProject(id){
   document.getElementById('edit_modal').style.display='flex';
 }
 function pickEmoji(e){if(!EP)return;EP.emoji=e;document.getElementById('em_prev_emoji').textContent=e;document.querySelectorAll('#em_emojis .emoji-opt').forEach(x=>x.classList.toggle('sel',x.textContent===e));}
-function pickColor(c){if(!EP)return;EP.color=c;document.getElementById('em_prev_box').style.background=c;document.querySelectorAll('#em_colors .color-dot').forEach(x=>x.classList.toggle('sel',x.getAttribute('onclick')===`pickColor('${c}')`) );}
+function pickColor(c){if(!EP)return;EP.color=c;document.getElementById('em_prev_box').style.background=c;document.querySelectorAll('#em_colors .color-dot').forEach(x=>x.classList.toggle('sel',x.getAttribute('onclick')===`pickColor('${c}')`));}
 function updWarn(){if(!EP)return;const nd=parseFloat(EP.editHours||0)+parseFloat(EP.editMinutes||0)/60;const w=document.getElementById('em_warn');if(w)w.style.display=(Math.abs(nd-(EP.origTotal||0))>0.008||EP.editStartDate!==EP.origStartDate)?'flex':'none';}
 function saveEdit(){
   if(!EP)return;const name=EP.name.trim();if(!name){showToast('⚠️ Nombre vacío');return;}
@@ -276,7 +310,6 @@ function saveEdit(){
 function closeEdit(){document.getElementById('edit_modal').style.display='none';EP=null;}
 
 function resetProject(id){
-  // Detiene el timer del proyecto si está activo
   if(id in activeTimers)stopTimer(id,false);
   const proj=projects.find(p=>p.id===id),cnt=sessions.filter(s=>s.projectId===id).length;
   if(cnt===0){showToast('ℹ️ No hay sesiones que reiniciar');return;}
@@ -338,27 +371,16 @@ function svgDonut(totals,gt){
   return paths;
 }
 
-// Actualiza SOLO los cronómetros en el banner (sin re-render completo)
-function renderBanner(){
-  Object.keys(activeTimers).forEach(pid=>{
-    const el=document.getElementById('el_'+pid);
-    if(el)el.textContent=fmtTime(elapsedMap[pid]||0);
-  });
-  // Actualiza contador en el header del banner
-  const bc=document.getElementById('banner_count');
-  if(bc)bc.textContent=activeCount()+' activo'+(activeCount()!==1?'s':'');
-}
-
-// ── RENDER PRINCIPAL ──────────────────────────────────────────
+// ── RENDER PRINCIPAL (#app solamente) ─────────────────────────
 function render(){
-  const totals=getTotals(),gt=grandTotal(totals),nActive=activeCount();
+  const totals=getTotals(),gt=grandTotal(totals);
   const pieData=[...totals].filter(p=>p.total>0).sort((a,b)=>b.total-a.total);
   const pending=pendingCount(),customN=projects.filter(p=>!p.isDefault).length;
+  const nActive=activeCount();
 
   document.getElementById('app').innerHTML=`
   ${toast?`<div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#0d1b3e;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.28);white-space:nowrap;animation:fadeDown .25s ease">${toast}</div>`:''}
 
-  <!-- HEADER -->
   <div style="background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:16px 20px 18px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
       <div style="background:#fff;border-radius:10px;padding:5px 13px;display:flex;align-items:center;justify-content:center;min-width:76px;min-height:44px;flex-shrink:0">
@@ -383,32 +405,6 @@ function render(){
     </div>
   </div>
 
-  <!-- MULTI-TIMER BANNER -->
-  ${nActive>0?`
-  <div style="background:#0d1b3e;padding:10px 16px">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:6px">
-        <div style="width:8px;height:8px;border-radius:50%;background:#3AAA35;animation:blink 1.4s ease-in-out infinite"></div>
-        <span id="banner_count" style="color:#7ab3d4;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">${nActive} activo${nActive!==1?'s':''}</span>
-      </div>
-      <button onclick="stopAll()" class="btn" style="background:rgba(239,75,31,.8);color:#fff;padding:5px 12px;font-size:11px">⏹ Detener todos</button>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px">
-      ${Object.keys(activeTimers).map(pid=>{
-        const p=projects.find(x=>x.id===pid);
-        return`<div class="timer-chip" style="border:1px solid ${p?.color||'#4a9fd4'}40">
-          <span style="font-size:16px">${p?.emoji||'⏱'}</span>
-          <div>
-            <div style="color:#fff;font-weight:700;font-size:12px;line-height:1.2">${p?.name||pid}</div>
-            <div id="el_${pid}" style="color:${p?.color||'#4a9fd4'};font-weight:800;font-size:18px;font-variant-numeric:tabular-nums;line-height:1">${fmtTime(elapsedMap[pid]||0)}</div>
-          </div>
-          <button onclick="stopTimer('${pid}')" class="btn" style="background:${p?.color||'#4a9fd4'};color:#fff;padding:5px 10px;font-size:11px;flex-shrink:0">⏹ Stop</button>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>`:''}
-
-  <!-- TABS -->
   <div style="display:flex;background:#fff;border-bottom:1px solid #dde1e9;overflow-x:auto">
     ${[
       ['tracker','⏱ Timer'],
@@ -421,22 +417,17 @@ function render(){
 
   <div style="padding:16px;max-width:1400px;margin:0 auto">
 
-  <!-- ══ TIMER ══ -->
   ${view==='tracker'?`
   <div class="proj-grid">
     ${totals.map(p=>{
-      const isA=p.id in activeTimers;
-      const pct=gt>0?(p.total/gt)*100:0;
+      const isA=p.id in activeTimers,pct=gt>0?(p.total/gt)*100:0;
       return`<div class="card" style="${isA?`border:2px solid ${p.color};box-shadow:0 0 0 3px ${p.color}20;`:''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:8px">
           <div style="flex:1;min-width:0">
             <div style="font-size:20px;line-height:1;margin-bottom:3px">${p.emoji}</div>
             <div style="font-weight:700;font-size:11.5px;color:#1a2035;line-height:1.3">${p.full}</div>
           </div>
-          <button class="btn" onclick="startTimer('${p.id}')"
-            style="flex-shrink:0;background:${isA?'#ef4b1f':p.color};color:#fff;padding:5px 9px;font-size:11px">
-            ${isA?'⏹ Stop':'▶ Start'}
-          </button>
+          <button class="btn" onclick="startTimer('${p.id}')" style="flex-shrink:0;background:${isA?'#ef4b1f':p.color};color:#fff;padding:5px 9px;font-size:11px">${isA?'⏹ Stop':'▶ Start'}</button>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
           <span style="color:${p.color};font-weight:800;font-size:16px">${fmtHrs(p.total)}</span>
@@ -472,7 +463,6 @@ function render(){
     </div></div>`:''}
   `:''}
 
-  <!-- ══ GRÁFICA ══ -->
   ${view==='chart'?`
   ${gt===0?`<div style="text-align:center;padding:70px 20px;color:#8a90a0"><div style="font-size:52px;margin-bottom:14px">📊</div><div style="font-weight:700;font-size:16px;color:#1a2035">Aún no hay datos</div></div>`:
   `<div class="chart-grid">
@@ -498,7 +488,6 @@ function render(){
   </div>`}
   `:''}
 
-  <!-- ══ HISTORIAL ══ -->
   ${view==='history'?`
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
     <div style="font-size:12px;color:#8a90a0">${sessions.length} sesión(es) · ${pending} pendiente(s)</div>
@@ -524,7 +513,6 @@ function render(){
   </div>`}
   `:''}
 
-  <!-- ══ PROYECTOS ══ -->
   ${view==='projects'?`
   <div class="card" style="margin-bottom:14px;border-left:4px solid #4a9fd4">
     <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">➕ Nuevo proyecto</div>
@@ -555,11 +543,11 @@ function render(){
     <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">Todos los proyectos</div>
     <div style="color:#8a90a0;font-size:12px;margin-bottom:14px">${projects.length} en total</div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      ${getTotals().map(p=>{const cnt=sessions.filter(s=>s.projectId===p.id).length;const isA=p.id in activeTimers;
-      return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid ${isA?p.color:'#dde1e9'};${isA?`box-shadow:0 0 0 2px ${p.color}25`:''};background:#fff">
+      ${getTotals().map(p=>{const cnt=sessions.filter(s=>s.projectId===p.id).length,isA=p.id in activeTimers;
+      return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid ${isA?p.color:'#dde1e9'};${isA?`box-shadow:0 0 0 2px ${p.color}25`:''}">
         <div style="width:36px;height:36px;border-radius:9px;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">${p.emoji}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:13px;color:#1a2035">${p.full} ${isA?'<span style="background:#3AAA35;color:#fff;border-radius:10px;font-size:9px;padding:1px 6px">▶ corriendo</span>':''}</div>
+          <div style="font-weight:700;font-size:13px;color:#1a2035">${p.full}${isA?' <span style="background:#3AAA35;color:#fff;border-radius:10px;font-size:9px;padding:1px 6px">▶ corriendo</span>':''}</div>
           <div style="font-size:11px;color:#8a90a0;margin-top:2px">${cnt} sesión${cnt!==1?'es':''} · ${fmtHrs(p.total)||'Sin horas'}${p.startDate?` · 📅 ${fmtDate(p.startDate)}`:''}
             · <span style="background:${p.isDefault?'#e8f0fb':'#eef4fc'};color:${p.isDefault?'#2d6aa0':'#4a9fd4'};border-radius:20px;padding:1px 6px;font-weight:700;font-size:10px">${p.isDefault?'Predefinido':'Personalizado'}</span>
           </div>
@@ -574,7 +562,6 @@ function render(){
   </div>
   `:''}
 
-  <!-- ══ SHEETS ══ -->
   ${view==='sheets'?`
   <div class="card" style="margin-bottom:14px;border-left:4px solid ${sheetsOn?'#3AAA35':'#dde1e9'}">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
