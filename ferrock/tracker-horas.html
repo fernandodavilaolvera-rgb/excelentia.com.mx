@@ -37,13 +37,15 @@ input:focus,select:focus{border-color:#4a9fd4}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal-box{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .slabel{font-size:10px;font-weight:700;color:#8a90a0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:block}
+/* Timer chip en el banner */
+.timer-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:10px;padding:8px 12px;flex-shrink:0}
 @media(max-width:560px){.stat-grid{grid-template-columns:1fr 1fr!important}.row3{grid-template-columns:1fr 1fr!important}.btn-row{flex-direction:column!important}}
 </style>
 </head>
 <body>
 <div id="app"></div>
 
-<!-- EDIT MODAL — fuera del app div para no ser re-renderizado -->
+<!-- EDIT MODAL fuera del render para evitar scroll jump -->
 <div id="edit_modal" style="display:none" class="modal-bg" onclick="if(event.target===this)closeEdit()">
   <div class="modal-box">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -53,20 +55,14 @@ input:focus,select:focus{border-color:#4a9fd4}
       </div>
       <button onclick="closeEdit()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#ccc;line-height:1">✕</button>
     </div>
-
-    <!-- NOMBRE -->
     <div style="margin-bottom:16px">
       <span class="slabel">Nombre</span>
       <input id="em_name" type="text" oninput="EP.name=this.value;document.getElementById('em_prev_name').textContent=this.value||'Nombre del proyecto'">
     </div>
-
-    <!-- EMOJI -->
     <div style="margin-bottom:16px">
       <span class="slabel">Emoji</span>
       <div id="em_emojis" style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px"></div>
     </div>
-
-    <!-- COLOR -->
     <div style="margin-bottom:16px">
       <span class="slabel">Color</span>
       <div id="em_colors" style="display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:10px"></div>
@@ -77,41 +73,29 @@ input:focus,select:focus{border-color:#4a9fd4}
         <div id="em_prev_name" style="font-weight:700;font-size:13px;color:#1a2035"></div>
       </div>
     </div>
-
-    <!-- DIVISOR -->
     <div style="border-top:2px dashed #dde1e9;margin:18px 0"></div>
-
-    <!-- HORAS Y FECHA -->
     <div style="margin-bottom:10px">
       <span class="slabel">⏱ Horas acumuladas y fecha de inicio</span>
       <div id="em_current" style="background:#f0f6ff;border:1px solid #c8d9f0;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#2d6aa0"></div>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
       <div>
         <label style="font-size:11px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Horas nuevas</label>
-        <!-- SIN render() en oninput — solo actualiza EP y el aviso -->
-        <input id="em_hours" type="number" min="0" max="9999" placeholder="0"
-          oninput="EP.editHours=this.value;updWarn()">
+        <input id="em_hours" type="number" min="0" max="9999" placeholder="0" oninput="EP.editHours=this.value;updWarn()">
       </div>
       <div>
         <label style="font-size:11px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Minutos</label>
-        <input id="em_minutes" type="number" min="0" max="59" placeholder="0"
-          oninput="EP.editMinutes=this.value;updWarn()">
+        <input id="em_minutes" type="number" min="0" max="59" placeholder="0" oninput="EP.editMinutes=this.value;updWarn()">
       </div>
       <div>
         <label style="font-size:11px;font-weight:700;color:#4a5068;display:block;margin-bottom:5px">Fecha de inicio</label>
-        <input id="em_date" type="date"
-          oninput="EP.editStartDate=this.value;updWarn()">
+        <input id="em_date" type="date" oninput="EP.editStartDate=this.value;updWarn()">
       </div>
     </div>
-
-    <!-- AVISO CONSOLIDACIÓN — toggle via JS, sin re-render -->
     <div id="em_warn" style="display:none;background:#fff3e0;border:1px solid #ffe0b2;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#e65100;gap:8px">
-      <span style="flex-shrink:0">⚠️</span>
+      <span>⚠️</span>
       <span>Cambiar horas o fecha <strong>consolidará</strong> el historial en una sesión de ajuste. Las sesiones anteriores se reemplazarán.</span>
     </div>
-
     <div style="display:flex;gap:8px;margin-top:4px">
       <button class="btn" onclick="closeEdit()" style="flex:1;background:#f0f4f8;color:#4a5068;padding:12px;font-size:13px">Cancelar</button>
       <button class="btn" onclick="saveEdit()" style="flex:2;background:#1a3a6b;color:#fff;padding:12px;font-size:13px">✓ Guardar cambios</button>
@@ -137,9 +121,14 @@ let projects  = JSON.parse(localStorage.getItem(PK)||'null')||DEFAULT_PROJECTS.m
 let cfg       = JSON.parse(localStorage.getItem(CFG)||'{}');
 let sheetsUrl = cfg.sheetsUrl||'';
 let sheetsOn  = cfg.sheetsOn||false;
-let activeTimer=null,elapsed=0,tickIntvl=null;
-let view='tracker',showManual=false,syncing=false;
-let toast=null,toastTimer=null;
+
+// ── MULTI-TIMER — objeto {projectId: startTime} ───────────────
+let activeTimers = {};   // {pid: Date.now()}
+let elapsedMap   = {};   // {pid: seconds}
+let tickIntvl    = null;
+
+let view='tracker', showManual=false, syncing=false;
+let toast=null, toastTimer=null;
 let newProj={name:'',emoji:'🚀',color:'#4a9fd4'};
 let mData={projectId:projects[0]?.id||'',hours:'',minutes:'',date:td(),notes:''};
 let EP=null;
@@ -165,31 +154,62 @@ function getTotals(){
 }
 function grandTotal(t){return t.reduce((a,p)=>a+p.total,0);}
 function pendingCount(){return sessions.filter(s=>!s.synced).length;}
+function activeCount(){return Object.keys(activeTimers).length;}
 
 function showToast(msg){
   toast=msg;render();clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>{toast=null;render();},3000);
 }
 
-// ── Timer ─────────────────────────────────────────────────────
+// ── MULTI-TIMER functions ─────────────────────────────────────
+
 function startTimer(pid){
-  if(activeTimer)stopTimer(false);
-  activeTimer={projectId:pid,startTime:Date.now()};elapsed=0;
-  tickIntvl=setInterval(()=>{elapsed=Math.floor((Date.now()-activeTimer.startTime)/1000);renderBanner();},1000);
+  // Toggle: si ya está corriendo, lo detiene
+  if(pid in activeTimers){stopTimer(pid);return;}
+
+  activeTimers[pid]=Date.now();
+  elapsedMap[pid]=0;
+
+  // Inicia el tick global si no estaba corriendo
+  if(!tickIntvl){
+    tickIntvl=setInterval(()=>{
+      const now=Date.now();
+      Object.keys(activeTimers).forEach(id=>{
+        elapsedMap[id]=Math.floor((now-activeTimers[id])/1000);
+      });
+      renderBanner();
+    },1000);
+  }
   render();
 }
-async function stopTimer(notify=true){
-  if(!activeTimer)return;
-  clearInterval(tickIntvl);tickIntvl=null;
-  const dur=(Date.now()-activeTimer.startTime)/3600000;
+
+async function stopTimer(pid, notify=true){
+  if(!(pid in activeTimers))return;
+  const dur=(Date.now()-activeTimers[pid])/3600000;
+  delete activeTimers[pid];
+  delete elapsedMap[pid];
+
+  // Detiene el tick si ya no hay timers activos
+  if(Object.keys(activeTimers).length===0){
+    clearInterval(tickIntvl);tickIntvl=null;
+  }
+
   if(dur>=0.005){
-    const s={id:Date.now(),projectId:activeTimer.projectId,date:td(),duration:dur,notes:'',type:'timer',synced:false};
+    const s={id:Date.now(),projectId:pid,date:td(),duration:dur,notes:'',type:'timer',synced:false};
     sessions.unshift(s);saveSess();
-    if(notify)showToast('✅ Sesión de '+fmtHrs(dur)+' guardada');
+    if(notify)showToast('✅ '+fmtHrs(dur)+' guardadas — '+(projects.find(p=>p.id===pid)?.name||''));
     syncOne(s);
   }
-  activeTimer=null;elapsed=0;render();
+  render();
 }
+
+async function stopAll(){
+  const pids=Object.keys(activeTimers);
+  if(!pids.length)return;
+  for(const pid of pids) await stopTimer(pid,false);
+  showToast('✅ '+pids.length+' cronómetro(s) detenidos');
+}
+
 async function saveManual(){
   const dur=parseFloat(mData.hours||0)+parseFloat(mData.minutes||0)/60;
   if(dur<=0)return;
@@ -211,133 +231,64 @@ function addProject(){
   newProj={name:'',emoji:'🚀',color:'#4a9fd4'};render();
 }
 
-// Abre el modal SIN llamar a render() — manipula el DOM directamente
 function editProject(id){
   const p=projects.find(x=>x.id===id);if(!p)return;
   const ps=sessions.filter(s=>s.projectId===id);
   const total=ps.reduce((a,s)=>a+s.duration,0);
   const startDate=ps.length>0?[...ps].map(s=>s.date).sort()[0]:td();
-  EP={
-    id, name:p.name, full:p.full, emoji:p.emoji, color:p.color,
-    editHours:Math.floor(total),
-    editMinutes:Math.round((total-Math.floor(total))*60),
-    editStartDate:startDate,
-    origTotal:total,
-    origStartDate:ps.length>0?[...ps].map(s=>s.date).sort()[0]:null,
-    sessionCount:ps.length
-  };
-
-  // Rellena campos sin tocar el scroll
+  EP={id,name:p.name,full:p.full,emoji:p.emoji,color:p.color,
+    editHours:Math.floor(total),editMinutes:Math.round((total-Math.floor(total))*60),
+    editStartDate:startDate,origTotal:total,
+    origStartDate:ps.length>0?[...ps].map(s=>s.date).sort()[0]:null,sessionCount:ps.length};
   document.getElementById('em_subtitle').textContent=p.full;
   document.getElementById('em_name').value=EP.name;
-  document.getElementById('em_current').innerHTML=
-    '<strong>Actualmente:</strong> '+fmtHrs(EP.origTotal)+
-    ' · Desde: '+(EP.origStartDate?fmtDate(EP.origStartDate):'Sin sesiones')+
-    ' · '+EP.sessionCount+' sesión'+(EP.sessionCount!==1?'es':'');
+  document.getElementById('em_current').innerHTML='<strong>Actualmente:</strong> '+fmtHrs(EP.origTotal)+' · Desde: '+(EP.origStartDate?fmtDate(EP.origStartDate):'Sin sesiones')+' · '+EP.sessionCount+' sesión'+(EP.sessionCount!==1?'es':'');
   document.getElementById('em_hours').value=EP.editHours;
   document.getElementById('em_minutes').value=EP.editMinutes;
   document.getElementById('em_date').value=EP.editStartDate;
   document.getElementById('em_prev_name').textContent=EP.name;
   document.getElementById('em_warn').style.display='none';
-
-  // Preview box
-  const box=document.getElementById('em_prev_box');
-  box.style.background=EP.color;
+  const box=document.getElementById('em_prev_box');box.style.background=EP.color;
   document.getElementById('em_prev_emoji').textContent=EP.emoji;
-
-  // Emojis
-  const ec=document.getElementById('em_emojis');
-  ec.innerHTML=EMOJIS.map(e=>
-    `<span class="emoji-opt${EP.emoji===e?' sel':''}" onclick="pickEmoji('${e}')">${e}</span>`
-  ).join('')+
-  `<input type="text" maxlength="2" placeholder="✏️" oninput="pickEmoji(this.value||'🚀')"
-     style="width:38px;height:36px;text-align:center;font-size:17px;padding:4px;flex-shrink:0;
-            border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif">`;
-
-  // Colors
-  const cc=document.getElementById('em_colors');
-  cc.innerHTML=COLORS.map(c=>
-    `<div class="color-dot${EP.color===c?' sel':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`
-  ).join('')+
-  `<input type="color" value="${EP.color}" oninput="pickColor(this.value)"
-     style="width:24px;height:24px;border-radius:50%;padding:0;border:2px solid #dde1e9;cursor:pointer">`;
-
-  // Muestra el modal
+  document.getElementById('em_emojis').innerHTML=EMOJIS.map(e=>
+    `<span class="emoji-opt${EP.emoji===e?' sel':''}" onclick="pickEmoji('${e}')">${e}</span>`).join('')+
+    `<input type="text" maxlength="2" placeholder="✏️" oninput="pickEmoji(this.value||'🚀')" style="width:38px;height:36px;text-align:center;font-size:17px;padding:4px;flex-shrink:0;border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif">`;
+  document.getElementById('em_colors').innerHTML=COLORS.map(c=>
+    `<div class="color-dot${EP.color===c?' sel':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`).join('')+
+    `<input type="color" value="${EP.color}" oninput="pickColor(this.value)" style="width:24px;height:24px;border-radius:50%;padding:0;border:2px solid #dde1e9;cursor:pointer">`;
   document.getElementById('edit_modal').style.display='flex';
 }
-
-// Pickers que NO llaman a render()
-function pickEmoji(e){
-  if(!EP)return;
-  EP.emoji=e;
-  document.getElementById('em_prev_emoji').textContent=e;
-  document.querySelectorAll('#em_emojis .emoji-opt').forEach(x=>{
-    x.classList.toggle('sel', x.textContent===e);
-  });
-}
-function pickColor(c){
-  if(!EP)return;
-  EP.color=c;
-  document.getElementById('em_prev_box').style.background=c;
-  document.querySelectorAll('#em_colors .color-dot').forEach(x=>{
-    x.classList.toggle('sel', x.style.background===c||x.getAttribute('onclick')===`pickColor('${c}')`);
-  });
-}
-
-// Actualiza SOLO el aviso de consolidación, sin tocar el scroll
-function updWarn(){
-  if(!EP)return;
-  const newDur=parseFloat(EP.editHours||0)+parseFloat(EP.editMinutes||0)/60;
-  const hc=Math.abs(newDur-(EP.origTotal||0))>0.008;
-  const dc=EP.editStartDate!==EP.origStartDate;
-  const w=document.getElementById('em_warn');
-  if(w)w.style.display=(hc||dc)?'flex':'none';
-}
-
+function pickEmoji(e){if(!EP)return;EP.emoji=e;document.getElementById('em_prev_emoji').textContent=e;document.querySelectorAll('#em_emojis .emoji-opt').forEach(x=>x.classList.toggle('sel',x.textContent===e));}
+function pickColor(c){if(!EP)return;EP.color=c;document.getElementById('em_prev_box').style.background=c;document.querySelectorAll('#em_colors .color-dot').forEach(x=>x.classList.toggle('sel',x.getAttribute('onclick')===`pickColor('${c}')`) );}
+function updWarn(){if(!EP)return;const nd=parseFloat(EP.editHours||0)+parseFloat(EP.editMinutes||0)/60;const w=document.getElementById('em_warn');if(w)w.style.display=(Math.abs(nd-(EP.origTotal||0))>0.008||EP.editStartDate!==EP.origStartDate)?'flex':'none';}
 function saveEdit(){
-  if(!EP)return;
-  const name=EP.name.trim();
-  if(!name){showToast('⚠️ El nombre no puede estar vacío');return;}
+  if(!EP)return;const name=EP.name.trim();if(!name){showToast('⚠️ Nombre vacío');return;}
   const idx=projects.findIndex(p=>p.id===EP.id);
-  if(idx>=0){
-    projects[idx]={...projects[idx],name,full:name,emoji:EP.emoji,color:EP.color};
-    saveProj();
-  }
-  const newDur=parseFloat(EP.editHours||0)+parseFloat(EP.editMinutes||0)/60;
-  const hc=Math.abs(newDur-(EP.origTotal||0))>0.008;
-  const dc=EP.editStartDate!==EP.origStartDate;
-  if(hc||dc){
+  if(idx>=0){projects[idx]={...projects[idx],name,full:name,emoji:EP.emoji,color:EP.color};saveProj();}
+  const nd=parseFloat(EP.editHours||0)+parseFloat(EP.editMinutes||0)/60;
+  if(Math.abs(nd-(EP.origTotal||0))>0.008||EP.editStartDate!==EP.origStartDate){
     sessions=sessions.filter(s=>s.projectId!==EP.id);
-    if(newDur>0){
-      const s={id:Date.now(),projectId:EP.id,date:EP.editStartDate||td(),duration:newDur,notes:'✏️ Ajuste manual',type:'manual',synced:false};
-      sessions.unshift(s);syncOne(s);
-    }
+    if(nd>0){const s={id:Date.now(),projectId:EP.id,date:EP.editStartDate||td(),duration:nd,notes:'✏️ Ajuste manual',type:'manual',synced:false};sessions.unshift(s);syncOne(s);}
     saveSess();
   }
-  document.getElementById('edit_modal').style.display='none';
-  EP=null;showToast('✅ Proyecto actualizado');render();
+  document.getElementById('edit_modal').style.display='none';EP=null;showToast('✅ Proyecto actualizado');render();
 }
-function closeEdit(){
-  document.getElementById('edit_modal').style.display='none';
-  EP=null;
-}
+function closeEdit(){document.getElementById('edit_modal').style.display='none';EP=null;}
 
 function resetProject(id){
-  const proj=projects.find(p=>p.id===id);
-  const cnt=sessions.filter(s=>s.projectId===id).length;
+  // Detiene el timer del proyecto si está activo
+  if(id in activeTimers)stopTimer(id,false);
+  const proj=projects.find(p=>p.id===id),cnt=sessions.filter(s=>s.projectId===id).length;
   if(cnt===0){showToast('ℹ️ No hay sesiones que reiniciar');return;}
-  if(!confirm(`¿Reiniciar "${proj?.full}"?\nSe borrarán ${cnt} sesión(es) y el contador vuelve a 0.`))return;
-  sessions=sessions.filter(s=>s.projectId!==id);
-  saveSess();showToast('🔄 "'+proj?.name+'" reiniciado');render();
+  if(!confirm(`¿Reiniciar "${proj?.full}"?\nSe borrarán ${cnt} sesión(es).`))return;
+  sessions=sessions.filter(s=>s.projectId!==id);saveSess();showToast('🔄 "'+proj?.name+'" reiniciado');render();
 }
 function deleteProject(id){
-  const proj=projects.find(p=>p.id===id);
-  const cnt=sessions.filter(s=>s.projectId===id).length;
-  let msg=`¿Eliminar "${proj?.full}"?`;
-  if(cnt>0)msg+=`\nSe borrarán ${cnt} sesión(es).`;
+  if(id in activeTimers)stopTimer(id,false);
+  const proj=projects.find(p=>p.id===id),cnt=sessions.filter(s=>s.projectId===id).length;
+  let msg=`¿Eliminar "${proj?.full}"?`;if(cnt>0)msg+=`\nSe borrarán ${cnt} sesión(es).`;
   if(!confirm(msg))return;
-  projects=projects.filter(p=>p.id!==id);
-  sessions=sessions.filter(s=>s.projectId!==id);
+  projects=projects.filter(p=>p.id!==id);sessions=sessions.filter(s=>s.projectId!==id);
   saveSess();saveProj();showToast('🗑 "'+proj?.name+'" eliminado');render();
 }
 
@@ -348,8 +299,7 @@ async function syncOne(session){
     const proj=projects.find(p=>p.id===session.projectId);
     await fetch(sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify({
       id:String(session.id),projectName:proj?.full||'—',date:session.date,
-      duration:Math.round(session.duration*1000)/1000,
-      durationFormatted:fmtHrs(session.duration),
+      duration:Math.round(session.duration*1000)/1000,durationFormatted:fmtHrs(session.duration),
       notes:session.notes||'',type:session.type
     })});
     session.synced=true;saveSess();render();
@@ -359,15 +309,15 @@ async function syncPending(){
   if(syncing||!sheetsOn||!sheetsUrl)return;
   const pending=sessions.filter(s=>!s.synced);
   if(!pending.length){showToast('✅ Todo ya sincronizado');return;}
-  syncing=true;showToast('⏳ Sincronizando '+pending.length+' sesión(es)…');render();
+  syncing=true;showToast('⏳ Sincronizando '+pending.length+'…');render();
   for(const s of pending)await syncOne(s);
   syncing=false;render();showToast('☁️ Sesiones enviadas a Sheets');
 }
 async function testConn(){
   if(!sheetsUrl){showToast('⚠️ Primero pega la URL');return;}
-  showToast('🔄 Probando conexión…');
-  try{await fetch(sheetsUrl,{mode:'no-cors'});showToast('✅ URL válida — conexión lista');}
-  catch(e){showToast('❌ No se pudo conectar — revisa la URL');}
+  showToast('🔄 Probando…');
+  try{await fetch(sheetsUrl,{mode:'no-cors'});showToast('✅ URL válida');}
+  catch(e){showToast('❌ No se pudo conectar');}
 }
 
 // ── SVG Donut ─────────────────────────────────────────────────
@@ -387,22 +337,28 @@ function svgDonut(totals,gt){
   paths+=`<text x="${CX}" y="${CY+13}" text-anchor="middle" fill="#1a3a6b" font-family="Manrope" font-size="14" font-weight="800">${fmtHrs(gt)}</text>`;
   return paths;
 }
+
+// Actualiza SOLO los cronómetros en el banner (sin re-render completo)
 function renderBanner(){
-  const b=document.getElementById('banner');if(!b)return;
-  if(!activeTimer){b.style.display='none';return;}
-  b.style.display='flex';
-  const te=document.getElementById('elapsed');if(te)te.textContent=fmtTime(elapsed);
+  Object.keys(activeTimers).forEach(pid=>{
+    const el=document.getElementById('el_'+pid);
+    if(el)el.textContent=fmtTime(elapsedMap[pid]||0);
+  });
+  // Actualiza contador en el header del banner
+  const bc=document.getElementById('banner_count');
+  if(bc)bc.textContent=activeCount()+' activo'+(activeCount()!==1?'s':'');
 }
 
 // ── RENDER PRINCIPAL ──────────────────────────────────────────
 function render(){
-  const totals=getTotals(),gt=grandTotal(totals),ap=activeTimer?projects.find(p=>p.id===activeTimer.projectId):null;
+  const totals=getTotals(),gt=grandTotal(totals),nActive=activeCount();
   const pieData=[...totals].filter(p=>p.total>0).sort((a,b)=>b.total-a.total);
   const pending=pendingCount(),customN=projects.filter(p=>!p.isDefault).length;
 
   document.getElementById('app').innerHTML=`
   ${toast?`<div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#0d1b3e;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.28);white-space:nowrap;animation:fadeDown .25s ease">${toast}</div>`:''}
 
+  <!-- HEADER -->
   <div style="background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:16px 20px 18px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
       <div style="background:#fff;border-radius:10px;padding:5px 13px;display:flex;align-items:center;justify-content:center;min-width:76px;min-height:44px;flex-shrink:0">
@@ -413,7 +369,8 @@ function render(){
         <div style="color:#fff;font-weight:800;font-size:18px">⏱ Tracker de Horas</div>
         <div style="display:flex;align-items:center;gap:7px;margin-top:2px">
           <div style="color:#7ab3d4;font-size:11px">Seguimiento por proyecto</div>
-          ${sheetsOn?`<div style="background:#3AAA35;color:#fff;font-size:9px;font-weight:700;border-radius:20px;padding:2px 7px">☁️ Sheets activo</div>`:''}
+          ${sheetsOn?`<div style="background:#3AAA35;color:#fff;font-size:9px;font-weight:700;border-radius:20px;padding:2px 7px">☁️ Sheets</div>`:''}
+          ${nActive>0?`<div style="background:#ef4b1f;color:#fff;font-size:9px;font-weight:700;border-radius:20px;padding:2px 7px">⏱ ${nActive} corriendo</div>`:''}
         </div>
       </div>
     </div>
@@ -426,20 +383,32 @@ function render(){
     </div>
   </div>
 
-  <div id="banner" style="display:${activeTimer?'flex':'none'};background:#0d1b3e;padding:10px 20px;align-items:center;justify-content:space-between;gap:12px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="width:8px;height:8px;border-radius:50%;background:#3AAA35;animation:blink 1.4s ease-in-out infinite;flex-shrink:0"></div>
-      <div>
-        <div style="color:#7ab3d4;font-size:9px;font-weight:700;text-transform:uppercase">Trabajando en</div>
-        <div style="color:#fff;font-weight:700;font-size:13px;margin-top:1px">${ap?.emoji} ${ap?.full}</div>
+  <!-- MULTI-TIMER BANNER -->
+  ${nActive>0?`
+  <div style="background:#0d1b3e;padding:10px 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#3AAA35;animation:blink 1.4s ease-in-out infinite"></div>
+        <span id="banner_count" style="color:#7ab3d4;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">${nActive} activo${nActive!==1?'s':''}</span>
       </div>
+      <button onclick="stopAll()" class="btn" style="background:rgba(239,75,31,.8);color:#fff;padding:5px 12px;font-size:11px">⏹ Detener todos</button>
     </div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <div id="elapsed" style="color:#4a9fd4;font-weight:800;font-size:22px;font-variant-numeric:tabular-nums">${fmtTime(elapsed)}</div>
-      <button class="btn" onclick="stopTimer()" style="background:#ef4b1f;color:#fff;padding:7px 14px">⏹ Stop</button>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${Object.keys(activeTimers).map(pid=>{
+        const p=projects.find(x=>x.id===pid);
+        return`<div class="timer-chip" style="border:1px solid ${p?.color||'#4a9fd4'}40">
+          <span style="font-size:16px">${p?.emoji||'⏱'}</span>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:12px;line-height:1.2">${p?.name||pid}</div>
+            <div id="el_${pid}" style="color:${p?.color||'#4a9fd4'};font-weight:800;font-size:18px;font-variant-numeric:tabular-nums;line-height:1">${fmtTime(elapsedMap[pid]||0)}</div>
+          </div>
+          <button onclick="stopTimer('${pid}')" class="btn" style="background:${p?.color||'#4a9fd4'};color:#fff;padding:5px 10px;font-size:11px;flex-shrink:0">⏹ Stop</button>
+        </div>`;
+      }).join('')}
     </div>
-  </div>
+  </div>`:''}
 
+  <!-- TABS -->
   <div style="display:flex;background:#fff;border-bottom:1px solid #dde1e9;overflow-x:auto">
     ${[
       ['tracker','⏱ Timer'],
@@ -452,17 +421,22 @@ function render(){
 
   <div style="padding:16px;max-width:1400px;margin:0 auto">
 
+  <!-- ══ TIMER ══ -->
   ${view==='tracker'?`
   <div class="proj-grid">
     ${totals.map(p=>{
-      const isA=activeTimer?.projectId===p.id,pct=gt>0?(p.total/gt)*100:0;
+      const isA=p.id in activeTimers;
+      const pct=gt>0?(p.total/gt)*100:0;
       return`<div class="card" style="${isA?`border:2px solid ${p.color};box-shadow:0 0 0 3px ${p.color}20;`:''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:8px">
           <div style="flex:1;min-width:0">
             <div style="font-size:20px;line-height:1;margin-bottom:3px">${p.emoji}</div>
             <div style="font-weight:700;font-size:11.5px;color:#1a2035;line-height:1.3">${p.full}</div>
           </div>
-          <button class="btn" onclick="${isA?`stopTimer()`:`startTimer('${p.id}')`}" style="flex-shrink:0;background:${isA?'#ef4b1f':p.color};color:#fff;padding:5px 9px;font-size:11px">${isA?'⏹ Stop':'▶ Start'}</button>
+          <button class="btn" onclick="startTimer('${p.id}')"
+            style="flex-shrink:0;background:${isA?'#ef4b1f':p.color};color:#fff;padding:5px 9px;font-size:11px">
+            ${isA?'⏹ Stop':'▶ Start'}
+          </button>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
           <span style="color:${p.color};font-weight:800;font-size:16px">${fmtHrs(p.total)}</span>
@@ -498,6 +472,7 @@ function render(){
     </div></div>`:''}
   `:''}
 
+  <!-- ══ GRÁFICA ══ -->
   ${view==='chart'?`
   ${gt===0?`<div style="text-align:center;padding:70px 20px;color:#8a90a0"><div style="font-size:52px;margin-bottom:14px">📊</div><div style="font-weight:700;font-size:16px;color:#1a2035">Aún no hay datos</div></div>`:
   `<div class="chart-grid">
@@ -523,6 +498,7 @@ function render(){
   </div>`}
   `:''}
 
+  <!-- ══ HISTORIAL ══ -->
   ${view==='history'?`
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
     <div style="font-size:12px;color:#8a90a0">${sessions.length} sesión(es) · ${pending} pendiente(s)</div>
@@ -548,6 +524,7 @@ function render(){
   </div>`}
   `:''}
 
+  <!-- ══ PROYECTOS ══ -->
   ${view==='projects'?`
   <div class="card" style="margin-bottom:14px;border-left:4px solid #4a9fd4">
     <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">➕ Nuevo proyecto</div>
@@ -578,11 +555,11 @@ function render(){
     <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">Todos los proyectos</div>
     <div style="color:#8a90a0;font-size:12px;margin-bottom:14px">${projects.length} en total</div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      ${getTotals().map(p=>{const cnt=sessions.filter(s=>s.projectId===p.id).length;
-      return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid #dde1e9">
+      ${getTotals().map(p=>{const cnt=sessions.filter(s=>s.projectId===p.id).length;const isA=p.id in activeTimers;
+      return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid ${isA?p.color:'#dde1e9'};${isA?`box-shadow:0 0 0 2px ${p.color}25`:''};background:#fff">
         <div style="width:36px;height:36px;border-radius:9px;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">${p.emoji}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:13px;color:#1a2035">${p.full}</div>
+          <div style="font-weight:700;font-size:13px;color:#1a2035">${p.full} ${isA?'<span style="background:#3AAA35;color:#fff;border-radius:10px;font-size:9px;padding:1px 6px">▶ corriendo</span>':''}</div>
           <div style="font-size:11px;color:#8a90a0;margin-top:2px">${cnt} sesión${cnt!==1?'es':''} · ${fmtHrs(p.total)||'Sin horas'}${p.startDate?` · 📅 ${fmtDate(p.startDate)}`:''}
             · <span style="background:${p.isDefault?'#e8f0fb':'#eef4fc'};color:${p.isDefault?'#2d6aa0':'#4a9fd4'};border-radius:20px;padding:1px 6px;font-weight:700;font-size:10px">${p.isDefault?'Predefinido':'Personalizado'}</span>
           </div>
@@ -597,6 +574,7 @@ function render(){
   </div>
   `:''}
 
+  <!-- ══ SHEETS ══ -->
   ${view==='sheets'?`
   <div class="card" style="margin-bottom:14px;border-left:4px solid ${sheetsOn?'#3AAA35':'#dde1e9'}">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
@@ -617,7 +595,7 @@ function render(){
       ${pending>0?`<button class="btn" onclick="syncPending()" style="background:#3AAA35;color:#fff;padding:8px 16px">☁️ Sync ${pending}</button>`:`<span style="font-size:12px;color:#3AAA35;font-weight:700">✅ Todo sincronizado</span>`}
     </div>`:''}
   </div>
-  <div class="card" style="margin-bottom:14px">
+  <div class="card">
     <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:12px 14px;margin-bottom:14px">
       <div style="font-weight:700;font-size:13px;color:#2e7d32;margin-bottom:4px">✅ Tu hoja ya fue creada</div>
       <div style="font-size:12px;color:#388e3c;margin-bottom:8px">📄 <strong>⏱ Tracker de Horas — ExcelentIA</strong> en tu carpeta Ferrock</div>
