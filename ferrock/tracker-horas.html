@@ -161,6 +161,7 @@ let filterDate='all', filterDateStart='', filterDateEnd='', filterProject='all';
 let toast=null, toastTimer=null;
 let newProj={name:'',emoji:'🚀',color:'#4a9fd4'};
 let newBk={name:'',url:''};
+let showAddBk=false;
 let EP=null, EB=null;
 
 function saveSess(){localStorage.setItem(SK,JSON.stringify(sessions));}
@@ -242,7 +243,7 @@ function addBookmark(){
   if(!name||!url){showToast('⚠️ Completa nombre y URL');return;}
   bookmarks.push({id:Date.now(),name,url});
   saveBk();showToast('✅ "'+name+'" agregado');
-  newBk={name:'',url:''};render();
+  newBk={name:'',url:''};showAddBk=false;render();
 }
 function deleteBookmark(id){
   const bk=bookmarks.find(b=>b.id===id);
@@ -664,12 +665,9 @@ function render(){
 
   <!-- ══ FAVS URL'S ══ -->
   ${view==='favs'?`
-  <div class="card" style="margin-bottom:14px;border-left:4px solid #4a9fd4">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-      <div>
-        <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">➕ Nuevo marcador</div>
-        <div style="color:#8a90a0;font-size:12px">Tus links favoritos, siempre a la mano</div>
-      </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:3px;flex-wrap:wrap">
+      <div style="font-weight:800;font-size:15px;color:#1a2035">Tus marcadores (${bookmarks.length})</div>
       <div style="display:flex;gap:6px;flex-shrink:0">
         <button onclick="exportBookmarks()" class="btn" style="background:#f0f6ff;color:#2d6aa0;border:1px solid #c8d9f0;padding:7px 12px;font-size:11px">⬇️ Exportar</button>
         <label class="btn" style="background:#f0f6ff;color:#2d6aa0;border:1px solid #c8d9f0;padding:7px 12px;font-size:11px;display:inline-flex;align-items:center;cursor:pointer">
@@ -678,21 +676,12 @@ function render(){
         </label>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <input type="text" placeholder="Nombre (ej: Mi CRM, Drive Ferrock…)" value="${newBk.name}" oninput="newBk.name=this.value">
-      <input type="text" placeholder="https://..." value="${newBk.url}" oninput="newBk.url=this.value">
-      <button onclick="addBookmark()" class="btn" style="background:#1a3a6b;color:#fff;padding:11px;font-size:13px">✓ Agregar marcador</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">Tus marcadores (${bookmarks.length})</div>
     <div style="color:#8a90a0;font-size:12px;margin-bottom:14px">Usa ↑↓ para reordenar · clic en el nombre para abrir</div>
     ${bookmarks.length===0?`
     <div style="text-align:center;padding:50px 20px;color:#8a90a0">
       <div style="font-size:44px;margin-bottom:10px">🔗</div>
       <div style="font-weight:700;font-size:15px;color:#1a2035">Sin marcadores aún</div>
-      <div style="font-size:12px;margin-top:4px">Agrega tu primer link arriba</div>
+      <div style="font-size:12px;margin-top:4px">Agrega tu primer link con el botón de abajo</div>
     </div>`:`
     <div style="display:flex;flex-direction:column;gap:7px">
       ${bookmarks.map((b,i)=>{
@@ -716,12 +705,27 @@ function render(){
       }).join('')}
     </div>`}
   </div>
+
+  <button class="btn" onclick="toggleAddBk()" style="display:block;width:100%;margin-top:12px;background:${showAddBk?'#f0f4f8':'#1a3a6b'};color:${showAddBk?'#4a5068':'#fff'};border:1px solid #dde1e9;padding:13px;font-size:14px">
+    ${showAddBk?'✕  Cancelar':'+ Agregar marcador'}
+  </button>
+
+  ${showAddBk?`<div class="card" style="margin-top:8px;border-left:4px solid #4a9fd4">
+    <div style="font-weight:800;font-size:15px;color:#1a2035;margin-bottom:3px">➕ Nuevo marcador</div>
+    <div style="color:#8a90a0;font-size:12px;margin-bottom:14px">Tus links favoritos, siempre a la mano</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input type="text" placeholder="Nombre (ej: Mi CRM, Drive Ferrock…)" value="${newBk.name}" oninput="newBk.name=this.value">
+      <input type="text" placeholder="https://..." value="${newBk.url}" oninput="newBk.url=this.value">
+      <button onclick="addBookmark()" class="btn" style="background:#3AAA35;color:#fff;padding:11px;font-size:13px">✓ Agregar marcador</button>
+    </div>
+  </div>`:''}
   `:''}
 
   </div>`;
 }
 
 function setView(v){view=v;render();}
+function toggleAddBk(){showAddBk=!showAddBk;render();}
 render();
 </script>
 </body>
