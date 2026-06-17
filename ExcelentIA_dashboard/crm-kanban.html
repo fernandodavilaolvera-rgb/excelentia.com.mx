@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM · Kanban — ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:40px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.header-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem}
+.header-title{color:#fff;font-size:1.1rem;font-weight:700;letter-spacing:.3px}
+.header-sub{color:#a8c4e0;font-size:.78rem}
+.header-right{display:flex;align-items:center;gap:.75rem}
+.user-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:.3rem .85rem;color:#fff;font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:.4rem}
+.user-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.date-badge{color:#a8c4e0;font-size:.78rem;text-align:right}
+
+/* ── PAGE ── */
+.page-wrap{padding:1.25rem 1.5rem;max-width:100%;margin:0 auto}
+.flex-between{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.flex-gap{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+
+/* ── BOTONES ── */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Manrope',sans-serif;text-decoration:none}
+.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
+.btn-secondary{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#dce8f7}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:.3rem .65rem;font-size:.78rem}
+.btn-icon{padding:.35rem .45rem;border-radius:6px}
+
+/* ── FILTRO USUARIO ── */
+.filter-bar{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.filter-select{padding:.38rem .65rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.8rem;background:#fff;cursor:pointer}
+.filter-select:focus{outline:none;border-color:#4a9fd4}
+
+/* ── STAT CHIPS ── */
+.stat-chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.stat-chip{background:#fff;border:1px solid #dde1e9;border-radius:20px;padding:.3rem .85rem;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.35rem}
+.stat-chip span{font-weight:800}
+
+/* ── PIPELINE SECTION ── */
+.pipeline-section{margin-bottom:2rem}
+.pipeline-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;padding:.6rem .9rem;border-radius:10px}
+.pipeline-header.a{background:linear-gradient(90deg,#1a3a6b18,#1a3a6b08);border-left:4px solid #1a3a6b}
+.pipeline-header.b{background:linear-gradient(90deg,#7c3aed18,#7c3aed08);border-left:4px solid #7c3aed}
+.pipeline-title{font-size:.92rem;font-weight:800;display:flex;align-items:center;gap:.5rem}
+.pipeline-title.a{color:#1a3a6b}
+.pipeline-title.b{color:#7c3aed}
+.pipeline-meta{font-size:.75rem;color:#4a5068;font-weight:600}
+
+/* ── KANBAN BOARD ── */
+.kanban-scroll{overflow-x:auto;padding-bottom:.75rem;-webkit-overflow-scrolling:touch}
+.kanban-board{display:flex;gap:.65rem;min-width:max-content;align-items:flex-start}
+
+/* ── KANBAN COLUMNA ── */
+.kanban-col{width:195px;flex-shrink:0;display:flex;flex-direction:column;gap:0}
+.kanban-col-head{padding:.55rem .7rem;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;border-bottom:none}
+.kanban-col-title{font-size:.75rem;font-weight:700}
+.kanban-col-count{font-size:.7rem;font-weight:800;padding:.1rem .4rem;border-radius:10px}
+.kanban-col-body{background:#f0f2f7;border:1px solid #dde1e9;border-top:none;border-radius:0 0 10px 10px;padding:.5rem;min-height:100px;display:flex;flex-direction:column;gap:.45rem;transition:.2s}
+.kanban-col-body.drag-over{background:#e0e8ff;border-color:#4a9fd4;box-shadow:inset 0 0 0 2px #4a9fd4}
+.kanban-col-valor{font-size:.68rem;font-weight:700;color:#059669;margin-top:.15rem}
+
+/* ── KANBAN CARD ── */
+.kanban-card{background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:.6rem .7rem;cursor:grab;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.06);user-select:none;position:relative}
+.kanban-card:hover{border-color:#4a9fd4;box-shadow:0 3px 12px rgba(74,159,212,.15);transform:translateY(-1px)}
+.kanban-card.dragging{opacity:.45;transform:rotate(2deg);box-shadow:0 8px 24px rgba(0,0,0,.15);cursor:grabbing}
+.kanban-card.drag-placeholder{background:#e8f0fb;border:2px dashed #4a9fd4;box-shadow:none;transform:none;opacity:1}
+.kc-nombre{font-size:.8rem;font-weight:700;color:#1a2035;margin-bottom:.2rem;line-height:1.3}
+.kc-empresa{font-size:.7rem;color:#4a5068;margin-bottom:.3rem}
+.kc-footer{display:flex;align-items:center;justify-content:space-between;gap:.3rem;flex-wrap:wrap}
+.kc-valor{font-size:.72rem;font-weight:700;color:#059669}
+.kc-prob{font-size:.68rem;font-weight:700;padding:.1rem .35rem;border-radius:6px}
+.kc-alerta{font-size:.67rem;color:#dc2626;font-weight:600;margin-top:.25rem;display:flex;align-items:center;gap:.2rem}
+.kc-badge{font-size:.65rem;padding:.1rem .35rem;border-radius:6px;font-weight:700}
+.kc-badge.unico{background:#f3f4f6;color:#374151}
+.kc-badge.mensual{background:#dce8f7;color:#1a3a6b}
+.kc-badge.anual{background:#ede9fe;color:#5b21b6}
+.kc-link{position:absolute;top:.4rem;right:.4rem;font-size:.65rem;color:#4a9fd4;text-decoration:none;opacity:0;transition:.15s}
+.kanban-card:hover .kc-link{opacity:1}
+
+/* ── EMPTY COL ── */
+.col-empty{text-align:center;padding:1rem .5rem;color:#b0b8cc;font-size:.72rem;font-style:italic}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:.18rem .5rem;border-radius:20px;font-size:.7rem;font-weight:700}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-yellow{background:#fef9c3;color:#713f12}
+
+/* ── MODAL DETALLE (click en card) ── */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22)}
+.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0}
+.modal-head h3{font-size:.92rem;font-weight:700}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:rgba(255,255,255,.3)}
+.modal-body{padding:1.1rem}
+.modal-foot{padding:.8rem 1.1rem;border-top:1px solid #eef2f8;display:flex;gap:.5rem;justify-content:flex-end;background:#fafbfc;border-radius:0 0 14px 14px}
+.det-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem}
+.det-field{display:flex;flex-direction:column;gap:.15rem}
+.det-label{font-size:.68rem;font-weight:700;color:#8a90a0;text-transform:uppercase;letter-spacing:.5px}
+.det-value{font-size:.84rem;font-weight:600;color:#1a2035}
+
+/* ── ETAPA SELECT EN MODAL ── */
+.etapa-select-wrap{margin-top:.75rem;padding:.65rem;background:#f5f6f8;border-radius:8px;border:1px solid #eef2f8}
+.etapa-select-wrap label{font-size:.72rem;font-weight:700;color:#4a5068;display:block;margin-bottom:.35rem}
+.etapa-select-wrap select{width:100%;padding:.4rem .6rem;border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff}
+.etapa-select-wrap select:focus{outline:none;border-color:#4a9fd4}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.7rem 1.1rem;border-radius:10px;font-size:.83rem;font-weight:600;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.15);font-family:'Manrope',sans-serif;transition:opacity .3s;display:none}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:2rem;color:#4a5068;font-size:.85rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .header{padding:.6rem 1rem;flex-wrap:wrap;gap:.5rem}
+  .page-wrap{padding:1rem .75rem}
+  .kanban-col{width:160px}
+  .stat-chips{gap:.35rem}
+  .modal{border-radius:14px 14px 0 0;align-self:flex-end;max-height:95vh}
+  .modal-backdrop{align-items:flex-end;padding:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ HEADER ══════ -->
+<header class="header">
+  <div class="logo-box">
+    <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+         onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+  </div>
+  <div class="header-center">
+    <span class="header-title">Mission Control</span>
+    <span class="header-sub">CRM · Kanban</span>
+  </div>
+  <div class="header-right">
+    <div>
+      <div class="date-badge" id="headerTime"></div>
+      <div class="date-badge">ExcelentIA</div>
+    </div>
+    <div class="user-chip">
+      <span class="user-dot" id="userDot"></span>
+      <span id="userName">Fernando</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════ CONTENIDO ══════ -->
+<div class="page-wrap">
+
+  <!-- TOP BAR -->
+  <div class="flex-between" style="margin-bottom:.85rem">
+    <div class="filter-bar" style="margin-bottom:0">
+      <span style="font-size:.82rem;font-weight:600;color:#4a5068">Filtrar por:</span>
+      <select class="filter-select" id="filtro-usuario" onchange="renderAmbos()">
+        <option value="">Todos los usuarios</option>
+        <option value="adolfo">Adolfo</option>
+        <option value="fernando">Fernando</option>
+        <option value="juanjose">Juan José</option>
+      </select>
+      <select class="filter-select" id="filtro-status" onchange="renderAmbos()">
+        <option value="">Activos y ganados</option>
+        <option value="activo">Solo activos</option>
+        <option value="ganado">Solo ganados</option>
+        <option value="todos">Todos (incl. perdidos)</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="irAProyectos()">＋ Nuevo proyecto</button>
+  </div>
+
+  <!-- STAT CHIPS -->
+  <div class="stat-chips">
+    <div class="stat-chip">🗂️ Pipeline total: <span id="chip-total">—</span></div>
+    <div class="stat-chip" style="color:#1a3a6b">🛠️ A medida: <span id="chip-a">—</span></div>
+    <div class="stat-chip" style="color:#7c3aed">⚙️ Producto listo: <span id="chip-b">—</span></div>
+    <div class="stat-chip" style="color:#dc2626">⚠️ Vencidos: <span id="chip-vencidos">—</span></div>
+  </div>
+
+  <!-- PIPELINE A -->
+  <div class="pipeline-section" id="section-a">
+    <div class="pipeline-header a">
+      <div class="pipeline-title a">🛠️ Pipeline A — A medida</div>
+      <div class="pipeline-meta" id="meta-a">0 proyectos · $0</div>
+    </div>
+    <div class="kanban-scroll">
+      <div class="kanban-board" id="board-a"></div>
+    </div>
+  </div>
+
+  <!-- PIPELINE B -->
+  <div class="pipeline-section" id="section-b">
+    <div class="pipeline-header b">
+      <div class="pipeline-title b">⚙️ Pipeline B — Producto listo</div>
+      <div class="pipeline-meta" id="meta-b">0 proyectos · $0</div>
+    </div>
+    <div class="kanban-scroll">
+      <div class="kanban-board" id="board-b"></div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- ══════ MODAL DETALLE ══════ -->
+<div class="modal-backdrop" id="modal-detalle">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="det-titulo">Proyecto</h3>
+      <button class="modal-close" onclick="closeDetalle()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="det-row" id="det-content"></div>
+      <!-- Cambiar etapa rápido -->
+      <div class="etapa-select-wrap">
+        <label>⚡ Cambiar etapa rápidamente</label>
+        <select id="det-etapa-select" onchange="cambiarEtapa()"></select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-sm" onclick="closeDetalle()">Cerrar</button>
+      <a id="det-link" href="crm-proyectos.html" class="btn btn-primary btn-sm">✏️ Ver / Editar</a>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════ JAVASCRIPT ══════ -->
+<script>
+// ════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════
+const N8N_BASE = 'https://excelentia.app.n8n.cloud/webhook';
+const USERS = {
+  fernando: { nombre:'Fernando', color:'#1a3a6b' },
+  juanjose: { nombre:'Juan José', color:'#7c3aed' },
+  adolfo:   { nombre:'Adolfo',   color:'#059669' }
+};
+
+// Pipeline A — Desarrollo a medida
+const ETAPAS_A = ['Prospecto','Contacto','Demo / Presentación','Propuesta','Cierre','Desarrollo','Entrega','Mantenimiento'];
+// Pipeline B — Producto listo / implementación
+const ETAPAS_B = ['Prospecto','Contacto','Demo / Presentación','Propuesta','Cierre','Onboarding','Activo','Mantenimiento'];
+
+const ETAPA_COLORS = {
+  'Prospecto':'#8a90a0','Contacto':'#4a9fd4','Demo / Presentación':'#7c3aed',
+  'Propuesta':'#f97316','Cierre':'#dc2626','Seguimiento':'#f59e0b',
+  'Desarrollo':'#2563eb','Entrega':'#059669','Mantenimiento':'#065f46',
+  'Onboarding':'#0891b2','Activo':'#059669','Presentación':'#7c3aed'
+};
+
+// Tipos que van al pipeline A vs B
+const TIPOS_A = ['Desarrollo'];
+const TIPOS_B = ['Implementación','Consultoría','Mantenimiento'];
+
+let currentUser = 'fernando';
+let DATA = [];
+let PROYECTO_ACTIVO = null;
+let dragSrc = null;
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const u = params.get('user')||'fernando';
+  currentUser = USERS[u] ? u : 'fernando';
+  updateUserUI();
+  updateClock();
+  setInterval(updateClock, 60000);
+  loadProyectos();
+});
+
+function updateClock() {
+  const now = new Date();
+  const el = document.getElementById('headerTime');
+  if(el) el.textContent = now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+}
+
+function updateUserUI() {
+  const u = USERS[currentUser];
+  const dot = document.getElementById('userDot');
+  const name = document.getElementById('userName');
+  if(dot) dot.style.background = u.color;
+  if(name) name.textContent = u.nombre;
+}
+
+function irAProyectos() {
+  window.location.href = 'crm-proyectos.html';
+}
+
+// ════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════
+function fmt$(n) {
+  return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:0}).format(n||0);
+}
+function fmtDate(d) {
+  if(!d) return '';
+  return new Date(d+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'});
+}
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function isVencido(p) {
+  if(!p.FechaAccion || p.Status!=='activo') return false;
+  return new Date(p.FechaAccion+'T23:59:59') < new Date();
+}
+function getPipeline(p) {
+  const tipo = p.TipoServicio||'Desarrollo';
+  return TIPOS_A.includes(tipo) ? 'A' : 'B';
+}
+function getEtapas(pipeline) {
+  return pipeline === 'A' ? ETAPAS_A : ETAPAS_B;
+}
+
+function showToast(msg, tipo='ok') {
+  const t = document.getElementById('toast');
+  t.style.background = tipo==='ok'?'#059669':'#dc2626';
+  t.style.color = '#fff';
+  t.textContent = msg;
+  t.style.display = 'block';
+  t.style.opacity = '1';
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>{ t.style.display='none'; },300); }, 2500);
+}
+
+function responsableBadge(uid) {
+  const u = USERS[uid]||{nombre:uid||'—',color:'#8a90a0'};
+  return `<span style="font-size:.68rem;font-weight:700;color:${u.color}">${u.nombre}</span>`;
+}
+
+// ════════════════════════════════════
+// CARGA
+// ════════════════════════════════════
+async function loadProyectos() {
+  document.getElementById('board-a').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando...</div>';
+  document.getElementById('board-b').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando...</div>';
+  try {
+    const res = await fetch(`${N8N_BASE}/crm-proyectos`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accion: 'get', userID: currentUser })
+    });
+    DATA = res.ok ? (await res.json()) : [];
+    if(!Array.isArray(DATA)) DATA = [];
+  } catch(e) {
+    console.warn('n8n no disponible — modo demo');
+    DATA = [];
+  }
+  renderAmbos();
+}
+
+// ════════════════════════════════════
+// RENDER
+// ════════════════════════════════════
+function getFiltered() {
+  const uid = document.getElementById('filtro-usuario')?.value||'';
+  const st  = document.getElementById('filtro-status')?.value||'';
+  return DATA.filter(p => {
+    const matchU = !uid || p.Responsable===uid;
+    let matchS = true;
+    if(st==='activo')  matchS = p.Status==='activo';
+    else if(st==='ganado') matchS = p.Status==='ganado';
+    else if(st==='todos')  matchS = true;
+    else matchS = (p.Status==='activo'||p.Status==='ganado'||!p.Status);
+    return matchU && matchS;
+  });
+}
+
+function renderAmbos() {
+  const filtered = getFiltered();
+  const pA = filtered.filter(p => getPipeline(p)==='A');
+  const pB = filtered.filter(p => getPipeline(p)==='B');
+
+  // Stats chips
+  const totalVal = filtered.reduce((s,p)=>s+parseFloat(p.ValorEstimado||0),0);
+  const valA = pA.reduce((s,p)=>s+parseFloat(p.ValorEstimado||0),0);
+  const valB = pB.reduce((s,p)=>s+parseFloat(p.ValorEstimado||0),0);
+  const vencidos = filtered.filter(p=>isVencido(p)).length;
+  document.getElementById('chip-total').textContent = fmt$(totalVal);
+  document.getElementById('chip-a').textContent = `${pA.length} · ${fmt$(valA)}`;
+  document.getElementById('chip-b').textContent = `${pB.length} · ${fmt$(valB)}`;
+  document.getElementById('chip-vencidos').textContent = vencidos;
+
+  // Meta
+  document.getElementById('meta-a').textContent = `${pA.length} proyecto${pA.length!==1?'s':''} · ${fmt$(valA)}`;
+  document.getElementById('meta-b').textContent = `${pB.length} proyecto${pB.length!==1?'s':''} · ${fmt$(valB)}`;
+
+  renderBoard('board-a', ETAPAS_A, pA, 'A');
+  renderBoard('board-b', ETAPAS_B, pB, 'B');
+}
+
+function renderBoard(boardId, etapas, proyectos, pipeline) {
+  const board = document.getElementById(boardId);
+  board.innerHTML = '';
+
+  etapas.forEach(etapa => {
+    const pEtapa = proyectos.filter(p => {
+      // Normalizar etapas compatibles entre pipelines
+      const e = p.Etapa||'';
+      if(etapa === 'Demo / Presentación') return e==='Demo / Presentación'||e==='Presentación'||e==='Demo';
+      if(etapa === 'Mantenimiento') return e==='Mantenimiento';
+      return e === etapa;
+    });
+    const color = ETAPA_COLORS[etapa]||'#8a90a0';
+    const valorCol = pEtapa.reduce((s,p)=>s+parseFloat(p.ValorEstimado||0),0);
+
+    const col = document.createElement('div');
+    col.className = 'kanban-col';
+    col.dataset.etapa = etapa;
+    col.dataset.pipeline = pipeline;
+
+    col.innerHTML = `
+      <div class="kanban-col-head" style="background:${color}18;border-top:3px solid ${color}">
+        <span class="kanban-col-title" style="color:${color}">${etapa}</span>
+        <span class="kanban-col-count" style="background:${color}22;color:${color}">${pEtapa.length}</span>
+      </div>
+      <div class="kanban-col-body" id="col-${pipeline}-${etapa.replace(/\s|[^a-zA-Z]/g,'_')}"
+           data-etapa="${etapa}" data-pipeline="${pipeline}">
+        ${pEtapa.length===0 ? '<div class="col-empty">Sin proyectos</div>' : ''}
+        ${pEtapa.map(p => renderCard(p, pipeline)).join('')}
+        ${valorCol>0 ? `<div class="kanban-col-valor">Total: ${fmt$(valorCol)}</div>` : ''}
+      </div>`;
+
+    board.appendChild(col);
+  });
+
+  // Activar drag & drop en columnas
+  board.querySelectorAll('.kanban-col-body').forEach(col => {
+    col.addEventListener('dragover', onDragOver);
+    col.addEventListener('dragleave', onDragLeave);
+    col.addEventListener('drop', onDrop);
+  });
+}
+
+function renderCard(p, pipeline) {
+  const venc = isVencido(p);
+  const prob = parseInt(p.Probabilidad)||0;
+  const probColor = prob>=70?'#059669':prob>=40?'#f59e0b':'#dc2626';
+  const esquema = p.EsquemaPago||'unico';
+  const badgeEsquema = esquema==='mensual'?`<span class="kc-badge mensual">📅 mensual</span>`:
+                       esquema==='anual'?`<span class="kc-badge anual">🗓️ anual</span>`:
+                       `<span class="kc-badge unico">💳 único</span>`;
+
+  return `<div class="kanban-card" draggable="true"
+    data-id="${p.ID}" data-pipeline="${pipeline}"
+    ondragstart="onDragStart(event)"
+    ondragend="onDragEnd(event)"
+    onclick="verDetalle('${p.ID}')">
+    ${p.DriveFolder?`<a class="kc-link" href="${p.DriveFolder}" target="_blank" onclick="event.stopPropagation()" title="Abrir Drive">📁</a>`:''}
+    <div class="kc-nombre">${escHtml(p.Nombre)}</div>
+    ${p.Empresa?`<div class="kc-empresa">${escHtml(p.Empresa)}</div>`:''}
+    <div class="kc-footer">
+      <span class="kc-valor">${fmt$(p.ValorEstimado)}</span>
+      <span class="kc-prob" style="background:${probColor}18;color:${probColor}">${prob}%</span>
+    </div>
+    <div style="display:flex;gap:.25rem;margin-top:.3rem;flex-wrap:wrap;align-items:center">
+      ${badgeEsquema}
+      ${responsableBadge(p.Responsable)}
+    </div>
+    ${venc?`<div class="kc-alerta">⚠️ ${escHtml(p.ProximaAccion||'Seguimiento vencido')}</div>`:''}
+  </div>`;
+}
+
+// ════════════════════════════════════
+// DRAG & DROP
+// ════════════════════════════════════
+function onDragStart(e) {
+  dragSrc = e.currentTarget;
+  dragSrc.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragSrc.dataset.id);
+}
+
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.kanban-col-body').forEach(c => c.classList.remove('drag-over'));
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+async function onDrop(e) {
+  e.preventDefault();
+  const col = e.currentTarget;
+  col.classList.remove('drag-over');
+
+  const id = e.dataTransfer.getData('text/plain');
+  const nuevaEtapa = col.dataset.etapa;
+  const pipeline = col.dataset.pipeline;
+
+  const p = DATA.find(x => x.ID===id);
+  if(!p || p.Etapa===nuevaEtapa) return;
+
+  const etapaAnterior = p.Etapa;
+  p.Etapa = nuevaEtapa;
+  renderAmbos();
+
+  // Guardar en n8n
+  try {
+    const res = await fetch(`${N8N_BASE}/crm-proyectos`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accion: 'update', ID:id, Etapa:nuevaEtapa, userID:currentUser })
+    });
+    if(res.ok) {
+      showToast(`✅ "${p.Nombre}" → ${nuevaEtapa}`);
+    } else {
+      showToast(`⚠️ Movido en pantalla — error al guardar en n8n`,'err');
+    }
+  } catch(err) {
+    showToast(`⚠️ "${p.Nombre}" movido (sin conexión a n8n)`, 'err');
+  }
+}
+
+// ════════════════════════════════════
+// MODAL DETALLE
+// ════════════════════════════════════
+function verDetalle(id) {
+  const p = DATA.find(x=>x.ID===id);
+  if(!p) return;
+  PROYECTO_ACTIVO = p;
+
+  document.getElementById('det-titulo').textContent = p.Nombre;
+
+  const venc = isVencido(p);
+  const pipeline = getPipeline(p);
+  const etapas = getEtapas(pipeline);
+
+  document.getElementById('det-content').innerHTML = `
+    <div class="det-field"><div class="det-label">Empresa</div><div class="det-value">${escHtml(p.Empresa||'—')}</div></div>
+    <div class="det-field"><div class="det-label">Etapa</div><div class="det-value" style="color:${ETAPA_COLORS[p.Etapa]||'#4a5068'}">${p.Etapa||'—'}</div></div>
+    <div class="det-field"><div class="det-label">Valor</div><div class="det-value" style="color:#059669;font-size:1rem;font-weight:800">${fmt$(p.ValorEstimado)}</div></div>
+    <div class="det-field"><div class="det-label">Probabilidad</div><div class="det-value">${p.Probabilidad||50}%</div></div>
+    <div class="det-field"><div class="det-label">Responsable</div><div class="det-value">${USERS[p.Responsable]?.nombre||p.Responsable||'—'}</div></div>
+    <div class="det-field"><div class="det-label">Tipo</div><div class="det-value">${p.TipoServicio||'—'} · ${p.EsquemaPago||'único'}</div></div>
+    <div class="det-field" style="grid-column:1/-1"><div class="det-label">Próxima acción</div>
+      <div class="det-value" style="color:${venc?'#dc2626':'#1a2035'}">${venc?'⚠️ ':''}${escHtml(p.ProximaAccion||'Sin definir')} ${p.FechaAccion?`· ${fmtDate(p.FechaAccion)}`:''}</div>
+    </div>
+    ${p.Notas?`<div class="det-field" style="grid-column:1/-1"><div class="det-label">Notas</div><div class="det-value" style="font-weight:400;font-size:.8rem;line-height:1.5;color:#4a5068">${escHtml(p.Notas)}</div></div>`:''}`;
+
+  // Select de etapa
+  const sel = document.getElementById('det-etapa-select');
+  sel.innerHTML = etapas.map(e => `<option value="${e}" ${p.Etapa===e?'selected':''}>${e}</option>`).join('');
+
+  // Link a proyectos
+  document.getElementById('det-link').href = `crm-proyectos.html?user=${currentUser}`;
+
+  document.getElementById('modal-detalle').classList.add('open');
+}
+
+async function cambiarEtapa() {
+  if(!PROYECTO_ACTIVO) return;
+  const nuevaEtapa = document.getElementById('det-etapa-select').value;
+  const p = PROYECTO_ACTIVO;
+  if(p.Etapa === nuevaEtapa) return;
+
+  p.Etapa = nuevaEtapa;
+  renderAmbos();
+  closeDetalle();
+
+  try {
+    const res = await fetch(`${N8N_BASE}/crm-proyectos`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accion: 'update', ID:p.ID, Etapa:nuevaEtapa, userID:currentUser })
+    });
+    showToast(res.ok ? `✅ "${p.Nombre}" → ${nuevaEtapa}` : `⚠️ Movido en pantalla — error al guardar`,'ok');
+  } catch {
+    showToast(`⚠️ Movido sin conexión a n8n`,'err');
+  }
+}
+
+function closeDetalle() {
+  document.getElementById('modal-detalle').classList.remove('open');
+  PROYECTO_ACTIVO = null;
+}
+
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM · Contactos — ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:40px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.header-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem}
+.header-title{color:#fff;font-size:1.1rem;font-weight:700}
+.header-sub{color:#a8c4e0;font-size:.78rem}
+.header-right{display:flex;align-items:center;gap:.75rem}
+.user-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:.3rem .85rem;color:#fff;font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:.4rem}
+.user-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.date-badge{color:#a8c4e0;font-size:.78rem;text-align:right}
+
+/* ── LAYOUT ── */
+.page-wrap{padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
+.flex-between{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.flex-gap{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.main-split{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-bottom:1rem}
+.stat-card{background:#fff;border:1px solid #dde1e9;border-radius:10px;padding:.7rem .85rem;position:relative;overflow:hidden;text-align:center}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-val{font-size:1.25rem;font-weight:800;color:#1a2035}
+.stat-lbl{font-size:.68rem;color:#4a5068;font-weight:600;margin-top:.1rem}
+
+/* ── CARD ── */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.card-head{background:#dce8f7;padding:.7rem 1rem;font-weight:700;font-size:.88rem;color:#1a2035;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.card-body{padding:.75rem}
+
+/* ── FILTROS ── */
+.filters{display:flex;flex-wrap:nowrap;gap:.5rem;margin-bottom:.85rem;align-items:center;overflow-x:auto}
+.filter-input{flex:2;min-width:0;padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem}
+.filter-input:focus{outline:none;border-color:#4a9fd4}
+.filter-select{flex:1;min-width:0;padding:.42rem .5rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.78rem;background:#fff}
+.filter-select:focus{outline:none;border-color:#4a9fd4}
+
+/* ── GRID TARJETAS ── */
+.contacts-grid{display:grid;grid-template-columns:1fr;gap:.65rem}
+.contact-card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.85rem;transition:.2s;cursor:pointer;position:relative}
+.contact-card:hover{border-color:#4a9fd4;box-shadow:0 4px 14px rgba(74,159,212,.14);transform:translateY(-1px)}
+.contact-card.selected{border-color:#1a3a6b;box-shadow:0 0 0 2px #1a3a6b30}
+.cc-top{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.5rem}
+.cc-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#fff;flex-shrink:0}
+.cc-info{flex:1;min-width:0}
+.cc-nombre{font-size:.88rem;font-weight:700;color:#1a2035;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-empresa{font-size:.74rem;color:#4a5068;margin-top:.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-cargo{font-size:.7rem;color:#8a90a0}
+.cc-links{display:flex;gap:.35rem;margin-top:.5rem;flex-wrap:wrap}
+.cc-btn{display:inline-flex;align-items:center;gap:.25rem;padding:.22rem .55rem;border-radius:6px;font-size:.7rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;font-family:'Manrope',sans-serif;transition:.15s}
+.cc-btn.wa{background:#d1fae5;color:#065f46}.cc-btn.wa:hover{background:#a7f3d0}
+.cc-btn.em{background:#dce8f7;color:#1a3a6b}.cc-btn.em:hover{background:#c8d9f0}
+.cc-btn.li{background:#ede9fe;color:#5b21b6}.cc-btn.li:hover{background:#ddd6fe}
+.cc-btn.ed{background:#f3f4f6;color:#374151}.cc-btn.ed:hover{background:#e5e7eb}
+.cc-btn.del{background:#fee2e2;color:#991b1b}.cc-btn.del:hover{background:#fecaca}
+.cc-actions{position:absolute;top:.5rem;right:.5rem;display:flex;gap:.25rem;opacity:0;transition:.15s}
+.contact-card:hover .cc-actions{opacity:1}
+
+/* ── TABLA ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:#dce8f7;padding:.6rem .75rem;text-align:left;font-weight:700;color:#1a2035;border-bottom:2px solid #c8d9f0;white-space:nowrap;font-size:.73rem;text-transform:uppercase;letter-spacing:.3px}
+td{padding:.55rem .75rem;border-bottom:1px solid #eef2f8;color:#1a2035;vertical-align:middle}
+tr:hover td{background:#f8faff;cursor:pointer}
+tr:last-child td{border-bottom:none}
+tr.tr-selected td{background:#f0f6ff}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:.18rem .5rem;border-radius:20px;font-size:.7rem;font-weight:700}
+.s-lead{background:#f3f4f6;color:#374151}
+.s-prospecto{background:#dce8f7;color:#1a3a6b}
+.s-cliente{background:#d1fae5;color:#065f46}
+.s-inactivo{background:#f3f4f6;color:#8a90a0}
+.s-aliado{background:#ede9fe;color:#5b21b6}
+.s-proveedor{background:#fed7aa;color:#9a3412}
+
+/* ── BOTONES ── */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Manrope',sans-serif;text-decoration:none}
+.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-secondary{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#dce8f7}
+.btn-sm{padding:.3rem .65rem;font-size:.78rem}
+.btn-icon{padding:.35rem .45rem;border-radius:6px}
+
+/* ── MODAL ── */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:580px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22)}
+.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;position:sticky;top:0;z-index:10}
+.modal-head h3{font-size:.95rem;font-weight:700}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:rgba(255,255,255,.3)}
+.modal-body{padding:1.25rem}
+.modal-foot{padding:.85rem 1.25rem;border-top:1px solid #eef2f8;display:flex;gap:.6rem;justify-content:flex-end;background:#fafbfc;border-radius:0 0 14px 14px}
+.form-section-title{font-size:.72rem;font-weight:700;color:#4a9fd4;text-transform:uppercase;letter-spacing:.8px;margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid #eef2f8;margin-top:.85rem}
+.form-section-title:first-child{margin-top:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.form-group{display:flex;flex-direction:column;gap:.3rem}
+.form-group.full{grid-column:1/-1}
+label{font-size:.78rem;font-weight:600;color:#4a5068}
+input,select,textarea{width:100%;padding:.5rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.83rem;color:#1a2035;background:#fff;transition:.2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.1)}
+textarea{resize:vertical;min-height:72px}
+
+/* ── TIPO RADIO ── */
+.tipo-radio{display:flex;gap:.75rem;flex-wrap:wrap}
+.tipo-radio label{display:flex;align-items:center;gap:.3rem;cursor:pointer;font-weight:500;font-size:.82rem}
+
+/* ── MISC ── */
+.loading{text-align:center;padding:2rem;color:#4a5068;font-size:.85rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:2rem;color:#8a90a0}
+.empty-state .es-icon{font-size:2rem;display:block;margin-bottom:.5rem}
+.text-muted{color:#8a90a0;font-size:.78rem}
+.tag{display:inline-block;background:#dce8f7;color:#1a3a6b;font-size:.67rem;padding:.1rem .38rem;border-radius:5px;font-weight:600;margin:.1rem}
+
+@media(max-width:900px){.main-split{grid-template-columns:1fr}}
+@media(max-width:600px){
+  .header{padding:.6rem 1rem;flex-wrap:wrap;gap:.5rem}
+  .page-wrap{padding:1rem}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+  .modal{border-radius:14px 14px 0 0;align-self:flex-end;max-height:95vh}
+  .modal-backdrop{align-items:flex-end;padding:0}
+  .filters{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="logo-box">
+    <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+         onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+  </div>
+  <div class="header-center">
+    <span class="header-title">Mission Control</span>
+    <span class="header-sub">CRM · Contactos</span>
+  </div>
+  <div class="header-right">
+    <div>
+      <div class="date-badge" id="headerTime"></div>
+      <div class="date-badge">ExcelentIA</div>
+    </div>
+    <div class="user-chip">
+      <span class="user-dot" id="userDot"></span>
+      <span id="userName">Fernando</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══ CONTENIDO ══ -->
+<div class="page-wrap">
+
+  <!-- STAT CARDS por status -->
+  <div class="stats-row">
+    <div class="stat-card" style="--c:#374151"><div style="height:3px;background:#374151;position:absolute;top:0;left:0;right:0;border-radius:10px 10px 0 0"></div><div class="stat-val" id="s-lead">—</div><div class="stat-lbl">Leads</div></div>
+    <div class="stat-card"><div style="height:3px;background:#1a3a6b;position:absolute;top:0;left:0;right:0;border-radius:10px 10px 0 0"></div><div class="stat-val" style="color:#1a3a6b" id="s-prospecto">—</div><div class="stat-lbl">Prospectos</div></div>
+    <div class="stat-card"><div style="height:3px;background:#059669;position:absolute;top:0;left:0;right:0;border-radius:10px 10px 0 0"></div><div class="stat-val" style="color:#059669" id="s-cliente">—</div><div class="stat-lbl">Clientes</div></div>
+    <div class="stat-card"><div style="height:3px;background:#7c3aed;position:absolute;top:0;left:0;right:0;border-radius:10px 10px 0 0"></div><div class="stat-val" style="color:#7c3aed" id="s-aliado">—</div><div class="stat-lbl">Aliados</div></div>
+    <div class="stat-card"><div style="height:3px;background:#f97316;position:absolute;top:0;left:0;right:0;border-radius:10px 10px 0 0"></div><div class="stat-val" style="color:#f97316" id="s-proveedor">—</div><div class="stat-lbl">Proveedores</div></div>
+    <div class="stat-card"><div style="height:3px;background:#8a90a0;position:absolute;top:0;left:0;right:0;border-radius:10px 10px 0 0"></div><div class="stat-val" style="color:#8a90a0" id="s-inactivo">—</div><div class="stat-lbl">Inactivos</div></div>
+  </div>
+
+  <!-- FILTROS GLOBALES -->
+  <div class="filters">
+    <input class="filter-input" type="text" id="filtro-buscar" placeholder="🔍  Buscar nombre, empresa o cargo..." oninput="applyFilters()">
+    <select class="filter-select" id="filtro-status" onchange="applyFilters()">
+      <option value="">Todos los status</option>
+      <option value="Lead">Lead</option>
+      <option value="Prospecto">Prospecto</option>
+      <option value="Cliente">Cliente</option>
+      <option value="Aliado">Aliado</option>
+      <option value="Proveedor">Proveedor</option>
+      <option value="Inactivo">Inactivo</option>
+    </select>
+    <select class="filter-select" id="filtro-tipo" onchange="applyFilters()">
+      <option value="">Personas y empresas</option>
+      <option value="Persona">Persona</option>
+      <option value="Empresa">Empresa</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="openModal()">＋ Nuevo</button>
+    <button class="btn btn-secondary btn-sm" onclick="resetFilters()">↺</button>
+  </div>
+
+  <!-- SPLIT: TARJETAS + TABLA -->
+  <div class="main-split">
+
+    <!-- LADO IZQUIERDO: TARJETAS -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+        <span style="font-size:.8rem;font-weight:700;color:#4a5068">📇 Directorio</span>
+        <span class="text-muted" id="contactos-count"></span>
+      </div>
+      <div id="contacts-grid">
+        <div class="loading"><span class="spinner"></span>Cargando contactos...</div>
+      </div>
+    </div>
+
+    <!-- LADO DERECHO: TABLA -->
+    <div>
+      <div style="font-size:.8rem;font-weight:700;color:#4a5068;margin-bottom:.6rem">📋 Vista tabla</div>
+      <div class="card" style="margin-bottom:0">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Empresa</th>
+                <th>Status</th>
+                <th>Contacto</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="contactos-tbody">
+              <tr><td colspan="5"><div class="loading"><span class="spinner"></span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODAL CONTACTO ══ -->
+<div class="modal-backdrop" id="modal-contacto">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>👤 <span id="modal-titulo">Nuevo Contacto</span></h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-section-title">Tipo</div>
+      <div class="tipo-radio" id="tipo-radio">
+        <label><input type="radio" name="c-tipo" value="Persona" checked> 👤 Persona física</label>
+        <label><input type="radio" name="c-tipo" value="Empresa"> 🏢 Empresa</label>
+      </div>
+
+      <div class="form-section-title">Datos personales</div>
+      <div class="form-grid">
+        <div class="form-group full"><label>Nombre *</label><input type="text" id="c-nombre" placeholder="Nombre completo o razón social"></div>
+        <div class="form-group"><label>Empresa</label><input type="text" id="c-empresa" placeholder="Empresa donde trabaja"></div>
+        <div class="form-group"><label>Cargo</label><input type="text" id="c-cargo" placeholder="Director, Gerente, CEO..."></div>
+        <div class="form-group"><label>Status</label>
+          <select id="c-status">
+            <option value="Lead">Lead</option>
+            <option value="Prospecto">Prospecto</option>
+            <option value="Cliente">Cliente</option>
+            <option value="Aliado">Aliado</option>
+            <option value="Proveedor">Proveedor</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Tags</label><input type="text" id="c-tags" placeholder="decisor, clave, referido..."></div>
+      </div>
+
+      <div class="form-section-title">Contacto</div>
+      <div class="form-grid">
+        <div class="form-group"><label>📱 WhatsApp</label><input type="tel" id="c-whatsapp" placeholder="+52 55 1234 5678"></div>
+        <div class="form-group"><label>✉️ Email</label><input type="email" id="c-email" placeholder="correo@empresa.com"></div>
+        <div class="form-group"><label>📞 Teléfono</label><input type="tel" id="c-telefono" placeholder="+52 55 1234 5678"></div>
+        <div class="form-group"><label>💼 LinkedIn</label><input type="url" id="c-linkedin" placeholder="linkedin.com/in/..."></div>
+      </div>
+
+      <div class="form-section-title">Notas</div>
+      <div class="form-grid">
+        <div class="form-group full"><textarea id="c-notas" rows="3" placeholder="Contexto, observaciones, cómo los conociste..."></textarea></div>
+      </div>
+
+      <input type="hidden" id="c-id">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar" onclick="saveContacto()">💾 Guardar contacto</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════
+const N8N_BASE = 'https://excelentia.app.n8n.cloud/webhook';
+const USERS = {
+  fernando:{ nombre:'Fernando', color:'#1a3a6b' },
+  juanjose:{ nombre:'Juan José', color:'#7c3aed' },
+  adolfo:  { nombre:'Adolfo',   color:'#059669' }
+};
+const STATUS_STYLES = {
+  'Lead':      { cls:'s-lead',      icon:'⚪' },
+  'Prospecto': { cls:'s-prospecto', icon:'🔵' },
+  'Cliente':   { cls:'s-cliente',   icon:'🟢' },
+  'Aliado':    { cls:'s-aliado',    icon:'🟣' },
+  'Proveedor': { cls:'s-proveedor', icon:'🟠' },
+  'Inactivo':  { cls:'s-inactivo',  icon:'⚫' }
+};
+const AVATAR_COLORS = ['#1a3a6b','#7c3aed','#059669','#dc2626','#f97316','#0891b2','#be185d','#4338ca'];
+
+let currentUser = 'fernando';
+let DATA = [];
+let DATA_FILTRADO = [];
+let MODO_EDICION = false;
+let SELECTED_ID = null;
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const u = params.get('user')||'fernando';
+  currentUser = USERS[u] ? u : 'fernando';
+  updateUserUI();
+  updateClock();
+  setInterval(updateClock, 60000);
+  loadContactos();
+});
+
+function updateClock() {
+  const el = document.getElementById('headerTime');
+  if(el) el.textContent = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+}
+function updateUserUI() {
+  const u = USERS[currentUser];
+  const dot = document.getElementById('userDot');
+  const name = document.getElementById('userName');
+  if(dot) dot.style.background = u.color;
+  if(name) name.textContent = u.nombre;
+}
+
+// ════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════
+function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function genId(){ return `C-${Date.now()}-${Math.random().toString(36).slice(2,5).toUpperCase()}`; }
+function getAvatarColor(nombre){ return AVATAR_COLORS[(nombre||'?').charCodeAt(0) % AVATAR_COLORS.length]; }
+function initials(nombre){
+  const p = (nombre||'?').split(' ');
+  return p.length>=2 ? (p[0][0]+p[1][0]).toUpperCase() : (p[0].slice(0,2)).toUpperCase();
+}
+function badgeStatus(s){
+  const st = STATUS_STYLES[s]||{cls:'s-lead',icon:'⚪'};
+  return `<span class="badge ${st.cls}">${st.icon} ${s||'—'}</span>`;
+}
+function waLink(num){ return `https://wa.me/${(num||'').replace(/[^0-9]/g,'')}`; }
+
+function showToast(msg, tipo='ok'){
+  let t = document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;bottom:1.5rem;right:1.5rem;padding:.7rem 1.1rem;border-radius:10px;font-size:.83rem;font-weight:600;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.15);font-family:Manrope,sans-serif;transition:opacity .3s'; document.body.appendChild(t); }
+  t.style.background=tipo==='ok'?'#059669':'#dc2626'; t.style.color='#fff'; t.style.opacity='1';
+  t.textContent=msg; setTimeout(()=>{ t.style.opacity='0'; },2800);
+}
+
+// ════════════════════════════════════
+// API
+// ════════════════════════════════════
+async function apiCall(endpoint, body){
+  try{
+    const res = await fetch(`${N8N_BASE}${endpoint}`,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...body, userID:currentUser}) });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch(e){
+    console.warn('API offline:', e);
+    if(body.action==='get') return [];
+    return { ok:true, offline:true };
+  }
+}
+
+// ════════════════════════════════════
+// CARGA
+// ════════════════════════════════════
+async function loadContactos(){
+  const res = await apiCall('/crm-contactos', { accion: 'get' });
+  DATA = Array.isArray(res) ? res : [];
+  DATA_FILTRADO = [...DATA];
+  updateStats();
+  renderAll(DATA_FILTRADO);
+}
+
+function updateStats(){
+  const counts = { Lead:0, Prospecto:0, Cliente:0, Aliado:0, Proveedor:0, Inactivo:0 };
+  DATA.forEach(c => { if(counts[c.Status]!==undefined) counts[c.Status]++; });
+  document.getElementById('s-lead').textContent      = counts.Lead;
+  document.getElementById('s-prospecto').textContent = counts.Prospecto;
+  document.getElementById('s-cliente').textContent   = counts.Cliente;
+  document.getElementById('s-aliado').textContent    = counts.Aliado;
+  document.getElementById('s-proveedor').textContent = counts.Proveedor;
+  document.getElementById('s-inactivo').textContent  = counts.Inactivo;
+}
+
+// ════════════════════════════════════
+// FILTROS
+// ════════════════════════════════════
+function applyFilters(){
+  const q  = document.getElementById('filtro-buscar')?.value.toLowerCase()||'';
+  const st = document.getElementById('filtro-status')?.value||'';
+  const ti = document.getElementById('filtro-tipo')?.value||'';
+
+  DATA_FILTRADO = DATA.filter(c => {
+    const matchQ = !q || c.Nombre?.toLowerCase().includes(q) || c.Empresa?.toLowerCase().includes(q) || c.Cargo?.toLowerCase().includes(q) || c.Tags?.toLowerCase().includes(q);
+    const matchS = !st || c.Status===st;
+    const matchT = !ti || c.Tipo===ti;
+    return matchQ && matchS && matchT;
+  });
+  renderAll(DATA_FILTRADO);
+}
+
+function resetFilters(){
+  document.getElementById('filtro-buscar').value='';
+  document.getElementById('filtro-status').value='';
+  document.getElementById('filtro-tipo').value='';
+  DATA_FILTRADO = [...DATA];
+  renderAll(DATA_FILTRADO);
+}
+
+// ════════════════════════════════════
+// RENDER AMBAS VISTAS
+// ════════════════════════════════════
+function renderAll(lista){
+  const count = document.getElementById('contactos-count');
+  if(count) count.textContent = `${lista.length} contacto${lista.length!==1?'s':''}`;
+  renderGrid(lista);
+  renderTabla(lista);
+}
+
+function renderGrid(lista){
+  const el = document.getElementById('contacts-grid');
+  if(!lista.length){
+    el.innerHTML='<div class="empty-state"><span class="es-icon">👤</span><p>Sin contactos con esos filtros</p></div>';
+    return;
+  }
+  el.innerHTML = lista.map(c => {
+    const color = getAvatarColor(c.Nombre);
+    const st = STATUS_STYLES[c.Status]||{cls:'s-lead',icon:'⚪'};
+    const tags = c.Tags ? c.Tags.split(',').map(t=>`<span class="tag">${t.trim()}</span>`).join('') : '';
+    return `<div class="contact-card ${SELECTED_ID===c.ID?'selected':''}" onclick="selectContact('${c.ID}')">
+      <div class="cc-actions">
+        <button class="cc-btn ed" onclick="event.stopPropagation();editarContacto('${c.ID}')">✏️</button>
+        <button class="cc-btn del" onclick="event.stopPropagation();deleteContacto('${c.ID}')">✕</button>
+      </div>
+      <div class="cc-top">
+        <div class="cc-avatar" style="background:${color}">${initials(c.Nombre)}</div>
+        <div class="cc-info">
+          <div class="cc-nombre">${escHtml(c.Nombre)}</div>
+          ${c.Empresa?`<div class="cc-empresa">🏢 ${escHtml(c.Empresa)}</div>`:''}
+          ${c.Cargo?`<div class="cc-cargo">${escHtml(c.Cargo)}</div>`:''}
+        </div>
+        <span class="badge ${st.cls}" style="flex-shrink:0">${st.icon} ${c.Status}</span>
+      </div>
+      ${tags?`<div style="margin-bottom:.4rem">${tags}</div>`:''}
+      <div class="cc-links">
+        ${c.WhatsApp?`<a class="cc-btn wa" href="${waLink(c.WhatsApp)}" target="_blank" onclick="event.stopPropagation()">💬 WA</a>`:''}
+        ${c.Email?`<a class="cc-btn em" href="mailto:${c.Email}" onclick="event.stopPropagation()">✉️ Email</a>`:''}
+        ${c.LinkedIn?`<a class="cc-btn li" href="${c.LinkedIn}" target="_blank" onclick="event.stopPropagation()">💼 LinkedIn</a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTabla(lista){
+  const tbody = document.getElementById('contactos-tbody');
+  if(!lista.length){
+    tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><span class="es-icon" style="font-size:1.25rem">👤</span><p>Sin resultados</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = lista.map(c => `
+    <tr class="${SELECTED_ID===c.ID?'tr-selected':''}" onclick="selectContact('${c.ID}')">
+      <td>
+        <div style="font-weight:700;font-size:.83rem">${escHtml(c.Nombre)}</div>
+        ${c.Cargo?`<div style="font-size:.7rem;color:#8a90a0">${escHtml(c.Cargo)}</div>`:''}
+      </td>
+      <td style="font-size:.78rem;color:#4a5068">${escHtml(c.Empresa||'—')}</td>
+      <td>${badgeStatus(c.Status)}</td>
+      <td>
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+          ${c.WhatsApp?`<a href="${waLink(c.WhatsApp)}" target="_blank" style="font-size:.72rem;color:#059669;text-decoration:none;font-weight:600" onclick="event.stopPropagation()">📱 WA</a>`:''}
+          ${c.Email?`<a href="mailto:${c.Email}" style="font-size:.72rem;color:#1a3a6b;text-decoration:none;font-weight:600" onclick="event.stopPropagation()">✉️</a>`:''}
+          ${c.LinkedIn?`<a href="${c.LinkedIn}" target="_blank" style="font-size:.72rem;color:#7c3aed;text-decoration:none;font-weight:600" onclick="event.stopPropagation()">💼</a>`:''}
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;gap:.25rem">
+          <button class="btn btn-secondary btn-sm btn-icon" onclick="event.stopPropagation();editarContacto('${c.ID}')">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="event.stopPropagation();deleteContacto('${c.ID}')">✕</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function selectContact(id){
+  SELECTED_ID = SELECTED_ID===id ? null : id;
+  renderAll(DATA_FILTRADO);
+}
+
+// ════════════════════════════════════
+// MODAL
+// ════════════════════════════════════
+function openModal(){
+  MODO_EDICION = false;
+  document.getElementById('modal-titulo').textContent='Nuevo Contacto';
+  document.getElementById('btn-guardar').textContent='💾 Guardar contacto';
+  document.getElementById('c-id').value='';
+  ['c-nombre','c-empresa','c-cargo','c-tags','c-whatsapp','c-email','c-telefono','c-linkedin','c-notas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('c-status').value='Lead';
+  document.querySelector('input[name="c-tipo"][value="Persona"]').checked=true;
+  document.getElementById('modal-contacto').classList.add('open');
+  setTimeout(()=>document.getElementById('c-nombre')?.focus(),200);
+}
+
+function closeModal(){
+  document.getElementById('modal-contacto').classList.remove('open');
+}
+
+function editarContacto(id){
+  const c = DATA.find(x=>x.ID===id);
+  if(!c) return;
+  MODO_EDICION = true;
+  document.getElementById('modal-titulo').textContent='Editar Contacto';
+  document.getElementById('btn-guardar').textContent='💾 Actualizar contacto';
+  document.getElementById('c-id').value=c.ID;
+  document.getElementById('c-nombre').value=c.Nombre||'';
+  document.getElementById('c-empresa').value=c.Empresa||'';
+  document.getElementById('c-cargo').value=c.Cargo||'';
+  document.getElementById('c-status').value=c.Status||'Lead';
+  document.getElementById('c-tags').value=c.Tags||'';
+  document.getElementById('c-whatsapp').value=c.WhatsApp||'';
+  document.getElementById('c-email').value=c.Email||'';
+  document.getElementById('c-telefono').value=c.Telefono||'';
+  document.getElementById('c-linkedin').value=c.LinkedIn||'';
+  document.getElementById('c-notas').value=c.Notas||'';
+  const tipoEl = document.querySelector(`input[name="c-tipo"][value="${c.Tipo||'Persona'}"]`);
+  if(tipoEl) tipoEl.checked=true;
+  document.getElementById('modal-contacto').classList.add('open');
+}
+
+// ════════════════════════════════════
+// GUARDAR
+// ════════════════════════════════════
+async function saveContacto(){
+  const nombre = document.getElementById('c-nombre')?.value.trim();
+  if(!nombre){ showToast('El nombre es obligatorio','err'); return; }
+
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled=true; btn.textContent='⏳ Guardando...';
+
+  // Datos puros del Sheet (sin accion ni userID para evitar columnas raras)
+  const datos = {
+    ID: MODO_EDICION ? document.getElementById('c-id').value : genId(),
+    Tipo: document.querySelector('input[name="c-tipo"]:checked')?.value||'Persona',
+    Nombre: nombre,
+    Empresa: document.getElementById('c-empresa')?.value||'',
+    Cargo: document.getElementById('c-cargo')?.value||'',
+    Status: document.getElementById('c-status')?.value||'Lead',
+    Tags: document.getElementById('c-tags')?.value||'',
+    WhatsApp: document.getElementById('c-whatsapp')?.value||'',
+    Email: document.getElementById('c-email')?.value||'',
+    Telefono: document.getElementById('c-telefono')?.value||'',
+    LinkedIn: document.getElementById('c-linkedin')?.value||'',
+    Notas: document.getElementById('c-notas')?.value||''
+  };
+
+  // Payload completo con campos de control separados
+  const payload = {
+    accion: MODO_EDICION ? 'update' : 'create',
+    userID: currentUser,
+    datos: datos  // Sheet solo recibe datos.* — no el objeto raíz
+  };
+
+  // Actualizar UI inmediatamente (no esperar respuesta de n8n)
+  if(MODO_EDICION){ const idx=DATA.findIndex(x=>x.ID===datos.ID); if(idx>=0) DATA[idx]=datos; }
+  else DATA.unshift(datos);
+  applyFilters();
+  updateStats();
+  closeModal(); // ← cerrar siempre, no esperar n8n
+  btn.disabled=false;
+  btn.textContent = MODO_EDICION?'💾 Actualizar contacto':'💾 Guardar contacto';
+  showToast(MODO_EDICION ? '✅ Contacto actualizado' : '✅ Contacto creado');
+
+  // Guardar en n8n en background
+  apiCall('/crm-contactos', payload).then(res => {
+    if(!res) console.warn('n8n no respondió — dato guardado solo en memoria');
+  });
+}
+
+// ════════════════════════════════════
+// ELIMINAR
+// ════════════════════════════════════
+async function deleteContacto(id){
+  const c = DATA.find(x=>x.ID===id);
+  if(!c||!confirm(`¿Eliminar a "${c.Nombre}"?`)) return;
+  await apiCall('/crm-contactos', { accion: 'delete', ID:id });
+  DATA = DATA.filter(x=>x.ID!==id);
+  if(SELECTED_ID===id) SELECTED_ID=null;
+  applyFilters();
+  updateStats();
+  showToast('Contacto eliminado');
+}
+
+document.querySelectorAll('.modal-backdrop').forEach(m=>{
+  m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
