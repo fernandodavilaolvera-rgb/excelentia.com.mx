@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Gastos · ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: #f5f6f8;
+    color: #1a2035;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 60%, #1e5096 100%);
+    border-bottom: 3px solid #4a9fd4;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .header-left { display: flex; align-items: center; gap: 1rem; }
+  .logo-box {
+    background: #fff;
+    border-radius: 10px;
+    padding: .4rem .75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    min-height: 52px;
+    flex-shrink: 0;
+  }
+  .logo-box img { height: 40px; width: auto; display: block; }
+  .logo-fallback { font-family:'Manrope',sans-serif; font-size:15px; font-weight:800; color:#1a3a6b; display:none; }
+  .header-title { color: #fff; }
+  .header-title h1 { font-size: 1.3rem; font-weight: 800; line-height: 1.2; }
+  .header-title p { font-size: .8rem; color: #a0c4e8; margin-top: .15rem; }
+  .header-right { display: flex; align-items: center; gap: .75rem; }
+  .btn-refresh {
+    background: rgba(74,159,212,.2);
+    border: 1px solid rgba(74,159,212,.5);
+    color: #a0c4e8;
+    border-radius: 8px;
+    padding: .45rem 1rem;
+    font-family: 'Manrope', sans-serif;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .btn-refresh:hover { background: rgba(74,159,212,.35); }
+  .last-update { color: #a0c4e8; font-size: .75rem; }
+
+  /* ── MAIN ── */
+  .main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* ── SECCIÓN JULIO ── */
+  .julio-banner {
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 100%);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2rem;
+    border: 1px solid #2a4a7f;
+    position: relative;
+    overflow: hidden;
+  }
+  .julio-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 100%;
+    background: radial-gradient(ellipse at right, rgba(74,159,212,.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .julio-banner-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+  }
+  .julio-badge {
+    background: #4a9fd4;
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 6px;
+    padding: .25rem .65rem;
+  }
+  .julio-title {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .julio-decision {
+    background: rgba(255,255,255,.05);
+    border-left: 3px solid #4a9fd4;
+    border-radius: 0 8px 8px 0;
+    padding: .9rem 1.1rem;
+    margin-bottom: 1.25rem;
+    color: #c8ddf0;
+    font-size: .85rem;
+    line-height: 1.7;
+  }
+  .julio-decision strong { color: #fff; }
+  .julio-decision .highlight { color: #7ec8f0; font-weight: 700; }
+
+  .julio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .85rem;
+    margin-bottom: 1rem;
+  }
+  .julio-item {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 10px;
+    padding: .85rem 1rem;
+  }
+  .julio-item-platform {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #7ec8f0;
+    margin-bottom: .3rem;
+  }
+  .julio-item-cost {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .julio-item-sub {
+    font-size: .72rem;
+    color: #a0c4e8;
+    margin-top: .2rem;
+  }
+  .julio-item.is-new { border-color: rgba(74,159,212,.4); }
+  .julio-item.is-special {
+    border-color: rgba(217,119,6,.4);
+    background: rgba(217,119,6,.08);
+  }
+  .new-pill {
+    display: inline-block;
+    background: #4a9fd4;
+    color: #fff;
+    font-size: .6rem;
+    font-weight: 800;
+    border-radius: 4px;
+    padding: .1rem .4rem;
+    margin-left: .4rem;
+    vertical-align: middle;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .especial-pill {
+    display: inline-block;
+    background: #d97706;
+    color: #fff;
+    font-size: .6rem;
+    font-weight: 800;
+    border-radius: 4px;
+    padding: .1rem .4rem;
+    margin-left: .4rem;
+    vertical-align: middle;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .julio-total-row {
+    background: rgba(74,159,212,.15);
+    border: 1px solid rgba(74,159,212,.35);
+    border-radius: 10px;
+    padding: .85rem 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .julio-total-label { color: #a0c4e8; font-size: .82rem; font-weight: 600; }
+  .julio-total-amount { color: #fff; font-size: 1.35rem; font-weight: 900; }
+  .julio-total-per { color: #7ec8f0; font-size: .78rem; font-weight: 600; }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .kpi-card {
+    background: #fff;
+    border: 1px solid #dde1e9;
+    border-radius: 12px;
+    padding: 1.25rem 1.25rem 1rem;
+    transition: box-shadow .2s;
+  }
+  .kpi-card:hover { box-shadow: 0 4px 16px rgba(26,58,107,.1); }
+  .kpi-label { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8a90a0; margin-bottom: .5rem; }
+  .kpi-value { font-size: 1.65rem; font-weight: 900; color: #1a2035; line-height: 1; }
+  .kpi-sub { font-size: .75rem; color: #4a5068; margin-top: .35rem; }
+
+  /* ── SOCIOS ── */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1a2035;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .socios-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .socio-card {
+    background: #fff;
+    border: 1px solid #dde1e9;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .socio-card:hover { box-shadow: 0 4px 16px rgba(26,58,107,.1); }
+  .socio-header {
+    background: #dce8f7;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+  }
+  .socio-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85rem; font-weight: 900; color: #fff;
+    flex-shrink: 0;
+  }
+  .socio-name { font-size: .95rem; font-weight: 800; color: #1a2035; }
+  .socio-rol { font-size: .72rem; color: #4a5068; font-weight: 600; }
+  .socio-body { padding: 1rem 1.25rem; }
+  .socio-total { font-size: 1.6rem; font-weight: 900; color: #1a2035; }
+  .socio-pct { font-size: .78rem; color: #4a5068; margin-bottom: .75rem; }
+  .progress-bar-bg { background: #f0f3f8; border-radius: 99px; height: 6px; overflow: hidden; margin-bottom: .85rem; }
+  .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .socio-platforms { display: flex; flex-direction: column; gap: .35rem; }
+  .platform-row { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; }
+  .platform-name { color: #4a5068; }
+  .platform-amount { font-weight: 700; color: #1a2035; }
+
+  /* ── GRÁFICOS ── */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .chart-card {
+    background: #fff;
+    border: 1px solid #dde1e9;
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .chart-card.full-width { grid-column: 1 / -1; }
+  .chart-title { font-size: .85rem; font-weight: 800; color: #1a2035; margin-bottom: 1rem; }
+  .chart-wrap { position: relative; height: 240px; }
+  .chart-wrap.tall { height: 300px; }
+
+  /* ── PLATAFORMAS (acordeón) ── */
+  .platforms-section { margin-bottom: 2rem; }
+  .accordion-main {
+    background: #fff;
+    border: 1px solid #dde1e9;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .accordion-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Manrope', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1a2035;
+    text-align: left;
+    transition: background .2s;
+  }
+  .accordion-toggle:hover { background: #e8f0fb; }
+  .accordion-icon {
+    width: 22px; height: 22px;
+    background: #dce8f7;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem;
+    color: #1a3a6b;
+    transition: transform .3s;
+    flex-shrink: 0;
+  }
+  .accordion-toggle[aria-expanded="true"] .accordion-icon { transform: rotate(180deg); }
+  .accordion-body {
+    display: none;
+    padding: 0 1.25rem 1.25rem;
+  }
+  .accordion-body.open { display: block; }
+
+  /* 2 columnas de plataformas */
+  .platforms-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  /* Sub-acordeón por plataforma */
+  .plat-accordion {
+    border: 1px solid #dde1e9;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .plat-toggle {
+    width: 100%;
+    background: #f5f6f8;
+    border: none;
+    cursor: pointer;
+    padding: .75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+    font-family: 'Manrope', sans-serif;
+    font-size: .875rem;
+    font-weight: 700;
+    color: #1a2035;
+    text-align: left;
+    transition: background .2s;
+  }
+  .plat-toggle:hover { background: #e8f0fb; }
+  .plat-toggle-left { display: flex; align-items: center; gap: .6rem; }
+  .plat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .plat-chevron {
+    font-size: .65rem;
+    color: #8a90a0;
+    transition: transform .3s;
+  }
+  .plat-toggle[aria-expanded="true"] .plat-chevron { transform: rotate(180deg); }
+  .plat-body {
+    display: none;
+    padding: .75rem 1rem;
+    background: #fff;
+  }
+  .plat-body.open { display: block; }
+  .plat-detail { font-size: .8rem; color: #4a5068; line-height: 1.7; }
+  .plat-detail li { margin-left: 1.1rem; }
+
+  /* ── TABLA ── */
+  .table-section { margin-bottom: 2rem; }
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .records-count { font-size: .78rem; color: #8a90a0; font-weight: 600; }
+  .table-wrap {
+    background: #fff;
+    border: 1px solid #dde1e9;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  thead { background: #dce8f7; }
+  th { padding: .75rem 1rem; text-align: left; font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #4a5068; white-space: nowrap; }
+  td { padding: .7rem 1rem; border-top: 1px solid #f0f3f8; color: #1a2035; }
+  tr:hover td { background: #f8fafd; }
+  .badge-socio {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    font-size: .65rem; font-weight: 900; color: #fff;
+  }
+  .pill-plataforma {
+    display: inline-block;
+    border-radius: 99px;
+    padding: .2rem .65rem;
+    font-size: .7rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .no-data {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #8a90a0;
+    font-size: .9rem;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: .75rem;
+    color: #8a90a0;
+    border-top: 1px solid #dde1e9;
+    margin-top: 1rem;
+  }
+  .footer strong { color: #4a5068; }
+
+  /* ── LOADER ── */
+  .loader-overlay {
+    position: fixed; inset: 0;
+    background: rgba(245,246,248,.9);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999;
+    flex-direction: column; gap: 1rem;
+  }
+  .loader-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid #dde1e9;
+    border-top-color: #4a9fd4;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text { color: #4a5068; font-size: .85rem; font-weight: 600; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .header { flex-direction: column; align-items: flex-start; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .socios-grid { grid-template-columns: 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .charts-grid .chart-card.full-width { grid-column: 1; }
+  }
+  @media (max-width: 600px) {
+    .main { padding: 1rem; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; gap: .6rem; }
+    .kpi-value { font-size: 1.3rem; }
+    .julio-grid { grid-template-columns: 1fr 1fr; }
+    .platforms-2col { grid-template-columns: 1fr; }
+    .table-scroll { -webkit-overflow-scrolling: touch; }
+    th, td { padding: .6rem .75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loader-overlay" id="loader">
+  <div class="loader-spinner"></div>
+  <div class="loader-text">Cargando datos desde Sheets…</div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-box">
+      <img src="https://excelentia.com.mx/assets/logo%20excelentIA.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <div class="header-title">
+      <h1>Dashboard Gastos Operativos</h1>
+      <p>Socios · Adolfo Cabrera · Juan José García · Fernando Dávila</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="last-update" id="lastUpdate">—</span>
+    <button class="btn-refresh" onclick="loadData()">↻ Actualizar</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECCIÓN: GASTOS PROYECTADOS JULIO 2025          -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="julio-banner">
+    <div class="julio-banner-header">
+      <span class="julio-badge">Julio 2025</span>
+      <span class="julio-title">Gastos Proyectados del Mes</span>
+    </div>
+
+    <div class="julio-decision">
+      <strong>Actualización de plataformas — decisión de socios:</strong><br>
+      En este mes se tomó la decisión estratégica de hacer <span class="highlight">upgrade de n8n</span> al plan superior
+      (de 24 EUR a 60 EUR + IVA), motivado por la actualización en la gestión de RAM que implementó n8n en su nueva versión,
+      lo que impacta directamente el rendimiento de nuestros flujos de automatización en producción.<br><br>
+      Adicionalmente, se realizó <span class="highlight">upgrade de Claude Pro a Claude Max</span> (100 USD/mes),
+      ya que con frecuencia los tokens de la ventana de 5 horas resultan insuficientes durante sesiones intensivas de desarrollo,
+      causando demoras en la entrega de proyectos a clientes. El upgrade al <strong>Plan Max</strong> resuelve esta limitación de forma definitiva.
+      <br><br>
+      <strong>Nota:</strong> El cambio a Claude Max se realizó el <span class="highlight">15 de junio</span>,
+      por lo que se registra un cargo adicional de <strong>$50 USD</strong> como complemento proporcional de junio
+      para completar el upgrade, aplicable únicamente este mes.
+    </div>
+
+    <div class="julio-grid">
+      <div class="julio-item is-new">
+        <div class="julio-item-platform">n8n <span class="new-pill">Upgrade</span></div>
+        <div class="julio-item-cost">69.60 EUR = $1,385 MXN</div>
+        <div class="julio-item-sub">60 EUR + IVA 16% (9.60 EUR)</div>
+      </div>
+      <div class="julio-item is-new">
+        <div class="julio-item-platform">Claude Max <span class="new-pill">Nuevo</span></div>
+        <div class="julio-item-cost">$100 USD = $1,740 MXN</div>
+        <div class="julio-item-sub">Reemplaza Claude Pro</div>
+      </div>
+      <div class="julio-item is-special">
+        <div class="julio-item-platform">Claude — Comp. Junio <span class="especial-pill">Solo este mes</span></div>
+        <div class="julio-item-cost">$50 USD = $870 MXN</div>
+        <div class="julio-item-sub">Complemento upgrade 15 jun</div>
+      </div>
+      <div class="julio-item">
+        <div class="julio-item-platform">Google Workspace</div>
+        <div class="julio-item-cost">$527 MXN</div>
+        <div class="julio-item-sub">Facturación mensual fija</div>
+      </div>
+      <div class="julio-item">
+        <div class="julio-item-platform">Open AI API</div>
+        <div class="julio-item-cost">$50 USD = $870 MXN</div>
+        <div class="julio-item-sub">Estimado mensual</div>
+      </div>
+      <div class="julio-item">
+        <div class="julio-item-platform">Railway</div>
+        <div class="julio-item-cost">$10 USD = $174 MXN</div>
+        <div class="julio-item-sub">Estimado mensual</div>
+      </div>
+    </div>
+
+    <div class="julio-total-row">
+      <div>
+        <div class="julio-total-label">Total proyectado julio 2025</div>
+      </div>
+      <div class="julio-total-amount">≈ $5,566 MXN</div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Gasto Total Acumulado</div>
+      <div class="kpi-value" id="kpiTotal">—</div>
+      <div class="kpi-sub" id="kpiTotalSub">Cargando…</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Plataformas Activas</div>
+      <div class="kpi-value" id="kpiPlataformas">—</div>
+      <div class="kpi-sub">plataformas únicas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Meses Registrados</div>
+      <div class="kpi-value" id="kpiMeses">—</div>
+      <div class="kpi-sub" id="kpiMesesSub">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Promedio Mensual</div>
+      <div class="kpi-value" id="kpiPromedio">—</div>
+      <div class="kpi-sub">MXN por mes</div>
+    </div>
+  </div>
+
+  <!-- SOCIOS -->
+  <div class="section-title">👤 Gasto por Socio</div>
+  <div class="socios-grid" id="sociosGrid">
+    <div class="no-data">Cargando…</div>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">🍩 Gasto por Plataforma</div>
+      <div class="chart-wrap"><canvas id="chartDonutPlat"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📊 Gasto por Socio</div>
+      <div class="chart-wrap"><canvas id="chartBarSocios"></canvas></div>
+    </div>
+    <div class="chart-card full-width">
+      <div class="chart-title">📅 Gasto Mensual por Plataforma</div>
+      <div class="chart-wrap tall"><canvas id="chartBarMensual"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🗂️ Gasto por Categoría</div>
+      <div class="chart-wrap"><canvas id="chartDonutCat"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📈 Evolución Mensual del Gasto</div>
+      <div class="chart-wrap"><canvas id="chartLinea"></canvas></div>
+    </div>
+  </div>
+
+  <!-- PLATAFORMAS — SECCIÓN CON ACORDEÓN -->
+  <div class="platforms-section">
+    <div class="accordion-main">
+      <button class="accordion-toggle" aria-expanded="false" onclick="toggleAccordion(this, 'platformsBody')">
+        <span>🛠️ Para qué sirve cada plataforma</span>
+        <span class="accordion-icon">▾</span>
+      </button>
+      <div class="accordion-body" id="platformsBody">
+        <div class="platforms-2col">
+
+          <!-- COLUMNA IZQUIERDA -->
+          <div style="display:flex;flex-direction:column;gap:.75rem;">
+
+            <!-- n8n -->
+            <div class="plat-accordion">
+              <button class="plat-toggle" aria-expanded="false" onclick="togglePlat(this, 'bodyN8n')">
+                <div class="plat-toggle-left">
+                  <span class="plat-dot" style="background:#ea5c0a;"></span>
+                  <span>n8n</span>
+                </div>
+                <span class="plat-chevron">▾</span>
+              </button>
+              <div class="plat-body" id="bodyN8n">
+                <div class="plat-detail">
+                  Motor central de automatizaciones de ExcelentIA. Conecta todas nuestras plataformas, agentes de IA y flujos de trabajo.
+                  <ul>
+                    <li>Agente de Citas Médicas (WhatsApp + Calendar)</li>
+                    <li>Agente Eco-IA (formulario → reporte Word)</li>
+                    <li>Agente de Resumen de Correos</li>
+                    <li>Flujos de automatización para clientes (Berimbau, etc.)</li>
+                    <li>Más de 248 templates activos en producción</li>
+                  </ul>
+                  <br><strong>Plan actual:</strong> Business (60 EUR + IVA 16%) — upgrade julio 2025 por gestión de RAM.
+                </div>
+              </div>
+            </div>
+
+            <!-- Google Workspace -->
+            <div class="plat-accordion">
+              <button class="plat-toggle" aria-expanded="false" onclick="togglePlat(this, 'bodyGoogle')">
+                <div class="plat-toggle-left">
+                  <span class="plat-dot" style="background:#4285f4;"></span>
+                  <span>Google Workspace</span>
+                </div>
+                <span class="plat-chevron">▾</span>
+              </button>
+              <div class="plat-body" id="bodyGoogle">
+                <div class="plat-detail">
+                  Suite de productividad y colaboración de ExcelentIA.
+                  <ul>
+                    <li>Correos corporativos (@excelentia.com.mx)</li>
+                    <li>Google Drive — repositorio de documentos y templates</li>
+                    <li>Google Sheets — base de datos de proyectos y gastos</li>
+                    <li>Google Calendar — agendamiento de citas y reuniones</li>
+                    <li>Google Meet — videollamadas con clientes</li>
+                  </ul>
+                  <br><strong>Costo:</strong> $527 MXN/mes (facturación fija).
+                </div>
+              </div>
+            </div>
+
+            <!-- Claude -->
+            <div class="plat-accordion">
+              <button class="plat-toggle" aria-expanded="false" onclick="togglePlat(this, 'bodyClaude')">
+                <div class="plat-toggle-left">
+                  <span class="plat-dot" style="background:#d97706;"></span>
+                  <span>Claude (Anthropic)</span>
+                </div>
+                <span class="plat-chevron">▾</span>
+              </button>
+              <div class="plat-body" id="bodyClaude">
+                <div class="plat-detail">
+                  Asistente de IA principal para desarrollo de proyectos, código y estrategia.
+                  <ul>
+                    <li>Desarrollo de HTMLs, dashboards y herramientas (este dashboard fue creado con Claude)</li>
+                    <li>Revisión y depuración de workflows n8n</li>
+                    <li>Redacción de propuestas comerciales y documentación</li>
+                    <li>Estrategia de proyectos de automatización</li>
+                  </ul>
+                  <br><strong>Plan actual:</strong> Claude Max ($100 USD/mes) — upgrade desde Claude Pro el 15 jun 2025,
+                  para eliminar las limitaciones de la ventana de tokens de 5 horas durante sesiones de desarrollo intensivo.
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /col izq -->
+
+          <!-- COLUMNA DERECHA -->
+          <div style="display:flex;flex-direction:column;gap:.75rem;">
+
+            <!-- Open AI -->
+            <div class="plat-accordion">
+              <button class="plat-toggle" aria-expanded="false" onclick="togglePlat(this, 'bodyOpenAI')">
+                <div class="plat-toggle-left">
+                  <span class="plat-dot" style="background:#10b981;"></span>
+                  <span>Open AI API</span>
+                </div>
+                <span class="plat-chevron">▾</span>
+              </button>
+              <div class="plat-body" id="bodyOpenAI">
+                <div class="plat-detail">
+                  API de modelos GPT integrada en los agentes de IA de nuestros clientes.
+                  <ul>
+                    <li>GPT-4o — agente de citas médicas (conversación WhatsApp)</li>
+                    <li>GPT-4.1-mini — procesamiento y clasificación de correos</li>
+                    <li>GPT-4o — interpretación de ecocardiogramas (Eco-IA)</li>
+                    <li>Embeddings para búsqueda semántica en proyectos RAG</li>
+                  </ul>
+                  <br><strong>Costo:</strong> Variable según consumo de tokens mensual.
+                </div>
+              </div>
+            </div>
+
+            <!-- Railway -->
+            <div class="plat-accordion">
+              <button class="plat-toggle" aria-expanded="false" onclick="togglePlat(this, 'bodyRailway')">
+                <div class="plat-toggle-left">
+                  <span class="plat-dot" style="background:#6b7280;"></span>
+                  <span>Railway</span>
+                </div>
+                <span class="plat-chevron">▾</span>
+              </button>
+              <div class="plat-body" id="bodyRailway">
+                <div class="plat-detail">
+                  Plataforma de hosting para servicios backend en producción.
+                  <ul>
+                    <li>Servidor Eco-IA (Node.js) — generación automática de reportes Word para cardiólogos</li>
+                    <li>URL: eco-reporte-server-production.up.railway.app</li>
+                    <li>Alta disponibilidad 24/7 sin intervención manual</li>
+                  </ul>
+                  <br><strong>Costo:</strong> Variable según uso de CPU y memoria del servidor.
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /col der -->
+
+        </div><!-- /platforms-2col -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA HISTORIAL -->
+  <div class="table-section">
+    <div class="table-header">
+      <div class="section-title" style="margin:0;">📋 Historial de Pagos</div>
+      <div class="records-count" id="recordsCount">—</div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mes</th>
+              <th>Fecha</th>
+              <th>Plataforma</th>
+              <th>Costo Original</th>
+              <th>MXN</th>
+              <th>Pagado por</th>
+              <th>Uso</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody">
+            <tr><td colspan="8" class="no-data">Cargando datos…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<footer class="footer">
+  <strong>ExcelentIA</strong> · Dashboard Gastos Operativos · Socios: Adolfo Cabrera · Juan José García · Fernando Dávila<br>
+  Datos en tiempo real desde Google Sheets · Auto-refresh cada 5 min
+</footer>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/1g5MDKWf2yO_NSKn6cKQG_TqES3MwV7zv_UWisrm-Awc/export?format=csv&gid=1814822849';
+const REFRESH_MS = 5 * 60 * 1000;
+
+const COLORES_PLATAFORMA = {
+  'n8n': '#ea5c0a',
+  'Google Workspace': '#4285f4',
+  'Claude Pro': '#d97706',
+  'Claude Max': '#d97706',
+  'Claude API': '#b45309',
+  'Open AI API': '#10b981',
+  'OpenAI API': '#10b981',
+  'Lucid': '#8b5cf6',
+  'Horizontes': '#ec4899',
+  'NoteBookLM': '#06b6d4',
+  'Dominio': '#6b7280',
+  'Google Suite': '#4285f4',
+  'Railway': '#6b7280',
+};
+
+const CATEGORIAS = {
+  'n8n': 'Infraestructura',
+  'Google Workspace': 'Infraestructura',
+  'Google Suite': 'Infraestructura',
+  'Dominio': 'Infraestructura',
+  'Railway': 'Infraestructura',
+  'Claude Pro': 'IA',
+  'Claude Max': 'IA',
+  'Claude API': 'IA',
+  'Open AI API': 'IA',
+  'OpenAI API': 'IA',
+  'NoteBookLM': 'IA',
+  'Lucid': 'Herramientas',
+  'Horizontes': 'Educación',
+};
+
+const SOCIOS_CONFIG = {
+  adolfo: { nombre: 'Adolfo Cabrera', rol: 'CEO', color: '#8b4513', iniciales: 'AC' },
+  jj:     { nombre: 'Juan José García', rol: 'CSO', color: '#2a7d4f', iniciales: 'JJ' },
+  fer:    { nombre: 'Fernando Dávila', rol: 'COO', color: '#1e5096', iniciales: 'FD' },
+  otro:   { nombre: 'Otro', rol: '—', color: '#8a90a0', iniciales: '?' },
+};
+
+const MESES_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+let charts = {};
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function getSocioKey(nombre) {
+  if (!nombre) return 'otro';
+  const n = nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if (n.includes('fer') || n.includes('fernando')) return 'fer';
+  if (n.includes('juan') || n.includes('jj') || n.includes('jose')) return 'jj';
+  if (n.includes('adolfo')) return 'adolfo';
+  return 'otro';
+}
+
+function fmtMXN(n) {
+  return '$' + Math.round(n).toLocaleString('es-MX');
+}
+
+function platColor(plat) {
+  return COLORES_PLATAFORMA[plat] || '#8a90a0';
+}
+
+function parseCSV(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const rows = lines.map(line => {
+    const cells = [];
+    let cur = ''; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    cells.push(cur.trim());
+    return cells;
+  });
+  return rows;
+}
+
+function findHeaderRow(rows) {
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i].join(' ').toLowerCase();
+    if ((row.includes('fecha') && row.includes('plataforma')) ||
+        (row.includes('plataforma') && row.includes('costo'))) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function getMesLabel(fechaStr) {
+  if (!fechaStr) return '—';
+  const parts = fechaStr.split('/');
+  if (parts.length >= 2) {
+    const m = parseInt(parts[1]) - 1;
+    const y = parts.length >= 3 ? parts[2].slice(-2) : '?';
+    return (MESES_ES[m] || '?') + ' ' + y;
+  }
+  return fechaStr;
+}
+
+// ═══════════════════════════════════════════
+// CARGA DE DATOS
+// ═══════════════════════════════════════════
+async function loadData() {
+  try {
+    const r = await fetch(SHEET_CSV + '&t=' + Date.now());
+    if (!r.ok) throw new Error('Error HTTP ' + r.status);
+    const text = await r.text();
+    const rows = parseCSV(text);
+    const hIdx = findHeaderRow(rows);
+    if (hIdx < 0) throw new Error('No se encontró encabezado');
+
+    const dataRows = rows.slice(hIdx + 1).filter(r => r[2] && r[4]);
+    renderDashboard(dataRows);
+    document.getElementById('lastUpdate').textContent =
+      'Actualizado: ' + new Date().toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
+  } catch (e) {
+    console.error(e);
+    document.getElementById('tablaBody').innerHTML =
+      '<tr><td colspan="8" class="no-data">⚠️ Error al cargar datos. Verifica que el Sheets es público (Lector).</td></tr>';
+  } finally {
+    document.getElementById('loader').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+function renderDashboard(rows) {
+  // Acumuladores
+  let totalGlobal = 0;
+  const porSocio = { adolfo: 0, jj: 0, fer: 0, otro: 0 };
+  const porSocioPlat = { adolfo: {}, jj: {}, fer: {}, otro: {} };
+  const porPlataforma = {};
+  const porCategoria = {};
+  const porMes = {};
+  const plataformasUnicas = new Set();
+  const mesesUnicos = new Set();
+
+  rows.forEach(r => {
+    const fecha    = r[1] || '';
+    const plat     = r[2] || 'Desconocida';
+    const mxn      = parseFloat(r[4]) || 0;
+    const pagadoPor = r[5] || '';
+    const socioKey  = getSocioKey(pagadoPor);
+    const mes       = getMesLabel(fecha);
+    const cat       = CATEGORIAS[plat] || 'Otro';
+
+    totalGlobal += mxn;
+    porSocio[socioKey] = (porSocio[socioKey] || 0) + mxn;
+    porSocioPlat[socioKey][plat] = (porSocioPlat[socioKey][plat] || 0) + mxn;
+    porPlataforma[plat] = (porPlataforma[plat] || 0) + mxn;
+    porCategoria[cat]   = (porCategoria[cat] || 0) + mxn;
+    porMes[mes]         = porMes[mes] || {};
+    porMes[mes][plat]   = (porMes[mes][plat] || 0) + mxn;
+    plataformasUnicas.add(plat);
+    mesesUnicos.add(mes);
+  });
+
+  // KPIs
+  const nMeses = mesesUnicos.size || 1;
+  document.getElementById('kpiTotal').textContent = fmtMXN(totalGlobal);
+  document.getElementById('kpiTotalSub').textContent = rows.length + ' pagos registrados';
+  document.getElementById('kpiPlataformas').textContent = plataformasUnicas.size;
+  document.getElementById('kpiMeses').textContent = nMeses;
+  document.getElementById('kpiMesesSub').textContent = [...mesesUnicos].join(' → ');
+  document.getElementById('kpiPromedio').textContent = fmtMXN(totalGlobal / nMeses);
+
+  // Socios
+  const sociosEl = document.getElementById('sociosGrid');
+  sociosEl.innerHTML = '';
+  ['adolfo','jj','fer'].forEach(key => {
+    const cfg = SOCIOS_CONFIG[key];
+    const total = porSocio[key] || 0;
+    const pct   = totalGlobal ? Math.round(total / totalGlobal * 100) : 0;
+    const plats  = Object.entries(porSocioPlat[key] || {})
+      .sort((a,b) => b[1]-a[1]).slice(0,5);
+
+    const card = document.createElement('div');
+    card.className = 'socio-card';
+    card.innerHTML = `
+      <div class="socio-header">
+        <div class="socio-avatar" style="background:${cfg.color}">${cfg.iniciales}</div>
+        <div>
+          <div class="socio-name">${cfg.nombre}</div>
+          <div class="socio-rol">${cfg.rol}</div>
+        </div>
+      </div>
+      <div class="socio-body">
+        <div class="socio-total">${fmtMXN(total)}</div>
+        <div class="socio-pct">${pct}% del total</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="background:${cfg.color};width:0%"
+               data-target="${pct}"></div>
+        </div>
+        <div class="socio-platforms">
+          ${plats.map(([p,v]) => `
+            <div class="platform-row">
+              <span class="platform-name">${p}</span>
+              <span class="platform-amount">${fmtMXN(v)}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    sociosEl.appendChild(card);
+    setTimeout(() => {
+      const bar = card.querySelector('[data-target]');
+      if (bar) bar.style.width = bar.dataset.target + '%';
+    }, 100);
+  });
+
+  // Tabla
+  document.getElementById('recordsCount').textContent = rows.length + ' registros';
+  const tbody = document.getElementById('tablaBody');
+  tbody.innerHTML = rows.length === 0
+    ? '<tr><td colspan="8" class="no-data">Sin datos</td></tr>'
+    : rows.map((r, i) => {
+        const socioKey = getSocioKey(r[5]);
+        const cfg = SOCIOS_CONFIG[socioKey];
+        const plat = r[2] || '—';
+        return `<tr>
+          <td>${r[0] || i+1}</td>
+          <td>${getMesLabel(r[1])}</td>
+          <td style="white-space:nowrap">${r[1] || '—'}</td>
+          <td><span class="pill-plataforma" style="background:${platColor(plat)}">${plat}</span></td>
+          <td>${r[3] || '—'}</td>
+          <td style="font-weight:700">${r[4] ? fmtMXN(parseFloat(r[4])) : '—'}</td>
+          <td><span class="badge-socio" style="background:${cfg.color}" title="${cfg.nombre}">${cfg.iniciales}</span></td>
+          <td style="color:#4a5068;font-size:.78rem">${r[6] || '—'}</td>
+        </tr>`;
+      }).join('');
+
+  // Gráficos
+  renderCharts({ porPlataforma, porSocio, porMes, porCategoria });
+}
+
+// ═══════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function renderCharts({ porPlataforma, porSocio, porMes, porCategoria }) {
+  const platLabels = Object.keys(porPlataforma);
+  const platData   = Object.values(porPlataforma);
+  const platColors = platLabels.map(p => platColor(p));
+
+  // Donut plataformas
+  destroyChart('donutPlat');
+  charts.donutPlat = new Chart(document.getElementById('chartDonutPlat'), {
+    type: 'doughnut',
+    data: { labels: platLabels, datasets: [{ data: platData, backgroundColor: platColors, borderWidth: 2, borderColor: '#fff' }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { font: { family: 'Manrope', size: 11 }, boxWidth: 12 } } } }
+  });
+
+  // Barras socios
+  destroyChart('barSocios');
+  const sociosKeys = ['adolfo','jj','fer'];
+  charts.barSocios = new Chart(document.getElementById('chartBarSocios'), {
+    type: 'bar',
+    data: {
+      labels: sociosKeys.map(k => SOCIOS_CONFIG[k].iniciales),
+      datasets: [{ data: sociosKeys.map(k => porSocio[k]||0), backgroundColor: sociosKeys.map(k => SOCIOS_CONFIG[k].color), borderRadius: 6 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { ticks: { callback: v => '$'+v.toLocaleString('es-MX'), font: { family: 'Manrope', size: 10 } } } }
+    }
+  });
+
+  // Barras apiladas mensual
+  destroyChart('barMensual');
+  const mesesLabels = Object.keys(porMes);
+  const allPlats = [...new Set(mesesLabels.flatMap(m => Object.keys(porMes[m])))];
+  charts.barMensual = new Chart(document.getElementById('chartBarMensual'), {
+    type: 'bar',
+    data: {
+      labels: mesesLabels,
+      datasets: allPlats.map(p => ({
+        label: p,
+        data: mesesLabels.map(m => porMes[m][p] || 0),
+        backgroundColor: platColor(p),
+        borderRadius: 3,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { family: 'Manrope', size: 10 }, boxWidth: 10 } } },
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => '$'+v.toLocaleString('es-MX'), font: { family: 'Manrope', size: 10 } } } }
+    }
+  });
+
+  // Donut categorías
+  destroyChart('donutCat');
+  const catLabels  = Object.keys(porCategoria);
+  const catData    = Object.values(porCategoria);
+  const catColors  = { 'IA':'#d97706', 'Infraestructura':'#4285f4', 'Herramientas':'#8b5cf6', 'Educación':'#ec4899', 'Otro':'#8a90a0' };
+  charts.donutCat  = new Chart(document.getElementById('chartDonutCat'), {
+    type: 'doughnut',
+    data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: catLabels.map(c => catColors[c]||'#8a90a0'), borderWidth: 2, borderColor: '#fff' }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { font: { family: 'Manrope', size: 11 }, boxWidth: 12 } } } }
+  });
+
+  // Línea evolución
+  destroyChart('linea');
+  charts.linea = new Chart(document.getElementById('chartLinea'), {
+    type: 'line',
+    data: {
+      labels: mesesLabels,
+      datasets: [{
+        label: 'Total MXN',
+        data: mesesLabels.map(m => Object.values(porMes[m]).reduce((a,b)=>a+b,0)),
+        borderColor: '#4a9fd4',
+        backgroundColor: 'rgba(74,159,212,.1)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#4a9fd4',
+        pointRadius: 5,
+        tension: .35,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { ticks: { callback: v => '$'+v.toLocaleString('es-MX'), font: { family: 'Manrope', size: 10 } } } }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// ACORDEONES
+// ═══════════════════════════════════════════
+function toggleAccordion(btn, bodyId) {
+  const body = document.getElementById(bodyId);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
+function togglePlat(btn, bodyId) {
+  const body = document.getElementById(bodyId);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+loadData();
+setInterval(loadData, REFRESH_MS);
+</script>
+</body>
+</html>
