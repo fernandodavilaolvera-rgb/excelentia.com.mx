@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Medket — Centro Médico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --azul:#1b2c5e;
+    --turquesa:#4ba4c0;
+    --ambar:#e6bc40;
+    --brisa:#b8e4f2;
+    --gris:#808080;
+    --fondo:#f4f9fc;
+    --texto:#1b2c5e;
+    --texto-sec:#5b6b85;
+    --borde:#d7e6ef;
+    --rojo:#d6534a;
+    --verde:#3fa86b;
+    --card:#ffffff;
+    --shadow:0 2px 10px rgba(27,44,94,0.07);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope',sans-serif;background:var(--fondo);color:var(--texto);}
+  h1,h2,h3,h4{margin:0;font-family:'Manrope',sans-serif;}
+  p{margin:0;}
+
+  /* ===== HEADER ===== */
+  header{
+    background:linear-gradient(135deg,#1b2c5e 0%,#214a7a 55%,#2c6a96 100%);
+    padding:1.1rem 5%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    border-bottom:3px solid var(--turquesa);
+  }
+  .header-left{display:flex;align-items:center;gap:.9rem;}
+  .logo-box{
+    background:#fff;border-radius:10px;padding:.35rem .7rem;
+    display:flex;align-items:center;justify-content:center;
+    min-width:64px;min-height:46px;flex-shrink:0;
+  }
+  .logo-box img{height:34px;width:auto;display:block;}
+  .logo-fallback{font-family:'Manrope',sans-serif;font-weight:900;font-size:14px;color:var(--azul);display:none;}
+  .header-titles h1{color:#fff;font-size:1.15rem;font-weight:800;letter-spacing:.2px;}
+  .header-titles p{color:var(--brisa);font-size:.78rem;margin-top:2px;}
+  .header-right{display:flex;align-items:center;gap:.6rem;}
+  .demo-badge{
+    background:rgba(230,188,64,.18);border:1px solid var(--ambar);color:var(--ambar);
+    font-size:.68rem;font-weight:800;padding:.35rem .65rem;border-radius:20px;letter-spacing:.4px;
+    text-transform:uppercase;white-space:nowrap;
+  }
+  .updated{color:var(--brisa);font-size:.72rem;text-align:right;}
+
+  /* ===== TABS ===== */
+  nav.tabs{
+    display:flex;gap:.4rem;background:#fff;border-bottom:1px solid var(--borde);
+    padding:0 5%;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  }
+  nav.tabs::-webkit-scrollbar{height:0;}
+  .tab-btn{
+    border:none;background:transparent;cursor:pointer;
+    font-family:'Manrope',sans-serif;font-weight:700;font-size:.82rem;color:var(--texto-sec);
+    padding:.95rem .9rem;white-space:nowrap;border-bottom:3px solid transparent;
+    transition:.15s;
+  }
+  .tab-btn:hover{color:var(--azul);}
+  .tab-btn.active{color:var(--azul);border-bottom-color:var(--turquesa);}
+
+  main{padding:1.6rem 5% 3rem;max-width:1320px;margin:0 auto;}
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .section-head{margin-bottom:1.1rem;}
+  .section-head h2{font-size:1.15rem;font-weight:800;color:var(--azul);}
+  .section-head p{font-size:.85rem;color:var(--texto-sec);margin-top:.2rem;}
+
+  /* ===== KPI CARDS ===== */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.9rem;margin-bottom:1.6rem;}
+  .kpi-card{
+    background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:1.1rem 1.2rem;
+    box-shadow:var(--shadow);
+  }
+  .kpi-card .kpi-label{font-size:.74rem;color:var(--texto-sec);font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+  .kpi-card .kpi-value{font-size:1.8rem;font-weight:900;color:var(--azul);margin-top:.25rem;}
+  .kpi-card .kpi-sub{font-size:.76rem;margin-top:.3rem;font-weight:700;}
+  .up{color:var(--verde);} .down{color:var(--rojo);}
+
+  /* ===== CARD GENERIC ===== */
+  .card{
+    background:var(--card);border:1px solid var(--borde);border-radius:14px;
+    padding:1.3rem 1.4rem;box-shadow:var(--shadow);margin-bottom:1.6rem;
+  }
+  .card h3{font-size:.95rem;font-weight:800;color:var(--azul);margin-bottom:.9rem;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+
+  /* ===== FUNNEL ===== */
+  .funnel{display:flex;gap:.7rem;flex-wrap:wrap;}
+  .funnel-step{
+    flex:1;min-width:140px;border-radius:12px;padding:1rem;text-align:center;color:#fff;position:relative;
+  }
+  .funnel-step .fs-num{font-size:1.6rem;font-weight:900;}
+  .funnel-step .fs-label{font-size:.74rem;font-weight:700;opacity:.92;margin-top:.15rem;}
+  .funnel-step .fs-arrow{position:absolute;right:-22px;top:50%;transform:translateY(-50%);font-size:1.3rem;color:var(--turquesa);display:none;}
+  .funnel-step:not(:last-child) .fs-arrow{display:block;}
+
+  /* ===== ALERTS / SEMAFORO ===== */
+  .alert-row{
+    display:flex;align-items:center;justify-content:space-between;gap:1rem;
+    padding:.75rem .9rem;border-radius:10px;margin-bottom:.55rem;border:1px solid var(--borde);
+    background:#fbfdff;flex-wrap:wrap;
+  }
+  .alert-row .a-left{display:flex;align-items:center;gap:.7rem;}
+  .dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+  .dot.r{background:var(--rojo);} .dot.y{background:var(--ambar);} .dot.g{background:var(--verde);}
+  .a-name{font-weight:700;font-size:.85rem;}
+  .a-doc{font-size:.76rem;color:var(--texto-sec);}
+  .a-days{font-size:.74rem;font-weight:800;padding:.3rem .6rem;border-radius:20px;white-space:nowrap;}
+  .a-days.r{background:rgba(214,83,74,.12);color:var(--rojo);}
+  .a-days.y{background:rgba(230,188,64,.18);color:#a8841f;}
+  .a-days.g{background:rgba(63,168,107,.12);color:var(--verde);}
+
+  /* ===== BRANCH CARDS ===== */
+  .branch-card{background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:1.2rem;box-shadow:var(--shadow);}
+  .branch-card h4{font-size:.95rem;font-weight:800;color:var(--azul);}
+  .branch-tag{display:inline-block;font-size:.68rem;font-weight:800;padding:.25rem .55rem;border-radius:20px;margin-top:.5rem;}
+  .tag-alta{background:rgba(63,168,107,.12);color:var(--verde);}
+  .tag-media{background:rgba(230,188,64,.18);color:#a8841f;}
+  .tag-baja{background:rgba(214,83,74,.12);color:var(--rojo);}
+  .branch-card .b-row{display:flex;justify-content:space-between;font-size:.8rem;margin-top:.55rem;color:var(--texto-sec);}
+  .branch-card .b-row b{color:var(--azul);font-size:.85rem;}
+
+  /* ===== TABLE ===== */
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:680px;}
+  th{background:var(--azul);color:#fff;text-align:left;padding:.65rem .8rem;font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.3px;}
+  th:first-child{border-radius:8px 0 0 0;} th:last-child{border-radius:0 8px 0 0;}
+  td{padding:.65rem .8rem;border-bottom:1px solid var(--borde);}
+  tr:nth-child(even) td{background:#fafdff;}
+  .chip{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;font-weight:700;padding:.25rem .55rem;border-radius:20px;}
+  .chip-ok{background:rgba(63,168,107,.12);color:var(--verde);}
+  .chip-pend{background:rgba(128,128,128,.13);color:var(--gris);}
+  .chip-complete{background:rgba(230,188,64,.2);color:#a8841f;}
+
+  /* ===== EXEC VIEW ===== */
+  .exec-hero{
+    background:linear-gradient(135deg,#1b2c5e 0%,#214a7a 55%,#2c6a96 100%);
+    border-radius:18px;padding:2rem 1.8rem;color:#fff;margin-bottom:1.6rem;
+  }
+  .exec-hero .badge{
+    display:inline-block;background:rgba(230,188,64,.18);border:1px solid var(--ambar);color:var(--ambar);
+    font-size:.7rem;font-weight:800;padding:.3rem .7rem;border-radius:20px;margin-bottom:.9rem;letter-spacing:.3px;
+  }
+  .exec-hero h2{font-size:1.4rem;font-weight:800;max-width:640px;line-height:1.35;}
+  .exec-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-top:1.6rem;}
+  .exec-stat .es-num{font-size:1.9rem;font-weight:900;color:#fff;}
+  .exec-stat .es-label{font-size:.74rem;color:var(--brisa);font-weight:700;margin-top:.1rem;}
+
+  canvas{max-width:100%;}
+  .chart-box{position:relative;height:260px;}
+  .chart-box.tall{height:300px;}
+
+  footer{text-align:center;padding:1.4rem 5%;color:var(--texto-sec);font-size:.74rem;}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:600px){
+    header{padding:.9rem 4%;flex-direction:column;align-items:flex-start;}
+    .header-right{width:100%;justify-content:space-between;}
+    main{padding:1.2rem 4% 2.5rem;}
+    .grid-2,.grid-3{grid-template-columns:1fr;}
+    .funnel{flex-direction:column;}
+    .funnel-step .fs-arrow{display:none !important;}
+    .kpi-card .kpi-value{font-size:1.5rem;}
+    .exec-hero h2{font-size:1.15rem;}
+    table{min-width:560px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-box">
+      <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/medket/assets/Logo_Medket_Horizontal_Fondo_Blanco.png" alt="Medket" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Medket</span>
+    </div>
+    <div class="header-titles">
+      <h1>Dashboard Medket</h1>
+      <p>Centro Médico · Trámites Libreta de Mar</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="demo-badge">Datos de demostración</span>
+    <span class="updated">Actualizado:<br>20 jun 2026, 09:14 h</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="operativo">📋 Operativo</button>
+  <button class="tab-btn" data-tab="sucursales">🏢 Sucursales</button>
+  <button class="tab-btn" data-tab="bot">💬 Agente WhatsApp</button>
+  <button class="tab-btn" data-tab="financiero">💰 Financiero</button>
+  <button class="tab-btn" data-tab="documentos">📑 Documentos</button>
+  <button class="tab-btn" data-tab="ejecutivo">⭐ Vista Ejecutiva</button>
+</nav>
+
+<main>
+
+  <!-- ===================== TAB 1: OPERATIVO ===================== -->
+  <section class="panel active" id="panel-operativo">
+    <div class="section-head">
+      <h2>Seguimiento de citas y trámites</h2>
+      <p>Estado operativo del día y la semana en las 3 sucursales</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Citas hoy</div>
+        <div class="kpi-value">14</div>
+        <div class="kpi-sub up">▲ 3 vs. ayer</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Citas esta semana</div>
+        <div class="kpi-value">67</div>
+        <div class="kpi-sub up">▲ 8% vs. semana pasada</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pacientes en proceso</div>
+        <div class="kpi-value">132</div>
+        <div class="kpi-sub" style="color:var(--texto-sec);">en alguna etapa del trámite</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Trámites completados (mes)</div>
+        <div class="kpi-value">218</div>
+        <div class="kpi-sub up">▲ 12% vs. mes anterior</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Pacientes en proceso por etapa</h3>
+      <div class="funnel">
+        <div class="funnel-step" style="background:#33508c;">
+          <div class="fs-num">38</div><div class="fs-label">Cita Agendada</div><span class="fs-arrow">→</span>
+        </div>
+        <div class="funnel-step" style="background:#2e6a93;">
+          <div class="fs-num">51</div><div class="fs-label">Exámenes en Proceso</div><span class="fs-arrow">→</span>
+        </div>
+        <div class="funnel-step" style="background:#2c8aa0;">
+          <div class="fs-num">28</div><div class="fs-label">Dictamen Listo</div><span class="fs-arrow">→</span>
+        </div>
+        <div class="funnel-step" style="background:#3aa3a8;">
+          <div class="fs-num">15</div><div class="fs-label">Libreta Entregada</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Citas por sucursal — hoy / esta semana</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Sucursal</th><th>Citas hoy</th><th>Citas esta semana</th><th>Ocupación</th></tr></thead>
+          <tbody>
+            <tr><td><b>Boca del Río, Ver.</b></td><td>6</td><td>28</td><td><span class="chip chip-ok">Alta</span></td></tr>
+            <tr><td><b>Coatzacoalcos, Ver.</b></td><td>5</td><td>24</td><td><span class="chip chip-ok">Alta</span></td></tr>
+            <tr><td><b>Ensenada, B.C.</b></td><td>3</td><td>15</td><td><span class="chip chip-pend">Media</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🚦 Alertas — documentos por vencer (vigencia de 3 meses)</h3>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot r"></span><div><div class="a-name">Juan Pérez Cruz</div><div class="a-doc">Identificación Oficial (INE) · Boca del Río</div></div></div>
+        <span class="a-days r">Vence en 4 días</span>
+      </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot r"></span><div><div class="a-name">María Torres Sánchez</div><div class="a-doc">Comprobante de Domicilio · Coatzacoalcos</div></div></div>
+        <span class="a-days r">Vence en 6 días</span>
+      </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot y"></span><div><div class="a-name">Carlos Mendoza Ruiz</div><div class="a-doc">CURP / Acta de Nacimiento · Ensenada</div></div></div>
+        <span class="a-days y">Vence en 18 días</span>
+      </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot y"></span><div><div class="a-name">Laura Jiménez Ortiz</div><div class="a-doc">Último Apto · Boca del Río</div></div></div>
+        <span class="a-days y">Vence en 25 días</span>
+      </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot g"></span><div><div class="a-name">Roberto Salinas Vega</div><div class="a-doc">Identificación Oficial (INE) · Coatzacoalcos</div></div></div>
+        <span class="a-days g">Vence en 45 días</span>
+      </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot g"></span><div><div class="a-name">Ana Beltrán López</div><div class="a-doc">Comprobante de Domicilio · Ensenada</div></div></div>
+        <span class="a-days g">Vence en 60 días</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 2: SUCURSALES ===================== -->
+  <section class="panel" id="panel-sucursales">
+    <div class="section-head">
+      <h2>Comparativo entre sucursales</h2>
+      <p>Demanda, tendencia y tiempos de proceso por punto de atención</p>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:1.6rem;">
+      <div class="branch-card">
+        <h4>Boca del Río, Ver.</h4>
+        <span class="branch-tag tag-alta">Mayor demanda</span>
+        <div class="b-row">Pacientes (mes)<b>65</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 7%</b></div>
+        <div class="b-row">Tiempo promedio<b>4.2 días</b></div>
+      </div>
+      <div class="branch-card">
+        <h4>Coatzacoalcos, Ver.</h4>
+        <span class="branch-tag tag-media">Demanda estable</span>
+        <div class="b-row">Pacientes (mes)<b>50</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 5%</b></div>
+        <div class="b-row">Tiempo promedio<b>5.1 días</b></div>
+      </div>
+      <div class="branch-card">
+        <h4>Ensenada, B.C.</h4>
+        <span class="branch-tag tag-baja">Necesita promoción</span>
+        <div class="b-row">Pacientes (mes)<b>33</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 3%</b></div>
+        <div class="b-row">Tiempo promedio<b>6.8 días</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Pacientes atendidos por sucursal — últimos 6 meses</h3>
+      <div class="chart-box tall"><canvas id="chartBranches"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Tiempo promedio de proceso por sucursal (días)</h3>
+      <div class="chart-box"><canvas id="chartTimes"></canvas></div>
+      <p style="font-size:.78rem;color:var(--texto-sec);margin-top:.7rem;">Tiempo desde cita agendada hasta libreta entregada. Ensenada muestra el tiempo más alto — posible foco de mejora operativa.</p>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 3: BOT WHATSAPP ===================== -->
+  <section class="panel" id="panel-bot">
+    <div class="section-head">
+      <h2>Agente de WhatsApp — piloto Medket</h2>
+      <p>Resultados del piloto de agendamiento automático y validación de INE por WhatsApp</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Conversaciones iniciadas</div>
+        <div class="kpi-value">156</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Citas agendadas por el bot</div>
+        <div class="kpi-value">41</div>
+        <div class="kpi-sub up">26% de conversión</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">INEs escaneados</div>
+        <div class="kpi-value">38</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Precisión de lectura INE</div>
+        <div class="kpi-value">87%</div>
+        <div class="kpi-sub up">33 correctos / 5 con error</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Embudo de conversión — conversación → cita agendada</h3>
+        <div class="funnel" style="flex-direction:column;">
+          <div class="funnel-step" style="background:#33508c;width:100%;">
+            <div class="fs-num">156</div><div class="fs-label">Conversaciones iniciadas</div>
+          </div>
+          <div class="funnel-step" style="background:#2c8aa0;width:60%;margin:0 auto;">
+            <div class="fs-num">41</div><div class="fs-label">Citas agendadas (26%)</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Escaneo de INE — correctos vs. con error</h3>
+        <div class="chart-box"><canvas id="chartIne"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Conversaciones del agente — últimos 14 días</h3>
+      <div class="chart-box"><canvas id="chartConv"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 4: FINANCIERO ===================== -->
+  <section class="panel" id="panel-financiero">
+    <div class="section-head">
+      <h2>Financiero / comercial</h2>
+      <p>Ingresos del examen médico marítimo ($4,500 MXN) y origen de pacientes</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Ingresos del mes</div>
+        <div class="kpi-value">$612,000</div>
+        <div class="kpi-sub up">▲ 9% vs. mes anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Exámenes facturados (mes)</div>
+        <div class="kpi-value">136</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Precio por examen</div>
+        <div class="kpi-value">$4,500</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Ticket promedio / sucursal</div>
+        <div class="kpi-value">$204,000</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Ingresos por sucursal (mes actual)</h3>
+        <div class="chart-box"><canvas id="chartIncomeBranch"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Origen de pacientes</h3>
+        <div class="chart-box"><canvas id="chartOrigin"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Ingresos — últimos 6 meses</h3>
+      <div class="chart-box tall"><canvas id="chartIncomeTrend"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 5: DOCUMENTOS Y CUMPLIMIENTO ===================== -->
+  <section class="panel" id="panel-documentos">
+    <div class="section-head">
+      <h2>Documentos y cumplimiento</h2>
+      <p>Checklist visual del estatus de exámenes por paciente</p>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Paciente</th><th>Sucursal</th><th>Laboratorio</th><th>Gabinete</th><th>Eval. Médica</th><th>Eval. Psicológica</th><th>Estatus</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Juan Pérez Cruz</b></td><td>Boca del Río</td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-ok">✔ Listo</span></td>
+              <td><span class="chip chip-pend">⏳ Pendiente</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>María Torres Sánchez</b></td><td>Coatzacoalcos</td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-ok">✔ Listo</span></td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Carlos Mendoza Ruiz</b></td><td>Ensenada</td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">⏳ Pendiente</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Laura Jiménez Ortiz</b></td><td>Boca del Río</td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-ok">✔ Listo</span></td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-ok">✔ Listo</span></td>
+              <td><span class="chip chip-complete">Dictamen listo</span></td>
+            </tr>
+            <tr>
+              <td><b>Roberto Salinas Vega</b></td><td>Coatzacoalcos</td>
+              <td><span class="chip chip-pend">⏳ Pendiente</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">⏳ Pendiente</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">Recién agendado</span></td>
+            </tr>
+            <tr>
+              <td><b>Ana Beltrán López</b></td><td>Ensenada</td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-ok">✔ Listo</span></td>
+              <td><span class="chip chip-pend">⏳ Pendiente</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Diego Fernández Cano</b></td><td>Boca del Río</td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-ok">✔ Listo</span></td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Sofía Ramírez Aguilar</b></td><td>Coatzacoalcos</td>
+              <td><span class="chip chip-ok">✔ Listo</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">⏳ Pendiente</span></td><td><span class="chip chip-pend">⏳ Pendiente</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 6: VISTA EJECUTIVA ===================== -->
+  <section class="panel" id="panel-ejecutivo">
+    <div class="exec-hero">
+      <span class="badge">Terceros autorizados · Marina Mercante</span>
+      <h2>Medket Centro Médico — resumen ejecutivo</h2>
+      <div class="exec-stats">
+        <div class="exec-stat"><div class="es-num">+1,000</div><div class="es-label">Pacientes atendidos</div></div>
+        <div class="exec-stat"><div class="es-num">3</div><div class="es-label">Sucursales activas</div></div>
+        <div class="exec-stat"><div class="es-num">148</div><div class="es-label">Pacientes este mes</div></div>
+        <div class="exec-stat"><div class="es-num">$612K</div><div class="es-label">Ingresos del mes</div></div>
+        <div class="exec-stat"><div class="es-num">26%</div><div class="es-label">Conversión bot WhatsApp</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Pacientes atendidos — tendencia de los últimos 6 meses</h3>
+      <div class="chart-box tall"><canvas id="chartExec"></canvas></div>
+    </div>
+
+    <div class="grid-3">
+      <div class="branch-card">
+        <h4>Boca del Río</h4>
+        <div class="b-row">Pacientes (mes)<b>65</b></div>
+        <div class="b-row">Satisfacción<b>97%</b></div>
+      </div>
+      <div class="branch-card">
+        <h4>Coatzacoalcos</h4>
+        <div class="b-row">Pacientes (mes)<b>50</b></div>
+        <div class="b-row">Satisfacción<b>96%</b></div>
+      </div>
+      <div class="branch-card">
+        <h4>Ensenada</h4>
+        <div class="b-row">Pacientes (mes)<b>33</b></div>
+        <div class="b-row">Satisfacción<b>95%</b></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>Dashboard de demostración con datos ficticios · Medket Centro Médico · Generado por ExcelentIA</footer>
+
+<script>
+  // ---------- TABS ----------
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel');
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>b.classList.remove('active'));
+      panels.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------- CHART DEFAULTS ----------
+  Chart.defaults.font.family = "'Manrope', sans-serif";
+  Chart.defaults.color = '#5b6b85';
+  const azul = '#1b2c5e', turquesa = '#4ba4c0', ambar = '#e6bc40', brisa = '#b8e4f2', verde = '#3fa86b', rojo = '#d6534a';
+  const meses6 = ['Ene','Feb','Mar','Abr','May','Jun'];
+
+  // Sucursales - pacientes por mes
+  new Chart(document.getElementById('chartBranches'), {
+    type: 'bar',
+    data: {
+      labels: meses6,
+      datasets: [
+        { label:'Boca del Río', data:[45,48,52,58,61,65], backgroundColor: azul, borderRadius:5 },
+        { label:'Coatzacoalcos', data:[38,40,42,39,45,50], backgroundColor: turquesa, borderRadius:5 },
+        { label:'Ensenada', data:[22,25,24,28,30,33], backgroundColor: brisa, borderRadius:5 },
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } },
+      scales:{ y:{ beginAtZero:true, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
+
+  // Tiempos promedio
+  new Chart(document.getElementById('chartTimes'), {
+    type: 'bar',
+    data: {
+      labels: ['Boca del Río','Coatzacoalcos','Ensenada'],
+      datasets: [{ label:'Días promedio', data:[4.2,5.1,6.8], backgroundColor:[azul,turquesa,ambar], borderRadius:6 }]
+    },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ x:{ beginAtZero:true, grid:{ color:'#eef3f8' } }, y:{ grid:{ display:false } } }
+    }
+  });
+
+  // INE correctos/error
+  new Chart(document.getElementById('chartIne'), {
+    type: 'doughnut',
+    data: { labels:['Correctos','Con error'], datasets:[{ data:[33,5], backgroundColor:[verde, rojo], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
+      plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } } }
+  });
+
+  // Conversaciones últimos 14 días
+  new Chart(document.getElementById('chartConv'), {
+    type: 'line',
+    data: {
+      labels: Array.from({length:14}, (_,i)=> 'D'+(i+1)),
+      datasets: [{
+        label:'Conversaciones', data:[8,10,7,12,15,11,9,13,14,16,12,18,15,17],
+        borderColor: turquesa, backgroundColor:'rgba(75,164,192,0.12)', fill:true, tension:.35, pointRadius:3
+      }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:true, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
+
+  // Ingresos por sucursal
+  new Chart(document.getElementById('chartIncomeBranch'), {
+    type:'bar',
+    data:{ labels:['Boca del Río','Coatzacoalcos','Ensenada'],
+      datasets:[{ data:[268000,210000,134000], backgroundColor:[azul,turquesa,ambar], borderRadius:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'$'+(v/1000)+'K' }, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
+
+  // Origen de pacientes
+  new Chart(document.getElementById('chartOrigin'), {
+    type:'doughnut',
+    data:{ labels:['Aspirantes UMPM','Navieras','Particulares','Empresas'],
+      datasets:[{ data:[40,35,20,5], backgroundColor:[azul,turquesa,ambar,brisa], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } } }
+  });
+
+  // Ingresos últimos 6 meses
+  new Chart(document.getElementById('chartIncomeTrend'), {
+    type:'line',
+    data:{ labels: meses6, datasets:[{
+      label:'Ingresos', data:[470000,505000,520000,548000,562000,612000],
+      borderColor: azul, backgroundColor:'rgba(27,44,94,0.08)', fill:true, tension:.35, pointRadius:4, pointBackgroundColor: ambar
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:false, ticks:{ callback:v=>'$'+(v/1000)+'K' }, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
+
+  // Vista ejecutiva - tendencia
+  new Chart(document.getElementById('chartExec'), {
+    type:'line',
+    data:{ labels: meses6, datasets:[{
+      label:'Pacientes atendidos', data:[105,113,118,125,140,148],
+      borderColor: turquesa, backgroundColor:'rgba(75,164,192,0.12)', fill:true, tension:.4, pointRadius:4, pointBackgroundColor: azul
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:false, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
+</script>
+</body>
+</html>
