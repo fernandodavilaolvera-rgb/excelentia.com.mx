@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4P Logistics — Panel de Control (Versión de Validación)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+  :root{
+    --bg:#f5f6f8; --card:#ffffff; --border:#dde1e9;
+    --header-grad: linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);
+    --accent:#4a9fd4; --accent-dark:#1a3a6b;
+    --text:#1a2035; --text2:#4a5068; --text3:#8a90a0;
+    --green:#1f9d55; --red:#c0392b; --amber:#c98a1f;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:'Manrope',sans-serif; font-size:14px; }
+
+  .topbar{ background:var(--header-grad); border-bottom:3px solid var(--accent); padding:16px 24px; color:#fff; }
+  .topbar-inner{ max-width:1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .topbar h1{ font-size:18px; margin:0; font-weight:800; }
+  .topbar .sub{ font-size:12px; opacity:.85; margin-top:2px; }
+
+  .banner{
+    max-width:1180px; margin:16px auto 0; padding:10px 16px;
+    background:#fff4e2; border:1px solid #f0d6a8; border-left:4px solid var(--amber);
+    border-radius:6px; font-size:12.5px; color:#7a5a16;
+  }
+
+  .tabnav{ max-width:1180px; margin:16px auto 0; padding:0 16px; display:flex; gap:6px; flex-wrap:wrap; border-bottom:2px solid var(--border); }
+  .tab-btn{
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:13px; color:var(--text2);
+    background:none; border:none; padding:10px 16px; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px;
+  }
+  .tab-btn.active{ color:var(--accent-dark); border-bottom-color:var(--accent); }
+  .tab-btn:hover{ color:var(--accent-dark); }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:18px 16px 50px; }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .filters{ display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 18px; }
+  .filter-btn{
+    border:1.5px solid var(--accent); background:#fff; color:var(--accent-dark);
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:12.5px;
+    padding:7px 14px; border-radius:20px; cursor:pointer; transition:.15s;
+  }
+  .filter-btn.active, .filter-btn:hover{ background:var(--accent-dark); color:#fff; border-color:var(--accent-dark); }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+  .kpi{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 18px; }
+  .kpi .label{ font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.4px; }
+  .kpi .value{ font-size:24px; font-weight:800; color:var(--accent-dark); margin-top:4px; }
+  .kpi .delta{ font-size:11.5px; margin-top:4px; color:var(--text3); }
+  .kpi .delta.pos{ color:var(--green); } .kpi .delta.warn{ color:var(--red); }
+
+  .grid-2{ display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-bottom:16px; }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:16px; }
+  .card-head{ background:#dce8f7; padding:11px 16px; font-weight:700; font-size:13.5px; color:var(--accent-dark); }
+  .card-body{ padding:16px; }
+  .chart-box{ position:relative; height:270px; }
+  .chart-box.tall{ height:330px; }
+  .chart-box.short{ height:220px; }
+
+  .alert-list{ display:flex; flex-direction:column; gap:8px; }
+  .alert-item{
+    display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:6px;
+    background:#f0f6ff; border:1px solid #c8d9f0; border-left:4px solid var(--accent); font-size:12.5px; color:var(--text2);
+  }
+  .alert-item.danger{ background:#fdecea; border-color:#f3c5c0; border-left-color:var(--red); }
+  .alert-item .ic{ font-size:15px; }
+  .legend-note{ font-size:11px; color:var(--text3); margin-top:8px; }
+
+  table.data-table{ width:100%; border-collapse:collapse; font-size:12px; }
+  table.data-table th{ background:var(--accent-dark); color:#fff; padding:7px 9px; text-align:left; font-weight:700; position:sticky; top:0; }
+  table.data-table td{ padding:6px 9px; border-bottom:1px solid var(--border); color:var(--text2); }
+  table.data-table tr:nth-child(even) td{ background:#f9fafc; }
+  .table-scroll{ max-height:360px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; }
+  .badge{ display:inline-block; padding:2px 8px; border-radius:20px; font-size:10.5px; font-weight:700; }
+  .badge.activo{ background:#e3f6ea; color:var(--green); }
+  .badge.pendiente{ background:#fdecea; color:var(--red); }
+  .badge.si{ background:#e9f3ff; color:var(--accent-dark); }
+  .badge.gap{ background:#fdecea; color:var(--red); }
+  .badge.ok{ background:#e3f6ea; color:var(--green); }
+
+  .dir-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .dir-row{ display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:12.5px; }
+  .dir-row:last-child{ border-bottom:none; }
+  .dir-name{ color:var(--text); font-weight:600; }
+  .dir-resp{ color:var(--text3); font-size:11.5px; }
+
+  .footer{ background:var(--header-grad); border-top:3px solid var(--accent); color:#fff; text-align:center; font-size:12.5px; padding:14px 0; margin-top:10px; }
+
+  @media (max-width:900px){
+    .kpi-row{ grid-template-columns:repeat(2,1fr); }
+    .grid-2{ grid-template-columns:1fr; }
+    .dir-grid{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <h1>4P Logistics — Panel de Control</h1>
+      <div class="sub">Versión de validación · para revisar con el dueño</div>
+    </div>
+    <div class="sub" style="text-align:right;">Datos reales · congelados al 26 jun 2026</div>
+  </div>
+</div>
+
+<div class="banner">
+  ⚠️ Esta es una versión de <strong>validación</strong>, no la versión final: usa datos reales pero "congelados" (no se actualiza solo todavía). Su objetivo es que el dueño diga qué le sirve, qué le falta y qué filtros quiere — la automatización en vivo viene después de validar esto.
+</div>
+
+<div class="tabnav" id="tabnav">
+  <button class="tab-btn active" data-tab="ejecutivo">📌 Ejecutivo</button>
+  <button class="tab-btn" data-tab="viajes">🚚 Viajes</button>
+  <button class="tab-btn" data-tab="facturacion">💳 Facturación</button>
+  <button class="tab-btn" data-tab="tarifario">🧾 Tarifario 4PL</button>
+  <button class="tab-btn" data-tab="directorio">👥 Clientes y Proveedores</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ===================== TAB: EJECUTIVO ===================== -->
+  <div class="tab-panel active" id="tab-ejecutivo">
+    <div class="kpi-row">
+      <div class="kpi"><div class="label">Viajes (1 mes)</div><div class="value">244</div><div class="delta">68% completados o entregados</div></div>
+      <div class="kpi"><div class="label">Costo de fletes</div><div class="value">$2.06M</div><div class="delta">Promedio $8,868 / viaje</div></div>
+      <div class="kpi"><div class="label">Facturas por pagar</div><div class="value">$112,285</div><div class="delta warn">19 facturas, 100% pendientes</div></div>
+      <div class="kpi"><div class="label">Ciudades sin tarifa</div><div class="value">18/35</div><div class="delta warn">en el Tarifario 4PL</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">🔔 Lo más importante de un vistazo</div>
+      <div class="card-body">
+        <div class="alert-list">
+          <div class="alert-item danger"><span class="ic">⚠️</span><span><strong>2 rutas con margen negativo:</strong> Querétaro y Guadalajara — el costo real salió más caro que la tarifa de venta. Ver pestaña Viajes.</span></div>
+          <div class="alert-item danger"><span class="ic">⚠️</span><span><strong>$112,285</strong> en facturas de proveedores, 100% en status "Pendiente" — sin ninguna pagada en la muestra. Ver pestaña Facturación.</span></div>
+          <div class="alert-item"><span class="ic">ℹ️</span><span><strong>18 de 35 ciudades</strong> del Tarifario 4PL no tienen tarifa cargada — se cotizan hoy sin referencia. Ver pestaña Tarifario.</span></div>
+          <div class="alert-item"><span class="ic">ℹ️</span><span><strong>"4PL" aparece como cliente y como proveedor</strong> al mismo tiempo dentro de la plataforma — vale la pena confirmarlo con el dueño. Ver pestaña Clientes y Proveedores.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">🗺️ Qué encontrarás en cada pestaña</div>
+      <div class="card-body" style="color:var(--text2); font-size:13px;">
+        <p><strong>Viajes</strong> — estatus de la operación, mezcla de flota y el comparativo de margen por ciudad, con filtro por tipo de unidad.</p>
+        <p><strong>Facturación</strong> — cuánto se debe a proveedores y a quién.</p>
+        <p><strong>Tarifario 4PL</strong> — la tabla de precios actual, con los huecos resaltados.</p>
+        <p><strong>Clientes y Proveedores</strong> — el directorio de con quién trabaja 4P hoy.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: VIAJES ===================== -->
+  <div class="tab-panel" id="tab-viajes">
+
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-tipo="Todas">Todas las unidades</button>
+      <button class="filter-btn" data-tipo="1.5 toneladas">1.5 toneladas</button>
+      <button class="filter-btn" data-tipo="3.5 toneladas">3.5 toneladas</button>
+      <button class="filter-btn" data-tipo="Torton / rabon">Torton / rabón</button>
+      <button class="filter-btn" data-tipo="Trailer">Trailer</button>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi"><div class="label">Viajes en el periodo</div><div class="value" id="kpiTotal">244</div><div class="delta">1.5 toneladas es la unidad más usada</div></div>
+      <div class="kpi"><div class="label">Completados / Entregados</div><div class="value" id="kpiDone">167</div><div class="delta pos" id="kpiDonePct">68% del total</div></div>
+      <div class="kpi"><div class="label">Costo de fletes</div><div class="value" id="kpiCosto">$2,057,071</div><div class="delta">Promedio $8,868 por viaje</div></div>
+      <div class="kpi"><div class="label">Rutas con alerta de margen</div><div class="value" style="color:var(--red)">2</div><div class="delta warn">Querétaro y Guadalajara</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">📊 Viajes por estatus</div>
+        <div class="card-body"><div class="chart-box"><canvas id="statusChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">🚚 Mezcla de flota usada</div>
+        <div class="card-body"><div class="chart-box"><canvas id="tipoChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">💰 Margen: costo real vs. Tarifario 4PL (unidad 1.5 ton, por ciudad)</div>
+      <div class="card-body">
+        <div class="chart-box tall"><canvas id="margenChart"></canvas></div>
+        <div class="legend-note">🔴 Rojo = el costo real fue mayor que la tarifa de venta (margen negativo) · 🔵 Azul = margen positivo · Muestra de 1 a 4 viajes por ciudad, solo un mes.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📍 Destinos más frecuentes</div>
+      <div class="card-body"><div class="chart-box short"><canvas id="destinoChart"></canvas></div></div>
+    </div>
+
+  </div>
+
+  <!-- ===================== TAB: FACTURACION ===================== -->
+  <div class="tab-panel" id="tab-facturacion">
+
+    <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+      <div class="kpi"><div class="label">Total por pagar</div><div class="value">$112,285</div><div class="delta warn">19 facturas (muestra)</div></div>
+      <div class="kpi"><div class="label">% en status pendiente</div><div class="value" style="color:var(--red)">100%</div><div class="delta">Ninguna marcada como pagada</div></div>
+      <div class="kpi"><div class="label">Proveedor con mayor saldo</div><div class="value" style="font-size:18px;">Noe López Mendiola</div><div class="delta">$62,929 (56% del total)</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">💵 Saldo pendiente por proveedor</div>
+        <div class="card-body"><div class="chart-box"><canvas id="facProveedorChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">📄 Factura vs. Complemento</div>
+        <div class="card-body"><div class="chart-box"><canvas id="facTipoChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📋 Detalle de facturas (muestra de 19 registros)</div>
+      <div class="card-body">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>No.</th><th>Viaje</th><th>Tipo</th><th>Fecha</th><th>Folio</th><th>Proveedor</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody id="facturasBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== TAB: TARIFARIO 4PL ===================== -->
+  <div class="tab-panel" id="tab-tarifario">
+
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi"><div class="label">Ciudades con tarifa</div><div class="value pos" style="color:var(--green)">17/35</div><div class="delta">49% del catálogo</div></div>
+      <div class="kpi"><div class="label">Ciudades sin tarifa</div><div class="value" style="color:var(--red)">18/35</div><div class="delta warn">Se cotizan a mano</div></div>
+      <div class="kpi"><div class="label">Tarifa típica · 1.5 ton</div><div class="value">$11,445</div><div class="delta">Mediana, ciudades con tarifa</div></div>
+      <div class="kpi"><div class="label">Tarifa típica · Trailer</div><div class="value">$21,321</div><div class="delta">Mediana, ciudades con tarifa</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">🧾 Tabla de tarifas por ciudad (4 unidades más usadas)</div>
+      <div class="card-body">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>Ciudad</th><th>Trailer</th><th>1.5 ton</th><th>3.5 ton</th><th>Torton/rabón</th><th>Estatus</th></tr></thead>
+            <tbody id="tarifarioBody"></tbody>
+          </table>
+        </div>
+        <div class="legend-note">Las columnas de 500kg, 750kg, 700kg, 1 y 2 toneladas aparecen vacías para todas las ciudades — no se están usando hoy.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== TAB: CLIENTES Y PROVEEDORES ===================== -->
+  <div class="tab-panel" id="tab-directorio">
+
+    <div class="alert-item" style="margin-bottom:16px;"><span class="ic">ℹ️</span><span><strong>"4PL" aparece dos veces:</strong> como cliente (4pl- Playmobill, Spradmex, Clipper, Multi cuentas) y como proveedor ("TRANSPORTE 4PL", con flota propia chica). El dueño ya confirmó que sí tienen algunas unidades propias que usan ocasionalmente — esto explica el doble rol.</span></div>
+
+    <div class="dir-grid">
+      <div class="card">
+        <div class="card-head">👤 Clientes (13 activos)</div>
+        <div class="card-body" id="clientesList"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">🚛 Proveedores (15 activos)</div>
+        <div class="card-body" id="proveedoresList"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">Diagnóstico preparado por ExcelentIA para 4P Logistics</div>
+
+<script>
+/* ============ DATOS REALES (congelados) ============ */
+const DATA_BY_TIPO = {
+  'Todas':          { Completado:94, Entregado:73, Iniciado:40, Asignado:18, Solicitado:11, Proveedor:7, Aceptado:1, total:244, costo:2057071 },
+  '1.5 toneladas':  { Completado:43, Entregado:44, Iniciado:22, Asignado:15, Solicitado:7,  Proveedor:5, Aceptado:1, total:137, costo:956331 },
+  '3.5 toneladas':  { Completado:32, Entregado:17, Iniciado:11, Asignado:1,  Solicitado:4,  Proveedor:0, Aceptado:0, total:65,  costo:590801 },
+  'Torton / rabon': { Completado:15, Entregado:9,  Iniciado:2,  Asignado:2,  Solicitado:0,  Proveedor:2, Aceptado:0, total:30,  costo:368039 },
+  'Trailer':        { Completado:4,  Entregado:3,  Iniciado:5,  Asignado:0,  Solicitado:0,  Proveedor:0, Aceptado:0, total:12,  costo:141900 }
+};
+const STATUS_LABELS = ['Completado','Entregado','Iniciado','Asignado','Solicitado','Proveedor','Aceptado'];
+const STATUS_COLORS = ['#1f9d55','#4a9fd4','#c98a1f','#7c6fd1','#e07a3f','#8a90a0','#c0392b'];
+const TIPO_TOTALS = { '1.5 toneladas':137, '3.5 toneladas':65, 'Torton / rabon':30, 'Trailer':12 };
+
+const MARGEN_CIUDADES = [
+  { ciudad:'Querétaro',    real:6500,  tarifa:5533,  margen:-17.5 },
+  { ciudad:'Guadalajara',  real:17513, tarifa:16225, margen:-7.9 },
+  { ciudad:'Jilotepec',    real:3100,  tarifa:3488,  margen:11.1 },
+  { ciudad:'Mérida',       real:31142, tarifa:36493, margen:14.7 },
+  { ciudad:'Monterrey',    real:15468, tarifa:18929, margen:18.3 },
+  { ciudad:'Villahermosa', real:18872, tarifa:24877, margen:24.1 },
+  { ciudad:'Culiacán',     real:26452, tarifa:36212, margen:27.0 },
+  { ciudad:'Chihuahua',    real:25875, tarifa:37670, margen:31.3 },
+  { ciudad:'Puebla',       real:5400,  tarifa:8829,  margen:38.8 },
+  { ciudad:'Mexicali',     real:52440, tarifa:90916, margen:42.3 },
+  { ciudad:'Chalco',       real:2875,  tarifa:5193,  margen:44.6 }
+];
+
+const DESTINOS = [
+  ['Oficina Playmobil Corporativo',10],['Liverpool CEDIS Jilotepec',7],['Danhos Cuautitlán',7],
+  ['Porteo',5],['Walmart 7464-Supercenter',5],['Walmart 7471-7459 Chalco',5],
+  ['Walmart 7482-CEDIS Sta Bárbara',4],['Walmart 7494-Bodega Cuautitlán',4],
+  ['Juguetrón CEDIS Tultitlán',3],['Toys R Us Santa Fe',2]
+];
+
+const FACTURAS = [
+  ['00804','01592','Factura','22-Jun-26','R79','Miguel Ángel Rodríguez Onofre',2376.00,'Pendiente'],
+  ['00802','01520','Factura','18-Jun-26','236','Noe López Mendiola',2060.80,'Pendiente'],
+  ['00801','01373','Complemento','18-Jun-26','235','Noe López Mendiola',1740.00,'Pendiente'],
+  ['00800','01373','Factura','18-Jun-26','234','Noe López Mendiola',14112.00,'Pendiente'],
+  ['00799','01375','Factura','18-Jun-26','233','Noe López Mendiola',17324.16,'Pendiente'],
+  ['00798','01377','Factura','18-Jun-26','F232','Noe López Mendiola',14588.00,'Pendiente'],
+  ['00797','01411','Factura','18-Jun-26','231','Noe López Mendiola',3584.00,'Pendiente'],
+  ['00796','01463','Factura','18-Jun-26','230','Noe López Mendiola',9520.00,'Pendiente'],
+  ['00795','01325','Factura','18-Jun-26','6130','Fabiola Martínez Martínez',6160.00,'Pendiente'],
+  ['00803','01526','Complemento','17-Jun-26','10781','Trucks & Roads',928.00,'Pendiente'],
+  ['00791','01527','Factura','17-Jun-26','10780','Trucks & Roads',10416.00,'Pendiente'],
+  ['00786','01401','Complemento','17-Jun-26','10778','Trucks & Roads',464.00,'Pendiente'],
+  ['00784','01365','Complemento','17-Jun-26','10777','Trucks & Roads',8584.00,'Pendiente'],
+  ['00782','01431','Complemento','17-Jun-26','10776','Trucks & Roads',5220.00,'Pendiente'],
+  ['00780','01581','Factura','15-Jun-26','R74','Miguel Ángel Rodríguez Onofre',5640.00,'Pendiente'],
+  ['00779','01447','Complemento','16-Jun-26','10773','Trucks & Roads',2320.00,'Pendiente'],
+  ['00777','01476','Complemento','16-Jun-26','10772','Trucks & Roads',1392.00,'Pendiente'],
+  ['00775','01550','Factura','15-Jun-26','R71','Miguel Ángel Rodríguez Onofre',4928.00,'Pendiente'],
+  ['00773','01552','Complemento','15-Jun-26','1079','Lizzet Falcón Mota',928.00,'Pendiente']
+];
+
+const TARIFARIO = [
+  ['CDMX / Edo. México',6929,2337,2863,4906,'ok'],['Chalco',9786,5193,6600,7463,'ok'],
+  ['Ajusco',11513,5193,6600,7463,'ok'],['Toluca',11513,5193,6600,7463,'ok'],
+  ['Guadalajara',29849,16225,19250,23454,'ok'],['Monterrey',32237,18929,22000,26038,'ok'],
+  ['Culiacán',69293,36212,42900,49039,'ok'],['Villahermosa',43708,24877,29700,35181,'ok'],
+  ['Chihuahua',86350,37670,42768,48357,'ok'],['Mérida',69293,36493,42900,49039,'ok'],
+  ['Puebla',15991,8829,9385,10604,'ok'],['Querétaro',14925,5533,8316,11012,'ok'],
+  ['Veracruz',28783,15304,17820,21785,'ok'],['Silao',21321,11445,17600,19190,'ok'],
+  ['Mexicali',172700,90916,100980,97864,'ok'],['Tepeji',9594,4905,6160,7037,'ok'],
+  ['Jilotepec',9594,3488,4400,5864,'ok'],
+  ['Morelos',null,null,null,null,'gap'],['Guanajuato',null,null,null,null,'gap'],
+  ['Jalisco',null,null,null,null,'gap'],['Michoacán',null,null,null,null,'gap'],
+  ['CDMX +30KM',null,null,null,null,'gap'],['Pachuca, Hgo.',null,null,null,null,'gap'],
+  ['Cuernavaca',null,null,null,null,'gap'],['Aguascalientes',null,null,null,null,'gap'],
+  ['Coahuila',null,null,null,null,'gap'],['Tijuana',null,null,null,null,'gap'],
+  ['Campeche',null,null,null,null,'gap'],['San Luis Potosí',null,null,null,null,'gap'],
+  ['Zacatecas',null,null,null,null,'gap'],['Sonora',null,null,null,null,'gap'],
+  ['Tlaxcala',null,null,null,null,'gap'],['Chiapas',null,null,null,null,'gap'],
+  ['Oaxaca',null,null,null,null,'gap'],['Guerrero',null,null,null,null,'gap']
+];
+
+const CLIENTES = [
+  ['LYC Soluciones- Batab','Denisse Copado'],['LYC Soluciones- Merik','Denisse Copado Juárez'],
+  ['LYC Soluciones- Fletes','Luis López Pérez'],['4pl- Multi cuentas','Héctor Sánchez'],
+  ['4pl- Spradmex','Héctor Sánchez'],['4pl- Clipper','Héctor Sánchez'],
+  ['4pl- Playmobil','Guadalupe González'],['SAP 3PL','Eduardo Ramírez'],
+  ['Bandai','Brenda Muñoz'],['Comercializadora Milenio','Mario Alberto Domínguez'],
+  ['TOTTO','Erick Alberto Rodríguez Santiago'],['Desarrollo Web Mx','José Ramírez']
+];
+const PROVEEDORES = [
+  ['Transportes Mas','Antonia Castro'],['Transporte 4PL','4PL'],
+  ['Transporte González','Luis Daniel González Bermúdez'],['Transporte Rodbar','Miguel Ángel Rodríguez Onofre'],
+  ['Transporte S.O.R.','Omar Pozos Sosa'],['Transguca','Alberto Callejas Gutiérrez'],
+  ['Armada y Multiservicios','Denise Copado'],['Trasportes Mendiola','Rosario Mendiola Gaspar'],
+  ['Trasportes García','Felipe García García'],['Trasportes Bautista','Juan Bautista Chávez'],
+  ['Mel Logistics','Miguel Ángel Rodríguez Onofre'],['Alfa Trasportes','Alfredo Álvares Curiel'],
+  ['TYR','María Fernanda Ortiz Roldán'],['Trasportes Pérez','Luis Pérez Alvarado']
+];
+
+const fmt = n => '$' + Math.round(n).toLocaleString('es-MX');
+
+/* ============ TABS ============ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ============ TAB VIAJES ============ */
+let statusChart, tipoChart, margenChart, destinoChart;
+
+function buildStatusChart(tipo){
+  const d = DATA_BY_TIPO[tipo];
+  const values = STATUS_LABELS.map(s => d[s]);
+  if(statusChart) statusChart.destroy();
+  statusChart = new Chart(document.getElementById('statusChart'), {
+    type:'bar',
+    data:{ labels:STATUS_LABELS, datasets:[{ data:values, backgroundColor:STATUS_COLORS, borderRadius:5 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ x:{ grid:{ color:'#eef0f4' } }, y:{ grid:{ display:false } } } }
+  });
+}
+function buildTipoChart(){
+  tipoChart = new Chart(document.getElementById('tipoChart'), {
+    type:'doughnut',
+    data:{ labels:Object.keys(TIPO_TOTALS), datasets:[{ data:Object.values(TIPO_TOTALS), backgroundColor:['#1a3a6b','#4a9fd4','#7c6fd1','#c98a1f'] }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:11 } } } } }
+  });
+}
+function buildMargenChart(){
+  margenChart = new Chart(document.getElementById('margenChart'), {
+    type:'bar',
+    data:{ labels:MARGEN_CIUDADES.map(c => c.ciudad),
+      datasets:[
+        { label:'Costo real', data:MARGEN_CIUDADES.map(c => c.real), backgroundColor:MARGEN_CIUDADES.map(c => c.margen<0 ? '#c0392b' : '#1a3a6b'), borderRadius:4 },
+        { label:'Tarifa 4PL', data:MARGEN_CIUDADES.map(c => c.tarifa), backgroundColor:'#aac8e8', borderRadius:4 }
+      ] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom' }, tooltip:{ callbacks:{ label: ctx => ctx.dataset.label + ': ' + fmt(ctx.raw) } } },
+      scales:{ y:{ ticks:{ callback:v => fmt(v) }, grid:{ color:'#eef0f4' } }, x:{ grid:{ display:false } } } }
+  });
+}
+function buildDestinoChart(){
+  destinoChart = new Chart(document.getElementById('destinoChart'), {
+    type:'bar',
+    data:{ labels:DESTINOS.map(d=>d[0]), datasets:[{ data:DESTINOS.map(d=>d[1]), backgroundColor:'#4a9fd4', borderRadius:4 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ x:{ grid:{ color:'#eef0f4' }, ticks:{ stepSize:2 } }, y:{ grid:{ display:false }, ticks:{ font:{ size:10.5 } } } } }
+  });
+}
+function setKpis(tipo){
+  const d = DATA_BY_TIPO[tipo];
+  const done = d.Completado + d.Entregado;
+  document.getElementById('kpiTotal').textContent = d.total;
+  document.getElementById('kpiDone').textContent = done;
+  document.getElementById('kpiDonePct').textContent = Math.round(done/d.total*100) + '% del total';
+  document.getElementById('kpiCosto').textContent = fmt(d.costo);
+}
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tipo = btn.dataset.tipo;
+    setKpis(tipo);
+    buildStatusChart(tipo);
+  });
+});
+
+/* ============ TAB FACTURACION ============ */
+function buildFacturacion(){
+  const porProveedor = {};
+  FACTURAS.forEach(f => { porProveedor[f[5]] = (porProveedor[f[5]]||0) + f[6]; });
+  new Chart(document.getElementById('facProveedorChart'), {
+    type:'bar',
+    data:{ labels:Object.keys(porProveedor), datasets:[{ data:Object.values(porProveedor), backgroundColor:'#1a3a6b', borderRadius:4 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => fmt(ctx.raw) } } },
+      scales:{ x:{ ticks:{ callback:v=>fmt(v) }, grid:{ color:'#eef0f4' } }, y:{ grid:{ display:false }, ticks:{ font:{ size:10.5 } } } } }
+  });
+  const facturaN = FACTURAS.filter(f=>f[2]==='Factura').length;
+  const complN = FACTURAS.filter(f=>f[2]==='Complemento').length;
+  new Chart(document.getElementById('facTipoChart'), {
+    type:'doughnut',
+    data:{ labels:['Factura','Complemento'], datasets:[{ data:[facturaN, complN], backgroundColor:['#1a3a6b','#aac8e8'] }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } } }
+  });
+  const body = document.getElementById('facturasBody');
+  FACTURAS.forEach(f => {
+    body.innerHTML += `<tr><td>${f[0]}</td><td>${f[1]}</td><td>${f[2]}</td><td>${f[3]}</td><td>${f[4]}</td><td>${f[5]}</td><td>${fmt(f[6])}</td><td><span class="badge pendiente">${f[7]}</span></td></tr>`;
+  });
+}
+
+/* ============ TAB TARIFARIO ============ */
+function buildTarifario(){
+  const body = document.getElementById('tarifarioBody');
+  TARIFARIO.forEach(r => {
+    const [ciudad,trailer,t15,t35,torton,estado] = r;
+    const cell = v => v===null ? '—' : fmt(v);
+    const badge = estado==='ok' ? '<span class="badge ok">Con tarifa</span>' : '<span class="badge gap">Sin tarifa</span>';
+    body.innerHTML += `<tr><td>${ciudad}</td><td>${cell(trailer)}</td><td>${cell(t15)}</td><td>${cell(t35)}</td><td>${cell(torton)}</td><td>${badge}</td></tr>`;
+  });
+}
+
+/* ============ TAB DIRECTORIO ============ */
+function buildDirectorio(){
+  const cl = document.getElementById('clientesList');
+  CLIENTES.forEach(c => { cl.innerHTML += `<div class="dir-row"><div><div class="dir-name">${c[0]}</div><div class="dir-resp">${c[1]}</div></div><span class="badge activo">Activo</span></div>`; });
+  const pv = document.getElementById('proveedoresList');
+  PROVEEDORES.forEach(p => { pv.innerHTML += `<div class="dir-row"><div><div class="dir-name">${p[0]}</div><div class="dir-resp">${p[1]}</div></div><span class="badge activo">Activo</span></div>`; });
+}
+
+/* ============ INIT ============ */
+buildStatusChart('Todas'); buildTipoChart(); buildMargenChart(); buildDestinoChart(); setKpis('Todas');
+buildFacturacion(); buildTarifario(); buildDirectorio();
+</script>
+
+</body>
+</html>
