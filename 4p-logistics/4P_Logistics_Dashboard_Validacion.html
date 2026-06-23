@@ -22,6 +22,16 @@
   .topbar h1{ font-size:18px; margin:0; font-weight:800; }
   .topbar .sub{ font-size:12px; opacity:.85; margin-top:2px; }
 
+  .logo-header-wrap{ display:flex; align-items:center; gap:.9rem; margin-bottom:10px; }
+  .logo-box{
+    background:#fff; border-radius:10px; padding:.4rem .75rem;
+    display:flex; align-items:center; justify-content:center;
+    min-width:80px; min-height:52px; flex-shrink:0;
+  }
+  .logo-box img{ height:48px; width:auto; display:block; }
+  .logo-fallback{ font-family:'Manrope',sans-serif; font-size:15px; font-weight:800; color:#1a3a6b; display:none; }
+  .logo-slogan{ font-family:'Manrope',sans-serif; font-size:13px; font-weight:500; color:#ffffff; letter-spacing:.2px; }
+
   .banner{
     max-width:1180px; margin:16px auto 0; padding:10px 16px;
     background:#fff4e2; border:1px solid #f0d6a8; border-left:4px solid var(--amber);
@@ -97,6 +107,10 @@
     .grid-2{ grid-template-columns:1fr; }
     .dir-grid{ grid-template-columns:1fr; }
   }
+  @media (max-width:600px){
+    .logo-header-wrap{ flex-direction:column; align-items:flex-start; gap:.3rem; }
+    .logo-slogan{ font-size:11px; }
+  }
 </style>
 </head>
 <body>
@@ -104,6 +118,14 @@
 <div class="topbar">
   <div class="topbar-inner">
     <div>
+      <div class="logo-header-wrap">
+        <div class="logo-box">
+          <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+          <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+        </div>
+        <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+      </div>
       <h1>4P Logistics — Panel de Control</h1>
       <div class="sub">Versión de validación · para revisar con el dueño</div>
     </div>
@@ -112,7 +134,7 @@
 </div>
 
 <div class="banner">
-  ⚠️ Esta es una versión de <strong>validación</strong>, no la versión final: usa datos reales pero "congelados" (no se actualiza solo todavía). Su objetivo es que el dueño diga qué le sirve, qué le falta y qué filtros quiere — la automatización en vivo viene después de validar esto.
+  ⚠️ Esta es una versión de <strong>validación</strong>, no la versión final: usa datos reales pero "congelados" (no se actualiza solo todavía). Su objetivo es que 4P Logistics valide qué información le es de utilidad en el Dashboard — la automatización en vivo viene después de validar esto.
 </div>
 
 <div class="tabnav" id="tabnav">
