@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propuesta Comercial — Club Berimbau</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #1a3575;
+    --naranja: #F37021;
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --borde: #dde1e9;
+    --header-grad: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 60%, #1e5096 100%);
+    --header-acento: #4a9fd4;
+    --cab-card: #dce8f7;
+    --texto: #1a2035;
+    --texto-sec: #4a5068;
+    --texto-gris: #8a90a0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family:'Manrope',sans-serif; background:var(--bg); color:var(--texto); font-size:14px; line-height:1.6; }
+
+  .header { background:var(--header-grad); border-bottom:3px solid var(--header-acento); padding:20px 0; }
+  .header-inner { max-width:860px; margin:0 auto; padding:0 24px; display:flex; justify-content:space-between; align-items:center; }
+  .logo-wrap { background:#fff; border-radius:12px; padding:10px 16px; display:flex; align-items:center; }
+  .header-logo { height:53px; width:auto; }
+  .logo-slogan-wrap { display:flex; align-items:center; gap:14px; }
+  .slogan-text { font-size:12px; font-weight:600; color:#ffffff; opacity:.9; line-height:1.4; }
+  .logo-fallback { font-family:'Manrope',sans-serif; font-size:15px; font-weight:800; color:#1a3a6b; display:none; }
+  .header-right { text-align:right; }
+  .header-label { font-size:11px; font-weight:400; color:#fff; opacity:.8; letter-spacing:.5px; text-transform:uppercase; }
+  .header-cliente { font-size:16px; font-weight:700; color:#fff; margin-top:2px; }
+
+  .contenido { max-width:860px; margin:0 auto; padding:28px 24px 60px; }
+
+  .prop-label { font-size:10px; font-weight:700; color:var(--naranja); letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+  .prop-titulo { font-size:24px; font-weight:800; color:var(--azul); line-height:1.3; margin-bottom:12px; }
+  .prop-linea { width:60px; height:3px; background:var(--naranja); border-radius:2px; margin-bottom:24px; }
+
+  .card { background:var(--card); border:1px solid var(--borde); border-radius:12px; margin-bottom:16px; overflow:hidden; }
+  .card-header { background:var(--cab-card); padding:10px 20px; font-size:11px; font-weight:700; color:var(--azul); text-transform:uppercase; letter-spacing:1px; }
+  .card-body { padding:20px; }
+
+  .datos-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; }
+  .dato-item { padding:6px 0; }
+  .dato-label { font-size:10px; font-weight:700; color:var(--texto-gris); text-transform:uppercase; letter-spacing:.5px; margin-bottom:2px; }
+  .dato-valor { font-size:13px; font-weight:600; color:var(--texto); }
+
+  .concepto-intro { font-size:13px; color:var(--texto-sec); line-height:1.7; margin-bottom:14px; }
+
+  .detalle-titulo { font-size:11px; font-weight:700; color:var(--azul); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; padding-bottom:6px; border-bottom:2px solid var(--cab-card); }
+  .detalle-bullets { list-style:none; }
+  .detalle-bullets > li { font-size:13px; color:var(--texto-sec); padding:8px 0; border-bottom:1px solid var(--bg); }
+  .detalle-bullets > li:last-child { border-bottom:none; }
+  .bullet-main { display:flex; align-items:flex-start; gap:10px; font-weight:700; color:var(--azul); margin-bottom:4px; }
+  .bullet-dot { width:7px; height:7px; background:var(--naranja); border-radius:50%; flex-shrink:0; margin-top:6px; }
+  .sub-bullets { list-style:none; margin-left:17px; margin-top:4px; }
+  .sub-bullets li { display:flex; align-items:flex-start; gap:8px; padding:3px 0; font-weight:400; color:var(--texto-sec); }
+  .sub-dot { width:4px; height:4px; background:var(--texto-gris); border-radius:50%; flex-shrink:0; margin-top:7px; }
+
+  .nota-card { background:#f0f6ff; border:1px solid #c8d9f0; border-left:4px solid #4a9fd4; border-radius:8px; padding:10px 16px; margin-top:16px; font-size:12px; color:var(--texto-sec); }
+  .nota-card strong { color:var(--azul); }
+
+  .tabla-info { width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:14px; }
+  .tabla-info thead th { background:var(--azul); color:#fff; padding:8px 12px; text-align:left; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
+  .tabla-info tbody tr:nth-child(even) { background:#f7f9fc; }
+  .tabla-info tbody td { padding:8px 12px; border-bottom:1px solid var(--borde); color:var(--texto-sec); vertical-align:top; }
+  .tabla-info tbody td strong { color:var(--texto); }
+  .gratis-tag { color:#1a8a4a; font-weight:700; }
+
+  .ejemplo-card { background:#eef4fc; border:1px solid var(--borde); border-left:4px solid var(--azul); border-radius:8px; padding:12px 16px; margin-top:10px; font-size:12.5px; color:var(--texto-sec); }
+  .ejemplo-card strong { color:var(--azul); }
+
+  .tabla-comercial { width:100%; border-collapse:collapse; font-size:13px; }
+  .tabla-comercial thead th { background:var(--azul); color:#ffffff; padding:10px 14px; text-align:left; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.5px; }
+  .tabla-comercial thead th:last-child { text-align:right; }
+  .tabla-comercial tbody tr:nth-child(even) { background:#f7f9fc; }
+  .tabla-comercial tbody td { padding:10px 14px; border-bottom:1px solid var(--borde); color:var(--texto); vertical-align:top; }
+  .td-monto { text-align:right !important; font-weight:600; }
+  .concepto-col { font-weight:500; }
+  .fila-subtotal td { padding:8px 14px; font-size:12px; color:var(--texto-sec); border-bottom:1px solid var(--borde); }
+  .fila-subtotal td:last-child { text-align:right; font-weight:600; color:var(--texto); }
+  .fila-total td { background:var(--azul); color:#ffffff !important; padding:12px 14px; font-weight:700; font-size:14px; }
+  .fila-total td:last-child { text-align:right; color:#ffffff !important; }
+  .total-letras { font-size:12px; font-style:italic; color:var(--texto-gris); margin-top:10px; }
+
+  .condiciones-lista { list-style:none; }
+  .condiciones-lista li { display:flex; align-items:flex-start; gap:10px; padding:6px 0; font-size:13px; color:var(--texto-sec); border-bottom:1px solid var(--bg); }
+  .condiciones-lista li:last-child { border-bottom:none; }
+  .check { color:var(--azul); font-weight:700; font-size:14px; flex-shrink:0; margin-top:1px; }
+
+  .firma-wrap { text-align:center; padding:10px 0; }
+  .firma-img { height:80px; width:auto; mix-blend-mode:multiply; margin-bottom:-12px; display:block; margin-left:auto; margin-right:auto; }
+  .firma-linea { width:200px; height:1.5px; background:var(--texto-gris); margin:0 auto 8px; }
+  .firma-nombre { font-size:14px; font-weight:700; color:var(--texto); }
+  .firma-puesto { font-size:12px; color:var(--texto-gris); margin-top:2px; }
+
+  .btn-imprimir { display:block; margin:0 auto 20px; padding:8px 20px; font-size:12px; font-family:'Manrope',sans-serif; font-weight:700; background:var(--azul); color:#fff; border:none; border-radius:8px; cursor:pointer; letter-spacing:.5px; }
+  .btn-imprimir:hover { background:#0f2250; }
+
+  .footer { background:var(--header-grad); border-top:3px solid var(--header-acento); padding:16px 24px; text-align:center; font-size:13px; color:#fff; }
+
+  @media (max-width:600px) {
+    .header-inner { flex-direction:column; gap:14px; align-items:flex-start; }
+    .header-right { text-align:left; }
+    .logo-slogan-wrap { flex-wrap:wrap; }
+    .slogan-text { font-size:11px; }
+    .datos-grid { grid-template-columns:1fr; }
+    .tabla-comercial, .tabla-info { display:block; overflow-x:auto; }
+    .prop-titulo { font-size:20px; }
+    .contenido { padding:20px 16px 40px; }
+    .card-body { padding:16px; }
+  }
+  @media print {
+    .btn-imprimir { display:none; }
+    body, .header, .card-header, thead th, .fila-total { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-slogan-wrap">
+      <div class="logo-wrap">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA" class="header-logo"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <div class="slogan-text">Inteligencia Artificial<br>con esencia Humana</div>
+    </div>
+    <div class="header-right">
+      <div class="header-label">Propuesta Comercial</div>
+      <div class="header-cliente">Club Berimbau</div>
+    </div>
+  </div>
+</header>
+
+<div class="contenido">
+
+  <div class="prop-label">Propuesta</div>
+  <h1 class="prop-titulo">Sistema de Gestión de Cobranza<br>y Comunicación con IA</h1>
+  <div class="prop-linea"></div>
+
+  <!-- DATOS -->
+  <div class="card">
+    <div class="card-header">Datos de la Propuesta</div>
+    <div class="card-body">
+      <div class="datos-grid">
+        <div class="dato-item"><div class="dato-label">Fecha</div><div class="dato-valor">24 de junio de 2026</div></div>
+        <div class="dato-item"><div class="dato-label">No. Cotización</div><div class="dato-valor">2406-2026a</div></div>
+        <div class="dato-item"><div class="dato-label">Empresa</div><div class="dato-valor">Club Berimbau</div></div>
+        <div class="dato-item"><div class="dato-label">Atención</div><div class="dato-valor">Ing. Enrique Medina</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETALLE DEL DESARROLLO -->
+  <div class="card">
+    <div class="card-header">Detalle del Desarrollo</div>
+    <div class="card-body">
+      <ul class="detalle-bullets">
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>1. Gestión visual de cartera vencida</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>Lista completa de socios con su estado de pago al día</li>
+            <li><span class="sub-dot"></span>Semáforo de morosidad en 4 segmentos automáticos: 0-30 días (olvido), 31-60 (problema temporal), 61-90 (riesgo alto), +90 (posible abandono)</li>
+            <li><span class="sub-dot"></span>Cálculo automático del interés moratorio (2.5% mensual prorrateado por día)</li>
+            <li><span class="sub-dot"></span>Detecta automáticamente el tipo de periodo de cada socio (mensual, trimestral, domiciliado, anual) y su regla de adeudo correspondiente</li>
+          </ul>
+        </li>
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>2. Envío manual de cobranza segmentado (s1-s4)</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>El equipo selecciona socios por segmento de morosidad y envía con un clic</li>
+            <li><span class="sub-dot"></span>Correo y WhatsApp en el mismo envío (con un solo toggle)</li>
+            <li><span class="sub-dot"></span>Mensajes con datos personalizados: nombre, membresía, meses de adeudo</li>
+          </ul>
+        </li>
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>3. Cinco módulos de avisos 100% automáticos</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>🎂 Cumpleaños de socios</li>
+            <li><span class="sub-dot"></span>📅 Vencimiento de membresía anual</li>
+            <li><span class="sub-dot"></span>🏦 Aviso previo a domiciliados (antes del cargo bancario)</li>
+            <li><span class="sub-dot"></span>🏦❌ Cargo fallido (cuando el banco rechaza el cobro)</li>
+            <li><span class="sub-dot"></span>🔔 Alerta de regla de 26 años (dependientes que pasan a membresía individual)</li>
+            <li><span class="sub-dot"></span>Cada módulo se activa/desactiva de forma independiente</li>
+            <li><span class="sub-dot"></span>Corren solos, programados, sin que nadie del club tenga que enviarlos a mano</li>
+          </ul>
+        </li>
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>4. Biblioteca de plantillas de mensajes y correos editable</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>El equipo del club puede cambiar el texto de cualquier aviso (asunto y cuerpo) sin tocar una línea de código</li>
+            <li><span class="sub-dot"></span>Los cambios se guardan solos en la base de datos</li>
+          </ul>
+        </li>
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>5. Historial de envíos</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>Registro de cada comunicación: quién la mandó, a quién, cuándo y por qué canal</li>
+            <li><span class="sub-dot"></span>Trazabilidad total de la cobranza — nada se pierde ni se duplica</li>
+          </ul>
+        </li>
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>6. Observaciones de cobranza</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>Notas internas por socio ("prometió pagar el viernes", "llamar de nuevo", etc.)</li>
+            <li><span class="sub-dot"></span>El equipo da seguimiento puntual sin depender de memoria o Excel aparte</li>
+          </ul>
+        </li>
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>7. 📲 WhatsApp integrado (yCloud + Meta)</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>Mismos avisos que por correo, pero llegan también por WhatsApp con plantillas aprobadas oficialmente por Meta</li>
+          </ul>
+        </li>
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>8. Base de socios centralizada</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>Toda la info de cada socio en un solo lugar: membresía, tipo, antigüedad, fechas de pago, edad, contacto</li>
+          </ul>
+        </li>
+        <li>
+          <div class="bullet-main"><span class="bullet-dot"></span>9. Agente de WhatsApp para atención a clientes (nuevo desarrollo)</div>
+          <ul class="sub-bullets">
+            <li><span class="sub-dot"></span>Responde automáticamente preguntas sobre horarios de actividades, eventos del club y menú del restaurante</li>
+            <li><span class="sub-dot"></span>Disponible las 24 horas, sin depender de que alguien del equipo esté en línea</li>
+            <li><span class="sub-dot"></span>El equipo de Club Berimbau puede tomar el control de la conversación en cualquier momento — el bot da el primer paso, pero un humano puede entrar a atender directo cuando se necesite</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ESQUEMA DE COBRO WHATSAPP -->
+  <div class="card">
+    <div class="card-header">Esquema de Cobro de WhatsApp</div>
+    <div class="card-body">
+      <p class="concepto-intro">El uso de WhatsApp para los avisos automáticos y el agente de atención tiene un costo independiente al desarrollo y a la renta mensual, directo entre el club y su wallet en yCloud. Así se clasifican los mensajes:</p>
+
+      <table class="tabla-info">
+        <thead><tr><th>Categoría</th><th>¿Para qué sirve?</th><th>¿Se cobra?</th><th>Costo aprox.</th></tr></thead>
+        <tbody>
+          <tr><td><strong>💬 Servicio</strong></td><td>Respuesta libre cuando el socio escribe primero</td><td class="gratis-tag">Siempre gratis</td><td>$0</td></tr>
+          <tr><td><strong>🔔 Utilidad</strong></td><td>Recordatorios de pago, alertas, confirmaciones</td><td>Gratis si el socio escribió en las últimas 24h</td><td>~$0.20–$0.35 MXN</td></tr>
+          <tr><td><strong>📣 Marketing</strong></td><td>Promociones, mensajes no transaccionales</td><td>Siempre se cobra</td><td>~$0.55–$0.75 MXN</td></tr>
+        </tbody>
+      </table>
+
+      <div class="ejemplo-card">
+        <strong>Ejemplo ilustrativo:</strong> si el club envía 200 avisos de cobranza al mes por WhatsApp (categoría Utilidad, fuera de la ventana de 24h), el costo sería aproximadamente 200 × $0.30 MXN ≈ <strong>$60 MXN al mes</strong>. Si la mitad de esos socios ya había escrito antes, el costo real baja a la mitad.
+      </div>
+
+      <div class="nota-card">
+        <strong>Nota:</strong> la ventana de 24 horas es la clave del ahorro — si el socio contesta cualquier cosa, todo lo que el club responda en esas 24 horas es gratis. Estas tarifas las actualiza Meta cada trimestre (1 ene, 1 abr, 1 jul, 1 oct); se recomienda confirmar el número exacto vigente en el panel de yCloud (Billing → WhatsApp) antes de comprometerse con una cifra.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPUESTA COMERCIAL -->
+  <div class="card">
+    <div class="card-header">Propuesta Comercial</div>
+    <div class="card-body">
+      <table class="tabla-comercial">
+        <thead><tr><th>Concepto</th><th style="text-align:right;">Costo</th><th style="text-align:right;">IVA 16%</th><th style="text-align:right;">Total</th></tr></thead>
+        <tbody>
+          <tr class="fila-total">
+            <td class="concepto-col" style="color:#ffffff !important;">Desarrollo de Sistema de Gestión de Cobranza y Comunicación de Inteligencia Artificial — Club Berimbau</td>
+            <td class="td-monto" style="color:#ffffff !important;">$119,000.00</td>
+            <td class="td-monto" style="color:#ffffff !important;">$19,040.00</td>
+            <td class="td-monto" style="color:#ffffff !important;">$138,040.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="total-letras">(ciento treinta y ocho mil cuarenta pesos 00/100 mn)</div>
+    </div>
+  </div>
+
+  <!-- SOPORTE Y MANTENIMIENTO -->
+  <div class="card">
+    <div class="card-header">Soporte y Mantenimiento Mensual</div>
+    <div class="card-body">
+      <p class="concepto-intro">El desarrollo incluye <strong>60 días de soporte y mantenimiento</strong> de la plataforma sin costo adicional, a partir de la entrega. Una vez concluido este periodo, el servicio de mantenimiento mensual tiene un costo de <strong>$4,900 MXN + IVA</strong>, el cual comienza a cobrarse a partir del <strong>tercer mes</strong> posterior a la entrega, bajo un contrato con vigencia mínima de <strong>1 año</strong>.</p>
+
+      <table class="tabla-comercial">
+        <thead><tr><th>Concepto</th><th style="text-align:right;">Costo</th><th style="text-align:right;">IVA 16%</th><th style="text-align:right;">Total</th></tr></thead>
+        <tbody>
+          <tr class="fila-total">
+            <td class="concepto-col" style="color:#ffffff !important;">Mantenimiento Mensual</td>
+            <td class="td-monto" style="color:#ffffff !important;">$4,900.00</td>
+            <td class="td-monto" style="color:#ffffff !important;">$784.00</td>
+            <td class="td-monto" style="color:#ffffff !important;">$5,684.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="total-letras">(cinco mil seiscientos ochenta y cuatro pesos 00/100 mn)</div>
+    </div>
+  </div>
+
+  <!-- CONDICIONES ECONÓMICAS -->
+  <div class="card">
+    <div class="card-header">Condiciones Económicas</div>
+    <div class="card-body">
+      <ul class="condiciones-lista">
+        <li><span class="check">✓</span> Precios expresados en pesos mexicanos.</li>
+        <li><span class="check">✓</span> Forma de pago: 50% al aceptar la propuesta ($69,020.00) y 50% a la entrega del desarrollo completo ($69,020.00).</li>
+        <li><span class="check">✓</span> Vigencia de esta propuesta: 30 días naturales.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FIRMA -->
+  <div class="card">
+    <div class="card-header">Autorización</div>
+    <div class="card-body">
+      <div class="firma-wrap">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/acm_firma.png" alt="Firma" class="firma-img" onerror="this.style.display='none'">
+        <div class="firma-linea"></div>
+        <div class="firma-nombre">Adolfo Cabrera</div>
+        <div class="firma-puesto">CEO — ExcelentIA</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-imprimir" onclick="window.print()">🖨️ Guardar como PDF</button>
+
+</div>
+
+<footer class="footer">ExcelentIA &nbsp;|&nbsp; excelentia.com.mx &nbsp;|&nbsp; Tel. (55) 1215 4800</footer>
+
+</body>
+</html>
