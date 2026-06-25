@@ -729,11 +729,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const wrap = document.getElementById('ganttWrap');
   if(!wrap) return;
   wrap.addEventListener('wheel', (e) => {
-    // Usa el eje que tenga más movimiento: deltaX (trackpad horizontal) o deltaY (rueda/Magic Mouse vertical)
-    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if(delta === 0) return;
+    // Solo reacciona si el gesto es claramente horizontal (deltaX). Si es vertical (deltaY),
+    // no hace nada y deja pasar el evento para que la página haga su scroll normal.
+    if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
     e.preventDefault();
-    wheelAccum += delta;
+    wheelAccum += e.deltaX;
     // Cada ~60px de gesto acumulado = avanzar/retroceder 1 día, para que se sienta suave
     const PIXELS_POR_DIA = 60;
     if(Math.abs(wheelAccum) >= PIXELS_POR_DIA){
