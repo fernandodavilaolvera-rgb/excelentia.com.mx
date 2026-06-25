@@ -85,6 +85,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 .gantt-row-label{width:240px;flex-shrink:0;background:#fff;border-right:2px solid #c8d9f0;display:flex;align-items:center;justify-content:space-between;padding:.4rem .6rem .4rem .8rem;position:sticky;left:0;z-index:4;gap:.4rem}
 .gantt-row.row-tarea .gantt-row-label{padding-left:1.6rem;background:#fafbfd}
 .gantt-row-name{font-size:.8rem;font-weight:700;color:#1a2035;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:.4rem;min-width:0}
+.gantt-collapse-toggle{cursor:pointer;color:#4a9fd4;font-size:.8rem;width:14px;flex-shrink:0;text-align:center;user-select:none}
+.gantt-collapse-toggle:hover{color:#1a3a6b}
 .gantt-row-name .name-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .resp-avatar{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;color:#fff;flex-shrink:0}
 .gantt-row.row-tarea .gantt-row-name{font-size:.76rem;font-weight:600;color:#4a5068}
@@ -99,10 +101,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 .gantt-cell.inhabil{background:repeating-linear-gradient(45deg,#fecaca,#fecaca 4px,#fca5a5 4px,#fca5a5 8px)}
 .gantt-cell:hover{background:#eef4fc;cursor:context-menu}
 
-.gantt-bar{position:absolute;top:8px;height:28px;border-radius:7px;display:flex;align-items:center;padding:0 .5rem;font-size:.7rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer;transition:.15s}
+.gantt-bar{position:absolute;top:8px;height:28px;border-radius:7px;display:flex;align-items:center;font-size:.7rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer;transition:.15s}
 .gantt-bar:hover{box-shadow:0 3px 8px rgba(0,0,0,.25);transform:translateY(-1px)}
-.gantt-bar-fill{position:absolute;inset:0;background:rgba(255,255,255,.28);border-radius:7px 0 0 7px}
-.gantt-bar-label{position:relative;z-index:1;overflow:hidden;text-overflow:ellipsis}
+.gantt-bar-seg{position:absolute;top:0;bottom:0}
+.gantt-bar-label{position:relative;z-index:1;overflow:hidden;text-overflow:ellipsis;padding-left:.5rem;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .gantt-row.row-tarea .gantt-bar{height:20px;top:12px}
 
 /* contexto menu para marcar inhabil */
@@ -320,6 +322,7 @@ let ITEMS = []; // todas las filas del Timeline (proyectos + tareas)
 let windowStart = startOfWeekMonday(new Date()); // primer día visible en el Gantt
 const DAYS_VISIBLE = 21; // 3 semanas a la vista, scrollable
 let ctxTarget = null; // {id, dateStr} del día sobre el que se hizo clic derecho
+let proyectosColapsados = new Set(); // IDs de proyectos contraídos (por default todos lo están)
 
 // ═══════════════════════════════════════
 // HELPERS DE FECHAS
@@ -369,6 +372,25 @@ function dateRange(startStr, endStr){
   return out;
 }
 
+// Devuelve el set de fechas (YYYY-MM-DD) que son días HÁBILES dentro del rango de la barra
+// (excluye fines de semana y días marcados inhábiles para esa barra específica)
+function diasHabilesDeBarra(item){
+  const todasLasFechas = dateRange(item.FechaInicio, item.FechaFin);
+  return todasLasFechas.filter(f => {
+    const d = fromISO(f);
+    return !isWeekend(d) && !item.DiasInhabiles.includes(f);
+  });
+}
+
+// Devuelve el Set de fechas que cuentan como "completadas" según el Avance% guardado,
+// tomando los primeros N días hábiles de la barra (N = días reales que representa ese %)
+function diasCompletadosDeBarra(item){
+  const habiles = diasHabilesDeBarra(item);
+  if(!habiles.length) return new Set();
+  const diasCompletados = Math.round((item.Avance / 100) * habiles.length);
+  return new Set(habiles.slice(0, diasCompletados));
+}
+
 function fmtFechaCorta(d){
   const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   return `${d.getDate()} ${meses[d.getMonth()]}`;
@@ -412,6 +434,8 @@ async function loadTimeline(){
   // Filtra la fila fantasma de encabezados que a veces n8n devuelve como si fuera un registro (ID literal = "ID")
   const limpio = (Array.isArray(res) ? res : []).filter(r => r.ID && r.ID !== 'ID');
   ITEMS = limpio.map(normalizeItem);
+  // Por default, todos los proyectos arrancan contraídos
+  proyectosColapsados = new Set(ITEMS.filter(i => i.Tipo === 'Proyecto').map(i => i.ID));
   renderAll();
 }
 
@@ -459,11 +483,8 @@ function renderEmptyState(){
 function renderProyectoSelectOptions(){
   const sel = document.getElementById('ta-proyecto-padre');
   const proyectos = ITEMS.filter(i => i.Tipo === 'Proyecto');
-  if(!proyectos.length){
-    sel.innerHTML = '<option value="">Crea un proyecto primero</option>';
-    return;
-  }
-  sel.innerHTML = proyectos.map(p => `<option value="${p.ID}">${escHtml(p.Nombre)}</option>`).join('');
+  const opcionesProyectos = proyectos.map(p => `<option value="${p.ID}">${escHtml(p.Nombre)}</option>`).join('');
+  sel.innerHTML = `<option value="">— Sin proyecto (tarea independiente) —</option>${opcionesProyectos}`;
 }
 
 function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -534,39 +555,60 @@ function renderGantt(){
   });
   headerHtml += `</div>`;
 
-  // Filas: cada proyecto, seguido de sus tareas
+  // Filas: cada proyecto (colapsable) seguido de sus tareas, luego las tareas sin proyecto
   const proyectos = ITEMS.filter(i => i.Tipo === 'Proyecto');
+  const tareasSueltas = ITEMS.filter(i => i.Tipo === 'Tarea' && !i.ProyectoPadreID);
   let bodyHtml = `<div class="gantt-body">`;
 
-  if(!proyectos.length){
-    bodyHtml += `<div class="empty-state"><span>📊</span>Sin proyectos en el Timeline todavía</div>`;
+  if(!proyectos.length && !tareasSueltas.length){
+    bodyHtml += `<div class="empty-state"><span>📊</span>Sin proyectos ni tareas en el Timeline todavía</div>`;
   }
 
   proyectos.forEach(py => {
-    bodyHtml += renderGanttRow(py, days, today, false);
     const tareas = ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === py.ID);
-    tareas.forEach(ta => {
-      bodyHtml += renderGanttRow(ta, days, today, true);
-    });
+    const colapsado = proyectosColapsados.has(py.ID);
+    bodyHtml += renderGanttRow(py, days, today, false, { tieneHijos: tareas.length > 0, colapsado });
+    if(!colapsado){
+      tareas.forEach(ta => { bodyHtml += renderGanttRow(ta, days, today, true); });
+    }
   });
+
+  tareasSueltas.forEach(ta => { bodyHtml += renderGanttRow(ta, days, today, true); });
+
   bodyHtml += `</div>`;
 
   grid.innerHTML = headerHtml + bodyHtml;
 }
 
-function renderGanttRow(item, days, today, esTarea){
+function toggleProyectoColapso(proyectoId){
+  if(proyectosColapsados.has(proyectoId)) proyectosColapsados.delete(proyectoId);
+  else proyectosColapsados.add(proyectoId);
+  renderGantt();
+}
+
+function renderGanttRow(item, days, today, esTarea, opts){
+  opts = opts || {};
   const rowClass = esTarea ? 'gantt-row row-tarea' : 'gantt-row';
   const icon = esTarea ? '↳' : '';
   const actions = esTarea
     ? `<button onclick="openTareaModal('${item.ID}')" title="Editar">✏️</button>`
     : `<button onclick="openTareaModal(null,'${item.ID}')" title="Agregar tarea">+</button><button onclick="openProyectoModal('${item.ID}')" title="Editar">✏️</button>`;
 
+  // Flechita de colapso, solo en proyectos que tienen tareas
+  let toggleHtml = '';
+  if(!esTarea && opts.tieneHijos){
+    const flecha = opts.colapsado ? '▸' : '▾';
+    toggleHtml = `<span class="gantt-collapse-toggle" onclick="toggleProyectoColapso('${item.ID}')" title="${opts.colapsado ? 'Expandir' : 'Contraer'}">${flecha}</span>`;
+  } else if(!esTarea){
+    toggleHtml = `<span class="gantt-collapse-toggle" style="visibility:hidden">▾</span>`;
+  }
+
   const resp = getResponsableInfo(item.Responsable);
   const inicial = (resp.nombre || '?').charAt(0).toUpperCase();
   const avatarHtml = `<span class="resp-avatar" style="background:${resp.color}" title="Responsable: ${escHtml(resp.nombre)}">${inicial}</span>`;
 
   let labelHtml = `<div class="gantt-row-label">
-    <span class="gantt-row-name" title="${escHtml(item.Nombre)} · ${escHtml(resp.nombre)}">${avatarHtml}<span class="name-text">${icon?icon+' ':''}${escHtml(item.Nombre)} <span style="color:#8a90a0;font-weight:600">(${item.Avance}%)</span></span></span>
+    <span class="gantt-row-name" title="${escHtml(item.Nombre)} · ${escHtml(resp.nombre)}">${toggleHtml}${avatarHtml}<span class="name-text">${icon?icon+' ':''}${escHtml(item.Nombre)} <span style="color:#8a90a0;font-weight:600">(${item.Avance}%)</span></span></span>
     <span class="gantt-row-actions">${actions}</span>
   </div>`;
 
@@ -603,9 +645,28 @@ function buildBarOverlay(item, days){
   const left = startIdx * 34;
   const width = (endIdx - startIdx + 1) * 34 - 4;
   const color = item.Color || '#1a3a6b';
+  const completados = diasCompletadosDeBarra(item);
 
-  return `<div class="gantt-bar" style="left:${left+2}px;width:${width}px;background:${color}" onclick="event.stopPropagation();${item.Tipo==='Tarea'?`openTareaModal('${item.ID}')`:`openProyectoModal('${item.ID}')`}" title="${escHtml(item.Nombre)} — ${item.Avance}% completado">
-    <div class="gantt-bar-fill" style="width:${100-item.Avance}%;left:${item.Avance}%"></div>
+  // Construye un segmento por cada día visible de la barra, con su color según su estado real:
+  // completado (color de la barra) > inhábil (rojo claro) > fin de semana (gris) > pendiente (color translúcido)
+  let segmentos = '';
+  for(let i = startIdx; i <= endIdx; i++){
+    const dStr = toISO(days[i]);
+    const esFinde = isWeekend(days[i]);
+    const esInhabil = item.DiasInhabiles.includes(dStr);
+    const esCompletado = completados.has(dStr);
+    let bg;
+    if(esInhabil) bg = '#fca5a5';
+    else if(esFinde) bg = '#d1d5db';
+    else if(esCompletado) bg = color;
+    else bg = color + '55'; // pendiente: mismo color pero translúcido
+
+    const segLeft = (i - startIdx) * 34;
+    segmentos += `<div class="gantt-bar-seg" style="left:${segLeft}px;width:34px;background:${bg}"></div>`;
+  }
+
+  return `<div class="gantt-bar" style="left:${left+2}px;width:${width}px" onclick="event.stopPropagation();${item.Tipo==='Tarea'?`openTareaModal('${item.ID}')`:`openProyectoModal('${item.ID}')`}" title="${escHtml(item.Nombre)} — ${item.Avance}% completado">
+    ${segmentos}
     <span class="gantt-bar-label">${escHtml(item.Nombre)}</span>
   </div>`;
 }
@@ -772,6 +833,7 @@ async function saveProyecto(){
       ITEMS[idx] = item;
     }else{
       ITEMS.push(item);
+      proyectosColapsados.add(item.ID); // nuevo proyecto arranca contraído, consistente con el resto
     }
     closeModal('modal-proyecto');
     renderAll();
@@ -806,16 +868,10 @@ function openTareaModal(idToEdit, presetProyectoId){
   editingTareaId = idToEdit || null;
   const item = editingTareaId ? ITEMS.find(i => i.ID === editingTareaId) : null;
 
-  const proyectos = ITEMS.filter(i => i.Tipo === 'Proyecto');
-  if(!proyectos.length){
-    showToast('Primero crea un proyecto', 'err');
-    return;
-  }
-
   document.getElementById('tareaModalTitle').textContent = item ? '☑️ Editar Tarea' : '☑️ Nueva Tarea';
   document.getElementById('ta-delete-btn').style.display = item ? 'inline-flex' : 'none';
   renderProyectoSelectOptions();
-  document.getElementById('ta-proyecto-padre').value = item ? item.ProyectoPadreID : (presetProyectoId || proyectos[0].ID);
+  document.getElementById('ta-proyecto-padre').value = item ? item.ProyectoPadreID : (presetProyectoId || '');
   document.getElementById('ta-nombre').value = item ? item.Nombre : '';
   document.getElementById('ta-fecha-inicio').value = item ? item.FechaInicio : toISO(new Date());
   document.getElementById('ta-duracion').value = item ? item.DuracionDias : '';
@@ -855,8 +911,8 @@ async function saveTarea(){
   const fechaInicio = document.getElementById('ta-fecha-inicio').value;
   const duracion = parseInt(document.getElementById('ta-duracion').value);
 
-  if(!proyectoPadreId || !nombre || !fechaInicio || !duracion || duracion < 1){
-    showToast('Proyecto, nombre, fecha y duración son obligatorios', 'err');
+  if(!nombre || !fechaInicio || !duracion || duracion < 1){
+    showToast('Nombre, fecha y duración son obligatorios', 'err');
     return;
   }
 
@@ -865,14 +921,15 @@ async function saveTarea(){
   const avanceCalculado = Math.round((diasCompletados / duracion) * 100);
 
   const existing = editingTareaId ? ITEMS.find(i => i.ID === editingTareaId) : null;
+  const proyectoPadreAnterior = existing ? existing.ProyectoPadreID : null;
   const diasInhabiles = existing ? existing.DiasInhabiles : [];
   const fechaFin = calcFechaFin(fechaInicio, duracion, diasInhabiles);
-  const proyectoPadre = ITEMS.find(i => i.ID === proyectoPadreId);
+  const proyectoPadre = proyectoPadreId ? ITEMS.find(i => i.ID === proyectoPadreId) : null;
 
   const item = {
     ID: editingTareaId || genId('TL'),
     Tipo: 'Tarea',
-    ProyectoPadreID: proyectoPadreId,
+    ProyectoPadreID: proyectoPadreId || '',
     Nombre: nombre,
     FechaInicio: fechaInicio,
     DuracionDias: duracion,
@@ -901,7 +958,9 @@ async function saveTarea(){
     }else{
       ITEMS.push(item);
     }
-    await recalcularAvanceProyecto(proyectoPadreId);
+    // Recalcula el proyecto nuevo (si tiene) y el anterior (si cambió de proyecto al editar)
+    if(proyectoPadreId) await recalcularAvanceProyecto(proyectoPadreId);
+    if(proyectoPadreAnterior && proyectoPadreAnterior !== proyectoPadreId) await recalcularAvanceProyecto(proyectoPadreAnterior);
     closeModal('modal-tarea');
     renderAll();
     showToast('✅ Tarea guardada');
