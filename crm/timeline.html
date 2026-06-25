@@ -74,7 +74,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 .gantt-header-row{display:flex;position:sticky;top:0;z-index:5;background:#fff}
 .gantt-label-col{width:240px;flex-shrink:0;background:#dce8f7;border-right:2px solid #c8d9f0;display:flex;align-items:center;padding:.6rem .8rem;font-weight:700;font-size:.78rem;color:#1a2035;position:sticky;left:0;z-index:6}
 .gantt-day-col{width:34px;flex-shrink:0;border-right:1px solid #eef2f8;text-align:center;padding:.35rem 0;font-size:.66rem;color:#4a5068;font-weight:600;background:#fff}
-.gantt-day-col.weekend{background:#f5f6f8;color:#b0b6c4}
+.gantt-day-col.weekend{background:#e8eaed;color:#8a90a0}
 .gantt-day-col.today{background:#fef9c3;color:#713f12}
 .gantt-day-num{font-size:.74rem;font-weight:700}
 .gantt-day-dow{font-size:.6rem;text-transform:uppercase}
@@ -94,9 +94,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 
 .gantt-row-track{position:relative;display:flex}
 .gantt-cell{width:34px;flex-shrink:0;border-right:1px solid #eef2f8;height:100%}
-.gantt-cell.weekend{background:#f9fafb}
+.gantt-cell.weekend{background:#e8eaed}
 .gantt-cell.today{background:#fef9c3}
-.gantt-cell.inhabil{background:repeating-linear-gradient(45deg,#fee2e2,#fee2e2 4px,#fecaca 4px,#fecaca 8px)}
+.gantt-cell.inhabil{background:repeating-linear-gradient(45deg,#fecaca,#fecaca 4px,#fca5a5 4px,#fca5a5 8px)}
 .gantt-cell:hover{background:#eef4fc;cursor:context-menu}
 
 .gantt-bar{position:absolute;top:8px;height:28px;border-radius:7px;display:flex;align-items:center;padding:0 .5rem;font-size:.7rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer;transition:.15s}
@@ -210,9 +210,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
       <div class="form-group" style="margin-top:.75rem">
         <label>Responsable</label>
         <select id="py-responsable" onchange="toggleOtroResponsable('py')">
+          <option value="adolfo">Adolfo</option>
           <option value="fernando">Fernando</option>
           <option value="juanjose">Juan José</option>
-          <option value="adolfo">Adolfo</option>
           <option value="__otro__">Otro...</option>
         </select>
         <input type="text" id="py-responsable-otro" placeholder="Escribe el nombre" style="display:none;margin-top:.4rem">
@@ -222,10 +222,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
         <input type="color" id="py-color" value="#1a3a6b" style="height:40px;padding:.2rem">
       </div>
       <div class="form-group">
-        <label>Avance (%)</label>
+        <label>Avance (calculado de sus tareas)</label>
         <div class="avance-row">
-          <input type="range" id="py-avance" min="0" max="100" value="0" oninput="document.getElementById('py-avance-val').textContent=this.value+'%'">
-          <span class="avance-val" id="py-avance-val">0%</span>
+          <span class="avance-val" id="py-avance-val" style="font-size:1.3rem">0%</span>
+          <span class="field-hint" id="py-avance-hint">Sin tareas aún — agrégalas para que se calcule solo</span>
         </div>
       </div>
       <div class="form-group">
@@ -268,17 +268,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
       <div class="form-group" style="margin-top:.75rem">
         <label>Responsable</label>
         <select id="ta-responsable" onchange="toggleOtroResponsable('ta')">
+          <option value="adolfo">Adolfo</option>
           <option value="fernando">Fernando</option>
           <option value="juanjose">Juan José</option>
-          <option value="adolfo">Adolfo</option>
           <option value="__otro__">Otro...</option>
         </select>
         <input type="text" id="ta-responsable-otro" placeholder="Escribe el nombre" style="display:none;margin-top:.4rem">
       </div>
       <div class="form-group">
-        <label>Avance (%)</label>
+        <label>Avance (días completados)</label>
         <div class="avance-row">
-          <input type="range" id="ta-avance" min="0" max="100" value="0" oninput="document.getElementById('ta-avance-val').textContent=this.value+'%'">
+          <input type="number" id="ta-dias-completados" min="0" value="0" style="max-width:90px" oninput="actualizarAvanceTareaDesdeDias()">
+          <span class="field-hint" id="ta-avance-de" style="white-space:nowrap">de 0 días</span>
           <span class="avance-val" id="ta-avance-val">0%</span>
         </div>
       </div>
@@ -308,9 +309,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 const N8N_BASE = 'https://excelentia.app.n8n.cloud/webhook';
 const TIMELINE_ENDPOINT = '/crm-timeline';
 const USERS = {
+  adolfo:   { nombre: 'Adolfo',    color: '#059669' },
   fernando: { nombre: 'Fernando', color: '#1a3a6b' },
-  juanjose: { nombre: 'Juan José', color: '#7c3aed' },
-  adolfo:   { nombre: 'Adolfo',    color: '#059669' }
+  juanjose: { nombre: 'Juan José', color: '#7c3aed' }
 };
 let currentUser = 'fernando';
 
@@ -408,7 +409,9 @@ async function loadTimeline(){
   document.getElementById('loadingTag').style.display = 'flex';
   const res = await apiCall({ accion:'get' });
   document.getElementById('loadingTag').style.display = 'none';
-  ITEMS = (Array.isArray(res) ? res : []).map(normalizeItem);
+  // Filtra la fila fantasma de encabezados que a veces n8n devuelve como si fuera un registro (ID literal = "ID")
+  const limpio = (Array.isArray(res) ? res : []).filter(r => r.ID && r.ID !== 'ID');
+  ITEMS = limpio.map(normalizeItem);
   renderAll();
 }
 
@@ -619,6 +622,32 @@ function goToday(){
   renderGantt();
 }
 
+// ── Desplazamiento con gesto de trackpad / Magic Mouse (como cualquier app o sitio web) ──
+let wheelAccum = 0;
+let wheelRenderPending = false;
+document.addEventListener('DOMContentLoaded', () => {
+  const wrap = document.getElementById('ganttWrap');
+  if(!wrap) return;
+  wrap.addEventListener('wheel', (e) => {
+    // Usa el eje que tenga más movimiento: deltaX (trackpad horizontal) o deltaY (rueda/Magic Mouse vertical)
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if(delta === 0) return;
+    e.preventDefault();
+    wheelAccum += delta;
+    // Cada ~60px de gesto acumulado = avanzar/retroceder 1 día, para que se sienta suave
+    const PIXELS_POR_DIA = 60;
+    if(Math.abs(wheelAccum) >= PIXELS_POR_DIA){
+      const dias = Math.trunc(wheelAccum / PIXELS_POR_DIA);
+      windowStart = addDays(windowStart, dias);
+      wheelAccum -= dias * PIXELS_POR_DIA;
+      if(!wheelRenderPending){
+        wheelRenderPending = true;
+        requestAnimationFrame(() => { renderGantt(); wheelRenderPending = false; });
+      }
+    }
+  }, { passive: false });
+});
+
 // ═══════════════════════════════════════
 // MENÚ CONTEXTUAL — marcar día inhábil
 // ═══════════════════════════════════════
@@ -686,8 +715,13 @@ function openProyectoModal(idToEdit){
   document.getElementById('py-duracion').value = item ? item.DuracionDias : '';
   setResponsableValue('py', item ? item.Responsable : currentUser);
   document.getElementById('py-color').value = item ? item.Color : '#1a3a6b';
-  document.getElementById('py-avance').value = item ? item.Avance : 0;
+
+  const numTareas = item ? ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === item.ID).length : 0;
   document.getElementById('py-avance-val').textContent = (item ? item.Avance : 0) + '%';
+  document.getElementById('py-avance-hint').textContent = numTareas
+    ? `Promedio de ${numTareas} tarea${numTareas===1?'':'s'}`
+    : 'Sin tareas aún — agrégalas para que se calcule solo';
+
   document.getElementById('py-notas').value = item ? item.Notas : '';
 
   document.getElementById('modal-proyecto').classList.add('open');
@@ -716,7 +750,7 @@ async function saveProyecto(){
     DuracionDias: duracion,
     DiasInhabiles: diasInhabiles,
     FechaFin: fechaFin,
-    Avance: parseInt(document.getElementById('py-avance').value) || 0,
+    Avance: existing ? existing.Avance : 0, // el avance del proyecto se calcula solo del promedio de sus tareas
     Color: document.getElementById('py-color').value,
     Responsable: readResponsableValue('py'),
     Notas: document.getElementById('py-notas').value,
@@ -786,12 +820,34 @@ function openTareaModal(idToEdit, presetProyectoId){
   document.getElementById('ta-fecha-inicio').value = item ? item.FechaInicio : toISO(new Date());
   document.getElementById('ta-duracion').value = item ? item.DuracionDias : '';
   setResponsableValue('ta', item ? item.Responsable : currentUser);
-  document.getElementById('ta-avance').value = item ? item.Avance : 0;
-  document.getElementById('ta-avance-val').textContent = (item ? item.Avance : 0) + '%';
+
+  // Días completados = Avance% guardado, convertido a días sobre la duración total
+  const duracionActual = item ? item.DuracionDias : 1;
+  const avanceActual = item ? item.Avance : 0;
+  const diasCompletados = item ? Math.round((avanceActual / 100) * duracionActual) : 0;
+  document.getElementById('ta-dias-completados').value = diasCompletados;
+  document.getElementById('ta-dias-completados').max = duracionActual;
+  document.getElementById('ta-avance-de').textContent = `de ${duracionActual} día${duracionActual===1?'':'s'}`;
+  document.getElementById('ta-avance-val').textContent = avanceActual + '%';
+
   document.getElementById('ta-notas').value = item ? item.Notas : '';
 
   document.getElementById('modal-tarea').classList.add('open');
 }
+
+// Recalcula el % mostrado cuando el usuario cambia días completados o la duración
+function actualizarAvanceTareaDesdeDias(){
+  const dias = parseInt(document.getElementById('ta-dias-completados').value) || 0;
+  const duracion = parseInt(document.getElementById('ta-duracion').value) || 1;
+  const pct = Math.min(100, Math.round((dias / duracion) * 100));
+  document.getElementById('ta-avance-val').textContent = pct + '%';
+  document.getElementById('ta-avance-de').textContent = `de ${duracion} día${duracion===1?'':'s'}`;
+}
+// También recalcula si el usuario cambia la duración después de tocar los días
+document.addEventListener('DOMContentLoaded', () => {
+  const dur = document.getElementById('ta-duracion');
+  if(dur) dur.addEventListener('input', actualizarAvanceTareaDesdeDias);
+});
 
 async function saveTarea(){
   const proyectoPadreId = document.getElementById('ta-proyecto-padre').value;
@@ -803,6 +859,10 @@ async function saveTarea(){
     showToast('Proyecto, nombre, fecha y duración son obligatorios', 'err');
     return;
   }
+
+  const diasCompletadosRaw = parseInt(document.getElementById('ta-dias-completados').value) || 0;
+  const diasCompletados = Math.max(0, Math.min(diasCompletadosRaw, duracion));
+  const avanceCalculado = Math.round((diasCompletados / duracion) * 100);
 
   const existing = editingTareaId ? ITEMS.find(i => i.ID === editingTareaId) : null;
   const diasInhabiles = existing ? existing.DiasInhabiles : [];
@@ -818,7 +878,7 @@ async function saveTarea(){
     DuracionDias: duracion,
     DiasInhabiles: diasInhabiles,
     FechaFin: fechaFin,
-    Avance: parseInt(document.getElementById('ta-avance').value) || 0,
+    Avance: avanceCalculado,
     Color: proyectoPadre ? proyectoPadre.Color : '#4a9fd4',
     Responsable: readResponsableValue('ta'),
     Notas: document.getElementById('ta-notas').value,
@@ -841,6 +901,7 @@ async function saveTarea(){
     }else{
       ITEMS.push(item);
     }
+    await recalcularAvanceProyecto(proyectoPadreId);
     closeModal('modal-tarea');
     renderAll();
     showToast('✅ Tarea guardada');
@@ -852,11 +913,35 @@ async function saveTarea(){
 async function deleteTarea(){
   if(!editingTareaId) return;
   if(!confirm('¿Eliminar esta tarea?')) return;
+  const tarea = ITEMS.find(i => i.ID === editingTareaId);
+  const proyectoPadreId = tarea ? tarea.ProyectoPadreID : null;
   await apiCall({ accion:'delete', ID: editingTareaId });
   ITEMS = ITEMS.filter(i => i.ID !== editingTareaId);
+  if(proyectoPadreId) await recalcularAvanceProyecto(proyectoPadreId);
   closeModal('modal-tarea');
   renderAll();
   showToast('Tarea eliminada');
+}
+
+// ── Recalcula el % de un Proyecto como promedio del Avance de sus tareas ──
+// Si el proyecto no tiene tareas, su Avance se mantiene en 0 (sin tareas que promediar).
+async function recalcularAvanceProyecto(proyectoId){
+  const proyecto = ITEMS.find(i => i.ID === proyectoId && i.Tipo === 'Proyecto');
+  if(!proyecto) return;
+  const tareas = ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === proyectoId);
+  const nuevoAvance = tareas.length
+    ? Math.round(tareas.reduce((sum, t) => sum + (t.Avance || 0), 0) / tareas.length)
+    : 0;
+  if(nuevoAvance === proyecto.Avance) return; // sin cambio, no hace falta guardar de nuevo
+  proyecto.Avance = nuevoAvance;
+  await apiCall({
+    accion: 'update',
+    ID: proyecto.ID, Tipo: proyecto.Tipo, ProyectoPadreID: proyecto.ProyectoPadreID,
+    Nombre: proyecto.Nombre, FechaInicio: proyecto.FechaInicio, DuracionDias: proyecto.DuracionDias,
+    DiasInhabiles: proyecto.DiasInhabiles.join(','), FechaFin: proyecto.FechaFin,
+    Avance: proyecto.Avance, Color: proyecto.Color, Responsable: proyecto.Responsable,
+    Notas: proyecto.Notas, UserID: proyecto.UserID
+  });
 }
 
 // ═══════════════════════════════════════
