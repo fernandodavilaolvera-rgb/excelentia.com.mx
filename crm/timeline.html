@@ -453,7 +453,8 @@ function normalizeItem(raw){
     Color: raw.Color || '#1a3a6b',
     Responsable: raw.Responsable || 'fernando',
     Notas: raw.Notas || '',
-    UserID: raw.UserID || currentUser
+    UserID: raw.UserID || currentUser,
+    Orden: parseInt(raw.Orden) || 0
   };
 }
 
@@ -555,25 +556,27 @@ function renderGantt(){
   });
   headerHtml += `</div>`;
 
-  // Filas: cada proyecto (colapsable) seguido de sus tareas, luego las tareas sin proyecto
-  const proyectos = ITEMS.filter(i => i.Tipo === 'Proyecto');
-  const tareasSueltas = ITEMS.filter(i => i.Tipo === 'Tarea' && !i.ProyectoPadreID);
+  // Filas: cada proyecto (colapsable) seguido de sus tareas, luego las tareas sin proyecto — todo ordenado por Orden
+  const proyectos = ITEMS.filter(i => i.Tipo === 'Proyecto').sort((a,b) => a.Orden - b.Orden);
+  const tareasSueltas = ITEMS.filter(i => i.Tipo === 'Tarea' && !i.ProyectoPadreID).sort((a,b) => a.Orden - b.Orden);
   let bodyHtml = `<div class="gantt-body">`;
 
   if(!proyectos.length && !tareasSueltas.length){
     bodyHtml += `<div class="empty-state"><span>📊</span>Sin proyectos ni tareas en el Timeline todavía</div>`;
   }
 
-  proyectos.forEach(py => {
-    const tareas = ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === py.ID);
+  proyectos.forEach((py, idx) => {
+    const tareas = ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === py.ID).sort((a,b) => a.Orden - b.Orden);
     const colapsado = proyectosColapsados.has(py.ID);
-    bodyHtml += renderGanttRow(py, days, today, false, { tieneHijos: tareas.length > 0, colapsado });
+    bodyHtml += renderGanttRow(py, days, today, false, { tieneHijos: tareas.length > 0, colapsado, esPrimero: idx === 0, esUltimo: idx === proyectos.length - 1, listaOrden: proyectos.map(p=>p.ID) });
     if(!colapsado){
-      tareas.forEach(ta => { bodyHtml += renderGanttRow(ta, days, today, true); });
+      tareas.forEach((ta, tIdx) => { bodyHtml += renderGanttRow(ta, days, today, true, { esPrimero: tIdx === 0, esUltimo: tIdx === tareas.length - 1, listaOrden: tareas.map(t=>t.ID) }); });
     }
   });
 
-  tareasSueltas.forEach(ta => { bodyHtml += renderGanttRow(ta, days, today, true); });
+  tareasSueltas.forEach((ta, idx) => {
+    bodyHtml += renderGanttRow(ta, days, today, true, { esPrimero: idx === 0, esUltimo: idx === tareasSueltas.length - 1, listaOrden: tareasSueltas.map(t=>t.ID) });
+  });
 
   bodyHtml += `</div>`;
 
@@ -586,13 +589,51 @@ function toggleProyectoColapso(proyectoId){
   renderGantt();
 }
 
+// Intercambia el Orden de un item con su vecino inmediato (direccion: -1 subir, +1 bajar), dentro de su misma lista (lista = array de IDs ya en orden visual)
+async function moverOrden(itemId, direccion, lista){
+  const idx = lista.indexOf(itemId);
+  const vecinoIdx = idx + direccion;
+  if(idx === -1 || vecinoIdx < 0 || vecinoIdx >= lista.length) return;
+
+  const item = ITEMS.find(i => i.ID === itemId);
+  const vecino = ITEMS.find(i => i.ID === lista[vecinoIdx]);
+  if(!item || !vecino) return;
+
+  // Si ambos tienen Orden=0 (datos viejos sin orden asignado), primero asigna un Orden basado en su posición actual en la lista
+  if(item.Orden === vecino.Orden){
+    lista.forEach((id, i) => { const it = ITEMS.find(x => x.ID === id); if(it) it.Orden = i; });
+  }
+
+  const ordenTemp = item.Orden;
+  item.Orden = vecino.Orden;
+  vecino.Orden = ordenTemp;
+
+  renderGantt(); // respuesta visual inmediata, sin esperar la red
+
+  await Promise.all([guardarSoloOrden(item), guardarSoloOrden(vecino)]);
+}
+
+async function guardarSoloOrden(item){
+  await apiCall({
+    accion: 'update',
+    ID: item.ID, Tipo: item.Tipo, ProyectoPadreID: item.ProyectoPadreID,
+    Nombre: item.Nombre, FechaInicio: item.FechaInicio, DuracionDias: item.DuracionDias,
+    DiasInhabiles: item.DiasInhabiles.join(','), FechaFin: item.FechaFin,
+    Avance: item.Avance, Color: item.Color, Responsable: item.Responsable,
+    Notas: item.Notas, UserID: item.UserID, Orden: item.Orden
+  });
+}
+
 function renderGanttRow(item, days, today, esTarea, opts){
   opts = opts || {};
   const rowClass = esTarea ? 'gantt-row row-tarea' : 'gantt-row';
   const icon = esTarea ? '↳' : '';
+  const listaJson = JSON.stringify(opts.listaOrden || []).replace(/"/g, '&quot;');
+  const btnSubir = opts.esPrimero ? '' : `<button onclick="moverOrden('${item.ID}',-1,${listaJson})" title="Subir prioridad">▲</button>`;
+  const btnBajar = opts.esUltimo ? '' : `<button onclick="moverOrden('${item.ID}',1,${listaJson})" title="Bajar prioridad">▼</button>`;
   const actions = esTarea
-    ? `<button onclick="openTareaModal('${item.ID}')" title="Editar">✏️</button>`
-    : `<button onclick="openTareaModal(null,'${item.ID}')" title="Agregar tarea">+</button><button onclick="openProyectoModal('${item.ID}')" title="Editar">✏️</button>`;
+    ? `${btnSubir}${btnBajar}<button onclick="openTareaModal('${item.ID}')" title="Editar">✏️</button>`
+    : `${btnSubir}${btnBajar}<button onclick="openTareaModal(null,'${item.ID}')" title="Agregar tarea">+</button><button onclick="openProyectoModal('${item.ID}')" title="Editar">✏️</button>`;
 
   // Flechita de colapso, solo en proyectos que tienen tareas
   let toggleHtml = '';
@@ -756,7 +797,7 @@ async function ctxToggleInhabil(){
     Nombre: item.Nombre, FechaInicio: item.FechaInicio, DuracionDias: item.DuracionDias,
     DiasInhabiles: item.DiasInhabiles.join(','), FechaFin: item.FechaFin,
     Avance: item.Avance, Color: item.Color, Responsable: item.Responsable,
-    Notas: item.Notas, UserID: item.UserID
+    Notas: item.Notas, UserID: item.UserID, Orden: item.Orden
   });
 }
 
@@ -815,7 +856,8 @@ async function saveProyecto(){
     Color: document.getElementById('py-color').value,
     Responsable: readResponsableValue('py'),
     Notas: document.getElementById('py-notas').value,
-    UserID: currentUser
+    UserID: currentUser,
+    Orden: existing ? existing.Orden : (Math.max(0, ...ITEMS.filter(i=>i.Tipo==='Proyecto').map(i=>i.Orden)) + 1)
   };
 
   const res = await apiCall({
@@ -824,7 +866,7 @@ async function saveProyecto(){
     Nombre: item.Nombre, FechaInicio: item.FechaInicio, DuracionDias: item.DuracionDias,
     DiasInhabiles: item.DiasInhabiles.join(','), FechaFin: item.FechaFin,
     Avance: item.Avance, Color: item.Color, Responsable: item.Responsable,
-    Notas: item.Notas, UserID: item.UserID
+    Notas: item.Notas, UserID: item.UserID, Orden: item.Orden
   });
 
   if(res){
@@ -939,6 +981,7 @@ async function saveTarea(){
     Color: proyectoPadre ? proyectoPadre.Color : '#4a9fd4',
     Responsable: readResponsableValue('ta'),
     Notas: document.getElementById('ta-notas').value,
+    Orden: existing ? existing.Orden : (Math.max(0, ...ITEMS.filter(i=>i.Tipo==='Tarea' && i.ProyectoPadreID===(proyectoPadreId||'')).map(i=>i.Orden)) + 1),
     UserID: currentUser
   };
 
@@ -948,7 +991,7 @@ async function saveTarea(){
     Nombre: item.Nombre, FechaInicio: item.FechaInicio, DuracionDias: item.DuracionDias,
     DiasInhabiles: item.DiasInhabiles.join(','), FechaFin: item.FechaFin,
     Avance: item.Avance, Color: item.Color, Responsable: item.Responsable,
-    Notas: item.Notas, UserID: item.UserID
+    Notas: item.Notas, UserID: item.UserID, Orden: item.Orden
   });
 
   if(res){
