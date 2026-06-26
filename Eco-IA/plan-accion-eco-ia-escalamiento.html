@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan de Acción — Eco IA Escalamiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --surface:#ffffff;
+    --border:#dde1e9;
+    --header-grad:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);
+    --header-accent:#4a9fd4;
+    --hover-bg:#e8f0fb;
+    --card-head:#dce8f7;
+    --alert-bg:#f0f6ff;
+    --alert-border:#c8d9f0;
+    --note-bg:#eef4fc;
+    --text:#1a2035;
+    --text2:#4a5068;
+    --text3:#8a90a0;
+    --accent:#4a9fd4;
+    --accent-dark:#1a3a6b;
+    --green:#2d9e5f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Manrope',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:var(--header-grad);
+    border-bottom:2px solid var(--header-accent);
+    padding:1.4rem 2rem;
+  }
+  .logo-header-wrap{
+    display:flex;
+    align-items:center;
+    gap:.9rem;
+    margin-bottom:1rem;
+  }
+  .logo-box{
+    background:#fff;
+    border-radius:10px;
+    padding:.4rem .75rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:80px;
+    min-height:52px;
+    flex-shrink:0;
+  }
+  .logo-box img{height:48px;width:auto;display:block;}
+  .logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none;}
+  .logo-slogan{
+    font-family:'Manrope',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    color:#ffffff;
+    letter-spacing:.2px;
+  }
+  .header-title{
+    color:#fff;
+    font-size:1.6rem;
+    font-weight:800;
+    margin:0;
+  }
+  .header-sub{
+    color:#cfe0f5;
+    font-size:.92rem;
+    font-weight:500;
+    margin-top:.3rem;
+  }
+  main{
+    max-width:920px;
+    margin:0 auto;
+    padding:2rem 1.5rem 3rem;
+  }
+  .intro{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1.3rem 1.5rem;
+    margin-bottom:1.5rem;
+    color:var(--text2);
+    font-size:.95rem;
+    line-height:1.6;
+  }
+  .callout{
+    background:var(--alert-bg);
+    border:1px solid var(--alert-border);
+    border-left:4px solid var(--header-accent);
+    border-radius:10px;
+    padding:1.1rem 1.3rem;
+    margin-bottom:2rem;
+  }
+  .callout-title{
+    font-weight:700;
+    font-size:.92rem;
+    color:var(--accent-dark);
+    margin:0 0 .5rem;
+  }
+  .callout ul{margin:0;padding-left:1.1rem;color:var(--text2);font-size:.88rem;line-height:1.7;}
+  .callout li{margin-bottom:.2rem;}
+
+  .phase-title{
+    display:flex;
+    align-items:baseline;
+    gap:.6rem;
+    margin:2rem 0 .9rem;
+  }
+  .phase-title h2{
+    font-size:1.05rem;
+    font-weight:800;
+    color:var(--accent-dark);
+    margin:0;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .phase-est{
+    font-size:.78rem;
+    color:var(--text3);
+    font-weight:600;
+  }
+
+  .task{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin-bottom:.7rem;
+    overflow:hidden;
+  }
+  .task-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.8rem;
+    padding:.9rem 1.1rem;
+    cursor:pointer;
+    background:var(--surface);
+    transition:background .15s;
+  }
+  .task-head:hover{background:var(--hover-bg);}
+  .task-head.open{background:var(--card-head);}
+  .task-left{display:flex;align-items:center;gap:.7rem;flex:1;min-width:0;}
+  .task-num{
+    width:26px;height:26px;flex-shrink:0;
+    border-radius:50%;
+    background:var(--accent-dark);
+    color:#fff;
+    font-size:.78rem;
+    font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .task-name{font-weight:700;font-size:.94rem;color:var(--text);}
+  .task-badges{display:flex;align-items:center;gap:.4rem;flex-shrink:0;}
+  .badge{
+    font-size:.7rem;
+    font-weight:700;
+    padding:.22rem .55rem;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .badge-time{background:var(--note-bg);color:var(--accent-dark);}
+  .badge-new{background:var(--accent-dark);color:#fff;}
+  .chevron{
+    font-size:.75rem;
+    color:var(--text3);
+    transition:transform .2s;
+    flex-shrink:0;
+  }
+  .task-head.open .chevron{transform:rotate(90deg);}
+  .task-body{
+    display:none;
+    padding:.2rem 1.1rem 1.1rem 3.5rem;
+    border-top:1px solid var(--border);
+  }
+  .task-body.show{display:block;}
+  .task-desc{
+    font-size:.85rem;
+    color:var(--text2);
+    margin:.7rem 0 .6rem;
+  }
+  .task-body ul{margin:0;padding-left:1.1rem;}
+  .task-body li{
+    font-size:.86rem;
+    color:var(--text2);
+    margin-bottom:.45rem;
+    line-height:1.5;
+  }
+  .depends{
+    display:inline-block;
+    margin-top:.6rem;
+    font-size:.76rem;
+    color:var(--text3);
+    font-weight:600;
+  }
+
+  .total-box{
+    background:var(--note-bg);
+    border-left:4px solid var(--accent-dark);
+    border-radius:10px;
+    padding:1.2rem 1.4rem;
+    margin-top:2.2rem;
+  }
+  .total-box h3{
+    margin:0 0 .4rem;
+    font-size:.95rem;
+    color:var(--accent-dark);
+    font-weight:800;
+  }
+  .total-box p{
+    margin:0;
+    font-size:.86rem;
+    color:var(--text2);
+    line-height:1.6;
+  }
+
+  footer{
+    text-align:center;
+    padding:1.5rem;
+    color:var(--text3);
+    font-size:.78rem;
+  }
+
+  @media (max-width:600px){
+    .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem;}
+    .logo-slogan{font-size:11px;}
+    header{padding:1.2rem 1.2rem;}
+    .header-title{font-size:1.3rem;}
+    main{padding:1.5rem 1rem 2.5rem;}
+    .task-head{padding:.8rem .9rem;}
+    .task-body{padding-left:2.2rem;}
+    .task-name{font-size:.88rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-header-wrap">
+    <div class="logo-box">
+      <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+  </div>
+  <h1 class="header-title">Plan de Acción — Eco IA Escalamiento</h1>
+  <div class="header-sub">Meta: 1,000 doctores · Actualizado 26 de junio de 2026</div>
+</header>
+
+<main>
+
+  <div class="intro">
+    Plan ordenado por dependencia real — qué necesita qué para poder avanzar. Cada tarea tiene un estimado de tiempo y, si aplica, sus sub-pasos en una lista desplegable (clic en la tarea para abrir).
+  </div>
+
+  <div class="callout">
+    <p class="callout-title">📌 Qué se agregó hoy respecto al timeline original</p>
+    <ul>
+      <li><strong>Facturación CFDI (Facturama)</strong> — decidida en esta sesión, no estaba en el timeline.</li>
+      <li><strong>Ambiente de desarrollo</strong> — necesario para probar carga antes de soltar con doctores reales.</li>
+      <li><strong>Validador de licencia</strong> — es distinto del verificador de pago; faltaba como tarea propia.</li>
+    </ul>
+  </div>
+
+  <!-- FASE 1 -->
+  <div class="phase-title">
+    <h2>Fase 1 — Fundación técnica</h2>
+    <span class="phase-est">≈ 2 semanas</span>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">1</div>
+        <div class="task-name">Migración a Supabase</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 1 semana</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Mover las 4 tablas del Sheet maestro a una base de datos real, lista para soportar miles de doctores sin techo de registros.</p>
+      <ul>
+        <li>Diseñar el esquema de las 4 tablas (Doctores, Reportes, Pagos, Comentarios) en Postgres</li>
+        <li>Crear el proyecto en Supabase (plan Pro, $25/mes)</li>
+        <li>Migrar los datos actuales del Sheet maestro</li>
+        <li>Configurar las relaciones entre tablas usando doctor_id como llave</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">2</div>
+        <div class="task-name">Reconectar n8n a Supabase</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 4 días</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Cambiar el workflow principal para que lea y escriba en Supabase en vez de Google Sheets, sin tocar la lógica de generación de reportes.</p>
+      <ul>
+        <li>Cambiar los nodos de Google Sheets por nodos de Postgres en el workflow principal</li>
+        <li>Probar que el flujo de generación de reportes siga funcionando igual</li>
+        <li>Validar con un estudio de prueba del Dr. Andrés</li>
+      </ul>
+      <span class="depends">Depende de: Migración a Supabase</span>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">3</div>
+        <div class="task-name">Reporte genérico (sin marca)</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 2 días</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Versión neutra del reporte para mostrar a Purview y otros clientes potenciales — sin marca de ningún doctor.</p>
+      <ul>
+        <li>Quitar nombre y cédula del Dr. Andrés del machote</li>
+        <li>Quitar logo del encabezado y el pie de página</li>
+        <li>Generar 2-3 ejemplos listos para mostrar a Purview y otros clientes</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">4</div>
+        <div class="task-name">Ambiente de desarrollo <span class="badge badge-new" style="margin-left:.4rem;">AGREGADA</span></div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 1 semana</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Una copia de pruebas del sistema para no arriesgar producción al construir y probar las piezas nuevas. Puede correr en paralelo con el resto de esta fase.</p>
+      <ul>
+        <li>Duplicar el workflow de n8n en una copia de "staging"</li>
+        <li>Probar carga simulada (varios estudios al mismo tiempo) antes de lanzamientos grandes</li>
+        <li>Validar los límites de OpenAI y de n8n antes de cada etapa de crecimiento</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FASE 2 -->
+  <div class="phase-title">
+    <h2>Fase 2 — Onboarding y cobro</h2>
+    <span class="phase-est">≈ 3-4 semanas</span>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">5</div>
+        <div class="task-name">Formulario de onboarding universal</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 1 semana</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Un solo formulario para cualquier doctor nuevo, sin duplicar HTML por cada uno — elimina el proceso manual actual.</p>
+      <ul>
+        <li>Crear formulario único con Form Trigger de n8n (doctor_id dinámico por URL)</li>
+        <li>Al completarse: crear automáticamente fila en Supabase + carpeta en Drive + correo de bienvenida</li>
+        <li>Permitir que el doctor suba su logo, firma y pie de página desde el mismo formulario</li>
+      </ul>
+      <span class="depends">Depende de: Migración a Supabase</span>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">6</div>
+        <div class="task-name">Validador de licencia <span class="badge badge-new" style="margin-left:.4rem;">AGREGADA</span></div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 4 días</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Confirmar que el doctor que se registra tiene cédula profesional vigente, antes de darle acceso pleno.</p>
+      <ul>
+        <li>Definir cómo se valida (consulta directa a cédula profesional, o verificación manual al onboarding)</li>
+        <li>Conectarlo al formulario de onboarding universal</li>
+      </ul>
+      <span class="depends">Depende de: Formulario de onboarding universal</span>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">7</div>
+        <div class="task-name">Motor de pago</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 1 semana</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">El cobro recurrente mensual a cada doctor.</p>
+      <ul>
+        <li>Confirmar proveedor (Stripe tiene nodo nativo en n8n, el más simple de integrar)</li>
+        <li>Conectar el cobro recurrente mensual</li>
+        <li>Probar con un pago de prueba</li>
+      </ul>
+      <p class="task-desc" style="margin-top:.8rem;">⚠️ Si Hospital Ángeles resulta ser acuerdo institucional en vez de individual, esta pieza podría necesitar ajustarse — esa respuesta sigue pendiente.</p>
+      <span class="depends">Depende de: Formulario de onboarding universal</span>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">8</div>
+        <div class="task-name">Facturación CFDI (Facturama) <span class="badge badge-new" style="margin-left:.4rem;">AGREGADA</span></div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 4 días</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Generar la factura fiscal automáticamente en cuanto se confirma cada pago.</p>
+      <ul>
+        <li>Dar de alta la cuenta en modo sandbox (pruebas, sin valor fiscal)</li>
+        <li>Conectar a n8n para timbrar automáticamente al confirmarse un pago</li>
+        <li>Probar en sandbox y luego activar producción</li>
+      </ul>
+      <span class="depends">Depende de: Motor de pago</span>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">9</div>
+        <div class="task-name">Verificador de pago + días de gracia</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 1 semana</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Detectar pagos vencidos y dar un margen antes de bloquear el acceso.</p>
+      <ul>
+        <li>Lógica que detecta cuándo un pago no llegó a tiempo</li>
+        <li>Período de gracia configurable (ej. 5 días) antes de bloquear acceso</li>
+        <li>Alertas previas al doctor, días antes del vencimiento</li>
+      </ul>
+      <span class="depends">Depende de: Motor de pago</span>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">10</div>
+        <div class="task-name">Función de repago / reactivación</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 4 días</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Reactivar el acceso automáticamente en cuanto el doctor se pone al corriente.</p>
+      <ul>
+        <li>Reactivar acceso automáticamente al detectar el pago</li>
+        <li>Enviar confirmación al doctor</li>
+      </ul>
+      <span class="depends">Depende de: Verificador de pago + días de gracia</span>
+    </div>
+  </div>
+
+  <!-- FASE 3 -->
+  <div class="phase-title">
+    <h2>Fase 3 — Visibilidad</h2>
+    <span class="phase-est">≈ 1.5 semanas</span>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">11</div>
+        <div class="task-name">Feedback estructurado</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 4 días</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">El canal de comentarios que sostiene el argumento de "Eco IA mejora con uso real" frente a cualquier partner.</p>
+      <ul>
+        <li>Tabla de Comentarios ligada a cada reporte (doctor_id, reporte_id, comentario, fecha)</li>
+        <li>Conectar la captura de comentarios desde el dashboard del doctor</li>
+      </ul>
+      <span class="depends">Depende de: Migración a Supabase</span>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head" onclick="toggleTask(this)">
+      <div class="task-left">
+        <div class="task-num">12</div>
+        <div class="task-name">Actualizar el Dashboard ExcelentIA</div>
+      </div>
+      <div class="task-badges">
+        <span class="badge badge-time">⏱ 1 semana</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="task-body">
+      <p class="task-desc">Upgrade del dashboard interno que ya existe, para que muestre a todos los doctores y sus comentarios — no es un dashboard nuevo desde cero.</p>
+      <ul>
+        <li>Agregar vista de feedback por reporte</li>
+        <li>Agregar filtros para manejar volumen alto de doctores</li>
+        <li>Corregir la hora (Greenwich → hora central de México) de paso, ya que se está tocando el Apps Script</li>
+      </ul>
+      <span class="depends">Depende de: Feedback estructurado</span>
+    </div>
+  </div>
+
+  <div class="total-box">
+    <h3>⏱ Estimado total</h3>
+    <p>Entre 8 y 10 semanas si se trabaja de forma escalonada con algo de paralelismo entre fases. El tiempo real depende de cuánto se le pueda dedicar por semana, y la Fase 2 podría moverse si llega la respuesta de Hospital Ángeles (institucional vs. individual) antes de construir el Motor de pago.</p>
+  </div>
+
+</main>
+
+<footer>
+  ExcelentIA · Plan de acción interno — Eco IA Escalamiento
+</footer>
+
+<script>
+  function toggleTask(headEl){
+    const body = headEl.nextElementSibling;
+    const isOpen = body.classList.contains('show');
+    body.classList.toggle('show', !isOpen);
+    headEl.classList.toggle('open', !isOpen);
+  }
+</script>
+
+</body>
+</html>
