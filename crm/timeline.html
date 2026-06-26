@@ -66,6 +66,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 .gantt-nav .btn-icon-nav{width:30px;height:30px;border-radius:8px;background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;font-weight:700}
 .gantt-nav .btn-icon-nav:hover{background:#dce8f7}
 .gantt-period-label{font-size:.85rem;font-weight:700;color:#1a3a6b;min-width:150px;text-align:center}
+.resp-filter-select{font-family:'Manrope',sans-serif;font-size:.8rem;font-weight:600;color:#1a2035;border:1px solid #dde1e9;border-radius:8px;padding:.35rem .55rem;background:#fff;cursor:pointer}
+.resp-filter-select:focus{outline:none;border-color:#4a9fd4}
 
 .gantt-wrap{overflow-x:auto;border:1px solid #dde1e9;border-radius:10px}
 .gantt-grid{display:grid;min-width:max-content}
@@ -80,19 +82,31 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 .gantt-day-dow{font-size:.6rem;text-transform:uppercase}
 
 .gantt-body{position:relative}
-.gantt-row{display:flex;border-top:1px solid #eef2f8;min-height:44px;position:relative}
+.gantt-row{display:flex;border-top:1px solid #eef2f8;min-height:30px;position:relative}
 .gantt-row.row-tarea{background:#fafbfd}
-.gantt-row-label{width:240px;flex-shrink:0;background:#fff;border-right:2px solid #c8d9f0;display:flex;align-items:center;justify-content:space-between;padding:.4rem .6rem .4rem .8rem;position:sticky;left:0;z-index:4;gap:.4rem}
-.gantt-row.row-tarea .gantt-row-label{padding-left:1.6rem;background:#fafbfd}
+.gantt-row-label{width:240px;flex-shrink:0;background:#fff;border-right:2px solid #c8d9f0;display:flex;align-items:center;justify-content:space-between;padding:.25rem .6rem .25rem .5rem;position:sticky;left:0;z-index:4;gap:.3rem}
+.gantt-row.row-tarea .gantt-row-label{background:#fafbfd}
+.gantt-row-left{display:flex;align-items:center;gap:.3rem;min-width:0;flex:1;overflow:hidden}
 .gantt-row-name{font-size:.8rem;font-weight:700;color:#1a2035;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:.4rem;min-width:0}
-.gantt-collapse-toggle{cursor:pointer;color:#4a9fd4;font-size:.8rem;width:14px;flex-shrink:0;text-align:center;user-select:none}
-.gantt-collapse-toggle:hover{color:#1a3a6b}
+.gantt-collapse-toggle{color:#4a9fd4;font-size:.8rem;width:14px;flex-shrink:0;text-align:center;user-select:none}
+.gantt-row-name.name-toggle{cursor:pointer}
+.gantt-row-name.name-toggle:hover{color:#1a3a6b}
+.gantt-row-name.name-toggle:hover .gantt-collapse-toggle{color:#1a3a6b}
 .gantt-row-name .name-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .resp-avatar{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;color:#fff;flex-shrink:0}
 .gantt-row.row-tarea .gantt-row-name{font-size:.76rem;font-weight:600;color:#4a5068}
-.gantt-row-actions{display:flex;gap:.2rem;flex-shrink:0}
+.gantt-row-actions{display:flex;gap:.2rem;flex-shrink:0;align-items:center}
 .gantt-row-actions button{background:none;border:none;cursor:pointer;font-size:.72rem;color:#8a90a0;padding:.15rem .3rem;border-radius:4px}
 .gantt-row-actions button:hover{background:#f0f4ff;color:#1a3a6b}
+.drag-handle{width:16px;flex-shrink:0;text-align:center;cursor:grab;color:#b9c0cc;font-size:.85rem;user-select:none;line-height:1}
+.drag-handle:hover{color:#4a9fd4}
+.drag-handle:active{cursor:grabbing}
+.drag-handle-disabled{cursor:not-allowed;color:#d8dce3}
+.drag-handle-disabled:hover{color:#d8dce3}
+.gantt-row.dragging{opacity:.35}
+.gantt-row.drag-over-top{box-shadow:inset 0 3px 0 0 #4a9fd4}
+.gantt-row.drag-over-bottom{box-shadow:inset 0 -3px 0 0 #4a9fd4}
+.gantt-row.drag-over-into{background:#eaf2fc;box-shadow:inset 0 0 0 2px #4a9fd4}
 
 .gantt-row-track{position:relative;display:flex}
 .gantt-cell{width:34px;flex-shrink:0;border-right:1px solid #eef2f8;height:100%}
@@ -101,11 +115,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 .gantt-cell.inhabil{background:repeating-linear-gradient(45deg,#fecaca,#fecaca 4px,#fca5a5 4px,#fca5a5 8px)}
 .gantt-cell:hover{background:#eef4fc;cursor:context-menu}
 
-.gantt-bar{position:absolute;top:8px;height:28px;border-radius:7px;display:flex;align-items:center;font-size:.7rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer;transition:.15s}
+.gantt-bar{position:absolute;top:4px;height:22px;border-radius:7px;display:flex;align-items:center;font-size:.7rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer;transition:.15s}
 .gantt-bar:hover{box-shadow:0 3px 8px rgba(0,0,0,.25);transform:translateY(-1px)}
 .gantt-bar-seg{position:absolute;top:0;bottom:0}
 .gantt-bar-label{position:relative;z-index:1;overflow:hidden;text-overflow:ellipsis;padding-left:.5rem;text-shadow:0 1px 2px rgba(0,0,0,.35)}
-.gantt-row.row-tarea .gantt-bar{height:28px;top:8px}
+.gantt-row.row-tarea .gantt-bar{height:22px;top:4px}
 
 /* contexto menu para marcar inhabil */
 .ctx-menu{position:fixed;background:#fff;border:1px solid #dde1e9;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:300;min-width:200px;overflow:hidden;display:none}
@@ -169,7 +183,20 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
           <button class="btn-icon-nav" onclick="moveWindow(7)">›</button>
           <button class="btn btn-secondary btn-sm" onclick="goToday()">Hoy</button>
         </div>
-        <div id="loadingTag" class="loading" style="display:none;padding:0"><span class="spinner"></span>Cargando...</div>
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <select id="ordenSel" class="resp-filter-select" onchange="cambiarCriterioOrden(this.value)" title="Ordenar por">
+            <option value="manual">↕️ Orden manual (arrastrando)</option>
+            <option value="fecha_inicio">📅 Fecha de inicio</option>
+            <option value="fecha_fin">⏰ Fecha de fin</option>
+            <option value="responsable">👤 Responsable</option>
+            <option value="avance">📊 Avance (lo más atrasado arriba)</option>
+            <option value="nombre">🔤 Nombre (A-Z)</option>
+          </select>
+          <select id="filtroResponsableSel" class="resp-filter-select" onchange="filtrarPorResponsable(this.value)" title="Filtrar por responsable">
+            <option value="">👥 Todos los responsables</option>
+          </select>
+          <div id="loadingTag" class="loading" style="display:none;padding:0"><span class="spinner"></span>Cargando...</div>
+        </div>
       </div>
 
       <div class="gantt-wrap" id="ganttWrap">
@@ -181,6 +208,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
         <span><i class="legend-dot" style="background:#f5f6f8;border:1px solid #dde1e9"></i> Fin de semana</span>
         <span><i class="legend-dot" style="background:repeating-linear-gradient(45deg,#fee2e2,#fee2e2 3px,#fecaca 3px,#fecaca 6px)"></i> Día inhábil marcado</span>
         <span>Clic derecho sobre un día de la barra → marcar como inhábil</span>
+        <span>Color sólido = día completado · color claro = día pendiente</span>
+        <span>Arrastra ⠿ para reordenar o cambiar de proyecto</span>
       </div>
       <div class="gantt-legend" id="respLegend"></div>
 
@@ -215,6 +244,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
           <option value="adolfo">Adolfo</option>
           <option value="fernando">Fernando</option>
           <option value="juanjose">Juan José</option>
+          <option value="team">Team ExcelentIA</option>
           <option value="__otro__">Otro...</option>
         </select>
         <input type="text" id="py-responsable-otro" placeholder="Escribe el nombre" style="display:none;margin-top:.4rem">
@@ -273,6 +303,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
           <option value="adolfo">Adolfo</option>
           <option value="fernando">Fernando</option>
           <option value="juanjose">Juan José</option>
+          <option value="team">Team ExcelentIA</option>
           <option value="__otro__">Otro...</option>
         </select>
         <input type="text" id="ta-responsable-otro" placeholder="Escribe el nombre" style="display:none;margin-top:.4rem">
@@ -313,7 +344,8 @@ const TIMELINE_ENDPOINT = '/crm-timeline-v2';
 const USERS = {
   adolfo:   { nombre: 'Adolfo',    color: '#059669' },
   fernando: { nombre: 'Fernando', color: '#1a3a6b' },
-  juanjose: { nombre: 'Juan José', color: '#7c3aed' }
+  juanjose: { nombre: 'Juan José', color: '#7c3aed' },
+  team:     { nombre: 'Team ExcelentIA', color: '#4a9fd4' }
 };
 let currentUser = 'fernando';
 
@@ -323,6 +355,8 @@ let windowStart = startOfWeekMonday(new Date()); // primer día visible en el Ga
 const DAYS_VISIBLE = 21; // 3 semanas a la vista, scrollable
 let ctxTarget = null; // {id, dateStr} del día sobre el que se hizo clic derecho
 let proyectosColapsados = new Set(); // IDs de proyectos contraídos (por default todos lo están)
+let filtroResponsable = ''; // '' = todos; si no, muestra solo lo de ese responsable (y los proyectos que tengan al menos una tarea suya)
+let criterioOrden = 'manual'; // 'manual' (Orden por drag&drop) | 'fecha_inicio' | 'fecha_fin' | 'responsable' | 'avance' | 'nombre'
 
 // ═══════════════════════════════════════
 // HELPERS DE FECHAS
@@ -389,6 +423,15 @@ function diasCompletadosDeBarra(item){
   if(!habiles.length) return new Set();
   const diasCompletados = Math.round((item.Avance / 100) * habiles.length);
   return new Set(habiles.slice(0, diasCompletados));
+}
+
+// Aclara un color hex mezclándolo con blanco (factor 0 = color original, 1 = blanco puro).
+// Se usa para distinguir días pendientes de días completados en la barra, SIN usar transparencia/opacidad.
+function lightenColor(hex, factor){
+  const h = (hex || '#1a3a6b').replace('#','');
+  const r = parseInt(h.substring(0,2),16) || 0, g = parseInt(h.substring(2,4),16) || 0, b = parseInt(h.substring(4,6),16) || 0;
+  const mezclar = (c) => Math.round(c + (255 - c) * factor);
+  return `rgb(${mezclar(r)},${mezclar(g)},${mezclar(b)})`;
 }
 
 function fmtFechaCorta(d){
@@ -464,8 +507,48 @@ function normalizeItem(raw){
 function renderAll(){
   renderEmptyState();
   renderProyectoSelectOptions();
+  renderFiltroResponsable();
   renderGantt();
   renderRespLegend();
+}
+
+// Llena el select de filtro: los responsables fijos (USERS) + cualquier nombre libre ("Otro...") que ya esté en uso
+function renderFiltroResponsable(){
+  const sel = document.getElementById('filtroResponsableSel');
+  if(!sel) return;
+  const nombresLibres = new Set();
+  ITEMS.forEach(i => { if(i.Responsable && !USERS[i.Responsable]) nombresLibres.add(i.Responsable); });
+
+  const valorPrevio = filtroResponsable;
+  let html = `<option value="">👥 Todos los responsables</option>`;
+  Object.entries(USERS).forEach(([uid, u]) => { html += `<option value="${uid}">${escHtml(u.nombre)}</option>`; });
+  nombresLibres.forEach(n => { html += `<option value="${escHtml(n)}">${escHtml(n)}</option>`; });
+  sel.innerHTML = html;
+  sel.value = valorPrevio; // conserva la selección si sigue existiendo
+}
+
+function filtrarPorResponsable(valor){
+  filtroResponsable = valor;
+  renderGantt();
+}
+
+function cambiarCriterioOrden(valor){
+  criterioOrden = valor;
+  renderGantt();
+}
+
+// Comparador único usado para ordenar tanto el nivel superior como las tareas dentro de cada proyecto.
+// Con 'manual' se respeta el Orden que se arma arrastrando; con cualquier otro criterio, el arrastre se desactiva
+// (no tendría sentido pelear contra un orden automático).
+function compararPorCriterio(a, b){
+  switch(criterioOrden){
+    case 'fecha_inicio': return (a.FechaInicio || '').localeCompare(b.FechaInicio || '') || a.Orden - b.Orden;
+    case 'fecha_fin': return (a.FechaFin || '').localeCompare(b.FechaFin || '') || a.Orden - b.Orden;
+    case 'responsable': return getResponsableInfo(a.Responsable).nombre.localeCompare(getResponsableInfo(b.Responsable).nombre, 'es') || a.Orden - b.Orden;
+    case 'avance': return (a.Avance - b.Avance) || a.Orden - b.Orden;
+    case 'nombre': return a.Nombre.localeCompare(b.Nombre, 'es') || a.Orden - b.Orden;
+    default: return a.Orden - b.Orden; // manual
+  }
 }
 
 function renderRespLegend(){
@@ -556,26 +639,36 @@ function renderGantt(){
   });
   headerHtml += `</div>`;
 
-  // Filas: cada proyecto (colapsable) seguido de sus tareas, luego las tareas sin proyecto — todo ordenado por Orden
-  const proyectos = ITEMS.filter(i => i.Tipo === 'Proyecto').sort((a,b) => a.Orden - b.Orden);
-  const tareasSueltas = ITEMS.filter(i => i.Tipo === 'Tarea' && !i.ProyectoPadreID).sort((a,b) => a.Orden - b.Orden);
+  // Nivel superior: proyectos Y tareas sueltas comparten el mismo orden — así se pueden intercalar entre sí.
+  // Cada proyecto sigue arrastrando a sus propias tareas hijas justo debajo (esas se ordenan aparte, solo entre hermanas).
+  // Si hay un filtro de responsable activo: una tarea se ve solo si es suya; un proyecto se ve si es suyo
+  // O si tiene al menos una tarea hija suya (para no perder el contexto), y en ese caso solo se muestran sus tareas que coincidan.
+  const pasaFiltro = (it) => !filtroResponsable || it.Responsable === filtroResponsable;
+  const nivelSuperior = ITEMS.filter(i => i.Tipo === 'Proyecto' || (i.Tipo === 'Tarea' && !i.ProyectoPadreID))
+    .filter(item => {
+      if(item.Tipo !== 'Proyecto') return pasaFiltro(item);
+      if(pasaFiltro(item)) return true;
+      return ITEMS.some(h => h.Tipo === 'Tarea' && h.ProyectoPadreID === item.ID && pasaFiltro(h));
+    })
+    .sort(compararPorCriterio);
   let bodyHtml = `<div class="gantt-body">`;
 
-  if(!proyectos.length && !tareasSueltas.length){
-    bodyHtml += `<div class="empty-state"><span>📊</span>Sin proyectos ni tareas en el Timeline todavía</div>`;
+  if(!nivelSuperior.length){
+    bodyHtml += `<div class="empty-state"><span>📊</span>${filtroResponsable ? 'Nadie con ese responsable tiene proyectos o tareas todavía' : 'Sin proyectos ni tareas en el Timeline todavía'}</div>`;
   }
 
-  proyectos.forEach((py, idx) => {
-    const tareas = ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === py.ID).sort((a,b) => a.Orden - b.Orden);
-    const colapsado = proyectosColapsados.has(py.ID);
-    bodyHtml += renderGanttRow(py, days, today, false, { tieneHijos: tareas.length > 0, colapsado, esPrimero: idx === 0, esUltimo: idx === proyectos.length - 1, listaOrden: proyectos.map(p=>p.ID) });
-    if(!colapsado){
-      tareas.forEach((ta, tIdx) => { bodyHtml += renderGanttRow(ta, days, today, true, { esPrimero: tIdx === 0, esUltimo: tIdx === tareas.length - 1, listaOrden: tareas.map(t=>t.ID) }); });
+  nivelSuperior.forEach(item => {
+    if(item.Tipo === 'Proyecto'){
+      const tareas = ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === item.ID).filter(pasaFiltro).sort(compararPorCriterio);
+      const colapsado = proyectosColapsados.has(item.ID);
+      bodyHtml += renderGanttRow(item, days, today, false, { tieneHijos: tareas.length > 0, colapsado });
+      if(!colapsado){
+        tareas.forEach(ta => { bodyHtml += renderGanttRow(ta, days, today, true, {}); });
+      }
+    } else {
+      // Tarea suelta — vive en el mismo nivel que los proyectos, se intercala con ellos
+      bodyHtml += renderGanttRow(item, days, today, true, {});
     }
-  });
-
-  tareasSueltas.forEach((ta, idx) => {
-    bodyHtml += renderGanttRow(ta, days, today, true, { esPrimero: idx === 0, esUltimo: idx === tareasSueltas.length - 1, listaOrden: tareasSueltas.map(t=>t.ID) });
   });
 
   bodyHtml += `</div>`;
@@ -589,28 +682,11 @@ function toggleProyectoColapso(proyectoId){
   renderGantt();
 }
 
-// Intercambia el Orden de un item con su vecino inmediato (direccion: -1 subir, +1 bajar), dentro de su misma lista (lista = array de IDs ya en orden visual)
-async function moverOrden(itemId, direccion, lista){
-  const idx = lista.indexOf(itemId);
-  const vecinoIdx = idx + direccion;
-  if(idx === -1 || vecinoIdx < 0 || vecinoIdx >= lista.length) return;
-
-  const item = ITEMS.find(i => i.ID === itemId);
-  const vecino = ITEMS.find(i => i.ID === lista[vecinoIdx]);
-  if(!item || !vecino) return;
-
-  // Si ambos tienen Orden=0 (datos viejos sin orden asignado), primero asigna un Orden basado en su posición actual en la lista
-  if(item.Orden === vecino.Orden){
-    lista.forEach((id, i) => { const it = ITEMS.find(x => x.ID === id); if(it) it.Orden = i; });
-  }
-
-  const ordenTemp = item.Orden;
-  item.Orden = vecino.Orden;
-  vecino.Orden = ordenTemp;
-
-  renderGantt(); // respuesta visual inmediata, sin esperar la red
-
-  await Promise.all([guardarSoloOrden(item), guardarSoloOrden(vecino)]);
+// Siguiente Orden disponible para un nuevo Proyecto o Tarea suelta — ambos comparten el mismo
+// espacio de numeración de "nivel superior" para poder intercalarse entre sí.
+function siguienteOrdenNivelSuperior(){
+  const nivelSuperior = ITEMS.filter(i => i.Tipo === 'Proyecto' || (i.Tipo === 'Tarea' && !i.ProyectoPadreID));
+  return nivelSuperior.length ? Math.max(...nivelSuperior.map(i => i.Orden)) + 1 : 0;
 }
 
 async function guardarSoloOrden(item){
@@ -624,23 +700,162 @@ async function guardarSoloOrden(item){
   });
 }
 
+// ═══════════════════════════════════════
+// DRAG & DROP — reordenar y cambiar de proyecto arrastrando (reemplaza las flechas ▲▼)
+// ═══════════════════════════════════════
+let draggedId = null;
+let draggedTipo = null;
+
+function onDragStartRow(e, id, tipo){
+  draggedId = id;
+  draggedTipo = tipo;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id);
+  const fila = e.target.closest('.gantt-row');
+  if(fila) fila.classList.add('dragging');
+}
+
+function onDragEndRow(){
+  document.querySelectorAll('.gantt-row.dragging').forEach(f => f.classList.remove('dragging'));
+  limpiarIndicadoresDrag();
+  draggedId = null;
+  draggedTipo = null;
+}
+
+function limpiarIndicadoresDrag(){
+  document.querySelectorAll('.gantt-row').forEach(f => f.classList.remove('drag-over-top','drag-over-bottom','drag-over-into'));
+}
+
+function onDragOverRow(e, hoverId, hoverTipo){
+  if(!draggedId || draggedId === hoverId) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+
+  const fila = e.currentTarget;
+  const rect = fila.getBoundingClientRect();
+  const enMitadInferior = e.clientY > (rect.top + rect.height / 2);
+
+  limpiarIndicadoresDrag();
+  if(hoverTipo === 'Proyecto' && draggedTipo === 'Tarea' && enMitadInferior){
+    fila.classList.add('drag-over-into');
+  } else if(enMitadInferior){
+    fila.classList.add('drag-over-bottom');
+  } else {
+    fila.classList.add('drag-over-top');
+  }
+}
+
+async function onDropRow(e, hoverId, hoverTipo){
+  e.preventDefault();
+  limpiarIndicadoresDrag();
+  if(!draggedId || draggedId === hoverId){ draggedId = null; draggedTipo = null; return; }
+
+  const item = ITEMS.find(i => i.ID === draggedId);
+  const hoverItem = ITEMS.find(i => i.ID === hoverId);
+  const tipoArrastrado = draggedTipo;
+  draggedId = null;
+  draggedTipo = null;
+  if(!item || !hoverItem) return;
+
+  const fila = e.currentTarget;
+  const rect = fila.getBoundingClientRect();
+  const enMitadInferior = e.clientY > (rect.top + rect.height / 2);
+
+  if(hoverTipo === 'Proyecto' && tipoArrastrado === 'Tarea' && enMitadInferior){
+    await soltarDentroDeProyecto(item, hoverItem);
+  } else {
+    await soltarRelativoA(item, hoverItem, enMitadInferior);
+  }
+}
+
+// Devuelve el "contexto" (padreId + lista de hermanos ordenada) al que pertenece refItem
+function contextoDe(refItem){
+  if(refItem.Tipo === 'Proyecto' || !refItem.ProyectoPadreID){
+    return {
+      padreId: '',
+      lista: ITEMS.filter(i => i.Tipo === 'Proyecto' || (i.Tipo === 'Tarea' && !i.ProyectoPadreID)).sort((a,b) => a.Orden - b.Orden)
+    };
+  }
+  return {
+    padreId: refItem.ProyectoPadreID,
+    lista: ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === refItem.ProyectoPadreID).sort((a,b) => a.Orden - b.Orden)
+  };
+}
+
+// Inserta `item` antes/después de `refItem`, dentro del contexto (mismo padre) de refItem — re-asigna padre si cambia de grupo
+async function soltarRelativoA(item, refItem, despues){
+  // Un Proyecto no puede "entrar" a las tareas de otro proyecto — si se soltó sobre una tarea hija,
+  // el ancla real es el proyecto al que pertenece esa tarea (se inserta justo después de ese proyecto)
+  let refReal = refItem;
+  if(item.Tipo === 'Proyecto' && refItem.Tipo === 'Tarea' && refItem.ProyectoPadreID){
+    refReal = ITEMS.find(i => i.ID === refItem.ProyectoPadreID) || refItem;
+    despues = true;
+  }
+
+  const { padreId, lista } = contextoDe(refReal);
+  const padreAnteriorId = item.ProyectoPadreID || '';
+
+  const otros = lista.filter(i => i.ID !== item.ID);
+  const idxRef = otros.findIndex(i => i.ID === refReal.ID);
+  const posInsercion = idxRef === -1 ? otros.length : (despues ? idxRef + 1 : idxRef);
+  otros.splice(posInsercion, 0, item);
+
+  item.ProyectoPadreID = padreId;
+  if(item.Tipo === 'Tarea' && padreId){
+    const proyectoDestino = ITEMS.find(i => i.ID === padreId);
+    if(proyectoDestino) item.Color = proyectoDestino.Color;
+  }
+
+  // Renumera el contexto destino completo (0,1,2…) — robusto sin importar el Orden previo de cada uno
+  otros.forEach((it, idx) => { it.Orden = idx; });
+
+  renderAll(); // respuesta visual inmediata, sin esperar la red
+
+  await Promise.all(otros.map(it => guardarSoloOrden(it)));
+  if(item.Tipo === 'Tarea'){
+    if(padreId) await recalcularAvanceProyecto(padreId);
+    if(padreAnteriorId && padreAnteriorId !== padreId) await recalcularAvanceProyecto(padreAnteriorId);
+  }
+}
+
+// Suelta `item` (una Tarea) como la ÚLTIMA tarea hija de `proyecto`
+async function soltarDentroDeProyecto(item, proyecto){
+  const padreAnteriorId = item.ProyectoPadreID || '';
+  if(padreAnteriorId === proyecto.ID) return; // ya es su hija
+
+  const hermanas = ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === proyecto.ID);
+  item.ProyectoPadreID = proyecto.ID;
+  item.Orden = hermanas.length ? Math.max(...hermanas.map(i => i.Orden)) + 1 : 0;
+  item.Color = proyecto.Color;
+  if(proyectosColapsados.has(proyecto.ID)) proyectosColapsados.delete(proyecto.ID); // expande para mostrar dónde quedó
+
+  renderAll();
+
+  await guardarSoloOrden(item);
+  await recalcularAvanceProyecto(proyecto.ID);
+  if(padreAnteriorId) await recalcularAvanceProyecto(padreAnteriorId);
+}
+
 function renderGanttRow(item, days, today, esTarea, opts){
   opts = opts || {};
   const rowClass = esTarea ? 'gantt-row row-tarea' : 'gantt-row';
   const icon = esTarea ? '↳' : '';
-  const listaJson = JSON.stringify(opts.listaOrden || []).replace(/"/g, '&quot;');
-  const btnSubir = opts.esPrimero ? '' : `<button onclick="moverOrden('${item.ID}',-1,${listaJson})" title="Subir prioridad">▲</button>`;
-  const btnBajar = opts.esUltimo ? '' : `<button onclick="moverOrden('${item.ID}',1,${listaJson})" title="Bajar prioridad">▼</button>`;
+  const ordenEsManual = criterioOrden === 'manual';
+  const dragHandle = ordenEsManual
+    ? `<span class="drag-handle" draggable="true" title="Arrastrar para reordenar${esTarea ? ' o cambiar de proyecto' : ''}" ondragstart="onDragStartRow(event,'${item.ID}','${item.Tipo}')" ondragend="onDragEndRow()">⠿</span>`
+    : `<span class="drag-handle drag-handle-disabled" title="Cambia a 'Orden manual' para poder arrastrar">⠿</span>`;
   const actions = esTarea
-    ? `${btnSubir}${btnBajar}<button onclick="openTareaModal('${item.ID}')" title="Editar">✏️</button>`
-    : `${btnSubir}${btnBajar}<button onclick="openTareaModal(null,'${item.ID}')" title="Agregar tarea">+</button><button onclick="openProyectoModal('${item.ID}')" title="Editar">✏️</button>`;
+    ? `<button onclick="openTareaModal('${item.ID}')" title="Editar">✏️</button>`
+    : `<button onclick="openTareaModal(null,'${item.ID}')" title="Agregar tarea">+</button><button onclick="openProyectoModal('${item.ID}')" title="Editar">✏️</button>`;
 
-  // Flechita de colapso, solo en proyectos que tienen tareas
+  // Flechita de colapso, solo en proyectos que tienen tareas — el clic para contraer/expandir
+  // vive en todo el nombre (gantt-row-name), no solo en la flecha, para que se pueda dar clic en cualquier parte.
+  // Las tareas reservan el mismo espacio (oculto) que los proyectos sin hijos, para que el avatar quede alineado en todas las filas.
   let toggleHtml = '';
   if(!esTarea && opts.tieneHijos){
     const flecha = opts.colapsado ? '▸' : '▾';
-    toggleHtml = `<span class="gantt-collapse-toggle" onclick="toggleProyectoColapso('${item.ID}')" title="${opts.colapsado ? 'Expandir' : 'Contraer'}">${flecha}</span>`;
-  } else if(!esTarea){
+    toggleHtml = `<span class="gantt-collapse-toggle" title="${opts.colapsado ? 'Expandir' : 'Contraer'}">${flecha}</span>`;
+  } else {
     toggleHtml = `<span class="gantt-collapse-toggle" style="visibility:hidden">▾</span>`;
   }
 
@@ -648,8 +863,16 @@ function renderGanttRow(item, days, today, esTarea, opts){
   const inicial = (resp.nombre || '?').charAt(0).toUpperCase();
   const avatarHtml = `<span class="resp-avatar" style="background:${resp.color}" title="Responsable: ${escHtml(resp.nombre)}">${inicial}</span>`;
 
+  // Solo los proyectos con tareas tienen algo que contraer/expandir — ahí se hace clicable todo el nombre
+  const nombreClickable = !esTarea && opts.tieneHijos;
+  const nombreClass = nombreClickable ? 'gantt-row-name name-toggle' : 'gantt-row-name';
+  const nombreOnclick = nombreClickable ? ` onclick="toggleProyectoColapso('${item.ID}')"` : '';
+
   let labelHtml = `<div class="gantt-row-label">
-    <span class="gantt-row-name" title="${escHtml(item.Nombre)} · ${escHtml(resp.nombre)}">${toggleHtml}${avatarHtml}<span class="name-text">${icon?icon+' ':''}${escHtml(item.Nombre)} <span style="color:#8a90a0;font-weight:600">(${item.Avance}%)</span></span></span>
+    <span class="gantt-row-left">
+      ${dragHandle}
+      <span class="${nombreClass}" title="${escHtml(item.Nombre)} · ${escHtml(resp.nombre)}"${nombreOnclick}>${toggleHtml}${avatarHtml}<span class="name-text">${icon?icon+' ':''}${escHtml(item.Nombre)} <span style="color:#8a90a0;font-weight:600">(${item.Avance}%)</span></span></span>
+    </span>
     <span class="gantt-row-actions">${actions}</span>
   </div>`;
 
@@ -668,7 +891,7 @@ function renderGanttRow(item, days, today, esTarea, opts){
   const barHtml = buildBarOverlay(item, days);
   trackHtml += barHtml + `</div>`;
 
-  return `<div class="${rowClass}">${labelHtml}${trackHtml}</div>`;
+  return `<div class="${rowClass}" ondragover="onDragOverRow(event,'${item.ID}','${item.Tipo}')" ondrop="onDropRow(event,'${item.ID}','${item.Tipo}')">${labelHtml}${trackHtml}</div>`;
 }
 
 function buildBarOverlay(item, days){
@@ -689,7 +912,7 @@ function buildBarOverlay(item, days){
   const completados = diasCompletadosDeBarra(item);
 
   // Construye un segmento por cada día visible de la barra, con su color según su estado real:
-  // fin de semana (gris, siempre gana) > inhábil (rojo claro) > completado/pendiente (color real, sin transparencia)
+  // fin de semana (gris, siempre gana) > inhábil (rojo claro) > completado (color sólido) > pendiente (mismo color, más claro — sin transparencia)
   let segmentos = '';
   for(let i = startIdx; i <= endIdx; i++){
     const dStr = toISO(days[i]);
@@ -698,7 +921,8 @@ function buildBarOverlay(item, days){
     let bg;
     if(esFinde) bg = '#9ca3af';
     else if(esInhabil) bg = '#fca5a5';
-    else bg = color;
+    else if(completados.has(dStr)) bg = color;
+    else bg = lightenColor(color, 0.55);
 
     const segLeft = (i - startIdx) * 34;
     segmentos += `<div class="gantt-bar-seg" style="left:${segLeft}px;width:34px;background:${bg}"></div>`;
@@ -855,8 +1079,11 @@ async function saveProyecto(){
     Responsable: readResponsableValue('py'),
     Notas: document.getElementById('py-notas').value,
     UserID: currentUser,
-    Orden: existing ? existing.Orden : (Math.max(0, ...ITEMS.filter(i=>i.Tipo==='Proyecto').map(i=>i.Orden)) + 1)
+    Orden: existing ? existing.Orden : siguienteOrdenNivelSuperior()
   };
+
+  // Cierra el modal de inmediato (ya validado) para que no se puedan generar duplicados con varios clics
+  closeModal('modal-proyecto');
 
   const res = await apiCall({
     accion: editingProyectoId ? 'update' : 'create',
@@ -875,7 +1102,6 @@ async function saveProyecto(){
       ITEMS.push(item);
       proyectosColapsados.add(item.ID); // nuevo proyecto arranca contraído, consistente con el resto
     }
-    closeModal('modal-proyecto');
     renderAll();
     showToast('✅ Proyecto guardado');
   }else{
@@ -979,9 +1205,14 @@ async function saveTarea(){
     Color: proyectoPadre ? proyectoPadre.Color : '#4a9fd4',
     Responsable: readResponsableValue('ta'),
     Notas: document.getElementById('ta-notas').value,
-    Orden: existing ? existing.Orden : (Math.max(0, ...ITEMS.filter(i=>i.Tipo==='Tarea' && i.ProyectoPadreID===(proyectoPadreId||'')).map(i=>i.Orden)) + 1),
+    Orden: existing ? existing.Orden : (proyectoPadreId
+      ? (Math.max(0, ...ITEMS.filter(i=>i.Tipo==='Tarea' && i.ProyectoPadreID===proyectoPadreId).map(i=>i.Orden)) + 1)
+      : siguienteOrdenNivelSuperior()),
     UserID: currentUser
   };
+
+  // Cierra el modal de inmediato (ya validado) para que no se puedan generar duplicados con varios clics
+  closeModal('modal-tarea');
 
   const res = await apiCall({
     accion: editingTareaId ? 'update' : 'create',
@@ -1002,7 +1233,6 @@ async function saveTarea(){
     // Recalcula el proyecto nuevo (si tiene) y el anterior (si cambió de proyecto al editar)
     if(proyectoPadreId) await recalcularAvanceProyecto(proyectoPadreId);
     if(proyectoPadreAnterior && proyectoPadreAnterior !== proyectoPadreId) await recalcularAvanceProyecto(proyectoPadreAnterior);
-    closeModal('modal-tarea');
     renderAll();
     showToast('✅ Tarea guardada');
   }else{
