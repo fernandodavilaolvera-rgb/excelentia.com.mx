@@ -1069,7 +1069,7 @@ async function onResizeEnd(e){
 
   await guardarSoloOrden(item);
   if(item.Tipo === 'Tarea' && item.ProyectoPadreID){
-    await expandirProyectoSiNecesario(item.ProyectoPadreID);
+    await sincronizarRangoProyecto(item.ProyectoPadreID);
     await recalcularAvanceProyecto(item.ProyectoPadreID);
     renderAll(); // refleja el nuevo rango del proyecto si tuvo que extenderse
   }
@@ -1376,7 +1376,7 @@ async function saveTarea(){
     }
     // Recalcula el proyecto nuevo (si tiene) y el anterior (si cambió de proyecto al editar)
     if(proyectoPadreId){
-      await expandirProyectoSiNecesario(proyectoPadreId);
+      await sincronizarRangoProyecto(proyectoPadreId);
       await recalcularAvanceProyecto(proyectoPadreId);
     }
     if(proyectoPadreAnterior && proyectoPadreAnterior !== proyectoPadreId) await recalcularAvanceProyecto(proyectoPadreAnterior);
@@ -1400,23 +1400,23 @@ async function deleteTarea(){
   showToast('Tarea eliminada');
 }
 
-// ── Si una tarea (al editarla en el modal o al redimensionar su barra) queda fuera del rango
-// de fechas de su proyecto padre, el proyecto se extiende por inicio y/o por fin para volver
-// a envolver a todas sus tareas hijas. Nunca lo encoge de vuelta, solo crece si hace falta. ──
-async function expandirProyectoSiNecesario(proyectoId){
+// ── Mantiene al proyecto del tamaño exacto que necesitan sus tareas hijas: se extiende
+// si una tarea queda fuera de su rango, y se encoge si la tarea que marcaba el límite
+// se hizo más chica y el proyecto ya no necesita ser tan grande. ──
+async function sincronizarRangoProyecto(proyectoId){
   const proyecto = ITEMS.find(i => i.ID === proyectoId && i.Tipo === 'Proyecto');
   if(!proyecto) return;
   const tareas = ITEMS.filter(i => i.Tipo === 'Tarea' && i.ProyectoPadreID === proyectoId);
-  if(!tareas.length) return;
+  if(!tareas.length) return; // sin tareas hijas, las fechas del proyecto se manejan a mano
 
-  let nuevaFechaInicio = proyecto.FechaInicio;
-  let nuevaFechaFin = proyecto.FechaFin;
+  let nuevaFechaInicio = tareas[0].FechaInicio;
+  let nuevaFechaFin = tareas[0].FechaFin;
   tareas.forEach(t => {
     if(t.FechaInicio && t.FechaInicio < nuevaFechaInicio) nuevaFechaInicio = t.FechaInicio;
     if(t.FechaFin && t.FechaFin > nuevaFechaFin) nuevaFechaFin = t.FechaFin;
   });
 
-  if(nuevaFechaInicio === proyecto.FechaInicio && nuevaFechaFin === proyecto.FechaFin) return; // ya las cubre, sin cambios
+  if(nuevaFechaInicio === proyecto.FechaInicio && nuevaFechaFin === proyecto.FechaFin) return; // ya coincide, sin cambios
 
   proyecto.FechaInicio = nuevaFechaInicio;
   proyecto.FechaFin = nuevaFechaFin;
