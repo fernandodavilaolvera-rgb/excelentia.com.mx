@@ -130,6 +130,9 @@ tr:last-child td{border-bottom:none}
       <div class="alert-box" id="empty-alert" style="display:none">
         💡 Aún no tienes contactos. Crea el primero con <strong>+ Nuevo contacto</strong>.
       </div>
+      <div class="alert-box" id="error-alert" style="display:none;border-color:#fecaca;border-left-color:#dc2626;background:#fef2f2">
+        ⚠️ No se pudo conectar con el servidor (puede tardar unos segundos en "despertar"). <button class="btn btn-secondary btn-sm" onclick="loadContactos()">Reintentar</button>
+      </div>
 
       <div class="filters">
         <input class="filter-input" type="text" placeholder="Buscar por nombre o empresa..." oninput="actualizarFiltro('q', this.value)">
@@ -211,7 +214,7 @@ let sortDir = 'asc';  // 'asc' | 'desc'
 async function apiCall(body){
   try{
     const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 8000);
+    const timeout = setTimeout(()=>controller.abort(), 25000); // n8n + Google Sheets a veces tardan más de 8s, sobre todo en "cold start"
     const res = await fetch(`${N8N_BASE}${CONTACTOS_ENDPOINT}`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -223,12 +226,12 @@ async function apiCall(body){
     return await res.json();
   }catch(e){
     console.error('Contactos API error:', e);
-    return body.accion === 'get' ? [] : null;
+    return null; // null = "no sabemos qué pasó" (puede que sí se haya guardado del lado del servidor aunque el navegador no alcanzó a leer la respuesta)
   }
 }
 
 function genId(prefix){ return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`; }
-function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function showToast(msg, tipo='ok'){
   let t = document.getElementById('toast');
@@ -250,28 +253,42 @@ function showToast(msg, tipo='ok'){
 // ═══════════════════════════════════════
 async function loadContactos(){
   document.getElementById('loadingTag').style.display = 'flex';
+  document.getElementById('error-alert').style.display = 'none';
   const res = await apiCall({ accion: 'get' });
   document.getElementById('loadingTag').style.display = 'none';
+
+  if(res === null){
+    // No llegó respuesta (timeout, red caída, etc.) — no asumimos que el Sheet está vacío, avisamos.
+    document.getElementById('error-alert').style.display = 'block';
+    document.getElementById('empty-alert').style.display = 'none';
+    document.getElementById('contactosTabla').innerHTML = '';
+    return;
+  }
+
   // Filtra la fila fantasma de encabezados que a veces n8n devuelve como si fuera un registro
   const limpio = (Array.isArray(res) ? res : []).filter(r => r.ID && r.ID !== 'ID');
   ITEMS = limpio.map(normalizeItem);
   renderAll();
 }
 
+function toStr(v){ return (v === null || v === undefined) ? '' : String(v); }
+
 function normalizeItem(raw){
+  // Google Sheets devuelve como NÚMERO cualquier columna que solo tenga dígitos (ID, WhatsApp, Telefono, Tags...),
+  // así que forzamos todo a string aquí — si no, cosas como WhatsApp.replace() truenan más adelante.
   return {
-    ID: raw.ID || raw.id || '',
-    Tipo: raw.Tipo || 'Persona',
-    Nombre: raw.Nombre || '(sin nombre)',
-    Empresa: raw.Empresa || '',
-    Cargo: raw.Cargo || '',
-    WhatsApp: raw.WhatsApp || '',
-    Email: raw.Email || '',
-    Telefono: raw.Telefono || '',
-    LinkedIn: raw.LinkedIn || '',
-    Status: raw.Status || 'Lead',
-    Tags: raw.Tags || '',
-    Notas: raw.Notas || ''
+    ID: toStr(raw.ID || raw.id),
+    Tipo: toStr(raw.Tipo) || 'Persona',
+    Nombre: toStr(raw.Nombre) || '(sin nombre)',
+    Empresa: toStr(raw.Empresa),
+    Cargo: toStr(raw.Cargo),
+    WhatsApp: toStr(raw.WhatsApp),
+    Email: toStr(raw.Email),
+    Telefono: toStr(raw.Telefono),
+    LinkedIn: toStr(raw.LinkedIn),
+    Status: toStr(raw.Status) || 'Lead',
+    Tags: toStr(raw.Tags),
+    Notas: toStr(raw.Notas)
   };
 }
 
@@ -435,6 +452,7 @@ async function saveContacto(){
 
   // Cierra el modal de inmediato (ya validado) para que no se generen duplicados con varios clics
   closeModal('modal-contacto');
+  showToast('⏳ Guardando...');
 
   const res = await apiCall({ accion: editingId ? 'update' : 'create', ...item });
 
@@ -448,7 +466,7 @@ async function saveContacto(){
     renderAll();
     showToast('✅ Contacto guardado');
   }else{
-    showToast('No se pudo guardar — revisa tu conexión', 'err');
+    showToast('⚠️ No hubo confirmación — recarga para verificar si sí se guardó', 'err');
   }
 }
 
