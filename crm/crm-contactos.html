@@ -95,6 +95,14 @@ tr:last-child td{border-bottom:none}
 .row-actions button{background:none;border:none;cursor:pointer;font-size:.78rem;color:#8a90a0;padding:.2rem .35rem;border-radius:4px}
 .row-actions button:hover{background:#f0f4ff;color:#1a3a6b}
 
+/* ── INDICADOR DE NOTAS ── */
+.notas-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:none;cursor:pointer;transition:.15s;flex-shrink:0}
+.notas-btn.tiene{background:#059669}
+.notas-btn.tiene:hover{background:#047857}
+.notas-btn.vacia{background:#dc2626;cursor:default}
+.notas-btn svg{width:11px;height:11px;fill:#fff}
+.notas-modal-text{font-size:.88rem;line-height:1.6;color:#1a2035;white-space:pre-wrap;word-break:break-word}
+
 @media(max-width:700px){
   .page{padding:.85rem}
   .form-grid{grid-template-columns:1fr}
@@ -191,6 +199,19 @@ tr:last-child td{border-bottom:none}
       <button class="btn btn-danger btn-sm" id="co-delete-btn" style="display:none;margin-right:auto" onclick="deleteContacto()">Eliminar contacto</button>
       <button class="btn btn-secondary" onclick="closeModal('modal-contacto')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveContacto()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ver Nota -->
+<div class="modal-backdrop" id="modal-vernota">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h3 id="vernotaTitle">📝 Nota</h3><button class="modal-close" onclick="closeModal('modal-vernota')">✕</button></div>
+    <div class="modal-body">
+      <div class="notas-modal-text" id="vernotaTexto"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-vernota')">Cerrar</button>
     </div>
   </div>
 </div>
@@ -369,12 +390,13 @@ function renderContactos(){
     theadHtml += `<th class="sortable ${activa}" onclick="toggleSort('${c.key}')">${c.label} <span class="sort-arrow">${sortArrow(c.key)}</span></th>`;
   });
   theadHtml += '<th>WhatsApp</th><th>Correo</th>';
+  theadHtml += '<th>Notas</th>';
   const tagsActiva = sortCol === 'Tags' ? 'sort-active' : '';
   theadHtml += `<th class="sortable ${tagsActiva}" onclick="toggleSort('Tags')">Tags <span class="sort-arrow">${sortArrow('Tags')}</span></th>`;
   theadHtml += '<th></th></tr></thead>';
 
   if(!lista.length){
-    tabla.innerHTML = theadHtml + `<tbody><tr><td colspan="9"><div class="empty-state"><span>🔍</span>Nadie coincide con ese filtro</div></td></tr></tbody>`;
+    tabla.innerHTML = theadHtml + `<tbody><tr><td colspan="10"><div class="empty-state"><span>🔍</span>Nadie coincide con ese filtro</div></td></tr></tbody>`;
     return;
   }
 
@@ -384,6 +406,9 @@ function renderContactos(){
       ? `<div style="display:flex;align-items:center;gap:.45rem"><a href="https://wa.me/${c.WhatsApp.replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" class="wa-btn" title="Abrir WhatsApp"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a><span>${escHtml(c.WhatsApp)}</span></div>`
       : (c.Telefono ? escHtml(c.Telefono) : '-');
     const correoCell = c.Email ? `<a href="mailto:${escHtml(c.Email)}" class="email-link">${escHtml(c.Email)}</a>` : '-';
+    const notasCell = c.Notas
+      ? `<button class="notas-btn tiene" title="Ver nota" onclick="verNota('${c.ID}')"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H6l-2 2V4zm2 2v9.17L6.83 14H18V6H6z"/></svg></button>`
+      : `<span class="notas-btn vacia" title="Sin nota"></span>`;
 
     return `<tr>
       <td><strong>${escHtml(c.Nombre)}</strong></td>
@@ -393,6 +418,7 @@ function renderContactos(){
       <td><span class="badge ${badgeClass}">${escHtml(c.Status)}</span></td>
       <td>${waCell}</td>
       <td>${correoCell}</td>
+      <td>${notasCell}</td>
       <td>${escHtml(c.Tags) || '-'}</td>
       <td><div class="row-actions">
         <button onclick="openContactoModal('${c.ID}')" title="Editar">✏️</button>
@@ -402,6 +428,14 @@ function renderContactos(){
   }).join('');
 
   tabla.innerHTML = theadHtml + `<tbody>${filas}</tbody>`;
+}
+
+function verNota(id){
+  const item = ITEMS.find(i => i.ID === id);
+  if(!item || !item.Notas) return;
+  document.getElementById('vernotaTitle').textContent = `📝 Nota — ${item.Nombre}`;
+  document.getElementById('vernotaTexto').textContent = item.Notas;
+  document.getElementById('modal-vernota').classList.add('open');
 }
 
 // ═══════════════════════════════════════
