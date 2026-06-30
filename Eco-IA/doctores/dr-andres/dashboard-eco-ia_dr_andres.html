@@ -455,6 +455,24 @@ const DOCTOR_ID = 'dr-andres';
 
 let todosLosReportes = [];
 
+/* ── HORA MÉXICO ── */
+// El Apps Script entrega "fecha_legible" ya formateada en GMT (desfase de 6h).
+// Aquí recalculamos siempre a partir de "timestamp" (UTC real) y la convertimos
+// a hora de Ciudad de México. Si no hay timestamp utilizable, usamos fecha_legible
+// como último recurso (puede seguir mostrando GMT en ese caso extremo).
+function formatFechaMX(rawTimestamp) {
+  if (!rawTimestamp) return null;
+  const d = new Date(rawTimestamp);
+  if (isNaN(d.getTime())) return null;
+  const partes = new Intl.DateTimeFormat('es-MX', {
+    timeZone: 'America/Mexico_City',
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(d);
+  const get = t => (partes.find(p => p.type === t) || {}).value || '';
+  return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`;
+}
+
 /* ══════════════════════════════════════════
    CARGA DE DATOS
 ══════════════════════════════════════════ */
@@ -530,7 +548,7 @@ function renderDashboard(filas) {
   document.getElementById('stat-sub-ok').textContent    = exitosos === total ? '100% tasa de éxito' : `de ${total} reportes`;
 
   if (ultimo) {
-    const fl = ultimo.fecha_legible || ultimo.timestamp || '—';
+    const fl = formatFechaMX(ultimo.timestamp) || ultimo.fecha_legible || ultimo.timestamp || '—';
     const fechaParts = fl.split(' ');
     document.getElementById('stat-ultimo').textContent     = fechaParts[0] || fl;
     document.getElementById('stat-sub-ultimo').textContent = fechaParts[1] ? 'a las ' + fechaParts[1] : '';
@@ -560,7 +578,7 @@ function renderTabla(filas) {
   const ordenadas = [...filas].reverse();
 
   tbody.innerHTML = ordenadas.map(f => {
-    const fecha   = f.fecha_legible || (f.timestamp || '').substring(0, 16).replace('T', ' ') || '—';
+    const fecha   = formatFechaMX(f.timestamp) || f.fecha_legible || (f.timestamp || '').substring(0, 16).replace('T', ' ') || '—';
     const nombre  = f.nombre_paciente || '—';
     const imgs    = f.num_imagenes || '—';
     const estado  = (f.estado || '').toLowerCase();
