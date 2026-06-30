@@ -304,6 +304,24 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DTChYr1q6BjP
 
 let todosLosReportes = [];
 
+/* ── HORA MÉXICO ── */
+// El Apps Script entrega "fecha_legible" ya formateada en GMT (desfase de 6h).
+// Aquí recalculamos siempre a partir de "timestamp" (UTC real) y la convertimos
+// a hora de Ciudad de México. Si no hay timestamp utilizable, usamos fecha_legible
+// como último recurso (puede seguir mostrando GMT en ese caso extremo).
+function formatFechaMX(rawTimestamp) {
+  if (!rawTimestamp) return null;
+  const d = new Date(rawTimestamp);
+  if (isNaN(d.getTime())) return null;
+  const partes = new Intl.DateTimeFormat('es-MX', {
+    timeZone: 'America/Mexico_City',
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(d);
+  const get = t => (partes.find(p => p.type === t) || {}).value || '';
+  return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`;
+}
+
 /* ── CARGA ── */
 function parsearRespuesta(data) {
   if (Array.isArray(data))           return data;
@@ -408,7 +426,7 @@ function renderDashboard(filas) {
   document.getElementById('stat-sub-drs').textContent   = drs === 1 ? 'doctor registrado' : 'doctores registrados';
 
   if (ultimo) {
-    const fl = ultimo.fecha_legible || (ultimo.timestamp||'').substring(0,16).replace('T',' ') || '—';
+    const fl = formatFechaMX(ultimo.timestamp) || ultimo.fecha_legible || (ultimo.timestamp||'').substring(0,16).replace('T',' ') || '—';
     const partes = fl.split(' ');
     document.getElementById('stat-ultimo').textContent     = partes[0] || fl;
     document.getElementById('stat-sub-ultimo').textContent = partes[1] ? 'a las ' + partes[1] : '';
@@ -435,7 +453,7 @@ function renderTabla(filas) {
   }
 
   tbody.innerHTML = filas.map(f => {
-    const fecha   = f.fecha_legible || (f.timestamp||'').substring(0,16).replace('T',' ') || '—';
+    const fecha   = formatFechaMX(f.timestamp) || f.fecha_legible || (f.timestamp||'').substring(0,16).replace('T',' ') || '—';
     const doctor  = f.nombre_doctor || f.doctor_id || '—';
     const nombre  = f.nombre_paciente || '—';
     const imgs    = f.num_imagenes || '—';
