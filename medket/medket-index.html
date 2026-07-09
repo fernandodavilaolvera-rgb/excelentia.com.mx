@@ -3,1397 +3,869 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Medket Centro Médico — Certificados médicos para la Gente de Mar. Terceros autorizados por la Dirección General de la Marina Mercante. Boca del Río, Coatzacoalcos y Ensenada.">
-<meta name="keywords" content="libreta de mar, certificado médico marítimo, gente de mar, examen médico marítimo, marina mercante, Veracruz, Ensenada">
-<title>Medket Centro Médico — Certificados para la Gente de Mar</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800;900&family=Bree+Serif&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
+<title>Dashboard Medket — Centro Médico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{
-  --azul:#1b2c5e;
-  --azul-mid:#2a3f7e;
-  --turq:#4ba4c0;
-  --turq-light:#6dbdd9;
-  --ambar:#e6bc40;
-  --brisa:#b8e4f2;
-  --brisa-light:#e8f6fb;
-  --gris:#808080;
-  --fondo:#f4f9fc;
-  --blanco:#ffffff;
-  --texto:#1a2035;
-  --texto-s:#4a5068;
-}
-html{scroll-behavior:smooth;}
-body{font-family:'Manrope',sans-serif;color:var(--texto);background:var(--blanco);overflow-x:hidden;}
+  :root{
+    --azul:#1b2c5e;
+    --turquesa:#4ba4c0;
+    --ambar:#e6bc40;
+    --brisa:#b8e4f2;
+    --gris:#808080;
+    --fondo:#f4f9fc;
+    --texto:#1b2c5e;
+    --texto-sec:#5b6b85;
+    --borde:#d7e6ef;
+    --rojo:#d6534a;
+    --verde:#3fa86b;
+    --card:#ffffff;
+    --shadow:0 2px 10px rgba(27,44,94,0.07);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Manrope',sans-serif;background:var(--fondo);color:var(--texto);}
+  h1,h2,h3,h4{margin:0;font-family:'Manrope',sans-serif;}
+  p{margin:0;}
 
-/* ═══ BARRA SUPERIOR ═══ */
-.top-stripe{height:4px;background:linear-gradient(90deg,var(--azul),var(--turq),var(--brisa));}
+  /* ===== HEADER ===== */
+  header{
+    background:linear-gradient(135deg,#1b2c5e 0%,#214a7a 55%,#2c6a96 100%);
+    padding:1.1rem 5%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    border-bottom:3px solid var(--turquesa);
+  }
+  .header-left{display:flex;align-items:center;gap:.9rem;}
+  .logo-box{
+    background:#fff;border-radius:10px;padding:.35rem .7rem;
+    display:flex;align-items:center;justify-content:center;
+    min-width:64px;min-height:46px;flex-shrink:0;
+  }
+  .logo-box img{height:34px;width:auto;display:block;}
+  .logo-fallback{font-family:'Manrope',sans-serif;font-weight:900;font-size:14px;color:var(--azul);display:none;}
+  .header-titles h1{color:#fff;font-size:1.15rem;font-weight:800;letter-spacing:.2px;}
+  .header-titles p{color:var(--brisa);font-size:.78rem;margin-top:2px;}
+  .header-right{display:flex;align-items:center;gap:.6rem;}
+  .demo-badge{
+    background:rgba(230,188,64,.18);border:1px solid var(--ambar);color:var(--ambar);
+    font-size:.68rem;font-weight:800;padding:.35rem .65rem;border-radius:20px;letter-spacing:.4px;
+    text-transform:uppercase;white-space:nowrap;
+  }
+  .updated{color:var(--brisa);font-size:.72rem;text-align:right;}
 
-/* ═══ NAV ═══ */
-nav{
-  position:sticky;top:0;z-index:1000;
-  background:#ffffff;
-  border-bottom:1px solid rgba(75,164,192,0.2);
-  box-shadow:0 2px 12px rgba(27,44,94,0.07);
-  padding:0 5%;
-}
-.nav-inner{
-  max-width:1200px;margin:0 auto;
-  display:flex;align-items:center;justify-content:space-between;
-  height:66px;
-}
-.nav-logo img{height:44px;width:auto;}
-.nav-links{display:flex;align-items:center;gap:1.8rem;}
-.nav-links a{
-  font-size:.875rem;font-weight:600;color:var(--azul);
-  text-decoration:none;letter-spacing:.01em;
-  transition:color .2s;position:relative;
-}
-.nav-links a::after{
-  content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;
-  background:var(--turq);border-radius:2px;transition:width .3s;
-}
-.nav-links a:hover::after{width:100%;}
-.nav-links a:hover{color:var(--turq);}
-.nav-cta{
-  background:var(--azul);color:#fff!important;
-  padding:.45rem 1.1rem;border-radius:8px;font-size:.84rem!important;
-  transition:background .2s,transform .15s!important;
-}
-.nav-cta:hover{background:var(--turq)!important;transform:translateY(-1px);}
-.nav-cta::after{display:none!important;}
-.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
-.hamburger span{display:block;width:24px;height:2px;background:var(--azul);border-radius:2px;transition:.3s;}
-.mobile-menu{display:none;position:fixed;top:70px;left:0;right:0;background:#fff;padding:1.25rem 5%;border-bottom:1px solid rgba(75,164,192,.2);z-index:999;flex-direction:column;gap:1.1rem;}
-.mobile-menu a{font-size:1rem;font-weight:600;color:var(--azul);text-decoration:none;}
-.mobile-menu .nav-cta{text-align:center;padding:.7rem;border-radius:8px;background:var(--azul);color:#fff;}
+  /* ===== TABS ===== */
+  nav.tabs{
+    display:flex;gap:.4rem;background:#fff;border-bottom:1px solid var(--borde);
+    padding:0 5%;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  }
+  nav.tabs::-webkit-scrollbar{height:0;}
+  .tab-btn{
+    border:none;background:transparent;cursor:pointer;
+    font-family:'Manrope',sans-serif;font-weight:700;font-size:.82rem;color:var(--texto-sec);
+    padding:.95rem .9rem;white-space:nowrap;border-bottom:3px solid transparent;
+    transition:.15s;
+  }
+  .tab-btn:hover{color:var(--azul);}
+  .tab-btn.active{color:var(--azul);border-bottom-color:var(--turquesa);}
 
-/* ═══ HERO ═══ */
-#inicio{
-  min-height:82vh;
-  background:linear-gradient(140deg,#0a1730 0%,var(--azul) 50%,#1a4070 100%);
-  position:relative;overflow:hidden;
-  display:flex;align-items:center;
-}
-#waveCanvas{position:absolute;bottom:0;left:0;width:100%;height:120px;pointer-events:none;z-index:1;}
-.hero-particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;}
-.particle{
-  position:absolute;border-radius:50%;
-  animation:float var(--d,8s) ease-in-out var(--del,0s) infinite alternate;
-  opacity:.06;
-}
-@keyframes float{0%{transform:translateY(0) translateX(0);}100%{transform:translateY(-30px) translateX(15px);}}
-.hero-content{
-  position:relative;z-index:2;
-  max-width:1200px;margin:0 auto;padding:1rem 5% 5rem;
-  display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:center;
-}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:.5rem;
-  background:rgba(75,164,192,.15);border:1px solid rgba(75,164,192,.3);
-  color:var(--brisa);font-size:.75rem;font-weight:700;letter-spacing:.07em;
-  padding:.35rem .9rem;border-radius:20px;margin-bottom:1.25rem;
-  text-transform:uppercase;
-}
-.hero-badge i{font-size:20px;color:var(--ambar);}
-.hero-title{
-  font-size:clamp(1.85rem,3.5vw,3rem);font-weight:900;
-  color:#fff;line-height:1.15;margin-bottom:1.25rem;
-}
-.hero-title span{color:var(--turq);}
-.hero-desc{
-  font-size:.975rem;color:rgba(255,255,255,.74);
-  line-height:1.75;margin-bottom:2rem;font-weight:400;
-}
-.hero-btns{display:flex;gap:.85rem;flex-wrap:wrap;}
-.btn-hero-primary{
-  display:inline-flex;align-items:center;gap:.45rem;
-  background:var(--ambar);color:var(--azul);
-  font-weight:800;font-size:.9rem;padding:.75rem 1.5rem;
-  border-radius:10px;text-decoration:none;
-  transition:transform .2s,box-shadow .2s;
-  box-shadow:0 4px 18px rgba(230,188,64,.32);
-}
-.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(230,188,64,.42);}
-.btn-hero-secondary{
-  display:inline-flex;align-items:center;gap:.45rem;
-  border:1.5px solid rgba(255,255,255,.3);color:#fff;
-  font-weight:700;font-size:.9rem;padding:.75rem 1.5rem;
-  border-radius:10px;text-decoration:none;
-  transition:.2s;
-}
-.btn-hero-secondary:hover{border-color:var(--turq);color:var(--turq);}
-.hero-right{display:flex;flex-direction:column;gap:.85rem;}
-.hero-card{
-  background:rgba(255,255,255,.065);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:12px;padding:1rem 1.25rem;
-  display:flex;align-items:center;gap:.9rem;
-  backdrop-filter:blur(6px);
-  transition:background .3s,border-color .3s;
-  animation:slideIn .6s ease both;
-}
-.hero-card:hover{background:rgba(255,255,255,.11);border-color:rgba(75,164,192,.38);}
-@keyframes slideIn{from{opacity:0;transform:translateX(28px);}to{opacity:1;transform:translateX(0);}}
-.hero-card:nth-child(2){animation-delay:.1s;}
-.hero-card:nth-child(3){animation-delay:.2s;}
-.hero-card:nth-child(4){animation-delay:.3s;}
-.hero-card-icon{
-  width:44px;height:44px;border-radius:10px;
-  background:linear-gradient(135deg,var(--turq),#3a8aa8);
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.hero-card-icon i{font-size:20px;color:#fff;}
-.hero-card-text h4{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:.15rem;}
-.hero-card-text p{font-size:.78rem;color:rgba(255,255,255,.56);line-height:1.4;}
+  main{padding:1.6rem 5% 3rem;max-width:1320px;margin:0 auto;}
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 
-/* ═══ STATS STRIP ═══ */
-.stats-strip{background:var(--azul);padding:1rem 5%;}
-.stats-inner{
-  max-width:1200px;margin:0 auto;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;
-}
-.stat-item{text-align:center;}
-.stat-num{font-size:1.6rem;font-weight:900;color:#fff;}
-.stat-label{font-size:.72rem;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.05em;}
+  .section-head{margin-bottom:1.1rem;}
+  .section-head h2{font-size:1.15rem;font-weight:800;color:var(--azul);}
+  .section-head p{font-size:.85rem;color:var(--texto-sec);margin-top:.2rem;}
 
-/* ═══ SECCIONES GENERALES ═══ */
-section{padding:2.25rem 5%;}
-.section-inner{max-width:1200px;margin:0 auto;}
-.section-tag{
-  display:inline-flex;align-items:center;gap:.4rem;
-  font-family:'Bree Serif',serif;
-  font-size:1rem;color:var(--turq);
-  letter-spacing:.04em;margin-bottom:.65rem;
-}
-.section-title{font-size:clamp(1.5rem,2.8vw,2.2rem);font-weight:900;color:var(--azul);line-height:1.2;margin-bottom:.85rem;}
-.section-title span{color:var(--turq);}
-.section-desc{font-size:.95rem;color:var(--texto-s);line-height:1.75;max-width:580px;}
+  /* ===== KPI CARDS ===== */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.9rem;margin-bottom:1.6rem;}
+  .kpi-card{
+    background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:1.1rem 1.2rem;
+    box-shadow:var(--shadow);
+  }
+  .kpi-card .kpi-label{font-size:.74rem;color:var(--texto-sec);font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+  .kpi-card .kpi-value{font-size:1.8rem;font-weight:900;color:var(--azul);margin-top:.25rem;}
+  .kpi-card .kpi-sub{font-size:.76rem;margin-top:.3rem;font-weight:700;}
+  .up{color:var(--verde);} .down{color:var(--rojo);}
 
-/* ═══ SEPARADOR ECG ═══ */
-.ecg-separator{width:100%;overflow:hidden;line-height:0;background:var(--fondo);padding:0;margin:0;display:block;}
+  /* ===== CARD GENERIC ===== */
+  .card{
+    background:var(--card);border:1px solid var(--borde);border-radius:14px;
+    padding:1.3rem 1.4rem;box-shadow:var(--shadow);margin-bottom:1.6rem;
+  }
+  .card h3{font-size:.95rem;font-weight:800;color:var(--azul);margin-bottom:.9rem;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
 
-/* ═══ NOSOTROS ═══ */
-#nosotros{background:var(--fondo);position:relative;overflow:hidden;padding-top:1.75rem;}
-.nosotros-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;
-  margin-top:1rem;
-}
-/* Panel izquierdo azul */
-.nosotros-panel{
-  background:linear-gradient(135deg,#0d1e44,var(--azul));
-  border-radius:18px;padding:1.5rem;
-  display:flex;flex-direction:column;gap:.85rem;
-  position:relative;overflow:hidden;
-}
-.nosotros-panel::before{
-  content:'';position:absolute;top:-50px;right:-50px;
-  width:160px;height:160px;border-radius:50%;
-  background:rgba(75,164,192,.1);
-}
-.nosotros-logo-box{
-  background:#fff;border-radius:10px;padding:.6rem 1.1rem;
-  display:inline-flex;align-items:center;justify-content:center;
-  align-self:flex-start;min-height:50px;
-}
-.nosotros-logo-box img{height:40px;width:auto;display:block;}
-.aval-badge{
-  display:flex;align-items:center;gap:.65rem;
-  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.17);
-  border-radius:10px;padding:.85rem 1rem;
-}
-.aval-badge i{font-size:24px;color:var(--ambar);flex-shrink:0;}
-.aval-badge-text h5{font-size:.84rem;font-weight:700;color:#fff;margin-bottom:.12rem;}
-.aval-badge-text p{font-size:.74rem;color:rgba(255,255,255,.65);}
-/* Valores dentro del panel */
-.valores-panel{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.25rem;}
-.valor-chip{
-  display:flex;align-items:center;gap:.55rem;
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);
-  border-radius:8px;padding:.6rem .75rem;
-}
-.valor-chip i{font-size:16px;color:var(--turq);flex-shrink:0;}
-.valor-chip span{font-size:.78rem;font-weight:600;color:#fff;line-height:1.3;}
-/* Panel derecho texto */
-.nosotros-text{}
-.nosotros-text h2{margin-bottom:1rem;}
-.nosotros-text p{color:var(--texto-s);line-height:1.85;margin-bottom:1.25rem;font-size:.95rem;}
-.nosotros-stat{
-  display:inline-flex;align-items:center;gap:.6rem;
-  background:#fff;border:1px solid rgba(75,164,192,.2);
-  border-radius:10px;padding:.65rem 1rem;
-  margin-top:.5rem;
-}
-.nosotros-stat i{font-size:20px;color:var(--turq);}
-.nosotros-stat-text p{font-size:.72rem;color:var(--gris);}
-.nosotros-stat-text strong{font-size:1.05rem;font-weight:800;color:var(--azul);}
+  /* ===== FUNNEL ===== */
+  .funnel{display:flex;gap:.7rem;flex-wrap:wrap;}
+  .funnel-step{
+    flex:1;min-width:140px;border-radius:12px;padding:1rem;text-align:center;color:#fff;position:relative;
+  }
+  .funnel-step .fs-num{font-size:1.6rem;font-weight:900;}
+  .funnel-step .fs-label{font-size:.74rem;font-weight:700;opacity:.92;margin-top:.15rem;}
+  .funnel-step .fs-arrow{position:absolute;right:-22px;top:50%;transform:translateY(-50%);font-size:1.3rem;color:var(--turquesa);display:none;}
+  .funnel-step:not(:last-child) .fs-arrow{display:block;}
 
-/* ═══ SERVICIOS ═══ */
-#servicios{background:#fff;}
-.servicios-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:1.5rem;flex-wrap:wrap;}
-.servicios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
-.servicio-card{
-  background:var(--fondo);border:1px solid rgba(75,164,192,.14);
-  border-radius:14px;padding:1.5rem;
-  transition:transform .3s,box-shadow .3s,border-color .3s,background .3s;
-  cursor:default;
-}
-.servicio-card:hover{
-  transform:translateY(-5px);
-  box-shadow:0 14px 40px rgba(27,44,94,.09);
-  border-color:var(--turq);background:#fff;
-}
-.servicio-icon{
-  width:52px;height:52px;border-radius:12px;
-  background:linear-gradient(135deg,var(--turq),#3a8aa8);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:1rem;
-}
-.servicio-icon i{font-size:23px;color:#fff;}
-.servicio-card h3{font-size:.97rem;font-weight:800;color:var(--azul);margin-bottom:.5rem;}
-.servicio-card p{font-size:.845rem;color:var(--texto-s);line-height:1.65;}
-.servicio-tag{
-  display:inline-block;margin-top:.85rem;
-  font-size:.72rem;font-weight:700;
-  color:var(--turq);letter-spacing:.05em;text-transform:uppercase;
-}
+  /* ===== ALERTS / SEMAFORO ===== */
+  .alert-row{
+    display:flex;align-items:center;justify-content:space-between;gap:1rem;
+    padding:.75rem .9rem;border-radius:10px;margin-bottom:.55rem;border:1px solid var(--borde);
+    background:#fbfdff;flex-wrap:wrap;
+  }
+  .alert-row .a-left{display:flex;align-items:center;gap:.7rem;}
+  .dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+  .dot.r{background:var(--rojo);} .dot.y{background:var(--ambar);} .dot.g{background:var(--verde);}
+  .a-name{font-weight:700;font-size:.85rem;}
+  .a-doc{font-size:.76rem;color:var(--texto-sec);}
+  .a-days{font-size:.74rem;font-weight:800;padding:.3rem .6rem;border-radius:20px;white-space:nowrap;}
+  .a-days.r{background:rgba(214,83,74,.12);color:var(--rojo);}
+  .a-days.y{background:rgba(230,188,64,.18);color:#a8841f;}
+  .a-days.g{background:rgba(63,168,107,.12);color:var(--verde);}
 
-/* ═══ PROCESO ═══ */
-#proceso{background:linear-gradient(160deg,#0d1e44 0%,var(--azul) 55%,#1d4a78 100%);position:relative;overflow:hidden;}
-#bubbleCanvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
-#proceso .section-inner{position:relative;z-index:1;}
-#proceso .section-title{color:#fff;}
-#proceso .section-desc{color:rgba(255,255,255,.68);}
-#proceso .section-tag{color:var(--ambar);}
-.proceso-intro{margin-bottom:1.5rem;}
-.proceso-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-top:0;}
-.proceso-step{
-  background:rgba(255,255,255,.065);
-  border:1px solid rgba(255,255,255,.11);
-  border-radius:14px;padding:1.5rem 1.25rem;
-  position:relative;text-align:center;
-  transition:background .3s;
-}
-.proceso-step:hover{background:rgba(255,255,255,.11);}
-.paso-num{
-  width:44px;height:44px;border-radius:10px;
-  background:var(--ambar);color:var(--azul);
-  font-weight:900;font-size:1rem;
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 1rem;
-}
-.proceso-step h4{font-size:.93rem;font-weight:800;color:#fff;margin-bottom:.5rem;}
-.proceso-step p{font-size:.82rem;color:rgba(255,255,255,.62);line-height:1.6;}
-.proceso-arrow{
-  display:flex;align-items:center;justify-content:center;
-  color:rgba(255,255,255,.22);font-size:1.4rem;
-  position:absolute;right:-20px;top:50%;transform:translateY(-50%);
-}
-.proceso-contenido{margin-top:1.5rem;}
-.proceso-contenido h3{font-size:1.25rem;font-weight:800;color:#fff;margin-bottom:1rem;text-align:center;}
-.examenes-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem;}
-.examen-bloque{
-  background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.11);
-  border-radius:12px;padding:1.25rem;
-}
-.examen-bloque h4{
-  font-size:.9rem;font-weight:800;color:var(--ambar);
-  display:flex;align-items:center;gap:.45rem;margin-bottom:.85rem;
-}
-.examen-bloque h4 i{font-size:18px;}
-.examen-bloque ul{list-style:none;}
-.examen-bloque ul li{
-  font-size:.84rem;color:rgba(255,255,255,.72);
-  padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.06);
-  display:flex;align-items:center;gap:.45rem;
-}
-.examen-bloque ul li:last-child{border-bottom:none;}
-.examen-bloque ul li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--turq);flex-shrink:0;}
-.docs-box{
-  margin-top:1.75rem;background:rgba(230,188,64,.09);
-  border:1px solid rgba(230,188,64,.28);border-radius:12px;padding:1.25rem 1.75rem;
-}
-.docs-box h4{font-size:.95rem;font-weight:800;color:var(--ambar);margin-bottom:.85rem;display:flex;align-items:center;gap:.45rem;}
-.docs-box h4 i{font-size:19px;}
-.docs-lista{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;}
-.docs-lista li{
-  font-size:.8rem;color:rgba(255,255,255,.72);
-  display:flex;align-items:center;gap:.38rem;list-style:none;
-}
-.docs-lista li::before{content:'✓';color:var(--ambar);font-weight:800;font-size:.82rem;}
+  /* ===== BRANCH CARDS ===== */
+  .branch-card{background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:1.2rem;box-shadow:var(--shadow);}
+  .branch-card h4{font-size:.95rem;font-weight:800;color:var(--azul);}
+  .branch-tag{display:inline-block;font-size:.68rem;font-weight:800;padding:.25rem .55rem;border-radius:20px;margin-top:.5rem;}
+  .tag-alta{background:rgba(63,168,107,.12);color:var(--verde);}
+  .tag-media{background:rgba(230,188,64,.18);color:#a8841f;}
+  .tag-baja{background:rgba(214,83,74,.12);color:var(--rojo);}
+  .branch-card .b-row{display:flex;justify-content:space-between;font-size:.8rem;margin-top:.55rem;color:var(--texto-sec);}
+  .branch-card .b-row b{color:var(--azul);font-size:.85rem;}
 
-/* ═══ SUCURSALES ═══ */
-#sucursales{background:var(--fondo);}
-.sucursales-header{margin-bottom:1.25rem;}
-.sucursales-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;}
-.sucursal-card{
-  background:#fff;border:1px solid rgba(75,164,192,.18);
-  border-radius:13px;overflow:hidden;
-  transition:transform .3s,box-shadow .3s;
-}
-.sucursal-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(27,44,94,.1);}
-.sucursal-header{
-  background:linear-gradient(135deg,var(--azul),#2a5080);
-  padding:1.1rem 1.25rem;display:flex;align-items:center;gap:.85rem;
-}
-.sucursal-icon{
-  width:40px;height:40px;border-radius:10px;
-  background:rgba(255,255,255,.13);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.sucursal-icon i{font-size:19px;color:var(--ambar);}
-.sucursal-ciudad{font-size:.95rem;font-weight:800;color:#fff;}
-.sucursal-estado{font-size:.76rem;color:rgba(255,255,255,.62);}
-.sucursal-body{padding:1.1rem 1.25rem;}
-.sucursal-telefono{
-  display:flex;align-items:center;gap:.55rem;
-  font-size:1rem;font-weight:800;color:var(--azul);margin-bottom:1rem;
-  text-decoration:none;
-}
-.sucursal-telefono i{font-size:16px;color:var(--turq);}
-.sucursal-telefono:hover{color:var(--turq);}
-.sucursal-wa{
-  display:flex;align-items:center;justify-content:center;gap:.45rem;
-  background:var(--azul);color:#fff;font-weight:700;font-size:.84rem;
-  padding:.55rem 1rem;border-radius:7px;text-decoration:none;
-  transition:background .2s;
-}
-.sucursal-wa:hover{background:var(--turq);}
-.sucursal-wa i{font-size:15px;}
+  /* ===== TABLE ===== */
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:680px;}
+  th{background:var(--azul);color:#fff;text-align:left;padding:.65rem .8rem;font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.3px;}
+  th:first-child{border-radius:8px 0 0 0;} th:last-child{border-radius:0 8px 0 0;}
+  td{padding:.65rem .8rem;border-bottom:1px solid var(--borde);}
+  tr:nth-child(even) td{background:#fafdff;}
+  .chip{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;font-weight:700;padding:.25rem .55rem;border-radius:20px;}
+  .chip-ok{background:rgba(63,168,107,.12);color:var(--verde);}
+  .chip-pend{background:rgba(128,128,128,.13);color:var(--gris);}
+  .chip-complete{background:rgba(230,188,64,.2);color:#a8841f;}
 
-/* ═══ POR QUÉ MEDKET ═══ */
-#porque{background:#fff;}
-.porque-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;margin-top:1.25rem;}
-.diferenciadores{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
-.dif-item{
-  background:var(--fondo);border:1px solid rgba(75,164,192,.14);
-  border-radius:12px;padding:1.25rem;
-  transition:border-color .3s,transform .3s;
-}
-.dif-item:hover{border-color:var(--turq);transform:translateY(-3px);}
-.dif-icon{font-size:26px;color:var(--turq);margin-bottom:.6rem;display:block;}
-.dif-item h4{font-size:.88rem;font-weight:800;color:var(--azul);margin-bottom:.35rem;}
-.dif-item p{font-size:.8rem;color:var(--texto-s);line-height:1.55;}
-.porque-visual{
-  background:linear-gradient(140deg,#0d1e44,var(--azul));
-  border-radius:16px;padding:2rem;
-  display:flex;flex-direction:column;gap:1rem;
-}
-.porque-visual-title{font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:.2rem;}
-.porque-visual-sub{font-size:.82rem;color:rgba(255,255,255,.55);}
-.testimonial{
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);
-  border-radius:10px;padding:1.1rem;
-}
-.testimonial-text{font-size:.86rem;color:rgba(255,255,255,.82);line-height:1.6;font-style:italic;margin-bottom:.65rem;}
-.testimonial-author{font-size:.77rem;font-weight:700;color:var(--ambar);}
-.estrellas{color:var(--ambar);font-size:.82rem;margin-bottom:.45rem;}
+  /* ===== EXEC VIEW ===== */
+  .exec-hero{
+    background:linear-gradient(135deg,#1b2c5e 0%,#214a7a 55%,#2c6a96 100%);
+    border-radius:18px;padding:2rem 1.8rem;color:#fff;margin-bottom:1.6rem;
+  }
+  .exec-hero .badge{
+    display:inline-block;background:rgba(230,188,64,.18);border:1px solid var(--ambar);color:var(--ambar);
+    font-size:.7rem;font-weight:800;padding:.3rem .7rem;border-radius:20px;margin-bottom:.9rem;letter-spacing:.3px;
+  }
+  .exec-hero h2{font-size:1.4rem;font-weight:800;max-width:640px;line-height:1.35;}
+  .exec-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-top:1.6rem;}
+  .exec-stat .es-num{font-size:1.9rem;font-weight:900;color:#fff;}
+  .exec-stat .es-label{font-size:.74rem;color:var(--brisa);font-weight:700;margin-top:.1rem;}
 
-/* ═══ BLOG ═══ */
-#blog{background:var(--fondo);}
-.blog-header{margin-bottom:1.25rem;}
-.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
-.blog-card{
-  background:#fff;border:1px solid rgba(75,164,192,.14);
-  border-radius:14px;overflow:hidden;
-  transition:transform .3s,box-shadow .3s;
-}
-.blog-card:hover{transform:translateY(-4px);box-shadow:0 14px 38px rgba(27,44,94,.09);}
-.blog-img{
-  height:130px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:2.8rem;
-}
-.blog-img.mar{background:linear-gradient(135deg,#0d1e44,#1d4a78);}
-.blog-img.med{background:linear-gradient(135deg,#1a5a7a,var(--turq));}
-.blog-img.doc{background:linear-gradient(135deg,#1b4030,#2d7a5a);}
-.blog-body{padding:1.25rem;}
-.blog-tag{
-  font-size:.7rem;font-weight:700;color:var(--turq);
-  text-transform:uppercase;letter-spacing:.06em;
-  margin-bottom:.45rem;display:block;
-}
-.blog-card h3{font-size:.9rem;font-weight:800;color:var(--azul);margin-bottom:.5rem;line-height:1.4;}
-.blog-card p{font-size:.8rem;color:var(--texto-s);line-height:1.62;margin-bottom:.85rem;}
-.blog-link{
-  font-size:.8rem;font-weight:700;color:var(--turq);
-  text-decoration:none;display:flex;align-items:center;gap:.3rem;
-}
-.blog-link i{font-size:13px;transition:transform .2s;}
-.blog-link:hover i{transform:translateX(4px);}
+  canvas{max-width:100%;}
+  .chart-box{position:relative;height:260px;}
+  .chart-box.tall{height:300px;}
 
-/* ═══ CONTACTO ═══ */
-#contacto{background:linear-gradient(160deg,#0d1e44 0%,var(--azul) 55%,#1d4a78 100%);}
-.contacto-inner{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start;}
-.contacto-left h2{color:#fff;font-size:clamp(1.5rem,2.8vw,2.1rem);font-weight:900;margin-bottom:.75rem;}
-.contacto-left p{color:rgba(255,255,255,.68);font-size:.95rem;line-height:1.8;margin-bottom:1.25rem;}
-.contacto-opciones{display:flex;flex-direction:column;gap:.85rem;}
-.opcion-contacto{
-  display:flex;align-items:center;gap:.9rem;
-  background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.11);
-  border-radius:10px;padding:.9rem 1.1rem;
-  text-decoration:none;transition:background .2s,border-color .2s;
-}
-.opcion-contacto:hover{background:rgba(255,255,255,.12);border-color:rgba(75,164,192,.38);}
-.opcion-icon{width:40px;height:40px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.opcion-icon.wa{background:rgba(37,211,102,.18);}
-.opcion-icon.wa i{color:#25d366;font-size:20px;}
-.opcion-icon.fb{background:rgba(66,103,178,.18);}
-.opcion-icon.fb i{color:#6b9fff;font-size:20px;}
-.opcion-icon.tel{background:rgba(75,164,192,.18);}
-.opcion-icon.tel i{color:var(--turq);font-size:20px;}
-.opcion-texto h5{font-size:.87rem;font-weight:700;color:#fff;margin-bottom:.12rem;}
-.opcion-texto span{font-size:.77rem;color:rgba(255,255,255,.5);}
-.contacto-form{
-  background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.11);
-  border-radius:18px;padding:1.75rem;
-}
-.form-title{font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:1.25rem;}
-.form-group{margin-bottom:1.1rem;}
-.form-group label{display:block;font-size:.8rem;font-weight:600;color:rgba(255,255,255,.65);margin-bottom:.38rem;}
-.form-group input,.form-group select,.form-group textarea{
-  width:100%;background:rgba(255,255,255,.075);
-  border:1px solid rgba(255,255,255,.14);border-radius:8px;
-  padding:.7rem .9rem;color:#fff;font-family:'Manrope',sans-serif;
-  font-size:.88rem;transition:border-color .2s;
-}
-.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(255,255,255,.28);}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--turq);}
-.form-group select option{background:var(--azul);color:#fff;}
-.form-group textarea{min-height:90px;resize:vertical;}
-.btn-form{
-  width:100%;background:var(--ambar);color:var(--azul);
-  font-weight:800;font-size:.92rem;padding:.8rem;
-  border:none;border-radius:9px;cursor:pointer;
-  transition:transform .2s,box-shadow .2s;
-  display:flex;align-items:center;justify-content:center;gap:.45rem;
-  font-family:'Manrope',sans-serif;
-}
-.btn-form:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(230,188,64,.38);}
-.btn-form i{font-size:17px;}
+  footer{text-align:center;padding:1.4rem 5%;color:var(--texto-sec);font-size:.74rem;}
 
-/* ═══ FOOTER ═══ */
-footer{background:#08122a;padding:2rem 5% 0;}
-.footer-inner{max-width:1200px;margin:0 auto;}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem;margin-bottom:1.25rem;}
-.footer-brand{display:flex;flex-direction:column;align-items:flex-start;}
-.footer-logo-box{
-  background:#fff;border-radius:10px;padding:.5rem .9rem;
-  display:flex;align-items:center;justify-content:center;
-  min-height:50px;margin-bottom:1rem;
-  line-height:0;
-}
-.footer-logo-box img{height:38px;width:auto;display:block;vertical-align:middle;}
-.footer-brand p{font-size:.845rem;color:rgba(255,255,255,.48);line-height:1.7;}
-.footer-col h5{font-size:.82rem;font-weight:700;color:#fff;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.06em;}
-.footer-col ul{list-style:none;}
-.footer-col ul li{margin-bottom:.55rem;}
-.footer-col ul li a{font-size:.82rem;color:rgba(255,255,255,.46);text-decoration:none;transition:color .2s;}
-.footer-col ul li a:hover{color:var(--turq);}
-.footer-bottom{
-  border-top:1px solid rgba(255,255,255,.07);
-  padding:1.1rem 0 1.25rem;
-  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;
-}
-.footer-bottom p{font-size:.76rem;color:rgba(255,255,255,.32);}
-.footer-bottom-right{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
-.footer-aval{
-  display:flex;align-items:center;gap:.45rem;
-  font-size:.74rem;color:rgba(255,255,255,.36);
-}
-.footer-aval i{font-size:14px;color:var(--ambar);}
-.footer-legal{display:flex;gap:1.1rem;}
-.footer-legal a{font-size:.74rem;color:rgba(255,255,255,.36);text-decoration:none;transition:color .2s;}
-.footer-legal a:hover{color:var(--turq);}
-
-/* ═══ WHATSAPP FLOTANTE ═══ */
-.wa-float{
-  position:fixed;bottom:26px;right:26px;z-index:999;
-  width:54px;height:54px;border-radius:50%;
-  background:linear-gradient(135deg,#25d366,#128c7e);
-  display:flex;align-items:center;justify-content:center;
-  text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,.42);
-  transition:transform .25s,box-shadow .25s;
-  animation:pulse 2.5s infinite;
-}
-.wa-float:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(37,211,102,.58);animation:none;}
-.wa-float i{font-size:26px;color:#fff;}
-@keyframes pulse{
-  0%,100%{box-shadow:0 4px 18px rgba(37,211,102,.42);}
-  50%{box-shadow:0 4px 30px rgba(37,211,102,.68);}
-}
-
-/* ═══ RESPONSIVE ═══ */
-@media(max-width:1024px){
-  .servicios-grid{grid-template-columns:repeat(2,1fr);}
-  .proceso-grid{grid-template-columns:repeat(2,1fr);}
-  .footer-grid{grid-template-columns:1fr 1fr;}
-  .examenes-grid{grid-template-columns:1fr;}
-  .docs-lista{grid-template-columns:repeat(2,1fr);}
-}
-@media(max-width:768px){
-  nav{padding:0 4%;}
-  .nav-links{display:none;}
-  .hamburger{display:flex;}
-  .hero-content{grid-template-columns:1fr;gap:2rem;padding:3.5rem 4% 5rem;}
-  .hero-right{display:none;}
-  .hero-title{font-size:1.85rem;}
-  .stats-inner{grid-template-columns:repeat(2,1fr);}
-  .nosotros-grid{grid-template-columns:1fr;gap:2rem;}
-  .valores-panel{grid-template-columns:1fr;}
-  .servicios-grid{grid-template-columns:1fr;}
-  .proceso-grid{grid-template-columns:1fr;}
-  .proceso-arrow{display:none;}
-  .examenes-grid{grid-template-columns:1fr;}
-  .docs-lista{grid-template-columns:1fr;}
-  .sucursales-grid{grid-template-columns:1fr;}
-  .porque-grid{grid-template-columns:1fr;}
-  .diferenciadores{grid-template-columns:1fr;}
-  .blog-grid{grid-template-columns:1fr;}
-  .contacto-inner{grid-template-columns:1fr;gap:2rem;}
-  .footer-grid{grid-template-columns:1fr;}
-  section{padding:1.75rem 4%;}
-  .footer-bottom{flex-direction:column;align-items:flex-start;gap:.5rem;}
-  .footer-bottom-right{flex-direction:column;align-items:flex-start;gap:.5rem;}
-}
-@media(max-width:480px){
-  .stats-inner{grid-template-columns:1fr 1fr;}
-  .hero-btns{flex-direction:column;}
-  .btn-hero-primary,.btn-hero-secondary{justify-content:center;}
-  .valores-panel{grid-template-columns:1fr 1fr;}
-}
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:600px){
+    header{padding:.9rem 4%;flex-direction:column;align-items:flex-start;}
+    .header-right{width:100%;justify-content:space-between;}
+    main{padding:1.2rem 4% 2.5rem;}
+    .grid-2,.grid-3{grid-template-columns:1fr;}
+    .funnel{flex-direction:column;}
+    .funnel-step .fs-arrow{display:none !important;}
+    .kpi-card .kpi-value{font-size:1.5rem;}
+    .exec-hero h2{font-size:1.15rem;}
+    table{min-width:560px;}
+  }
 </style>
 </head>
 <body>
 
-<!-- Stripe superior -->
-<div class="top-stripe"></div>
-
-<!-- NAV -->
-<nav id="navbar">
-  <div class="nav-inner">
-    <a href="#inicio" class="nav-logo">
-      <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/medket/assets/Logo_Medket_Horizontal_Fondo_Blanco.png"
-           alt="Medket Centro Médico"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-      <span style="display:none;font-weight:900;font-size:1.1rem;color:#1b2c5e;font-family:'Manrope',sans-serif;">Medket</span>
-    </a>
-    <div class="nav-links">
-      <a href="#nosotros">Nosotros</a>
-      <a href="#servicios">Servicios</a>
-      <a href="#proceso">Proceso</a>
-      <a href="#sucursales">Sucursales</a>
-      <a href="#blog">Blog</a>
-      <a href="https://wa.me/522291442287" class="nav-cta" target="_blank">
-        <i class="ti ti-brand-whatsapp"></i> Agendar cita
-      </a>
+<header>
+  <div class="header-left">
+    <div class="logo-box">
+      <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/medket/assets/Logo_Medket_Horizontal_Fondo_Blanco.png" alt="Medket" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Medket</span>
     </div>
-    <div class="hamburger" onclick="toggleMenu()" aria-label="Menú">
-      <span></span><span></span><span></span>
+    <div class="header-titles">
+      <h1>Dashboard Medket</h1>
+      <p>Centro Médico · Trámites Libreta de Mar</p>
     </div>
   </div>
+  <div class="header-right">
+    <span class="demo-badge">Datos de demostración</span>
+    <span class="updated">Actualizado:<br>20 jun 2026, 09:14 h</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="operativo">📋 Operativo</button>
+  <button class="tab-btn" data-tab="sucursales">🏢 Sucursales</button>
+  <button class="tab-btn" data-tab="bot">💬 Agente WhatsApp</button>
+  <button class="tab-btn" data-tab="financiero">💰 Financiero</button>
+  <button class="tab-btn" data-tab="documentos">📑 Documentos</button>
+  <button class="tab-btn" data-tab="ejecutivo">⭐ Vista Ejecutiva</button>
 </nav>
-<div class="mobile-menu" id="mobileMenu">
-  <a href="#nosotros" onclick="toggleMenu()">Nosotros</a>
-  <a href="#servicios" onclick="toggleMenu()">Servicios</a>
-  <a href="#proceso" onclick="toggleMenu()">Proceso</a>
-  <a href="#sucursales" onclick="toggleMenu()">Sucursales</a>
-  <a href="#blog" onclick="toggleMenu()">Blog</a>
-  <a href="https://wa.me/522291442287" class="nav-cta" target="_blank">Agendar cita por WhatsApp</a>
-</div>
 
-<!-- HERO -->
-<section id="inicio">
-  <div class="hero-particles" id="particles"></div>
-  <div class="hero-content">
-    <div class="hero-left">
-      <div class="hero-badge">
-        <i class="ti ti-medal"></i>
-        Terceros autorizados por la Dirección General de Marina Mercante
-      </div>
-      <h1 class="hero-title">
-        El Mar te espera.<br>
-        <span>Nosotros te preparamos.</span>
-      </h1>
-      <p class="hero-desc">
-        Certificados médicos marítimos con los más altos estándares de calidad y cumplimiento normativo. Proceso ágil, profesional y con respaldo oficial para la Gente de Mar.
-      </p>
-      <div class="hero-btns">
-        <a href="https://wa.me/522291442287?text=Hola,%20me%20interesa%20agendar%20mi%20cita%20para%20el%20certificado%20m%C3%A9dico%20mar%C3%ADtimo" class="btn-hero-primary" target="_blank">
-          <i class="ti ti-brand-whatsapp"></i> Agendar mi cita
-        </a>
-        <a href="#proceso" class="btn-hero-secondary">
-          <i class="ti ti-info-circle"></i> Ver requisitos
-        </a>
-      </div>
-    </div>
-    <div class="hero-right">
-      <div class="hero-card">
-        <div class="hero-card-icon"><i class="ti ti-certificate"></i></div>
-        <div class="hero-card-text">
-          <h4>Certificado Médico Marítimo</h4>
-          <p>Avalado por la Dirección General de la Marina Mercante</p>
-        </div>
-      </div>
-      <div class="hero-card">
-        <div class="hero-card-icon"><i class="ti ti-microscope"></i></div>
-        <div class="hero-card-text">
-          <h4>Exámenes Completos</h4>
-          <p>Laboratorio, gabinete, médico y evaluación psicológica</p>
-        </div>
-      </div>
-      <div class="hero-card">
-        <div class="hero-card-icon"><i class="ti ti-map-pin"></i></div>
-        <div class="hero-card-text">
-          <h4>3 Sucursales</h4>
-          <p>Boca del Río, Coatzacoalcos y Ensenada</p>
-        </div>
-      </div>
-      <div class="hero-card">
-        <div class="hero-card-icon"><i class="ti ti-clock"></i></div>
-        <div class="hero-card-text">
-          <h4>Proceso Ágil</h4>
-          <p>Obtén tu certificado en el menor tiempo posible</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  <canvas id="waveCanvas"></canvas>
-</section>
+<main>
 
-<!-- STATS -->
-<div class="stats-strip">
-  <div class="stats-inner">
-    <div class="stat-item">
-      <div class="stat-num">3+</div>
-      <div class="stat-label">Sucursales</div>
+  <!-- ===================== TAB 1: OPERATIVO ===================== -->
+  <section class="panel active" id="panel-operativo">
+    <div class="section-head">
+      <h2>Seguimiento de citas y trámites</h2>
+      <p>Estado operativo del día y la semana en las 3 sucursales</p>
     </div>
-    <div class="stat-item">
-      <div class="stat-num">100%</div>
-      <div class="stat-label">Aval oficial</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">+1,000</div>
-      <div class="stat-label">Pacientes atendidos</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">4</div>
-      <div class="stat-label">Tipos de examen</div>
-    </div>
-  </div>
-</div>
 
-<!-- SEPARADOR ECG -->
-<div class="ecg-separator">
-  <svg id="ecgSvg" viewBox="0 0 1440 40" preserveAspectRatio="none" height="40" style="display:block;width:100%;" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1440" height="40" fill="#f4f9fc"/>
-    <polyline id="ecgPath" points="" fill="none" stroke="#4ba4c0" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.16"/>
-    <circle id="ecgDot" cx="0" cy="20" r="3" fill="#e6bc40" opacity="0.45"/>
-  </svg>
-</div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Citas hoy</div>
+        <div class="kpi-value">14</div>
+        <div class="kpi-sub up">▲ 3 vs. ayer</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Citas esta semana</div>
+        <div class="kpi-value">67</div>
+        <div class="kpi-sub up">▲ 8% vs. semana pasada</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pacientes en proceso</div>
+        <div class="kpi-value">132</div>
+        <div class="kpi-sub" style="color:var(--texto-sec);">en alguna etapa del trámite</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Trámites completados (mes)</div>
+        <div class="kpi-value">218</div>
+        <div class="kpi-sub up">▲ 12% vs. mes anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Tasa de asistencia</div>
+        <div class="kpi-value">91%</div>
+        <div class="kpi-sub up">▲ 2pp vs. mes anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">No-shows (mes)</div>
+        <div class="kpi-value">19</div>
+        <div class="kpi-sub down">▼ 4 vs. mes anterior</div>
+      </div>
+    </div>
 
-<!-- NOSOTROS -->
-<section id="nosotros">
-  <div class="section-inner">
-    <div class="nosotros-grid">
-      <!-- Panel izquierdo azul con aval + valores -->
-      <div class="nosotros-panel">
-        <div class="aval-badge">
-          <i class="ti ti-anchor"></i>
-          <div class="aval-badge-text">
-            <h5>Avalado oficialmente</h5>
-            <p>Dirección General de la Marina Mercante</p>
-          </div>
-        </div>
-        <div class="aval-badge">
-          <i class="ti ti-building-hospital"></i>
-          <div class="aval-badge-text">
-            <h5>+1,000 Pacientes atendidos</h5>
-            <p>Equipo especializado en medicina marítima</p>
-          </div>
-        </div>
-        <div class="valores-panel">
-          <div class="valor-chip"><i class="ti ti-shield-check"></i><span>Profesionalismo</span></div>
-          <div class="valor-chip"><i class="ti ti-heart"></i><span>Atención humana</span></div>
-          <div class="valor-chip"><i class="ti ti-lock"></i><span>Confianza</span></div>
-          <div class="valor-chip"><i class="ti ti-bolt"></i><span>Agilidad</span></div>
-          <div class="valor-chip"><i class="ti ti-cpu"></i><span>Innovación</span></div>
-          <div class="valor-chip"><i class="ti ti-award"></i><span>Cumplimiento</span></div>
-        </div>
-      </div>
-      <!-- Panel derecho texto -->
-      <div class="nosotros-text">
-        <div class="section-tag">¿Quiénes somos?</div>
-        <h2 class="section-title">Centro médico especializado en la <span>Gente de Mar</span></h2>
-        <p>Medket es una empresa especializada en exámenes médicos y trámites oficiales para la liberación de la Libreta de Mar. Contamos con el aval de la Dirección General de la Marina Mercante, lo que nos posiciona como un centro de referencia para quienes trabajan y aspiran a trabajar en el sector marítimo.</p>
-        <p>Nuestra misión es brindar un servicio profesional, ágil y humano, combinando tecnología de punta con atención personalizada para que cada paciente obtenga su certificación de manera confiable y sin complicaciones.</p>
+    <div class="card">
+      <h3>📅 Agenda de hoy — próximas citas</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Hora</th><th>Paciente</th><th>Sucursal</th><th>Tipo de examen</th><th>Estatus</th></tr></thead>
+          <tbody>
+            <tr><td><b>08:00</b></td><td>Arturo Solis Mora</td><td>Boca del Río</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>08:30</b></td><td>Valentina Cruz Pérez</td><td>Coatzacoalcos</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>09:00</b></td><td>Héctor Ramírez Blanco</td><td>Boca del Río</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>09:30</b></td><td>Gabriela Torres Leal</td><td>Ensenada</td><td>Examen completo</td><td><span class="chip chip-pend">Sin confirmar</span></td></tr>
+            <tr><td><b>10:00</b></td><td>Jorge Mendoza Reyes</td><td>Boca del Río</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>10:30</b></td><td>Claudia Ávila Serna</td><td>Coatzacoalcos</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>11:00</b></td><td>Mario Fuentes Castro</td><td>Ensenada</td><td>Examen completo</td><td><span class="chip chip-pend">Sin confirmar</span></td></tr>
+            <tr><td><b>11:30</b></td><td>Patricia López Vidal</td><td>Boca del Río</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>12:00</b></td><td>Samuel Ortega Díaz</td><td>Coatzacoalcos</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>12:30</b></td><td>Isabel Moreno Bravo</td><td>Ensenada</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>13:00</b></td><td>Francisco Jiménez Ruiz</td><td>Boca del Río</td><td>Examen completo</td><td><span class="chip chip-pend">Sin confirmar</span></td></tr>
+            <tr><td><b>14:30</b></td><td>Daniela Vargas Núñez</td><td>Coatzacoalcos</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>15:00</b></td><td>Ricardo Herrera Campos</td><td>Boca del Río</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+            <tr><td><b>15:30</b></td><td>Lucía Peñaloza Barrera</td><td>Ensenada</td><td>Examen completo</td><td><span class="chip chip-ok">Confirmado</span></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- SERVICIOS -->
-<section id="servicios">
-  <div class="section-inner">
-    <div class="servicios-intro">
-      <div>
-        <div class="section-tag">Lo que ofrecemos</div>
-        <h2 class="section-title">Nuestros <span>servicios</span></h2>
-        <p class="section-desc">Soluciones médicas integrales diseñadas para personas y empresas del sector marítimo y ocupacional.</p>
-      </div>
-      <a href="https://wa.me/522291442287?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20sus%20servicios" class="btn-hero-primary" target="_blank" style="white-space:nowrap;">
-        <i class="ti ti-brand-whatsapp"></i> Solicitar información
-      </a>
-    </div>
-    <div class="servicios-grid">
-      <div class="servicio-card">
-        <div class="servicio-icon"><i class="ti ti-certificate"></i></div>
-        <h3>Certificado Médico Marítimo</h3>
-        <p>Examen médico integral para la obtención de la Libreta de Mar, avalado oficialmente. Proceso completo en un solo lugar.</p>
-        <span class="servicio-tag">Servicio principal ⚓</span>
-      </div>
-      <div class="servicio-card">
-        <div class="servicio-icon"><i class="ti ti-microscope"></i></div>
-        <h3>Pruebas de Laboratorio</h3>
-        <p>Biometría Hemática, Hemoglobina Glucosilada, Examen General de Orina. Resultados precisos con equipos de última generación.</p>
-        <span class="servicio-tag">Incluido en certificación</span>
-      </div>
-      <div class="servicio-card">
-        <div class="servicio-icon"><i class="ti ti-heart-rate-monitor"></i></div>
-        <h3>Estudios de Gabinete</h3>
-        <p>Radiografía de Tórax, Electrocardiograma, Audiometría tonal y Prueba de agudeza visual en instalaciones certificadas.</p>
-        <span class="servicio-tag">Incluido en certificación</span>
-      </div>
-      <div class="servicio-card">
-        <div class="servicio-icon"><i class="ti ti-stethoscope"></i></div>
-        <h3>Evaluación Médica</h3>
-        <p>Toma de signos vitales, examen de exploración física completa y dictaminación por médicos especializados.</p>
-        <span class="servicio-tag">Evaluación integral</span>
-      </div>
-      <div class="servicio-card">
-        <div class="servicio-icon"><i class="ti ti-brain"></i></div>
-        <h3>Evaluación Psicológica</h3>
-        <p>Diagnóstico psicológico especializado conforme a la normatividad de la Marina Mercante. Evaluación profesional y confidencial.</p>
-        <span class="servicio-tag">Requisito oficial</span>
-      </div>
-      <div class="servicio-card">
-        <div class="servicio-icon"><i class="ti ti-building-community"></i></div>
-        <h3>Servicio a Empresas</h3>
-        <p>Atención a navieras, agencias y empresas del sector marítimo. Convenios y precios especiales disponibles.</p>
-        <span class="servicio-tag">Sector empresarial</span>
+    <div class="card">
+      <h3>Pacientes en proceso por etapa</h3>
+      <div class="funnel">
+        <div class="funnel-step" style="background:#33508c;">
+          <div class="fs-num">38</div><div class="fs-label">Cita Agendada</div><span class="fs-arrow">→</span>
+        </div>
+        <div class="funnel-step" style="background:#2e6a93;">
+          <div class="fs-num">51</div><div class="fs-label">Exámenes en Proceso</div><span class="fs-arrow">→</span>
+        </div>
+        <div class="funnel-step" style="background:#2c8aa0;">
+          <div class="fs-num">28</div><div class="fs-label">Dictamen Listo</div><span class="fs-arrow">→</span>
+        </div>
+        <div class="funnel-step" style="background:#3aa3a8;">
+          <div class="fs-num">15</div><div class="fs-label">Libreta Entregada</div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- PROCESO -->
-<section id="proceso">
-  <canvas id="bubbleCanvas"></canvas>
-  <div class="section-inner">
-    <div class="proceso-intro">
-      <div class="section-tag" style="color:var(--ambar);">Cómo funciona</div>
-      <h2 class="section-title">Proceso para tu <span style="color:var(--ambar);">certificado</span></h2>
-      <p class="section-desc">Obtener tu Certificado Médico Marítimo es más sencillo de lo que crees. Sigue estos pasos:</p>
-    </div>
-    <div class="proceso-grid">
-      <div class="proceso-step">
-        <div class="paso-num">1</div>
-        <h4>Reúne tus documentos</h4>
-        <p>Prepara tu RFC, CURP, Último Apto, Acta de Nacimiento, Identificación Oficial y Comprobante de Domicilio.</p>
-      </div>
-      <div class="proceso-step">
-        <div class="paso-num">2</div>
-        <h4>Agenda tu cita</h4>
-        <p>Contáctanos por WhatsApp o teléfono. Selecciona la sucursal más cercana y elige tu horario disponible.</p>
-      </div>
-      <div class="proceso-step">
-        <div class="paso-num">3</div>
-        <h4>Realiza tus exámenes</h4>
-        <p>Laboratorio, gabinete, evaluación médica y psicológica en nuestras instalaciones o en centros aliados.</p>
-      </div>
-      <div class="proceso-step">
-        <div class="paso-num">4</div>
-        <h4>Recibe tu certificado</h4>
-        <p>Obtén tu Certificado Médico Marítimo oficial, listo para tramitar tu Libreta de Mar ante la Marina.</p>
+    <div class="card">
+      <h3>Citas por sucursal — hoy / esta semana</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Sucursal</th><th>Citas hoy</th><th>Citas esta semana</th><th>Ocupación</th></tr></thead>
+          <tbody>
+            <tr><td><b>Boca del Río, Ver.</b></td><td>6</td><td>28</td><td><span class="chip chip-ok">Alta</span></td></tr>
+            <tr><td><b>Coatzacoalcos, Ver.</b></td><td>5</td><td>24</td><td><span class="chip chip-ok">Alta</span></td></tr>
+            <tr><td><b>Ensenada, B.C.</b></td><td>3</td><td>15</td><td><span class="chip chip-pend">Media</span></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="proceso-contenido">
-      <h3>¿Qué incluye tu examen médico para Libreta de Mar?</h3>
-      <div class="examenes-grid">
-        <div class="examen-bloque">
-          <h4><i class="ti ti-microscope"></i> Pruebas de Laboratorio</h4>
-          <ul>
-            <li>Biometría Hemática</li>
-            <li>Hemoglobina Glucosilada</li>
-            <li>Examen General de Orina</li>
-          </ul>
-        </div>
-        <div class="examen-bloque">
-          <h4><i class="ti ti-stethoscope"></i> Evaluación Médica</h4>
-          <ul>
-            <li>Toma de signos vitales</li>
-            <li>Examen de exploración física</li>
-            <li>Dictaminación oficial</li>
-          </ul>
-        </div>
-        <div class="examen-bloque">
-          <h4><i class="ti ti-heart-rate-monitor"></i> Estudios de Gabinete</h4>
-          <ul>
-            <li>Radiografía de Tórax Posterior - Anterior</li>
-            <li>Electrocardiograma</li>
-            <li>Audiometría tonal</li>
-            <li>Prueba de agudeza visual</li>
-          </ul>
-        </div>
-        <div class="examen-bloque">
-          <h4><i class="ti ti-brain"></i> Evaluación Psicológica</h4>
-          <ul>
-            <li>Diagnóstico psicológico completo</li>
-            <li>Evaluación emocional y cognitiva</li>
-            <li>Dictamen psicológico oficial</li>
-          </ul>
-        </div>
-      </div>
-      <div class="docs-box">
-        <h4><i class="ti ti-file-check"></i> Documentos necesarios</h4>
-        <ul class="docs-lista">
-          <li>RFC (primera vez)</li>
-          <li>CURP</li>
-          <li>Último Apto</li>
-          <li>Acta de Nacimiento</li>
-          <li>Identificación Oficial</li>
-          <li>Comprobante de Domicilio</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- SUCURSALES -->
-<section id="sucursales">
-  <div class="section-inner">
-    <div class="sucursales-header">
-      <div class="section-tag">Encuéntranos</div>
-      <h2 class="section-title">Nuestras <span>sucursales</span></h2>
-      <p class="section-desc">Estamos presentes en las principales ciudades costeras de México para estar cerca de ti.</p>
-    </div>
-    <div class="sucursales-grid">
-      <div class="sucursal-card">
-        <div class="sucursal-header">
-          <div class="sucursal-icon"><i class="ti ti-anchor"></i></div>
-          <div>
-            <div class="sucursal-ciudad">Boca del Río</div>
-            <div class="sucursal-estado">Veracruz, México</div>
-          </div>
-        </div>
-        <div class="sucursal-body">
-          <a href="tel:2292442287" class="sucursal-telefono">
-            <i class="ti ti-phone"></i> 229 244 2287
-          </a>
-          <a href="https://wa.me/522292442287?text=Hola%20Medket%20Boca%20del%20R%C3%ADo,%20quiero%20agendar%20una%20cita" class="sucursal-wa" target="_blank">
-            <i class="ti ti-brand-whatsapp"></i> WhatsApp Boca del Río
-          </a>
-        </div>
+    <div class="card">
+      <h3>🚦 Alertas — documentos por vencer (vigencia de 3 meses)</h3>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot r"></span><div><div class="a-name">Juan Pérez Cruz</div><div class="a-doc">Identificación Oficial (INE) · Boca del Río</div></div></div>
+        <span class="a-days r">Vence en 4 días</span>
       </div>
-      <div class="sucursal-card">
-        <div class="sucursal-header">
-          <div class="sucursal-icon"><i class="ti ti-ship"></i></div>
-          <div>
-            <div class="sucursal-ciudad">Coatzacoalcos</div>
-            <div class="sucursal-estado">Veracruz, México</div>
-          </div>
-        </div>
-        <div class="sucursal-body">
-          <a href="tel:9111401838" class="sucursal-telefono">
-            <i class="ti ti-phone"></i> 911 140 1838
-          </a>
-          <a href="https://wa.me/529111401838?text=Hola%20Medket%20Coatzacoalcos,%20quiero%20agendar%20una%20cita" class="sucursal-wa" target="_blank">
-            <i class="ti ti-brand-whatsapp"></i> WhatsApp Coatzacoalcos
-          </a>
-        </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot r"></span><div><div class="a-name">María Torres Sánchez</div><div class="a-doc">Comprobante de Domicilio · Coatzacoalcos</div></div></div>
+        <span class="a-days r">Vence en 6 días</span>
       </div>
-      <div class="sucursal-card">
-        <div class="sucursal-header">
-          <div class="sucursal-icon"><i class="ti ti-waves"></i></div>
-          <div>
-            <div class="sucursal-ciudad">Ensenada</div>
-            <div class="sucursal-estado">Baja California, México</div>
-          </div>
-        </div>
-        <div class="sucursal-body">
-          <a href="tel:6462728537" class="sucursal-telefono">
-            <i class="ti ti-phone"></i> 646 272 8537
-          </a>
-          <a href="https://wa.me/526462728537?text=Hola%20Medket%20Ensenada,%20quiero%20agendar%20una%20cita" class="sucursal-wa" target="_blank">
-            <i class="ti ti-brand-whatsapp"></i> WhatsApp Ensenada
-          </a>
-        </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot y"></span><div><div class="a-name">Carlos Mendoza Ruiz</div><div class="a-doc">CURP / Acta de Nacimiento · Ensenada</div></div></div>
+        <span class="a-days y">Vence en 18 días</span>
+      </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot y"></span><div><div class="a-name">Laura Jiménez Ortiz</div><div class="a-doc">Último Apto · Boca del Río</div></div></div>
+        <span class="a-days y">Vence en 25 días</span>
+      </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot g"></span><div><div class="a-name">Roberto Salinas Vega</div><div class="a-doc">Identificación Oficial (INE) · Coatzacoalcos</div></div></div>
+        <span class="a-days g">Vence en 45 días</span>
+      </div>
+      <div class="alert-row">
+        <div class="a-left"><span class="dot g"></span><div><div class="a-name">Ana Beltrán López</div><div class="a-doc">Comprobante de Domicilio · Ensenada</div></div></div>
+        <span class="a-days g">Vence en 60 días</span>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- POR QUÉ MEDKET -->
-<section id="porque">
-  <div class="section-inner">
-    <div class="section-tag">Nuestra diferencia</div>
-    <h2 class="section-title">¿Por qué elegir <span>Medket</span>?</h2>
-    <div class="porque-grid">
-      <div>
-        <p class="section-desc" style="margin-bottom:1.75rem;">Somos el aliado más confiable para quienes trabajan en el mar. Te explicamos por qué.</p>
-        <div class="diferenciadores">
-          <div class="dif-item">
-            <i class="ti ti-shield-check dif-icon"></i>
-            <h4>Aval oficial</h4>
-            <p>Reconocidos por la Dirección General de la Marina Mercante.</p>
+  <!-- ===================== TAB 2: SUCURSALES ===================== -->
+  <section class="panel" id="panel-sucursales">
+    <div class="section-head">
+      <h2>Comparativo entre sucursales</h2>
+      <p>Demanda, tendencia y tiempos de proceso por punto de atención</p>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:1.6rem;">
+      <div class="branch-card">
+        <h4>Boca del Río, Ver.</h4>
+        <span class="branch-tag tag-alta">Mayor demanda</span>
+        <div class="b-row">Pacientes (mes)<b>65</b></div>
+        <div class="b-row">% del total<b>43.9%</b></div>
+        <div class="b-row">Ingresos (mes)<b>$292,500</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 7%</b></div>
+        <div class="b-row">Tiempo promedio<b>4.2 días</b></div>
+        <div class="b-row">Tasa de asistencia<b>94%</b></div>
+        <div class="b-row">Médicos asignados<b>3</b></div>
+      </div>
+      <div class="branch-card">
+        <h4>Coatzacoalcos, Ver.</h4>
+        <span class="branch-tag tag-media">Demanda estable</span>
+        <div class="b-row">Pacientes (mes)<b>50</b></div>
+        <div class="b-row">% del total<b>33.8%</b></div>
+        <div class="b-row">Ingresos (mes)<b>$225,000</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 5%</b></div>
+        <div class="b-row">Tiempo promedio<b>5.1 días</b></div>
+        <div class="b-row">Tasa de asistencia<b>90%</b></div>
+        <div class="b-row">Médicos asignados<b>2</b></div>
+      </div>
+      <div class="branch-card">
+        <h4>Ensenada, B.C.</h4>
+        <span class="branch-tag tag-baja">Necesita promoción</span>
+        <div class="b-row">Pacientes (mes)<b>33</b></div>
+        <div class="b-row">% del total<b>22.3%</b></div>
+        <div class="b-row">Ingresos (mes)<b>$148,500</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 3%</b></div>
+        <div class="b-row">Tiempo promedio<b>6.8 días</b></div>
+        <div class="b-row">Tasa de asistencia<b>88%</b></div>
+        <div class="b-row">Médicos asignados<b>2</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Pacientes atendidos por sucursal — últimos 6 meses</h3>
+      <div class="chart-box tall"><canvas id="chartBranches"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Tiempo promedio de proceso por sucursal (días)</h3>
+      <div class="chart-box"><canvas id="chartTimes"></canvas></div>
+      <p style="font-size:.78rem;color:var(--texto-sec);margin-top:.7rem;">Tiempo desde cita agendada hasta libreta entregada. Ensenada muestra el tiempo más alto — posible foco de mejora operativa.</p>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 3: BOT WHATSAPP ===================== -->
+  <section class="panel" id="panel-bot">
+    <div class="section-head">
+      <h2>Agente de WhatsApp — piloto Medket</h2>
+      <p>Resultados del piloto de agendamiento automático y validación de INE por WhatsApp</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Conversaciones iniciadas</div>
+        <div class="kpi-value">156</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Citas agendadas por el bot</div>
+        <div class="kpi-value">41</div>
+        <div class="kpi-sub up">26% de conversión</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">INEs escaneados</div>
+        <div class="kpi-value">38</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Precisión de lectura INE</div>
+        <div class="kpi-value">87%</div>
+        <div class="kpi-sub up">33 correctos / 5 con error</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Embudo de conversión — del primer mensaje a la cita confirmada</h3>
+        <div class="funnel" style="flex-direction:column;gap:.5rem;">
+          <div class="funnel-step" style="background:#33508c;width:100%;">
+            <div class="fs-num">156</div><div class="fs-label">Conversaciones iniciadas</div>
           </div>
-          <div class="dif-item">
-            <i class="ti ti-clock dif-icon"></i>
-            <h4>Proceso ágil</h4>
-            <p>Optimizamos cada paso para que obtengas tu certificado lo antes posible.</p>
+          <div class="funnel-step" style="background:#2e6a93;width:82%;margin:0 auto;">
+            <div class="fs-num">128</div><div class="fs-label">Solicitaron información (82%)</div>
           </div>
-          <div class="dif-item">
-            <i class="ti ti-map-pin dif-icon"></i>
-            <h4>Cobertura nacional</h4>
-            <p>Presentes en los principales puertos de México.</p>
+          <div class="funnel-step" style="background:#2c8aa0;width:60%;margin:0 auto;">
+            <div class="fs-num">64</div><div class="fs-label">Seleccionaron horario (41%)</div>
           </div>
-          <div class="dif-item">
-            <i class="ti ti-heart dif-icon"></i>
-            <h4>Trato humano</h4>
-            <p>Te acompañamos en todo el proceso con atención personalizada.</p>
-          </div>
-          <div class="dif-item">
-            <i class="ti ti-cpu dif-icon"></i>
-            <h4>Tecnología</h4>
-            <p>Equipos modernos y procesos digitalizados para mayor precisión.</p>
-          </div>
-          <div class="dif-item">
-            <i class="ti ti-building-community dif-icon"></i>
-            <h4>Para empresas</h4>
-            <p>Convenios y atención especial para navieras y agencias marítimas.</p>
+          <div class="funnel-step" style="background:#3aa3a8;width:40%;margin:0 auto;">
+            <div class="fs-num">41</div><div class="fs-label">Cita confirmada (26%)</div>
           </div>
         </div>
       </div>
-      <div class="porque-visual">
-        <div>
-          <div class="porque-visual-title">Lo que dicen nuestros pacientes</div>
-          <div class="porque-visual-sub">Experiencias reales de la Gente de Mar</div>
-        </div>
-        <div class="testimonial">
-          <div class="estrellas">★★★★★</div>
-          <p class="testimonial-text">"Proceso muy rápido y profesional. En un solo día realicé todos mis exámenes y me atendieron con mucha amabilidad. 100% recomendado para quien necesita su Libreta de Mar."</p>
-          <div class="testimonial-author">— Marinero, Boca del Río, Ver.</div>
-        </div>
-        <div class="testimonial">
-          <div class="estrellas">★★★★★</div>
-          <p class="testimonial-text">"Excelente servicio. Me explicaron todo el proceso paso a paso y me ayudaron con la documentación. El personal es muy atento y calificado."</p>
-          <div class="testimonial-author">— Oficial de Marina, Coatzacoalcos, Ver.</div>
-        </div>
-        <div class="testimonial">
-          <div class="estrellas">★★★★★</div>
-          <p class="testimonial-text">"Por fin un centro médico especializado en marítima aquí en Ensenada. Muy buenas instalaciones y atención de primer nivel."</p>
-          <div class="testimonial-author">— Aspirante UMPM, Ensenada, B.C.</div>
+      <div class="card">
+        <h3>Escaneo de INE — correctos vs. con error</h3>
+        <div class="chart-box"><canvas id="chartIne"></canvas></div>
+        <div style="margin-top:.9rem;display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+          <div style="background:#f4f9fc;border-radius:10px;padding:.75rem;text-align:center;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--verde);">33</div>
+            <div style="font-size:.72rem;color:var(--texto-sec);font-weight:700;margin-top:.15rem;">INEs correctos</div>
+          </div>
+          <div style="background:#f4f9fc;border-radius:10px;padding:.75rem;text-align:center;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--rojo);">5</div>
+            <div style="font-size:.72rem;color:var(--texto-sec);font-weight:700;margin-top:.15rem;">Con error de lectura</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- BLOG -->
-<section id="blog">
-  <div class="section-inner">
-    <div class="blog-header">
-      <div class="section-tag">Conocimiento marítimo</div>
-      <h2 class="section-title">Blog y <span>noticias</span></h2>
-      <p class="section-desc">Información útil para la Gente de Mar y el sector marítimo mexicano.</p>
-    </div>
-    <div class="blog-grid">
-      <div class="blog-card">
-        <div class="blog-img mar">⚓</div>
-        <div class="blog-body">
-          <span class="blog-tag">Libreta de Mar</span>
-          <h3>¿Qué es la Libreta de Mar y cómo obtenerla?</h3>
-          <p>La Libreta de Mar es el documento oficial que acredita la identidad marítima de la Gente de Mar en México. Conoce todo el proceso.</p>
-          <a href="#" class="blog-link">Leer más <i class="ti ti-arrow-right"></i></a>
-        </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Conversaciones del agente — últimos 14 días</h3>
+        <div class="chart-box"><canvas id="chartConv"></canvas></div>
       </div>
-      <div class="blog-card">
-        <div class="blog-img med">🩺</div>
-        <div class="blog-body">
-          <span class="blog-tag">Salud Marítima</span>
-          <h3>Guía completa del examen médico para marineros</h3>
-          <p>Todo lo que necesitas saber sobre los exámenes de laboratorio, gabinete y evaluaciones que conforman el Certificado Médico Marítimo.</p>
-          <a href="#" class="blog-link">Leer más <i class="ti ti-arrow-right"></i></a>
-        </div>
-      </div>
-      <div class="blog-card">
-        <div class="blog-img doc">📋</div>
-        <div class="blog-body">
-          <span class="blog-tag">Normatividad</span>
-          <h3>Requisitos actualizados para aspirantes UMPM 2025</h3>
-          <p>Mantente al día con los requisitos y documentación necesaria para los aspirantes de la Unidad de Marina y Puerto de México.</p>
-          <a href="#" class="blog-link">Leer más <i class="ti ti-arrow-right"></i></a>
+      <div class="card">
+        <h3>Métricas de operación del agente</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Indicador</th><th>Valor</th></tr></thead>
+            <tbody>
+              <tr><td>Tiempo promedio de respuesta</td><td><b style="color:var(--verde);">4 segundos</b></td></tr>
+              <tr><td>Hora pico de conversaciones</td><td><b>10:00 – 12:00 h</b></td></tr>
+              <tr><td>Segundo pico</td><td><b>18:00 – 20:00 h</b></td></tr>
+              <tr><td>Día más activo de la semana</td><td><b>Lunes</b></td></tr>
+              <tr><td>Conversaciones sin respuesta del usuario</td><td><b>23 (14.7%)</b></td></tr>
+              <tr><td>Usuarios que regresan después de 24 h</td><td><b>18 (11.5%)</b></td></tr>
+              <tr><td>Tasa de error del bot (respuesta incorrecta)</td><td><b style="color:var(--rojo);">3.8%</b></td></tr>
+              <tr><td>Uptime del agente (mes)</td><td><b style="color:var(--verde);">99.6%</b></td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- CONTACTO -->
-<section id="contacto">
-  <div class="section-inner">
-    <div class="contacto-inner">
-      <div class="contacto-left">
-        <div class="section-tag" style="color:var(--ambar);">Contáctanos</div>
-        <h2>¿Listo para tramitar tu <span style="color:var(--turq);">Libreta de Mar?</span></h2>
-        <p>Estamos aquí para acompañarte en cada paso del proceso. Contáctanos por el medio de tu preferencia y agenda tu cita hoy mismo.</p>
-        <div class="contacto-opciones">
-          <a href="https://wa.me/522291442287?text=Hola,%20quiero%20informaci%C3%B3n%20para%20mi%20certificado%20m%C3%A9dico%20mar%C3%ADtimo" class="opcion-contacto" target="_blank">
-            <div class="opcion-icon wa"><i class="ti ti-brand-whatsapp"></i></div>
-            <div class="opcion-texto">
-              <h5>WhatsApp</h5>
-              <span>229 144 2287 — Respuesta rápida</span>
-            </div>
-          </a>
-          <a href="https://www.facebook.com/p/Medket-Centro-M%C3%A9dico-61567024395687/" class="opcion-contacto" target="_blank">
-            <div class="opcion-icon fb"><i class="ti ti-brand-facebook"></i></div>
-            <div class="opcion-texto">
-              <h5>Facebook</h5>
-              <span>Medket Centro Médico</span>
-            </div>
-          </a>
-          <a href="tel:2292442287" class="opcion-contacto">
-            <div class="opcion-icon tel"><i class="ti ti-phone"></i></div>
-            <div class="opcion-texto">
-              <h5>Teléfono</h5>
-              <span>Boca del Río: 229 244 2287</span>
-            </div>
-          </a>
-        </div>
-      </div>
-      <div class="contacto-form">
-        <div class="form-title">Solicita información</div>
-        <div class="form-group">
-          <label>Nombre completo</label>
-          <input type="text" placeholder="Tu nombre">
-        </div>
-        <div class="form-group">
-          <label>Teléfono / WhatsApp</label>
-          <input type="tel" placeholder="+52 000 000 0000">
-        </div>
-        <div class="form-group">
-          <label>Sucursal de tu preferencia</label>
-          <select>
-            <option value="">Selecciona una sucursal</option>
-            <option>Boca del Río, Veracruz</option>
-            <option>Coatzacoalcos, Veracruz</option>
-            <option>Ensenada, Baja California</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>¿En qué podemos ayudarte?</label>
-          <textarea placeholder="Cuéntanos tu situación o duda..."></textarea>
-        </div>
-        <button class="btn-form" onclick="sendToWA()">
-          <i class="ti ti-send"></i> Enviar por WhatsApp
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <div class="footer-logo-box">
-          <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/medket/assets/Logo_Medket_Horizontal_Fondo_Blanco.png"
-               alt="Medket Centro Médico"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-          <span style="display:none;font-family:'Manrope',sans-serif;font-size:15px;font-weight:900;color:#1b2c5e;">Medket</span>
-        </div>
-        <p>Centro Médico especializado en exámenes y certificaciones para la Gente de Mar. Avalados por la Dirección General de la Marina Mercante.</p>
-      </div>
-      <div class="footer-col">
-        <h5>Navegación</h5>
-        <ul>
-          <li><a href="#inicio">Inicio</a></li>
-          <li><a href="#nosotros">Nosotros</a></li>
-          <li><a href="#servicios">Servicios</a></li>
-          <li><a href="#proceso">Proceso</a></li>
-          <li><a href="#blog">Blog</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Sucursales</h5>
-        <ul>
-          <li><a href="tel:2292442287">Boca del Río, Ver.</a></li>
-          <li><a href="tel:9111401838">Coatzacoalcos, Ver.</a></li>
-          <li><a href="tel:6462728537">Ensenada, B.C.</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Contacto</h5>
-        <ul>
-          <li><a href="https://wa.me/522291442287" target="_blank">WhatsApp directo</a></li>
-          <li><a href="https://www.facebook.com/p/Medket-Centro-M%C3%A9dico-61567024395687/" target="_blank">Facebook</a></li>
-          <li><a href="tel:2292442287">229 244 2287</a></li>
-          <li><a href="tel:9111401838">911 140 1838</a></li>
-          <li><a href="tel:6462728537">646 272 8537</a></li>
-        </ul>
-      </div>
+  <!-- ===================== TAB 4: FINANCIERO ===================== -->
+  <section class="panel" id="panel-financiero">
+    <div class="section-head">
+      <h2>Financiero / comercial</h2>
+      <p>Ingresos del examen médico marítimo ($4,500 MXN) y origen de pacientes</p>
     </div>
-    <div class="footer-bottom">
-      <p>© 2025 Medket Centro Médico · Todos los derechos reservados</p>
-      <div class="footer-bottom-right">
-        <div class="footer-aval">
-          <i class="ti ti-anchor"></i>
-          Avalado por la Dirección General de la Marina Mercante
-        </div>
-        <div class="footer-legal">
-          <a href="#">Aviso de Privacidad</a>
-          <a href="#">Términos y Condiciones</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
 
-<!-- WhatsApp flotante -->
-<a href="https://wa.me/522291442287?text=Hola%20Medket,%20quiero%20informaci%C3%B3n%20sobre%20el%20certificado%20m%C3%A9dico%20mar%C3%ADtimo" class="wa-float" target="_blank" aria-label="Contactar por WhatsApp">
-  <i class="ti ti-brand-whatsapp"></i>
-</a>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Ingresos del mes</div>
+        <div class="kpi-value">$612,000</div>
+        <div class="kpi-sub up">▲ 9% vs. mes anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Meta mensual</div>
+        <div class="kpi-value">$650,000</div>
+        <div class="kpi-sub" style="color:var(--ambar);font-weight:700;">94% cumplido</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Acumulado 2026</div>
+        <div class="kpi-value">$3.22M</div>
+        <div class="kpi-sub up">▲ 11% vs. 2025 (mismo periodo)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Exámenes facturados (mes)</div>
+        <div class="kpi-value">136</div>
+        <div class="kpi-sub" style="color:var(--texto-sec);">meta: 145</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Precio por examen</div>
+        <div class="kpi-value">$4,500</div>
+        <div class="kpi-sub" style="color:var(--texto-sec);">certificado médico marítimo</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Promedio mensual 2026</div>
+        <div class="kpi-value">$537K</div>
+        <div class="kpi-sub up">▲ vs. $484K en 2025</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.6rem;">
+      <h3>Desglose mensual de ingresos — 2026</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Mes</th><th>Exámenes</th><th>Ingresos</th><th>Meta</th><th>% cumplimiento</th><th>vs. 2025</th></tr></thead>
+          <tbody>
+            <tr><td><b>Enero</b></td><td>104</td><td>$468,000</td><td>$500,000</td><td><span class="chip chip-pend">93.6%</span></td><td class="up">▲ 8%</td></tr>
+            <tr><td><b>Febrero</b></td><td>112</td><td>$504,000</td><td>$500,000</td><td><span class="chip chip-ok">100.8% ✔</span></td><td class="up">▲ 10%</td></tr>
+            <tr><td><b>Marzo</b></td><td>116</td><td>$522,000</td><td>$550,000</td><td><span class="chip chip-pend">94.9%</span></td><td class="up">▲ 9%</td></tr>
+            <tr><td><b>Abril</b></td><td>122</td><td>$549,000</td><td>$580,000</td><td><span class="chip chip-pend">94.7%</span></td><td class="up">▲ 12%</td></tr>
+            <tr><td><b>Mayo</b></td><td>125</td><td>$562,500</td><td>$600,000</td><td><span class="chip chip-pend">93.8%</span></td><td class="up">▲ 11%</td></tr>
+            <tr><td><b>Junio</b></td><td>136</td><td>$612,000</td><td>$650,000</td><td><span class="chip chip-pend">94.2%</span></td><td class="up">▲ 9%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Ingresos por sucursal (mes actual)</h3>
+        <div class="chart-box"><canvas id="chartIncomeBranch"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Origen de pacientes</h3>
+        <div class="chart-box"><canvas id="chartOrigin"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Ingresos — últimos 6 meses</h3>
+      <div class="chart-box tall"><canvas id="chartIncomeTrend"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 5: DOCUMENTOS Y CUMPLIMIENTO ===================== -->
+  <section class="panel" id="panel-documentos">
+    <div class="section-head">
+      <h2>Documentos y cumplimiento</h2>
+      <p>Checklist visual del estatus de exámenes por paciente</p>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table style="min-width:860px;">
+          <thead>
+            <tr><th>Paciente</th><th>Sucursal</th><th>Fecha cita</th><th>Días en proceso</th><th>Laboratorio</th><th>Gabinete</th><th>Eval. Médica</th><th>Eval. Psicológica</th><th>Estatus</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Juan Pérez Cruz</b></td><td>Boca del Río</td><td>16 jun</td><td>4 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>María Torres Sánchez</b></td><td>Coatzacoalcos</td><td>15 jun</td><td>5 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Carlos Mendoza Ruiz</b></td><td>Ensenada</td><td>17 jun</td><td>3 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Laura Jiménez Ortiz</b></td><td>Boca del Río</td><td>12 jun</td><td>8 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-complete">Dictamen listo</span></td>
+            </tr>
+            <tr>
+              <td><b>Roberto Salinas Vega</b></td><td>Coatzacoalcos</td><td>19 jun</td><td>1 día</td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">Recién agendado</span></td>
+            </tr>
+            <tr>
+              <td><b>Ana Beltrán López</b></td><td>Ensenada</td><td>14 jun</td><td>6 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Diego Fernández Cano</b></td><td>Boca del Río</td><td>13 jun</td><td>7 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Sofía Ramírez Aguilar</b></td><td>Coatzacoalcos</td><td>16 jun</td><td>4 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Arturo Solís Mora</b></td><td>Boca del Río</td><td>10 jun</td><td>10 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-complete">Dictamen listo</span></td>
+            </tr>
+            <tr>
+              <td><b>Valentina Cruz Pérez</b></td><td>Ensenada</td><td>18 jun</td><td>2 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Héctor Ramírez Blanco</b></td><td>Coatzacoalcos</td><td>11 jun</td><td>9 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-complete">Dictamen listo</span></td>
+            </tr>
+            <tr>
+              <td><b>Gabriela Torres Leal</b></td><td>Boca del Río</td><td>17 jun</td><td>3 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Jorge Mendoza Reyes</b></td><td>Ensenada</td><td>9 jun</td><td>11 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-complete">Dictamen listo</span></td>
+            </tr>
+            <tr>
+              <td><b>Claudia Ávila Serna</b></td><td>Coatzacoalcos</td><td>19 jun</td><td>1 día</td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">Recién agendado</span></td>
+            </tr>
+            <tr>
+              <td><b>Mario Fuentes Castro</b></td><td>Boca del Río</td><td>15 jun</td><td>5 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+            <tr>
+              <td><b>Patricia López Vidal</b></td><td>Ensenada</td><td>14 jun</td><td>6 días</td>
+              <td><span class="chip chip-ok">✔</span></td><td><span class="chip chip-ok">✔</span></td>
+              <td><span class="chip chip-pend">⏳</span></td><td><span class="chip chip-pend">⏳</span></td>
+              <td><span class="chip chip-pend">En proceso</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 6: VISTA EJECUTIVA ===================== -->
+  <section class="panel" id="panel-ejecutivo">
+    <div class="exec-hero">
+      <span class="badge">Terceros autorizados · Marina Mercante</span>
+      <h2>Medket Centro Médico — resumen ejecutivo</h2>
+      <div class="exec-stats">
+        <div class="exec-stat"><div class="es-num">+1,000</div><div class="es-label">Pacientes atendidos</div></div>
+        <div class="exec-stat"><div class="es-num">3</div><div class="es-label">Sucursales activas</div></div>
+        <div class="exec-stat"><div class="es-num">148</div><div class="es-label">Pacientes este mes</div></div>
+        <div class="exec-stat"><div class="es-num">$612K</div><div class="es-label">Ingresos del mes</div></div>
+        <div class="exec-stat"><div class="es-num">26%</div><div class="es-label">Conversión bot WhatsApp</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Pacientes atendidos — tendencia de los últimos 6 meses</h3>
+      <div class="chart-box tall"><canvas id="chartExec"></canvas></div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:1.6rem;">
+      <div class="branch-card">
+        <h4>🏥 Boca del Río</h4>
+        <span class="branch-tag tag-alta">Mayor demanda</span>
+        <div class="b-row">Pacientes (mes)<b>65</b></div>
+        <div class="b-row">Ingresos (mes)<b>$292,500</b></div>
+        <div class="b-row">Satisfacción<b>97%</b></div>
+        <div class="b-row">Asistencia<b>94%</b></div>
+        <div class="b-row">Tiempo de proceso<b>4.2 días</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 7%</b></div>
+      </div>
+      <div class="branch-card">
+        <h4>🏥 Coatzacoalcos</h4>
+        <span class="branch-tag tag-media">Demanda estable</span>
+        <div class="b-row">Pacientes (mes)<b>50</b></div>
+        <div class="b-row">Ingresos (mes)<b>$225,000</b></div>
+        <div class="b-row">Satisfacción<b>96%</b></div>
+        <div class="b-row">Asistencia<b>90%</b></div>
+        <div class="b-row">Tiempo de proceso<b>5.1 días</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 5%</b></div>
+      </div>
+      <div class="branch-card">
+        <h4>🏥 Ensenada</h4>
+        <span class="branch-tag tag-baja">Necesita promoción</span>
+        <div class="b-row">Pacientes (mes)<b>33</b></div>
+        <div class="b-row">Ingresos (mes)<b>$148,500</b></div>
+        <div class="b-row">Satisfacción<b>95%</b></div>
+        <div class="b-row">Asistencia<b>88%</b></div>
+        <div class="b-row">Tiempo de proceso<b>6.8 días</b></div>
+        <div class="b-row">Tendencia<b class="up">▲ 3%</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Metas del 2° semestre 2026</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Objetivo</th><th>Meta</th><th>Avance actual</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>Pacientes atendidos (anual)</td><td>1,800</td><td>709 (39.4%)</td><td><span class="chip chip-ok">En ruta</span></td></tr>
+            <tr><td>Ingresos anuales</td><td>$8.1M</td><td>$3.22M (39.8%)</td><td><span class="chip chip-ok">En ruta</span></td></tr>
+            <tr><td>Cumplimiento de metas mensuales</td><td>100%</td><td>1/6 meses al 100%</td><td><span class="chip chip-pend">Área de oportunidad</span></td></tr>
+            <tr><td>Tasa de asistencia promedio</td><td>95%</td><td>91%</td><td><span class="chip chip-pend">Por mejorar</span></td></tr>
+            <tr><td>Tiempo promedio de proceso</td><td>4.5 días</td><td>5.2 días (promedio 3 suc.)</td><td><span class="chip chip-pend">Por mejorar</span></td></tr>
+            <tr><td>Conversión del agente WhatsApp</td><td>35%</td><td>26%</td><td><span class="chip chip-pend">Por mejorar</span></td></tr>
+            <tr><td>Ensenada — crecimiento de pacientes</td><td>+20%</td><td>+3%</td><td><span class="chip" style="background:rgba(214,83,74,.12);color:var(--rojo);">Atención requerida</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>Dashboard de demostración con datos ficticios · Medket Centro Médico · Generado por ExcelentIA</footer>
 
 <script>
-/* ═══ OLAS HERO (canvas) ═══ */
-(function(){
-  // Canvas unificado: olas + barco viajero
-  const canvas = document.getElementById('waveCanvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let t = 0;
-  let shipX = null;
-
-  function resize(){
-    canvas.width = canvas.offsetWidth;
-    canvas.height = 120;
-    if(shipX === null) shipX = canvas.width + 60;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Amplitudes medianas = parte blanca ~2cm de alto visible
-  const waves = [
-    {a:16, f:0.015, sp:0.009, col:'rgba(75,164,192,', op:0.13},
-    {a:11, f:0.023, sp:0.015, col:'rgba(184,228,242,', op:0.09},
-    {a:7,  f:0.034, sp:0.022, col:'rgba(255,255,255,', op:0.06},
-    {a:5,  f:0.043, sp:0.028, col:'rgba(255,255,255,', op:1.00, solid:true}
-  ];
-
-  // Y de la ola de referencia (primera) en posición x
-  function refY(x, H){
-    const w = waves[0];
-    return H - 25 + Math.sin(x*w.f + t*w.sp)*w.a
-                  + Math.sin(x*w.f*1.7 + t*w.sp*0.7)*w.a*0.35;
-  }
-
-  // Barco pequeño: ~80x38px (≈ 2.1cm x 1cm a 96dpi)
-  function drawShip(sx, sy){
-    ctx.save();
-    ctx.globalAlpha = 0.12;
-    ctx.strokeStyle = '#b8e4f2';
-    ctx.lineWidth = 1.1;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.translate(sx, sy);
-
-    // Casco (viajando hacia la izquierda, proa a la izquierda)
-    ctx.beginPath();
-    ctx.moveTo(-40, 0);      // proa punta
-    ctx.lineTo(-32, -8);     // proa cubierta
-    ctx.lineTo( 36, -8);     // popa cubierta
-    ctx.lineTo( 38,  0);     // popa base
-    ctx.lineTo(-40,  0);     // cerrar base
-    ctx.stroke();
-
-    // Superestructura (popa, lado derecho del barco)
-    ctx.beginPath();
-    ctx.rect(18, -22, 18, 14);
-    ctx.stroke();
-
-    // Chimenea
-    ctx.beginPath();
-    ctx.moveTo(24, -22);
-    ctx.lineTo(24, -28);
-    ctx.moveTo(30, -22);
-    ctx.lineTo(30, -28);
-    ctx.stroke();
-
-    // Mástil (proa)
-    ctx.beginPath();
-    ctx.moveTo(-28, -8);
-    ctx.lineTo(-28, -20);
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  function draw(){
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0,0,W,H);
-
-    // Olas
-    waves.forEach((w,i)=>{
-      ctx.beginPath();
-      for(let x=0;x<=W;x+=2){
-        const y = H - 25 + Math.sin(x*w.f + t*w.sp + i*1.1)*w.a
-                         + Math.sin(x*w.f*1.7 + t*w.sp*0.7)*w.a*0.35;
-        x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-      }
-      ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
-      ctx.fillStyle = w.solid ? '#f4f9fc' : w.col + w.op + ')';
-      ctx.fill();
+  // ---------- TABS ----------
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel');
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>b.classList.remove('active'));
+      panels.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
     });
+  });
 
-    // Barco viaja lento de derecha a izquierda
-    shipX -= 0.4;
-    if(shipX < -100) shipX = W + 80;
+  // ---------- CHART DEFAULTS ----------
+  Chart.defaults.font.family = "'Manrope', sans-serif";
+  Chart.defaults.color = '#5b6b85';
+  const azul = '#1b2c5e', turquesa = '#4ba4c0', ambar = '#e6bc40', brisa = '#b8e4f2', verde = '#3fa86b', rojo = '#d6534a';
+  const meses6 = ['Ene','Feb','Mar','Abr','May','Jun'];
 
-    // Se asienta sobre la ola de referencia
-    const sy = refY(shipX, H) - 14;
-    drawShip(shipX, sy);
-
-    t++;
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-/* ═══ ECG SEPARADOR (más sutil) ═══ */
-(function(){
-  const poly = document.getElementById('ecgPath');
-  const dot  = document.getElementById('ecgDot');
-  if(!poly) return;
-  const W = 1440, MID = 20;
-  const seg = [
-    [0,MID],[60,MID],[72,MID-4],[80,MID+7],[86,MID-13],[92,MID+8],[98,MID],[140,MID],
-    [200,MID],[260,MID],[272,MID-4],[280,MID+7],[286,MID-13],[292,MID+8],[298,MID],[340,MID],
-    [400,MID],[460,MID],[472,MID-4],[480,MID+7],[486,MID-13],[492,MID+8],[498,MID],[540,MID],
-    [600,MID],[660,MID],[672,MID-4],[680,MID+7],[686,MID-13],[692,MID+8],[698,MID],[740,MID],
-    [800,MID],[860,MID],[872,MID-4],[880,MID+7],[886,MID-13],[892,MID+8],[898,MID],[940,MID],
-    [1000,MID],[1060,MID],[1072,MID-4],[1080,MID+7],[1086,MID-13],[1092,MID+8],[1098,MID],[1140,MID],
-    [1200,MID],[1260,MID],[1272,MID-4],[1280,MID+7],[1286,MID-13],[1292,MID+8],[1298,MID],[1440,MID]
-  ];
-  let frame = 0, speed = 5;
-  function animECG(){
-    frame = (frame + speed) % (W + 60);
-    const pts = seg.filter(p => p[0] <= frame);
-    if(pts.length > 0){
-      poly.setAttribute('points', pts.map(p=>p.join(',')).join(' '));
-      const last = pts[pts.length-1];
-      dot.setAttribute('cx', last[0]);
-      dot.setAttribute('cy', last[1]);
+  // Sucursales - pacientes por mes
+  new Chart(document.getElementById('chartBranches'), {
+    type: 'bar',
+    data: {
+      labels: meses6,
+      datasets: [
+        { label:'Boca del Río', data:[45,48,52,58,61,65], backgroundColor: azul, borderRadius:5 },
+        { label:'Coatzacoalcos', data:[38,40,42,39,45,50], backgroundColor: turquesa, borderRadius:5 },
+        { label:'Ensenada', data:[22,25,24,28,30,33], backgroundColor: brisa, borderRadius:5 },
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } },
+      scales:{ y:{ beginAtZero:true, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
     }
-    requestAnimationFrame(animECG);
-  }
-  animECG();
-})();
-
-/* ═══ BURBUJAS PROCESO (canvas) ═══ */
-(function(){
-  const canvas = document.getElementById('bubbleCanvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let bubbles = [];
-  function init(){
-    canvas.width  = canvas.offsetWidth  || window.innerWidth;
-    canvas.height = canvas.offsetHeight || 800;
-    bubbles = Array.from({length:35}, () => ({
-      x: Math.random() * canvas.width,
-      y: canvas.height + Math.random() * 200,
-      r: 2 + Math.random() * 5,
-      s: 0.35 + Math.random() * 1,
-      op: 0.06 + Math.random() * 0.18,
-      wobble: Math.random() * Math.PI * 2,
-      wobbleSpeed: 0.02 + Math.random() * 0.03
-    }));
-  }
-  init();
-  window.addEventListener('resize', init);
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    bubbles.forEach(b=>{
-      b.y -= b.s; b.wobble += b.wobbleSpeed;
-      b.x += Math.sin(b.wobble) * 0.55;
-      if(b.y < -20){ b.y = canvas.height + Math.random()*60; b.x = Math.random()*canvas.width; }
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-      ctx.strokeStyle = 'rgba(75,164,192,' + b.op + ')';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.fillStyle = 'rgba(184,228,242,' + (b.op*0.35) + ')';
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-/* ═══ PARTÍCULAS HERO ═══ */
-const pc = document.getElementById('particles');
-if(pc){
-  const cols = ['rgba(75,164,192,.07)','rgba(184,228,242,.06)','rgba(255,255,255,.04)'];
-  for(let i=0;i<14;i++){
-    const p = document.createElement('div');
-    const s = 18+Math.random()*70;
-    p.className='particle';
-    p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*80}%;background:${cols[i%cols.length]};--d:${6+Math.random()*10}s;--del:-${Math.random()*8}s;`;
-    pc.appendChild(p);
-  }
-}
-
-/* ═══ MENÚ MOBILE ═══ */
-function toggleMenu(){
-  const m = document.getElementById('mobileMenu');
-  m.style.display = m.style.display==='flex' ? 'none' : 'flex';
-}
-window.addEventListener('scroll',()=>{ document.getElementById('mobileMenu').style.display='none'; });
-
-/* ═══ FORMULARIO → WHATSAPP ═══ */
-function sendToWA(){
-  const nombre   = document.querySelector('input[type=text]').value  || 'Sin nombre';
-  const tel      = document.querySelector('input[type=tel]').value   || 'Sin teléfono';
-  const sucursal = document.querySelector('select').value            || 'Sin especificar';
-  const mensaje  = document.querySelector('textarea').value          || 'Sin mensaje';
-  const txt = `Hola Medket, me contacto desde su página web.%0ANombre: ${encodeURIComponent(nombre)}%0ATeléfono: ${encodeURIComponent(tel)}%0ASucursal: ${encodeURIComponent(sucursal)}%0AMensaje: ${encodeURIComponent(mensaje)}`;
-  window.open(`https://wa.me/522291442287?text=${txt}`,'_blank');
-}
-
-/* ═══ SCROLL ANIMATIONS ═══ */
-const observer = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){ e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }
   });
-},{threshold:0.08});
-document.querySelectorAll('.servicio-card,.sucursal-card,.blog-card,.dif-item,.proceso-step').forEach(el=>{
-  el.style.opacity='0';
-  el.style.transform='translateY(18px)';
-  el.style.transition='opacity .5s ease, transform .5s ease';
-  observer.observe(el);
-});
 
-/* ═══ SMOOTH SCROLL ═══ */
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    const t = document.querySelector(a.getAttribute('href'));
-    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
+  // Tiempos promedio
+  new Chart(document.getElementById('chartTimes'), {
+    type: 'bar',
+    data: {
+      labels: ['Boca del Río','Coatzacoalcos','Ensenada'],
+      datasets: [{ label:'Días promedio', data:[4.2,5.1,6.8], backgroundColor:[azul,turquesa,ambar], borderRadius:6 }]
+    },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ x:{ beginAtZero:true, grid:{ color:'#eef3f8' } }, y:{ grid:{ display:false } } }
+    }
   });
-});
+
+  // INE correctos/error
+  new Chart(document.getElementById('chartIne'), {
+    type: 'doughnut',
+    data: { labels:['Correctos','Con error'], datasets:[{ data:[33,5], backgroundColor:[verde, rojo], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
+      plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } } }
+  });
+
+  // Conversaciones últimos 14 días
+  new Chart(document.getElementById('chartConv'), {
+    type: 'line',
+    data: {
+      labels: Array.from({length:14}, (_,i)=> 'D'+(i+1)),
+      datasets: [{
+        label:'Conversaciones', data:[8,10,7,12,15,11,9,13,14,16,12,18,15,17],
+        borderColor: turquesa, backgroundColor:'rgba(75,164,192,0.12)', fill:true, tension:.35, pointRadius:3
+      }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:true, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
+
+  // Ingresos por sucursal
+  new Chart(document.getElementById('chartIncomeBranch'), {
+    type:'bar',
+    data:{ labels:['Boca del Río','Coatzacoalcos','Ensenada'],
+      datasets:[{ data:[268000,210000,134000], backgroundColor:[azul,turquesa,ambar], borderRadius:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'$'+(v/1000)+'K' }, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
+
+  // Origen de pacientes
+  new Chart(document.getElementById('chartOrigin'), {
+    type:'doughnut',
+    data:{ labels:['Aspirantes UMPM','Navieras','Particulares','Empresas'],
+      datasets:[{ data:[40,35,20,5], backgroundColor:[azul,turquesa,ambar,brisa], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } } }
+  });
+
+  // Ingresos últimos 6 meses
+  new Chart(document.getElementById('chartIncomeTrend'), {
+    type:'line',
+    data:{ labels: meses6, datasets:[{
+      label:'Ingresos', data:[470000,505000,520000,548000,562000,612000],
+      borderColor: azul, backgroundColor:'rgba(27,44,94,0.08)', fill:true, tension:.35, pointRadius:4, pointBackgroundColor: ambar
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:false, ticks:{ callback:v=>'$'+(v/1000)+'K' }, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
+
+  // Vista ejecutiva - tendencia
+  new Chart(document.getElementById('chartExec'), {
+    type:'line',
+    data:{ labels: meses6, datasets:[{
+      label:'Pacientes atendidos', data:[105,113,118,125,140,148],
+      borderColor: turquesa, backgroundColor:'rgba(75,164,192,0.12)', fill:true, tension:.4, pointRadius:4, pointBackgroundColor: azul
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:false, grid:{ color:'#eef3f8' } }, x:{ grid:{ display:false } } }
+    }
+  });
 </script>
 </body>
 </html>
