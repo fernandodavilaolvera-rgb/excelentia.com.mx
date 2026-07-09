@@ -124,6 +124,10 @@
     tbody tr { border-bottom:1px solid #f0f2f5; transition:background .15s; }
     tbody tr:last-child { border-bottom:none; }
     tbody tr:hover { background:var(--alert-bg); }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: #1a3a6b; }
+    .sort-arrow { font-size: .65rem; margin-left: .3rem; opacity: .35; display: inline-block; }
+    .sort-arrow.active { opacity: 1; color: var(--accent); }
     td { padding:.8rem 1rem; color:var(--text-sec); vertical-align:middle; }
     td.fecha  { color:var(--text-gray); font-size:.78rem; white-space:nowrap; }
     td.nombre { font-weight:700; color:var(--text-main); }
@@ -148,6 +152,7 @@
       background:var(--error-bg); color:var(--error);
       font-size:.73rem; font-weight:700;
       padding:.22rem .6rem; border-radius:20px; border:1px solid #f5c6c2;
+      cursor:help;
     }
     .btn-ver {
       display:inline-flex; align-items:center; gap:.3rem;
@@ -229,17 +234,24 @@
   <!-- FILTROS -->
   <div class="filtros-row">
     <label>Filtrar por:</label>
-    <select class="select-filtro" id="filtro-doctor" onchange="aplicarFiltros()">
-      <option value="">Todos los doctores</option>
-    </select>
     <select class="select-filtro" id="filtro-estado" onchange="aplicarFiltros()">
       <option value="">Todos los estados</option>
       <option value="exito">✓ Exitosos</option>
       <option value="error">✗ Con error</option>
     </select>
+    <input class="search-input" id="filtro-doctor" list="doctor-datalist" type="text"
+           placeholder="🔍 Buscar doctor..."
+           oninput="aplicarFiltros()" autocomplete="off">
+    <datalist id="doctor-datalist"></datalist>
     <input class="search-input" id="search" type="text"
-           placeholder="🔍 Buscar paciente..."
+           placeholder="🔍 Buscar paciente..." autocomplete="off"
            oninput="aplicarFiltros()">
+    <input class="search-input" id="filtro-fecha" type="date"
+           onchange="aplicarFiltros()" title="Filtrar por fecha del estudio">
+    <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;font-weight:700;color:var(--text-sec);cursor:pointer;user-select:none;">
+      <input type="checkbox" id="chk-ocultar-pruebas" onchange="onToggleOcultarPruebas()">
+      Ocultar cuentas de prueba
+    </label>
     <button class="btn-limpiar" onclick="limpiarFiltros()">✕ Limpiar</button>
   </div>
 
@@ -256,11 +268,11 @@
       <table>
         <thead>
           <tr>
-            <th>Fecha</th>
-            <th>Doctor</th>
-            <th>Paciente</th>
+            <th class="sortable" onclick="ordenarPor('fecha')">Fecha <span class="sort-arrow" id="arrow-fecha">⇅</span></th>
+            <th class="sortable" onclick="ordenarPor('doctor')">Doctor <span class="sort-arrow" id="arrow-doctor">⇅</span></th>
+            <th class="sortable" onclick="ordenarPor('nombre')">Paciente <span class="sort-arrow" id="arrow-nombre">⇅</span></th>
             <th style="text-align:center">Imágenes</th>
-            <th>Estado</th>
+            <th class="sortable" onclick="ordenarPor('estado')">Estado <span class="sort-arrow" id="arrow-estado">⇅</span></th>
             <th>Reporte</th>
           </tr>
         </thead>
@@ -281,15 +293,14 @@
 </main>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DTChYr1q6BjPXflDvRcqA5B0yDiOZzwDY3x1CBz__KaxZFW_vDVvJrTu_8fNj1S8/exec';
+const DASHBOARD_API_URL = 'https://n8n.excelentia.com.mx/webhook/eco-ia-dashboard';
 
 let todosLosReportes = [];
+let todosLosDoctores = [];
+let ultimasFilasRenderizadas = [];
+let sortCol = null, sortDir = 1; // dir: 1 = ascendente, -1 = descendente
 
 /* ── HORA MÉXICO ── */
-// El Apps Script entrega "fecha_legible" ya formateada en GMT (desfase de 6h).
-// Aquí recalculamos siempre a partir de "timestamp" (UTC real) y la convertimos
-// a hora de Ciudad de México. Si no hay timestamp utilizable, usamos fecha_legible
-// como último recurso (puede seguir mostrando GMT en ese caso extremo).
 function formatFechaMX(rawTimestamp) {
   if (!rawTimestamp) return null;
   const d = new Date(rawTimestamp);
@@ -303,81 +314,93 @@ function formatFechaMX(rawTimestamp) {
   return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`;
 }
 
-/* ── CARGA ── */
-function parsearRespuesta(data) {
-  if (Array.isArray(data))           return data;
-  if (Array.isArray(data.data))      return data.data;
-  if (Array.isArray(data.rows))      return data.rows;
-  if (Array.isArray(data.records))   return data.records;
-  if (Array.isArray(data.logs))      return data.logs;
-  if (Array.isArray(data.reportes))  return data.reportes;
-  if (Array.isArray(data.results))   return data.results;
-  return null;
+// Devuelve YYYY-MM-DD en hora de México, para comparar contra un <input type="date">
+function fechaMXISO(rawTimestamp) {
+  if (!rawTimestamp) return null;
+  const d = new Date(rawTimestamp);
+  if (isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(d);
 }
 
+/* ── CARGA (Supabase vía webhook n8n) ── */
 async function cargarDatos() {
   mostrarCargando();
   try {
-    // Sin filtro de doctor — trae todos
-    const endpoints = [
-      APPS_SCRIPT_URL + '?action=dashboard',
-      APPS_SCRIPT_URL
-    ];
-    let filas = null, rawResp = null;
-    for (const ep of endpoints) {
-      try {
-        const res = await fetch(ep);
-        if (!res.ok) continue;
-        const data = await res.json();
-        rawResp = data;
-        filas = parsearRespuesta(data);
-        if (filas !== null) break;
-      } catch(e) { continue; }
-    }
-    if (filas === null) {
-      const raw = rawResp ? JSON.stringify(rawResp, null, 2).substring(0, 500) : 'Sin respuesta';
-      throw new Error('Formato desconocido:\n' + raw);
-    }
-    todosLosReportes = [...filas].reverse(); // más reciente primero
-    poblarFiltroDoctor(todosLosReportes);
-    renderDashboard(todosLosReportes);
+    const res = await fetch(DASHBOARD_API_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    todosLosReportes = Array.isArray(data.reportes) ? data.reportes : [];
+    todosLosDoctores = Array.isArray(data.doctores) ? data.doctores : [];
+    poblarFiltroDoctor();
+    aplicarFiltros();
   } catch (err) {
     mostrarError(err.message);
   }
 }
 
 /* ── FILTROS ── */
-function poblarFiltroDoctor(filas) {
-  const sel = document.getElementById('filtro-doctor');
-  const actual = sel.value;
-  // Recopilar IDs únicos
-  const ids = [...new Set(filas.map(f => (f.doctor_id || '').trim()).filter(Boolean))];
-  sel.innerHTML = '<option value="">Todos los doctores</option>';
-  ids.forEach(id => {
+// "plan: interno" identifica cuentas de prueba internas de ExcelentIA (ver tabla doctores en Supabase)
+function idsDePrueba() {
+  return new Set(todosLosDoctores.filter(d => d.plan === 'interno').map(d => d.doctor_id));
+}
+
+function poblarFiltroDoctor() {
+  const input = document.getElementById('filtro-doctor');
+  const dl = document.getElementById('doctor-datalist');
+  const ocultarPruebas = document.getElementById('chk-ocultar-pruebas').checked;
+  const pruebas = idsDePrueba();
+  const lista = todosLosDoctores.filter(d => !ocultarPruebas || !pruebas.has(d.doctor_id));
+
+  dl.innerHTML = '';
+  lista.forEach(d => {
     const opt = document.createElement('option');
-    opt.value = id;
-    // Intentar usar nombre del doctor si está disponible
-    const muestra = filas.find(f => f.doctor_id === id);
-    opt.textContent = (muestra && muestra.nombre_doctor) ? muestra.nombre_doctor : id;
-    sel.appendChild(opt);
+    opt.value = d.nombre_completo || d.doctor_id;
+    dl.appendChild(opt);
   });
-  if (actual) sel.value = actual;
+  // Si lo que hay escrito ya no corresponde a ningún doctor visible (p.ej. se ocultó por ser de prueba), se limpia
+  const nombresVisibles = lista.map(d => (d.nombre_completo || d.doctor_id).toLowerCase());
+  if (input.value && !nombresVisibles.some(n => n.includes(input.value.trim().toLowerCase()))) {
+    input.value = '';
+  }
+}
+
+function onToggleOcultarPruebas() {
+  poblarFiltroDoctor();
+  aplicarFiltros();
 }
 
 function aplicarFiltros() {
-  let filas = [...todosLosReportes];
-  const doctor = document.getElementById('filtro-doctor').value;
+  const ocultarPruebas = document.getElementById('chk-ocultar-pruebas').checked;
+  const pruebas = idsDePrueba();
+
+  // Base: todos los reportes, o todos menos los de cuentas de prueba si el checkbox está activo.
+  // Las estadísticas (stat-cards) siempre se calculan sobre esta base, no sobre la tabla ya filtrada.
+  let base = ocultarPruebas
+    ? todosLosReportes.filter(f => !pruebas.has(f.doctor_id))
+    : [...todosLosReportes];
+
+  actualizarStats(base);
+
+  const doctorQ = document.getElementById('filtro-doctor').value.trim().toLowerCase();
   const estado = document.getElementById('filtro-estado').value;
+  const fecha  = document.getElementById('filtro-fecha').value; // YYYY-MM-DD o ''
   const q      = document.getElementById('search').value.trim().toLowerCase();
 
-  if (doctor) filas = filas.filter(f => (f.doctor_id || '').trim() === doctor);
+  let filas = [...base];
+  if (doctorQ) filas = filas.filter(f =>
+    (f.nombre_doctor || '').toLowerCase().includes(doctorQ) ||
+    (f.doctor_id      || '').toLowerCase().includes(doctorQ)
+  );
+  if (fecha) filas = filas.filter(f => fechaMXISO(f.timestamp) === fecha);
   if (estado === 'exito') filas = filas.filter(f => (f.estado||'').toLowerCase().includes('exit'));
   if (estado === 'error') filas = filas.filter(f => !(f.estado||'').toLowerCase().includes('exit'));
   if (q) filas = filas.filter(f =>
     (f.nombre_paciente||'').toLowerCase().includes(q) ||
     (f.nombre_doctor  ||'').toLowerCase().includes(q) ||
-    (f.doctor_id      ||'').toLowerCase().includes(q) ||
-    (f.fecha_legible  ||'').toLowerCase().includes(q)
+    (f.doctor_id      ||'').toLowerCase().includes(q)
   );
   renderTabla(filas);
 }
@@ -385,17 +408,23 @@ function aplicarFiltros() {
 function limpiarFiltros() {
   document.getElementById('filtro-doctor').value = '';
   document.getElementById('filtro-estado').value = '';
+  document.getElementById('filtro-fecha').value = '';
   document.getElementById('search').value = '';
-  renderDashboard(todosLosReportes);
+  aplicarFiltros();
 }
 
 /* ── RENDER ── */
-function renderDashboard(filas) {
-  const total    = todosLosReportes.length; // stats siempre sobre total global
-  const exitosos = todosLosReportes.filter(f => (f.estado||'').toLowerCase().includes('exit')).length;
+function actualizarStats(base) {
+  const total    = base.length;
+  const exitosos = base.filter(f => (f.estado||'').toLowerCase().includes('exit')).length;
   const errores  = total - exitosos;
-  const drs      = new Set(todosLosReportes.map(f => f.doctor_id).filter(Boolean)).size;
-  const ultimo   = todosLosReportes[0] || null; // ya está ordenado reciente primero
+  const ultimo   = base[0] || null; // ya viene ordenado reciente primero desde Supabase
+
+  // Doctores activos: se separa cuántos son reales vs cuentas de prueba (plan: interno)
+  const idsPrueba       = idsDePrueba();
+  const doctorIdsUnicos = new Set(base.map(f => f.doctor_id).filter(Boolean));
+  const drsReales  = [...doctorIdsUnicos].filter(id => !idsPrueba.has(id)).length;
+  const drsPrueba  = doctorIdsUnicos.size - drsReales;
 
   document.getElementById('stat-total').textContent     = total;
   document.getElementById('stat-sub-total').textContent = total === 1 ? 'reporte generado' : 'reportes generados';
@@ -403,11 +432,13 @@ function renderDashboard(filas) {
   document.getElementById('stat-sub-ok').textContent    = total > 0 ? Math.round(exitosos/total*100) + '% tasa de éxito' : '—';
   document.getElementById('stat-err').textContent       = errores;
   document.getElementById('stat-sub-err').textContent   = errores === 0 ? 'Sin errores 🎉' : `error${errores > 1 ? 'es' : ''}`;
-  document.getElementById('stat-drs').textContent       = drs;
-  document.getElementById('stat-sub-drs').textContent   = drs === 1 ? 'doctor registrado' : 'doctores registrados';
+  document.getElementById('stat-drs').textContent       = drsReales;
+  let subDrs = `${drsReales} doctor${drsReales !== 1 ? 'es' : ''} activo${drsReales !== 1 ? 's' : ''}`;
+  if (drsPrueba > 0) subDrs += ` · ${drsPrueba} de prueba`;
+  document.getElementById('stat-sub-drs').textContent = subDrs;
 
   if (ultimo) {
-    const fl = formatFechaMX(ultimo.timestamp) || ultimo.fecha_legible || (ultimo.timestamp||'').substring(0,16).replace('T',' ') || '—';
+    const fl = formatFechaMX(ultimo.timestamp) || '—';
     const partes = fl.split(' ');
     document.getElementById('stat-ultimo').textContent     = partes[0] || fl;
     document.getElementById('stat-sub-ultimo').textContent = partes[1] ? 'a las ' + partes[1] : '';
@@ -415,11 +446,57 @@ function renderDashboard(filas) {
     document.getElementById('stat-ultimo').textContent     = '—';
     document.getElementById('stat-sub-ultimo').textContent = 'Sin reportes aún';
   }
+}
 
-  renderTabla(filas);
+/* ── ORDENAMIENTO POR COLUMNA ── */
+function ordenarFilas(filas) {
+  if (!sortCol) return filas;
+  const copia = [...filas];
+  copia.sort((a, b) => {
+    let va, vb;
+    if (sortCol === 'fecha') {
+      va = new Date(a.timestamp).getTime() || 0;
+      vb = new Date(b.timestamp).getTime() || 0;
+    } else if (sortCol === 'nombre') {
+      va = (a.nombre_paciente || '').toLowerCase();
+      vb = (b.nombre_paciente || '').toLowerCase();
+    } else if (sortCol === 'estado') {
+      va = (a.estado || '').toLowerCase();
+      vb = (b.estado || '').toLowerCase();
+    } else if (sortCol === 'doctor') {
+      va = (a.nombre_doctor || a.doctor_id || '').toLowerCase();
+      vb = (b.nombre_doctor || b.doctor_id || '').toLowerCase();
+    }
+    if (va < vb) return -1 * sortDir;
+    if (va > vb) return 1 * sortDir;
+    return 0;
+  });
+  return copia;
+}
+
+function ordenarPor(col) {
+  if (sortCol === col) sortDir = -sortDir;
+  else { sortCol = col; sortDir = 1; }
+  actualizarFlechasOrden();
+  renderTabla(ultimasFilasRenderizadas);
+}
+
+function actualizarFlechasOrden() {
+  ['fecha', 'nombre', 'estado', 'doctor'].forEach(c => {
+    const el = document.getElementById('arrow-' + c);
+    if (!el) return;
+    if (sortCol === c) {
+      el.textContent = sortDir === 1 ? '▲' : '▼';
+      el.classList.add('active');
+    } else {
+      el.textContent = '⇅';
+      el.classList.remove('active');
+    }
+  });
 }
 
 function renderTabla(filas) {
+  ultimasFilasRenderizadas = filas; // se reutiliza si el usuario cambia el orden sin recargar
   const tbody = document.getElementById('tabla-body');
   document.getElementById('tabla-count').textContent = filas.length;
 
@@ -433,8 +510,10 @@ function renderTabla(filas) {
     return;
   }
 
-  tbody.innerHTML = filas.map(f => {
-    const fecha   = formatFechaMX(f.timestamp) || f.fecha_legible || (f.timestamp||'').substring(0,16).replace('T',' ') || '—';
+  const ordenadas = ordenarFilas(filas);
+
+  tbody.innerHTML = ordenadas.map(f => {
+    const fecha   = formatFechaMX(f.timestamp) || '—';
     const doctor  = f.nombre_doctor || f.doctor_id || '—';
     const nombre  = f.nombre_paciente || '—';
     const imgs    = f.num_imagenes || '—';
@@ -444,7 +523,7 @@ function renderTabla(filas) {
 
     const badgeHtml = esOk
       ? `<span class="badge-ok">✓ Exitoso</span>`
-      : `<span class="badge-err">✗ Error</span>`;
+      : `<span class="badge-err" title="${esc(f.error_detalle || 'Sin detalle disponible')}">✗ Error</span>`;
     const linkHtml = url
       ? `<a class="btn-ver" href="${url}" target="_blank" rel="noopener">📄 Ver Word</a>`
       : `<span class="btn-ver btn-ver-dis">Sin link</span>`;
