@@ -240,6 +240,10 @@
     }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--alert-bg); }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: #1a3a6b; }
+    .sort-arrow { font-size: .65rem; margin-left: .3rem; opacity: .35; display: inline-block; }
+    .sort-arrow.active { opacity: 1; color: var(--accent); }
 
     td {
       padding: .85rem 1rem;
@@ -407,8 +411,10 @@
         <span class="card-count" id="tabla-count">0</span>
       </div>
       <div class="search-box">
+        <input class="search-input" id="filtro-fecha" type="date"
+               onchange="filtrarTabla()" title="Filtrar por fecha del estudio">
         <input class="search-input" id="search" type="text"
-               placeholder="🔍 Buscar paciente..."
+               placeholder="🔍 Buscar paciente..." autocomplete="off"
                oninput="filtrarTabla()">
       </div>
     </div>
@@ -416,10 +422,10 @@
       <table id="tabla-reportes">
         <thead>
           <tr>
-            <th>Fecha</th>
-            <th>Paciente</th>
+            <th class="sortable" onclick="ordenarPor('fecha')">Fecha <span class="sort-arrow" id="arrow-fecha">⇅</span></th>
+            <th class="sortable" onclick="ordenarPor('nombre')">Paciente <span class="sort-arrow" id="arrow-nombre">⇅</span></th>
             <th style="text-align:center">Imágenes</th>
-            <th>Estado</th>
+            <th class="sortable" onclick="ordenarPor('estado')">Estado <span class="sort-arrow" id="arrow-estado">⇅</span></th>
             <th>Reporte</th>
           </tr>
         </thead>
@@ -450,16 +456,14 @@
 /* ══════════════════════════════════════════
    CONFIGURACIÓN
 ══════════════════════════════════════════ */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DTChYr1q6BjPXflDvRcqA5B0yDiOZzwDY3x1CBz__KaxZFW_vDVvJrTu_8fNj1S8/exec';
+const DASHBOARD_API_URL = 'https://n8n.excelentia.com.mx/webhook/eco-ia-dashboard';
 const DOCTOR_ID = 'dr-andres';
 
 let todosLosReportes = [];
+let ultimasFilasRenderizadas = [];
+let sortCol = null, sortDir = 1; // dir: 1 = ascendente, -1 = descendente
 
 /* ── HORA MÉXICO ── */
-// El Apps Script entrega "fecha_legible" ya formateada en GMT (desfase de 6h).
-// Aquí recalculamos siempre a partir de "timestamp" (UTC real) y la convertimos
-// a hora de Ciudad de México. Si no hay timestamp utilizable, usamos fecha_legible
-// como último recurso (puede seguir mostrando GMT en ese caso extremo).
 function formatFechaMX(rawTimestamp) {
   if (!rawTimestamp) return null;
   const d = new Date(rawTimestamp);
@@ -473,60 +477,28 @@ function formatFechaMX(rawTimestamp) {
   return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`;
 }
 
-/* ══════════════════════════════════════════
-   CARGA DE DATOS
-══════════════════════════════════════════ */
-function parsearRespuesta(data) {
-  if (Array.isArray(data))              return data;
-  if (Array.isArray(data.data))         return data.data;
-  if (Array.isArray(data.rows))         return data.rows;
-  if (Array.isArray(data.records))      return data.records;
-  if (Array.isArray(data.logs))         return data.logs;
-  if (Array.isArray(data.reportes))     return data.reportes;
-  if (Array.isArray(data.results))      return data.results;
-  if (Array.isArray(data.log))          return data.log;
-  if (Array.isArray(data.items))        return data.items;
-  return null;
+// Devuelve YYYY-MM-DD en hora de México, para comparar contra un <input type="date">
+function fechaMXISO(rawTimestamp) {
+  if (!rawTimestamp) return null;
+  const d = new Date(rawTimestamp);
+  if (isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(d);
 }
 
+/* ══════════════════════════════════════════
+   CARGA DE DATOS (Supabase vía webhook n8n)
+══════════════════════════════════════════ */
 async function cargarDatos() {
   mostrarCargando();
   try {
-    // Intentar los endpoints en orden hasta encontrar datos
-    const endpoints = [
-      APPS_SCRIPT_URL + '?action=doctor&id=' + DOCTOR_ID,
-      APPS_SCRIPT_URL + '?action=dashboard',
-      APPS_SCRIPT_URL
-    ];
-
-    let filas = null;
-    let rawResp = null;
-
-    for (const ep of endpoints) {
-      try {
-        const res = await fetch(ep);
-        if (!res.ok) continue;
-        const data = await res.json();
-        rawResp = data;
-        filas = parsearRespuesta(data);
-        if (filas !== null) break;
-      } catch(e) { continue; }
-    }
-
-    if (filas === null) {
-      const raw = rawResp
-        ? JSON.stringify(rawResp, null, 2).substring(0, 600)
-        : 'Sin respuesta del servidor';
-      throw new Error(
-        'Formato de datos desconocido.\n\n' +
-        'Respuesta del servidor:\n' + raw + '\n\n' +
-        'Comparte este mensaje con ExcelentIA para ajustar el dashboard.'
-      );
-    }
-
-    todosLosReportes = filas;
-    renderDashboard(filas);
-
+    const res = await fetch(DASHBOARD_API_URL + '?doctor_id=' + encodeURIComponent(DOCTOR_ID));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    todosLosReportes = Array.isArray(data.reportes) ? data.reportes : [];
+    renderDashboard(todosLosReportes);
   } catch (err) {
     mostrarError(err.message);
   }
@@ -539,8 +511,7 @@ function renderDashboard(filas) {
   // — Stats —
   const total    = filas.length;
   const exitosos = filas.filter(f => (f.estado || '').toLowerCase().includes('exit')).length;
-  const errores  = total - exitosos;
-  const ultimo   = filas.length > 0 ? filas[filas.length - 1] : null;
+  const ultimo   = filas.length > 0 ? filas[0] : null; // ya viene ordenado reciente primero desde Supabase
 
   document.getElementById('stat-total').textContent     = total;
   document.getElementById('stat-sub-total').textContent = total === 1 ? 'reporte generado' : 'reportes generados';
@@ -548,7 +519,7 @@ function renderDashboard(filas) {
   document.getElementById('stat-sub-ok').textContent    = exitosos === total ? '100% tasa de éxito' : `de ${total} reportes`;
 
   if (ultimo) {
-    const fl = formatFechaMX(ultimo.timestamp) || ultimo.fecha_legible || ultimo.timestamp || '—';
+    const fl = formatFechaMX(ultimo.timestamp) || '—';
     const fechaParts = fl.split(' ');
     document.getElementById('stat-ultimo').textContent     = fechaParts[0] || fl;
     document.getElementById('stat-sub-ultimo').textContent = fechaParts[1] ? 'a las ' + fechaParts[1] : '';
@@ -560,7 +531,52 @@ function renderDashboard(filas) {
   renderTabla(filas);
 }
 
+/* ── ORDENAMIENTO POR COLUMNA ── */
+function ordenarFilas(filas) {
+  if (!sortCol) return filas;
+  const copia = [...filas];
+  copia.sort((a, b) => {
+    let va, vb;
+    if (sortCol === 'fecha') {
+      va = new Date(a.timestamp).getTime() || 0;
+      vb = new Date(b.timestamp).getTime() || 0;
+    } else if (sortCol === 'nombre') {
+      va = (a.nombre_paciente || '').toLowerCase();
+      vb = (b.nombre_paciente || '').toLowerCase();
+    } else if (sortCol === 'estado') {
+      va = (a.estado || '').toLowerCase();
+      vb = (b.estado || '').toLowerCase();
+    }
+    if (va < vb) return -1 * sortDir;
+    if (va > vb) return 1 * sortDir;
+    return 0;
+  });
+  return copia;
+}
+
+function ordenarPor(col) {
+  if (sortCol === col) sortDir = -sortDir;
+  else { sortCol = col; sortDir = 1; }
+  actualizarFlechasOrden();
+  renderTabla(ultimasFilasRenderizadas);
+}
+
+function actualizarFlechasOrden() {
+  ['fecha', 'nombre', 'estado'].forEach(c => {
+    const el = document.getElementById('arrow-' + c);
+    if (!el) return;
+    if (sortCol === c) {
+      el.textContent = sortDir === 1 ? '▲' : '▼';
+      el.classList.add('active');
+    } else {
+      el.textContent = '⇅';
+      el.classList.remove('active');
+    }
+  });
+}
+
 function renderTabla(filas) {
+  ultimasFilasRenderizadas = filas; // se reutiliza si el usuario cambia el orden sin recargar
   const tbody = document.getElementById('tabla-body');
   document.getElementById('tabla-count').textContent = filas.length;
 
@@ -574,11 +590,11 @@ function renderTabla(filas) {
     return;
   }
 
-  // Mostrar del más reciente al más antiguo
-  const ordenadas = [...filas].reverse();
+  // Ya vienen ordenados del más reciente al más antiguo desde Supabase; se reordenan solo si hay un click activo
+  const ordenadas = ordenarFilas(filas);
 
   tbody.innerHTML = ordenadas.map(f => {
-    const fecha   = formatFechaMX(f.timestamp) || f.fecha_legible || (f.timestamp || '').substring(0, 16).replace('T', ' ') || '—';
+    const fecha   = formatFechaMX(f.timestamp) || '—';
     const nombre  = f.nombre_paciente || '—';
     const imgs    = f.num_imagenes || '—';
     const estado  = (f.estado || '').toLowerCase();
@@ -609,12 +625,11 @@ function renderTabla(filas) {
 ══════════════════════════════════════════ */
 function filtrarTabla() {
   const q = document.getElementById('search').value.trim().toLowerCase();
-  if (!q) { renderTabla(todosLosReportes); return; }
-  const filtradas = todosLosReportes.filter(f =>
-    (f.nombre_paciente || '').toLowerCase().includes(q) ||
-    (f.fecha_legible   || '').toLowerCase().includes(q)
-  );
-  renderTabla(filtradas);
+  const fecha = document.getElementById('filtro-fecha').value; // YYYY-MM-DD o ''
+  let filas = [...todosLosReportes];
+  if (fecha) filas = filas.filter(f => fechaMXISO(f.timestamp) === fecha);
+  if (q) filas = filas.filter(f => (f.nombre_paciente || '').toLowerCase().includes(q));
+  renderTabla(filas);
 }
 
 /* ══════════════════════════════════════════
