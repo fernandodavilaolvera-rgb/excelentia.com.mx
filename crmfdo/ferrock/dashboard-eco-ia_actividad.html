@@ -229,9 +229,10 @@
   <!-- FILTROS -->
   <div class="filtros-row">
     <label>Filtrar por:</label>
-    <select class="select-filtro" id="filtro-doctor" onchange="aplicarFiltros()">
-      <option value="">Todos los doctores</option>
-    </select>
+    <input class="search-input" id="filtro-doctor" list="doctor-datalist" type="text"
+           placeholder="🔍 Buscar doctor..."
+           oninput="aplicarFiltros()" autocomplete="off">
+    <datalist id="doctor-datalist"></datalist>
     <select class="select-filtro" id="filtro-estado" onchange="aplicarFiltros()">
       <option value="">Todos los estados</option>
       <option value="exito">✓ Exitosos</option>
@@ -240,6 +241,10 @@
     <input class="search-input" id="search" type="text"
            placeholder="🔍 Buscar paciente..."
            oninput="aplicarFiltros()">
+    <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;font-weight:700;color:var(--text-sec);cursor:pointer;user-select:none;">
+      <input type="checkbox" id="chk-ocultar-pruebas" onchange="onToggleOcultarPruebas()">
+      Ocultar cuentas de prueba
+    </label>
     <button class="btn-limpiar" onclick="limpiarFiltros()">✕ Limpiar</button>
   </div>
 
@@ -281,15 +286,12 @@
 </main>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6DTChYr1q6BjPXflDvRcqA5B0yDiOZzwDY3x1CBz__KaxZFW_vDVvJrTu_8fNj1S8/exec';
+const DASHBOARD_API_URL = 'https://n8n.excelentia.com.mx/webhook/eco-ia-dashboard';
 
 let todosLosReportes = [];
+let todosLosDoctores = [];
 
 /* ── HORA MÉXICO ── */
-// El Apps Script entrega "fecha_legible" ya formateada en GMT (desfase de 6h).
-// Aquí recalculamos siempre a partir de "timestamp" (UTC real) y la convertimos
-// a hora de Ciudad de México. Si no hay timestamp utilizable, usamos fecha_legible
-// como último recurso (puede seguir mostrando GMT en ese caso extremo).
 function formatFechaMX(rawTimestamp) {
   if (!rawTimestamp) return null;
   const d = new Date(rawTimestamp);
@@ -303,81 +305,80 @@ function formatFechaMX(rawTimestamp) {
   return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`;
 }
 
-/* ── CARGA ── */
-function parsearRespuesta(data) {
-  if (Array.isArray(data))           return data;
-  if (Array.isArray(data.data))      return data.data;
-  if (Array.isArray(data.rows))      return data.rows;
-  if (Array.isArray(data.records))   return data.records;
-  if (Array.isArray(data.logs))      return data.logs;
-  if (Array.isArray(data.reportes))  return data.reportes;
-  if (Array.isArray(data.results))   return data.results;
-  return null;
-}
-
+/* ── CARGA (Supabase vía webhook n8n) ── */
 async function cargarDatos() {
   mostrarCargando();
   try {
-    // Sin filtro de doctor — trae todos
-    const endpoints = [
-      APPS_SCRIPT_URL + '?action=dashboard',
-      APPS_SCRIPT_URL
-    ];
-    let filas = null, rawResp = null;
-    for (const ep of endpoints) {
-      try {
-        const res = await fetch(ep);
-        if (!res.ok) continue;
-        const data = await res.json();
-        rawResp = data;
-        filas = parsearRespuesta(data);
-        if (filas !== null) break;
-      } catch(e) { continue; }
-    }
-    if (filas === null) {
-      const raw = rawResp ? JSON.stringify(rawResp, null, 2).substring(0, 500) : 'Sin respuesta';
-      throw new Error('Formato desconocido:\n' + raw);
-    }
-    todosLosReportes = [...filas].reverse(); // más reciente primero
-    poblarFiltroDoctor(todosLosReportes);
-    renderDashboard(todosLosReportes);
+    const res = await fetch(DASHBOARD_API_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    todosLosReportes = Array.isArray(data.reportes) ? data.reportes : [];
+    todosLosDoctores = Array.isArray(data.doctores) ? data.doctores : [];
+    poblarFiltroDoctor();
+    aplicarFiltros();
   } catch (err) {
     mostrarError(err.message);
   }
 }
 
 /* ── FILTROS ── */
-function poblarFiltroDoctor(filas) {
-  const sel = document.getElementById('filtro-doctor');
-  const actual = sel.value;
-  // Recopilar IDs únicos
-  const ids = [...new Set(filas.map(f => (f.doctor_id || '').trim()).filter(Boolean))];
-  sel.innerHTML = '<option value="">Todos los doctores</option>';
-  ids.forEach(id => {
+// "plan: interno" identifica cuentas de prueba internas de ExcelentIA (ver tabla doctores en Supabase)
+function idsDePrueba() {
+  return new Set(todosLosDoctores.filter(d => d.plan === 'interno').map(d => d.doctor_id));
+}
+
+function poblarFiltroDoctor() {
+  const input = document.getElementById('filtro-doctor');
+  const dl = document.getElementById('doctor-datalist');
+  const ocultarPruebas = document.getElementById('chk-ocultar-pruebas').checked;
+  const pruebas = idsDePrueba();
+  const lista = todosLosDoctores.filter(d => !ocultarPruebas || !pruebas.has(d.doctor_id));
+
+  dl.innerHTML = '';
+  lista.forEach(d => {
     const opt = document.createElement('option');
-    opt.value = id;
-    // Intentar usar nombre del doctor si está disponible
-    const muestra = filas.find(f => f.doctor_id === id);
-    opt.textContent = (muestra && muestra.nombre_doctor) ? muestra.nombre_doctor : id;
-    sel.appendChild(opt);
+    opt.value = d.nombre_completo || d.doctor_id;
+    dl.appendChild(opt);
   });
-  if (actual) sel.value = actual;
+  // Si lo que hay escrito ya no corresponde a ningún doctor visible (p.ej. se ocultó por ser de prueba), se limpia
+  const nombresVisibles = lista.map(d => (d.nombre_completo || d.doctor_id).toLowerCase());
+  if (input.value && !nombresVisibles.some(n => n.includes(input.value.trim().toLowerCase()))) {
+    input.value = '';
+  }
+}
+
+function onToggleOcultarPruebas() {
+  poblarFiltroDoctor();
+  aplicarFiltros();
 }
 
 function aplicarFiltros() {
-  let filas = [...todosLosReportes];
-  const doctor = document.getElementById('filtro-doctor').value;
+  const ocultarPruebas = document.getElementById('chk-ocultar-pruebas').checked;
+  const pruebas = idsDePrueba();
+
+  // Base: todos los reportes, o todos menos los de cuentas de prueba si el checkbox está activo.
+  // Las estadísticas (stat-cards) siempre se calculan sobre esta base, no sobre la tabla ya filtrada.
+  let base = ocultarPruebas
+    ? todosLosReportes.filter(f => !pruebas.has(f.doctor_id))
+    : [...todosLosReportes];
+
+  actualizarStats(base);
+
+  const doctorQ = document.getElementById('filtro-doctor').value.trim().toLowerCase();
   const estado = document.getElementById('filtro-estado').value;
   const q      = document.getElementById('search').value.trim().toLowerCase();
 
-  if (doctor) filas = filas.filter(f => (f.doctor_id || '').trim() === doctor);
+  let filas = [...base];
+  if (doctorQ) filas = filas.filter(f =>
+    (f.nombre_doctor || '').toLowerCase().includes(doctorQ) ||
+    (f.doctor_id      || '').toLowerCase().includes(doctorQ)
+  );
   if (estado === 'exito') filas = filas.filter(f => (f.estado||'').toLowerCase().includes('exit'));
   if (estado === 'error') filas = filas.filter(f => !(f.estado||'').toLowerCase().includes('exit'));
   if (q) filas = filas.filter(f =>
     (f.nombre_paciente||'').toLowerCase().includes(q) ||
     (f.nombre_doctor  ||'').toLowerCase().includes(q) ||
-    (f.doctor_id      ||'').toLowerCase().includes(q) ||
-    (f.fecha_legible  ||'').toLowerCase().includes(q)
+    (f.doctor_id      ||'').toLowerCase().includes(q)
   );
   renderTabla(filas);
 }
@@ -386,16 +387,16 @@ function limpiarFiltros() {
   document.getElementById('filtro-doctor').value = '';
   document.getElementById('filtro-estado').value = '';
   document.getElementById('search').value = '';
-  renderDashboard(todosLosReportes);
+  aplicarFiltros();
 }
 
 /* ── RENDER ── */
-function renderDashboard(filas) {
-  const total    = todosLosReportes.length; // stats siempre sobre total global
-  const exitosos = todosLosReportes.filter(f => (f.estado||'').toLowerCase().includes('exit')).length;
+function actualizarStats(base) {
+  const total    = base.length;
+  const exitosos = base.filter(f => (f.estado||'').toLowerCase().includes('exit')).length;
   const errores  = total - exitosos;
-  const drs      = new Set(todosLosReportes.map(f => f.doctor_id).filter(Boolean)).size;
-  const ultimo   = todosLosReportes[0] || null; // ya está ordenado reciente primero
+  const drs      = new Set(base.map(f => f.doctor_id).filter(Boolean)).size;
+  const ultimo   = base[0] || null; // ya viene ordenado reciente primero desde Supabase
 
   document.getElementById('stat-total').textContent     = total;
   document.getElementById('stat-sub-total').textContent = total === 1 ? 'reporte generado' : 'reportes generados';
@@ -407,7 +408,7 @@ function renderDashboard(filas) {
   document.getElementById('stat-sub-drs').textContent   = drs === 1 ? 'doctor registrado' : 'doctores registrados';
 
   if (ultimo) {
-    const fl = formatFechaMX(ultimo.timestamp) || ultimo.fecha_legible || (ultimo.timestamp||'').substring(0,16).replace('T',' ') || '—';
+    const fl = formatFechaMX(ultimo.timestamp) || '—';
     const partes = fl.split(' ');
     document.getElementById('stat-ultimo').textContent     = partes[0] || fl;
     document.getElementById('stat-sub-ultimo').textContent = partes[1] ? 'a las ' + partes[1] : '';
@@ -415,8 +416,6 @@ function renderDashboard(filas) {
     document.getElementById('stat-ultimo').textContent     = '—';
     document.getElementById('stat-sub-ultimo').textContent = 'Sin reportes aún';
   }
-
-  renderTabla(filas);
 }
 
 function renderTabla(filas) {
@@ -434,7 +433,7 @@ function renderTabla(filas) {
   }
 
   tbody.innerHTML = filas.map(f => {
-    const fecha   = formatFechaMX(f.timestamp) || f.fecha_legible || (f.timestamp||'').substring(0,16).replace('T',' ') || '—';
+    const fecha   = formatFechaMX(f.timestamp) || '—';
     const doctor  = f.nombre_doctor || f.doctor_id || '—';
     const nombre  = f.nombre_paciente || '—';
     const imgs    = f.num_imagenes || '—';
