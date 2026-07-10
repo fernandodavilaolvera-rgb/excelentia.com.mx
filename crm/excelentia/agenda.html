@@ -281,16 +281,19 @@ async function fetchUserEmail(){
 // LLAMADAS A GOOGLE CALENDAR
 // ════════════════════════════════════════════
 async function calFetch(url, opciones={}){
-  const res = await fetch(url, {
-    ...opciones,
-    headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json', ...(opciones.headers||{}) }
-  });
+  const headers = { Authorization: 'Bearer ' + accessToken, ...(opciones.headers||{}) };
+  if(opciones.body) headers['Content-Type'] = 'application/json';
+  const res = await fetch(url, { ...opciones, headers });
   if(res.status === 401){ // token vencido
     accessToken = null;
     showDesconectado();
     throw new Error('sesion');
   }
-  if(!res.ok){ throw new Error('HTTP ' + res.status); }
+  if(!res.ok){
+    let detalle = 'HTTP ' + res.status;
+    try{ const j = await res.json(); if(j.error && j.error.message) detalle += ' – ' + j.error.message; }catch(e){}
+    throw new Error(detalle);
+  }
   if(res.status === 204) return {};
   return await res.json();
 }
@@ -359,7 +362,7 @@ async function cargarEventos(force){
   }catch(e){
     if(e.message === 'sesion') return;
     document.getElementById('agenda-content').innerHTML =
-      '<div class="connect-card"><span class="ico">⚠️</span><h3>No se pudo cargar</h3><p>Revisa tu conexión e intenta de nuevo.</p><button class="btn btn-primary" onclick="cargarEventos(true)">Reintentar</button></div>';
+      '<div class="connect-card"><span class="ico">⚠️</span><h3>No se pudo cargar</h3><p>'+esc(e.message||'Error desconocido')+'</p><button class="btn btn-primary" onclick="cargarEventos(true)">Reintentar</button></div>';
   }
 }
 
