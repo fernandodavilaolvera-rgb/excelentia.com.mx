@@ -90,6 +90,7 @@ th[data-col]:hover{background:#c8d9f0}
 
 /* ── STAT CARDS ── */
 .stat-card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.25rem}
+.stats-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
 .stat-val{font-size:1.55rem;font-weight:800;color:#1a3a6b}
 .stat-lbl{font-size:.78rem;color:#4a5068;font-weight:600}
 .stat-sub{font-size:.75rem;color:#8a90a0}
@@ -149,6 +150,7 @@ textarea{resize:vertical;min-height:70px}
   .page{padding:1rem}
   .tc-bar{padding:0 1rem}
   .grid-2,.grid-3,.form-grid{grid-template-columns:1fr}
+  .stats-4{grid-template-columns:1fr 1fr}
   .form-grid .form-group.full{grid-column:1}
   .modal{max-width:100%;border-radius:14px 14px 0 0;align-self:flex-end;max-height:95vh}
   .modal-backdrop{align-items:flex-end;padding:0}
@@ -183,10 +185,18 @@ textarea{resize:vertical;min-height:70px}
 
 <!-- ══════════ TAB: GASTOS ══════════ -->
 <div class="page active" id="tab-gastos">
-  <div class="grid-3" style="margin-bottom:1rem">
-    <div class="stat-card"><div class="stat-val text-danger" id="g-total-mes">$0</div><div class="stat-lbl">Gastos del mes</div><div class="stat-sub" id="g-mes-lbl"></div></div>
-    <div class="stat-card"><div class="stat-val" id="g-recurrente">$0</div><div class="stat-lbl">Recurrente / mes</div><div class="stat-sub">plataformas fijas</div></div>
-    <div class="stat-card"><div class="stat-val text-danger" id="g-pendiente">$0</div><div class="stat-lbl">Por reembolsar</div></div>
+  <div class="card" style="margin-bottom:1rem;width:fit-content;max-width:100%">
+    <div class="card-body" style="display:flex;gap:2rem;flex-wrap:wrap;align-items:center">
+      <div>
+        <div class="stat-val text-danger" id="g-total-mes">$0</div>
+        <div class="stat-lbl" style="margin-bottom:.5rem">Gastos de <span id="g-mes-lbl"></span></div>
+        <select class="filter-select" id="g-mesStat" onchange="actualizarTotalMesGasto()" style="min-width:140px"></select>
+      </div>
+      <div>
+        <div style="font-size:.72rem;color:#8a90a0;font-weight:700;margin-bottom:.4rem">📅 Últimos 6 meses</div>
+        <div id="g-ultimos6"></div>
+      </div>
+    </div>
   </div>
   <div class="card">
     <div class="card-head">
@@ -291,11 +301,26 @@ textarea{resize:vertical;min-height:70px}
       <span class="balance-val" id="r-balance">$0</span>
       <span class="balance-lbl" id="r-balance-sub"></span>
     </div>
-    <div class="grid-2" style="gap:.75rem">
-      <div class="stat-card"><div class="stat-val text-success" id="r-ingresos">$0</div><div class="stat-lbl">Ingresos mes</div></div>
-      <div class="stat-card"><div class="stat-val text-danger" id="r-gastos">$0</div><div class="stat-lbl">Gastos mes</div></div>
-      <div class="stat-card"><div class="stat-val text-success" id="r-cobrado">$0</div><div class="stat-lbl">Cobrado</div></div>
-      <div class="stat-card"><div class="stat-val text-danger" id="r-porcobrar">$0</div><div class="stat-lbl">Por cobrar</div></div>
+    <div class="balance-card balance-pos" id="balanceTotalCard">
+      <span class="balance-lbl">Balance total · todos los meses</span>
+      <span class="balance-val" id="r-balance-total">$0</span>
+      <span class="balance-lbl" id="r-balance-total-sub"></span>
+    </div>
+  </div>
+  <div class="stats-4" style="margin-bottom:1rem">
+    <div class="stat-card"><div class="stat-val text-success" id="r-ingresos">$0</div><div class="stat-lbl">Ingresos mes</div></div>
+    <div class="stat-card"><div class="stat-val text-danger" id="r-gastos">$0</div><div class="stat-lbl">Gastos mes</div></div>
+    <div class="stat-card"><div class="stat-val text-success" id="r-cobrado">$0</div><div class="stat-lbl">Cobrado</div></div>
+    <div class="stat-card"><div class="stat-val text-danger" id="r-porcobrar">$0</div><div class="stat-lbl">Por cobrar</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">💼 Ingresos por cliente / proyecto</div>
+      <div class="card-body" id="r-clientes"><div class="loading"><span class="spinner"></span>Calculando...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">📅 Balance por mes</div>
+      <div class="card-body" id="r-meses"><div class="loading"><span class="spinner"></span>Calculando...</div></div>
     </div>
   </div>
   <div class="grid-2">
@@ -320,16 +345,6 @@ textarea{resize:vertical;min-height:70px}
     <div class="card-head">📈 Evolución mensual del gasto</div>
     <div class="card-body"><div style="position:relative;height:260px"><canvas id="chartLinea"></canvas></div></div>
   </div>
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-head">💼 Ingresos por cliente / proyecto</div>
-      <div class="card-body" id="r-clientes"><div class="loading"><span class="spinner"></span>Calculando...</div></div>
-    </div>
-    <div class="card">
-      <div class="card-head">📅 Balance por mes</div>
-      <div class="card-body" id="r-meses"><div class="loading"><span class="spinner"></span>Calculando...</div></div>
-    </div>
-  </div>
 </div>
 
 <!-- ══════════ MODAL: GASTO ══════════ -->
@@ -338,7 +353,7 @@ textarea{resize:vertical;min-height:70px}
     <div class="modal-head"><h3 id="modal-gasto-title">💸 Nuevo gasto</h3><button class="modal-close" onclick="closeModal('modal-gasto')">✕</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="form-group full"><label>Descripción *</label><input type="text" id="g-desc" placeholder="Ej: Suscripción n8n Cloud"></div>
+        <div class="form-group full"><label>Descripción *</label><input type="text" id="g-desc" list="dl-servicios" placeholder="Elige de la lista o escribe una nueva" autocomplete="off"></div>
         <div class="form-group"><label>Moneda *</label>
           <select id="g-moneda" onchange="calcGastoMXN()"><option value="MXN">MXN (pesos)</option><option value="USD">USD (dólar)</option><option value="EUR">EUR (euro)</option></select>
         </div>
@@ -828,15 +843,55 @@ function renderGastos(){
   }
   pintarIndicadores('gastos');
   actualizarDatalistServicios();
-  // stats
-  const delMes=GASTOS.filter(g=>esDelMes(g.fecha));
-  const totMes=delMes.reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0);
-  const recur=GASTOS.filter(g=>(g.recurrente===true||g.recurrente==='true')).reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0);
-  const pend=GASTOS.filter(g=>g.status==='Por reembolsar').reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0);
-  document.getElementById('g-total-mes').textContent=fmt$(totMes);
-  document.getElementById('g-mes-lbl').textContent=nombreMes();
-  document.getElementById('g-recurrente').textContent=fmt$(recur);
-  document.getElementById('g-pendiente').textContent=fmt$(pend);
+  poblarMesesGasto();
+  actualizarTotalMesGasto();
+  renderUltimos6Gastos();
+}
+
+// Mini-tabla: gastos e ingresos de los últimos 6 meses
+function renderUltimos6Gastos(){
+  const el=document.getElementById('g-ultimos6');
+  if(!el) return;
+  const meses={};
+  GASTOS.forEach(g=>{ const k=mesKey(g.fecha); (meses[k]=meses[k]||{g:0,i:0}).g+=parseFloat(g.monto_mxn||0); });
+  INGRESOS.forEach(i=>{ const k=mesKey(i.fecha); (meses[k]=meses[k]||{g:0,i:0}).i+=parseFloat(i.monto_mxn||0); });
+  const keys=Object.keys(meses).sort().reverse().slice(0,6).reverse();
+  if(!keys.length){ el.innerHTML='<div class="text-muted" style="font-size:.75rem">Sin datos</div>'; return; }
+  el.innerHTML=`<div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:.12rem 1rem;font-size:.76rem;align-items:center">
+    <span style="font-size:.66rem;color:#8a90a0;font-weight:700">Mes</span>
+    <span style="font-size:.66rem;color:#8a90a0;font-weight:700;text-align:right">Gastos</span>
+    <span style="font-size:.66rem;color:#8a90a0;font-weight:700;text-align:right">Ingresos</span>
+    ${keys.map(k=>`
+      <span style="color:#4a5068">${mesLabel(k)}</span>
+      <span style="text-align:right;font-weight:700;color:#dc2626">${fmt$(meses[k].g)}</span>
+      <span style="text-align:right;font-weight:700;color:#059669">${meses[k].i>0?fmt$(meses[k].i):'—'}</span>
+    `).join('')}
+  </div>`;
+}
+
+// Selector de mes en la tarjeta de gastos
+function mesLabelLargo(k){
+  const [y,m]=k.split('-');
+  const M=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return `${M[parseInt(m)]} ${y}`;
+}
+function poblarMesesGasto(){
+  const sel=document.getElementById('g-mesStat');
+  if(!sel) return;
+  const now=new Date();
+  const actual=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const meses=[...new Set([actual, ...GASTOS.map(g=>mesKey(g.fecha))])].sort().reverse();
+  const prev=sel.value;
+  sel.innerHTML=meses.map(k=>`<option value="${k}">${mesLabelLargo(k)}</option>`).join('');
+  sel.value=(prev && meses.includes(prev)) ? prev : actual;
+}
+function actualizarTotalMesGasto(){
+  const sel=document.getElementById('g-mesStat');
+  const k=sel?sel.value:null;
+  const tot=GASTOS.filter(g=>mesKey(g.fecha)===k).reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0);
+  document.getElementById('g-total-mes').textContent=fmt$(tot);
+  const lbl=document.getElementById('g-mes-lbl');
+  if(lbl && k) lbl.textContent=mesLabelLargo(k).toLowerCase();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1055,6 +1110,15 @@ function renderResumen(){
   document.getElementById('r-gastos').textContent=fmt$(gMes);
   document.getElementById('r-cobrado').textContent=fmt$(cobrado);
   document.getElementById('r-porcobrar').textContent=fmt$(porCobrar);
+
+  // Balance TOTAL — todos los meses
+  const iTotal=INGRESOS.reduce((s,i)=>s+parseFloat(i.monto_mxn||0),0);
+  const gTotal=GASTOS.reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0);
+  const balanceTotal=iTotal-gTotal;
+  const cardT=document.getElementById('balanceTotalCard');
+  cardT.className='balance-card '+(balanceTotal>=0?'balance-pos':'balance-neg');
+  document.getElementById('r-balance-total').textContent=fmt$(balanceTotal);
+  document.getElementById('r-balance-total-sub').textContent=`Ingresos ${fmt$(iTotal)} − Gastos ${fmt$(gTotal)}`;
 
   destroyCharts();
 
