@@ -309,7 +309,7 @@ textarea{resize:vertical;min-height:70px}
     </div>
   </div>
   <div class="card">
-    <div class="card-head">👥 Cuánto ha puesto cada socio <span class="text-muted" style="font-weight:400">· acumulado</span></div>
+    <div class="card-head">👥 Cuánto ha puesto cada socio <span class="text-muted" style="font-weight:400">· aporte propio (excluye fondos de empresa)</span></div>
     <div class="card-body"><div style="position:relative;height:230px"><canvas id="chartSoc"></canvas></div></div>
   </div>
   <div class="card">
@@ -662,8 +662,17 @@ async function cargarTodo(){
 // Poblar el dropdown "origen de fondos" con los ingresos existentes
 function actualizarOrigenFondos(){
   const sel=document.getElementById('g-origen');
+  if(!sel) return;
+  const val=sel.value;
   sel.innerHTML='<option value="">— No aplica / fondos propios —</option>'+
-    INGRESOS.map(i=>`<option value="${i.id}">${escHtml(i.cliente||i.concepto)} · ${fmt$(i.monto_mxn)}</option>`).join('');
+    '<option value="empresa">💼 Fondos de la empresa / caja común</option>'+
+    INGRESOS.map(i=>`<option value="${i.id}">💰 ${escHtml(i.cliente||i.concepto)} · ${fmt$(i.monto_mxn)}</option>`).join('');
+  sel.value=val;
+}
+function origenLabel(g){
+  if(g.origen_fondos==='empresa') return '💼 Empresa';
+  const ing=INGRESOS.find(i=>i.id===g.origen_fondos);
+  return ing?('💰 '+escHtml(ing.cliente||ing.concepto)):'—';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -800,7 +809,6 @@ function renderGastos(){
   if(!lista.length){ tbody.innerHTML='<tr><td colspan="9"><div class="empty-state"><span>💸</span>Sin gastos registrados</div></td></tr>'; }
   else{
     tbody.innerHTML=lista.map(g=>{
-      const ing=INGRESOS.find(i=>i.id===g.origen_fondos);
       const recur=(g.recurrente===true||g.recurrente==='true')?'<span class="recur-tag">🔁 mensual</span>':'';
       return `<tr>
         <td>${fmtDate(g.fecha)}</td>
@@ -808,7 +816,7 @@ function renderGastos(){
         <td>${catBadge(g.categoria)}</td>
         <td>${montoCell(g.moneda,g.monto_original,g.monto_mxn)}</td>
         <td>${socioBadge(g.pagado_por)}</td>
-        <td style="font-size:.76rem;color:#4a5068">${ing?escHtml(ing.cliente||ing.concepto):'—'}</td>
+        <td style="font-size:.76rem;color:#4a5068">${origenLabel(g)}</td>
         <td style="font-size:.76rem;color:#4a5068">${escHtml(g.proyecto_nombre||'—')}</td>
         <td>${statusBadge(g.status)}</td>
         <td style="white-space:nowrap">
@@ -973,7 +981,7 @@ function sortTabla(tabla, col){
 function valorOrden(row, col){
   if(col==='monto_mxn') return parseFloat(row.monto_mxn||0);
   if(col==='fecha') return row.fecha||'';
-  if(col==='origen'){ const ing=INGRESOS.find(i=>i.id===row.origen_fondos); return (ing?(ing.cliente||ing.concepto):'').toLowerCase(); }
+  if(col==='origen'){ if(row.origen_fondos==='empresa') return 'empresa'; const ing=INGRESOS.find(i=>i.id===row.origen_fondos); return (ing?(ing.cliente||ing.concepto):'').toLowerCase(); }
   const v=row[col];
   return typeof v==='string' ? v.toLowerCase() : (v??'');
 }
@@ -1062,11 +1070,20 @@ function renderResumen(){
   const cat=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
   CHARTS.cat=chartDona('chartCat', cat.map(e=>e[0]), cat.map(e=>e[1]), cat.map(e=>CAT_COLOR[e[0]]||'#8a90a0'));
 
-  // 👥 Cuánto ha puesto cada socio (barras horizontales, acumulado)
-  const porSoc={};
-  GASTOS.forEach(g=>{ porSoc[g.pagado_por]=(porSoc[g.pagado_por]||0)+parseFloat(g.monto_mxn||0); });
+  // 👥 Cuánto ha puesto cada socio (solo fondos PROPIOS; los de empresa/ingreso van aparte)
+  const porSoc={}; let fondosEmpresa=0;
+  GASTOS.forEach(g=>{
+    const m=parseFloat(g.monto_mxn||0);
+    if(g.origen_fondos){ fondosEmpresa+=m; }              // pagado con dinero externo → no se adjudica
+    else { porSoc[g.pagado_por]=(porSoc[g.pagado_por]||0)+m; }
+  });
   const socUids=Object.keys(USERS);
-  CHARTS.soc=chartBarras('chartSoc', socUids.map(u=>USERS[u].nombre), socUids.map(u=>porSoc[u]||0), socUids.map(u=>USERS[u].color), true);
+  const socLabels=socUids.map(u=>USERS[u].nombre);
+  const socData=socUids.map(u=>porSoc[u]||0);
+  const socColors=socUids.map(u=>USERS[u].color);
+  if((porSoc['']||0)>0){ socLabels.push('Sin registrar'); socData.push(porSoc['']); socColors.push('#8a90a0'); }
+  if(fondosEmpresa>0){ socLabels.push('💼 Empresa/ingresos'); socData.push(fondosEmpresa); socColors.push('#0891b2'); }
+  CHARTS.soc=chartBarras('chartSoc', socLabels, socData, socColors, true);
 
   // 📅 Gasto mensual por categoría (barras apiladas)
   const mesesSet=[...new Set(GASTOS.map(g=>mesKey(g.fecha)))].sort();
