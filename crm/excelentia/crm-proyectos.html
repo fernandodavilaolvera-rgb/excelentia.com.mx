@@ -198,7 +198,7 @@ textarea{resize:vertical;min-height:70px}
       <div class="form-grid">
         <div class="form-group full"><label>Nombre del proyecto *</label><input type="text" id="p-nombre" placeholder="Ej: Dashboard Berimbau v2"></div>
         <div class="form-group"><label>Empresa</label><input type="text" id="p-empresa" placeholder="Razón social o nombre"></div>
-        <div class="form-group"><label>Contacto (ID)</label><input type="text" id="p-contacto" placeholder="ID del contacto"></div>
+        <div class="form-group"><label>Contacto</label><input type="text" id="p-contacto" list="dl-contactos" placeholder="Elige de la lista o escribe" autocomplete="off"><datalist id="dl-contactos"></datalist></div>
         <div class="form-group"><label>Etapa</label>
           <select id="p-etapa"><option>Prospecto</option><option>Contacto</option><option>Presentación</option><option>Seguimiento</option><option>Propuesta</option><option>Cierre</option><option>Desarrollo</option><option>Entrega</option><option>Mantenimiento</option></select>
         </div>
@@ -264,9 +264,21 @@ const STATUS_LABEL = { activo:'Activo', ganado:'Ganado', perdido:'Perdido', paus
 
 let currentUser = 'fernando';
 let ITEMS = [];
+let CONTACTOS = [];
 let sortCol = 'accionfecha';
 let sortDir = 1;
 let editId = null;
+
+// ── Contactos: mostrar nombre pero guardar el ID cuando existe ──
+function nombreContacto(idOrText){
+  const c = CONTACTOS.find(x => x.id === toStr(idOrText));
+  return c ? c.nombre : toStr(idOrText);
+}
+function idDeContacto(text){
+  const t = toStr(text).trim();
+  const c = CONTACTOS.find(x => x.nombre.toLowerCase() === t.toLowerCase());
+  return c ? c.id : t;   // coincide un contacto → su ID; si no, se guarda el texto libre
+}
 
 // ═══════════════════════════════════════
 // HELPERS — blindaje contra Bug raíz #2
@@ -394,6 +406,28 @@ async function cargarProyectos(){
   const res = await apiCall('get');
   ITEMS = (Array.isArray(res) ? res : []).map(normalizeItem);
   render();
+}
+
+// Carga los contactos (endpoint propio de n8n) y llena el datalist del modal
+async function cargarContactos(){
+  try{
+    const res = await fetch(`${N8N_BASE}/crm-contactos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'get' })
+    });
+    const data = await res.json();
+    CONTACTOS = (Array.isArray(data) ? data : [])
+      .map(c => ({ id: toStr(c.ID || c.id), nombre: toStr(c.Nombre || c.nombre), empresa: toStr(c.Empresa || c.empresa) }))
+      .filter(c => c.nombre);
+  }catch(e){
+    console.error('Error cargando contactos:', e);
+    CONTACTOS = [];
+  }
+  const dl = document.getElementById('dl-contactos');
+  if(dl){
+    dl.innerHTML = CONTACTOS.map(c => `<option value="${escHtml(c.nombre)}">${escHtml(c.empresa)}</option>`).join('');
+  }
 }
 
 // ═══════════════════════════════════════
@@ -541,7 +575,7 @@ function abrirModal(id = null){
 
   document.getElementById('p-nombre').value = p?.Nombre || '';
   document.getElementById('p-empresa').value = p?.Empresa || '';
-  document.getElementById('p-contacto').value = p?.ContactoID || '';
+  document.getElementById('p-contacto').value = nombreContacto(p?.ContactoID || '');
   document.getElementById('p-etapa').value = p?.Etapa || 'Prospecto';
   document.getElementById('p-status').value = p?.Status || 'activo';
   document.getElementById('p-valor').value = p ? toNum(p.ValorEstimado) || '' : '';
@@ -570,7 +604,7 @@ async function guardarProyecto(){
     ID: editId || genId(),
     Nombre: nombre,
     Empresa: document.getElementById('p-empresa').value.trim(),
-    ContactoID: document.getElementById('p-contacto').value.trim(),
+    ContactoID: idDeContacto(document.getElementById('p-contacto').value),
     Etapa: document.getElementById('p-etapa').value,
     ValorEstimado: toNum(document.getElementById('p-valor').value),
     Responsable: document.getElementById('p-responsable').value,
@@ -642,6 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if(fi) fi.value = hoy;
 
   cargarProyectos();
+  cargarContactos();
 });
 </script>
 </body>
