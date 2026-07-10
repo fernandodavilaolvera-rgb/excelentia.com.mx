@@ -33,7 +33,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .mode-cloud{background:#d1fae5;color:#065f46;border-bottom:1px solid #a7f3d0}
 
 /* ── SUB-NAV ── */
-.sub-nav{background:#fff;border-bottom:2px solid #dde1e9;padding:0 1.5rem;display:flex;gap:0;overflow-x:auto;position:sticky;top:83px;z-index:90}
+.sub-nav{background:#fff;border-bottom:2px solid #dde1e9;padding:0 1.5rem;display:flex;gap:0;overflow-x:auto}
 .sub-tab{padding:.75rem 1.1rem;font-size:.85rem;font-weight:600;color:#4a5068;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:.2s;display:flex;align-items:center;gap:.35rem;background:none;border-left:none;border-right:none;border-top:none;font-family:'Manrope',sans-serif}
 .sub-tab:hover{color:#1a3a6b;background:#f0f4ff}
 .sub-tab.active{color:#1a3a6b;border-bottom-color:#4a9fd4;background:#f0f4ff}
@@ -72,6 +72,11 @@ th{background:#dce8f7;padding:.6rem .8rem;text-align:left;font-weight:700;color:
 td{padding:.55rem .8rem;border-bottom:1px solid #eef2f8;color:#1a2035;vertical-align:middle}
 tr:hover td{background:#f8faff}
 tr:last-child td{border-bottom:none}
+th[data-col]{cursor:pointer;user-select:none;transition:.15s}
+th[data-col]:hover{background:#c8d9f0}
+.sort-ind{font-size:.68rem;color:#1a3a6b;margin-left:.15rem}
+.desc-cell{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.desc-cell .recur-tag{flex-shrink:0}
 
 /* ── BADGES ── */
 .badge{display:inline-block;padding:.2rem .55rem;border-radius:20px;font-size:.73rem;font-weight:700}
@@ -91,8 +96,8 @@ tr:last-child td{border-bottom:none}
 
 /* ── FILTROS ── */
 .filters{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center}
-.filter-input{flex:1;min-width:150px;padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem}
-.filter-select{padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff}
+.filter-input{width:210px;max-width:100%;padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem}
+.filter-select{width:auto;min-width:140px;padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff}
 
 /* ── MODAL ── */
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
@@ -154,33 +159,7 @@ textarea{resize:vertical;min-height:70px}
 </head>
 <body>
 
-<!-- ══════════ HEADER ══════════ -->
-<header class="header">
-  <div class="logo-header-wrap">
-    <div class="logo-box">
-      <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
-    </div>
-    <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
-  </div>
-  <div class="header-center">
-    <span class="header-title">💰 Finanzas</span>
-    <span class="header-sub" id="headerDate"></span>
-  </div>
-  <div class="header-right">
-    <div class="user-chip" onclick="cycleUser()">
-      <span class="user-dot" id="userDot"></span>
-      <span id="userChipName">Fernando</span>
-      <span>▾</span>
-    </div>
-  </div>
-</header>
-
-<!-- Banner de modo (local / nube) -->
-<div class="mode-banner mode-local" id="modeBanner">
-  ⚠️ Modo local (datos en este navegador). Conecta Supabase para sincronizar entre socios y dispositivos.
-</div>
+<!-- Header quitado: lo pone el HTML concentrador de iframes. El usuario se toma de ?user=xxx -->
 
 <!-- Barra tipo de cambio -->
 <div class="tc-bar">
@@ -213,6 +192,7 @@ textarea{resize:vertical;min-height:70px}
     <div class="card-head">
       💸 Registro de gastos
       <div class="flex-gap">
+        <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosGastos()">🧹 Limpiar</button>
         <button class="btn btn-secondary btn-sm" onclick="cargarRecurrentes()">🔁 Cargar recurrentes del mes</button>
         <button class="btn btn-primary btn-sm" onclick="openGasto()">+ Nuevo gasto</button>
       </div>
@@ -220,6 +200,9 @@ textarea{resize:vertical;min-height:70px}
     <div class="card-body" style="padding:.5rem">
       <div class="filters">
         <input class="filter-input" type="text" placeholder="Buscar descripción..." oninput="filterGastos()" id="g-search">
+        <input class="filter-input" list="dl-servicios" id="g-fServicio" placeholder="🔎 Plataforma / servicio" oninput="filterGastos()">
+        <datalist id="dl-servicios"></datalist>
+        <input class="filter-select" type="month" id="g-fMes" onchange="filterGastos()" title="Filtrar por mes">
         <select class="filter-select" id="g-fCat" onchange="filterGastos()">
           <option value="">Categoría</option>
         </select>
@@ -236,7 +219,17 @@ textarea{resize:vertical;min-height:70px}
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Monto</th><th>Pagó</th><th>Origen fondos</th><th>Proyecto</th><th>Status</th><th></th></tr></thead>
+          <thead id="thead-gastos"><tr>
+            <th data-col="fecha" onclick="sortTabla('gastos','fecha')">Fecha <span class="sort-ind"></span></th>
+            <th data-col="descripcion" onclick="sortTabla('gastos','descripcion')">Descripción <span class="sort-ind"></span></th>
+            <th data-col="categoria" onclick="sortTabla('gastos','categoria')">Categoría <span class="sort-ind"></span></th>
+            <th data-col="monto_mxn" onclick="sortTabla('gastos','monto_mxn')">Monto <span class="sort-ind"></span></th>
+            <th data-col="pagado_por" onclick="sortTabla('gastos','pagado_por')">Pagó <span class="sort-ind"></span></th>
+            <th data-col="origen" onclick="sortTabla('gastos','origen')">Origen fondos <span class="sort-ind"></span></th>
+            <th data-col="proyecto_nombre" onclick="sortTabla('gastos','proyecto_nombre')">Proyecto <span class="sort-ind"></span></th>
+            <th data-col="status" onclick="sortTabla('gastos','status')">Status <span class="sort-ind"></span></th>
+            <th></th>
+          </tr></thead>
           <tbody id="gastos-tbody"><tr><td colspan="9" class="loading"><span class="spinner"></span>Cargando...</td></tr></tbody>
         </table>
       </div>
@@ -254,11 +247,15 @@ textarea{resize:vertical;min-height:70px}
   <div class="card">
     <div class="card-head">
       💰 Registro de ingresos
-      <button class="btn btn-primary btn-sm" onclick="openIngreso()">+ Nuevo ingreso</button>
+      <div class="flex-gap">
+        <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosIngresos()">🧹 Limpiar</button>
+        <button class="btn btn-primary btn-sm" onclick="openIngreso()">+ Nuevo ingreso</button>
+      </div>
     </div>
     <div class="card-body" style="padding:.5rem">
       <div class="filters">
         <input class="filter-input" type="text" placeholder="Buscar concepto o cliente..." oninput="filterIngresos()" id="i-search">
+        <input class="filter-select" type="month" id="i-fMes" onchange="filterIngresos()" title="Filtrar por mes">
         <select class="filter-select" id="i-fProyecto" onchange="filterIngresos()">
           <option value="">Proyecto</option>
         </select>
@@ -269,7 +266,16 @@ textarea{resize:vertical;min-height:70px}
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Fecha</th><th>Concepto</th><th>Cliente</th><th>Proyecto</th><th>Monto</th><th>Método</th><th>Status</th><th></th></tr></thead>
+          <thead id="thead-ingresos"><tr>
+            <th data-col="fecha" onclick="sortTabla('ingresos','fecha')">Fecha <span class="sort-ind"></span></th>
+            <th data-col="concepto" onclick="sortTabla('ingresos','concepto')">Concepto <span class="sort-ind"></span></th>
+            <th data-col="cliente" onclick="sortTabla('ingresos','cliente')">Cliente <span class="sort-ind"></span></th>
+            <th data-col="proyecto_nombre" onclick="sortTabla('ingresos','proyecto_nombre')">Proyecto <span class="sort-ind"></span></th>
+            <th data-col="monto_mxn" onclick="sortTabla('ingresos','monto_mxn')">Monto <span class="sort-ind"></span></th>
+            <th data-col="metodo" onclick="sortTabla('ingresos','metodo')">Método <span class="sort-ind"></span></th>
+            <th data-col="status_cobro" onclick="sortTabla('ingresos','status_cobro')">Status <span class="sort-ind"></span></th>
+            <th></th>
+          </tr></thead>
           <tbody id="ingresos-tbody"><tr><td colspan="8" class="loading"><span class="spinner"></span>Cargando...</td></tr></tbody>
         </table>
       </div>
@@ -294,13 +300,27 @@ textarea{resize:vertical;min-height:70px}
   </div>
   <div class="grid-2">
     <div class="card">
-      <div class="card-head">🍩 Gasto por categoría <span class="text-muted" style="font-weight:400">· mes</span></div>
-      <div class="card-body"><div style="position:relative;height:260px"><canvas id="chartCat"></canvas></div><div id="r-cat-empty"></div></div>
+      <div class="card-head">🍩 Gasto por servicio</div>
+      <div class="card-body"><div style="position:relative;height:280px"><canvas id="chartServ"></canvas></div></div>
     </div>
     <div class="card">
-      <div class="card-head">🍩 Gasto por socio <span class="text-muted" style="font-weight:400">· mes</span></div>
-      <div class="card-body"><div style="position:relative;height:260px"><canvas id="chartSocio"></canvas></div><div id="r-socio-empty"></div></div>
+      <div class="card-head">🗂️ Gasto por categoría</div>
+      <div class="card-body"><div style="position:relative;height:280px"><canvas id="chartCat"></canvas></div></div>
     </div>
+  </div>
+  <div class="card">
+    <div class="card-head">👥 Cuánto ha puesto cada socio <span class="text-muted" style="font-weight:400">· acumulado</span></div>
+    <div class="card-body"><div style="position:relative;height:230px"><canvas id="chartSoc"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-head">📅 Gasto mensual por categoría</div>
+    <div class="card-body"><div style="position:relative;height:300px"><canvas id="chartMensualCat"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-head">📈 Evolución mensual del gasto</div>
+    <div class="card-body"><div style="position:relative;height:260px"><canvas id="chartLinea"></canvas></div></div>
+  </div>
+  <div class="grid-2">
     <div class="card">
       <div class="card-head">💼 Ingresos por cliente / proyecto</div>
       <div class="card-body" id="r-clientes"><div class="loading"><span class="spinner"></span>Calculando...</div></div>
@@ -401,8 +421,8 @@ textarea{resize:vertical;min-height:70px}
 //  4) Copia la llave "anon public" y pégala en SUPABASE_ANON_KEY
 //  (Mientras estén vacías, el módulo funciona en MODO LOCAL de prueba.)
 // ═══════════════════════════════════════════════════════════════
-const SUPABASE_URL = 'https://rcotlydvsubvdapubnkx.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T';
+const SUPABASE_URL = '';        // ej: 'https://xxxxx.supabase.co'
+const SUPABASE_ANON_KEY = '';   // ej: 'eyJhbGciOi...'
 
 // Nombre de la tabla de proyectos del CRM en tu Supabase (para el dropdown).
 // Si tu tabla se llama distinto, cámbialo aquí. Columnas esperadas: nombre / empresa (o Nombre / Empresa).
@@ -470,8 +490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     USE_CLOUD = true;
     const b = document.getElementById('modeBanner');
-    b.className = 'mode-banner mode-cloud';
-    b.innerHTML = '☁️ Conectado a Supabase — datos sincronizados en la nube.';
+    if(b){ b.className = 'mode-banner mode-cloud'; b.innerHTML = '☁️ Conectado a Supabase — datos sincronizados en la nube.'; }
   }
 
   await cargarProyectos();
@@ -490,19 +509,19 @@ function updateClock(){
 }
 function updateUserUI(){
   const u=USERS[currentUser];
-  document.getElementById('userDot').style.background=u.color;
-  document.getElementById('userChipName').textContent=u.nombre;
-}
-function cycleUser(){
-  const keys=Object.keys(USERS);
-  const i=keys.indexOf(currentUser);
-  currentUser=keys[(i+1)%keys.length];
-  updateUserUI();
+  const dot=document.getElementById('userDot'); if(dot) dot.style.background=u.color;
+  const chip=document.getElementById('userChipName'); if(chip) chip.textContent=u.nombre;
 }
 function fillCategorias(){
   const opts=CATEGORIAS.map(c=>`<option>${c}</option>`).join('');
   document.getElementById('g-cat').innerHTML=opts;
   document.getElementById('g-fCat').innerHTML='<option value="">Categoría</option>'+opts;
+}
+function actualizarDatalistServicios(){
+  const dl=document.getElementById('dl-servicios');
+  if(!dl) return;
+  const servs=[...new Set(GASTOS.map(g=>g.descripcion).filter(Boolean))].sort();
+  dl.innerHTML=servs.map(s=>`<option value="${escHtml(s)}"></option>`).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -752,25 +771,40 @@ async function cargarRecurrentes(){
 
 function filtrarGastos(){
   const q=document.getElementById('g-search').value.toLowerCase();
+  const serv=document.getElementById('g-fServicio').value.toLowerCase();
+  const mes=document.getElementById('g-fMes').value;
   const cat=document.getElementById('g-fCat').value;
   const soc=document.getElementById('g-fSocio').value;
   const st=document.getElementById('g-fStatus').value;
   return GASTOS.filter(g=>
     (!q||g.descripcion?.toLowerCase().includes(q))&&
+    (!serv||g.descripcion?.toLowerCase().includes(serv))&&
+    (!mes||mesKey(g.fecha)===mes)&&
     (!cat||g.categoria===cat)&&(!soc||g.pagado_por===soc)&&(!st||g.status===st)
   );
 }
 function filterGastos(){ renderGastos(); }
+function limpiarFiltrosGastos(){
+  document.getElementById('g-search').value='';
+  document.getElementById('g-fServicio').value='';
+  document.getElementById('g-fMes').value='';
+  document.getElementById('g-fCat').value='';
+  document.getElementById('g-fSocio').value='';
+  document.getElementById('g-fStatus').value='';
+  renderGastos();
+  showToast('🧹 Filtros limpiados');
+}
 function renderGastos(){
-  const lista=filtrarGastos();
+  const lista=aplicarOrden(filtrarGastos(),'gastos');
   const tbody=document.getElementById('gastos-tbody');
   if(!lista.length){ tbody.innerHTML='<tr><td colspan="9"><div class="empty-state"><span>💸</span>Sin gastos registrados</div></td></tr>'; }
   else{
     tbody.innerHTML=lista.map(g=>{
       const ing=INGRESOS.find(i=>i.id===g.origen_fondos);
+      const recur=(g.recurrente===true||g.recurrente==='true')?'<span class="recur-tag">🔁 mensual</span>':'';
       return `<tr>
         <td>${fmtDate(g.fecha)}</td>
-        <td><strong>${escHtml(g.descripcion)}</strong>${(g.recurrente===true||g.recurrente==='true')?' <span class="recur-tag">🔁 mensual</span>':''}</td>
+        <td><div class="desc-cell"><strong>${escHtml(g.descripcion)}</strong>${recur}</div></td>
         <td>${catBadge(g.categoria)}</td>
         <td>${montoCell(g.moneda,g.monto_original,g.monto_mxn)}</td>
         <td>${socioBadge(g.pagado_por)}</td>
@@ -784,6 +818,8 @@ function renderGastos(){
       </tr>`;
     }).join('');
   }
+  pintarIndicadores('gastos');
+  actualizarDatalistServicios();
   // stats
   const delMes=GASTOS.filter(g=>esDelMes(g.fecha));
   const totMes=delMes.reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0);
@@ -876,16 +912,26 @@ function editIngreso(id){ const i=INGRESOS.find(x=>x.id===id); if(i)openIngreso(
 
 function filtrarIngresos(){
   const q=document.getElementById('i-search').value.toLowerCase();
+  const mes=document.getElementById('i-fMes').value;
   const proy=document.getElementById('i-fProyecto').value;
   const st=document.getElementById('i-fStatus').value;
   return INGRESOS.filter(i=>
     (!q||i.concepto?.toLowerCase().includes(q)||i.cliente?.toLowerCase().includes(q))&&
+    (!mes||mesKey(i.fecha)===mes)&&
     (!proy||i.proyecto_id==proy)&&(!st||i.status_cobro===st)
   );
 }
 function filterIngresos(){ renderIngresos(); }
+function limpiarFiltrosIngresos(){
+  document.getElementById('i-search').value='';
+  document.getElementById('i-fMes').value='';
+  document.getElementById('i-fProyecto').value='';
+  document.getElementById('i-fStatus').value='';
+  renderIngresos();
+  showToast('🧹 Filtros limpiados');
+}
 function renderIngresos(){
-  const lista=filtrarIngresos();
+  const lista=aplicarOrden(filtrarIngresos(),'ingresos');
   const tbody=document.getElementById('ingresos-tbody');
   if(!lista.length){ tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><span>💰</span>Sin ingresos registrados</div></td></tr>'; }
   else{
@@ -903,6 +949,7 @@ function renderIngresos(){
       </td>
     </tr>`).join('');
   }
+  pintarIndicadores('ingresos');
   const delMes=INGRESOS.filter(i=>esDelMes(i.fecha));
   const totMes=delMes.reduce((s,i)=>s+parseFloat(i.monto_mxn||0),0);
   const cobrado=INGRESOS.filter(i=>i.status_cobro==='Cobrado').reduce((s,i)=>s+parseFloat(i.monto_mxn||0),0);
@@ -914,32 +961,77 @@ function renderIngresos(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  RESUMEN
+//  ORDENAMIENTO DE TABLAS
 // ═══════════════════════════════════════════════════════════════
-let chartCat=null, chartSocio=null;
-function donut(id, prev, emptyId, labels, data, colors){
-  if(prev){ prev.destroy(); }
-  const empty=document.getElementById(emptyId);
-  const canvas=document.getElementById(id);
-  if(!labels.length){
-    if(empty) empty.innerHTML='<div class="text-muted" style="text-align:center;padding:1rem">Sin datos del mes</div>';
-    canvas.style.display='none';
-    return null;
-  }
-  if(empty) empty.innerHTML='';
-  canvas.style.display='block';
-  return new Chart(canvas,{
-    type:'doughnut',
-    data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#fff' }] },
-    options:{
-      responsive:true, maintainAspectRatio:false, cutout:'60%',
-      plugins:{
-        legend:{ position:'bottom', labels:{ font:{family:'Manrope',size:11}, padding:12, usePointStyle:true, pointStyle:'circle' } },
-        tooltip:{ callbacks:{ label:(c)=>' '+c.label+': '+fmt$(c.parsed) } }
-      }
-    }
+let sortState = { gastos:{col:'fecha',dir:'desc'}, ingresos:{col:'fecha',dir:'desc'} };
+function sortTabla(tabla, col){
+  const st=sortState[tabla];
+  if(st.col===col){ st.dir = st.dir==='asc'?'desc':'asc'; }
+  else { st.col=col; st.dir='asc'; }
+  if(tabla==='gastos') renderGastos(); else renderIngresos();
+}
+function valorOrden(row, col){
+  if(col==='monto_mxn') return parseFloat(row.monto_mxn||0);
+  if(col==='fecha') return row.fecha||'';
+  if(col==='origen'){ const ing=INGRESOS.find(i=>i.id===row.origen_fondos); return (ing?(ing.cliente||ing.concepto):'').toLowerCase(); }
+  const v=row[col];
+  return typeof v==='string' ? v.toLowerCase() : (v??'');
+}
+function aplicarOrden(lista, tabla){
+  const {col,dir}=sortState[tabla];
+  const mult = dir==='asc'?1:-1;
+  return [...lista].sort((a,b)=>{
+    const va=valorOrden(a,col), vb=valorOrden(b,col);
+    if(va<vb) return -1*mult;
+    if(va>vb) return 1*mult;
+    return 0;
   });
 }
+function pintarIndicadores(tabla){
+  const thead=document.getElementById('thead-'+tabla);
+  if(!thead) return;
+  thead.querySelectorAll('th[data-col]').forEach(th=>{
+    const ind=th.querySelector('.sort-ind'); if(!ind) return;
+    ind.textContent = th.dataset.col===sortState[tabla].col ? (sortState[tabla].dir==='asc'?'▲':'▼') : '';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RESUMEN + GRÁFICAS (estilo dashboard de gastos original)
+// ═══════════════════════════════════════════════════════════════
+const PALETA=['#ea5c0a','#4285f4','#d97706','#10b981','#8b5cf6','#ec4899','#06b6d4','#6b7280','#2563eb','#059669'];
+let CHARTS={};
+function destroyCharts(){ Object.values(CHARTS).forEach(c=>{ if(c) c.destroy(); }); CHARTS={}; }
+function mesKey(f){ const d=new Date(f+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function mesLabel(k){ const [y,m]=k.split('-'); const M=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; return `${M[parseInt(m)]} ${y.slice(2)}`; }
+const FONT={family:'Manrope'};
+
+function chartDona(id,labels,data,colors){
+  const el=document.getElementById(id); if(!el) return null;
+  return new Chart(el,{ type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'58%',
+      plugins:{ legend:{ position:'bottom', labels:{ font:{...FONT,size:11}, padding:10, usePointStyle:true, pointStyle:'circle' } },
+        tooltip:{ callbacks:{ label:c=>' '+c.label+': '+fmt$(c.parsed) } } } } });
+}
+function chartBarras(id,labels,data,colors,horizontal){
+  const el=document.getElementById(id); if(!el) return null;
+  return new Chart(el,{ type:'bar',
+    data:{ labels, datasets:[{ data, backgroundColor:colors, borderRadius:6 }] },
+    options:{ indexAxis: horizontal?'y':'x', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false },
+        tooltip:{ callbacks:{ label:c=>' '+fmt$(horizontal?c.parsed.x:c.parsed.y) } } },
+      scales:{ x:{ ticks:{ font:FONT } }, y:{ ticks:{ font:FONT } } } } });
+}
+function chartLineaEvol(id,labels,data){
+  const el=document.getElementById(id); if(!el) return null;
+  return new Chart(el,{ type:'line',
+    data:{ labels, datasets:[{ data, borderColor:'#1a3a6b', backgroundColor:'rgba(26,58,107,.1)', fill:true, tension:.3, pointBackgroundColor:'#4a9fd4', pointRadius:4 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:c=>' '+fmt$(c.parsed.y) } } },
+      scales:{ x:{ ticks:{ font:FONT } }, y:{ ticks:{ font:FONT, callback:v=>'$'+Math.round(v/1000)+'k' } } } } });
+}
+
 function renderResumen(){
   const gMes=GASTOS.filter(g=>esDelMes(g.fecha)).reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0);
   const iMes=INGRESOS.filter(i=>esDelMes(i.fecha)).reduce((s,i)=>s+parseFloat(i.monto_mxn||0),0);
@@ -956,21 +1048,49 @@ function renderResumen(){
   document.getElementById('r-cobrado').textContent=fmt$(cobrado);
   document.getElementById('r-porcobrar').textContent=fmt$(porCobrar);
 
-  // Gasto por socio (mes) → dona
-  const porSocio={};
-  GASTOS.filter(g=>esDelMes(g.fecha)).forEach(g=>{ porSocio[g.pagado_por]=(porSocio[g.pagado_por]||0)+parseFloat(g.monto_mxn||0); });
-  const socUids=Object.keys(USERS).filter(uid=>(porSocio[uid]||0)>0);
-  chartSocio=donut('chartSocio',chartSocio,'r-socio-empty',
-    socUids.map(uid=>USERS[uid].nombre), socUids.map(uid=>porSocio[uid]), socUids.map(uid=>USERS[uid].color));
+  destroyCharts();
 
-  // Gasto por categoría (mes) → dona
+  // 🍩 Gasto por servicio (acumulado, top 8)
+  const porServ={};
+  GASTOS.forEach(g=>{ porServ[g.descripcion]=(porServ[g.descripcion]||0)+parseFloat(g.monto_mxn||0); });
+  const serv=Object.entries(porServ).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  CHARTS.serv=chartDona('chartServ', serv.map(e=>e[0]), serv.map(e=>e[1]), serv.map((_,i)=>PALETA[i%PALETA.length]));
+
+  // 🗂️ Gasto por categoría (acumulado)
   const porCat={};
-  GASTOS.filter(g=>esDelMes(g.fecha)).forEach(g=>{ porCat[g.categoria]=(porCat[g.categoria]||0)+parseFloat(g.monto_mxn||0); });
-  const catEntries=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
-  chartCat=donut('chartCat',chartCat,'r-cat-empty',
-    catEntries.map(e=>e[0]), catEntries.map(e=>e[1]), catEntries.map(e=>CAT_COLOR[e[0]]||'#8a90a0'));
+  GASTOS.forEach(g=>{ porCat[g.categoria]=(porCat[g.categoria]||0)+parseFloat(g.monto_mxn||0); });
+  const cat=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+  CHARTS.cat=chartDona('chartCat', cat.map(e=>e[0]), cat.map(e=>e[1]), cat.map(e=>CAT_COLOR[e[0]]||'#8a90a0'));
 
-  // Ingresos por cliente/proyecto (todos)
+  // 👥 Cuánto ha puesto cada socio (barras horizontales, acumulado)
+  const porSoc={};
+  GASTOS.forEach(g=>{ porSoc[g.pagado_por]=(porSoc[g.pagado_por]||0)+parseFloat(g.monto_mxn||0); });
+  const socUids=Object.keys(USERS);
+  CHARTS.soc=chartBarras('chartSoc', socUids.map(u=>USERS[u].nombre), socUids.map(u=>porSoc[u]||0), socUids.map(u=>USERS[u].color), true);
+
+  // 📅 Gasto mensual por categoría (barras apiladas)
+  const mesesSet=[...new Set(GASTOS.map(g=>mesKey(g.fecha)))].sort();
+  const catsSet=[...new Set(GASTOS.map(g=>g.categoria))];
+  const elMC=document.getElementById('chartMensualCat');
+  if(elMC){
+    CHARTS.mensualCat=new Chart(elMC,{ type:'bar',
+      data:{ labels:mesesSet.map(mesLabel), datasets:catsSet.map(c=>({
+        label:c, backgroundColor:CAT_COLOR[c]||'#8a90a0',
+        data:mesesSet.map(k=>GASTOS.filter(g=>mesKey(g.fecha)===k&&g.categoria===c).reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0))
+      })) },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:'bottom', labels:{ font:{...FONT,size:11}, padding:8, usePointStyle:true, pointStyle:'circle' } },
+          tooltip:{ callbacks:{ label:c=>' '+c.dataset.label+': '+fmt$(c.parsed.y) } } },
+        scales:{ x:{ stacked:true, ticks:{ font:FONT } }, y:{ stacked:true, ticks:{ font:FONT } } } } });
+  }
+
+  // 📈 Evolución mensual del gasto (línea)
+  const porMes={};
+  GASTOS.forEach(g=>{ const k=mesKey(g.fecha); porMes[k]=(porMes[k]||0)+parseFloat(g.monto_mxn||0); });
+  const mesesEvol=Object.keys(porMes).sort();
+  CHARTS.linea=chartLineaEvol('chartLinea', mesesEvol.map(mesLabel), mesesEvol.map(k=>porMes[k]));
+
+  // 💼 Ingresos por cliente/proyecto (barras texto)
   const porCli={};
   INGRESOS.forEach(i=>{ const k=i.cliente||i.proyecto_nombre||i.concepto||'Sin cliente'; porCli[k]=(porCli[k]||0)+parseFloat(i.monto_mxn||0); });
   const clis=Object.entries(porCli).sort((a,b)=>b[1]-a[1]).slice(0,8);
@@ -983,17 +1103,15 @@ function renderResumen(){
       <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:#059669"></div></div></div>`;
   }).join(''):'<div class="text-muted">Aún no hay ingresos</div>';
 
-  // Balance por mes (últimos 6)
+  // 📅 Balance por mes (últimos 6)
   const meses={};
-  const key=(f)=>{ const d=new Date(f+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
-  GASTOS.forEach(g=>{ const k=key(g.fecha); (meses[k]=meses[k]||{g:0,i:0}).g+=parseFloat(g.monto_mxn||0); });
-  INGRESOS.forEach(i=>{ const k=key(i.fecha); (meses[k]=meses[k]||{g:0,i:0}).i+=parseFloat(i.monto_mxn||0); });
+  GASTOS.forEach(g=>{ const k=mesKey(g.fecha); (meses[k]=meses[k]||{g:0,i:0}).g+=parseFloat(g.monto_mxn||0); });
+  INGRESOS.forEach(i=>{ const k=mesKey(i.fecha); (meses[k]=meses[k]||{g:0,i:0}).i+=parseFloat(i.monto_mxn||0); });
   const ordenados=Object.entries(meses).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,6);
-  const nombreM=(k)=>{ const [y,m]=k.split('-'); const M=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; return `${M[parseInt(m)]} ${y.slice(2)}`; };
   document.getElementById('r-meses').innerHTML=ordenados.length?ordenados.map(([k,v])=>{
     const bal=v.i-v.g; const col=bal>=0?'#059669':'#dc2626';
     return `<div class="flex-between" style="padding:.4rem 0;border-bottom:1px solid #eef2f8">
-      <span style="font-size:.82rem;font-weight:600">${nombreM(k)}</span>
+      <span style="font-size:.82rem;font-weight:600">${mesLabel(k)}</span>
       <span style="font-size:.76rem;color:#8a90a0">↑${fmt$(v.i)} · ↓${fmt$(v.g)}</span>
       <span style="font-size:.82rem;font-weight:700;color:${col}">${fmt$(bal)}</span></div>`;
   }).join(''):'<div class="text-muted">Sin datos</div>';
