@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda · ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size:15px}
+.wrap{max-width:1150px;margin:0 auto;padding:1rem 1.25rem}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
+.toolbar-left{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.toolbar-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.toolbar-title{font-size:1.05rem;font-weight:800;color:#1a2035;display:flex;align-items:center;gap:.4rem}
+.week-nav{display:flex;align-items:center;gap:.35rem;background:#fff;border:1px solid #dde1e9;border-radius:10px;padding:.25rem .3rem}
+.week-nav button{background:none;border:none;cursor:pointer;font-size:1rem;color:#1a3a6b;width:30px;height:30px;border-radius:7px;transition:.15s;display:flex;align-items:center;justify-content:center}
+.week-nav button:hover{background:#dce8f7}
+.week-label{font-size:.83rem;font-weight:700;color:#1a2035;padding:0 .5rem;min-width:150px;text-align:center}
+
+/* CONEXIÓN */
+.conn-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;background:#fff;border:1px solid #dde1e9;border-radius:10px;padding:.5rem .75rem}
+.conn-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.conn-email{font-size:.82rem;font-weight:600;color:#1a2035}
+.conn-status{font-size:.82rem;color:#4a5068}
+
+/* BOTONES */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .9rem;border-radius:9px;font-size:.83rem;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Manrope',sans-serif}
+.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
+.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-secondary{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#dce8f7}
+.btn-ghost{background:#fff;color:#1a3a6b;border:1px solid #dde1e9}.btn-ghost:hover{background:#dce8f7}
+.btn-google{background:#fff;color:#1a2035;border:1px solid #dde1e9;font-weight:700}
+.btn-google:hover{background:#f0f4ff;border-color:#c8d9f0}
+.btn-sm{padding:.35rem .7rem;font-size:.78rem}
+
+/* GRID SEMANAL */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.6rem}
+.day-col{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:180px}
+.day-col.today{border-color:#4a9fd4;box-shadow:0 0 0 2px rgba(74,159,212,.18)}
+.day-head{background:#dce8f7;padding:.5rem .55rem;text-align:center;border-bottom:1px solid #c8d9f0}
+.day-col.today .day-head{background:#1a3a6b}
+.day-name{font-size:.7rem;font-weight:700;color:#4a5068;text-transform:uppercase;letter-spacing:.4px}
+.day-col.today .day-name{color:#a8c4e0}
+.day-num{font-size:1.15rem;font-weight:800;color:#1a2035;line-height:1.1}
+.day-col.today .day-num{color:#fff}
+.day-body{padding:.45rem;display:flex;flex-direction:column;gap:.4rem;flex:1}
+.day-empty{color:#c2c8d4;font-size:.85rem;text-align:center;margin:auto;padding:.5rem 0}
+
+/* EVENTO CHIP */
+.ev{background:#f0f6ff;border-left:3px solid #4a9fd4;border-radius:7px;padding:.4rem .5rem;cursor:pointer;transition:.15s}
+.ev:hover{background:#dce8f7;transform:translateY(-1px)}
+.ev.allday{background:#eafaf2;border-left-color:#059669}
+.ev-time{font-size:.68rem;font-weight:700;color:#4a5068;margin-bottom:.1rem}
+.ev.allday .ev-time{color:#059669}
+.ev-title{font-size:.78rem;font-weight:600;color:#1a2035;line-height:1.25;word-break:break-word}
+.ev-loc{font-size:.68rem;color:#8a90a0;margin-top:.15rem}
+.ev-guests{font-size:.66rem;color:#7c3aed;margin-top:.15rem;font-weight:600}
+
+/* ESTADO CONECTAR / VACÍO */
+.connect-card{background:#fff;border:1px solid #dde1e9;border-radius:14px;padding:2.5rem 1.5rem;text-align:center;max-width:440px;margin:2rem auto}
+.connect-card .ico{font-size:2.4rem;display:block;margin-bottom:.75rem}
+.connect-card h3{font-size:1.05rem;font-weight:800;margin-bottom:.4rem}
+.connect-card p{font-size:.85rem;color:#4a5068;margin-bottom:1.25rem;line-height:1.5}
+
+/* MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0}
+.modal-head h3{font-size:.95rem;font-weight:700}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:1.25rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-group{display:flex;flex-direction:column;gap:.3rem}
+.form-group.full{grid-column:1/-1}
+label{font-size:.8rem;font-weight:600;color:#4a5068}
+input,textarea{width:100%;padding:.55rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.85rem;color:#1a2035;background:#fff;transition:.2s}
+input:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+textarea{resize:vertical;min-height:70px}
+.check-row{display:flex;align-items:center;gap:.5rem}
+.check-row input{width:auto}
+.modal-foot{padding:.85rem 1.25rem;border-top:1px solid #eef2f8;display:flex;gap:.6rem;justify-content:space-between;align-items:center;flex-wrap:wrap}
+
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.65rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;z-index:999;opacity:0;transition:.3s;font-family:'Manrope',sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.15);color:#fff;pointer-events:none}
+.loading{text-align:center;padding:2rem;color:#4a5068;font-size:.85rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  .wrap{padding:1rem}
+  .toolbar{gap:.6rem}
+  .toolbar-left{width:100%;justify-content:space-between}
+  .week-label{min-width:auto;flex:1}
+  .btn-nuevo{width:100%;justify-content:center}
+  .toolbar-actions{width:100%}
+  .week-grid{grid-template-columns:1fr;gap:.5rem}
+  .day-col{min-height:auto;flex-direction:row}
+  .day-col:not(.has-events) .day-body{display:none}
+  .day-col:not(.has-events){opacity:.55}
+  .day-head{min-width:70px;display:flex;flex-direction:column;justify-content:center;border-bottom:none;border-right:1px solid #c8d9f0}
+  .day-empty{margin:0;text-align:left;padding:.4rem 0}
+  .modal{max-width:100%;border-radius:14px 14px 0 0;align-self:flex-end;max-height:95vh}
+  .modal-backdrop{align-items:flex-end;padding:0}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- BARRA DE CONEXIÓN -->
+  <div class="conn-bar" id="connBar">
+    <span class="conn-dot" id="connDot" style="background:#c2c8d4"></span>
+    <span class="conn-status" id="connStatus">Verificando conexión...</span>
+    <span class="conn-email" id="connEmail" style="display:none"></span>
+    <div style="margin-left:auto;display:flex;gap:.4rem">
+      <button class="btn btn-google btn-sm" id="btnConectar" onclick="conectarGoogle()" style="display:none">Conectar mi Google</button>
+      <button class="btn btn-ghost btn-sm" id="btnDesconectar" onclick="desconectar()" style="display:none">Desconectar</button>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar" id="toolbar" style="display:none">
+    <div class="toolbar-left">
+      <span class="toolbar-title">📅 Agenda</span>
+      <div class="week-nav">
+        <button onclick="cambiarSemana(-1)" title="Semana anterior">‹</button>
+        <span class="week-label" id="weekLabel">—</span>
+        <button onclick="cambiarSemana(1)" title="Semana siguiente">›</button>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="irHoy()">Hoy</button>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-secondary btn-nuevo" onclick="copiarTeams()">🔗 Copiar Liga Teams</button>
+      <button class="btn btn-primary btn-nuevo" onclick="abrirNuevo()">+ Nueva cita</button>
+    </div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div id="agenda-content">
+    <div class="loading"><span class="spinner"></span>Cargando...</div>
+  </div>
+
+</div>
+
+<!-- MODAL CITA -->
+<div class="modal-backdrop" id="modal-evento">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-titulo">📅 Nueva cita</h3>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Título *</label><input type="text" id="e-titulo" placeholder="Ej: Call con cliente"></div>
+        <div class="form-group full">
+          <div class="check-row">
+            <input type="checkbox" id="e-allday" onchange="toggleAllDay()">
+            <label for="e-allday" style="cursor:pointer">Todo el día</label>
+          </div>
+        </div>
+        <div class="form-group full"><label>Fecha *</label><input type="date" id="e-fecha"></div>
+        <div class="form-group full hora-field"><label>Hora inicio</label><input type="time" id="e-hini" value="09:00" onchange="autoHoraFin()"></div>
+        <div class="form-group full hora-field"><label>Hora fin</label><input type="time" id="e-hfin" value="10:00"></div>
+        <div class="form-group full" id="grp-hora-fin" style="display:none"><label>Fecha fin (opcional)</label><input type="date" id="e-fecha-fin"></div>
+        <div class="form-group full"><label>Ubicación</label><input type="text" id="e-ubic" placeholder="Google Meet, oficina, etc."></div>
+        <div class="form-group full"><label>Invitados <span style="font-weight:400;color:#8a90a0">(correos separados por coma)</span></label><input type="text" id="e-invitados" placeholder="correo1@ejemplo.com, correo2@ejemplo.com"></div>
+        <div class="form-group full"><label>Descripción</label><textarea id="e-desc" placeholder="Notas de la cita..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger btn-sm" id="btn-borrar" style="display:none" onclick="borrarEvento()">🗑️ Eliminar</button>
+      <div style="display:flex;gap:.6rem;margin-left:auto">
+        <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+        <button class="btn btn-primary" id="btn-guardar" onclick="guardarEvento()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
+<script>
+// ════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════
+const CLIENT_ID = '110358240241-mfa0qfoofsn5ramut699r2o8ec8blpvh.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/calendar.events email profile';
+const CAL_API = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Mexico_City';
+const TEAMS_URL = 'https://teams.live.com/dl/launcher/launcher.html?url=%2F_%23%2Fmeet%2F9333981856543%3Fp%3D944r3Hj0nvd5BV74U5%26anon%3Dtrue&type=meet&deeplinkId=9905e4a3-f6aa-49f0-898b-62d545536c72&directDl=true&msLaunch=true&enableMobilePage=true&suppressPrompt=true';
+
+const DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+let tokenClient = null;
+let accessToken = null;
+let userEmail = null;
+let lunesActual = null;
+let EVENTOS = [];
+let rangoCargado = { min:null, max:null };
+let editandoId = null;
+
+// ════════════════════════════════════════════
+// GOOGLE IDENTITY SERVICES
+// ════════════════════════════════════════════
+function gisLoaded(){
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if(resp && resp.access_token){
+        accessToken = resp.access_token;
+        onConnected();
+      }
+    },
+    error_callback: () => { showDesconectado(); }
+  });
+  // Intento silencioso: si ya diste permiso antes y tu sesión de Google está activa, entra solo
+  try { tokenClient.requestAccessToken({ prompt: 'none' }); }
+  catch(e) { showDesconectado(); }
+}
+
+function conectarGoogle(){
+  if(!tokenClient){ toast('Cargando Google, intenta de nuevo','err'); return; }
+  tokenClient.requestAccessToken({ prompt: '' });
+}
+
+function desconectar(){
+  if(accessToken && google.accounts.oauth2){
+    google.accounts.oauth2.revoke(accessToken, () => {});
+  }
+  accessToken = null; userEmail = null;
+  showDesconectado();
+}
+
+async function onConnected(){
+  await fetchUserEmail();
+  document.getElementById('connDot').style.background = '#059669';
+  document.getElementById('connStatus').textContent = 'Conectado:';
+  const em = document.getElementById('connEmail');
+  em.textContent = userEmail || '';
+  em.style.display = 'inline';
+  document.getElementById('btnConectar').style.display = 'none';
+  document.getElementById('btnDesconectar').style.display = 'inline-flex';
+  document.getElementById('toolbar').style.display = 'flex';
+  lunesActual = lunesDe(new Date());
+  cargarEventos(true);
+}
+
+function showDesconectado(){
+  document.getElementById('connDot').style.background = '#dc2626';
+  document.getElementById('connStatus').textContent = 'No conectado';
+  document.getElementById('connEmail').style.display = 'none';
+  document.getElementById('btnConectar').style.display = 'inline-flex';
+  document.getElementById('btnDesconectar').style.display = 'none';
+  document.getElementById('toolbar').style.display = 'none';
+  document.getElementById('agenda-content').innerHTML = `
+    <div class="connect-card">
+      <span class="ico">📅</span>
+      <h3>Conecta tu Google</h3>
+      <p>Inicia sesión con tu cuenta de excelentia para ver y gestionar <strong>tu propia agenda</strong> desde aquí.</p>
+      <button class="btn btn-google" onclick="conectarGoogle()">Conectar mi Google</button>
+    </div>`;
+}
+
+async function fetchUserEmail(){
+  try{
+    const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: 'Bearer ' + accessToken }
+    });
+    const j = await r.json();
+    userEmail = j.email || null;
+  }catch(e){ userEmail = null; }
+}
+
+// ════════════════════════════════════════════
+// LLAMADAS A GOOGLE CALENDAR
+// ════════════════════════════════════════════
+async function calFetch(url, opciones={}){
+  const res = await fetch(url, {
+    ...opciones,
+    headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json', ...(opciones.headers||{}) }
+  });
+  if(res.status === 401){ // token vencido
+    accessToken = null;
+    showDesconectado();
+    throw new Error('sesion');
+  }
+  if(!res.ok){ throw new Error('HTTP ' + res.status); }
+  if(res.status === 204) return {};
+  return await res.json();
+}
+
+// ════════════════════════════════════════════
+// UTILIDADES DE FECHA
+// ════════════════════════════════════════════
+function lunesDe(fecha){
+  const d = new Date(fecha);
+  const dia = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - dia);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function addDias(fecha, n){ const d = new Date(fecha); d.setDate(d.getDate()+n); return d; }
+function isoFecha(d){
+  const dt = (d instanceof Date) ? d : new Date(d);
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth()+1).padStart(2,'0');
+  const day = String(dt.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function mismaFecha(a,b){ return isoFecha(a) === isoFecha(b); }
+function fmtRangoSemana(lunes){
+  const dom = addDias(lunes,6);
+  return `${lunes.getDate()} ${MESES[lunes.getMonth()]} – ${dom.getDate()} ${MESES[dom.getMonth()]}`;
+}
+// "YYYY-MM-DDTHH:MM:00-06:00" con la zona local
+function isoLocal(fecha, hora){
+  const d = new Date(`${fecha}T${hora}:00`);
+  const offMin = -d.getTimezoneOffset();
+  const sign = offMin >= 0 ? '+' : '-';
+  const abs = Math.abs(offMin);
+  const hh = String(Math.floor(abs/60)).padStart(2,'0');
+  const mm = String(abs%60).padStart(2,'0');
+  return `${fecha}T${hora}:00${sign}${hh}:${mm}`;
+}
+
+// ════════════════════════════════════════════
+// CARGA DE EVENTOS
+// ════════════════════════════════════════════
+async function cargarEventos(force){
+  if(!accessToken){ showDesconectado(); return; }
+  const minD = lunesActual;
+  const maxD = addDias(lunesActual, 34);
+
+  if(!force && rangoCargado.min && isoFecha(minD) >= rangoCargado.min && isoFecha(maxD) <= rangoCargado.max){
+    renderSemana(); return;
+  }
+
+  document.getElementById('agenda-content').innerHTML =
+    '<div class="loading"><span class="spinner"></span>Cargando agenda...</div>';
+
+  try{
+    const params = new URLSearchParams({
+      timeMin: new Date(minD.getFullYear(),minD.getMonth(),minD.getDate(),0,0,0).toISOString(),
+      timeMax: new Date(maxD.getFullYear(),maxD.getMonth(),maxD.getDate(),23,59,59).toISOString(),
+      singleEvents: 'true',
+      orderBy: 'startTime',
+      maxResults: '2500'
+    });
+    const r = await calFetch(`${CAL_API}?${params.toString()}`);
+    EVENTOS = (r.items || []).map(normalizar).filter(Boolean);
+    rangoCargado = { min: isoFecha(minD), max: isoFecha(maxD) };
+    renderSemana();
+  }catch(e){
+    if(e.message === 'sesion') return;
+    document.getElementById('agenda-content').innerHTML =
+      '<div class="connect-card"><span class="ico">⚠️</span><h3>No se pudo cargar</h3><p>Revisa tu conexión e intenta de nuevo.</p><button class="btn btn-primary" onclick="cargarEventos(true)">Reintentar</button></div>';
+  }
+}
+
+function normalizar(ev){
+  if(!ev || ev.status === 'cancelled') return null;
+  const start = ev.start || {};
+  const end = ev.end || {};
+  const allDay = !!start.date && !start.dateTime;
+  return {
+    id: ev.id,
+    titulo: ev.summary || '(sin título)',
+    descripcion: ev.description || '',
+    ubicacion: ev.location || '',
+    allDay,
+    inicio: start.dateTime || start.date,
+    fin: end.dateTime || end.date,
+    invitados: (ev.attendees || []).map(a => a.email).filter(Boolean).join(', ')
+  };
+}
+
+// ════════════════════════════════════════════
+// RENDER SEMANA
+// ════════════════════════════════════════════
+function renderSemana(){
+  document.getElementById('weekLabel').textContent = fmtRangoSemana(lunesActual);
+  const hoy = new Date();
+  let html = '<div class="week-grid">';
+  for(let i=0;i<7;i++){
+    const dia = addDias(lunesActual, i);
+    const esHoy = mismaFecha(dia, hoy);
+    const delDia = EVENTOS.filter(ev => eventoEnDia(ev, dia)).sort(ordenarEventos);
+    html += `<div class="day-col ${esHoy?'today':''} ${delDia.length?'has-events':''}">
+      <div class="day-head"><div class="day-name">${DIAS[i]}</div><div class="day-num">${dia.getDate()}</div></div>
+      <div class="day-body">`;
+    html += delDia.length ? delDia.map(chipEvento).join('') : `<div class="day-empty">—</div>`;
+    html += `</div></div>`;
+  }
+  html += '</div>';
+  document.getElementById('agenda-content').innerHTML = html;
+}
+function eventoEnDia(ev, dia){
+  const ini = ev.allDay ? new Date(ev.inicio+'T00:00:00') : new Date(ev.inicio);
+  return mismaFecha(ini, dia);
+}
+function ordenarEventos(a,b){
+  if(a.allDay && !b.allDay) return -1;
+  if(!a.allDay && b.allDay) return 1;
+  return new Date(a.inicio) - new Date(b.inicio);
+}
+function chipEvento(ev){
+  const hora = ev.allDay ? 'Todo el día'
+    : new Date(ev.inicio).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  const nInv = ev.invitados ? ev.invitados.split(',').filter(x=>x.trim()).length : 0;
+  return `<div class="ev ${ev.allDay?'allday':''}" onclick='abrirEditar(${JSON.stringify(ev).replace(/'/g,"&#39;")})'>
+    <div class="ev-time">${hora}</div>
+    <div class="ev-title">${esc(ev.titulo)}</div>
+    ${ev.ubicacion?`<div class="ev-loc">📍 ${esc(ev.ubicacion.length>22?ev.ubicacion.slice(0,22)+'…':ev.ubicacion)}</div>`:''}
+    ${nInv?`<div class="ev-guests">👥 ${nInv} invitado${nInv>1?'s':''}</div>`:''}
+  </div>`;
+}
+
+// ════════════════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════════════════
+function cambiarSemana(n){ lunesActual = addDias(lunesActual, n*7); cargarEventos(); }
+function irHoy(){ lunesActual = lunesDe(new Date()); cargarEventos(); }
+
+// ════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════
+function abrirNuevo(){
+  editandoId = null;
+  document.getElementById('modal-titulo').textContent = '📅 Nueva cita';
+  document.getElementById('btn-borrar').style.display = 'none';
+  document.getElementById('e-titulo').value = '';
+  document.getElementById('e-fecha').value = isoFecha(new Date());
+  document.getElementById('e-fecha-fin').value = '';
+  document.getElementById('e-hini').value = '09:00';
+  document.getElementById('e-hfin').value = '10:00';
+  document.getElementById('e-ubic').value = TEAMS_URL;
+  document.getElementById('e-invitados').value = '';
+  document.getElementById('e-desc').value = '';
+  document.getElementById('e-allday').checked = false;
+  toggleAllDay();
+  document.getElementById('modal-evento').classList.add('open');
+}
+function abrirEditar(ev){
+  editandoId = ev.id;
+  document.getElementById('modal-titulo').textContent = '✏️ Editar cita';
+  document.getElementById('btn-borrar').style.display = 'inline-flex';
+  document.getElementById('e-titulo').value = ev.titulo === '(sin título)' ? '' : ev.titulo;
+  document.getElementById('e-allday').checked = ev.allDay;
+  const ini = ev.allDay ? new Date(ev.inicio+'T00:00:00') : new Date(ev.inicio);
+  document.getElementById('e-fecha').value = isoFecha(ini);
+  if(ev.allDay){
+    document.getElementById('e-fecha-fin').value = ev.fin ? isoFecha(addDias(new Date(ev.fin+'T00:00:00'),-1)) : '';
+  }else{
+    const fin = ev.fin ? new Date(ev.fin) : ini;
+    document.getElementById('e-hini').value = ini.toTimeString().slice(0,5);
+    document.getElementById('e-hfin').value = fin.toTimeString().slice(0,5);
+    document.getElementById('e-fecha-fin').value = '';
+  }
+  document.getElementById('e-ubic').value = ev.ubicacion || '';
+  document.getElementById('e-invitados').value = ev.invitados || '';
+  document.getElementById('e-desc').value = ev.descripcion || '';
+  toggleAllDay();
+  document.getElementById('modal-evento').classList.add('open');
+}
+function toggleAllDay(){
+  const allday = document.getElementById('e-allday').checked;
+  document.querySelectorAll('.hora-field').forEach(el => el.style.display = allday ? 'none':'flex');
+  document.getElementById('grp-hora-fin').style.display = allday ? 'flex':'none';
+}
+function autoHoraFin(){
+  const ini = document.getElementById('e-hini').value;
+  if(!ini) return;
+  const [h,m] = ini.split(':').map(Number);
+  const d = new Date(2000,0,1,h,m);
+  d.setHours(d.getHours()+1);
+  document.getElementById('e-hfin').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function cerrarModal(){ document.getElementById('modal-evento').classList.remove('open'); }
+document.getElementById('modal-evento').addEventListener('click', e=>{ if(e.target.id==='modal-evento') cerrarModal(); });
+
+// ════════════════════════════════════════════
+// GUARDAR / BORRAR (Google Calendar API)
+// ════════════════════════════════════════════
+async function guardarEvento(){
+  const titulo = document.getElementById('e-titulo').value.trim();
+  if(!titulo){ toast('El título es obligatorio','err'); return; }
+  const allDay = document.getElementById('e-allday').checked;
+  const fecha = document.getElementById('e-fecha').value;
+  if(!fecha){ toast('La fecha es obligatoria','err'); return; }
+
+  const body = {
+    summary: titulo,
+    location: document.getElementById('e-ubic').value,
+    description: document.getElementById('e-desc').value
+  };
+  if(allDay){
+    const fFin = document.getElementById('e-fecha-fin').value || fecha;
+    body.start = { date: fecha };
+    body.end = { date: isoFecha(addDias(new Date(fFin+'T00:00:00'), 1)) }; // fin exclusivo
+  }else{
+    body.start = { dateTime: isoLocal(fecha, document.getElementById('e-hini').value), timeZone: TZ };
+    body.end   = { dateTime: isoLocal(fecha, document.getElementById('e-hfin').value), timeZone: TZ };
+  }
+  const inv = document.getElementById('e-invitados').value.split(',').map(e=>e.trim()).filter(e=>e);
+  if(inv.length) body.attendees = inv.map(email => ({ email }));
+
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const enviaInvites = inv.length ? 'all' : 'none';
+
+  try{
+    if(editandoId){
+      await calFetch(`${CAL_API}/${encodeURIComponent(editandoId)}?sendUpdates=${enviaInvites}`, { method:'PATCH', body: JSON.stringify(body) });
+      toast('✅ Cita actualizada');
+    }else{
+      await calFetch(`${CAL_API}?sendUpdates=${enviaInvites}`, { method:'POST', body: JSON.stringify(body) });
+      toast('✅ Cita creada');
+    }
+    cerrarModal();
+    await cargarEventos(true);
+  }catch(e){
+    if(e.message !== 'sesion') toast('Error al guardar','err');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Guardar';
+  }
+}
+
+async function borrarEvento(){
+  if(!editandoId) return;
+  if(!confirm('¿Eliminar esta cita del calendario?')) return;
+  try{
+    await calFetch(`${CAL_API}/${encodeURIComponent(editandoId)}?sendUpdates=all`, { method:'DELETE' });
+    toast('Cita eliminada');
+    cerrarModal();
+    await cargarEventos(true);
+  }catch(e){
+    if(e.message !== 'sesion') toast('Error al eliminar','err');
+  }
+}
+
+// ════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(msg, tipo='ok'){
+  let t = document.getElementById('toast');
+  if(!t){ t = document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
+  t.style.background = tipo==='ok' ? '#059669' : '#dc2626';
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(()=> t.style.opacity='0', 2500);
+}
+function copiarTeams(){
+  const done = () => toast('🔗 Liga de Teams copiada');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(TEAMS_URL).then(done).catch(copiarFallback);
+  }else{ copiarFallback(); }
+  function copiarFallback(){
+    const ta = document.createElement('textarea');
+    ta.value = TEAMS_URL; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }
+    catch(e){ toast('No se pudo copiar','err'); }
+    document.body.removeChild(ta);
+  }
+}
+</script>
+</body>
+</html>
