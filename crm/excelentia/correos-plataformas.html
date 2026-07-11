@@ -233,7 +233,9 @@ function parseDetalle(dia){
   }).filter(function(a){ return a.accion; });
   acciones.sort(function(a,b){ return (ORDEN[a.nivel]||2) - (ORDEN[b.nivel]||2); });
 
-  return { porPlataforma: porPlataforma, acciones: acciones };
+  // estructurado = el detalle YA trae la lista de mensajes (aunque esté vacía porque los borraste).
+  // Si es false, es un resumen viejo sin estructura y sí vale la pena caer al texto plano.
+  return { porPlataforma: porPlataforma, acciones: acciones, estructurado: Array.isArray(obj.porPlataforma) };
 }
 
 // ── Guarda el detalle del día actual en Supabase (vía n8n)
@@ -343,11 +345,17 @@ function render(){
   const dia = DIAS[idx];
   const det = parseDetalle(dia);
   const c = contar(det);
-  const plataformas = (dia.plataformas||'').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  // Los chips reflejan las plataformas que AÚN tienen mensajes (no el campo estático de la BD)
+  let plataformas = det.porPlataforma.map(function(p){ return p.plataforma; });
+  if(!plataformas.length && !det.estructurado){
+    plataformas = (dia.plataformas||'').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  }
 
-  // Acciones sugeridas
+  const vacio = !det.acciones.length && !det.porPlataforma.length;
+
+  // Acciones sugeridas — solo si quedan acciones o si aún hay mensajes por revisar
   let secAcciones = '';
-  if(Number(dia.num_correos) > 0){
+  if(Number(dia.num_correos) > 0 && !vacio){
     secAcciones = '<div class="sec"><div class="sec-head">⚠️ Acciones sugeridas</div>'
       + (det.acciones.length
           ? det.acciones.map(function(a){ return msgHTML('a', a, a.plataforma); }).join('')
@@ -366,8 +374,15 @@ function render(){
             + p.puntos.map(function(pt){ return msgHTML('m', pt, ''); }).join('');
         }).join('')
       + '</div>';
-  } else {
-    secMensajes = '<div class="sec"><div class="plain">'+esc(dia.resumen||'Sin contenido.')+'</div></div>';
+  } else if(!det.estructurado && dia.resumen){
+    // Resumen viejo, sin mensajes estructurados: se muestra el texto tal cual.
+    secMensajes = '<div class="sec"><div class="plain">'+esc(dia.resumen)+'</div></div>';
+  } else if(vacio){
+    // Ya revisaste y borraste todo lo de este día.
+    secMensajes = '<div class="sec"><div class="none-box" style="text-align:center">'
+      + '🎉 <strong>Todo revisado.</strong> Ya no quedan mensajes de este día.<br>'
+      + '<span style="font-size:.78rem;color:#8a90a0">Puedes borrar el día completo con el botón de arriba.</span>'
+      + '</div></div>';
   }
 
   const chips = plataformas.length
