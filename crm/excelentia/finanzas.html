@@ -6,7 +6,6 @@
 <title>Finanzas · ExcelentIA</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -428,20 +427,15 @@ textarea{resize:vertical;min-height:70px}
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  CONFIGURACIÓN SUPABASE  ←  PEGA AQUÍ TUS 2 LLAVES
+//  API DE FINANZAS (n8n)  —  sin llaves de base de datos en el HTML
+//  Workflow: "ExcelentIA - Finanzas API"  ·  webhook POST /finanzas
+//  Acciones: get · crear · editar · eliminar
 // ═══════════════════════════════════════════════════════════════
-//  1) Entra a tu proyecto en https://supabase.com
-//  2) Settings (⚙️) → API
-//  3) Copia "Project URL" y pégala en SUPABASE_URL
-//  4) Copia la llave "anon public" y pégala en SUPABASE_ANON_KEY
-//  (Mientras estén vacías, el módulo funciona en MODO LOCAL de prueba.)
-// ═══════════════════════════════════════════════════════════════
-const SUPABASE_URL = 'https://rcotlydvsubvdapubnkx.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T';
+const N8N_BASE = 'https://n8n.excelentia.com.mx/webhook';
+const ENDPOINT = '/finanzas';
 
-// Nombre de la tabla de proyectos del CRM en tu Supabase (para el dropdown).
-// Si tu tabla se llama distinto, cámbialo aquí. Columnas esperadas: nombre / empresa (o Nombre / Empresa).
-const TABLA_PROYECTOS = 'crm_proyectos';
+// Nombres de tabla que entiende el webhook
+const TABLA_API = { finanzas_gastos: 'gastos', finanzas_ingresos: 'ingresos' };
 
 // ═══════════════════════════════════════════════════════════════
 //  CONSTANTES
@@ -458,20 +452,10 @@ const CAT_COLOR = {
 };
 const MONEDA_SIMB = { MXN:'$', USD:'US$', EUR:'€' };
 
-// Datos semilla (gastos recurrentes junio 2026 — hoja 2 del Sheet). Solo se usan en modo local.
-const SEMILLA_GASTOS = [
-  { descripcion:'n8n',              moneda:'EUR', monto_original:28, categoria:'Infraestructura', pagado_por:'fernando', metodo_pago:'Tarjeta',    recurrente:true, status:'Pagado', fecha:'2026-06-01', notas:'Plan mensual n8n Cloud' },
-  { descripcion:'Google Workspace', moneda:'MXN', monto_original:476,categoria:'Infraestructura', pagado_por:'fernando', metodo_pago:'Domiciliado',recurrente:true, status:'Pagado', fecha:'2026-06-01', notas:'Facturación fija en pesos' },
-  { descripcion:'Claude Pro',       moneda:'USD', monto_original:20, categoria:'IA',             pagado_por:'fernando', metodo_pago:'Tarjeta',    recurrente:true, status:'Pagado', fecha:'2026-06-01', notas:'Suscripción mensual' },
-  { descripcion:'Open AI API',      moneda:'USD', monto_original:50, categoria:'IA',             pagado_por:'fernando', metodo_pago:'Tarjeta',    recurrente:true, status:'Pagado', fecha:'2026-06-01', notas:'Estimado mensual' },
-  { descripcion:'Railway',          moneda:'USD', monto_original:5,  categoria:'Infraestructura', pagado_por:'fernando', metodo_pago:'Tarjeta',    recurrente:true, status:'Pagado', fecha:'2026-06-01', notas:'Hosting servidor Word Eco-IA' }
-];
 
 // ═══════════════════════════════════════════════════════════════
 //  ESTADO
 // ═══════════════════════════════════════════════════════════════
-let sb = null;                 // cliente supabase
-let USE_CLOUD = false;         // true si Supabase configurado
 let currentUser = 'fernando';
 let TC = { EUR:20.17, USD:17.35 };
 let GASTOS = [];
@@ -500,15 +484,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Llenar selects de categorías
   fillCategorias();
 
-  // ¿Nube o local?
-  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    USE_CLOUD = true;
-    const b = document.getElementById('modeBanner');
-    if(b){ b.className = 'mode-banner mode-cloud'; b.innerHTML = '☁️ Conectado a Supabase — datos sincronizados en la nube.'; }
-  }
+  const b = document.getElementById('modeBanner');
+  if(b){ b.className = 'mode-banner mode-cloud'; b.innerHTML = '☁️ Conectado — datos sincronizados en la nube.'; }
 
-  await cargarProyectos();
   await cargarTodo();
 });
 
@@ -601,75 +579,59 @@ document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('clic
 // ═══════════════════════════════════════════════════════════════
 //  PERSISTENCIA (Supabase o localStorage)
 // ═══════════════════════════════════════════════════════════════
-async function dbSelect(tabla){
-  if(USE_CLOUD){
-    const { data, error } = await sb.from(tabla).select('*').order('fecha',{ascending:false});
-    if(error){ console.error(error); showToast('Error leyendo '+tabla,'err'); return []; }
-    return data||[];
+async function apiCall(accion, payload = {}){
+  try{
+    const res = await fetch(`${N8N_BASE}${ENDPOINT}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion, ...payload })
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }catch(e){
+    console.error('Error API finanzas:', e);
+    return null;
   }
-  return JSON.parse(localStorage.getItem('fin_'+tabla)||'null') || null;
 }
+
 async function dbInsert(tabla,row){
-  if(USE_CLOUD){
-    const { data, error } = await sb.from(tabla).insert(row).select();
-    if(error){ console.error(error); showToast('Error guardando','err'); return null; }
-    return data[0];
-  }
-  const arr=JSON.parse(localStorage.getItem('fin_'+tabla)||'[]'); arr.unshift(row);
-  localStorage.setItem('fin_'+tabla,JSON.stringify(arr)); return row;
+  const r = await apiCall('crear', { tabla: TABLA_API[tabla], data: row });
+  if(!r || r.ok === false){ showToast('Error guardando','err'); return null; }
+  return (r.rows && r.rows[0]) || row;
 }
 async function dbUpdate(tabla,id,row){
-  if(USE_CLOUD){
-    const { error } = await sb.from(tabla).update(row).eq('id',id);
-    if(error){ console.error(error); showToast('Error actualizando','err'); return false; }
-    return true;
-  }
-  const arr=JSON.parse(localStorage.getItem('fin_'+tabla)||'[]');
-  const i=arr.findIndex(x=>x.id===id); if(i>=0){arr[i]={...arr[i],...row};localStorage.setItem('fin_'+tabla,JSON.stringify(arr));}
+  const r = await apiCall('editar', { tabla: TABLA_API[tabla], id, data: row });
+  if(!r || r.ok === false){ showToast('Error actualizando','err'); return false; }
   return true;
 }
 async function dbDelete(tabla,id){
-  if(USE_CLOUD){
-    const { error } = await sb.from(tabla).delete().eq('id',id);
-    if(error){ console.error(error); showToast('Error eliminando','err'); return false; }
-    return true;
-  }
-  const arr=JSON.parse(localStorage.getItem('fin_'+tabla)||'[]').filter(x=>x.id!==id);
-  localStorage.setItem('fin_'+tabla,JSON.stringify(arr)); return true;
+  const r = await apiCall('eliminar', { tabla: TABLA_API[tabla], id });
+  if(!r || r.ok === false){ showToast('Error eliminando','err'); return false; }
+  return true;
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  CARGA DE DATOS
 // ═══════════════════════════════════════════════════════════════
-async function cargarProyectos(){
-  const sel=['g-proyecto','i-proyecto','i-fProyecto'];
-  if(USE_CLOUD){
-    try{
-      const { data, error } = await sb.from(TABLA_PROYECTOS).select('*');
-      if(!error && data){
-        PROYECTOS = data.map(p=>({ id:p.id||p.ID, nombre:p.nombre||p.Nombre||'(sin nombre)', empresa:p.empresa||p.Empresa||'' }));
-      }
-    }catch(e){ console.warn('Sin tabla de proyectos:',e); }
-  }
-  // Llenar dropdowns
+function llenarProyectos(){
   const optsProy = '<option value="">— Sin proyecto —</option>'+PROYECTOS.map(p=>`<option value="${p.id}">${escHtml(p.nombre)}${p.empresa?' · '+escHtml(p.empresa):''}</option>`).join('');
   document.getElementById('g-proyecto').innerHTML=optsProy;
   document.getElementById('i-proyecto').innerHTML='<option value="">— Elige un proyecto —</option>'+PROYECTOS.map(p=>`<option value="${p.id}">${escHtml(p.nombre)}${p.empresa?' · '+escHtml(p.empresa):''}</option>`).join('');
   document.getElementById('i-fProyecto').innerHTML='<option value="">Proyecto</option>'+PROYECTOS.map(p=>`<option value="${p.id}">${escHtml(p.nombre)}</option>`).join('');
 }
 
+// Una sola llamada al webhook trae gastos, ingresos y proyectos
 async function cargarTodo(){
-  // Gastos
-  let g = await dbSelect('finanzas_gastos');
-  if(g===null){ // primera vez en local → semilla
-    g = SEMILLA_GASTOS.map(s=>({ id:genId('G'), ...s, tipo_cambio:(s.moneda==='MXN'?1:TC[s.moneda]), monto_mxn:aMXN(s.moneda,s.monto_original), origen_fondos:'', proyecto_id:'', proyecto_nombre:'' }));
-    localStorage.setItem('fin_finanzas_gastos',JSON.stringify(g));
+  const data = await apiCall('get');
+  if(!data){
+    showToast('No se pudieron cargar los datos','err');
+    GASTOS = []; INGRESOS = []; PROYECTOS = [];
+  }else{
+    GASTOS    = data.gastos   || [];
+    INGRESOS  = data.ingresos || [];
+    PROYECTOS = (data.proyectos || []).map(p=>({ id:p.id, nombre:p.nombre||'(sin nombre)', empresa:p.empresa||'' }));
   }
-  GASTOS = g;
-  let ing = await dbSelect('finanzas_ingresos');
-  if(ing===null){ ing=[]; localStorage.setItem('fin_finanzas_ingresos',JSON.stringify(ing)); }
-  INGRESOS = ing;
-
+  llenarProyectos();
   actualizarOrigenFondos();
   renderGastos(); renderIngresos();
 }
