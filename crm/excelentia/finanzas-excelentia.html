@@ -6,7 +6,6 @@
 <title>Finanzas · ExcelentIA (consulta)</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -293,11 +292,10 @@ input:focus,select:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px 
 // ═══════════════════════════════════════════════════════════════
 //  FINANZAS — VERSIÓN DE SOLO LECTURA
 //  Réplica de finanzas.html sin crear / editar / borrar.
-//  Solo hace SELECT a Supabase. No hay insert, update ni delete.
+//  Los datos vienen del webhook de n8n (accion: 'get'). Sin llaves en el HTML.
 // ═══════════════════════════════════════════════════════════════
-const SUPABASE_URL = 'https://rcotlydvsubvdapubnkx.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T';
-const TABLA_PROYECTOS = 'crm_proyectos';
+const N8N_BASE = 'https://n8n.excelentia.com.mx/webhook';
+const ENDPOINT = '/finanzas';
 
 const USERS = {
   fernando: { nombre:'Fernando',  color:'#1a3a6b' },
@@ -312,7 +310,6 @@ const CAT_COLOR = {
 const MONEDA_SIMB = { MXN:'$', USD:'US$', EUR:'€' };
 
 // ── ESTADO ──
-let sb = null;
 let currentUser = 'fernando';
 let TC = { EUR:20.17, USD:17.35 };   // solo informativo en esta vista
 let GASTOS = [];
@@ -334,11 +331,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   fillCategorias();
 
-  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-
-  await cargarProyectos();
   await cargarTodo();
 });
 
@@ -394,30 +386,39 @@ function showTab(tab){
 // ═══════════════════════════════════════════════════════════════
 //  LECTURA (única operación permitida)
 // ═══════════════════════════════════════════════════════════════
-async function dbSelect(tabla){
-  if(!sb) return [];
-  const { data, error } = await sb.from(tabla).select('*').order('fecha',{ascending:false});
-  if(error){ console.error(error); showToast('Error leyendo '+tabla,'err'); return []; }
-  return data||[];
+// Una sola llamada al webhook trae gastos, ingresos y proyectos.
+async function apiCall(accion, payload = {}){
+  try{
+    const res = await fetch(`${N8N_BASE}${ENDPOINT}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion, ...payload })
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }catch(e){
+    console.error('Error API finanzas:', e);
+    return null;
+  }
 }
 
-async function cargarProyectos(){
-  if(sb){
-    try{
-      const { data, error } = await sb.from(TABLA_PROYECTOS).select('*');
-      if(!error && data){
-        PROYECTOS = data.map(p=>({ id:p.id||p.ID, nombre:p.nombre||p.Nombre||'(sin nombre)', empresa:p.empresa||p.Empresa||'' }));
-      }
-    }catch(e){ console.warn('Sin tabla de proyectos:',e); }
-  }
+function llenarProyectos(){
   document.getElementById('i-fProyecto').innerHTML =
     '<option value="">Proyecto</option>' +
     PROYECTOS.map(p=>`<option value="${p.id}">${escHtml(p.nombre)}</option>`).join('');
 }
 
 async function cargarTodo(){
-  GASTOS   = await dbSelect('finanzas_gastos');
-  INGRESOS = await dbSelect('finanzas_ingresos');
+  const data = await apiCall('get');
+  if(!data){
+    showToast('No se pudieron cargar los datos','err');
+    GASTOS = []; INGRESOS = []; PROYECTOS = [];
+  }else{
+    GASTOS    = data.gastos   || [];
+    INGRESOS  = data.ingresos || [];
+    PROYECTOS = (data.proyectos || []).map(p=>({ id:p.id, nombre:p.nombre||'(sin nombre)', empresa:p.empresa||'' }));
+  }
+  llenarProyectos();
   renderGastos();
   renderIngresos();
 }
