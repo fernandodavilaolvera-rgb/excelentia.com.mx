@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Correos de Plataformas · ExcelentIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size:15px;padding:1rem}
+.wrap{max-width:720px;margin:0 auto}
+
+/* ── BARRA SUPERIOR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
+.topbar h1{font-size:1.05rem;font-weight:800;color:#1a2035;display:flex;align-items:center;gap:.4rem}
+.topbar .sub{font-size:.78rem;color:#8a90a0;font-weight:500;margin-top:.1rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .95rem;border-radius:8px;font-size:.83rem;font-weight:700;cursor:pointer;border:none;font-family:'Manrope',sans-serif;transition:.2s}
+.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
+.btn-primary:disabled{background:#8a90a0;cursor:not-allowed}
+.btn-ghost{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-ghost:hover{background:#dce8f7}
+.btn-sm{padding:.32rem .6rem;font-size:.78rem}
+
+/* ── NAVEGADOR DE DÍA ── */
+.daynav{display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.6rem .8rem;margin-bottom:1rem}
+.daynav .arrow{width:36px;height:36px;border-radius:8px;border:1px solid #c8d9f0;background:#f0f4ff;color:#1a3a6b;font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.daynav .arrow:hover:not(:disabled){background:#dce8f7}
+.daynav .arrow:disabled{opacity:.35;cursor:not-allowed}
+.daynav .day-center{flex:1;text-align:center;min-width:0}
+.daynav .day-label{font-size:.92rem;font-weight:800;color:#1a3a6b}
+.daynav .day-meta{font-size:.74rem;color:#8a90a0;margin-top:.1rem}
+
+/* ── CARD ── */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.card-head{background:#dce8f7;padding:.7rem 1rem;font-weight:700;font-size:.86rem;color:#1a2035;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.card-body{padding:1rem}
+
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.9rem}
+.chip{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;font-weight:700;padding:.22rem .6rem;border-radius:20px;background:#f0f4ff;color:#1a3a6b;border:1px solid #dbe6f7}
+
+/* ── ACCIONES / SEMÁFORO ── */
+.acciones{margin-bottom:1rem}
+.acc-head{font-size:.86rem;font-weight:800;color:#1a2035;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.acc{display:flex;gap:.6rem;align-items:flex-start;border-radius:10px;padding:.7rem .85rem;margin-bottom:.5rem;border:1px solid #dde1e9;background:#fff}
+.acc:last-child{margin-bottom:0}
+.acc-rojo{background:#fef2f2;border-color:#fecaca;border-left:4px solid #dc2626}
+.acc-amarillo{background:#fffbeb;border-color:#fde68a;border-left:4px solid #f59e0b}
+.acc-verde{background:#f0fdf4;border-color:#bbf7d0;border-left:4px solid #059669}
+.acc-dot{font-size:.95rem;line-height:1.4;flex-shrink:0}
+.acc-body{flex:1;min-width:0}
+.acc-plat{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;margin-bottom:.15rem}
+.acc-rojo .acc-plat{color:#991b1b}
+.acc-amarillo .acc-plat{color:#92400e}
+.acc-verde .acc-plat{color:#065f46}
+.acc-text{font-size:.85rem;line-height:1.5;color:#1a2035}
+.acc-none{font-size:.82rem;color:#4a5068;background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #059669;border-radius:8px;padding:.65rem .85rem}
+
+/* ── PLATAFORMAS ── */
+.plat{border:1px solid #eef2f8;border-radius:10px;padding:.7rem .85rem;margin-bottom:.7rem;background:#fbfcfe}
+.plat:last-child{margin-bottom:0}
+.plat-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
+.plat-ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.plat-name{font-size:.88rem;font-weight:800;color:#1a2035}
+.plat ul{list-style:none;margin:0;padding:0}
+.plat li{position:relative;padding-left:1.05rem;font-size:.85rem;line-height:1.55;color:#1a2035;margin-bottom:.35rem}
+.plat li:last-child{margin-bottom:0}
+.plat li::before{content:'';position:absolute;left:.15rem;top:.6rem;width:5px;height:5px;border-radius:50%;background:#4a9fd4}
+
+.plain{font-size:.88rem;line-height:1.6;color:#1a2035;white-space:pre-wrap;word-break:break-word}
+
+/* ── ANTERIORES ── */
+.recent-title{font-size:.78rem;font-weight:700;color:#4a5068;margin:.2rem 0 .5rem}
+.recent{display:flex;flex-wrap:wrap;gap:.4rem}
+.rchip{cursor:pointer;font-size:.76rem;font-weight:700;padding:.32rem .65rem;border-radius:8px;background:#fff;border:1px solid #dde1e9;color:#4a5068;transition:.15s;display:flex;align-items:center;gap:.25rem}
+.rchip:hover{border-color:#4a9fd4;color:#1a3a6b}
+.rchip.active{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
+
+/* ── ESTADOS ── */
+.alert{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:#1a2035;margin-bottom:1rem}
+.empty{text-align:center;padding:2.5rem 1rem;color:#8a90a0}
+.empty span{font-size:2rem;display:block;margin-bottom:.5rem}
+.loading{text-align:center;padding:2rem;color:#4a5068;font-size:.85rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem;vertical-align:-3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  body{padding:.75rem}
+  .topbar h1{font-size:.98rem}
+  .daynav .day-label{font-size:.85rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <h1>📧 Correos de Plataformas</h1>
+      <div class="sub">Digest cada 3 días · Anthropic · YCloud · n8n · Supabase · GitHub · Railway · OpenAI · Google · Redis</div>
+    </div>
+    <button class="btn btn-primary" id="btnGenerar" onclick="generarAhora()">🔄 Generar ahora</button>
+  </div>
+
+  <div id="app">
+    <div class="loading"><span class="spinner"></span>Cargando resúmenes…</div>
+  </div>
+
+</div>
+
+<script>
+const N8N_BASE = 'https://n8n.excelentia.com.mx/webhook';
+const ENDPOINT = '/correos-resumen';
+
+const params = new URLSearchParams(location.search);
+const USER = params.get('user') || 'fernando';
+
+let DIAS = [];
+let idx = 0;
+
+const PLAT = [
+  { key:'anthropic', ic:'🤖', bg:'#f4ede4' },
+  { key:'claude',    ic:'🤖', bg:'#f4ede4' },
+  { key:'ycloud',    ic:'💬', bg:'#e3f6ec' },
+  { key:'n8n',       ic:'⚙️', bg:'#f3e9fb' },
+  { key:'supabase',  ic:'🗄️', bg:'#e3f6ec' },
+  { key:'github',    ic:'🐙', bg:'#eef0f4' },
+  { key:'railway',   ic:'🚆', bg:'#ecebfb' },
+  { key:'openai',    ic:'🧠', bg:'#e6f5f1' },
+  { key:'google',    ic:'🔵', bg:'#e8f0ff' },
+  { key:'redis',     ic:'🧱', bg:'#fdeaea' }
+];
+function platInfo(nombre){
+  const n = (nombre||'').toLowerCase();
+  for(const p of PLAT){ if(n.includes(p.key)) return p; }
+  return { ic:'📨', bg:'#eef2f8' };
+}
+const NIVEL_ICON = { rojo:'🔴', amarillo:'🟡', verde:'✅' };
+
+async function api(accion, extra){
+  const res = await fetch(N8N_BASE + ENDPOINT, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(Object.assign({ accion: accion, userID: USER }, extra||{}))
+  });
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const txt = await res.text();
+  try { return txt ? JSON.parse(txt) : null; } catch(e){ return null; }
+}
+
+function fmtFecha(f){
+  if(!f) return '';
+  const dt = new Date(f + 'T12:00:00');
+  const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const s = dias[dt.getDay()] + ' ' + dt.getDate() + ' ' + meses[dt.getMonth()] + ' ' + dt.getFullYear();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function normalizar(rows){
+  const arr = Array.isArray(rows) ? rows : (rows && rows.data ? rows.data : []);
+  const porFecha = {};
+  for(const r of arr){
+    if(!r || !r.fecha) continue;
+    const prev = porFecha[r.fecha];
+    if(!prev || (r.created_at||'') > (prev.created_at||'')) porFecha[r.fecha] = r;
+  }
+  return Object.values(porFecha).sort((a,b)=> (a.fecha < b.fecha ? 1 : -1));
+}
+
+async function cargar(){
+  document.getElementById('app').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando resúmenes…</div>';
+  try {
+    const rows = await api('get');
+    DIAS = normalizar(rows);
+    idx = 0;
+    render();
+  } catch(e){
+    document.getElementById('app').innerHTML =
+      '<div class="alert">No se pudo conectar con el servidor. Revisa que el workflow esté activo e inténtalo de nuevo.</div>';
+  }
+}
+
+function parseDetalle(d){
+  let obj = d;
+  if(!obj) return { porPlataforma:[], acciones:[] };
+  if(typeof obj === 'string'){ try { obj = JSON.parse(obj); } catch(e){ return { porPlataforma:[], acciones:[] }; } }
+  if(Array.isArray(obj)) return { porPlataforma: obj, acciones: [] };
+  return {
+    porPlataforma: Array.isArray(obj.porPlataforma) ? obj.porPlataforma : [],
+    acciones: Array.isArray(obj.acciones) ? obj.acciones : []
+  };
+}
+
+function renderAcciones(acciones, numCorreos){
+  if(!numCorreos) return '';
+  if(!acciones.length){
+    return '<div class="acciones"><div class="acc-head">⚠️ Acciones sugeridas</div>'
+         + '<div class="acc-none">✅ Nada que hacer por ahora. Todo es informativo.</div></div>';
+  }
+  const items = acciones.map(a=>{
+    const n = (a.nivel||'verde');
+    return '<div class="acc acc-'+esc(n)+'">'
+      + '<div class="acc-dot">'+(NIVEL_ICON[n]||'✅')+'</div>'
+      + '<div class="acc-body">'
+      + (a.plataforma ? '<div class="acc-plat">'+esc(a.plataforma)+'</div>' : '')
+      + '<div class="acc-text">'+esc(a.accion)+'</div>'
+      + '</div></div>';
+  }).join('');
+  return '<div class="acciones"><div class="acc-head">⚠️ Acciones sugeridas</div>'+items+'</div>';
+}
+
+function render(){
+  const app = document.getElementById('app');
+  if(!DIAS.length){
+    app.innerHTML = '<div class="empty"><span>📭</span>Aún no hay resúmenes.<br>Usa <strong>Generar ahora</strong> para crear el primero.</div>';
+    return;
+  }
+  if(idx < 0) idx = 0;
+  if(idx > DIAS.length-1) idx = DIAS.length-1;
+  const dia = DIAS[idx];
+  const det = parseDetalle(dia.detalle);
+  const plataformas = (dia.plataformas||'').split(',').map(s=>s.trim()).filter(Boolean);
+
+  let contenido = '';
+  if(det.porPlataforma.length){
+    contenido = det.porPlataforma.map(p=>{
+      const info = platInfo(p.plataforma);
+      const puntos = Array.isArray(p.puntos) ? p.puntos : [];
+      return '<div class="plat">'
+        + '<div class="plat-head"><div class="plat-ic" style="background:'+info.bg+'">'+info.ic+'</div>'
+        + '<div class="plat-name">'+esc(p.plataforma||'Plataforma')+'</div></div>'
+        + '<ul>'+ puntos.map(pt=>'<li>'+esc(pt)+'</li>').join('') +'</ul>'
+        + '</div>';
+    }).join('');
+  } else {
+    contenido = '<div class="plain">'+esc(dia.resumen||'Sin contenido.')+'</div>';
+  }
+
+  const chips = plataformas.length
+    ? '<div class="chips">'+ plataformas.map(n=>{const i=platInfo(n);return '<span class="chip">'+i.ic+' '+esc(n)+'</span>';}).join('') +'</div>'
+    : '';
+
+  app.innerHTML =
+    '<div class="daynav">'
+    + '<button class="arrow" onclick="mover(1)" '+(idx>=DIAS.length-1?'disabled':'')+'>‹</button>'
+    + '<div class="day-center"><div class="day-label">'+fmtFecha(dia.fecha)+'</div>'
+    + '<div class="day-meta">'+ (Number(dia.num_correos)||0) +' correo(s) resumido(s)</div></div>'
+    + '<button class="arrow" onclick="mover(-1)" '+(idx<=0?'disabled':'')+'>›</button>'
+    + '</div>'
+    + '<div class="card">'
+    + '<div class="card-head">🗂️ Resumen'
+    + '<button class="btn btn-ghost btn-sm" onclick="eliminarDia(\''+esc(dia.id)+'\')">🗑️ Borrar</button></div>'
+    + '<div class="card-body">'
+    + renderAcciones(det.acciones, Number(dia.num_correos)||0)
+    + chips + contenido
+    + '</div></div>'
+    + recientes();
+}
+
+function recientes(){
+  if(DIAS.length < 2) return '';
+  const chips = DIAS.slice(0,14).map((d,i)=>{
+    const dt = new Date(d.fecha+'T12:00:00');
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const lbl = dt.getDate()+' '+meses[dt.getMonth()];
+    const det = parseDetalle(d.detalle);
+    const rojo = det.acciones.some(a=>a.nivel==='rojo') ? '🔴' : '';
+    return '<div class="rchip'+(i===idx?' active':'')+'" onclick="irA('+i+')">'+rojo+lbl+'</div>';
+  }).join('');
+  return '<div class="recent-title">Resúmenes anteriores</div><div class="recent">'+chips+'</div>';
+}
+
+function mover(delta){ idx += delta; render(); }
+function irA(i){ idx = i; render(); }
+
+async function generarAhora(){
+  const btn = document.getElementById('btnGenerar');
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span>Generando…';
+  try {
+    await api('generar');
+    await cargar();
+  } catch(e){
+    alert('No se pudo generar el resumen. Revisa que el workflow esté activo.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+async function eliminarDia(id){
+  if(!confirm('¿Borrar este resumen?')) return;
+  try { await api('eliminar', { id: id }); await cargar(); }
+  catch(e){ alert('No se pudo borrar.'); }
+}
+
+function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+cargar();
+</script>
+</body>
+</html>
