@@ -81,54 +81,78 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;min-height:100vh}
 <nav class="nav-bar">
   <button class="nav-pill" data-tab="ferrock" onclick="showTab('ferrock')">🗂️ Ferrock</button>
   <button class="nav-pill" data-tab="tracker" onclick="showTab('tracker')">⏱️ Tracker</button>
+  <button class="nav-pill" data-tab="agenda" onclick="showTab('agenda')">📅 Agenda</button>
   <button class="nav-pill" data-tab="contactos" onclick="showTab('contactos')">👥 Contactos</button>
   <button class="nav-pill" data-tab="proyectos" onclick="showTab('proyectos')">📋 Proyectos</button>
   <button class="nav-pill" data-tab="pendientes" onclick="showTab('pendientes')">☑️ Lista de Pendientes</button>
   <button class="nav-pill active" data-tab="timeline" onclick="showTab('timeline')">📅 Timeline</button>
+  <button class="nav-pill" data-tab="drive" onclick="showTab('drive')">📂 Drive</button>
+  <button class="nav-pill" data-tab="finanzas" onclick="showTab('finanzas')">💰 Finanzas</button>
+  <button class="nav-pill" data-tab="plats" onclick="showTab('plats')">📧 Plat´s Info</button>
   <button class="nav-pill" data-tab="ecoia" onclick="showTab('ecoia')">🫀 Eco-IA Actividad</button>
 </nav>
 
 <!-- FERROCK -->
 <div class="tab-frame-wrap" id="wrap-ferrock">
-  <iframe src="excelentia/Ferrock_Index.html" title="Ferrock"></iframe>
+  <iframe src="excelentia/Ferrock_Index.html" data-base="excelentia/Ferrock_Index.html" title="Ferrock"></iframe>
 </div>
 
 <!-- TRACKER -->
 <div class="tab-frame-wrap" id="wrap-tracker">
-  <iframe src="excelentia/tracker-horas.html" title="Tracker"></iframe>
+  <iframe src="excelentia/tracker-horas.html" data-base="excelentia/tracker-horas.html" title="Tracker"></iframe>
+</div>
+
+<!-- AGENDA -->
+<div class="tab-frame-wrap" id="wrap-agenda">
+  <iframe src="excelentia/agenda.html" data-base="excelentia/agenda.html" title="Agenda"></iframe>
 </div>
 
 <!-- CONTACTOS (Contactos + Equipo apilados) -->
 <div class="tab-frame-wrap" id="wrap-contactos">
   <div class="personas-wrap">
-    <iframe class="personas-iframe-co" src="excelentia/crm-contactos.html" title="Contactos" onload="autoSize(this)"></iframe>
+    <iframe class="personas-iframe-co" src="excelentia/crm-contactos.html" data-base="excelentia/crm-contactos.html" title="Contactos" onload="autoSize(this)"></iframe>
     <div class="personas-divider">
       <div class="personas-divider-line"></div>
       <span class="personas-divider-label">👥 Equipo ExcelentIA</span>
       <div class="personas-divider-line" style="background:linear-gradient(to left,#4a9fd4,transparent)"></div>
     </div>
-    <iframe class="personas-iframe-eq" src="excelentia/crm-equipo.html" title="Equipo" onload="autoSize(this)"></iframe>
+    <iframe class="personas-iframe-eq" src="excelentia/crm-equipo.html" data-base="excelentia/crm-equipo.html" title="Equipo" onload="autoSize(this)"></iframe>
   </div>
 </div>
 
 <!-- PROYECTOS -->
 <div class="tab-frame-wrap" id="wrap-proyectos">
-  <iframe src="excelentia/crm-proyectos.html" title="Proyectos"></iframe>
+  <iframe src="excelentia/crm-proyectos.html" data-base="excelentia/crm-proyectos.html" title="Proyectos"></iframe>
 </div>
 
 <!-- LISTA DE PENDIENTES -->
 <div class="tab-frame-wrap" id="wrap-pendientes">
-  <iframe src="excelentia/crm-tareas.html" title="Lista de Pendientes"></iframe>
+  <iframe src="excelentia/crm-tareas.html" data-base="excelentia/crm-tareas.html" title="Lista de Pendientes"></iframe>
 </div>
 
 <!-- TIMELINE (default) -->
 <div class="tab-frame-wrap active" id="wrap-timeline">
-  <iframe src="excelentia/timeline.html" title="Timeline"></iframe>
+  <iframe src="excelentia/timeline.html" data-base="excelentia/timeline.html" title="Timeline"></iframe>
+</div>
+
+<!-- DRIVE -->
+<div class="tab-frame-wrap" id="wrap-drive">
+  <iframe src="excelentia/drive.html" data-base="excelentia/drive.html" title="Drive"></iframe>
+</div>
+
+<!-- FINANZAS (editable) -->
+<div class="tab-frame-wrap" id="wrap-finanzas">
+  <iframe src="excelentia/finanzas.html" data-base="excelentia/finanzas.html" title="Finanzas"></iframe>
+</div>
+
+<!-- PLAT´S INFO (resumen de correos de plataformas) -->
+<div class="tab-frame-wrap" id="wrap-plats">
+  <iframe src="excelentia/correos-plataformas.html" data-base="excelentia/correos-plataformas.html" title="Plat´s Info"></iframe>
 </div>
 
 <!-- ECO-IA ACTIVIDAD -->
 <div class="tab-frame-wrap" id="wrap-ecoia">
-  <iframe src="excelentia/dashboard-eco-ia_actividad.html" title="Eco-IA Actividad"></iframe>
+  <iframe src="excelentia/dashboard-eco-ia_actividad.html" data-base="excelentia/dashboard-eco-ia_actividad.html" title="Eco-IA Actividad"></iframe>
 </div>
 
 <script>
@@ -155,12 +179,10 @@ function setUser(uid){
   document.getElementById('userDot').style.background = u.color;
   document.getElementById('userChipName').textContent = u.nombre;
   document.getElementById('userMenu').classList.remove('open');
-  const proyIframe = document.querySelector('#wrap-proyectos iframe');
-  const timelineIframe = document.querySelector('#wrap-timeline iframe');
-  const pendIframe = document.querySelector('#wrap-pendientes iframe');
-  if(proyIframe) proyIframe.src = 'excelentia/crm-proyectos.html?user=' + uid;
-  if(timelineIframe) timelineIframe.src = 'excelentia/timeline.html?user=' + uid;
-  if(pendIframe) pendIframe.src = 'excelentia/crm-tareas.html?user=' + uid;
+  // Propaga ?user=xxx a TODOS los módulos (cada iframe recarga con su base)
+  document.querySelectorAll('iframe[data-base]').forEach(f=>{
+    f.src = f.dataset.base + '?user=' + uid;
+  });
 }
 
 function toggleUserMenu(){
