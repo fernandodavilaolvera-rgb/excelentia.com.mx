@@ -66,6 +66,33 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* ── URLs DE INTERÉS ── */
+.sep-sec{height:1px;background:#dde1e9;margin:1.75rem 0 1.25rem}
+.url-form{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.85rem;margin-bottom:.9rem;display:none;flex-direction:column;gap:.55rem}
+.url-form.open{display:flex}
+.url-form .row{display:flex;gap:.5rem;flex-wrap:wrap}
+.url-form input,.url-form select{flex:1 1 180px;min-width:0;padding:.5rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.83rem;color:#1a2035;background:#fff}
+.url-form input:focus,.url-form select:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+.url-form .foot{display:flex;justify-content:flex-end;gap:.5rem}
+
+.url-filtros{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.85rem}
+.url-fchip{cursor:pointer;font-size:.75rem;font-weight:700;padding:.3rem .65rem;border-radius:20px;background:#fff;border:1px solid #dde1e9;color:#4a5068;transition:.15s}
+.url-fchip:hover{border-color:#4a9fd4;color:#1a3a6b}
+.url-fchip.active{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
+
+.url-grupo{margin-bottom:1rem}
+.url-grupo:last-child{margin-bottom:0}
+.url-grupo-tit{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#8a90a0;margin-bottom:.4rem;padding-left:.2rem}
+.url-item{display:flex;align-items:center;gap:.6rem;padding:.6rem .3rem;border-bottom:1px solid #eef2f8}
+.url-item:last-child{border-bottom:none}
+.url-ico{width:34px;height:34px;border-radius:8px;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.url-info{flex:1;min-width:0}
+.url-nombre{font-size:.85rem;font-weight:700;color:#1a2035;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.url-link{font-size:.72rem;color:#4a9fd4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;text-decoration:none}
+.url-link:hover{text-decoration:underline}
+.url-notas{font-size:.72rem;color:#8a90a0;margin-top:.1rem}
+.url-acc{display:flex;gap:.35rem;flex-shrink:0}
+
 /* ── RESPONSIVE ≤600px ── */
 @media(max-width:600px){
   .page{padding:1rem}
@@ -73,6 +100,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
   .selector-wrap{flex-direction:column;align-items:stretch}
   .selector-wrap select{width:100%}
   .arch-actions .btn{flex:1 1 auto;justify-content:center}
+  .url-form input,.url-form select{flex:1 1 100%}
 }
 </style>
 </head>
@@ -132,6 +160,54 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
   <div class="card" id="panel-vacio">
     <div class="card-body">
       <div class="empty-state"><span>👆</span>Elige un proyecto arriba para gestionar sus archivos</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       URLs DE INTERÉS (favoritos del equipo)
+  ══════════════════════════════════════ -->
+  <div class="sep-sec"></div>
+
+  <div class="toolbar">
+    <h2>🔗 URLs de Interés</h2>
+    <span class="resumen-pill">⭐ <strong id="url-total">0</strong>&nbsp;ligas</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span>Favoritos del equipo</span>
+      <button class="btn btn-primary btn-sm" onclick="abrirFormUrl()">+ Nueva liga</button>
+    </div>
+    <div class="card-body">
+
+      <div class="url-form" id="url-form">
+        <div class="row">
+          <input type="text" id="u-nombre" placeholder="Nombre (ej: CRM ExcelentIA)">
+          <input type="url" id="u-url" placeholder="https://...">
+        </div>
+        <div class="row">
+          <input type="text" id="u-categoria" list="u-cats" placeholder="Categoría (ej: Herramientas)">
+          <datalist id="u-cats">
+            <option value="General"></option>
+            <option value="Herramientas"></option>
+            <option value="Clientes"></option>
+            <option value="Pruebas"></option>
+            <option value="Plataformas"></option>
+            <option value="Documentación"></option>
+          </datalist>
+          <input type="text" id="u-notas" placeholder="Nota corta (opcional)">
+        </div>
+        <div class="foot">
+          <button class="btn btn-secondary btn-sm" onclick="cerrarFormUrl()">Cancelar</button>
+          <button class="btn btn-primary btn-sm" id="u-guardar" onclick="guardarUrl()">Guardar liga</button>
+        </div>
+      </div>
+
+      <div class="url-filtros" id="url-filtros"></div>
+
+      <div id="url-lista">
+        <div class="loading"><span class="spinner"></span>Cargando ligas...</div>
+      </div>
     </div>
   </div>
 
@@ -426,6 +502,168 @@ async function eliminarArchivo(id, driveFileId, origen){
 }
 
 // ═══════════════════════════════════════
+// URLs DE INTERÉS (favoritos compartidos)
+// ═══════════════════════════════════════
+const URLS_ENDPOINT = '/urls-interes';
+let URLS = [];
+let filtroCat = '';
+let editandoUrl = null;
+
+async function apiUrls(accion, data = {}){
+  try {
+    const res = await fetch(`${N8N_BASE}${URLS_ENDPOINT}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion, userID: currentUser, ...data })
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const txt = await res.text();
+    return txt ? JSON.parse(txt) : null;
+  } catch(e){
+    console.error('API URLs:', e);
+    return null;
+  }
+}
+
+function icoUrl(u){
+  const s = (toStr(u.url) + ' ' + toStr(u.nombre)).toLowerCase();
+  if(s.includes('teams') || s.includes('microsoft')) return '👥';
+  if(s.includes('drive.google') || s.includes('docs.google')) return '📁';
+  if(s.includes('github')) return '🐙';
+  if(s.includes('n8n')) return '⚙️';
+  if(s.includes('supabase')) return '🗄️';
+  if(s.includes('crm')) return '🤝';
+  if(s.includes('excelentia.com.mx')) return '🌐';
+  if(s.includes('notion')) return '📝';
+  if(s.includes('whatsapp') || s.includes('ycloud')) return '💬';
+  return '🔗';
+}
+
+async function cargarUrls(){
+  const res = await apiUrls('listar');
+  URLS = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
+  renderUrls();
+}
+
+function renderUrls(){
+  const el = document.getElementById('url-lista');
+  const tot = document.getElementById('url-total');
+  if(tot) tot.textContent = URLS.length;
+  if(!el) return;
+
+  renderFiltrosUrl();
+
+  const lista = filtroCat ? URLS.filter(u => toStr(u.categoria) === filtroCat) : URLS;
+  if(!lista.length){
+    el.innerHTML = '<div class="empty-state"><span>🔗</span>Sin ligas todavía. Agrega la primera con "+ Nueva liga".</div>';
+    return;
+  }
+
+  const grupos = {};
+  lista.forEach(u => {
+    const c = toStr(u.categoria) || 'General';
+    if(!grupos[c]) grupos[c] = [];
+    grupos[c].push(u);
+  });
+
+  el.innerHTML = Object.keys(grupos).sort().map(cat => {
+    const items = grupos[cat].map(u => {
+      const id = toStr(u.id);
+      const url = toStr(u.url);
+      const autor = USERS[toStr(u.user_id)] ? USERS[toStr(u.user_id)].nombre : '';
+      return `<div class="url-item">
+        <div class="url-ico">${icoUrl(u)}</div>
+        <div class="url-info">
+          <div class="url-nombre">${escHtml(u.nombre)}</div>
+          <a class="url-link" href="${escHtml(url)}" target="_blank" rel="noopener">${escHtml(url)}</a>
+          ${u.notas ? `<div class="url-notas">${escHtml(u.notas)}${autor ? ' · ' + escHtml(autor) : ''}</div>` : (autor ? `<div class="url-notas">${escHtml(autor)}</div>` : '')}
+        </div>
+        <div class="url-acc">
+          <button class="btn btn-secondary btn-sm btn-icon" title="Abrir" onclick="window.open('${escHtml(url)}','_blank')">↗</button>
+          <button class="btn btn-secondary btn-sm btn-icon" title="Editar" onclick="editarUrl('${id}')">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" title="Eliminar" onclick="eliminarUrl('${id}')">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="url-grupo"><div class="url-grupo-tit">${escHtml(cat)}</div>${items}</div>`;
+  }).join('');
+}
+
+function renderFiltrosUrl(){
+  const el = document.getElementById('url-filtros');
+  if(!el) return;
+  const cats = [...new Set(URLS.map(u => toStr(u.categoria) || 'General'))].sort();
+  if(cats.length < 2){ el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="url-fchip ${filtroCat===''?'active':''}" onclick="filtrarUrl('')">Todas</div>`
+    + cats.map(c => `<div class="url-fchip ${filtroCat===c?'active':''}" onclick="filtrarUrl('${escHtml(c)}')">${escHtml(c)}</div>`).join('');
+}
+
+function filtrarUrl(c){ filtroCat = c; renderUrls(); }
+
+function abrirFormUrl(){
+  editandoUrl = null;
+  document.getElementById('u-nombre').value = '';
+  document.getElementById('u-url').value = '';
+  document.getElementById('u-categoria').value = '';
+  document.getElementById('u-notas').value = '';
+  document.getElementById('u-guardar').textContent = 'Guardar liga';
+  document.getElementById('url-form').classList.add('open');
+  document.getElementById('u-nombre').focus();
+}
+
+function cerrarFormUrl(){
+  editandoUrl = null;
+  document.getElementById('url-form').classList.remove('open');
+}
+
+function editarUrl(id){
+  const u = URLS.find(x => toStr(x.id) === toStr(id));
+  if(!u) return;
+  editandoUrl = toStr(u.id);
+  document.getElementById('u-nombre').value = toStr(u.nombre);
+  document.getElementById('u-url').value = toStr(u.url);
+  document.getElementById('u-categoria').value = toStr(u.categoria);
+  document.getElementById('u-notas').value = toStr(u.notas);
+  document.getElementById('u-guardar').textContent = 'Guardar cambios';
+  document.getElementById('url-form').classList.add('open');
+  document.getElementById('u-nombre').focus();
+}
+
+async function guardarUrl(){
+  const nombre = document.getElementById('u-nombre').value.trim();
+  const url = document.getElementById('u-url').value.trim();
+  if(!nombre || !url){ showToast('Nombre y URL son obligatorios', 'err'); return; }
+
+  const payload = {
+    nombre,
+    url,
+    categoria: document.getElementById('u-categoria').value.trim() || 'General',
+    notas: document.getElementById('u-notas').value.trim()
+  };
+  if(editandoUrl) payload.id = editandoUrl;
+
+  const res = await apiUrls(editandoUrl ? 'editar' : 'crear', payload);
+  if(res && res.ok){
+    showToast(editandoUrl ? '✅ Liga actualizada' : '✅ Liga agregada');
+    cerrarFormUrl();
+    cargarUrls();
+  } else {
+    showToast('Error al guardar', 'err');
+  }
+}
+
+async function eliminarUrl(id){
+  if(!confirm('¿Eliminar esta liga de los favoritos del equipo?')) return;
+  const res = await apiUrls('eliminar', { id });
+  if(res && res.ok){
+    showToast('Liga eliminada');
+    cargarUrls();
+  } else {
+    showToast('Error al eliminar', 'err');
+  }
+}
+
+// ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
@@ -436,6 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if(hu) hu.textContent = USERS[currentUser].nombre;
 
   cargarProyectos();
+  cargarUrls();
 });
 </script>
 </body>
