@@ -58,7 +58,9 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 .msg-check{width:18px;height:18px;margin-top:.15rem;cursor:pointer;flex-shrink:0;accent-color:#1a3a6b}
 .msg-dot{font-size:.95rem;line-height:1.35;flex-shrink:0}
 .msg-body{flex:1;min-width:0}
-.msg-plat{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;margin-bottom:.15rem}
+.msg-plat{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;margin-bottom:.2rem;display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
+.msg-sep{opacity:.5;font-weight:600}
+.msg-time{text-transform:none;letter-spacing:0;font-weight:700;font-size:.71rem;color:#8a90a0;background:rgba(255,255,255,.75);border:1px solid rgba(0,0,0,.06);border-radius:20px;padding:.05rem .4rem;white-space:nowrap}
 .msg-rojo .msg-plat{color:#991b1b}
 .msg-amarillo .msg-plat{color:#92400e}
 .msg-verde .msg-plat{color:#065f46}
@@ -385,15 +387,35 @@ function copiarMensaje(tipo, mid){
 }
 
 // ── RENDER DE UN MENSAJE ────────────────────────────
+// Fecha/hora de recepción del correo (ISO → "10 jul, 14:32")
+function fmtCorreo(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '';
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  return d.getDate() + ' ' + meses[d.getMonth()] + ', ' + hh + ':' + mm;
+}
+
 function msgHTML(tipo, m, plataforma){
   const n = m.nivel || 'verde';
   const txt = (tipo === 'a') ? m.accion : m.txt;
+  const cuando = fmtCorreo(m.fecha);
+  let meta = '';
+  if(plataforma || cuando){
+    meta = '<div class="msg-plat">'
+      + (plataforma ? esc(plataforma) : '')
+      + (plataforma && cuando ? '<span class="msg-sep">·</span>' : '')
+      + (cuando ? '<span class="msg-time" title="Fecha y hora en que llegó el correo">🕓 '+cuando+'</span>' : '')
+      + '</div>';
+  }
   return '<div class="msg msg-'+n+(m.leido?' leido':'')+'">'
     + '<input type="checkbox" class="msg-check" '+(m.leido?'checked':'')
     + ' onchange="toggleLeido(\''+tipo+'\',\''+esc(m.id)+'\')" title="Marcar como leído">'
     + '<div class="msg-dot">'+(NIVEL_ICON[n]||'✅')+'</div>'
     + '<div class="msg-body">'
-    + (plataforma ? '<div class="msg-plat">'+esc(plataforma)+'</div>' : '')
+    + meta
     + '<div class="msg-text">'+esc(txt)+'</div>'
     + '</div>'
     + '<div class="msg-tools">'
