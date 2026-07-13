@@ -94,12 +94,53 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 @keyframes spin{to{transform:rotate(360deg)}}
 #toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);padding:.6rem 1.1rem;border-radius:8px;font-size:.82rem;font-weight:700;color:#fff;background:#059669;opacity:0;transition:.3s;z-index:999;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.15)}
 
+/* ── SELECTOR DE DÍAS + ACCIONES TOPBAR ── */
+.topbar-actions{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.sel-dias{padding:.5rem .6rem;border:1px solid #c8d9f0;border-radius:8px;background:#fff;font-family:'Manrope',sans-serif;font-size:.8rem;font-weight:700;color:#1a3a6b;cursor:pointer}
+.sel-dias:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+
+/* ── MODAL PLATAFORMAS ── */
+.backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.backdrop.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;position:sticky;top:0}
+.modal-head h3{font-size:.92rem;font-weight:800}
+.modal-x{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:1rem 1.1rem}
+.modal-note{background:#eef4fc;border-left:4px solid #1a3a6b;border-radius:0 6px 6px 0;padding:.55rem .75rem;font-size:.76rem;color:#4a5068;line-height:1.45;margin-bottom:.9rem}
+
+.prow{display:flex;align-items:center;gap:.55rem;padding:.55rem .6rem;border:1px solid #dde1e9;border-radius:9px;margin-bottom:.45rem;background:#fff;transition:.15s}
+.prow.off{opacity:.5;background:#f5f6f8}
+.prow-ic{width:30px;height:30px;border-radius:8px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.prow-body{flex:1;min-width:0}
+.prow-name{font-size:.84rem;font-weight:800;color:#1a2035}
+.prow-filtro{font-size:.72rem;color:#8a90a0;font-family:ui-monospace,monospace;word-break:break-all}
+.switch{position:relative;width:38px;height:21px;flex-shrink:0;cursor:pointer}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#c8cdd8;border-radius:20px;transition:.2s}
+.slider:before{content:"";position:absolute;height:15px;width:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:#059669}
+.switch input:checked + .slider:before{transform:translateX(17px)}
+
+.addbox{border:1px dashed #c8d9f0;border-radius:10px;padding:.75rem;background:#f0f6ff;margin-top:.9rem}
+.addgrid{display:grid;grid-template-columns:60px 1fr 1fr;gap:.5rem;margin-bottom:.6rem}
+.addbox label{font-size:.72rem;font-weight:700;color:#4a5068;display:block;margin-bottom:.2rem}
+.addbox input{width:100%;padding:.45rem .55rem;border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif;font-size:.82rem;color:#1a2035;background:#fff}
+.addbox input:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+.hint{font-size:.72rem;color:#8a90a0;line-height:1.4}
+
 @media(max-width:600px){
   body{padding:.75rem}
   .topbar h1{font-size:.98rem}
   .daynav .day-label{font-size:.85rem}
   .msg{padding:.6rem .55rem;gap:.45rem}
   .msg-tools{flex-direction:row}
+  .topbar-actions{width:100%}
+  .topbar-actions .btn{flex:1;justify-content:center}
+  .backdrop{align-items:flex-end;padding:0}
+  .modal{max-width:100%;border-radius:14px 14px 0 0;max-height:92vh}
+  .addgrid{grid-template-columns:56px 1fr;gap:.45rem}
+  .addgrid .f-filtro{grid-column:1/-1}
 }
 </style>
 </head>
@@ -109,9 +150,18 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
   <div class="topbar">
     <div>
       <h1>📧 Correos de Plataformas</h1>
-      <div class="sub">Digest cada 3 días · Anthropic · YCloud · n8n · Supabase · GitHub · Railway · OpenAI · Google · Redis</div>
+      <div class="sub" id="subPlat">Digest cada 3 días · cargando plataformas…</div>
     </div>
-    <button class="btn btn-primary" id="btnGenerar" onclick="generarAhora()">🔄 Generar ahora</button>
+    <div class="topbar-actions">
+      <select class="sel-dias" id="selDias" title="Cuántos días hacia atrás revisar">
+        <option value="3" selected>Últimos 3 días</option>
+        <option value="7">Últimos 7 días</option>
+        <option value="15">Últimos 15 días</option>
+        <option value="30">Últimos 30 días</option>
+      </select>
+      <button class="btn btn-ghost" onclick="abrirPlataformas()" title="Configurar plataformas vigiladas">⚙️</button>
+      <button class="btn btn-primary" id="btnGenerar" onclick="generarAhora()">🔄 Generar ahora</button>
+    </div>
   </div>
 
   <div id="app">
@@ -119,6 +169,34 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
   </div>
 
 </div>
+
+<!-- ── MODAL: PLATAFORMAS VIGILADAS ── -->
+<div class="backdrop" id="modalPlat">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⚙️ Plataformas vigiladas</h3>
+      <button class="modal-x" onclick="cerrarPlataformas()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-note">
+        El <strong>filtro</strong> es lo que se busca en el remitente del correo (ej. <code>digitalocean</code> encuentra a
+        <em>no-reply@digitalocean.com</em>). Apaga el switch para dejar de vigilar una plataforma sin borrarla.
+      </div>
+      <div id="platList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+
+      <div class="addbox">
+        <div class="addgrid">
+          <div><label>Icono</label><input type="text" id="np-icono" maxlength="2" placeholder="📨"></div>
+          <div><label>Nombre</label><input type="text" id="np-nombre" placeholder="DigitalOcean"></div>
+          <div class="f-filtro"><label>Filtro (remitente)</label><input type="text" id="np-filtro" placeholder="digitalocean"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="crearPlataforma()">+ Agregar plataforma</button>
+        <div class="hint" style="margin-top:.5rem">Si dejas el filtro vacío se usa el nombre en minúsculas.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -131,21 +209,24 @@ const USER = params.get('user') || 'fernando';
 let DIAS = [];
 let idx = 0;
 
-const PLAT = [
-  { key:'anthropic', ic:'🤖', bg:'#f4ede4' },
-  { key:'claude',    ic:'🤖', bg:'#f4ede4' },
-  { key:'ycloud',    ic:'💬', bg:'#e3f6ec' },
-  { key:'n8n',       ic:'⚙️', bg:'#f3e9fb' },
-  { key:'supabase',  ic:'🗄️', bg:'#e3f6ec' },
-  { key:'github',    ic:'🐙', bg:'#eef0f4' },
-  { key:'railway',   ic:'🚆', bg:'#ecebfb' },
-  { key:'openai',    ic:'🧠', bg:'#e6f5f1' },
-  { key:'google',    ic:'🔵', bg:'#e8f0ff' },
-  { key:'redis',     ic:'🧱', bg:'#fdeaea' }
-];
+// Plataformas vigiladas — vienen de la BD (tabla crm.plataformas_vigiladas)
+let PLATAFORMAS = [];
+
+// Colores de fondo por plataforma conocida (solo cosmético)
+const PLAT_BG = {
+  anthropic:'#f4ede4', claude:'#f4ede4', ycloud:'#e3f6ec', n8n:'#f3e9fb',
+  supabase:'#e3f6ec', github:'#eef0f4', railway:'#ecebfb', openai:'#e6f5f1',
+  google:'#e8f0ff', redis:'#fdeaea', digitalocean:'#e8f0ff'
+};
 function platInfo(nombre){
   const n = (nombre||'').toLowerCase();
-  for(const p of PLAT){ if(n.includes(p.key)) return p; }
+  for(const p of PLATAFORMAS){
+    const pn = (p.nombre||'').toLowerCase();
+    if(pn && (n.includes(pn) || pn.includes(n))){
+      return { ic: p.icono || '📨', bg: PLAT_BG[pn] || '#eef2f8' };
+    }
+  }
+  for(const k in PLAT_BG){ if(n.includes(k)) return { ic:'📨', bg:PLAT_BG[k] }; }
   return { ic:'📨', bg:'#eef2f8' };
 }
 const NIVEL_ICON = { rojo:'🔴', amarillo:'🟡', verde:'✅' };
@@ -447,11 +528,12 @@ async function cargar(){
 
 async function generarAhora(){
   const btn = document.getElementById('btnGenerar');
+  const dias = parseInt(document.getElementById('selDias').value, 10) || 3;
   btn.disabled = true;
   const original = btn.innerHTML;
   btn.innerHTML = '<span class="spinner"></span>Generando…';
   try {
-    await api('generar');
+    await api('generar', { dias: dias });
     await cargar();
   } catch(e){
     toast('No se pudo generar el resumen', false);
@@ -467,9 +549,99 @@ async function eliminarDia(id){
   catch(e){ toast('No se pudo borrar', false); }
 }
 
+// ═══════════════════════════════════════
+// PLATAFORMAS VIGILADAS
+// ═══════════════════════════════════════
+async function cargarPlataformas(silencioso){
+  try {
+    const res = await api('plataformas', { op:'listar' });
+    PLATAFORMAS = (res && res.data) ? res.data : [];
+  } catch(e){
+    PLATAFORMAS = [];
+  }
+  pintarSub();
+  if(!silencioso) pintarPlataformas();
+}
+
+function pintarSub(){
+  const sub = document.getElementById('subPlat');
+  if(!sub) return;
+  const activas = PLATAFORMAS.filter(function(p){ return p.activo; });
+  sub.textContent = activas.length
+    ? 'Digest cada 3 días · ' + activas.map(function(p){ return p.nombre; }).join(' · ')
+    : 'Digest cada 3 días · sin plataformas activas';
+}
+
+function pintarPlataformas(){
+  const el = document.getElementById('platList');
+  if(!el) return;
+  if(!PLATAFORMAS.length){
+    el.innerHTML = '<div class="hint" style="padding:.6rem 0">Aún no hay plataformas. Agrega la primera abajo.</div>';
+    return;
+  }
+  el.innerHTML = PLATAFORMAS.map(function(p){
+    return '<div class="prow'+(p.activo?'':' off')+'">'
+      + '<div class="prow-ic">'+esc(p.icono||'📨')+'</div>'
+      + '<div class="prow-body">'
+      +   '<div class="prow-name">'+esc(p.nombre)+'</div>'
+      +   '<div class="prow-filtro">'+esc(p.filtro)+'</div>'
+      + '</div>'
+      + '<label class="switch" title="'+(p.activo?'Vigilando':'Pausada')+'">'
+      +   '<input type="checkbox" '+(p.activo?'checked':'')+' onchange="togglePlataforma(\''+esc(p.id)+'\', this.checked)">'
+      +   '<span class="slider"></span>'
+      + '</label>'
+      + '<button class="tool tool-del" onclick="borrarPlataforma(\''+esc(p.id)+'\',\''+esc(p.nombre)+'\')" title="Borrar">🗑️</button>'
+      + '</div>';
+  }).join('');
+}
+
+function abrirPlataformas(){
+  document.getElementById('modalPlat').classList.add('open');
+  cargarPlataformas();
+}
+function cerrarPlataformas(){
+  document.getElementById('modalPlat').classList.remove('open');
+}
+document.getElementById('modalPlat').addEventListener('click', function(e){
+  if(e.target === this) cerrarPlataformas();
+});
+
+async function togglePlataforma(id, activo){
+  try {
+    await api('plataformas', { op:'editar', plat:{ id:id, activo:activo } });
+    await cargarPlataformas();
+    toast(activo ? 'Plataforma activada' : 'Plataforma pausada');
+  } catch(e){ toast('No se pudo actualizar', false); await cargarPlataformas(); }
+}
+
+async function crearPlataforma(){
+  const nombre = document.getElementById('np-nombre').value.trim();
+  let filtro   = document.getElementById('np-filtro').value.trim();
+  const icono  = document.getElementById('np-icono').value.trim() || '📨';
+  if(!nombre){ toast('Escribe el nombre', false); return; }
+  if(!filtro) filtro = nombre.toLowerCase();
+  try {
+    await api('plataformas', { op:'crear', plat:{ nombre:nombre, filtro:filtro, icono:icono } });
+    document.getElementById('np-nombre').value = '';
+    document.getElementById('np-filtro').value = '';
+    document.getElementById('np-icono').value  = '';
+    await cargarPlataformas();
+    toast('✅ ' + nombre + ' agregada');
+  } catch(e){ toast('No se pudo agregar', false); }
+}
+
+async function borrarPlataforma(id, nombre){
+  if(!confirm('¿Dejar de vigilar "'+nombre+'" y borrarla de la lista?')) return;
+  try {
+    await api('plataformas', { op:'eliminar', plat:{ id:id } });
+    await cargarPlataformas();
+    toast('Plataforma eliminada');
+  } catch(e){ toast('No se pudo borrar', false); }
+}
+
 function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-cargar();
+cargarPlataformas(true).then(cargar);
 </script>
 </body>
 </html>
