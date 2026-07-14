@@ -367,7 +367,8 @@ let expandedRow = null;
 
 // ── INIT ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  const hoy = new Date().toISOString().split('T')[0];
+  const _hoy = new Date();
+  const hoy = `${_hoy.getFullYear()}-${String(_hoy.getMonth()+1).padStart(2,'0')}-${String(_hoy.getDate()).padStart(2,'0')}`;
   document.getElementById('fechaInput').max = hoy;
   document.getElementById('fechaInput').value = hoy;
   cargarHistorico();
