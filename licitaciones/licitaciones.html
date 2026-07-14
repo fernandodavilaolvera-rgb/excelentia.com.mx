@@ -358,7 +358,7 @@ td { padding: 11px 14px; font-size: 13px; color: var(--txt); vertical-align: mid
 // ── CONFIGURACIÓN ──────────────────────────────────────────
 const SUPABASE_URL = 'https://rcotlydvsubvdapubnkx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjb3RseWR2c3VidmRhcHVibmt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDc5MzYsImV4cCI6MjA5OTEyMzkzNn0.gZyklBXbSI6B_5Iz62faMf31ZlmpGmCD7v0tMICK_9Y';
-const N8N_WEBHOOK   = 'https://n8n.excelentia.com.mx/webhook/dof-monitoreo';
+const N8N_WEBHOOK   = 'https://rcotlydvsubvdapubnkx.supabase.co/functions/v1/dof-monitoreo';
 const N8N_RESUMEN   = 'https://rcotlydvsubvdapubnkx.supabase.co/functions/v1/dof-resumen';
 
 // ── ESTADO ────────────────────────────────────────────────
@@ -451,7 +451,7 @@ function renderLicitCard(l, tipo, urlPdf) {
         </div>
         <button onclick="pedirResumen('${uid}','${dataL}')"
           style="flex-shrink:0;padding:5px 12px;border-radius:6px;border:1px solid var(--accent);background:#fff;color:var(--accent);font-family:Manrope,sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">
-          ✨ Resumen IA
+          ✨ Resumen
         </button>
       </div>
       <div id="${uid}-resumen" style="display:none;margin-top:12px;"></div>
@@ -469,7 +469,7 @@ async function pedirResumen(uid, dataEncoded) {
   // Toggle — si ya tiene contenido, ocultar
   if (panel.style.display === 'block') {
     panel.style.display = 'none';
-    btn.textContent = '✨ Resumen IA';
+    btn.textContent = '✨ Resumen';
     return;
   }
 
@@ -512,14 +512,14 @@ async function pedirResumen(uid, dataEncoded) {
             ${r.acciones_recomendadas}
           </div>
         </div>
-        <p style="font-size:10px;color:var(--txt3);margin-top:10px;">⚙️ Resumen generado por IA — verificar siempre con el PDF oficial</p>
+        <a href="#" onclick="event.preventDefault()" style="font-size:10px;color:var(--accent);text-decoration:none;">📄 Verificar PDF Oficial</a>
       </div>
     `;
-    btn.textContent = '✕ Cerrar resumen';
+    btn.textContent = '✕ Cerrar';
     btn.disabled = false;
   } catch(e) {
     panel.innerHTML = `<p style="font-size:12px;color:var(--red);">No se pudo generar el resumen. Intenta de nuevo.</p>`;
-    btn.textContent = '✨ Resumen IA';
+    btn.textContent = '✨ Resumen';
     btn.disabled = false;
   }
 }
