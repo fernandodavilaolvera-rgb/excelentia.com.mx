@@ -340,6 +340,7 @@ td { padding: 11px 14px; font-size: 13px; color: var(--txt); vertical-align: mid
             <th>Resultado del análisis</th>
             <th>Sector médico</th>
             <th>Archivo PDF</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="tbodyHistorico">
@@ -412,7 +413,7 @@ function badgeDesdeRow(r) {
 function renderTabla(rows) {
   const tbody = document.getElementById('tbodyHistorico');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="icon">📭</div><p>No hay registros aún. Ejecuta el primer análisis arriba.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">📭</div><p>No hay registros aún. Ejecuta el primer análisis arriba.</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(r => `
@@ -422,6 +423,14 @@ function renderTabla(rows) {
       <td>${r.tiene_medicas || r.datos?.licitaciones_medicas?.length > 0 ? '<span class="badge-medica">⚕️ Sí</span>' : '<span style="color:var(--txt3);font-size:12px">No</span>'}</td>
       <td style="font-size:11px;color:var(--txt2);">
         ${r.archivo_pdf ? `<a href="${r.url_pdf}" target="_blank" style="color:var(--accent);text-decoration:none;" onclick="event.stopPropagation()">📄 ${r.archivo_pdf}</a>` : '<span style="color:var(--txt3)">N/A</span>'}
+      </td>
+      <td style="text-align:right;" onclick="event.stopPropagation()">
+        <button onclick="borrarRegistro('${r.id}','${r.fecha_legible}')"
+          title="Borrar registro"
+          style="background:none;border:1px solid #fed7d7;border-radius:6px;padding:4px 8px;cursor:pointer;color:#e53e3e;font-size:12px;transition:background .15s;"
+          onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='none'">
+          🗑
+        </button>
       </td>
     </tr>
   `).join('');
@@ -557,7 +566,7 @@ async function toggleDetalle(id, tr) {
     detailRow.id = `detail-${id}`;
     detailRow.className = 'detail-row';
     detailRow.innerHTML = `
-      <td colspan="4">
+      <td colspan="5">
         <div class="detail-inner">
 
           ${mon.estado === 'sin_edicion' ? `
@@ -648,6 +657,33 @@ async function ejecutarAnalisis() {
   } finally {
     btn.disabled = false;
     document.getElementById('btnIcon').outerHTML = '<span id="btnIcon">▶</span>';
+  }
+}
+
+// ── BORRAR REGISTRO ───────────────────────────────────────
+async function borrarRegistro(id, fecha) {
+  if (!confirm(`¿Borrar el registro del ${fecha}?\n\nEsto eliminará el monitoreo y todas sus licitaciones. No se puede deshacer.`)) return;
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/dof_monitoreos?id=eq.${id}`,
+      { method: 'DELETE', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    // Cerrar detalle si está abierto
+    if (expandedRow == id) {
+      document.getElementById(`detail-${id}`)?.remove();
+      expandedRow = null;
+    }
+    // Quitar la fila de la tabla
+    const tr = document.querySelector(`tr[data-id="${id}"]`);
+    if (tr) tr.remove();
+
+    toast(`Registro del ${fecha} eliminado`, 'success');
+    await cargarHistorico(); // refrescar stats
+  } catch(e) {
+    toast(`Error al borrar: ${e.message}`, 'error');
   }
 }
 
