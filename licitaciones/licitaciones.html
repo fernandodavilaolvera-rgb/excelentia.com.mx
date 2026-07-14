@@ -236,6 +236,142 @@ td { padding: 11px 14px; font-size: 13px; color: var(--txt); vertical-align: mid
 .licit-item.medica { border-left: 3px solid var(--green); }
 .licit-item.otra   { border-left: 3px solid var(--accent); }
 
+/* ── PANEL DE BASES (Agente 2) ───────────────────────────── */
+.bases-panel {
+  max-width: 720px;
+  margin: 12px auto 0;
+  background: #f8faff;
+  border: 1px solid #c8d9f0;
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.bases-head {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid #c8d9f0;
+}
+.bases-head strong { font-size: 13px; color: var(--txt); }
+.chip {
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .3px;
+  white-space: nowrap;
+}
+.chip.ALTA  { background: var(--red-bg);    color: var(--red);    border: 1px solid #feb2b2; }
+.chip.MEDIA { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-bd); }
+.chip.BAJA  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
+.chip.info  { background: #fff; color: var(--txt2); border: 1px solid var(--border); }
+
+.bases-resumen {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 6px; padding: 12px; margin-bottom: 14px;
+  color: var(--txt2);
+}
+
+/* Calendario */
+.cal-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-bottom: 14px;
+}
+.cal-item {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px;
+}
+.cal-item .k {
+  font-size: 9px; font-weight: 800; color: var(--txt3);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.cal-item .v { font-size: 12px; font-weight: 700; color: var(--txt); margin-top: 2px; }
+.cal-item.urgente { border-left: 3px solid var(--red); }
+
+/* Riesgos */
+.riesgo {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 12px; margin-bottom: 6px;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.riesgo.ALTO  { border-left: 3px solid var(--red); }
+.riesgo.MEDIO { border-left: 3px solid var(--yellow); }
+.riesgo.BAJO  { border-left: 3px solid var(--green); }
+.riesgo .dot { font-size: 14px; line-height: 1.2; flex-shrink: 0; }
+.riesgo .t { font-weight: 700; color: var(--txt); }
+.riesgo .m { color: var(--txt2); font-size: 11px; margin-top: 2px; }
+
+/* Bloques colapsables */
+.bloque { margin-bottom: 8px; }
+.bloque summary {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 6px; padding: 9px 12px;
+  font-weight: 700; color: var(--txt); cursor: pointer;
+  list-style: none; user-select: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.bloque summary::-webkit-details-marker { display: none; }
+.bloque summary:hover { background: var(--hover); }
+.bloque summary .cnt {
+  background: var(--accent); color: #fff;
+  border-radius: 20px; padding: 1px 9px;
+  font-size: 10px; font-weight: 800;
+}
+.bloque[open] summary { border-radius: 6px 6px 0 0; border-bottom-color: transparent; }
+.bloque .cuerpo {
+  background: #fff; border: 1px solid var(--border);
+  border-top: none; border-radius: 0 0 6px 6px;
+  padding: 4px 12px 10px;
+}
+.req { padding: 8px 0; border-bottom: 1px dashed var(--border); }
+.req:last-child { border-bottom: none; }
+.req .r { font-weight: 700; color: var(--txt); }
+.req .d { color: var(--txt2); font-size: 11px; margin-top: 2px; }
+.req .ref { color: var(--txt3); font-size: 10px; margin-top: 2px; }
+.req .oblig { color: var(--red); font-size: 10px; font-weight: 800; }
+
+/* Checklist */
+.check-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 7px 0; border-bottom: 1px dashed var(--border);
+}
+.check-item:last-child { border-bottom: none; }
+.check-item input { margin-top: 2px; cursor: pointer; accent-color: var(--accent); }
+.check-item label { cursor: pointer; color: var(--txt); flex: 1; }
+.check-item .cat {
+  font-size: 9px; font-weight: 800; color: var(--txt3);
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 1px 7px; white-space: nowrap;
+}
+.check-item input:checked + label { text-decoration: line-through; color: var(--txt3); }
+
+/* Barra de progreso */
+.prog-wrap {
+  max-width: 720px; margin: 12px auto 0;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px;
+}
+.prog-bar {
+  height: 6px; background: var(--bg);
+  border-radius: 20px; overflow: hidden; margin-top: 8px;
+}
+.prog-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent), #1e5096);
+  border-radius: 20px;
+  transition: width .6s ease;
+}
+.prog-txt { font-size: 12px; font-weight: 600; color: var(--txt2); }
+.prog-sub { font-size: 10px; color: var(--txt3); margin-top: 6px; }
+
+.num-licit {
+  display: inline-block;
+  background: var(--note-bg); border: 1px solid #c8d9f0;
+  border-radius: 5px; padding: 1px 7px;
+  font-size: 10px; font-weight: 800; color: var(--accent);
+  font-family: ui-monospace, monospace;
+  margin-bottom: 3px;
+}
+
 /* ── VACÍO / CARGA ───────────────────────────────────────── */
 .empty-state {
   text-align: center;
@@ -275,6 +411,11 @@ td { padding: 11px 14px; font-size: 13px; color: var(--txt); vertical-align: mid
   .run-panel { flex-direction: column; align-items: stretch; }
   .btn { width: 100%; justify-content: center; }
   th, td { padding: 8px 10px; }
+  .cal-grid { grid-template-columns: 1fr 1fr; }
+  .bases-panel { padding: 12px; }
+  .licit-item > div:first-child { flex-direction: column; }
+  .licit-actions { width: 100%; }
+  .licit-actions button { flex: 1; }
 }
 </style>
 </head>
@@ -326,6 +467,8 @@ td { padding: 11px 14px; font-size: 13px; color: var(--txt); vertical-align: mid
     <div class="note-footer">
       El análisis descarga el PDF del DOF para la fecha seleccionada, extrae todas las licitaciones con IA y guarda el resultado en el histórico.
       Los días sin edición (fines de semana y feriados) quedan registrados automáticamente.
+      Dentro de cada licitación con número, el botón <strong>📊 Analizar bases</strong> entra a ComprasMX, descarga la convocatoria completa
+      y devuelve requisitos, riesgos y checklist de entregables (tarda ~90 segundos la primera vez).
     </div>
   </div>
 
@@ -361,6 +504,7 @@ const SUPABASE_URL = 'https://rcotlydvsubvdapubnkx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjb3RseWR2c3VidmRhcHVibmt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDc5MzYsImV4cCI6MjA5OTEyMzkzNn0.gZyklBXbSI6B_5Iz62faMf31ZlmpGmCD7v0tMICK_9Y';
 const N8N_WEBHOOK   = 'https://rcotlydvsubvdapubnkx.supabase.co/functions/v1/dof-monitoreo';
 const N8N_RESUMEN   = 'https://rcotlydvsubvdapubnkx.supabase.co/functions/v1/dof-resumen';
+const N8N_BASES     = 'https://rcotlydvsubvdapubnkx.supabase.co/functions/v1/analizar-bases';
 
 // ── ESTADO ────────────────────────────────────────────────
 let expandedRow = null;
@@ -450,23 +594,287 @@ function renderLicitCard(l, tipo, urlPdf) {
     fecha_limite:      l.fecha_limite || ''
   }));
 
+  const num = (l.numero_licitacion || '').trim();
+  const ctx = encodeURIComponent(JSON.stringify({
+    numero: num,
+    fecha_dof: l.fecha_dof || null,
+    monitoreo_id: l.monitoreo_id || null
+  }));
+
   return `
     <div class="licit-item ${cls}" id="${uid}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-        <div>
+        <div style="min-width:0;">
+          ${num ? `<div class="num-licit">${num}</div>` : ''}
           <div class="dep">${l.dependencia}</div>
           <div class="obj">${l.objeto}</div>
           ${l.tipo_procedimiento ? `<div class="meta">📋 ${l.tipo_procedimiento}${l.fecha_limite ? ` &nbsp;·&nbsp; 📅 Cierre: ${l.fecha_limite}` : ''}</div>` : ''}
         </div>
-        <button onclick="pedirResumen('${uid}','${dataL}')"
-          style="flex-shrink:0;padding:5px 12px;border-radius:6px;border:1px solid var(--accent);background:#fff;color:var(--accent);font-family:Manrope,sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">
-          ✨ Resumen
-        </button>
+        <div class="licit-actions" style="flex-shrink:0;display:flex;flex-direction:column;gap:5px;">
+          <button onclick="pedirResumen('${uid}','${dataL}')"
+            style="padding:5px 12px;border-radius:6px;border:1px solid var(--accent);background:#fff;color:var(--accent);font-family:Manrope,sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">
+            ✨ Resumen
+          </button>
+          ${num ? `
+          <button id="${uid}-btnbases" onclick="analizarBases('${uid}','${ctx}')"
+            style="padding:5px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-family:Manrope,sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">
+            📊 Analizar bases
+          </button>` : `
+          <span title="El DOF no publicó el número de esta convocatoria"
+            style="padding:5px 12px;border-radius:6px;border:1px dashed var(--border);background:#fff;color:var(--txt3);font-size:11px;font-weight:700;white-space:nowrap;">
+            Sin número
+          </span>`}
+        </div>
       </div>
       <div id="${uid}-resumen" style="display:none;margin-top:12px;"></div>
+      <div id="${uid}-bases"></div>
       ${urlPdf ? `<div style="margin-top:8px;"><a href="${urlPdf}" target="_blank" style="color:var(--txt3);font-size:10px;text-decoration:none;">Ver PDF del DOF ↗</a></div>` : ''}
     </div>
   `;
+}
+
+// ══════════════════════════════════════════════════════════
+//  AGENTE 2 — ANALIZAR BASES EN COMPRASMX
+// ══════════════════════════════════════════════════════════
+const PASOS_BASES = [
+  { t: 'Abriendo ComprasMX…',            s: 'Levantando un navegador real contra la plataforma oficial', p: 12 },
+  { t: 'Buscando la licitación…',        s: 'Revisando anuncios vigentes, en seguimiento y concluidos',  p: 26 },
+  { t: 'Entrando a la ficha oficial…',   s: 'Extrayendo datos generales, calendario y anexos',           p: 42 },
+  { t: 'Descargando la convocatoria…',   s: 'Bajando los PDFs de las bases y el anexo técnico',          p: 58 },
+  { t: 'Leyendo las bases…',             s: 'Convirtiendo los PDFs a texto (pueden ser 250 mil letras)', p: 72 },
+  { t: 'Analizando con IA…',             s: 'Identificando requisitos, riesgos y entregables',           p: 88 },
+  { t: 'Guardando el análisis…',         s: 'Casi listo',                                                p: 96 }
+];
+
+async function analizarBases(uid, ctxEncoded) {
+  const panel = document.getElementById(uid + '-bases');
+  const btn   = document.getElementById(uid + '-btnbases');
+  if (!panel) return;
+
+  // Toggle: si ya está abierto, cerrar
+  if (panel.dataset.open === '1') {
+    panel.innerHTML = '';
+    panel.dataset.open = '0';
+    if (btn) btn.textContent = '📊 Analizar bases';
+    return;
+  }
+
+  const ctx = JSON.parse(decodeURIComponent(ctxEncoded));
+  panel.dataset.open = '1';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analizando…'; }
+
+  // 1) ¿Ya está analizada? (cache en Supabase)
+  try {
+    const cacheRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/bases_licitacion?numero_licitacion=eq.${encodeURIComponent(ctx.numero)}&select=*`,
+      { headers: sbHeaders() }
+    );
+    const cache = await cacheRes.json();
+    if (Array.isArray(cache) && cache.length) {
+      pintarBases(panel, cache[0], uid, true);
+      if (btn) { btn.disabled = false; btn.textContent = '✕ Cerrar'; }
+      return;
+    }
+  } catch(e) { /* si falla el cache, seguimos al análisis */ }
+
+  // 2) Análisis en vivo con barra de progreso
+  panel.innerHTML = `
+    <div class="prog-wrap">
+      <div class="prog-txt" id="${uid}-ptxt">🚀 Iniciando análisis…</div>
+      <div class="prog-bar"><div class="prog-fill" id="${uid}-pfill"></div></div>
+      <div class="prog-sub" id="${uid}-psub">Esto toma alrededor de 90 segundos. No cierres la pestaña.</div>
+    </div>
+  `;
+
+  let paso = 0;
+  const tick = setInterval(() => {
+    if (paso >= PASOS_BASES.length) return;
+    const p = PASOS_BASES[paso];
+    const et = document.getElementById(uid + '-ptxt');
+    const ef = document.getElementById(uid + '-pfill');
+    const es = document.getElementById(uid + '-psub');
+    if (et) et.textContent = p.t;
+    if (ef) ef.style.width = p.p + '%';
+    if (es) es.textContent = p.s;
+    paso++;
+  }, 13000);
+  // primer paso inmediato
+  setTimeout(() => {
+    const et = document.getElementById(uid + '-ptxt');
+    const ef = document.getElementById(uid + '-pfill');
+    if (et) et.textContent = PASOS_BASES[0].t;
+    if (ef) ef.style.width = PASOS_BASES[0].p + '%';
+    paso = 1;
+  }, 300);
+
+  try {
+    const res = await fetch(N8N_BASES, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        numero: ctx.numero,
+        fecha_dof: ctx.fecha_dof,
+        monitoreo_id: ctx.monitoreo_id
+      })
+    });
+    clearInterval(tick);
+    const data = await res.json();
+
+    if (!data.success) {
+      panel.innerHTML = `
+        <div class="prog-wrap" style="border-left:4px solid var(--red);">
+          <div class="prog-txt" style="color:var(--red);">❌ No se pudo analizar la licitación</div>
+          <div class="prog-sub">${data.error || 'ComprasMX no devolvió la licitación. Puede que ya no esté publicada o que el número no coincida.'}</div>
+        </div>`;
+      if (btn) { btn.disabled = false; btn.textContent = '🔄 Reintentar'; }
+      toast('No se pudo analizar las bases', 'error');
+      return;
+    }
+
+    // Releer la fila completa desde Supabase (el webhook solo devuelve totales)
+    const filaRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/bases_licitacion?numero_licitacion=eq.${encodeURIComponent(ctx.numero)}&select=*`,
+      { headers: sbHeaders() }
+    );
+    const [fila] = await filaRes.json();
+
+    const ef = document.getElementById(uid + '-pfill');
+    if (ef) ef.style.width = '100%';
+
+    pintarBases(panel, fila, uid, false);
+    if (btn) { btn.disabled = false; btn.textContent = '✕ Cerrar'; }
+    toast('✅ Bases analizadas correctamente', 'success');
+
+  } catch(e) {
+    clearInterval(tick);
+    panel.innerHTML = `
+      <div class="prog-wrap" style="border-left:4px solid var(--red);">
+        <div class="prog-txt" style="color:var(--red);">❌ Error de conexión</div>
+        <div class="prog-sub">${e.message || e}</div>
+      </div>`;
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 Reintentar'; }
+    toast('Error al analizar las bases', 'error');
+  }
+}
+
+// ── PINTAR EL RESULTADO DEL ANÁLISIS ──────────────────────
+function pintarBases(panel, b, uid, deCache) {
+  if (!b) {
+    panel.innerHTML = `<div class="prog-wrap"><div class="prog-txt">Sin datos.</div></div>`;
+    return;
+  }
+
+  const nivel = (b.nivel_complejidad || '').toUpperCase();
+  const cal   = b.calendario || {};
+  const tec   = b.requisitos_tecnicos   || [];
+  const adm   = b.requisitos_admin      || [];
+  const eco   = b.requisitos_economicos || [];
+  const rie   = b.riesgos               || [];
+  const chk   = b.checklist             || [];
+
+  const dot = { ALTO: '🔴', MEDIO: '🟡', BAJO: '🟢' };
+
+  const calItems = [
+    ['Publicación',   cal.publicacion],
+    ['Límite aclarac.', cal.limite_aclaraciones],
+    ['Junta aclarac.',  cal.junta_aclaraciones],
+    ['Apertura',      cal.presentacion_apertura],
+    ['Fallo',         cal.fallo],
+    ['Inicio contrato', cal.inicio_contrato]
+  ].filter(x => x[1]);
+
+  const bloqueReq = (titulo, arr, icono) => !arr.length ? '' : `
+    <details class="bloque">
+      <summary><span>${icono} ${titulo}</span><span class="cnt">${arr.length}</span></summary>
+      <div class="cuerpo">
+        ${arr.map(r => `
+          <div class="req">
+            <div class="r">${r.requisito || ''} ${r.obligatorio ? '<span class="oblig">· OBLIGATORIO</span>' : ''}</div>
+            ${r.descripcion ? `<div class="d">${r.descripcion}</div>` : ''}
+            ${r.referencia  ? `<div class="ref">📎 ${r.referencia}</div>` : ''}
+          </div>`).join('')}
+      </div>
+    </details>`;
+
+  panel.innerHTML = `
+    <div class="bases-panel">
+
+      <div class="bases-head">
+        <strong>📊 Análisis de bases</strong>
+        ${nivel ? `<span class="chip ${nivel}">Complejidad ${nivel}</span>` : ''}
+        ${b.estado ? `<span class="chip info">${b.estado}</span>` : ''}
+        ${b.caracter ? `<span class="chip info">${b.caracter}</span>` : ''}
+        ${deCache ? `<span style="margin-left:auto;font-size:10px;color:var(--txt3);">análisis guardado</span>` : ''}
+      </div>
+
+      ${b.resumen ? `<div class="bases-resumen">${b.resumen}</div>` : ''}
+
+      ${calItems.length ? `
+        <div style="font-size:10px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">📅 Calendario oficial</div>
+        <div class="cal-grid">
+          ${calItems.map(([k,v]) => `
+            <div class="cal-item ${/apertura|fallo/i.test(k) ? 'urgente' : ''}">
+              <div class="k">${k}</div><div class="v">${v}</div>
+            </div>`).join('')}
+        </div>` : ''}
+
+      ${rie.length ? `
+        <div style="font-size:10px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">⚠️ Riesgos detectados (${rie.length})</div>
+        <div style="margin-bottom:14px;">
+          ${rie.map(r => {
+            const imp = (r.impacto || '').toUpperCase();
+            return `
+            <div class="riesgo ${imp}">
+              <span class="dot">${dot[imp] || '⚪'}</span>
+              <div>
+                <div class="t">${r.riesgo || ''}</div>
+                ${r.mitigacion ? `<div class="m"><strong>Mitigación:</strong> ${r.mitigacion}</div>` : ''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>` : ''}
+
+      <div style="font-size:10px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">📋 Requisitos</div>
+      ${bloqueReq('Técnicos',        tec, '🔬')}
+      ${bloqueReq('Administrativos', adm, '🗂️')}
+      ${bloqueReq('Económicos',      eco, '💰')}
+
+      ${chk.length ? `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 6px;flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;">✅ Checklist de entregables (${chk.length})</span>
+          <button onclick="copiarChecklist('${uid}')"
+            style="padding:4px 10px;border-radius:6px;border:1px solid var(--accent);background:#fff;color:var(--accent);font-family:Manrope,sans-serif;font-size:10px;font-weight:700;cursor:pointer;">
+            📋 Copiar checklist
+          </button>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px 12px;" id="${uid}-chk">
+          ${chk.map((c,i) => `
+            <div class="check-item">
+              <input type="checkbox" id="${uid}-c${i}">
+              <label for="${uid}-c${i}" data-txt="${(c.item||'').replace(/"/g,'&quot;')}">
+                ${c.item || ''}${c.fecha_limite ? ` <span style="color:var(--txt3);font-size:10px;">· 📅 ${c.fecha_limite}</span>` : ''}
+              </label>
+              ${c.categoria ? `<span class="cat">${c.categoria}</span>` : ''}
+            </div>`).join('')}
+        </div>` : ''}
+
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        ${b.url_comprasmx ? `<a href="${b.url_comprasmx}" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">🔗 Ver en ComprasMX</a>` : ''}
+        ${b.anexos?.length ? `<span style="font-size:10px;color:var(--txt3);">📎 ${b.anexos.length} anexos publicados</span>` : ''}
+      </div>
+
+    </div>
+  `;
+}
+
+// ── COPIAR CHECKLIST AL PORTAPAPELES ──────────────────────
+function copiarChecklist(uid) {
+  const cont = document.getElementById(uid + '-chk');
+  if (!cont) return;
+  const lineas = [...cont.querySelectorAll('label')].map(l => '☐ ' + (l.dataset.txt || l.textContent.trim()));
+  navigator.clipboard.writeText(lineas.join('\n'))
+    .then(() => toast('✅ Checklist copiado al portapapeles', 'success'))
+    .catch(() => toast('No se pudo copiar', 'error'));
 }
 
 // ── PEDIR RESUMEN IA ──────────────────────────────────────
