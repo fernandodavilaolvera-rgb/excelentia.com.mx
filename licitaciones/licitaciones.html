@@ -337,11 +337,9 @@ td { padding: 11px 14px; font-size: 13px; color: var(--txt); vertical-align: mid
         <thead>
           <tr>
             <th>Fecha</th>
-            <th>Estado</th>
-            <th>Licitaciones</th>
+            <th>Resultado del análisis</th>
             <th>Sector médico</th>
             <th>Archivo PDF</th>
-            <th>Ejecutado por</th>
           </tr>
         </thead>
         <tbody id="tbodyHistorico">
@@ -398,54 +396,87 @@ function renderStats(rows) {
   document.getElementById('statSinEdicion').textContent = rows.filter(r => r.estado === 'sin_edicion').length;
 }
 
-// ── RENDER TABLA ──────────────────────────────────────────
+// ── BADGE: derivado de datos reales, no del campo estado ──
+function badgeDesdeRow(r) {
+  if (r.estado === 'sin_edicion') return `<span class="badge sin_edicion">📭 Sin edición DOF</span>`;
+  const total = r.total_licitaciones || 0;
+  // Datos JSONB también puede tener licitaciones que no se reflejan en total
+  const datosTotal = (r.datos?.licitaciones_medicas?.length || 0) + (r.datos?.otras_licitaciones?.length || 0);
+  const real = Math.max(total, datosTotal);
+  if (real > 0) return `<span class="badge con_licitaciones">✅ ${real} licitaci${real === 1 ? 'ón' : 'ones'}</span>`;
+  return `<span class="badge sin_licitaciones">📄 Sin licitaciones</span>`;
+}
+
+// ── RENDER TABLA — 4 columnas claras ──────────────────────
 function renderTabla(rows) {
   const tbody = document.getElementById('tbodyHistorico');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">📭</div><p>No hay registros aún. Ejecuta el primer análisis arriba.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="icon">📭</div><p>No hay registros aún. Ejecuta el primer análisis arriba.</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(r => `
-    <tr onclick="toggleDetalle('${r.id}', this)" data-id="${r.id}">
+    <tr onclick="toggleDetalle('${r.id}', this)" data-id="${r.id}" style="cursor:pointer;">
       <td><strong>${r.fecha_legible}</strong></td>
-      <td>${badgeEstado(r.estado)}</td>
-      <td>${r.total_licitaciones > 0 ? `<strong>${r.total_licitaciones}</strong>` : '<span style="color:var(--txt3)">—</span>'}</td>
-      <td>${r.tiene_medicas ? '<span class="badge-medica">⚕️ Sí</span>' : '<span style="color:var(--txt3);font-size:12px">No</span>'}</td>
-      <td style="font-size:11px;color:var(--txt2)">${r.archivo_pdf || '<span style="color:var(--txt3)">N/A</span>'}</td>
-      <td style="font-size:11px;color:var(--txt2);text-transform:capitalize">${r.ejecutado_por || 'automático'}</td>
+      <td>${badgeDesdeRow(r)}</td>
+      <td>${r.tiene_medicas || r.datos?.licitaciones_medicas?.length > 0 ? '<span class="badge-medica">⚕️ Sí</span>' : '<span style="color:var(--txt3);font-size:12px">No</span>'}</td>
+      <td style="font-size:11px;color:var(--txt2);">
+        ${r.archivo_pdf ? `<a href="${r.url_pdf}" target="_blank" style="color:var(--accent);text-decoration:none;" onclick="event.stopPropagation()">📄 ${r.archivo_pdf}</a>` : '<span style="color:var(--txt3)">N/A</span>'}
+      </td>
     </tr>
   `).join('');
 }
 
-// ── BADGE ─────────────────────────────────────────────────
-function badgeEstado(estado) {
-  const labels = {
-    con_licitaciones: '✅ Con licitaciones',
-    sin_licitaciones: '📄 Sin licitaciones',
-    sin_edicion:      '📭 Sin edición',
-    error:            '❌ Error',
-    pendiente:        '⏳ Pendiente'
-  };
-  return `<span class="badge ${estado}">${labels[estado] || estado}</span>`;
+// ── TOGGLE LICITACIÓN INDIVIDUAL ──────────────────────────
+function toggleLicitacion(el) {
+  const detail = el.querySelector('.licit-expand');
+  if (!detail) return;
+  const isOpen = detail.style.display === 'block';
+  // Cerrar todos los demás
+  document.querySelectorAll('.licit-expand').forEach(d => d.style.display = 'none');
+  document.querySelectorAll('.licit-item').forEach(i => i.style.background = '');
+  if (!isOpen) {
+    detail.style.display = 'block';
+    el.style.background = '#f0f6ff';
+  }
 }
 
-// ── TOGGLE DETALLE ─────────────────────────────────────────
+// ── RENDER CARD LICITACIÓN ────────────────────────────────
+function renderLicitCard(l, tipo, urlPdf) {
+  const cls = tipo === 'medica' ? 'medica' : 'otra';
+  const campos = [
+    l.tipo_procedimiento ? `<div class="meta">📋 Tipo: <strong>${l.tipo_procedimiento}</strong></div>` : '',
+    l.fecha_limite       ? `<div class="meta">📅 Fecha límite: <strong>${l.fecha_limite}</strong></div>` : '',
+    urlPdf               ? `<div class="meta" style="margin-top:8px;"><a href="${urlPdf}" target="_blank" style="color:var(--accent);font-size:11px;">📄 Ver en PDF del DOF</a></div>` : ''
+  ].filter(Boolean).join('');
+
+  return `
+    <div class="licit-item ${cls}" onclick="toggleLicitacion(this)" style="cursor:pointer;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div class="dep">${l.dependencia}</div>
+        <span style="font-size:10px;color:var(--txt3);flex-shrink:0;">Clic para ver ▾</span>
+      </div>
+      <div class="obj">${l.objeto}</div>
+      <div class="licit-expand" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+        ${campos || '<span style="font-size:11px;color:var(--txt3);">No hay más detalle disponible.</span>'}
+      </div>
+    </div>
+  `;
+}
+
+// ── TOGGLE DETALLE DE FILA ────────────────────────────────
 async function toggleDetalle(id, tr) {
-  // Cerrar si ya está abierto
   if (expandedRow === id) {
     const existingDetail = document.getElementById(`detail-${id}`);
     if (existingDetail) existingDetail.remove();
     expandedRow = null;
     return;
   }
-  // Cerrar el anterior
   if (expandedRow) {
     const prev = document.getElementById(`detail-${expandedRow}`);
     if (prev) prev.remove();
   }
   expandedRow = id;
 
-  // Cargar datos
   try {
     const [monitoreoRes, medicasRes, otrasRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/dof_monitoreos?id=eq.${id}&select=*`, { headers: sbHeaders() }),
@@ -456,61 +487,52 @@ async function toggleDetalle(id, tr) {
     const medicas = await medicasRes.json();
     const otras   = await otrasRes.json();
 
-    // Si no hay detalle en tablas separadas, revisar campo datos
+    // Fuente de verdad: tablas separadas primero, luego JSONB como fallback
     const datosMedicas = medicas.length ? medicas : (mon.datos?.licitaciones_medicas || []);
-    const datosOtras   = otras.length   ? otras   : (mon.datos?.otras_licitaciones || []);
+    const datosOtras   = otras.length   ? otras   : (mon.datos?.otras_licitaciones   || []);
+    const hayLicit     = datosMedicas.length + datosOtras.length > 0;
 
     const detailRow = document.createElement('tr');
     detailRow.id = `detail-${id}`;
     detailRow.className = 'detail-row';
     detailRow.innerHTML = `
-      <td colspan="6">
+      <td colspan="4">
         <div class="detail-inner">
+
           ${mon.estado === 'sin_edicion' ? `
             <div style="background:var(--yellow-bg);border:1px solid var(--yellow-bd);border-radius:7px;padding:14px;border-left:4px solid var(--yellow);">
               <strong>📭 DOF sin edición este día</strong>
               <p style="font-size:12px;color:var(--txt2);margin-top:4px;">El Diario Oficial no publicó edición en esta fecha (fin de semana o día feriado).</p>
             </div>
-          ` : ''}
-          ${mon.estado === 'sin_licitaciones' ? `
+          ` : !hayLicit ? `
             <div style="background:var(--note-bg);border:1px solid #c8d9f0;border-radius:7px;padding:14px;border-left:4px solid var(--accent);">
               <strong>📄 DOF analizado — sin licitaciones</strong>
               <p style="font-size:12px;color:var(--txt2);margin-top:4px;">Se descargó y analizó el PDF del DOF. No se encontraron convocatorias de licitación pública ese día.</p>
-              ${mon.archivo_pdf ? `<p style="font-size:11px;color:var(--txt3);margin-top:6px;">Archivo: <a href="${mon.url_pdf}" target="_blank" style="color:var(--accent)">${mon.archivo_pdf}</a></p>` : ''}
             </div>
           ` : ''}
+
           ${datosMedicas.length ? `
             <div class="detail-section">
               <h4>⚕️ Licitaciones Sector Médico / Salud (${datosMedicas.length})</h4>
-              ${datosMedicas.map(l => `
-                <div class="licit-item medica">
-                  <div class="dep">${l.dependencia}</div>
-                  <div class="obj">${l.objeto}</div>
-                  <div class="meta">${l.tipo_procedimiento ? `Tipo: ${l.tipo_procedimiento}` : ''} ${l.fecha_limite ? ` · Cierre: ${l.fecha_limite}` : ''}</div>
-                </div>
-              `).join('')}
+              <p style="font-size:11px;color:var(--txt3);margin-bottom:8px;">Clic en cada tarjeta para ver el detalle</p>
+              ${datosMedicas.map(l => renderLicitCard(l, 'medica', mon.url_pdf)).join('')}
             </div>
           ` : ''}
+
           ${datosOtras.length ? `
             <div class="detail-section">
               <h4>📄 Otras licitaciones del día (${datosOtras.length})</h4>
-              ${datosOtras.map(l => `
-                <div class="licit-item otra">
-                  <div class="dep">${l.dependencia}</div>
-                  <div class="obj">${l.objeto}</div>
-                  ${l.tipo_procedimiento ? `<div class="meta">Tipo: ${l.tipo_procedimiento}</div>` : ''}
-                </div>
-              `).join('')}
+              <p style="font-size:11px;color:var(--txt3);margin-bottom:8px;">Clic en cada tarjeta para ver el detalle</p>
+              ${datosOtras.map(l => renderLicitCard(l, 'otra', mon.url_pdf)).join('')}
             </div>
           ` : ''}
-          ${mon.estado === 'con_licitaciones' && !datosMedicas.length && !datosOtras.length ? `
-            <p style="font-size:12px;color:var(--txt2);">Detalle guardado en el campo datos. <a href="${mon.url_pdf}" target="_blank" style="color:var(--accent)">Ver PDF original</a></p>
-          ` : ''}
+
           ${mon.url_pdf && mon.estado !== 'sin_edicion' ? `
-            <div style="margin-top:12px;">
-              <a href="${mon.url_pdf}" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;display:inline-flex;">📄 Ver PDF del DOF</a>
+            <div style="margin-top:14px;">
+              <a href="${mon.url_pdf}" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;display:inline-flex;">📄 Ver PDF completo del DOF</a>
             </div>
           ` : ''}
+
         </div>
       </td>
     `;
