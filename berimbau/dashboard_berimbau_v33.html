@@ -734,6 +734,27 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
   <!-- ===== AVISOS CORREO v10 ===== -->
   <div id="panel-avisos" class="panel">
 
+    <!-- INTERRUPTOR MODO PRUEBA -->
+    <div style="max-width:720px;margin:0 auto 16px;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:.9rem;color:#1a2035">🔒 Modo prueba</span>
+        <span id="modo-prueba-label" style="font-size:.72rem;font-weight:700;color:#1a5c18">Modo prueba ACTIVO</span>
+      </div>
+      <label style="position:relative;display:inline-block;width:52px;height:28px;cursor:pointer;flex-shrink:0">
+        <input type="checkbox" id="toggle-modo-prueba" onchange="guardarModoPrueba(this.checked)" style="opacity:0;width:0;height:0">
+        <span style="position:absolute;inset:0;background:#c3c8d4;border-radius:28px;transition:.2s"></span>
+        <span style="position:absolute;left:3px;top:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></span>
+      </label>
+    </div>
+    <div id="banner-modo-prueba" style="max-width:720px;margin:0 auto 18px;background:#f0faf0;border:1px solid #3AAA35;border-left:4px solid #3AAA35;border-radius:0 10px 10px 0;padding:11px 16px;display:flex;align-items:center;gap:10px;font-size:.78rem;color:#1a5c18;line-height:1.4">
+      <span style="font-size:1.1rem">🛡️</span>
+      <span><strong>Modo prueba activo.</strong> Todos los envíos (correo, WhatsApp y programados) van <strong>solo al equipo de prueba</strong>: Nancy, Carlos, Gustavo y Fernando. Ningún socio real recibe nada.</span>
+    </div>
+    <style>
+      #toggle-modo-prueba:checked + span { background:#3AAA35 !important; }
+      #toggle-modo-prueba:checked ~ span:last-child { transform:translateX(24px); }
+    </style>
+
     <!-- ACCESOS RÁPIDOS A SEGMENTOS -->
     <div class="mod-quicklinks">
       <span class="mod-quicklinks-label">Segmentos</span>
@@ -1437,8 +1458,39 @@ let EN_ADEUDO = [];
 
 const URL_DIRECTORIO = 'https://n8n.excelentia.com.mx/webhook/berimbau-datos';
 const URL_SYNC_AHORA = 'https://n8n.excelentia.com.mx/webhook/berimbau-sync-socios';
+const URL_CONFIG_GUARDAR = 'https://n8n.excelentia.com.mx/webhook/berimbau-config-guardar';
 let ALERTA_ANUAL = [];
 let SYNC_INFO = {};
+let MODO_PRUEBA = true; // se sobrescribe al cargar datos; por seguridad arranca en true
+
+// Equipo de prueba: cuando MODO_PRUEBA está activo, todo envío se redirige solo a estas personas.
+const EQUIPO_PRUEBA = [
+  { m:'990001', n:'Nancy',    cor:'asiscobranza@berimbau.mx',        tel:'5546973912', dias:10  },
+  { m:'990002', n:'Carlos',   cor:'sistemas@berimbau.com.mx',        tel:'5562228110', dias:40  },
+  { m:'990003', n:'Gustavo',  cor:'contabilidad@berimbau.com.mx',    tel:'5525730414', dias:71  },
+  { m:'990004', n:'Fernando', cor:'fernando.davila.olvera@gmail.com', tel:'5512154800', dias:160 }
+];
+
+function renderModoPruebaUI(){
+  const chk = document.getElementById('toggle-modo-prueba');
+  const banner = document.getElementById('banner-modo-prueba');
+  const lbl = document.getElementById('modo-prueba-label');
+  if(chk) chk.checked = MODO_PRUEBA;
+  if(banner) banner.style.display = MODO_PRUEBA ? 'flex' : 'none';
+  if(lbl){ lbl.textContent = MODO_PRUEBA ? 'Modo prueba ACTIVO' : 'Modo prueba apagado'; lbl.style.color = MODO_PRUEBA ? '#1a5c18' : '#8a90a0'; }
+}
+
+async function guardarModoPrueba(valor){
+  MODO_PRUEBA = !!valor;
+  renderModoPruebaUI();
+  try{
+    const r = await fetch(URL_CONFIG_GUARDAR,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({modo_prueba:MODO_PRUEBA})});
+    const res = await r.json().catch(()=>({}));
+    if(res && typeof res.modo_prueba==='boolean'){ MODO_PRUEBA = res.modo_prueba; renderModoPruebaUI(); }
+    showToast(MODO_PRUEBA ? '🔒 Modo prueba ACTIVADO — los envíos solo van al equipo de prueba' : '⚠️ Modo prueba APAGADO — los envíos irán a socios reales');
+  }catch(e){ showToast('⚠️ No se pudo guardar el modo prueba — verifica n8n'); }
+}
 
 async function cargarDirectorio(){
   mostrarCargando(true);
@@ -1449,6 +1501,8 @@ async function cargarDirectorio(){
     DATA = Array.isArray(json.data) ? json.data : [];
     ALERTA_ANUAL = Array.isArray(json.alerta_anual) ? json.alerta_anual : [];
     SYNC_INFO = json.sync || {};
+    if(typeof json.modo_prueba==='boolean') MODO_PRUEBA = json.modo_prueba;
+    renderModoPruebaUI();
   }catch(e){
     console.error('Error cargando directorio desde Supabase:', e);
     mostrarErrorCarga();
@@ -2039,9 +2093,9 @@ const SHEET_ID_AV = '1LINqYng5wuA7s0pcoDnt1YNsfCp5GdosBMZs6KeCM-8';
 const URL_AV_GUARDAR     = 'https://n8n.excelentia.com.mx/webhook/berimbau-avisos-guardar';
 const URL_AV_ENVIAR      = 'https://n8n.excelentia.com.mx/webhook/berimbau-avisos-enviar';
 const URL_AV_CARGAR      = 'https://n8n.excelentia.com.mx/webhook/berimbau-avisos-cargar';
-const URL_WA_YCLOUD      = 'https://api.ycloud.com/v2/whatsapp/messages';
-const WA_FROM            = '5215547850510';
-const WA_APIKEY          = '048c657a6ac828bbc881851d47f98e03';
+const URL_WA_ENVIAR      = 'https://n8n.excelentia.com.mx/webhook/berimbau-wa-enviar';
+// WhatsApp: el envío ahora pasa por n8n (webhook berimbau-wa-enviar).
+// La API key de YCloud vive del lado del servidor en n8n, ya NO en el navegador.
 const URL_CARGO_FALLIDO  = 'https://n8n.excelentia.com.mx/webhook/berimbau-cargo-fallido';
 
 let avisosConfig = {
@@ -2126,7 +2180,8 @@ async function guardarProg(){
     segmento: segmentoActivo,
     asunto,
     cuerpo,
-    remitente: avisosConfig.remitente
+    remitente: avisosConfig.remitente,
+    modo_prueba: MODO_PRUEBA
   };
 
   const btn = document.querySelector('.btn-av-save');
@@ -2459,8 +2514,10 @@ async function enviarManual(){
   if(!asunto||!cuerpo){showToast('⚠️ Completa asunto y mensaje');return;}
   const lista=currentManualDestinatarios;
   const extras=correosExtras.map(c=>({membresia:'',nombre:c.split('@')[0],correo:c,dias:0,meses:0}));
-  const totalLista=[...lista,...extras];
+  let totalLista=[...lista,...extras];
   if(!totalLista.length){showToast('⚠️ No hay destinatarios seleccionados');return;}
+  // Modo prueba: redirige TODO el envío (correo y WhatsApp) al equipo de prueba
+  if(MODO_PRUEBA){ totalLista = EQUIPO_PRUEBA.slice(); }
   const enviarWA=document.getElementById('toggle-wa')?.checked||false;
   const btn=document.getElementById('btn-send-manual');
   if(btn){btn.disabled=true;btn.textContent='⏳ Enviando...';}
@@ -2476,37 +2533,31 @@ async function enviarManual(){
     showToast('✅ ¡'+totalLista.length+' correos enviados!');
     // ── Envío WA (si toggle activo) ──
     if(enviarWA){
-      const conTel=totalLista.filter(d=>(d.tel||'').toString().trim().length>=10);
+      const conTel=totalLista.filter(d=>(d.tel||d.telefono||'').toString().replace(/\D/g,'').length>=10);
       if(conTel.length){
         showToast('📱 Enviando '+conTel.length+' WhatsApp...');
         const segVal=document.getElementById('av-seg-manual')?.value||'s1';
-        const plantillaMap={'s1':'berimbau_cobranza_s1','s2':'berimbau_cobranza_s2','s3':'berimbau_cobranza_s3','s4':'berimbau_cobranza_s4'};
-        const templateName=plantillaMap[segVal]||'berimbau_cobranza_s1';
-        const mesNombres=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-        const mesActual=mesNombres[new Date().getMonth()]+' '+new Date().getFullYear();
-        let waOK=0,waFail=0;
-        for(const d of conTel){
-          const tel='52'+String(d.tel||d.telefono||'').replace(/\D/g,'').replace(/^52/,'');
-          const nombre=(d.n||d.nombre||'Socio').split(' ')[0];
-          const memb=String(d.m||d.membresia||'');
-          const dias=String(d.dias!=null?d.dias:(d.meses||0));
-          try{
-            const r=await fetch(URL_WA_YCLOUD,{method:'POST',
-              headers:{'Content-Type':'application/json','X-API-Key':WA_APIKEY},
-              body:JSON.stringify({from:WA_FROM,to:tel,type:'template',template:{
-                name:templateName,language:{code:'es_MX'},
-                components:[{type:'body',parameters:[
-                  {type:'text',text:nombre},
-                  {type:'text',text:memb},
-                  {type:'text',text:dias},
-                  {type:'text',text:mesActual}
-                ]}]
-              }})
-            });
-            if(r.ok) waOK++; else waFail++;
-          }catch(e){ waFail++; }
+        try{
+          const r=await fetch(URL_WA_ENVIAR,{method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+              segmento:segVal,
+              modo_prueba:MODO_PRUEBA,
+              destinatarios:conTel.map(d=>({
+                telefono:(d.tel||d.telefono||''),
+                nombre:(d.n||d.nombre||'Socio'),
+                membresia:(d.m||d.membresia||''),
+                dias:(d.dias!=null?d.dias:0)
+              }))
+            })
+          });
+          const res=await r.json().catch(()=>({}));
+          const waOK=res.ok!=null?res.ok:(r.ok?conTel.length:0);
+          const waFail=res.fail!=null?res.fail:(r.ok?0:conTel.length);
+          showToast(`📱 WA: ${waOK} enviados${waFail?', '+waFail+' fallaron':''}`);
+        }catch(e){
+          showToast('⚠️ Error enviando WhatsApp — verifica n8n');
         }
-        showToast(`📱 WA: ${waOK} enviados${waFail?', '+waFail+' fallaron':''}`);
       } else {
         showToast('⚠️ Ningún destinatario tiene teléfono registrado para WA');
       }
