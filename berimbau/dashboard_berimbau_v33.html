@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Inteligente v33 — Club Berimbau</title>
+<title>Dashboard Inteligente v34 — Club Berimbau</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -807,6 +807,16 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
         </div>
         <button class="btn-av-save" onclick="guardarProg()">📅 Programar envío</button>
       </div>
+      <div id="prueba-selector" style="display:none;margin-top:14px;background:#f0faf0;border:1px solid #bfe3bf;border-radius:10px;padding:12px 14px">
+        <div style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:800;color:#1a5c18;margin-bottom:8px;display:flex;align-items:center;gap:6px">🔒 Solo en modo prueba · ¿A quién le llega este envío programado?</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px 18px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-prueba" value="990001" checked style="accent-color:#3AAA35;width:15px;height:15px"> Nancy <span style="color:#8a90a0;font-size:.68rem">(0–30)</span></label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-prueba" value="990002" checked style="accent-color:#3AAA35;width:15px;height:15px"> Carlos <span style="color:#8a90a0;font-size:.68rem">(31–60)</span></label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-prueba" value="990003" checked style="accent-color:#3AAA35;width:15px;height:15px"> Gustavo <span style="color:#8a90a0;font-size:.68rem">(61–90)</span></label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-prueba" value="990004" checked style="accent-color:#3AAA35;width:15px;height:15px"> Fernando <span style="color:#8a90a0;font-size:.68rem">(+90)</span></label>
+        </div>
+        <div style="font-size:.68rem;color:#4a5068;margin-top:8px">El mensaje que se envía es el del segmento que dejes activo arriba; aquí solo eliges quién lo recibe para revisarlo.</div>
+      </div>
       <div class="av-next-info" id="av-next-info" style="margin-top:12px">
         <span>📆</span> <span id="av-next-txt">Próximo envío: <strong id="av-next-date">—</strong></span>
       </div>
@@ -1475,8 +1485,10 @@ function renderModoPruebaUI(){
   const chk = document.getElementById('toggle-modo-prueba');
   const banner = document.getElementById('banner-modo-prueba');
   const lbl = document.getElementById('modo-prueba-label');
+  const sel = document.getElementById('prueba-selector');
   if(chk) chk.checked = MODO_PRUEBA;
   if(banner) banner.style.display = MODO_PRUEBA ? 'flex' : 'none';
+  if(sel) sel.style.display = MODO_PRUEBA ? 'block' : 'none';
   if(lbl){ lbl.textContent = MODO_PRUEBA ? 'Modo prueba ACTIVO' : 'Modo prueba apagado'; lbl.style.color = MODO_PRUEBA ? '#1a5c18' : '#8a90a0'; }
 }
 
@@ -2183,6 +2195,10 @@ async function guardarProg(){
     remitente: avisosConfig.remitente,
     modo_prueba: MODO_PRUEBA
   };
+  if(MODO_PRUEBA){
+    payload.prueba_ids = Array.from(document.querySelectorAll('.chk-prueba:checked')).map(c=>c.value);
+    if(!payload.prueba_ids.length){ showToast('⚠️ Elige al menos una persona de prueba'); return; }
+  }
 
   const btn = document.querySelector('.btn-av-save');
   const textoOriginal = btn ? btn.innerHTML : '';
@@ -3576,7 +3592,7 @@ function initModulesV10(){
       <span class="footer-logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
     </div>
     <div class="footer-tagline">
-      <strong>Dashboard Inteligente v33 — Club Berimbau</strong>
+      <strong>Dashboard Inteligente v34 — Club Berimbau</strong>
       Automatización e Inteligencia Artificial · excelentia.com.mx
     </div>
   </div>
