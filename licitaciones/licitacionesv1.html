@@ -478,7 +478,7 @@ td { padding: 11px 14px; font-size: 13px; color: var(--txt); vertical-align: mid
           <input type="date" id="fechaInput" max="" />
         </div>
         <button class="btn btn-primary" id="btnEjecutar" onclick="ejecutarAnalisis()">
-          <span id="btnIcon">▶</span> Analizar DOF
+          <span id="btnIcon">▶</span> Buscar licitaciones DOF
         </button>
       </div>
       <div id="runStatus" style="margin-top:12px;font-size:12px;color:var(--txt2);display:none;"></div>
@@ -514,7 +514,7 @@ td { padding: 11px 14px; font-size: 13px; color: var(--txt); vertical-align: mid
 
   <!-- FOOTER DE VERSIÓN -->
   <div class="version-footer">
-    <span class="badge-ver">Dashboard v1</span> &nbsp;·&nbsp; ExcelentIA — Inteligencia Artificial con esencia Humana
+    <span class="badge-ver">Dashboard v2</span> &nbsp;·&nbsp; ExcelentIA — Inteligencia Artificial con esencia Humana
   </div>
 
 </main>
@@ -635,7 +635,7 @@ function renderLicitCard(l, tipo, urlPdf) {
           ${l.tipo_procedimiento ? `<div class="meta">📋 ${l.tipo_procedimiento}${l.fecha_limite ? ` &nbsp;·&nbsp; 📅 Cierre: ${l.fecha_limite}` : ''}</div>` : ''}
         </div>
         <div class="licit-actions" style="flex-shrink:0;display:flex;flex-direction:column;gap:5px;">
-          <button onclick="pedirResumen('${uid}','${dataL}')"
+          <button onclick="pedirResumen('${uid}','${dataL}','${ctx}')"
             style="padding:5px 12px;border-radius:6px;border:1px solid var(--accent);background:#fff;color:var(--accent);font-family:Manrope,sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">
             ✨ Resumen
           </button>
@@ -902,7 +902,7 @@ function copiarChecklist(uid) {
 }
 
 // ── PEDIR RESUMEN IA ──────────────────────────────────────
-async function pedirResumen(uid, dataEncoded) {
+async function pedirResumen(uid, dataEncoded, ctxEncoded) {
   const panel = document.getElementById(uid + '-resumen');
   const btn   = document.querySelector(`#${uid} button`);
   if (!panel || !btn) return;
@@ -921,6 +921,38 @@ async function pedirResumen(uid, dataEncoded) {
 
   try {
     const data = JSON.parse(decodeURIComponent(dataEncoded));
+
+    // ¿Ya se analizaron las bases de esta licitación? → resumen enriquecido
+    let deBases = false;
+    try {
+      const ctx = ctxEncoded ? JSON.parse(decodeURIComponent(ctxEncoded)) : {};
+      const numero = (ctx.numero || '').trim();
+      if (numero) {
+        const bRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/bases_licitacion?numero_licitacion=eq.${encodeURIComponent(numero)}&select=*`,
+          { headers: sbHeaders() }
+        );
+        const bArr = await bRes.json();
+        if (Array.isArray(bArr) && bArr.length) {
+          const b = bArr[0];
+          const arr = (x) => Array.isArray(x) ? x : [];
+          const nombres = (x) => arr(x).map(i => (typeof i === 'string' ? i : (i.requisito || i.nombre || i.item || i.descripcion || i.riesgo || JSON.stringify(i)))).slice(0, 40);
+          data.bases_analizadas = {
+            estado: b.estado || '',
+            nivel_complejidad: b.nivel_complejidad || '',
+            resumen_bases: b.resumen || '',
+            requisitos_tecnicos: nombres(b.requisitos_tecnicos),
+            requisitos_admin: nombres(b.requisitos_admin),
+            requisitos_economicos: nombres(b.requisitos_economicos),
+            riesgos: nombres(b.riesgos),
+            checklist: nombres(b.checklist),
+            calendario: b.calendario || {}
+          };
+          deBases = true;
+        }
+      }
+    } catch(e) { /* si falla, seguimos con el resumen normal del DOF */ }
+
     const res  = await fetch(N8N_RESUMEN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -942,12 +974,14 @@ async function pedirResumen(uid, dataEncoded) {
           <span style="background:${color};color:#fff;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;">
             ${nivel || 'N/A'} oportunidad
           </span>
+          ${deBases ? `<span style="background:#dce8f7;color:#1a3a6b;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;">📊 Basado en bases de ComprasMX</span>` : ''}
         </div>
         <div style="display:grid;gap:8px;">
           <div><span style="color:var(--txt3);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px;">Qué se licita</span><br>${r.que_se_licita}</div>
           <div><span style="color:var(--txt3);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px;">Quién compra</span><br>${r.quien_compra}</div>
           <div><span style="color:var(--txt3);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px;">Tipo de proceso</span><br>${r.tipo_proceso}</div>
           <div><span style="color:var(--txt3);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px;">Relevancia médica</span><br>${r.relevancia_medica}</div>
+          ${r.detalle_bases ? `<div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px;border-left:3px solid #4a9fd4;"><span style="color:var(--txt3);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px;">Detalle de las bases</span><br>${r.detalle_bases}</div>` : ''}
           <div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px;border-left:3px solid var(--accent);">
             <span style="color:var(--txt3);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px;">Acciones recomendadas</span><br>
             ${r.acciones_recomendadas}
