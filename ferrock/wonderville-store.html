@@ -636,7 +636,8 @@ header .subtitle {
 <div class="toast" id="toast"></div>
 
 <script>
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwxtryBPi0ri2P1MZclTZYi30Czyexo8Rv9iZA1pOLZByUYDOmT7ltrKwB80WBZpjfRA/exec';
+// ⬇️ PEGA AQUÍ LA URL NUEVA DE TU APPS SCRIPT (la que copies al hacer "Implementar")
+const GOOGLE_SCRIPT_URL = 'PEGAR_AQUI_URL_NUEVA_DEL_APPS_SCRIPT';
 
 // ── PRODUCTOS FIJOS ──
 const FIXED_PRODUCTS = [
@@ -652,7 +653,7 @@ const FIXED_PRODUCTS = [
   { key:'gorras',    name:'Gorra',     basePrice:150 },
   { key:'stickers',  name:'Stickers',  basePrice:120 },
 ];
-const ART_COUNT = 6;
+const ART_COUNT = 3;
 
 // ── ESTADO ──
 let fixedQty    = FIXED_PRODUCTS.map(()=>0);
@@ -1023,26 +1024,27 @@ async function registerSale(){
   const esEfectivo=pago==='Efectivo'?total:0;
   const esTarjeta=pago==='Tarjeta'?total:0;
   const esTransferencia=pago==='Transferencia'?total:0;
+  // Orden de FIXED_PRODUCTS: 0 Constance · 1 Jane Doe · 2 Ocean · 3 Mischa · 4 Noel · 5 Ricky · 6 Tote Bag · 7 Karnak · 8 Oráculo · 9 Gorra · 10 Stickers
   const params=new URLSearchParams({
     fecha,
-    bolsas:fixedQty[6],
+    totebag:fixedQty[6],
     stickers:fixedQty[10],
     oraculos:fixedQty[8],
     gorras:fixedQty[9],
-    playeras:fixedQty[0]+fixedQty[1]+fixedQty[2]+fixedQty[3]+fixedQty[4]+fixedQty[5]+fixedQty[7],
+    janedoe:fixedQty[1],
+    ocean:fixedQty[2],
+    constance:fixedQty[0],
+    noel:fixedQty[4],
+    mischa:fixedQty[3],
+    ricky:fixedQty[5],
+    karnak:fixedQty[7],
     art1:artConfigs[0].configured?artQty[0]:0,
     art2:artConfigs[1].configured?artQty[1]:0,
     art3:artConfigs[2].configured?artQty[2]:0,
-    art4:artConfigs[3].configured?artQty[3]:0,
-    art5:artConfigs[4].configured?artQty[4]:0,
-    art6:artConfigs[5].configured?artQty[5]:0,
-    art1nombre:artConfigs[0].name||'',
-    art2nombre:artConfigs[1].name||'',
-    art3nombre:artConfigs[2].name||'',
-    art4nombre:artConfigs[3].name||'',
-    art5nombre:artConfigs[4].name||'',
-    art6nombre:artConfigs[5].name||'',
-    items, pago, total, esEfectivo, esTarjeta, esTransferencia
+    items, total,
+    efectivo:esEfectivo,
+    tarjeta:esTarjeta,
+    transfer:esTransferencia
   });
   try{ await fetch(GOOGLE_SCRIPT_URL+'?'+params.toString(),{method:'GET',mode:'no-cors'}); }
   catch(e){ console.log(e); }
