@@ -659,14 +659,6 @@ async function cargarT2(manual){
     renderTemporada(semanas, wrap);
     pane.innerHTML = toolbar;
     pane.appendChild(wrap);
-    // re-enganchar acordeón (quedó dentro de wrap)
-    wrap.querySelectorAll('.accordion-item').forEach(item => {
-      item.querySelector('.accordion-header').addEventListener('click', () => {
-        const isOpen = item.classList.contains('open');
-        wrap.querySelectorAll('.accordion-item.open').forEach(el => el.classList.remove('open'));
-        if (!isOpen) item.classList.add('open');
-      });
-    });
     pane.dataset.loaded = '1';
     document.getElementById('globalBadge').innerHTML = `Temporada 2 · <b style="color:var(--neon)">${money(semanas.reduce((a,s)=>a+s.total,0))}</b>`;
   } catch (err){
