@@ -78,8 +78,8 @@
   .bar-legend-item { display: flex; align-items: center; gap: 0.4rem; }
   .bar-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
   .bar-legend-text { font-size: 0.68rem; font-weight: 800; color: var(--muted); }
-  .stacked-bars { display: flex; align-items: flex-end; gap: 0.5rem; height: 260px; }
-  .stacked-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; height: 100%; justify-content: flex-end; min-width: 30px; }
+  .stacked-bars { display: flex; align-items: flex-end; gap: 0.6rem; height: 260px; justify-content: flex-start; overflow-x: auto; padding-bottom: 6px; }
+  .stacked-bar-wrap { flex: 0 0 120px; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; height: 100%; justify-content: flex-end; min-width: 120px; }
   .stacked-bar-col { width: 100%; display: flex; flex-direction: column; border-radius: 6px 6px 0 0; overflow: hidden; }
   .stacked-bar-val { font-family: 'Black Ops One', cursive; font-size: 0.64rem; color: var(--text); text-align: center; white-space: nowrap; }
   .stacked-bar-label { font-size: 0.64rem; font-weight: 800; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; text-align: center; }
@@ -169,8 +169,8 @@
     .kpi-value { font-size: 1.4rem; }
     .semana-grid { grid-template-columns: repeat(2, 1fr); }
     .char-grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
-    .stacked-bars { height: 150px; gap: 0.25rem; overflow-x: auto; padding-bottom: 4px; }
-    .stacked-bar-wrap { min-width: 26px; }
+    .stacked-bars { height: 150px; gap: 0.4rem; overflow-x: auto; padding-bottom: 4px; }
+    .stacked-bar-wrap { flex: 0 0 92px; min-width: 92px; }
     .stacked-bar-val { font-size: 0.42rem; }
     .stacked-bar-label { font-size: 0.4rem; }
     .stacked-bar-date { font-size: 0.36rem; }
@@ -272,8 +272,9 @@ const SEMANAS_T1 = [
     bolsas:0, stickers:3, oraculos:9, gorras:0, playeras:18,
     chars:{'Constance':0,'Ricky':6,'Noel':2,'Karnak':1,'Ocean':2,'Mischa':2,'Jane Doe':5} },
   { num:10, fecha:'23 Jun 2026', efectivo:12220, tarjeta:0, transfer:4240, total:16460,
-    bolsas:1, stickers:10, oraculos:30, gorras:4, playeras:27,
-    chars:{'Constance':0,'Ricky':3,'Noel':0,'Karnak':6,'Ocean':0,'Mischa':0,'Jane Doe':7,'Concurso':11} },
+    bolsas:1, stickers:10, oraculos:30, gorras:4, playeras:16,
+    chars:{'Constance':0,'Ricky':3,'Noel':0,'Karnak':6,'Ocean':0,'Mischa':0,'Jane Doe':7},
+    especiales:{'Concurso':11} },
 ];
 
 /* ============================================================
@@ -284,11 +285,18 @@ function pct(part, whole){ return whole > 0 ? (part/whole*100).toFixed(1) + '%' 
 
 function esc(str){ return String(str).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-// Total de playeras de una semana (personajes + especiales)
+// Playeras de una semana = SOLO los 7 personajes (los especiales van aparte)
 function totalPlayeras(s){
   if (typeof s.playeras === 'number') return s.playeras;
-  return Object.values(s.chars || {}).reduce((a,v)=>a+v, 0);
+  return Object.entries(s.chars || {}).filter(([k]) => CHAR_KEYS.includes(k)).reduce((a,[,v]) => a+v, 0);
 }
+// Diseños especiales de una semana (Art en T2, Concurso en T1): junta s.especiales + claves no-personaje de chars
+function especialesDe(s){
+  const e = Object.assign({}, s.especiales || {});
+  Object.entries(s.chars || {}).forEach(([k,v]) => { if (!CHAR_KEYS.includes(k)) e[k] = (e[k]||0) + v; });
+  return e;
+}
+function totalEspeciales(s){ return Object.values(especialesDe(s)).reduce((a,v) => a+v, 0); }
 
 /* ============================================================
    RENDER DE UNA TEMPORADA (sirve para T1 y T2)
@@ -296,7 +304,7 @@ function totalPlayeras(s){
 function renderTemporada(semanas, paneEl){
   const tot = {
     total:0, efectivo:0, tarjeta:0, transfer:0,
-    bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, piezas:0
+    bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, especiales:0, piezas:0
   };
   const charTotals = {};
   const specialTotals = {};
@@ -311,14 +319,18 @@ function renderTemporada(semanas, paneEl){
     tot.stickers += s.stickers || 0;
     tot.oraculos += s.oraculos || 0;
     tot.gorras   += s.gorras   || 0;
-    const pl = totalPlayeras(s);
-    tot.playeras += pl;
+    tot.playeras += totalPlayeras(s);
+    // personajes
     Object.entries(s.chars || {}).forEach(([k,v]) => {
       if (CHAR_KEYS.includes(k)) charTotals[k] = (charTotals[k]||0) + v;
-      else specialTotals[k] = (specialTotals[k]||0) + v;
+    });
+    // especiales (Art / Concurso)
+    Object.entries(especialesDe(s)).forEach(([k,v]) => {
+      specialTotals[k] = (specialTotals[k]||0) + v;
+      tot.especiales += v;
     });
   });
-  tot.piezas = tot.bolsas + tot.stickers + tot.oraculos + tot.gorras + tot.playeras;
+  tot.piezas = tot.bolsas + tot.stickers + tot.oraculos + tot.gorras + tot.playeras + tot.especiales;
   const nfunc = semanas.length;
   const prom = nfunc ? tot.total / nfunc : 0;
 
@@ -350,6 +362,7 @@ function renderTemporada(semanas, paneEl){
   html += `<p class="section-title">Por Función</p><div class="semana-grid">`;
   semanas.forEach(s => {
     const pl = totalPlayeras(s);
+    const esp = totalEspeciales(s);
     const rango = s.rango ? `<div class="semana-rango">${esc(s.rango)}</div>` : '';
     html += `<div class="semana-card">
       <div class="semana-num">Función ${s.num}</div>
@@ -365,6 +378,7 @@ function renderTemporada(semanas, paneEl){
         <div class="semana-row"><span class="semana-key">Oráculos</span><span class="semana-val">${s.oraculos||0}</span></div>
         <div class="semana-row"><span class="semana-key">Gorras</span><span class="semana-val">${s.gorras||0}</span></div>
         <div class="semana-row"><span class="semana-key">Playeras</span><span class="semana-val">${pl}</span></div>
+        ${(esp>0)?`<div class="semana-row"><span class="semana-key" style="color:var(--orange)">Especiales</span><span class="semana-val" style="color:var(--orange)">${esp}</span></div>`:''}
       </div>
     </div>`;
   });
@@ -427,8 +441,8 @@ function renderTemporada(semanas, paneEl){
       </div>
     </div>`;
 
-  /* ---- Playeras por personaje ---- */
-  html += `<p class="section-title">Playeras · Total por Personaje / Diseño</p><div class="char-grid">`;
+  /* ---- Playeras por personaje (solo los 7) ---- */
+  html += `<p class="section-title">Playeras · Total por Personaje</p><div class="char-grid">`;
   CHARS.forEach(ch => {
     const qty = charTotals[ch.key] || 0;
     html += `<div class="char-card">
@@ -439,44 +453,50 @@ function renderTemporada(semanas, paneEl){
       <div class="char-monto">${money(qty*PRECIOS.playera)}</div>
     </div>`;
   });
-  // Especiales (Concurso en T1, Art 1-3 en T2)
-  Object.entries(specialTotals).forEach(([name, qty]) => {
-    html += `<div class="char-card concurso">
-      <div class="char-img-placeholder show">🏆</div>
-      <div class="char-name">${esc(name)}</div>
-      <div class="char-qty">${qty}</div>
-      <div class="char-monto">${money(qty*PRECIOS.playera)}</div>
-    </div>`;
-  });
   html += `</div>`;
+
+  /* ---- Diseños especiales (aparte de playeras) ---- */
+  const specialEntries = Object.entries(specialTotals).filter(([,v]) => v > 0);
+  if (specialEntries.length){
+    html += `<p class="section-title">Diseños Especiales</p><div class="char-grid">`;
+    specialEntries.forEach(([name, qty]) => {
+      html += `<div class="char-card concurso">
+        <div class="char-img-placeholder show">🏆</div>
+        <div class="char-name">${esc(name)}</div>
+        <div class="char-qty">${qty}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
 
   /* ---- Acordeón: detalle por función ---- */
   html += `<p class="section-title">Playeras · Detalle por Función</p><div class="accordion-list">`;
   semanas.forEach(s => {
     const pl = totalPlayeras(s);
-    const entries = Object.entries(s.chars || {}).filter(([,v]) => v > 0);
-    const assigned = entries.reduce((a,[,v]) => a+v, 0);
+    const esp = especialesDe(s);
+    const espTot = totalEspeciales(s);
+    const charEntries = Object.entries(s.chars || {}).filter(([k,v]) => v > 0 && CHAR_KEYS.includes(k));
+    const assigned = charEntries.reduce((a,[,v]) => a+v, 0);
     const unassigned = pl - assigned;
-    const badgeClass = pl === 0 ? 'zero' : '';
-    const badgeText = pl === 0 ? '0 playeras' : `${pl} playera${pl>1?'s':''}`;
+    const totalLinea = pl + espTot;
+    const badgeClass = totalLinea === 0 ? 'zero' : '';
+    const badgeText = totalLinea === 0 ? 'sin playeras'
+      : `${pl} playera${pl!==1?'s':''}${espTot>0?` · ${espTot} especial${espTot!==1?'es':''}`:''}`;
     let body = '';
-    if (pl === 0) {
+    if (totalLinea === 0) {
       body = `<div class="accordion-empty">Sin ventas de playeras esta función</div>`;
     } else {
-      entries.forEach(([name, qty]) => {
+      charEntries.forEach(([name, qty]) => {
         const ch = CHARS.find(c => c.key === name);
-        const isSpecial = !ch;
-        const img = ch ? `${GITHUB}${ch.img}` : '';
-        const fb = ch ? ch.fb : '🏆';
-        const thumb = isSpecial
-          ? `<div class="char-thumb-placeholder">${fb}</div>`
-          : `<img class="char-thumb" src="${img}" alt="${esc(name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="char-thumb-placeholder" style="display:none">${fb}</div>`;
-        const extra = isSpecial ? ' <span style="color:var(--orange);font-size:0.6rem">(especial)</span>' : '';
-        body += `<div class="char-row"><div class="char-row-left">${thumb}<span class="char-row-name">${esc(name)}${extra}</span></div><div class="char-row-right"><span class="char-row-qty">${qty}</span><span class="char-row-monto">${money(qty*PRECIOS.playera)}</span></div></div>`;
+        const thumb = `<img class="char-thumb" src="${GITHUB}${ch.img}" alt="${esc(name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="char-thumb-placeholder" style="display:none">${ch.fb}</div>`;
+        body += `<div class="char-row"><div class="char-row-left">${thumb}<span class="char-row-name">${esc(name)}</span></div><div class="char-row-right"><span class="char-row-qty">${qty}</span><span class="char-row-monto">${money(qty*PRECIOS.playera)}</span></div></div>`;
       });
       if (unassigned > 0) {
         body += `<div class="char-row"><div class="char-row-left"><div class="char-thumb-placeholder">🎭</div><span class="char-row-name" style="color:var(--muted)">Sin personaje asignado</span></div><div class="char-row-right"><span class="char-row-qty" style="color:var(--muted)">${unassigned}</span><span class="char-row-monto">${money(unassigned*PRECIOS.playera)}</span></div></div>`;
       }
+      Object.entries(esp).filter(([,v]) => v > 0).forEach(([name, qty]) => {
+        body += `<div class="char-row"><div class="char-row-left"><div class="char-thumb-placeholder">🏆</div><span class="char-row-name">${esc(name)} <span style="color:var(--orange);font-size:0.6rem">(especial)</span></span></div><div class="char-row-right"><span class="char-row-qty" style="color:var(--orange)">${qty}</span></div></div>`;
+      });
     }
     html += `<div class="accordion-item">
       <div class="accordion-header">
@@ -522,15 +542,20 @@ function parseFecha(row){
     const n = v.slice(5, -1).split(',').map(x => parseInt(x,10));
     return new Date(n[0], n[1], n[2]||1, n[3]||0, n[4]||0, n[5]||0);
   }
-  // texto "20/7/2026, 14:30:00" o "20/7/2026"
   if (typeof v === 'string'){
-    const parts = v.split(',')[0].trim().split('/');
-    if (parts.length === 3){
-      const d = parseInt(parts[0],10), m = parseInt(parts[1],10)-1, y = parseInt(parts[2],10);
-      const dt = new Date(y, m, d);
+    const s = v.trim();
+    // ISO "2026-07-20 ..."
+    const iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso){ const dt = new Date(+iso[1], +iso[2]-1, +iso[3]); if(!isNaN(dt)) return dt; }
+    // "20/7/2026, 14:30" o "20/7/2026"
+    const p = s.split(',')[0].trim().split('/');
+    if (p.length === 3){
+      const dt = new Date(parseInt(p[2],10), parseInt(p[1],10)-1, parseInt(p[0],10));
       if (!isNaN(dt)) return dt;
     }
   }
+  // respaldo: fecha ya formateada por gviz en c.f
+  if (c.f){ const dt = new Date(c.f); if(!isNaN(dt)) return dt; }
   return null;
 }
 function funcionIndex(fecha){
@@ -548,18 +573,24 @@ function rangoFuncion(idx){
   return `${lun.getDate()} ${MESES[lun.getMonth()]} – ${dom.getDate()} ${MESES[dom.getMonth()]}`;
 }
 
+let T2_IGNORADAS = 0;
 function agruparT2(rows){
   const grupos = {};
+  T2_IGNORADAS = 0;
   rows.forEach(row => {
     const fecha = parseFecha(row);
-    if (!fecha) return; // salta encabezados o filas sin fecha válida
     const total = cell(row, 16);
+    // ¿la fila tiene algún dato real?
+    const hayDatos = total > 0 || cell(row,1)||cell(row,2)||cell(row,3)||cell(row,4)||
+      cell(row,5)||cell(row,6)||cell(row,7)||cell(row,8)||cell(row,9)||cell(row,10)||
+      cell(row,11)||cell(row,12)||cell(row,13)||cell(row,14);
+    if (!fecha) { if (hayDatos) T2_IGNORADAS++; return; } // sin fecha = resumen/basura → se ignora
     const idx = funcionIndex(fecha);
     if (!grupos[idx]){
       grupos[idx] = {
         num: idx + 1, fecha: fechaFuncion(idx), rango: rangoFuncion(idx),
         efectivo:0, tarjeta:0, transfer:0, total:0,
-        bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, chars:{}
+        bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, chars:{}, especiales:{}
       };
     }
     const g = grupos[idx];
@@ -576,13 +607,13 @@ function agruparT2(rows){
       const q = cell(row, ch.col);
       if (q) g.chars[ch.key] = (g.chars[ch.key]||0) + q;
     });
-    // Diseños especiales Art 1-3 (columnas 12,13,14)
+    // Diseños especiales Art 1-3 (columnas 12,13,14) → aparte de playeras
     [['Art 1',12],['Art 2',13],['Art 3',14]].forEach(([name,col]) => {
       const q = cell(row, col);
-      if (q) g.chars[name] = (g.chars[name]||0) + q;
+      if (q) g.especiales[name] = (g.especiales[name]||0) + q;
     });
   });
-  // playeras = suma de personajes + especiales
+  // playeras = suma de personajes (los especiales van aparte)
   Object.values(grupos).forEach(g => {
     g.playeras = Object.values(g.chars).reduce((a,v)=>a+v, 0);
   });
