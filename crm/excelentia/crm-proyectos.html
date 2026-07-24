@@ -95,6 +95,32 @@ tr:last-child td{border-bottom:none}
 .modal-body{padding:1.25rem}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
 .form-group{display:flex;flex-direction:column;gap:.3rem}
+
+/* ── PANEL: CREAR CONTACTO AL VUELO ── */
+.nuevo-contacto{display:none;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:0 10px 10px 0;padding:.8rem .9rem;max-width:720px;margin:0 auto;width:100%}
+.nuevo-contacto.open{display:block}
+.nc-head{font-size:.82rem;font-weight:800;color:#1a3a6b;margin-bottom:.6rem}
+.nc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.nc-field{display:flex;flex-direction:column;gap:.25rem}
+.nc-field.nc-full{grid-column:1/-1}
+.nc-field label{font-size:.73rem;font-weight:700;color:#4a5068}
+.nc-field input{width:100%;padding:.45rem .6rem;border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif;font-size:.83rem;color:#1a2035;background:#fff}
+.nc-field input:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+.nc-hint{font-size:.73rem;color:#8a90a0;margin-top:.5rem;line-height:1.4}
+.nc-aviso{display:none;margin-top:.55rem;border-radius:8px;padding:.5rem .65rem;font-size:.77rem;line-height:1.45}
+.nc-aviso.open{display:block}
+.nc-aviso.dup{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b}
+.nc-aviso.parecido{background:#fef9c3;border:1px solid #fde047;color:#713f12}
+.nc-aviso b{font-weight:800}
+.nc-usar{background:#fff;border:1px solid #c8d9f0;border-radius:6px;padding:.2rem .5rem;font-size:.74rem;font-weight:700;color:#1a3a6b;cursor:pointer;font-family:'Manrope',sans-serif;margin-top:.35rem;margin-right:.3rem}
+.nc-usar:hover{background:#dce8f7}
+.nc-acciones{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
+.nc-sugerencia{display:none;font-size:.76rem;color:#4a5068;background:#eef4fc;border-left:4px solid #1a3a6b;border-radius:0 6px 6px 0;padding:.5rem .7rem;line-height:1.45;max-width:720px;margin:0 auto;width:100%}
+.nc-sugerencia.open{display:block}
+@media(max-width:600px){
+  .nc-grid{grid-template-columns:1fr}
+  .nc-field.nc-full{grid-column:1}
+}
 .form-group.full{grid-column:1/-1}
 label{font-size:.8rem;font-weight:600;color:#4a5068}
 input,select,textarea{padding:.5rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.83rem;color:#1a2035;background:#fff}
@@ -198,7 +224,35 @@ textarea{resize:vertical;min-height:70px}
       <div class="form-grid">
         <div class="form-group full"><label>Nombre del proyecto *</label><input type="text" id="p-nombre" placeholder="Ej: Dashboard Berimbau v2"></div>
         <div class="form-group"><label>Empresa</label><input type="text" id="p-empresa" placeholder="Razón social o nombre"></div>
-        <div class="form-group"><label>Contacto</label><input type="text" id="p-contacto" list="dl-contactos" placeholder="Elige de la lista o escribe" autocomplete="off"><datalist id="dl-contactos"></datalist></div>
+        <div class="form-group"><label>Contacto</label><input type="text" id="p-contacto" list="dl-contactos" placeholder="Elige de la lista o escribe" autocomplete="off" oninput="revisarContactoProyecto()"><datalist id="dl-contactos"></datalist></div>
+        <div class="form-group full nuevo-contacto" id="panelNuevoContacto">
+          <div class="nc-head">➕ Agregar al directorio</div>
+          <div class="nc-grid">
+            <div class="nc-field nc-full">
+              <label>Nombre *</label>
+              <input type="text" id="ncNombre" placeholder="Nombre completo" oninput="revisarDuplicado()" autocomplete="off">
+            </div>
+            <div class="nc-field">
+              <label>Empresa</label>
+              <input type="text" id="ncEmpresa" placeholder="Dónde trabaja" oninput="validarNuevoContacto()">
+            </div>
+            <div class="nc-field">
+              <label>WhatsApp</label>
+              <input type="tel" id="ncWhatsApp" placeholder="+52 55 1234 5678" oninput="validarNuevoContacto()">
+            </div>
+            <div class="nc-field nc-full">
+              <label>Email</label>
+              <input type="email" id="ncEmail" placeholder="correo@empresa.com" oninput="validarNuevoContacto()">
+            </div>
+          </div>
+          <div class="nc-aviso" id="ncAviso"></div>
+          <div class="nc-hint" id="ncHint">Además del nombre, agrega al menos empresa, WhatsApp o email.</div>
+          <div class="nc-acciones">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="cancelarNuevoContacto()">Cancelar</button>
+            <button type="button" class="btn btn-primary btn-sm" id="ncBtnCrear" onclick="crearContactoRapido()" disabled>Crear y usar</button>
+          </div>
+        </div>
+        <div class="form-group full nc-sugerencia" id="ncSugerencia"></div>
         <div class="form-group"><label>Etapa</label>
           <select id="p-etapa"><option>Prospecto</option><option>Contacto</option><option>Presentación</option><option>Seguimiento</option><option>Propuesta</option><option>Cierre</option><option>Desarrollo</option><option>Entrega</option><option>Mantenimiento</option></select>
         </div>
@@ -269,15 +323,208 @@ let sortCol = 'accionfecha';
 let sortDir = 1;
 let editId = null;
 
-// ── Contactos: mostrar nombre pero guardar el ID cuando existe ──
-function nombreContacto(idOrText){
+// ── Contactos: se guarda el nombre visible SIEMPRE (texto libre), y el ID solo
+//    cuando el texto coincide con un contacto formal existente ──
+function nombreContacto(idOrText, nombreLibre){
+  // 1) Si hay nombre libre guardado, ese manda
+  const libre = toStr(nombreLibre).trim();
+  if(libre) return libre;
+  // 2) Si el valor es un ID de contacto formal, mostrar su nombre
   const c = CONTACTOS.find(x => x.id === toStr(idOrText));
   return c ? c.nombre : toStr(idOrText);
 }
 function idDeContacto(text){
   const t = toStr(text).trim();
   const c = CONTACTOS.find(x => x.nombre.toLowerCase() === t.toLowerCase());
-  return c ? c.id : t;   // coincide un contacto → su ID; si no, se guarda el texto libre
+  return c ? c.id : '';   // coincide un contacto formal → su ID; si no, vacío (será texto libre)
+}
+
+// ═══════════════════════════════════════
+// CREAR CONTACTO AL VUELO
+// ═══════════════════════════════════════
+
+// ── Anti-duplicados: ignora acentos, mayúsculas y errores de dedo ──
+function normNombre(s){
+  return String(s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9ñ ]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function distanciaTexto(a,b){
+  if(a === b) return 0;
+  const m = a.length, n = b.length;
+  if(!m) return n;
+  if(!n) return m;
+  let prev = Array.from({length:n+1},(_,i)=>i);
+  for(let i=1;i<=m;i++){
+    const cur=[i];
+    for(let j=1;j<=n;j++){
+      cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1] + (a[i-1]===b[j-1]?0:1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function buscarSimilares(nombre){
+  const n = normNombre(nombre);
+  const res = { exacto:null, parecidos:[] };
+  if(n.length < 3) return res;
+  for(const c of CONTACTOS){
+    const cn = normNombre(c.nombre);
+    if(!cn) continue;
+    if(cn === n){ res.exacto = c; return res; }
+    const largo = Math.max(cn.length, n.length);
+    const umbral = largo <= 6 ? 1 : Math.max(2, Math.floor(largo * 0.25));
+    if(distanciaTexto(cn,n) <= umbral || cn.includes(n) || n.includes(cn)) res.parecidos.push(c);
+  }
+  res.parecidos = res.parecidos.slice(0,3);
+  return res;
+}
+
+// Mientras escribes en el campo Contacto del proyecto: si no está en el directorio, ofrecer crearlo
+function revisarContactoProyecto(){
+  const txt = document.getElementById('p-contacto').value.trim();
+  const sug = document.getElementById('ncSugerencia');
+  const panel = document.getElementById('panelNuevoContacto');
+  if(panel.classList.contains('open')) return;   // el panel manda
+
+  if(txt.length < 3){ sug.classList.remove('open'); return; }
+  const { exacto, parecidos } = buscarSimilares(txt);
+
+  if(exacto){
+    sug.classList.remove('open');
+  } else if(parecidos.length){
+    sug.className = 'form-group full nc-sugerencia open';
+    sug.innerHTML = '🤔 ¿Te refieres a ' +
+      parecidos.map(c => `<button type="button" class="nc-usar" onclick="usarContactoExistente('${escHtml(c.nombre)}')">${escHtml(c.nombre)}${c.empresa?' · '+escHtml(c.empresa):''}</button>`).join('') +
+      '? Si no, <button type="button" class="nc-usar" onclick="abrirNuevoContacto()">➕ agregarlo al directorio</button>';
+  } else {
+    sug.className = 'form-group full nc-sugerencia open';
+    sug.innerHTML = `<b>${escHtml(txt)}</b> no está en tu directorio. Se guardará como texto libre, o puedes ` +
+      '<button type="button" class="nc-usar" onclick="abrirNuevoContacto()">➕ agregarlo al directorio</button>';
+  }
+}
+
+function abrirNuevoContacto(){
+  const panel = document.getElementById('panelNuevoContacto');
+  document.getElementById('ncSugerencia').classList.remove('open');
+  panel.classList.add('open');
+  document.getElementById('ncNombre').value = document.getElementById('p-contacto').value.trim();
+  ['ncEmpresa','ncWhatsApp','ncEmail'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  // Precargar la empresa del proyecto, que casi siempre es la misma
+  const emp = document.getElementById('p-empresa').value.trim();
+  if(emp) document.getElementById('ncEmpresa').value = emp;
+  revisarDuplicado();
+  setTimeout(()=>document.getElementById('ncNombre')?.focus(), 60);
+}
+
+function cerrarPanelNuevoContacto(){
+  document.getElementById('panelNuevoContacto')?.classList.remove('open');
+  document.getElementById('ncSugerencia')?.classList.remove('open');
+  ocultarAviso();
+}
+function cancelarNuevoContacto(){ cerrarPanelNuevoContacto(); }
+
+function ocultarAviso(){
+  const av = document.getElementById('ncAviso');
+  if(av){ av.className = 'nc-aviso'; av.innerHTML = ''; }
+}
+
+function revisarDuplicado(){
+  const nombre = document.getElementById('ncNombre').value;
+  const av = document.getElementById('ncAviso');
+  const { exacto, parecidos } = buscarSimilares(nombre);
+
+  if(exacto){
+    av.className = 'nc-aviso open dup';
+    av.innerHTML = `⚠️ <b>${escHtml(exacto.nombre)}</b> ya está en tu directorio${exacto.empresa?' · '+escHtml(exacto.empresa):''}. No se puede duplicar.
+      <br><button type="button" class="nc-usar" onclick="usarContactoExistente('${escHtml(exacto.nombre)}')">Usar este contacto</button>`;
+  } else if(parecidos.length){
+    av.className = 'nc-aviso open parecido';
+    av.innerHTML = '🤔 Se parece a ' + (parecidos.length>1?'estos contactos':'este contacto') + ':<br>' +
+      parecidos.map(c => `<button type="button" class="nc-usar" onclick="usarContactoExistente('${escHtml(c.nombre)}')">${escHtml(c.nombre)}${c.empresa?' · '+escHtml(c.empresa):''}</button>`).join('') +
+      '<br><span style="font-size:.73rem">Si de verdad es alguien distinto, puedes crearlo.</span>';
+  } else {
+    ocultarAviso();
+  }
+  validarNuevoContacto();
+}
+
+function usarContactoExistente(nombre){
+  document.getElementById('p-contacto').value = nombre;
+  cerrarPanelNuevoContacto();
+  showToast('Contacto tomado del directorio');
+}
+
+// ── Ficha mínima: nombre + al menos un dato de contexto ──
+function validarNuevoContacto(){
+  const nombre = document.getElementById('ncNombre').value.trim();
+  const empresa = document.getElementById('ncEmpresa').value.trim();
+  const wa = document.getElementById('ncWhatsApp').value.trim();
+  const mail = document.getElementById('ncEmail').value.trim();
+  const btn = document.getElementById('ncBtnCrear');
+  const hint = document.getElementById('ncHint');
+  const { exacto } = buscarSimilares(nombre);
+
+  const tieneContexto = !!(empresa || wa || mail);
+  btn.disabled = !(nombre.length >= 3 && tieneContexto && !exacto);
+
+  if(exacto)                  hint.textContent = 'Ese contacto ya existe — úsalo desde el aviso de arriba.';
+  else if(nombre.length < 3)  hint.textContent = 'Escribe el nombre completo del contacto.';
+  else if(!tieneContexto)     hint.textContent = 'Falta contexto: agrega empresa, WhatsApp o email para no dejar la ficha vacía.';
+  else                        hint.textContent = 'Listo para crear. Quedará etiquetado como «ficha-rápida» para completarlo después.';
+}
+
+async function crearContactoRapido(){
+  const nombre = document.getElementById('ncNombre').value.trim();
+  const empresa = document.getElementById('ncEmpresa').value.trim();
+  const wa = document.getElementById('ncWhatsApp').value.trim();
+  const mail = document.getElementById('ncEmail').value.trim();
+  if(!nombre) return;
+
+  const { exacto } = buscarSimilares(nombre);
+  if(exacto){ revisarDuplicado(); return; }
+
+  const btn = document.getElementById('ncBtnCrear');
+  btn.disabled = true;
+  const textoPrevio = btn.textContent;
+  btn.textContent = 'Creando…';
+
+  const nuevo = {
+    accion: 'create',
+    ID: 'C-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+    Tipo: 'Persona',
+    Nombre: nombre,
+    Empresa: empresa,
+    Cargo: '',
+    WhatsApp: wa,
+    Email: mail,
+    Telefono: '',
+    LinkedIn: '',
+    Status: 'Lead',
+    Tags: 'ficha-rápida',
+    Notas: 'Creado desde Proyectos'
+  };
+
+  try{
+    const res = await fetch(`${N8N_BASE}/crm-contactos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nuevo)
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+
+    CONTACTOS.push({ id: nuevo.ID, nombre: nuevo.Nombre, empresa: nuevo.Empresa });
+    const dl = document.getElementById('dl-contactos');
+    if(dl) dl.innerHTML = CONTACTOS.map(c => `<option value="${escHtml(c.nombre)}">${escHtml(c.empresa)}</option>`).join('');
+    document.getElementById('p-contacto').value = nuevo.Nombre;
+    cerrarPanelNuevoContacto();
+    showToast('✅ ' + nombre + ' agregado al directorio');
+  }catch(e){
+    showToast('No se pudo crear el contacto', 'err');
+    btn.disabled = false;
+  }
+  btn.textContent = textoPrevio;
 }
 
 // ═══════════════════════════════════════
@@ -320,6 +567,7 @@ function normalizeItem(p){
     Nombre: toStr(p.Nombre),
     Empresa: toStr(p.Empresa),
     ContactoID: toStr(p.ContactoID),
+    ContactoNombre: toStr(p.ContactoNombre),
     Etapa: toStr(p.Etapa) || 'Prospecto',
     ValorEstimado: toStr(p.ValorEstimado),
     Responsable: toStr(p.Responsable),
@@ -575,7 +823,8 @@ function abrirModal(id = null){
 
   document.getElementById('p-nombre').value = p?.Nombre || '';
   document.getElementById('p-empresa').value = p?.Empresa || '';
-  document.getElementById('p-contacto').value = nombreContacto(p?.ContactoID || '');
+  document.getElementById('p-contacto').value = nombreContacto(p?.ContactoID || '', p?.ContactoNombre || '');
+  cerrarPanelNuevoContacto();
   document.getElementById('p-etapa').value = p?.Etapa || 'Prospecto';
   document.getElementById('p-status').value = p?.Status || 'activo';
   document.getElementById('p-valor').value = p ? toNum(p.ValorEstimado) || '' : '';
@@ -605,6 +854,7 @@ async function guardarProyecto(){
     Nombre: nombre,
     Empresa: document.getElementById('p-empresa').value.trim(),
     ContactoID: idDeContacto(document.getElementById('p-contacto').value),
+    ContactoNombre: document.getElementById('p-contacto').value.trim(),
     Etapa: document.getElementById('p-etapa').value,
     ValorEstimado: toNum(document.getElementById('p-valor').value),
     Responsable: document.getElementById('p-responsable').value,
