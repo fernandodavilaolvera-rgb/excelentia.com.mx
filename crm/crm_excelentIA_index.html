@@ -95,45 +95,45 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;height:100vh;display:fl
 
 <!-- AGENDA -->
 <div class="tab-frame-wrap" id="wrap-agenda">
-  <iframe src="excelentia/agenda.html" data-base="excelentia/agenda.html" title="Agenda"></iframe>
+  <iframe data-base="excelentia/agenda.html" title="Agenda"></iframe>
 </div>
 
 <!-- CONTACTOS (Contactos + Equipo apilados) -->
 <div class="tab-frame-wrap" id="wrap-contactos">
   <div class="personas-wrap">
-    <iframe class="personas-iframe-co" src="excelentia/crm-contactos.html" data-base="excelentia/crm-contactos.html" title="Contactos" onload="autoSize(this)"></iframe>
+    <iframe class="personas-iframe-co" data-base="excelentia/crm-contactos.html" title="Contactos" onload="autoSize(this)"></iframe>
     <div class="personas-divider">
       <div class="personas-divider-line"></div>
       <span class="personas-divider-label">👥 Equipo ExcelentIA</span>
       <div class="personas-divider-line" style="background:linear-gradient(to left,#4a9fd4,transparent)"></div>
     </div>
-    <iframe class="personas-iframe-eq" src="excelentia/crm-equipo.html" data-base="excelentia/crm-equipo.html" title="Equipo" onload="autoSize(this)"></iframe>
+    <iframe class="personas-iframe-eq" data-base="excelentia/crm-equipo.html" title="Equipo" onload="autoSize(this)"></iframe>
   </div>
 </div>
 
 <!-- PROYECTOS -->
 <div class="tab-frame-wrap" id="wrap-proyectos">
-  <iframe src="excelentia/crm-proyectos.html" data-base="excelentia/crm-proyectos.html" title="Proyectos"></iframe>
+  <iframe data-base="excelentia/crm-proyectos.html" title="Proyectos"></iframe>
 </div>
 
 <!-- LISTA DE PENDIENTES -->
 <div class="tab-frame-wrap" id="wrap-pendientes">
-  <iframe src="excelentia/crm-tareas.html" data-base="excelentia/crm-tareas.html" title="Lista de Pendientes"></iframe>
+  <iframe data-base="excelentia/crm-tareas.html" title="Lista de Pendientes"></iframe>
 </div>
 
 <!-- TIMELINE (default) -->
 <div class="tab-frame-wrap active" id="wrap-timeline">
-  <iframe src="excelentia/timeline.html" data-base="excelentia/timeline.html" title="Timeline"></iframe>
+  <iframe data-base="excelentia/timeline.html" title="Timeline"></iframe>
 </div>
 
 <!-- DRIVE -->
 <div class="tab-frame-wrap" id="wrap-drive">
-  <iframe src="excelentia/drive.html" data-base="excelentia/drive.html" title="Drive"></iframe>
+  <iframe data-base="excelentia/drive.html" title="Drive"></iframe>
 </div>
 
 <!-- FINANZAS (SOLO LECTURA) -->
 <div class="tab-frame-wrap" id="wrap-finanzas">
-  <iframe src="excelentia/finanzas-excelentia.html" data-base="excelentia/finanzas-excelentia.html" title="Finanzas (consulta)"></iframe>
+  <iframe data-base="excelentia/finanzas-excelentia.html" title="Finanzas (consulta)"></iframe>
 </div>
 
 <script>
@@ -144,11 +144,23 @@ const USERS = {
 };
 let currentUser = 'fernando';
 
+// ── CARGA DIFERIDA: un iframe solo se carga la primera vez que abres su pestaña
+function cargarFrame(tab){
+  const wrap = document.getElementById('wrap-'+tab);
+  if(!wrap) return;
+  wrap.querySelectorAll('iframe[data-base]').forEach(f=>{
+    if(!f.getAttribute('src')){
+      f.src = f.dataset.base + '?user=' + currentUser;
+    }
+  });
+}
+
 function showTab(tab){
   document.querySelectorAll('.nav-pill').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-frame-wrap').forEach(w=>w.classList.remove('active'));
   document.querySelector(`.nav-pill[data-tab="${tab}"]`)?.classList.add('active');
   document.getElementById('wrap-'+tab)?.classList.add('active');
+  cargarFrame(tab);
   const url = new URL(window.location);
   url.searchParams.set('tab', tab);
   window.history.replaceState({}, '', url);
@@ -160,10 +172,12 @@ function setUser(uid){
   document.getElementById('userDot').style.background = u.color;
   document.getElementById('userChipName').textContent = u.nombre;
   document.getElementById('userMenu').classList.remove('open');
-  // Propaga ?user=xxx a TODOS los módulos (cada iframe recarga con su base)
+  // Propaga ?user=xxx solo a los módulos YA cargados; los demás lo reciben al abrirse
   document.querySelectorAll('iframe[data-base]').forEach(f=>{
-    f.src = f.dataset.base + '?user=' + uid;
+    if(f.getAttribute('src')) f.src = f.dataset.base + '?user=' + uid;
   });
+  const activa = document.querySelector('.nav-pill.active')?.dataset.tab;
+  if(activa) cargarFrame(activa);
 }
 
 function toggleUserMenu(){
@@ -194,6 +208,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const tabParam = params.get('tab');
   if(tabParam && document.getElementById('wrap-'+tabParam)){
     showTab(tabParam);
+  }else{
+    // Carga solo la pestaña que abre por default
+    const activa = document.querySelector('.nav-pill.active')?.dataset.tab;
+    if(activa) cargarFrame(activa);
   }
 });
 </script>
