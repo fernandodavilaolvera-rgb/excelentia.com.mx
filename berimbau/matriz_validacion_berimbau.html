@@ -47,8 +47,8 @@ body{margin:0;background:#f5f6f8;font-family:'Manrope',sans-serif;color:#1a2035;
 .f .val b{color:#1a2035}
 .paso{display:inline-flex;align-items:center;justify-content:center;background:#1a3a6b;color:#fff;font-size:.66rem;font-weight:800;min-width:17px;height:17px;padding:0 5px;border-radius:20px;margin-right:.35rem;vertical-align:1px}
 .porque{background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:6px;padding:.6rem .75rem}
-.porque .lab{color:#1a3a6b}
-.tip{display:inline-block;background:#fff6ec;border:1px solid #f0d5b6;border-radius:6px;padding:.5rem .7rem;font-size:.78rem;color:#8a5a1e;line-height:1.45;margin-top:.2rem}
+.porque .lab2{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.22rem;color:#1a3a6b}
+.tip{display:block;background:#fff6ec;border:1px solid #f0d5b6;border-radius:6px;padding:.55rem .7rem;font-size:.78rem;color:#8a5a1e;line-height:1.45;margin-top:.55rem}
 .nota{margin-top:.85rem;border-top:1px dashed #dde1e9;padding-top:.75rem}
 textarea{width:100%;max-width:100%;min-height:52px;border:1px solid #dde1e9;border-radius:8px;padding:.55rem .65rem;font-family:'Manrope',sans-serif;font-size:.82rem;color:#1a2035;background:#fcfdff;resize:vertical;line-height:1.45}
 textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
@@ -59,8 +59,10 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
 .fila{display:flex;gap:1rem;flex-wrap:wrap}
 .fila>div{flex:1;min-width:180px}
 .fila .lab{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#8a90a0;margin-bottom:.5rem}
-.linea{border-bottom:1px solid #8a90a0;height:34px}
+.linea{border:0;border-bottom:1px solid #8a90a0;height:34px;width:100%;background:transparent;font-family:'Manrope',sans-serif;font-size:.85rem;color:#1a2035;padding:0 2px;outline:none}
+.linea:focus{border-bottom-color:#4a9fd4}
 .foot{max-width:720px;margin:1.4rem auto 0;text-align:center;font-size:.72rem;color:#8a90a0}
+code{background:#eef4fc;padding:.05rem .3rem;border-radius:4px;font-size:.8rem;font-family:ui-monospace,Menlo,monospace;color:#1a3a6b}
 @media (max-width:600px){
   .header-inner{flex-direction:column;align-items:flex-start}
   .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
@@ -106,7 +108,7 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
 
   <div class="card intro">
     <h1>Guía de pruebas para el equipo del Club</h1>
-    <p>Esta guía sirve para revisar, punto por punto, que el dashboard haga lo que se acordó.
+    <p>Esta guía sirve para revisar, punto por punto, que el dashboard haga lo acordado.
        <b>Todo se hace dentro del dashboard</b>, dando clics. Cada prueba toma menos de un minuto y no necesitas
        ningún conocimiento técnico.</p>
     <p>Cada punto te dice <b>qué se prueba</b>, <b>cómo hacerlo</b> paso a paso y <b>qué debe pasar</b>. Cuando el
@@ -133,21 +135,32 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
   <div class="sec"><div class="sec-l">A</div><div class="sec-t">Primeros pasos</div></div>
 
   <div class="pt">
-    <div class="pt-h"><span class="pt-c">A1</span><span class="pt-t">El dashboard abre y trae información</span><input type="checkbox" class="chk"></div>
+    <div class="pt-h"><span class="pt-c">A1</span><span class="pt-t">Las columnas de las tablas son las correctas</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
-      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que el dashboard cargue bien y tenga datos.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Abre el dashboard en tu navegador. <span class="paso">2</span>Arriba verás una fila de pestañas: <b>📋 Directorio · 🏃 Accesos · 💰 Cobranza · ✉️ Módulo de Avisos · 🕘 Historial · 📊 Gráficas · 🔔 Notificaciones</b>. Cada una trae un numerito a un lado.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Las pestañas muestran números (por ejemplo, cuántos socios hay o cuántos deben). No aparece la pantalla en blanco ni un mensaje de error.</div></div>
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que las tablas de Directorio y Cobranza muestren las columnas acordadas, ni de más ni de menos.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>📋 Directorio</b> y revisa el encabezado (la fila de títulos de la tabla). <span class="paso">2</span>Entra a <b>💰 Cobranza</b> y revisa su encabezado.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">En <b>📋 Directorio</b> están estas columnas: <b>Memb. · Nombre · Tipo de usuario · Dep. · Periodo · Cuota · Situación · WhatsApp · Correo · Teléfono · Visitas</b>.<br><br>En <b>💰 Cobranza</b> están estas: <b>Memb. · Nombre · Tipo · Periodo · Días adeudo · Visitas memb. · Vino · WhatsApp · Correo · Teléfono · Observaciones</b>.</div></div>
+      <div class="tip">💡 En el celular las tablas se deslizan de lado (scroll horizontal) para alcanzar a ver todas las columnas.</div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
 
   <div class="pt">
-    <div class="pt-h"><span class="pt-c">A2</span><span class="pt-t">Los datos están al día</span><input type="checkbox" class="chk"></div>
+    <div class="pt-h"><span class="pt-c">A2</span><span class="pt-t">El dashboard abre y trae información</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que el dashboard cargue bien y tenga datos.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Abre el dashboard en tu navegador. <span class="paso">2</span>Arriba verás las pestañas: <b>📋 Directorio · 🏃 Accesos · 💰 Cobranza · ✉️ Módulo de Avisos · 🕘 Historial · 📊 Gráficas · 🔔 Notificaciones</b>. Varias traen un numerito a un lado.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Las pestañas muestran números (cuántos socios, cuántos deben, etc.). No aparece la pantalla en blanco ni un error.</div></div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="pt-c">A3</span><span class="pt-t">Los datos están al día</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
       <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que puedas refrescar la información cuando quieras.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a la pestaña <b>💰 Cobranza</b>. <span class="paso">2</span>En la barra gris de arriba está el botón <b>🔄 Actualizar ahora</b>. Dale clic.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">El dashboard vuelve a leer del Sistema sin marcar error. Los números quedan actualizados.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>💰 Cobranza</b>. <span class="paso">2</span>En la barra gris de arriba está el botón <b>🔄 Actualizar ahora</b>. Dale clic.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">El dashboard vuelve a leer del Sistema sin marcar error y los números quedan al día.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
@@ -169,8 +182,8 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
     <div class="pt-h"><span class="pt-c">B2</span><span class="pt-t">Buscar a un socio</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
       <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que puedas encontrar a alguien rápido.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>💰 Cobranza</b>, arriba está la caja <i>"Nombre o Membresía..."</i>. <span class="paso">2</span>Escribe un apellido o un número de membresía que conozcas.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">La lista se reduce a lo que buscaste conforme vas escribiendo.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>💰 Cobranza</b>, usa la caja <i>"Nombre o Membresía..."</i>. <span class="paso">2</span>Escribe un apellido o un número de membresía.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">La lista se reduce a lo que buscaste conforme escribes.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
@@ -178,19 +191,19 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
   <div class="pt">
     <div class="pt-h"><span class="pt-c">B3</span><span class="pt-t">Solo aparece el titular de cada membresía</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
-      <div class="f"><div class="lab">Qué se prueba</div><div class="val">La regla que confirmó el Club: en cobranza se ve al titular, no a cada integrante por separado.</div></div>
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">La regla del Club: en cobranza se ve al titular, no a cada integrante por separado.</div></div>
       <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>💰 Cobranza</b>, busca una membresía familiar o de pareja. <span class="paso">2</span>Cuéntala en la lista.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Esa membresía aparece <b>una sola vez</b>, con el nombre del titular. Los demás integrantes no salen como renglones sueltos: se ven al abrir la ficha del socio (eso lo pruebas en el punto C1).</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Esa membresía aparece <b>una sola vez</b>, con el nombre del titular. Los demás integrantes se ven al abrir la ficha (punto C1), no como renglones sueltos.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
 
   <div class="pt">
-    <div class="pt-h"><span class="pt-c">B4</span><span class="pt-t">Los niveles de atraso filtran bien</span><input type="checkbox" class="chk"></div>
+    <div class="pt-h"><span class="pt-c">B4</span><span class="pt-t">Los filtros de cobranza funcionan</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
-      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que puedas separar a los socios por qué tan atrasados están.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>💰 Cobranza</b>, arriba están los cuatro niveles de atraso: <b>0–30 · 31–60 · 61–90 · +90 días</b>. <span class="paso">2</span>Ve dándole clic a cada uno.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Con cada nivel la lista se reduce solo a los socios de ese rango, y el color del semáforo cambia (verde-azulado, dorado, naranja, rojo).</div></div>
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que puedas separar a los deudores por tipo de pago y por qué tan atrasados están.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>💰 Cobranza</b>, arriba hay pastillas de periodo: <b>📅 Mensual · 📆 Trimestral · 🏦 Mensual Domiciliado</b>, etc. Dale clic a una. <span class="paso">2</span>Luego usa el filtro <b>Segmento</b> y elige un nivel de atraso: <b>0–30 · 31–60 · 61–90 · +90 días</b>.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Con cada filtro la lista se reduce solo a los socios que cumplen. Con el segmento, además cambia el color del semáforo.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
@@ -202,8 +215,8 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
     <div class="pt-h"><span class="pt-c">C1</span><span class="pt-t">Abrir la ficha de un socio</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
       <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que al hacer clic en un socio veas todos sus datos en una sola pantalla.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>💰 Cobranza</b> (o en <b>📋 Directorio</b>), haz clic sobre el <b>nombre</b> de cualquier socio.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Se abre una ventana con su información en español claro: situación, tipo de membresía, titular, fechas de pago, teléfono, correo y —si es familiar— sus integrantes. Para cerrarla, clic en la ✕ o fuera de la ventana.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>💰 Cobranza</b> (o en <b>📋 Directorio</b>), haz clic sobre el <b>nombre</b> de un socio.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Se abre una ventana con su información en español claro: situación, tipo de membresía, titular, fechas de pago, teléfono, correo y —si es familiar— sus integrantes. Se cierra con la ✕ o dando clic afuera.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
@@ -213,8 +226,8 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
     <div class="pt-b">
       <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que la ficha muestre, sin cuentas ni archivos aparte, cuánto debe el socio.</div></div>
       <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Con una ficha abierta, busca los renglones <b>Fecha límite de pago</b> y <b>Días de atraso</b>.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val"><b>Días de atraso</b> dice <i>"Al corriente"</i> en verde, o los días en rojo si debe. <b>Fecha límite de pago</b> muestra una fecha clara. Ahí mismo ves también <i>"Últ. pago cubre hasta"</i>, que es hasta cuándo le alcanza su último pago.</div></div>
-      <div class="porque"><div class="lab" style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.22rem">Por qué importa</div><div class="val">Toda la lógica de cobro se puede revisar aquí, dentro del dashboard, sin abrir nada más.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val"><b>Días de atraso</b> dice <i>"Al corriente"</i> en verde, o los días en rojo si debe. <b>Fecha límite de pago</b> muestra una fecha clara. Ahí mismo ves <i>"Últ. pago cubre hasta"</i>, que es hasta cuándo le alcanza su último pago.</div></div>
+      <div class="tip">💡 <b>El único lugar donde se lee "Al corriente" es dentro de la ficha</b>, en el renglón Días de atraso. En las listas no hay una columna que lo diga.</div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
@@ -226,9 +239,9 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
     <div class="pt-h"><span class="pt-c">D1</span><span class="pt-t">La baja temporal sí debe</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
       <div class="f"><div class="lab">Qué se prueba</div><div class="val">La regla del Club: estar en baja temporal <b>no</b> borra el adeudo.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>📋 Directorio</b>. <span class="paso">2</span>En el filtro <b>Situación</b> elige <b>Baja Temporal</b>. Verás la lista de socios en baja, cada uno con su etiqueta naranja. <span class="paso">3</span>Haz clic en el nombre de uno que en su ficha tenga días de atraso. <span class="paso">4</span>Anota su membresía, ve a <b>💰 Cobranza</b> y búscala.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>📋 Directorio</b>. <span class="paso">2</span>En el filtro <b>Situación</b> elige <b>Baja Temporal</b>: verás la lista con su etiqueta naranja. <span class="paso">3</span>Haz clic en un nombre y confirma en su ficha que tiene días de atraso. <span class="paso">4</span>Anota su membresía y búscala en <b>💰 Cobranza</b>.</div></div>
       <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Ese socio <b>sí aparece</b> en Cobranza con su adeudo. La baja temporal no lo saca de la cobranza.</div></div>
-      <div class="tip">💡 La etiqueta naranja de Baja Temporal se ve en la pestaña <b>Directorio</b> (columna Situación) y dentro de la <b>ficha</b> del socio.</div>
+      <div class="tip">💡 La etiqueta naranja de Baja Temporal se ve en <b>Directorio</b> (columna Situación) y dentro de la <b>ficha</b> del socio.</div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
@@ -236,10 +249,11 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
   <div class="pt">
     <div class="pt-h"><span class="pt-c">D2</span><span class="pt-t">El trimestral al corriente no debe</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
-      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que un socio de pago trimestral no aparezca como deudor mientras su pago siga cubriendo.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>📋 Directorio</b>. <span class="paso">2</span>En el filtro <b>Periodo Pago</b> elige <b>Trimestral</b>. <span class="paso">3</span>Abre la ficha de uno que diga <i>"Al corriente"</i>. <span class="paso">4</span>Anota su membresía y búscala en <b>💰 Cobranza</b>.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val"><b>No aparece</b> en Cobranza, porque su pago aún lo cubre.</div></div>
-      <div class="porque"><div class="lab" style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.22rem">Por qué</div><div class="val">El pago trimestral cubre 3 meses completos. El adeudo empieza hasta el primer día del cuarto mes; no hay mes extra de cortesía.</div></div>
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que un socio de pago trimestral que ya pagó no aparezca como deudor.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>📋 Directorio</b>. <span class="paso">2</span>En el filtro <b>Periodo Pago</b> elige <b>Trimestral</b>. <span class="paso">3</span>Haz clic en un nombre para abrir la ficha y mira <b>Días de atraso</b>: si dice <i>"Al corriente"</i>, ese es el que buscas. Si trae días en rojo, cierra y prueba con otro (la mayoría de los trimestrales están al corriente, así que lo encuentras rápido). <span class="paso">4</span>Anota su membresía y búscala en <b>💰 Cobranza</b>.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Ese socio <b>no aparece</b> en Cobranza, porque su pago aún lo cubre.</div></div>
+      <div class="tip">⚠️ <b>Ojo con el punto verde:</b> el punto de color de la columna <b>Dep.</b> del Directorio es de los <b>dependientes</b> (🟢 = ninguno debe · 🔴 = alguno debe), <b>no</b> indica si el titular está al corriente. Eso solo se lee dentro de la ficha, en <b>Días de atraso</b>.</div>
+      <div class="porque"><div class="lab2">Por qué</div><div class="val">El pago trimestral cubre 3 meses completos. El adeudo empieza hasta el primer día del cuarto mes; no hay mes extra de cortesía.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
@@ -256,20 +270,23 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
   </div>
 
   <!-- ================= E ================= -->
-  <div class="sec"><div class="sec-l">E</div><div class="sec-t">Accesos y avisos seguros</div></div>
+  <div class="sec"><div class="sec-l">E</div><div class="sec-t">Observaciones</div></div>
 
   <div class="pt">
-    <div class="pt-h"><span class="pt-c">E1</span><span class="pt-t">Accesos: quién ha venido al club</span><input type="checkbox" class="chk"></div>
+    <div class="pt-h"><span class="pt-c">E1</span><span class="pt-t">Escribir una observación y que se guarde</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
-      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que se vea la asistencia de los socios.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a la pestaña <b>🏃 Accesos</b>. <span class="paso">2</span>Verás a los socios por nivel de asistencia (Alta, Media, Baja, Sin visitas). Dale clic a un nivel.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">La lista se filtra a los socios de ese nivel de asistencia en el periodo mostrado.</div></div>
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que Cobranza pueda dejar notas de seguimiento en cada socio y que queden guardadas.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>💰 Cobranza</b>, ubica la última columna de la tabla: <b>Observaciones</b>. <span class="paso">2</span>En el renglón de un socio, escribe una nota (por ejemplo, <i>"Llamada 24-jul, promete pagar el viernes"</i>). <span class="paso">3</span>Haz clic fuera de la casilla.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Aparece un aviso de <i>"Guardando…"</i> y luego <i>"Guardado"</i>. La nota se conserva en ese socio. Arriba, la pastilla <b>📝 Observaciones</b> lleva la cuenta de cuántos socios tienen nota.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
 
+  <!-- ================= F ================= -->
+  <div class="sec"><div class="sec-l">F</div><div class="sec-t">Avisos por correo (con seguridad)</div></div>
+
   <div class="pt">
-    <div class="pt-h"><span class="pt-c">E2</span><span class="pt-t">El Modo Prueba está encendido y a la vista</span><input type="checkbox" class="chk"></div>
+    <div class="pt-h"><span class="pt-c">F1</span><span class="pt-t">El Modo Prueba está encendido y a la vista</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
       <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que sea imposible mandar avisos a socios reales por accidente durante las pruebas.</div></div>
       <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>✉️ Módulo de Avisos</b>. <span class="paso">2</span>Hasta arriba está el interruptor <b>🔒 Modo prueba</b>.</div></div>
@@ -279,20 +296,63 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
   </div>
 
   <div class="pt">
-    <div class="pt-h"><span class="pt-c">E3</span><span class="pt-t">Una prueba de aviso solo llega al equipo de prueba</span><input type="checkbox" class="chk"></div>
+    <div class="pt-h"><span class="pt-c">F2</span><span class="pt-t">Enviar un correo de prueba y recibirlo</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
-      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que el botón de probar avisos no alcance a ningún socio real.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>✉️ Módulo de Avisos</b>, abre cualquier módulo (por ejemplo, el recordatorio de cargo). <span class="paso">2</span>Marca a una persona del equipo de prueba. <span class="paso">3</span>Da clic en <b>🧪 Probar (seleccionados)</b>.</div></div>
-      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">El aviso de prueba llega únicamente a las personas del equipo de prueba. Confírmalo revisando su correo o WhatsApp.</div></div>
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que los avisos por correo salgan bien y solo lleguen al equipo de prueba.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>✉️ Módulo de Avisos</b>, en el menú de la izquierda abre un aviso, por ejemplo <b>🏦 Domiciliado</b> o <b>🎂 Cumpleaños</b>. <span class="paso">2</span>Arriba del módulo, deja activo el canal <b>✉️ Correo</b> (si solo quieres probar correo, apaga <b>📱 WhatsApp</b> dándole clic). <span class="paso">3</span>En <b>"¿A quién enviar la prueba?"</b> deja marcada al menos a una persona (Nancy, Carlos, Gustavo o Fernando). <span class="paso">4</span>Da clic en <b>🧪 Probar (seleccionados)</b>.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">El correo de prueba llega a la bandeja de esa(s) persona(s), con el texto de la plantilla. Ningún socio real lo recibe.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
   </div>
 
-  <!-- ================= F ================= -->
-  <div class="sec"><div class="sec-l">F</div><div class="sec-t">Antes de encender en real</div></div>
+  <div class="pt">
+    <div class="pt-h"><span class="pt-c">F3</span><span class="pt-t">Vista previa del correo antes de enviar</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que puedas ver cómo quedará el correo antes de mandarlo.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>En <b>✉️ Módulo de Avisos</b>, menú izquierdo, entra a <b>✍️ Envío manual</b>. <span class="paso">2</span>Elige un <b>Segmento destino</b> (por ejemplo, 0–30 días): se carga el asunto y el mensaje. <span class="paso">3</span>Da clic en <b>👁 Vista previa</b>.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Se muestra cómo se verá el correo, ya con el nombre y los datos del socio en su lugar.</div></div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- ================= G ================= -->
+  <div class="sec"><div class="sec-l">G</div><div class="sec-t">Un vistazo a las demás pestañas</div></div>
 
   <div class="pt">
-    <div class="pt-h"><span class="pt-c">F1</span><span class="pt-t">El Modo Prueba sigue encendido al terminar</span><input type="checkbox" class="chk"></div>
+    <div class="pt-h"><span class="pt-c">G1</span><span class="pt-t">Accesos: quién ha venido al club</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que se vea la asistencia de los socios.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>🏃 Accesos</b>. <span class="paso">2</span>Usa el filtro <b>Actividad</b> (Alta, Media, Baja, Sin visitas) o el filtro <b>Estado pago</b> (Al corriente / En adeudo).</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">La lista se filtra según lo que elijas y muestra las visitas de cada socio.</div></div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="pt-c">G2</span><span class="pt-t">Historial: los envíos quedan registrados</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que cada correo o mensaje enviado quede guardado para consultarlo después.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Después de hacer la prueba del punto F2, entra a <b>🕘 Historial</b>. <span class="paso">2</span>Busca por nombre o membresía de quien recibió la prueba.</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Aparece el envío que acabas de hacer, con su fecha.</div></div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="pt-c">G3</span><span class="pt-t">Gráficas y Notificaciones</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que las vistas de resumen y de casos por revisar funcionen.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Abre <b>📊 Gráficas</b> y revisa que se dibujen los tableros de socios por segmento. <span class="paso">2</span>Abre <b>🔔 Notificaciones</b> y revisa la lista de casos que requieren revisión humana (por ejemplo, bajas o socios sin correo).</div></div>
+      <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Las gráficas se muestran y las notificaciones listan casos. No son errores: son avisos para que el Club los revise.</div></div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- ================= H ================= -->
+  <div class="sec"><div class="sec-l">H</div><div class="sec-t">Antes de encender en real</div></div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="pt-c">H1</span><span class="pt-t">El Modo Prueba sigue encendido al terminar</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
       <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que las pruebas de hoy no dejen prendido el envío a socios reales.</div></div>
       <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Al cerrar la sesión, regresa a <b>✉️ Módulo de Avisos</b> y confirma que <b>🔒 Modo prueba</b> sigue en <i>ACTIVO</i>.</div></div>
@@ -302,10 +362,10 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
   </div>
 
   <div class="pt">
-    <div class="pt-h"><span class="pt-c">F2</span><span class="pt-t">Los textos de los avisos están aprobados</span><input type="checkbox" class="chk"></div>
+    <div class="pt-h"><span class="pt-c">H2</span><span class="pt-t">Los textos de los avisos están aprobados</span><input type="checkbox" class="chk"></div>
     <div class="pt-b">
       <div class="f"><div class="lab">Qué se prueba</div><div class="val">Que cada mensaje que saldrá a los socios tenga el visto bueno del Club.</div></div>
-      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Junto con ExcelentIA, revisa que los textos (recordatorio de cargo, cobranza, cumpleaños, vencimiento anual, aviso de 26 años) sean los aprobados por el Club.</div></div>
+      <div class="f"><div class="lab">Cómo hacerlo</div><div class="val"><span class="paso">1</span>Junto con ExcelentIA, revisa que los textos (recordatorio de cargo, cobranza por segmento, cumpleaños, vencimiento anual, aviso de 26 años) sean los aprobados por el Club.</div></div>
       <div class="f"><div class="lab">Qué debe pasar</div><div class="val">Todos los textos están confirmados antes de la fecha de arranque.</div></div>
       <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aquí si algo no cuadró..."></textarea></div>
     </div>
@@ -315,12 +375,12 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
   <div class="firma">
     <h3>Cierre de la validación</h3>
     <div class="fila">
-      <div><div class="lab">Revisó por el Club</div><div class="linea"></div></div>
-      <div><div class="lab">Revisó por ExcelentIA</div><div class="linea"></div></div>
+      <div><div class="lab">Revisó por el Club</div><input class="linea" type="text"></div>
+      <div><div class="lab">Revisó por ExcelentIA</div><input class="linea" type="text"></div>
     </div>
     <div class="fila" style="margin-top:1rem">
-      <div><div class="lab">Fecha</div><div class="linea"></div></div>
-      <div><div class="lab">Observaciones generales</div><div class="linea"></div></div>
+      <div><div class="lab">Fecha</div><input class="linea" type="text"></div>
+      <div><div class="lab">Observaciones generales</div><input class="linea" type="text"></div>
     </div>
   </div>
 
@@ -348,7 +408,6 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
   chks.forEach(function(c){ c.addEventListener('change', refresca); });
   refresca();
 
-  // Las anotaciones crecen solas para que se impriman completas
   function crece(t){ t.style.height='auto'; t.style.height=(t.scrollHeight+4)+'px'; }
   document.querySelectorAll('textarea').forEach(function(t){
     t.addEventListener('input', function(){ crece(t); });
