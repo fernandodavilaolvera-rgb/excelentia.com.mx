@@ -36,6 +36,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 .btn-google{background:#fff;color:#1a2035;border:1px solid #dde1e9;font-weight:700}
 .btn-google:hover{background:#f0f4ff;border-color:#c8d9f0}
 .btn-sm{padding:.35rem .7rem;font-size:.78rem}
+a.btn{text-decoration:none}
 
 /* GRID SEMANAL */
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.6rem}
@@ -96,7 +97,8 @@ textarea{resize:vertical;min-height:70px}
   .toolbar-left{width:100%;justify-content:space-between}
   .week-label{min-width:auto;flex:1}
   .btn-nuevo{width:100%;justify-content:center}
-  .toolbar-actions{width:100%}
+  .toolbar-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .toolbar-actions .btn-full{grid-column:1/-1}
   .week-grid{grid-template-columns:1fr;gap:.5rem}
   .day-col{min-height:auto;flex-direction:row}
   .day-col:not(.has-events) .day-body{display:none}
@@ -136,7 +138,8 @@ textarea{resize:vertical;min-height:70px}
     </div>
     <div class="toolbar-actions">
       <button class="btn btn-secondary btn-nuevo" onclick="copiarTeams()">🔗 Copiar Liga Teams</button>
-      <button class="btn btn-primary btn-nuevo" onclick="abrirNuevo()">+ Nueva cita</button>
+      <a class="btn btn-ghost btn-nuevo" id="btnGCal" href="https://calendar.google.com/calendar/r" target="_blank" rel="noopener" title="Abrir Google Calendar en una pestaña nueva">↗️ Abrir en Google Calendar</a>
+      <button class="btn btn-primary btn-nuevo btn-full" onclick="abrirNuevo()">+ Nueva cita</button>
     </div>
   </div>
 
@@ -203,6 +206,71 @@ let lunesActual = null;
 let EVENTOS = [];
 let rangoCargado = { min:null, max:null };
 let editandoId = null;
+let conectado = false;
+
+// ════════════════════════════════════════════
+// SESIÓN PERSISTENTE (sobrevive recargas)
+// ════════════════════════════════════════════
+const LS_KEY = 'agenda_gtoken';
+const MARGEN_MS = 5 * 60 * 1000;   // renueva 5 min antes de que venza
+let timerRenov = null;
+let promesaRenov = null;
+let resolverRenov = null;
+
+function guardarToken(token, expiresInSec){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      token: token,
+      exp: Date.now() + (Number(expiresInSec || 3600) * 1000),
+      email: userEmail || null
+    }));
+  }catch(e){ /* modo privado o storage lleno: seguimos sin persistir */ }
+}
+
+function leerToken(){
+  try{
+    const o = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if(!o || !o.token || !o.exp) return null;
+    if(Date.now() > (o.exp - MARGEN_MS)) return null;   // vencido o a punto de vencer
+    return o;
+  }catch(e){ return null; }
+}
+
+function borrarToken(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} }
+
+// Guarda el correo en la sesión ya almacenada, sin tocar la fecha de expiración
+function guardarEmailEnSesion(){
+  try{
+    const o = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if(o && o.token){ o.email = userEmail || null; localStorage.setItem(LS_KEY, JSON.stringify(o)); }
+  }catch(e){}
+}
+
+// Renueva el token SIN abrir ninguna ventana. Si no se puede, devuelve false.
+function renovarSilencioso(){
+  if(!tokenClient) return Promise.resolve(false);
+  if(promesaRenov) return promesaRenov;
+  promesaRenov = new Promise((resolve) => {
+    resolverRenov = resolve;
+    try{ tokenClient.requestAccessToken({ prompt: 'none' }); }
+    catch(e){ cerrarRenovacion(false); }
+    setTimeout(() => cerrarRenovacion(false), 12000);   // por si Google nunca contesta
+  });
+  return promesaRenov;
+}
+
+function cerrarRenovacion(ok){
+  const f = resolverRenov;
+  resolverRenov = null;
+  promesaRenov = null;
+  if(f) f(ok);
+}
+
+function programarRenovacion(expiresInSec){
+  if(timerRenov) clearTimeout(timerRenov);
+  const ms = Math.max((Number(expiresInSec || 3600) * 1000) - MARGEN_MS, 30000);
+  timerRenov = setTimeout(() => { renovarSilencioso(); }, ms);
+}
 
 // ════════════════════════════════════════════
 // GOOGLE IDENTITY SERVICES
@@ -214,16 +282,38 @@ function gisLoaded(){
     callback: (resp) => {
       if(resp && resp.access_token){
         accessToken = resp.access_token;
-        onConnected();
+        guardarToken(resp.access_token, resp.expires_in);
+        programarRenovacion(resp.expires_in);
+        const primeraVez = !conectado;
+        cerrarRenovacion(true);
+        if(primeraVez) onConnected();
+      }else{
+        cerrarRenovacion(false);
       }
     },
-    error_callback: () => { showDesconectado(); }
+    error_callback: () => {
+      cerrarRenovacion(false);
+      if(!conectado) showDesconectado();
+    }
   });
-  // Intento silencioso: si ya diste permiso antes y tu sesión de Google está activa, entra solo
-  try { tokenClient.requestAccessToken({ prompt: 'none' }); }
-  catch(e) { showDesconectado(); }
+  arrancarSesion();
 }
 
+// Cascada: token guardado vigente → renovación silenciosa → botón de conectar
+async function arrancarSesion(){
+  const guardado = leerToken();
+  if(guardado){
+    accessToken = guardado.token;
+    userEmail = guardado.email || null;
+    programarRenovacion(Math.floor((guardado.exp - Date.now()) / 1000));
+    onConnected();          // si el token ya no sirve, el 401 lo renueva solo
+    return;
+  }
+  const ok = await renovarSilencioso();
+  if(!ok) showDesconectado();
+}
+
+// Este SÍ puede abrir ventana: solo se llama con clic del usuario
 function conectarGoogle(){
   if(!tokenClient){ toast('Cargando Google, intenta de nuevo','err'); return; }
   tokenClient.requestAccessToken({ prompt: '' });
@@ -233,12 +323,16 @@ function desconectar(){
   if(accessToken && google.accounts.oauth2){
     google.accounts.oauth2.revoke(accessToken, () => {});
   }
-  accessToken = null; userEmail = null;
+  if(timerRenov) clearTimeout(timerRenov);
+  borrarToken();
+  accessToken = null; userEmail = null; conectado = false;
   showDesconectado();
 }
 
 async function onConnected(){
+  conectado = true;
   await fetchUserEmail();
+  guardarEmailEnSesion();
   document.getElementById('connDot').style.background = '#059669';
   document.getElementById('connStatus').textContent = 'Conectado:';
   const em = document.getElementById('connEmail');
@@ -248,10 +342,22 @@ async function onConnected(){
   document.getElementById('btnDesconectar').style.display = 'inline-flex';
   document.getElementById('toolbar').style.display = 'flex';
   lunesActual = lunesDe(new Date());
+  actualizarLinkGCal();
   cargarEventos(true);
 }
 
+// El botón abre Google Calendar en la SEMANA que estás viendo y en la cuenta conectada
+function actualizarLinkGCal(){
+  const a = document.getElementById('btnGCal');
+  if(!a) return;
+  const d = lunesActual || new Date();
+  let url = `https://calendar.google.com/calendar/r/week/${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+  if(userEmail) url += '?authuser=' + encodeURIComponent(userEmail);
+  a.href = url;
+}
+
 function showDesconectado(){
+  conectado = false;
   document.getElementById('connDot').style.background = '#dc2626';
   document.getElementById('connStatus').textContent = 'No conectado';
   document.getElementById('connEmail').style.display = 'none';
@@ -267,11 +373,16 @@ function showDesconectado(){
     </div>`;
 }
 
-async function fetchUserEmail(){
+async function fetchUserEmail(_reintento){
   try{
     const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: 'Bearer ' + accessToken }
     });
+    if(r.status === 401 && !_reintento){
+      borrarToken();
+      const ok = await renovarSilencioso();
+      if(ok) return fetchUserEmail(true);
+    }
     const j = await r.json();
     userEmail = j.email || null;
   }catch(e){ userEmail = null; }
@@ -280,11 +391,16 @@ async function fetchUserEmail(){
 // ════════════════════════════════════════════
 // LLAMADAS A GOOGLE CALENDAR
 // ════════════════════════════════════════════
-async function calFetch(url, opciones={}){
+async function calFetch(url, opciones={}, _reintento){
   const headers = { Authorization: 'Bearer ' + accessToken, ...(opciones.headers||{}) };
   if(opciones.body) headers['Content-Type'] = 'application/json';
   const res = await fetch(url, { ...opciones, headers });
   if(res.status === 401){ // token vencido
+    borrarToken();
+    if(!_reintento){
+      const ok = await renovarSilencioso();   // intenta sin molestar al usuario
+      if(ok) return calFetch(url, opciones, true);
+    }
     accessToken = null;
     showDesconectado();
     throw new Error('sesion');
@@ -388,6 +504,7 @@ function normalizar(ev){
 // ════════════════════════════════════════════
 function renderSemana(){
   document.getElementById('weekLabel').textContent = fmtRangoSemana(lunesActual);
+  actualizarLinkGCal();
   const hoy = new Date();
   let html = '<div class="week-grid">';
   for(let i=0;i<7;i++){
