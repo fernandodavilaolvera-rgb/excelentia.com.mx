@@ -109,6 +109,30 @@ input[readonly]{background:#f5f6f8;color:#8a90a0;cursor:not-allowed}
 
 /* ── MISC ── */
 .text-muted{color:#8a90a0;font-size:.78rem}
+
+/* ── PANEL: CREAR CONTACTO AL VUELO ── */
+.nuevo-contacto{display:none;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:0 10px 10px 0;padding:.8rem .9rem;max-width:720px;margin:0 auto;width:100%}
+.nuevo-contacto.open{display:block}
+.nc-head{font-size:.82rem;font-weight:800;color:#1a3a6b;margin-bottom:.6rem}
+.nc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.nc-field{display:flex;flex-direction:column;gap:.25rem}
+.nc-field.nc-full{grid-column:1/-1}
+.nc-field label{font-size:.73rem;font-weight:700;color:#4a5068}
+.nc-field input{width:100%;padding:.45rem .6rem;border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif;font-size:.83rem;color:#1a2035;background:#fff}
+.nc-field input:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+.nc-hint{font-size:.73rem;color:#8a90a0;margin-top:.5rem;line-height:1.4}
+.nc-aviso{display:none;margin-top:.55rem;border-radius:8px;padding:.5rem .65rem;font-size:.77rem;line-height:1.45}
+.nc-aviso.open{display:block}
+.nc-aviso.dup{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b}
+.nc-aviso.parecido{background:#fef9c3;border:1px solid #fde047;color:#713f12}
+.nc-aviso b{font-weight:800}
+.nc-usar{background:#fff;border:1px solid #c8d9f0;border-radius:6px;padding:.2rem .5rem;font-size:.74rem;font-weight:700;color:#1a3a6b;cursor:pointer;font-family:'Manrope',sans-serif;margin-top:.35rem;margin-right:.3rem}
+.nc-usar:hover{background:#dce8f7}
+.nc-acciones{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
+@media(max-width:600px){
+  .nc-grid{grid-template-columns:1fr}
+  .nc-field.nc-full{grid-column:1}
+}
 .date-vencida{color:#dc2626;font-weight:700}
 .date-ok{color:#4a5068}
 .flex-between{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
@@ -244,12 +268,39 @@ input[readonly]{background:#f5f6f8;color:#8a90a0;cursor:not-allowed}
           <input type="date" id="mFechaLimite">
         </div>
         <div class="form-group">
-          <label>Proyecto (ID)</label>
-          <input type="text" id="mProyectoID" placeholder="ID del proyecto">
+          <label>Proyecto</label>
+          <select id="mProyectoID"><option value="">— Sin proyecto —</option></select>
         </div>
         <div class="form-group">
-          <label>Contacto (ID)</label>
-          <input type="text" id="mContactoID" placeholder="ID del contacto">
+          <label>Contacto</label>
+          <select id="mContactoID" onchange="onCambioContacto()"><option value="">— Sin contacto —</option></select>
+        </div>
+        <div class="form-group full nuevo-contacto" id="panelNuevoContacto">
+          <div class="nc-head">➕ Nuevo contacto</div>
+          <div class="nc-grid">
+            <div class="nc-field nc-full">
+              <label>Nombre *</label>
+              <input type="text" id="ncNombre" placeholder="Nombre completo" oninput="revisarDuplicado()" autocomplete="off">
+            </div>
+            <div class="nc-field">
+              <label>Empresa</label>
+              <input type="text" id="ncEmpresa" placeholder="Dónde trabaja" oninput="validarNuevoContacto()">
+            </div>
+            <div class="nc-field">
+              <label>WhatsApp</label>
+              <input type="tel" id="ncWhatsApp" placeholder="+52 55 1234 5678" oninput="validarNuevoContacto()">
+            </div>
+            <div class="nc-field nc-full">
+              <label>Email</label>
+              <input type="email" id="ncEmail" placeholder="correo@empresa.com" oninput="validarNuevoContacto()">
+            </div>
+          </div>
+          <div class="nc-aviso" id="ncAviso"></div>
+          <div class="nc-hint" id="ncHint">Además del nombre, agrega al menos empresa, WhatsApp o email.</div>
+          <div class="nc-acciones">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="cancelarNuevoContacto()">Cancelar</button>
+            <button type="button" class="btn btn-primary btn-sm" id="ncBtnCrear" onclick="crearContactoRapido()" disabled>Crear y usar</button>
+          </div>
         </div>
         <div class="form-group full" id="grupoID" style="display:none">
           <label>ID de registro</label>
@@ -270,6 +321,14 @@ input[readonly]{background:#f5f6f8;color:#8a90a0;cursor:not-allowed}
 // ═══════════════════════════════════
 const ENDPOINT      = 'https://n8n.excelentia.com.mx/webhook/crm-tareas';
 const HIST_ENDPOINT = 'https://n8n.excelentia.com.mx/webhook/crm-historial';
+const PROY_ENDPOINT = 'https://n8n.excelentia.com.mx/webhook/crm-proyectos';
+const CONT_ENDPOINT = 'https://n8n.excelentia.com.mx/webhook/crm-contactos';
+
+// Catálogos para los desplegables (ID → nombre)
+let PROYECTOS = [];
+let CONTACTOS = [];
+const PROY_NOMBRE = {};   // { 'P-123': 'Página Web' }
+const CONT_NOMBRE = {};   // { 'C-123': 'Juan Pérez' }
 
 const USERS = {
   fernando: { nombre: 'Fernando', color: '#1a3a6b' },
@@ -297,8 +356,295 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarUserUI();
   actualizarReloj();
   setInterval(actualizarReloj, 60000);
+  cargarCatalogos();
   cargarTareas();
 });
+
+// ═══════════════════════════════════
+// CATÁLOGOS (proyectos y contactos)
+// ═══════════════════════════════════
+async function cargarCatalogos() {
+  try {
+    const res = await fetch(PROY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'get' })
+    });
+    const data = await res.json();
+    PROYECTOS = Array.isArray(data) ? data : (data.data || []);
+  } catch(e) { PROYECTOS = []; }
+
+  try {
+    const res = await fetch(CONT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'get' })
+    });
+    const data = await res.json();
+    CONTACTOS = Array.isArray(data) ? data : (data.data || []);
+  } catch(e) { CONTACTOS = []; }
+
+  // Mapas ID → nombre
+  PROYECTOS.forEach(p => {
+    const id = p.ID || p.id;
+    const nom = p.Nombre || p.nombre || p.Proyecto || '';
+    if (id) PROY_NOMBRE[id] = nom || id;
+  });
+  CONTACTOS.forEach(c => {
+    const id = c.ID || c.id;
+    const nom = c.Nombre || c.nombre || '';
+    if (id) CONT_NOMBRE[id] = nom || id;
+  });
+
+  llenarSelectProyectos();
+  llenarSelectContactos();
+  // Re-render por si las tareas cargaron antes que los catálogos
+  if (ITEMS.length) renderTabla();
+}
+
+function llenarSelectProyectos() {
+  const sel = document.getElementById('mProyectoID');
+  if (!sel) return;
+  const valActual = sel.value;
+  const ordenados = PROYECTOS.slice().sort((a,b) =>
+    (a.Nombre||a.nombre||'').localeCompare(b.Nombre||b.nombre||''));
+  sel.innerHTML = '<option value="">— Sin proyecto —</option>' +
+    ordenados.map(p => {
+      const id = p.ID || p.id;
+      const nom = p.Nombre || p.nombre || id;
+      const emp = p.Empresa || p.empresa;
+      const etiqueta = emp ? `${nom} · ${emp}` : nom;
+      return `<option value="${escAttr(id)}">${escHtml(etiqueta)}</option>`;
+    }).join('');
+  sel.value = valActual;
+}
+
+function llenarSelectContactos() {
+  const sel = document.getElementById('mContactoID');
+  if (!sel) return;
+  const valActual = sel.value;
+  const ordenados = CONTACTOS.slice().sort((a,b) =>
+    (a.Nombre||a.nombre||'').localeCompare(b.Nombre||b.nombre||''));
+  sel.innerHTML = '<option value="">— Sin contacto —</option>' +
+    ordenados.map(c => {
+      const id = c.ID || c.id;
+      const nom = c.Nombre || c.nombre || id;
+      const emp = c.Empresa || c.empresa;
+      const etiqueta = emp ? `${nom} · ${emp}` : nom;
+      return `<option value="${escAttr(id)}">${escHtml(etiqueta)}</option>`;
+    }).join('') +
+    '<option value="__nuevo__">➕ Crear contacto nuevo…</option>';
+  sel.value = valActual;
+}
+
+// ═══════════════════════════════════
+// CREAR CONTACTO AL VUELO
+// ═══════════════════════════════════
+let contactoPrevio = '';   // para regresar si cancela
+
+function onCambioContacto() {
+  const sel = document.getElementById('mContactoID');
+  if (sel.value === '__nuevo__') {
+    abrirNuevoContacto();
+  } else {
+    contactoPrevio = sel.value;
+    cerrarPanelNuevoContacto();
+  }
+}
+
+function abrirNuevoContacto() {
+  const panel = document.getElementById('panelNuevoContacto');
+  panel.classList.add('open');
+  ['ncNombre','ncEmpresa','ncWhatsApp','ncEmail'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ocultarAviso();
+  validarNuevoContacto();
+  setTimeout(() => document.getElementById('ncNombre')?.focus(), 60);
+}
+
+function cerrarPanelNuevoContacto() {
+  document.getElementById('panelNuevoContacto')?.classList.remove('open');
+  ocultarAviso();
+}
+
+function cancelarNuevoContacto() {
+  const sel = document.getElementById('mContactoID');
+  sel.value = contactoPrevio || '';
+  cerrarPanelNuevoContacto();
+}
+
+// ── Anti-duplicados: ignora acentos, mayúsculas y errores de dedo ──
+function normNombre(s) {
+  return String(s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9ñ ]/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+
+function distanciaTexto(a, b) {
+  if (a === b) return 0;
+  const m = a.length, n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) {
+      cur[j] = Math.min(
+        prev[j] + 1,
+        cur[j - 1] + 1,
+        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+
+function buscarSimilares(nombre) {
+  const n = normNombre(nombre);
+  const res = { exacto: null, parecidos: [] };
+  if (n.length < 3) return res;
+  for (const c of CONTACTOS) {
+    const nom = c.Nombre || c.nombre || '';
+    const cn = normNombre(nom);
+    if (!cn) continue;
+    if (cn === n) { res.exacto = c; return res; }
+    const largo = Math.max(cn.length, n.length);
+    const umbral = largo <= 6 ? 1 : Math.max(2, Math.floor(largo * 0.25));
+    if (distanciaTexto(cn, n) <= umbral || cn.includes(n) || n.includes(cn)) {
+      res.parecidos.push(c);
+    }
+  }
+  res.parecidos = res.parecidos.slice(0, 3);
+  return res;
+}
+
+function ocultarAviso() {
+  const av = document.getElementById('ncAviso');
+  if (av) { av.className = 'nc-aviso'; av.innerHTML = ''; }
+}
+
+function revisarDuplicado() {
+  const nombre = document.getElementById('ncNombre').value;
+  const av = document.getElementById('ncAviso');
+  const { exacto, parecidos } = buscarSimilares(nombre);
+
+  if (exacto) {
+    const id = exacto.ID || exacto.id;
+    const nom = exacto.Nombre || exacto.nombre;
+    const emp = exacto.Empresa || exacto.empresa;
+    av.className = 'nc-aviso open dup';
+    av.innerHTML = `⚠️ <b>${escHtml(nom)}</b> ya está en tu directorio${emp ? ' · ' + escHtml(emp) : ''}. No se puede duplicar.
+      <br><button type="button" class="nc-usar" onclick="usarContactoExistente('${escAttr(id)}')">Usar este contacto</button>`;
+  } else if (parecidos.length) {
+    av.className = 'nc-aviso open parecido';
+    av.innerHTML = '🤔 Se parece a ' + (parecidos.length > 1 ? 'estos contactos' : 'este contacto') + ':<br>' +
+      parecidos.map(c => {
+        const id = c.ID || c.id;
+        const nom = c.Nombre || c.nombre;
+        const emp = c.Empresa || c.empresa;
+        return `<button type="button" class="nc-usar" onclick="usarContactoExistente('${escAttr(id)}')">${escHtml(nom)}${emp ? ' · ' + escHtml(emp) : ''}</button>`;
+      }).join('') +
+      '<br><span style="font-size:.73rem">Si de verdad es alguien distinto, puedes crearlo.</span>';
+  } else {
+    ocultarAviso();
+  }
+  validarNuevoContacto();
+}
+
+function usarContactoExistente(id) {
+  const sel = document.getElementById('mContactoID');
+  sel.value = id;
+  contactoPrevio = id;
+  cerrarPanelNuevoContacto();
+  toast('Contacto seleccionado del directorio');
+}
+
+// ── Ficha mínima: nombre + al menos un dato de contexto ──
+function validarNuevoContacto() {
+  const nombre = document.getElementById('ncNombre').value.trim();
+  const empresa = document.getElementById('ncEmpresa').value.trim();
+  const wa = document.getElementById('ncWhatsApp').value.trim();
+  const mail = document.getElementById('ncEmail').value.trim();
+  const btn = document.getElementById('ncBtnCrear');
+  const hint = document.getElementById('ncHint');
+  const { exacto } = buscarSimilares(nombre);
+
+  const tieneContexto = !!(empresa || wa || mail);
+  const ok = nombre.length >= 3 && tieneContexto && !exacto;
+  btn.disabled = !ok;
+
+  if (exacto) {
+    hint.textContent = 'Ese contacto ya existe — úsalo desde el aviso de arriba.';
+  } else if (nombre.length < 3) {
+    hint.textContent = 'Escribe el nombre completo del contacto.';
+  } else if (!tieneContexto) {
+    hint.textContent = 'Falta contexto: agrega empresa, WhatsApp o email para no dejar la ficha vacía.';
+  } else {
+    hint.textContent = 'Listo para crear. Quedará etiquetado como «ficha-rápida» para completarlo después.';
+  }
+}
+
+async function crearContactoRapido() {
+  const nombre = document.getElementById('ncNombre').value.trim();
+  const empresa = document.getElementById('ncEmpresa').value.trim();
+  const wa = document.getElementById('ncWhatsApp').value.trim();
+  const mail = document.getElementById('ncEmail').value.trim();
+  if (!nombre) return;
+
+  // Última revisión contra duplicados justo antes de guardar
+  const { exacto } = buscarSimilares(nombre);
+  if (exacto) { revisarDuplicado(); return; }
+
+  const btn = document.getElementById('ncBtnCrear');
+  btn.disabled = true;
+  const textoPrevio = btn.textContent;
+  btn.textContent = 'Creando…';
+
+  const nuevo = {
+    accion: 'create',
+    ID: 'C-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+    Tipo: 'Persona',
+    Nombre: nombre,
+    Empresa: empresa,
+    Cargo: '',
+    WhatsApp: wa,
+    Email: mail,
+    Telefono: '',
+    LinkedIn: '',
+    Status: 'Lead',
+    Tags: 'ficha-rápida',
+    Notas: 'Creado desde Tareas Pendientes'
+  };
+
+  try {
+    const res = await fetch(CONT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nuevo)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    CONTACTOS.push({ ID: nuevo.ID, Nombre: nuevo.Nombre, Empresa: nuevo.Empresa });
+    CONT_NOMBRE[nuevo.ID] = nuevo.Nombre;
+    llenarSelectContactos();
+    document.getElementById('mContactoID').value = nuevo.ID;
+    contactoPrevio = nuevo.ID;
+    cerrarPanelNuevoContacto();
+    toast('✅ ' + nombre + ' agregado al directorio');
+  } catch (e) {
+    toast('No se pudo crear el contacto', 'err');
+    btn.disabled = false;
+  }
+  btn.textContent = textoPrevio;
+}
+
+function escAttr(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 document.addEventListener('click', e => {
   if (!e.target.closest('#userChip') && !e.target.closest('#userMenu')) {
@@ -467,7 +813,8 @@ function aplicarFiltros() {
   const stat = document.getElementById('filtroStatus').value;
 
   FILTERED = ITEMS.filter(t => {
-    if (txt  && !t.Titulo.toLowerCase().includes(txt) && !t.ProyectoID.toLowerCase().includes(txt)) return false;
+    const proyNombre = (PROY_NOMBRE[t.ProyectoID] || t.ProyectoID || '').toLowerCase();
+    if (txt  && !t.Titulo.toLowerCase().includes(txt) && !proyNombre.includes(txt)) return false;
     if (asig && t.Asignado !== asig) return false;
     if (prio && t.Prioridad !== prio) return false;
     if (stat && t.Status !== stat)   return false;
@@ -534,11 +881,12 @@ function renderTabla() {
     const fechaTxt = t.FechaLimite ? fmtFecha(t.FechaLimite) : '—';
     const fechaClass = vencida ? 'date-vencida' : 'date-ok';
     const vencidaIco = vencida ? '⚠️ ' : '';
-    const proyLabel = t.ProyectoID || '<span class="text-muted">—</span>';
+    const proyNom = t.ProyectoID ? (PROY_NOMBRE[t.ProyectoID] || t.ProyectoID) : '';
+    const proyLabel = proyNom ? escHtml(proyNom) : '<span class="text-muted">—</span>';
 
     return `<tr>
       <td><strong>${escHtml(t.Titulo)}</strong></td>
-      <td style="font-size:.78rem;color:#4a5068">${escHtml(proyLabel)}</td>
+      <td style="font-size:.78rem;color:#4a5068">${proyLabel}</td>
       <td>${badgeAsignado(t.Asignado)}</td>
       <td>${badgePrioridad(t.Prioridad)}</td>
       <td class="${fechaClass}" style="font-size:.78rem;white-space:nowrap">${vencidaIco}${fechaTxt}</td>
@@ -589,6 +937,8 @@ function abrirModalNuevo() {
   document.getElementById('mFechaLimite').value = '';
   document.getElementById('mProyectoID').value  = '';
   document.getElementById('mContactoID').value  = '';
+  contactoPrevio = '';
+  cerrarPanelNuevoContacto();
   document.getElementById('mID').value          = '';
   document.getElementById('grupoID').style.display = 'none';
   document.getElementById('modalTarea').classList.add('open');
@@ -606,8 +956,12 @@ function abrirModalEditar(id) {
   document.getElementById('mPrioridad').value   = t.Prioridad || 'Media';
   document.getElementById('mStatus').value      = t.Status || 'Pendiente';
   document.getElementById('mFechaLimite').value = t.FechaLimite || '';
-  document.getElementById('mProyectoID').value  = t.ProyectoID || '';
-  document.getElementById('mContactoID').value  = t.ContactoID || '';
+  llenarSelectProyectos();
+  llenarSelectContactos();
+  fijarSelect('mProyectoID', t.ProyectoID, PROY_NOMBRE);
+  fijarSelect('mContactoID', t.ContactoID, CONT_NOMBRE);
+  contactoPrevio = document.getElementById('mContactoID').value;
+  cerrarPanelNuevoContacto();
   document.getElementById('mID').value          = t.ID;
   document.getElementById('grupoID').style.display = 'flex';
   document.getElementById('modalTarea').classList.add('open');
@@ -615,6 +969,22 @@ function abrirModalEditar(id) {
 
 function cerrarModal() {
   document.getElementById('modalTarea').classList.remove('open');
+}
+
+// Fija el valor de un select; si el ID ya no existe en la lista, agrega una opción temporal
+function fijarSelect(selId, valor, mapaNombres) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  if (!valor) { sel.value = ''; return; }
+  const existe = Array.from(sel.options).some(o => o.value === valor);
+  if (!existe) {
+    const nom = mapaNombres[valor] || valor;
+    const opt = document.createElement('option');
+    opt.value = valor;
+    opt.textContent = nom + ' (ya no existe)';
+    sel.appendChild(opt);
+  }
+  sel.value = valor;
 }
 
 // ═══════════════════════════════════
@@ -636,8 +1006,8 @@ async function guardarTarea() {
     Prioridad:   document.getElementById('mPrioridad').value,
     Status:      document.getElementById('mStatus').value,
     FechaLimite: document.getElementById('mFechaLimite').value,
-    ProyectoID:  document.getElementById('mProyectoID').value.trim(),
-    ContactoID:  document.getElementById('mContactoID').value.trim()
+    ProyectoID:  document.getElementById('mProyectoID').value || '',
+    ContactoID:  (document.getElementById('mContactoID').value === '__nuevo__' ? '' : document.getElementById('mContactoID').value) || ''
   };
 
   try {
