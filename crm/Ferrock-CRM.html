@@ -9,10 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Manrope',sans-serif;background:#f5f6f8;min-height:100vh}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── HEADER ── */
-.crm-header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:relative}
+.crm-header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:relative;flex-shrink:0}
 .logo-box{background:#fff;border-radius:10px;padding:.35rem .7rem;display:flex;align-items:center;justify-content:center;min-width:70px;min-height:44px;flex-shrink:0}
 .logo-box img{height:38px;width:auto;display:block}
 .logo-fallback{font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;color:#1a3a6b;display:none}
@@ -28,18 +28,19 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;min-height:100vh}
 .user-menu-item:hover{background:#f0f4ff}
 
 /* ── NAV PILLS (centrados) ── */
-.nav-bar{background:#fff;border-bottom:1px solid #dde1e9;padding:.6rem 1.5rem;display:flex;gap:.5rem;overflow-x:auto;justify-content:center;flex-wrap:wrap}
+.nav-bar{background:#fff;border-bottom:1px solid #dde1e9;padding:.6rem 1rem;display:flex;flex-direction:column;gap:.45rem;flex-shrink:0}
+.nav-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}
 .nav-pill{padding:.4rem .9rem;border-radius:20px;font-size:.82rem;font-weight:700;color:#4a5068;background:#f0f4ff;border:1px solid #dde1e9;cursor:pointer;white-space:nowrap;transition:.15s;display:flex;align-items:center;gap:.35rem;font-family:'Manrope',sans-serif}
 .nav-pill:hover{background:#dce8f7;color:#1a3a6b}
 .nav-pill.active{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
 
 /* ── CONTENIDO ── */
-.tab-frame-wrap{display:none;height:calc(100vh - 110px)}
+.tab-frame-wrap{display:none;flex:1;min-height:0}
 .tab-frame-wrap.active{display:block}
 .tab-frame-wrap iframe{width:100%;height:100%;border:none;display:block}
 
 /* ── CONTACTOS: Contactos + Equipo apilados ── */
-.personas-wrap{height:calc(100vh - 110px);overflow-y:auto;background:#f5f6f8}
+.personas-wrap{height:100%;overflow-y:auto;background:#f5f6f8}
 .personas-iframe-co{width:100%;border:none;display:block;height:640px}
 .personas-divider{display:flex;align-items:center;gap:.6rem;padding:1rem 1.5rem .4rem;background:#f5f6f8}
 .personas-divider-line{flex:1;height:2px;background:linear-gradient(to right,#4a9fd4,transparent)}
@@ -50,7 +51,9 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;min-height:100vh}
   .crm-header{padding:.5rem .8rem;flex-wrap:wrap;gap:.4rem}
   .logo-slogan{display:none}
   .crm-title{position:static;transform:none;font-size:.85rem;order:3;width:100%;justify-content:center;margin-top:.3rem}
-  .nav-bar{padding:.5rem .8rem}
+  .nav-bar{padding:.5rem .6rem;gap:.35rem}
+  .nav-row{gap:.35rem}
+  .nav-pill{padding:.35rem .7rem;font-size:.76rem}
 }
 </style>
 </head>
@@ -80,17 +83,21 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;min-height:100vh}
 </div>
 
 <nav class="nav-bar">
-  <button class="nav-pill" data-tab="ferrock" onclick="showTab('ferrock')">🗂️ Ferrock</button>
-  <button class="nav-pill" data-tab="tracker" onclick="showTab('tracker')">⏱️ Tracker</button>
-  <button class="nav-pill" data-tab="agenda" onclick="showTab('agenda')">📅 Agenda</button>
-  <button class="nav-pill" data-tab="contactos" onclick="showTab('contactos')">👥 Contactos</button>
-  <button class="nav-pill" data-tab="proyectos" onclick="showTab('proyectos')">📋 Proyectos</button>
-  <button class="nav-pill" data-tab="pendientes" onclick="showTab('pendientes')">☑️ Lista de Pendientes</button>
-  <button class="nav-pill active" data-tab="timeline" onclick="showTab('timeline')">📅 Timeline</button>
-  <button class="nav-pill" data-tab="drive" onclick="showTab('drive')">📂 Drive</button>
-  <button class="nav-pill" data-tab="finanzas" onclick="showTab('finanzas')">💰 Finanzas</button>
-  <button class="nav-pill" data-tab="plats" onclick="showTab('plats')">📧 Plat´s Info</button>
-  <button class="nav-pill" data-tab="ecoia" onclick="showTab('ecoia')">🫀 Eco-IA Actividad</button>
+  <div class="nav-row">
+    <button class="nav-pill" data-tab="tracker" onclick="showTab('tracker')">⏱️ Tracker</button>
+    <button class="nav-pill" data-tab="drive" onclick="showTab('drive')">📂 Drive</button>
+    <button class="nav-pill" data-tab="contactos" onclick="showTab('contactos')">👥 Contactos</button>
+    <button class="nav-pill" data-tab="proyectos" onclick="showTab('proyectos')">📋 Proyectos</button>
+    <button class="nav-pill" data-tab="plats" onclick="showTab('plats')">📧 Plat´s Info</button>
+    <button class="nav-pill" data-tab="finanzas" onclick="showTab('finanzas')">💰 Finanzas</button>
+  </div>
+  <div class="nav-row">
+    <button class="nav-pill" data-tab="ferrock" onclick="showTab('ferrock')">🗂️ Ferrock</button>
+    <button class="nav-pill" data-tab="agenda" onclick="showTab('agenda')">📅 Agenda</button>
+    <button class="nav-pill active" data-tab="timeline" onclick="showTab('timeline')">📅 Timeline</button>
+    <button class="nav-pill" data-tab="pendientes" onclick="showTab('pendientes')">☑️ Pendientes</button>
+    <button class="nav-pill" data-tab="ecoia" onclick="showTab('ecoia')">🫀 Eco IA</button>
+  </div>
 </nav>
 
 <!-- FERROCK -->
