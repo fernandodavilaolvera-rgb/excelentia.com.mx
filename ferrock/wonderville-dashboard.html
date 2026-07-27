@@ -304,7 +304,7 @@ function totalEspeciales(s){ return Object.values(especialesDe(s)).reduce((a,v) 
 function renderTemporada(semanas, paneEl){
   const tot = {
     total:0, efectivo:0, tarjeta:0, transfer:0,
-    bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, especiales:0, piezas:0
+    bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, especiales:0, espRev:0, piezas:0
   };
   const charTotals = {};
   const specialTotals = {};
@@ -320,6 +320,7 @@ function renderTemporada(semanas, paneEl){
     tot.oraculos += s.oraculos || 0;
     tot.gorras   += s.gorras   || 0;
     tot.playeras += totalPlayeras(s);
+    tot.espRev   += s.espRev || 0;
     // personajes
     Object.entries(s.chars || {}).forEach(([k,v]) => {
       if (CHAR_KEYS.includes(k)) charTotals[k] = (charTotals[k]||0) + v;
@@ -424,7 +425,7 @@ function renderTemporada(semanas, paneEl){
     {name:'Bolsas',   qty:tot.bolsas,   rev:tot.bolsas*PRECIOS.bolsa,     color:'var(--orange)'},
     {name:'Gorras',   qty:tot.gorras,   rev:tot.gorras*PRECIOS.gorra,     color:'var(--yellow)'},
     // Especiales: precio variable por diseño → solo unidades, sin estimar dinero
-    {name:'Especiales', qty:tot.especiales, rev:0, color:'#ffb64a', sinRev:true},
+    {name:'Especiales', qty:tot.especiales, rev:tot.espRev, color:'#ffb64a', sinRev: !(tot.espRev > 0)},
   ].sort((a,b) => b.qty - a.qty);
   const maxQ = Math.max(1, ...productos.map(p => p.qty));
   const maxR = Math.max(1, ...productos.filter(p => !p.sinRev).map(p => p.rev));
@@ -443,7 +444,7 @@ function renderTemporada(semanas, paneEl){
       <div class="chart-card">
         <div class="chart-card-header"><h3>💰 Recaudación por producto</h3><span class="chart-total-badge">estimado</span></div>
         <div class="prod-bars">${rBars}</div>
-        <div class="est-note">* Estimado con precios base. Los diseños especiales no aparecen aquí porque su precio cambia por diseño. El dinero real total y por forma de pago sale directo del Sheet.</div>
+        <div class="est-note">* Estimado con precios base. Los diseños especiales se calculan restando los productos de precio conocido al total real de cada venta. El dinero real total y por forma de pago sale directo del Sheet.</div>
       </div>
     </div>`;
 
@@ -645,7 +646,7 @@ function agruparT2(rows){
       grupos[idx] = {
         num: idx + 1, fecha: fechaFuncion(idx), rango: rangoFuncion(idx),
         efectivo:0, tarjeta:0, transfer:0, total:0,
-        bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, chars:{}, especiales:{}
+        bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, chars:{}, especiales:{}, espRev:0
       };
     }
     const g = grupos[idx];
@@ -663,9 +664,25 @@ function agruparT2(rows){
       if (q) g.chars[ch.key] = (g.chars[ch.key]||0) + q;
     });
     // Diseños especiales → con su NOMBRE REAL leído de la columna Productos
-    Object.entries(especialesDeFila(row)).forEach(([name, q]) => {
-      if (q) g.especiales[name] = (g.especiales[name]||0) + q;
+    const espFila = especialesDeFila(row);
+    let qEsp = 0;
+    Object.entries(espFila).forEach(([name, q]) => {
+      if (q) { g.especiales[name] = (g.especiales[name]||0) + q; qEsp += q; }
     });
+    // Dinero de los especiales = total REAL de la venta − lo que valen los
+    // productos de precio conocido. Se calcula venta por venta para que un
+    // descuento aislado no contamine toda la temporada.
+    if (qEsp > 0){
+      const playerasFila = CHARS.reduce((a,ch) => a + cell(row, ch.col), 0);
+      const conocidos =
+        playerasFila   * PRECIOS.playera +
+        cell(row,1)    * PRECIOS.bolsa   +
+        cell(row,2)    * PRECIOS.sticker +
+        cell(row,3)    * PRECIOS.oraculo +
+        cell(row,4)    * PRECIOS.gorra;
+      const resto = total - conocidos;
+      g.espRev = (g.espRev || 0) + (resto > 0 ? resto : 0);
+    }
   });
   // playeras = suma de personajes (los especiales van aparte)
   Object.values(grupos).forEach(g => {
