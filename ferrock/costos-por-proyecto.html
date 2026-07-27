@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costos por proyecto | ExcelentIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8; --surface:#ffffff; --border:#dde1e9;
+    --header-grad:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);
+    --header-accent:#4a9fd4;
+    --hover-bg:#e8f0fb; --card-head:#dce8f7;
+    --text:#1a2035; --text2:#4a5068; --text3:#8a90a0;
+    --accent:#4a9fd4; --accent-dark:#1a3a6b;
+    --alert-bg:#f0f6ff; --alert-bd:#c8d9f0; --note-bg:#eef4fc;
+    --green:#2d9e5f; --red:#c0392b;
+    --max:720px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);
+       line-height:1.6;font-size:15px;-webkit-font-smoothing:antialiased}
+
+  header{background:var(--header-grad);border-bottom:3px solid var(--header-accent);padding:1.4rem 1.5rem}
+  .header-inner{max-width:var(--max);margin:0 auto}
+  .logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+  .logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;
+            justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+  .logo-box img{height:48px;width:auto;display:block}
+  .logo-fallback{font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+  .logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+
+  .doc-head{max-width:var(--max);margin:2rem auto 0;padding:0 1.5rem}
+  .doc-kicker{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
+              color:var(--accent);margin-bottom:.45rem}
+  .doc-head h1{font-size:1.65rem;font-weight:800;letter-spacing:-.4px;line-height:1.25}
+  .doc-head .sub{margin-top:.45rem;font-size:13.5px;color:var(--text3)}
+
+  main{max-width:var(--max);margin:0 auto;padding:1.6rem 1.5rem 3rem}
+
+  /* ---------- ACORDEÓN NIVEL 1 : PROYECTO ---------- */
+  .proj{background:var(--surface);border:1px solid var(--border);border-radius:9px;
+        margin-bottom:1rem;overflow:hidden}
+  .proj-head{display:flex;align-items:center;gap:.75rem;padding:.95rem 1.1rem;cursor:pointer;
+             background:var(--card-head);user-select:none;transition:background .15s}
+  .proj-head:hover{background:#cfe0f4}
+  .proj-icon{width:34px;height:34px;border-radius:8px;flex-shrink:0;
+             background:linear-gradient(135deg,#1a3a6b,#4a9fd4);color:#fff;
+             display:flex;align-items:center;justify-content:center;font-size:16px}
+  .proj-title{flex:1;min-width:0}
+  .proj-name{font-size:15px;font-weight:800;color:var(--accent-dark);line-height:1.25}
+  .proj-meta{font-size:11.5px;color:var(--text2);margin-top:.1rem}
+  .proj-sum{font-size:13px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums;
+            white-space:nowrap;text-align:right}
+  .proj-sum small{display:block;font-size:10px;font-weight:700;color:var(--text3);
+                  text-transform:uppercase;letter-spacing:.4px}
+  .chev{font-size:12px;color:var(--accent-dark);transition:transform .2s;flex-shrink:0}
+  .proj.open .chev{transform:rotate(90deg)}
+  .proj-body{display:none;padding:.9rem 1.1rem 1.1rem}
+  .proj.open .proj-body{display:block}
+
+  /* ---------- ACORDEÓN NIVEL 2 : SECCIÓN ---------- */
+  .sub{border:1px solid var(--border);border-radius:7px;margin-bottom:.7rem;overflow:hidden}
+  .sub:last-child{margin-bottom:0}
+  .sub-head{display:flex;align-items:center;gap:.55rem;padding:.65rem .9rem;cursor:pointer;
+            background:var(--bg);user-select:none;transition:background .15s}
+  .sub-head:hover{background:var(--hover-bg)}
+  .sub-name{flex:1;font-size:12.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+            color:var(--accent-dark)}
+  .sub-chev{font-size:11px;color:var(--text3);transition:transform .2s}
+  .sub.open .sub-chev{transform:rotate(90deg)}
+  .sub-body{display:none;padding:.9rem}
+  .sub.open .sub-body{display:block}
+
+  /* ---------- TABLA ---------- */
+  .tbl-wrap{border:1px solid var(--border);border-radius:7px;overflow-x:auto;background:var(--surface)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:300px}
+  thead th{background:var(--card-head);color:var(--accent-dark);font-size:10.5px;font-weight:800;
+           letter-spacing:.6px;text-transform:uppercase;text-align:left;padding:.6rem .9rem;white-space:nowrap}
+  tbody td{padding:.6rem .9rem;border-top:1px solid var(--border);color:var(--text2)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.total td{background:var(--card-head);font-weight:800;color:var(--accent-dark);
+              border-top:2px solid var(--accent)}
+  tr.margen td{background:#e8feee;font-weight:800;color:#1a7b3a;border-top:2px solid var(--green)}
+  .muted{color:var(--text3);font-size:12px}
+
+  .nota{background:var(--note-bg);border-left:3px solid var(--accent-dark);border-radius:0 6px 6px 0;
+        padding:.75rem 1rem;margin-top:.9rem;font-size:13px;color:var(--text2)}
+  .nota b{color:var(--accent-dark);font-weight:700}
+
+  /* ---------- SLIDERS ---------- */
+  .ctrl{margin-bottom:1.05rem}
+  .ctrl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem;gap:.6rem}
+  .ctrl-label{font-size:13.5px;font-weight:600;color:var(--text2)}
+  .ctrl-val{font-size:14px;font-weight:800;color:var(--accent-dark);font-variant-numeric:tabular-nums;
+            white-space:nowrap}
+  input[type=range]{width:100%;height:5px;border-radius:3px;background:var(--border);
+                    outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:19px;height:19px;
+    border-radius:50%;background:var(--accent-dark);border:3px solid #fff;cursor:pointer;
+    box-shadow:0 1px 4px rgba(13,27,62,.35)}
+  input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:var(--accent-dark);
+    border:3px solid #fff;cursor:pointer;box-shadow:0 1px 4px rgba(13,27,62,.35)}
+  .divider{height:1px;background:var(--border);margin:1.1rem 0}
+
+  .result{background:var(--alert-bg);border:1px solid var(--alert-bd);border-left:4px solid var(--header-accent);
+          border-radius:7px;padding:.95rem 1.1rem;margin-top:.5rem}
+  .result-row{display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;
+              border-bottom:1px dashed var(--alert-bd);gap:.8rem}
+  .result-row:last-child{border-bottom:none}
+  .result-row .lbl{font-size:13.5px;color:var(--text2)}
+  .result-row .val{font-size:15px;font-weight:800;color:var(--accent-dark);
+                   font-variant-numeric:tabular-nums;white-space:nowrap}
+  .result-row.big{padding-top:.65rem;margin-top:.25rem;border-top:2px solid var(--accent);border-bottom:none}
+  .result-row.big .lbl{font-size:14px;font-weight:700;color:var(--text)}
+  .result-row.big .val{font-size:1.3rem;color:var(--green)}
+
+  .btn-row{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.8rem}
+  button{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:6px;padding:.48rem .9rem;
+         cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);
+         transition:background .15s}
+  button:hover{background:var(--hover-bg)}
+  button.primary{background:var(--accent-dark);color:#fff;border-color:var(--accent-dark)}
+  button.primary:hover{background:#12294d}
+  .saved-msg{font-size:12px;color:var(--green);font-weight:700;margin-top:.5rem;display:none}
+
+  footer{border-top:1px solid var(--border);background:var(--surface);padding:1.3rem 1.5rem}
+  .footer-inner{max-width:var(--max);margin:0 auto;font-size:12px;color:var(--text3)}
+  .footer-inner b{color:var(--text2)}
+
+  @media (max-width:600px){
+    body{font-size:14.5px}
+    header{padding:1.1rem}
+    .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+    .logo-slogan{font-size:11px}
+    .doc-head{padding:0 1.1rem;margin-top:1.5rem}
+    .doc-head h1{font-size:1.3rem}
+    main{padding:1.2rem 1.1rem 2.2rem}
+    .proj-head{padding:.8rem .85rem;gap:.55rem}
+    .proj-icon{width:30px;height:30px;font-size:14px}
+    .proj-name{font-size:14px}
+    .proj-sum{font-size:12px}
+    .proj-body{padding:.75rem .85rem 1rem}
+    table{font-size:13.5px}
+    thead th,tbody td{padding:.52rem .7rem}
+    .ctrl-head{flex-direction:column;gap:.15rem}
+    footer{padding:1.1rem}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+  </div>
+</header>
+
+<div class="doc-head">
+  <div class="doc-kicker">Uso interno</div>
+  <h1>Costos por proyecto</h1>
+  <div class="sub">Montos mensuales antes de IVA · Julio 2026</div>
+</div>
+
+<main>
+
+  <!-- ============================================================
+       PROYECTO: CLUB BERIMBAU
+       Para agregar otro proyecto, copia todo el bloque .proj
+       y cambia data-proj por un identificador nuevo.
+       ============================================================ -->
+  <div class="proj open" data-proj="berimbau">
+    <div class="proj-head" data-toggle="proj">
+      <div class="proj-icon">🏋️</div>
+      <div class="proj-title">
+        <div class="proj-name">Club Berimbau</div>
+        <div class="proj-meta">Dashboard de cobranza y avisos</div>
+      </div>
+      <div class="proj-sum"><span data-sum>$4,813</span><small>Margen</small></div>
+      <span class="chev">▶</span>
+    </div>
+
+    <div class="proj-body">
+
+      <!-- ---------- COSTOS ---------- -->
+      <div class="sub open">
+        <div class="sub-head" data-toggle="sub">
+          <span class="sub-chev">▶</span>
+          <span class="sub-name">Costos</span>
+        </div>
+        <div class="sub-body">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Concepto</th><th class="num">Mensual</th></tr></thead>
+              <tbody>
+                <tr><td>Servidor n8n <span class="muted">· DigitalOcean</span></td><td class="num">$87</td></tr>
+                <tr><td>Supabase</td><td class="num">$0</td></tr>
+                <tr><td>Mensajería WhatsApp <span class="muted">· la paga el Club</span></td><td class="num">$0</td></tr>
+                <tr class="total"><td>Costo total</td><td class="num">$87</td></tr>
+                <tr><td>Renta que factura</td><td class="num">$4,900</td></tr>
+                <tr class="margen"><td>Margen · 98.2%</td><td class="num">$4,813</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="nota">
+            <b>Nota:</b> la renta arranca el 1 de septiembre de 2026. Hasta esa fecha el proyecto solo genera costo.
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------- SIMULADOR ---------- -->
+      <div class="sub">
+        <div class="sub-head" data-toggle="sub">
+          <span class="sub-chev">▶</span>
+          <span class="sub-name">Simulador</span>
+        </div>
+        <div class="sub-body">
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">DigitalOcean</span>
+              <span class="ctrl-val" data-out="do">$87</span></div>
+            <input type="range" data-in="do" data-def="87" min="0" max="3000" step="10" value="87">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">OpenAI</span>
+              <span class="ctrl-val" data-out="oa">$0</span></div>
+            <input type="range" data-in="oa" data-def="0" min="0" max="5000" step="10" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Supabase</span>
+              <span class="ctrl-val" data-out="sb">$0</span></div>
+            <input type="range" data-in="sb" data-def="0" min="0" max="3000" step="10" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Mensajería WhatsApp</span>
+              <span class="ctrl-val" data-out="wa">$0</span></div>
+            <input type="range" data-in="wa" data-def="0" min="0" max="3000" step="10" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Otros costos</span>
+              <span class="ctrl-val" data-out="ot">$0</span></div>
+            <input type="range" data-in="ot" data-def="0" min="0" max="10000" step="50" value="0">
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="ctrl" style="margin-bottom:0">
+            <div class="ctrl-head"><span class="ctrl-label">Renta mensual</span>
+              <span class="ctrl-val" data-out="rt">$4,900</span></div>
+            <input type="range" data-in="rt" data-def="4900" data-role="renta" min="0" max="30000" step="100" value="4900">
+          </div>
+
+          <div class="result">
+            <div class="result-row"><span class="lbl">Costo total al mes</span><span class="val" data-res="costo">—</span></div>
+            <div class="result-row"><span class="lbl">Renta</span><span class="val" data-res="renta">—</span></div>
+            <div class="result-row big"><span class="lbl">Margen</span><span class="val" data-res="margen">—</span></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="primary" data-act="save">Guardar mis valores</button>
+            <button data-act="reset">Volver a los reales</button>
+          </div>
+          <div class="saved-msg" data-msg>Valores guardados ✓</div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <b>ExcelentIA</b> · Costos por proyecto · Los valores del simulador se guardan solo en este navegador.
+  </div>
+</footer>
+
+<script>
+(function(){
+  const mxn = n => '$' + Math.round(n).toLocaleString('es-MX');
+
+  /* ---------- ACORDEONES ---------- */
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-toggle]');
+    if(!t) return;
+    const kind = t.getAttribute('data-toggle');
+    t.closest(kind === 'proj' ? '.proj' : '.sub').classList.toggle('open');
+  });
+
+  /* ---------- UN SIMULADOR POR PROYECTO ---------- */
+  document.querySelectorAll('.proj').forEach(proj => {
+    const id    = proj.getAttribute('data-proj');
+    const KEY   = 'excelentia_costos_' + id;
+    const inputs= [...proj.querySelectorAll('[data-in]')];
+    const outs  = {};
+    proj.querySelectorAll('[data-out]').forEach(el => outs[el.getAttribute('data-out')] = el);
+    const res   = {};
+    proj.querySelectorAll('[data-res]').forEach(el => res[el.getAttribute('data-res')] = el);
+    const sumEl = proj.querySelector('[data-sum]');
+    const msgEl = proj.querySelector('[data-msg]');
+    if(!inputs.length) return;
+
+    function render(){
+      let costo = 0, renta = 0;
+      inputs.forEach(inp => {
+        const k = inp.getAttribute('data-in');
+        const v = parseFloat(inp.value) || 0;
+        if(outs[k]) outs[k].textContent = mxn(v);
+        if(inp.getAttribute('data-role') === 'renta') renta = v; else costo += v;
+      });
+      const margen = renta - costo;
+      const pct = renta > 0 ? (margen / renta) * 100 : 0;
+
+      if(res.costo)  res.costo.textContent = mxn(costo);
+      if(res.renta)  res.renta.textContent = mxn(renta);
+      if(res.margen){
+        res.margen.textContent = mxn(margen) + '  ·  ' + pct.toFixed(1) + '%';
+        res.margen.style.color = margen < 0 ? 'var(--red)' : 'var(--green)';
+      }
+      if(sumEl){
+        sumEl.textContent = mxn(margen);
+        sumEl.style.color = margen < 0 ? 'var(--red)' : 'var(--green)';
+      }
+    }
+
+    function save(){
+      try{
+        const o = {};
+        inputs.forEach(i => o[i.getAttribute('data-in')] = parseFloat(i.value));
+        localStorage.setItem(KEY, JSON.stringify(o));
+        if(msgEl){ msgEl.style.display = 'block'; setTimeout(() => msgEl.style.display = 'none', 2200); }
+      }catch(e){
+        alert('Este navegador no permite guardar. Los valores funcionan igual, pero no se recordarán.');
+      }
+    }
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return;
+        const o = JSON.parse(raw);
+        inputs.forEach(i => {
+          const k = i.getAttribute('data-in');
+          if(typeof o[k] === 'number') i.value = o[k];
+        });
+      }catch(e){}
+    }
+
+    function reset(){
+      inputs.forEach(i => i.value = i.getAttribute('data-def') || 0);
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      render();
+    }
+
+    inputs.forEach(i => i.addEventListener('input', render));
+    proj.querySelectorAll('[data-act]').forEach(b => {
+      b.addEventListener('click', () => b.getAttribute('data-act') === 'save' ? save() : reset());
+    });
+
+    load();
+    render();
+  });
+})();
+</script>
+
+</body>
+</html>
