@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preparación de junta — SOA Pharmacour · ExcelentIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8; --surface:#ffffff; --border:#dde1e9;
+    --header-grad:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);
+    --header-accent:#4a9fd4;
+    --hover:#e8f0fb; --card-head:#dce8f7;
+    --alert-bg:#f0f6ff; --alert-border:#c8d9f0; --alert-accent:#4a9fd4;
+    --note-bg:#eef4fc; --note-accent:#1a3a6b;
+    --text:#1a2035; --text2:#4a5068; --text3:#8a90a0;
+    --accent:#4a9fd4; --accent-dark:#1a3a6b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Manrope',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.55;
+    padding:0 0 48px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:var(--header-grad);
+    border-bottom:3px solid var(--header-accent);
+    padding:1.6rem 1.5rem 1.7rem;
+  }
+  .header-inner{max-width:760px;margin:0 auto;}
+  .logo-header-wrap{display:flex;align-items:center;gap:.9rem;margin-bottom:1.1rem;}
+  .logo-box{
+    background:#fff;border-radius:10px;padding:.4rem .75rem;
+    display:flex;align-items:center;justify-content:center;
+    min-width:80px;min-height:52px;flex-shrink:0;
+  }
+  .logo-box img{height:48px;width:auto;display:block;}
+  .logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none;}
+  .logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px;}
+
+  .doc-tag{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:1px;
+    text-transform:uppercase;color:#bcd8f0;
+    border:1px solid rgba(255,255,255,.35);border-radius:6px;
+    padding:.2rem .55rem;margin-bottom:.7rem;
+  }
+  header h1{color:#fff;font-size:1.6rem;font-weight:800;line-height:1.2;}
+  header .subtitle{color:#cfe0f2;font-size:.95rem;font-weight:500;margin-top:.35rem;}
+
+  /* ---------- LAYOUT ---------- */
+  main{max-width:760px;margin:0 auto;padding:0 1.5rem;}
+  .card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;margin-top:1.4rem;overflow:hidden;
+    max-width:720px;margin-left:auto;margin-right:auto;
+  }
+  .card-head{
+    background:var(--card-head);
+    padding:.85rem 1.2rem;
+    font-size:1.05rem;font-weight:800;color:var(--accent-dark);
+    display:flex;align-items:center;gap:.55rem;
+  }
+  .card-head .n{
+    background:var(--accent-dark);color:#fff;
+    width:26px;height:26px;border-radius:7px;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:.85rem;font-weight:800;
+  }
+  .card-body{padding:1.1rem 1.2rem;}
+  .card-body p{color:var(--text2);font-size:.95rem;margin-bottom:.7rem;}
+  .card-body p:last-child{margin-bottom:0;}
+  .card-body strong{color:var(--text);font-weight:700;}
+
+  .lead{
+    background:var(--note-bg);border-left:4px solid var(--note-accent);
+    border-radius:8px;padding:.85rem 1rem;font-size:.95rem;color:var(--text2);
+    max-width:720px;margin:1.4rem auto 0;
+  }
+  .lead strong{color:var(--accent-dark);}
+
+  /* glosario */
+  .term{
+    padding:.6rem 0;border-bottom:1px dashed var(--border);
+    font-size:.92rem;color:var(--text2);
+  }
+  .term:last-child{border-bottom:none;}
+  .term b{color:var(--accent-dark);font-weight:800;}
+
+  /* preguntas */
+  .q-group{margin-bottom:1.1rem;}
+  .q-group:last-child{margin-bottom:0;}
+  .q-title{
+    font-size:.78rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--accent);margin-bottom:.55rem;
+  }
+  ol.q, ul.plain{list-style:none;}
+  ol.q{counter-reset:qc;}
+  ol.q li{
+    counter-increment:qc;position:relative;
+    padding:.5rem .5rem .5rem 2.1rem;
+    font-size:.93rem;color:var(--text);
+    border-bottom:1px solid var(--border);
+  }
+  ol.q li:last-child{border-bottom:none;}
+  ol.q li::before{
+    content:counter(qc);position:absolute;left:0;top:.5rem;
+    width:1.5rem;height:1.5rem;border-radius:6px;
+    background:var(--hover);color:var(--accent-dark);
+    font-size:.78rem;font-weight:800;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  ol.q li .hint{display:block;font-size:.8rem;color:var(--text3);margin-top:.15rem;}
+
+  ul.plain li{
+    position:relative;padding:.45rem 0 .45rem 1.4rem;
+    font-size:.93rem;color:var(--text2);
+    border-bottom:1px solid var(--border);
+  }
+  ul.plain li:last-child{border-bottom:none;}
+  ul.plain li::before{
+    content:"✓";position:absolute;left:0;top:.45rem;
+    color:#2d9e5f;font-weight:800;font-size:.85rem;
+  }
+  ul.plain li b{color:var(--text);font-weight:700;}
+
+  .alert{
+    background:var(--alert-bg);border:1px solid var(--alert-border);
+    border-left:4px solid var(--alert-accent);border-radius:8px;
+    padding:.9rem 1.1rem;font-size:.93rem;color:var(--text2);
+    max-width:720px;margin:1.4rem auto 0;
+  }
+  .alert b{color:var(--accent-dark);}
+
+  footer{
+    max-width:720px;margin:2rem auto 0;padding:0 1.5rem;
+    text-align:center;font-size:.8rem;color:var(--text3);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:600px){
+    .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem;}
+    .logo-slogan{font-size:11px;}
+    header{padding:1.3rem 1.1rem;}
+    header h1{font-size:1.3rem;}
+    main{padding:0 1.1rem;}
+    .card-body,.card-head{padding-left:1rem;padding-right:1rem;}
+  }
+
+  /* ---------- PRINT / PDF ---------- */
+  @media print{
+    body{background:#fff;padding:0;}
+    header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .card,.alert,.lead{break-inside:avoid;box-shadow:none;}
+    .card-head{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    @page{margin:1.2cm;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <span class="doc-tag">Preparación de junta · Confidencial</span>
+    <h1>Integración al SOA de Pharmacour</h1>
+    <div class="subtitle">Guía rápida para la reunión técnica · Proyecto Licitaciones Públicas con Agentes de IA</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="lead">
+    <strong>SOA = Service-Oriented Architecture</strong> (Arquitectura Orientada a Servicios). No es un programa: es la forma en que Pharmacour tiene organizados sus sistemas, dividido en “ventanillas” especializadas que atienden peticiones y devuelven información en un formato estándar. Integrarnos a su SOA significa que ellos nos abren ciertas ventanillas para que nuestros agentes pidan documentos e información <strong>de forma automática y segura</strong>, sin subir nada a mano.
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="n">1</span>Qué es y por qué nos conviene</div>
+    <div class="card-body">
+      <p>Imagina su sistema como un conjunto de ventanillas: una de <strong>documentos</strong>, una de <strong>licitaciones</strong>, una de <strong>inventario</strong>. Nosotros no entramos a su “cocina” (sus sistemas internos); solo pedimos platillos específicos del menú que ellos autoricen.</p>
+      <p>Para el proyecto es <strong>excelente noticia</strong>: nuestros agentes podrían jalar las bases y documentos de una licitación directamente de su sistema, automático y seguro. Eleva el nivel de toda la solución.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="n">2</span>Por qué les importa la seguridad</div>
+    <div class="card-body">
+      <p>En licitaciones, los documentos son oro: propuestas económicas, precios, estrategias. El SOA les da <strong>control fino</strong>: pueden darnos acceso a solo ciertas ventanillas, con credenciales que ellos revocan cuando quieran y con <strong>bitácora de quién entró y a qué</strong>. Por eso lo mencionan de entrada — quieren ver que sabemos movernos con esas reglas.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="n">3</span>Los términos que voy a oír</div>
+    <div class="card-body">
+      <div class="term"><b>API / REST / SOAP</b> — el “idioma” de las ventanillas. REST (moderno, JSON) o SOAP (clásico, XML). Nuestro n8n habla los dos.</div>
+      <div class="term"><b>Autenticación</b> — cómo demostramos que somos nosotros: API key, OAuth o certificados.</div>
+      <div class="term"><b>Autorización / roles</b> — qué nos dejan hacer adentro. Conviene pedir <b>solo lectura</b> donde se pueda.</div>
+      <div class="term"><b>HTTPS / TLS / cifrado</b> — que la información viaje “en sobre cerrado”.</div>
+      <div class="term"><b>Whitelisting de IP / VPN</b> — que solo nuestro servidor pueda conectarse. Aquí traemos ventaja: IP fija.</div>
+      <div class="term"><b>Bitácora / auditoría</b> — el registro de todos los accesos.</div>
+      <div class="term"><b>Sandbox</b> — ambiente de pruebas para no tocar el sistema real durante el desarrollo.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="n">4</span>Preguntas para la junta</div>
+    <div class="card-body">
+      <div class="q-group">
+        <div class="q-title">Sobre la integración</div>
+        <ol class="q">
+          <li>¿Su SOA es REST o SOAP? ¿Nos pueden dar la documentación técnica (Swagger/OpenAPI o WSDL)?</li>
+          <li>¿Qué servicios específicos nos van a exponer? (documentos, licitaciones, ¿cuáles?)</li>
+          <li>¿En qué formato nos entregan los archivos? (PDF, JSON, XML)</li>
+          <li>¿Hay ambiente de pruebas (sandbox) o solo producción?</li>
+        </ol>
+      </div>
+      <div class="q-group">
+        <div class="q-title">Sobre la seguridad</div>
+        <ol class="q">
+          <li>¿Cómo se autentica la conexión? (API key, OAuth, certificados)</li>
+          <li>¿Necesitan que registremos nuestra IP en su whitelist o usar VPN?</li>
+          <li>¿Qué permisos nos asignan? ¿Podemos tener acceso de solo lectura?</li>
+          <li>¿Llevan bitácora de accesos?<span class="hint">Esta pregunta les va a encantar: muestra que pensamos en su seguridad.</span></li>
+          <li>¿Hay que firmar un NDA o cumplir algún requisito de manejo de datos?</li>
+        </ol>
+      </div>
+      <div class="q-group">
+        <div class="q-title">Sobre la logística</div>
+        <ol class="q">
+          <li>¿Quién es el contacto técnico de su lado y a quién le pedimos las credenciales?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="n">5</span>Lo que ExcelentIA ofrece (para darles confianza)</div>
+    <div class="card-body">
+      <ul class="plain">
+        <li>Nuestro n8n está <b>self-hosted en servidor propio</b> con dominio e HTTPS — no en una nube pública compartida. Control total.</li>
+        <li>Tenemos <b>IP fija</b>, lo que hace muy fácil que nos pongan en su whitelist.</li>
+        <li>Trabajamos con el principio de <b>mínimo privilegio</b>: pedimos solo el acceso necesario, de preferencia solo lectura.</li>
+        <li>Estamos <b>dispuestos a firmar NDA</b> y a apegarnos a sus reglas de manejo de documentos.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert">
+    <b>Recordatorio para el arranque de la junta:</b> confirmar que su “SOA” es Arquitectura Orientada a Servicios (99% seguro por cómo lo describen) y pedirles un recorrido de cómo lo tienen armado. Con eso aterrizamos todo lo demás.
+  </div>
+
+</main>
+
+<footer>
+  ExcelentIA · Inteligencia Artificial con esencia Humana · Documento interno de preparación
+</footer>
+
+</body>
+</html>
