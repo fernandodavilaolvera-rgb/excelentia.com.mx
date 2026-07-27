@@ -324,9 +324,12 @@ function renderTemporada(semanas, paneEl){
     Object.entries(s.chars || {}).forEach(([k,v]) => {
       if (CHAR_KEYS.includes(k)) charTotals[k] = (charTotals[k]||0) + v;
     });
-    // especiales (Art / Concurso)
+    // especiales (nombre real / Art / Concurso) — se agrupan ignorando
+    // mayúsculas y acentos, pero se muestran como se escribieron la 1a vez
     Object.entries(especialesDe(s)).forEach(([k,v]) => {
-      specialTotals[k] = (specialTotals[k]||0) + v;
+      const key = normaliza(k);
+      if (!specialTotals[key]) specialTotals[key] = { name: k, qty: 0 };
+      specialTotals[key].qty += v;
       tot.especiales += v;
     });
   });
@@ -420,12 +423,15 @@ function renderTemporada(semanas, paneEl){
     {name:'Stickers', qty:tot.stickers, rev:tot.stickers*PRECIOS.sticker, color:'var(--neon)'},
     {name:'Bolsas',   qty:tot.bolsas,   rev:tot.bolsas*PRECIOS.bolsa,     color:'var(--orange)'},
     {name:'Gorras',   qty:tot.gorras,   rev:tot.gorras*PRECIOS.gorra,     color:'var(--yellow)'},
+    // Especiales: precio variable por diseño → solo unidades, sin estimar dinero
+    {name:'Especiales', qty:tot.especiales, rev:0, color:'#ffb64a', sinRev:true},
   ].sort((a,b) => b.qty - a.qty);
   const maxQ = Math.max(1, ...productos.map(p => p.qty));
-  const maxR = Math.max(1, ...productos.map(p => p.rev));
+  const maxR = Math.max(1, ...productos.filter(p => !p.sinRev).map(p => p.rev));
   let qBars = '', rBars = '';
   productos.forEach(p => {
     qBars += `<div class="prod-bar-row"><div class="prod-bar-top"><span class="prod-name">${p.name}</span><span class="prod-stats">${p.qty} unidades</span></div><div class="prod-track"><div class="prod-fill" style="width:${(p.qty/maxQ*100).toFixed(1)}%;background:${p.color}"></div></div></div>`;
+    if (p.sinRev) return;
     rBars += `<div class="prod-bar-row"><div class="prod-bar-top"><span class="prod-name">${p.name}</span><span class="prod-stats">${money(p.rev)}</span></div><div class="prod-track"><div class="prod-fill" style="width:${(p.rev/maxR*100).toFixed(1)}%;background:${p.color}"></div></div></div>`;
   });
   html += `<p class="section-title">Rendimiento por Producto</p>
@@ -437,7 +443,7 @@ function renderTemporada(semanas, paneEl){
       <div class="chart-card">
         <div class="chart-card-header"><h3>💰 Recaudación por producto</h3><span class="chart-total-badge">estimado</span></div>
         <div class="prod-bars">${rBars}</div>
-        <div class="est-note">* Estimado con precios base. El dinero real total y por forma de pago sale directo del Sheet.</div>
+        <div class="est-note">* Estimado con precios base. Los diseños especiales no aparecen aquí porque su precio cambia por diseño. El dinero real total y por forma de pago sale directo del Sheet.</div>
       </div>
     </div>`;
 
@@ -456,10 +462,11 @@ function renderTemporada(semanas, paneEl){
   html += `</div>`;
 
   /* ---- Diseños especiales (aparte de playeras) ---- */
-  const specialEntries = Object.entries(specialTotals).filter(([,v]) => v > 0);
+  const specialEntries = Object.values(specialTotals)
+    .filter(o => o.qty > 0).sort((a,b) => b.qty - a.qty);
   if (specialEntries.length){
     html += `<p class="section-title">Diseños Especiales</p><div class="char-grid">`;
-    specialEntries.forEach(([name, qty]) => {
+    specialEntries.forEach(({name, qty}) => {
       html += `<div class="char-card concurso">
         <div class="char-img-placeholder show">🏆</div>
         <div class="char-name">${esc(name)}</div>
@@ -532,6 +539,54 @@ function cell(row, i){
 function cellStr(row, i){
   const c = row.c && row.c[i];
   return (c && c.v != null) ? String(c.v) : '';
+}
+
+/* ------------------------------------------------------------------
+   NOMBRE REAL DE LOS DISEÑOS ESPECIALES
+   La columna "Productos" (15) guarda el detalle en texto, ej:
+       "1x Karnak, 1x Paola"
+   Los productos fijos ya los conoce el dashboard; lo que sobra en ese
+   texto es el diseño especial con su nombre y cantidad reales.
+   Si no se puede identificar, cae de vuelta a "Art 1/2/3".
+   ------------------------------------------------------------------ */
+const PRODUCTOS_FIJOS = [
+  'constance','jane doe','janedoe','ocean','mischa','noel','ricky','karnak',
+  'tote bag','totebag','bolsa','bolsas','oraculo','oraculos','oráculo','oráculos',
+  'gorra','gorras','sticker','stickers','playera','playeras'
+];
+function normaliza(s){
+  return String(s).toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // quita acentos
+    .replace(/\s+/g,' ');
+}
+// "1x Karnak, 1x Paola" → [{qty:1,name:'Karnak'}, {qty:1,name:'Paola'}]
+function parseProductos(txt){
+  if (!txt) return [];
+  return String(txt).split(/[,;\n]+/).map(p => {
+    const m = p.trim().match(/^(\d+)\s*[xX×]\s*(.+)$/);
+    if (!m) return null;
+    const name = m[2].trim();
+    return name ? { qty: parseInt(m[1],10) || 0, name } : null;
+  }).filter(Boolean);
+}
+// Devuelve { 'Paola': 2, ... } para una fila del Sheet
+function especialesDeFila(row){
+  const arts = [cell(row,12), cell(row,13), cell(row,14)];
+  const artTot = arts.reduce((a,v)=>a+v, 0);
+  if (!artTot) return {};
+  // nombres del texto que NO son productos fijos
+  const sueltos = parseProductos(cellStr(row,15))
+    .filter(i => i.qty > 0 && PRODUCTOS_FIJOS.indexOf(normaliza(i.name)) === -1);
+  const sumaSueltos = sueltos.reduce((a,i)=>a+i.qty, 0);
+  if (sueltos.length && sumaSueltos === artTot){
+    const out = {};
+    sueltos.forEach(i => { out[i.name] = (out[i.name]||0) + i.qty; });
+    return out;
+  }
+  // fallback: no cuadra o no hay nombre → se queda como Art 1/2/3
+  const out = {};
+  ['Art 1','Art 2','Art 3'].forEach((n,k) => { if (arts[k]) out[n] = arts[k]; });
+  return out;
 }
 function parseFecha(row){
   const c = row.c && row.c[0];
@@ -607,9 +662,8 @@ function agruparT2(rows){
       const q = cell(row, ch.col);
       if (q) g.chars[ch.key] = (g.chars[ch.key]||0) + q;
     });
-    // Diseños especiales Art 1-3 (columnas 12,13,14) → aparte de playeras
-    [['Art 1',12],['Art 2',13],['Art 3',14]].forEach(([name,col]) => {
-      const q = cell(row, col);
+    // Diseños especiales → con su NOMBRE REAL leído de la columna Productos
+    Object.entries(especialesDeFila(row)).forEach(([name, q]) => {
       if (q) g.especiales[name] = (g.especiales[name]||0) + q;
     });
   });
