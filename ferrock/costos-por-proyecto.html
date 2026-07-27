@@ -23,7 +23,7 @@
   body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);
        line-height:1.6;font-size:15px;-webkit-font-smoothing:antialiased}
 
-  header{background:var(--header-grad);border-bottom:3px solid var(--header-accent);padding:1.4rem 1.5rem}
+  header{background:var(--header-grad);border-bottom:3px solid var(--header-accent);padding:.85rem 1.5rem}
   .header-inner{max-width:var(--max);margin:0 auto}
   .logo-header-wrap{display:flex;align-items:center;gap:.9rem}
   .logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;
@@ -32,11 +32,38 @@
   .logo-fallback{font-size:15px;font-weight:800;color:#1a3a6b;display:none}
   .logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
 
-  .doc-head{max-width:var(--max);margin:2rem auto 0;padding:0 1.5rem}
-  .doc-kicker{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
-              color:var(--accent);margin-bottom:.45rem}
-  .doc-head h1{font-size:1.65rem;font-weight:800;letter-spacing:-.4px;line-height:1.25}
+  .doc-head{max-width:var(--max);margin:1.35rem auto 0;padding:0 1.5rem}
+  .doc-kicker{font-size:10.5px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
+              color:var(--accent);margin-bottom:.3rem}
+  .doc-head h1{font-size:1.4rem;font-weight:800;letter-spacing:-.4px;line-height:1.25}
   .doc-head .sub{margin-top:.45rem;font-size:13.5px;color:var(--text3)}
+
+
+  /* ---------- LAYOUT CON PANEL IZQUIERDO ---------- */
+  .layout{display:flex;align-items:flex-start}
+  .sidebar{width:200px;flex-shrink:0;background:#eef1f6;border-right:1px solid var(--border);
+           padding:1.1rem .8rem;position:sticky;top:0;align-self:stretch;min-height:calc(100vh - 76px)}
+  .content{flex:1;min-width:0}
+
+  /* ---------- CALCULADORAS EN SIDEBAR ---------- */
+  .calc{margin-bottom:1.1rem}
+  .calc-head{font-size:9.5px;font-weight:800;color:var(--accent-dark);text-transform:uppercase;
+             letter-spacing:.7px;margin-bottom:.45rem;padding-bottom:.3rem;
+             border-bottom:1px solid #dde1e9}
+  .calc-row{display:flex;gap:.35rem;margin-bottom:.35rem}
+  .calc-field{flex:1;min-width:0}
+  .calc-lbl{display:block;font-size:9px;font-weight:700;color:var(--text3);
+            text-transform:uppercase;letter-spacing:.4px;margin-bottom:.1rem}
+  .calc input,.calc select{width:100%;font-family:inherit;font-size:12.5px;font-weight:600;
+       color:var(--text);background:#fff;border:1px solid var(--border);border-radius:5px;
+       padding:.24rem .35rem;font-variant-numeric:tabular-nums;line-height:1.35}
+  .calc input:focus,.calc select:focus{outline:none;border-color:var(--accent)}
+  .calc-out{display:flex;align-items:baseline;justify-content:space-between;gap:.35rem;
+            margin-top:.45rem;padding:.32rem .45rem;background:#fff;
+            border:1px solid var(--border);border-radius:5px}
+  .calc-out-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px}
+  .calc-out-val{font-size:13px;font-weight:800;color:var(--accent-dark);
+                font-variant-numeric:tabular-nums;white-space:nowrap}
 
   main{max-width:var(--max);margin:0 auto;padding:1.6rem 1.5rem 3rem}
 
@@ -131,6 +158,11 @@
   .footer-inner b{color:var(--text2)}
 
   @media (max-width:600px){
+    .layout{flex-direction:column}
+    .sidebar{width:100%;position:static;min-height:0;border-right:none;
+             border-bottom:1px solid var(--border);padding:.9rem 1.2rem;
+             display:flex;gap:1.2rem;flex-wrap:wrap}
+    .sidebar .calc{flex:1;min-width:160px;margin-bottom:0}
     body{font-size:14.5px}
     header{padding:1.1rem}
     .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
@@ -165,10 +197,47 @@
   </div>
 </header>
 
+
+<div class="layout">
+
+  <!-- ============================================================
+       PANEL IZQUIERDO: CALCULADORAS DE APOYO
+       ============================================================ -->
+  <aside class="sidebar">
+
+    <div class="calc">
+      <div class="calc-head">Divisas → pesos</div>
+      <div class="calc-row">
+        <div class="calc-field"><label class="calc-lbl">USD</label>
+          <input type="number" step="0.01" id="tcUsd" value="17.48"></div>
+        <div class="calc-field"><label class="calc-lbl">EUR</label>
+          <input type="number" step="0.01" id="tcEur" value="19.86"></div>
+      </div>
+      <div class="calc-row">
+        <div class="calc-field"><label class="calc-lbl">Monto</label>
+          <input type="number" step="0.01" id="fxMonto" value="0"></div>
+        <div class="calc-field"><label class="calc-lbl">Divisa</label>
+          <select id="fxDiv"><option value="usd">USD</option><option value="eur">EUR</option></select></div>
+      </div>
+      <div class="calc-out"><span class="calc-out-lbl">MXN</span><span class="calc-out-val" id="fxOut">$0</span></div>
+    </div>
+
+    <div class="calc">
+      <div class="calc-head">Factor 1.0614</div>
+      <div class="calc-row">
+        <div class="calc-field"><label class="calc-lbl">Monto</label>
+          <input type="number" step="0.01" id="fkMonto" value="0"></div>
+      </div>
+      <div class="calc-out"><span class="calc-out-lbl">Resultado</span><span class="calc-out-val" id="fkOut">$0</span></div>
+    </div>
+
+  </aside>
+
+  <div class="content">
+
 <div class="doc-head">
   <div class="doc-kicker">Uso interno</div>
   <h1>Costos por proyecto</h1>
-  <div class="sub">Montos mensuales antes de IVA · Julio 2026</div>
 </div>
 
 <main>
@@ -283,11 +352,45 @@
 
 </main>
 
+  </div>
+</div>
+
 <footer>
   <div class="footer-inner">
     <b>ExcelentIA</b> · Costos por proyecto · Los valores del simulador se guardan solo en este navegador.
   </div>
 </footer>
+
+<script>
+/* ---------- CALCULADORAS ---------- */
+(function(){
+  const KEY='excelentia_costos_tc';
+  const $=id=>document.getElementById(id);
+  const tcUsd=$('tcUsd'), tcEur=$('tcEur'), fxMonto=$('fxMonto'), fxDiv=$('fxDiv'), fxOut=$('fxOut');
+  const fkMonto=$('fkMonto'), fkOut=$('fkOut');
+  const mxn=n=>'$'+(Math.round(n*100)/100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  function renderFx(){
+    const tc=parseFloat(fxDiv.value==='eur'?tcEur.value:tcUsd.value)||0;
+    const m=parseFloat(fxMonto.value)||0;
+    fxOut.textContent=mxn(m*tc);
+    try{ localStorage.setItem(KEY,JSON.stringify({usd:tcUsd.value,eur:tcEur.value})); }catch(e){}
+  }
+  function renderFk(){
+    const m=parseFloat(fkMonto.value)||0;
+    fkOut.textContent=mxn(m*1.0614);
+  }
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw){ const o=JSON.parse(raw); if(o.usd) tcUsd.value=o.usd; if(o.eur) tcEur.value=o.eur; }
+  }catch(e){}
+
+  [tcUsd,tcEur,fxMonto,fxDiv].forEach(el=>el.addEventListener('input',renderFx));
+  fxDiv.addEventListener('change',renderFx);
+  fkMonto.addEventListener('input',renderFk);
+  renderFx(); renderFk();
+})();
+</script>
 
 <script>
 (function(){
