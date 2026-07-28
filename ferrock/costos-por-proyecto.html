@@ -163,8 +163,15 @@
 
   /* ---------- SLIDERS ---------- */
   .ctrl{margin-bottom:.7rem}
-  .ctrl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.18rem;gap:.6rem}
-  .ctrl-label{font-size:12.5px;font-weight:600;color:var(--text2)}
+  .ctrl-head{display:flex;align-items:center;margin-bottom:.18rem;gap:.45rem}
+  .usd-in{width:60px;flex-shrink:0;font-family:inherit;font-size:10.5px;font-weight:700;text-align:right;
+          color:var(--accent-dark);background:#fff;border:1px solid var(--border);border-radius:4px;
+          padding:.08rem .28rem;font-variant-numeric:tabular-nums}
+  .usd-in::placeholder{color:var(--text3);font-weight:600;font-size:9.5px}
+  .usd-in:focus{outline:none;border-color:var(--accent)}
+  .ctrl.usd-on input[type=range]{opacity:.3;pointer-events:none}
+  .usd-tag{font-size:9.5px;font-weight:700;color:var(--accent);margin-left:.25rem}
+  .ctrl-label{font-size:12.5px;font-weight:600;color:var(--text2);flex:1;min-width:0}
   .ctrl-val{font-size:14px;font-weight:800;color:var(--accent-dark);font-variant-numeric:tabular-nums;
             white-space:nowrap}
   input[type=range]{width:100%;height:5px;border-radius:3px;background:var(--border);
@@ -296,7 +303,7 @@
        Para agregar otro proyecto, copia todo el bloque .proj
        y cambia data-proj por un identificador nuevo.
        ============================================================ -->
-  <div class="proj" data-proj="berimbau" data-costo-real="87" data-renta-fija="4900">
+  <div class="proj" data-proj="berimbau">
     <div class="proj-head" data-toggle="proj">
       <div class="proj-icon">🏋️</div>
       <div class="proj-title">
@@ -310,62 +317,91 @@
     <div class="proj-body">
 
       <!-- ---------- COSTOS ---------- -->
-      <div class="sub">
+      <div class="sub open">
         <div class="sub-head" data-toggle="sub">
           <span class="sub-chev">▶</span>
           <span class="sub-name">Costos</span>
         </div>
-        <div class="sub-body">
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>Concepto</th><th class="num">Mensual</th></tr></thead>
-              <tbody>
-                <tr><td>Servidor n8n <span class="muted">· DigitalOcean</span></td><td class="num">$87</td></tr>
-                <tr><td>Supabase</td><td class="num">$0</td></tr>
-                <tr><td>Mensajería WhatsApp <span class="muted">· la paga el Club</span></td><td class="num">$0</td></tr>
-                <tr class="total"><td>Ingreso</td><td class="num">$4,900</td></tr>
-                <tr class="total"><td>Costo</td><td class="num">$87</td></tr>
-                <tr class="margen"><td>Margen · 98.2%</td><td class="num">$4,813</td></tr>
-              </tbody>
-            </table>
+        <div class="sub-body" data-scope="real">
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Servidor n8n · DigitalOcean</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
+              <span class="ctrl-val" data-out="do">$87</span></div>
+            <input type="range" data-in="do" data-def="87" min="0" max="3000" step="1" value="87">
           </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Supabase</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
+              <span class="ctrl-val" data-out="sb">$0</span></div>
+            <input type="range" data-in="sb" data-def="0" min="0" max="3000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Mensajería WhatsApp · la paga el Club</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
+              <span class="ctrl-val" data-out="wa">$0</span></div>
+            <input type="range" data-in="wa" data-def="0" min="0" max="3000" step="1" value="0">
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="ctrl" style="margin-bottom:0">
+            <div class="ctrl-head"><span class="ctrl-label">Ingreso</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
+              <span class="ctrl-val" data-out="rt">$4,900</span></div>
+            <input type="range" data-in="rt" data-def="4900" data-role="renta" min="0" max="30000" step="50" value="4900">
+          </div>
+
+          <div class="result">
+            <div class="result-row hl"><span class="lbl">Ingreso</span><span class="val" data-res="renta">—</span></div>
+            <div class="result-row hl"><span class="lbl">Costo</span><span class="val" data-res="costo">—</span></div>
+            <div class="result-row big"><span class="lbl">Margen</span><span class="val" data-res="margen">—</span></div>
+          </div>
+
         </div>
       </div>
 
       <!-- ---------- SIMULADOR ---------- -->
-      <div class="sub">
+      <div class="sub open">
         <div class="sub-head" data-toggle="sub">
           <span class="sub-chev">▶</span>
           <span class="sub-name">Simulador</span>
         </div>
-        <div class="sub-body">
+        <div class="sub-body" data-scope="sim">
 
           <div class="ctrl">
             <div class="ctrl-head"><span class="ctrl-label">DigitalOcean</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
               <span class="ctrl-val" data-out="do">$87</span></div>
             <input type="range" data-in="do" data-def="87" min="0" max="3000" step="10" value="87">
           </div>
 
           <div class="ctrl">
             <div class="ctrl-head"><span class="ctrl-label">OpenAI</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
               <span class="ctrl-val" data-out="oa">$0</span></div>
             <input type="range" data-in="oa" data-def="0" min="0" max="5000" step="10" value="0">
           </div>
 
           <div class="ctrl">
             <div class="ctrl-head"><span class="ctrl-label">Supabase</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
               <span class="ctrl-val" data-out="sb">$0</span></div>
             <input type="range" data-in="sb" data-def="0" min="0" max="3000" step="10" value="0">
           </div>
 
           <div class="ctrl">
             <div class="ctrl-head"><span class="ctrl-label">Mensajería WhatsApp</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
               <span class="ctrl-val" data-out="wa">$0</span></div>
             <input type="range" data-in="wa" data-def="0" min="0" max="3000" step="10" value="0">
           </div>
 
           <div class="ctrl">
             <div class="ctrl-head"><span class="ctrl-label">Otros costos</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
               <span class="ctrl-val" data-out="ot">$0</span></div>
             <input type="range" data-in="ot" data-def="0" min="0" max="10000" step="50" value="0">
           </div>
@@ -373,7 +409,8 @@
           <div class="divider"></div>
 
           <div class="ctrl" style="margin-bottom:0">
-            <div class="ctrl-head"><span class="ctrl-label">Renta mensual</span>
+            <div class="ctrl-head"><span class="ctrl-label">Ingreso</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
               <span class="ctrl-val" data-out="rt">$4,900</span></div>
             <input type="range" data-in="rt" data-def="4900" data-role="renta" min="0" max="30000" step="100" value="4900">
           </div>
@@ -387,11 +424,183 @@
           <div class="util">
             <div class="util-title">Utilidad por socio</div>
             <div class="util-row">
-              <span class="util-lbl">Utilidad con costo real<small>Renta fija menos costo real, entre 3</small></span>
+              <span class="util-lbl">Utilidad con costo real<small>Ingreso menos costo real, entre 3</small></span>
               <span class="util-val" data-util="real">—</span>
             </div>
             <div class="util-row">
-              <span class="util-lbl">Utilidad con Simulador<small>Renta fija menos costo simulado, entre 3</small></span>
+              <span class="util-lbl">Utilidad con Simulador<small>Ingreso menos costo simulado, entre 3</small></span>
+              <span class="util-val" data-util="sim">—</span>
+            </div>
+            <div class="util-row">
+              <span class="util-lbl">Costo real</span>
+              <span class="util-val" data-util="costoreal">—</span>
+            </div>
+            <div class="util-row">
+              <span class="util-lbl">Utilidad de socio menos costo real</span>
+              <span class="util-val" data-util="neta">—</span>
+            </div>
+            <div class="util-row final">
+              <span class="util-lbl">Margen final<small>Renglón anterior más el costo del simulador</small></span>
+              <span class="util-val" data-util="final">—</span>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="primary" data-act="save">Guardar mis valores</button>
+            <button data-act="reset">Volver a los reales</button>
+          </div>
+          <div class="saved-msg" data-msg>Valores guardados ✓</div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       PROYECTO: ECO IA
+       ============================================================ -->
+  <div class="proj" data-proj="ecoia">
+    <div class="proj-head" data-toggle="proj">
+      <div class="proj-icon">🩺</div>
+      <div class="proj-title">
+        <div class="proj-name">Eco IA</div>
+        <div class="proj-meta">Reportes de ecocardiograma automáticos</div>
+      </div>
+      <button class="pdf-btn" data-pdf title="Guardar este proyecto en PDF">PDF</button>
+      <span class="chev">▶</span>
+    </div>
+
+    <div class="proj-body">
+
+      <!-- ---------- COSTOS ---------- -->
+      <div class="sub open">
+        <div class="sub-head" data-toggle="sub">
+          <span class="sub-chev">▶</span>
+          <span class="sub-name">Costos</span>
+        </div>
+        <div class="sub-body" data-scope="real">
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Servidor n8n · DigitalOcean</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="30" value="30" placeholder="USD">
+              <span class="ctrl-val" data-out="do">$0</span></div>
+            <input type="range" data-in="do" data-def="0" min="0" max="3000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Railway · servidor Word</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="5" value="5" placeholder="USD">
+              <span class="ctrl-val" data-out="rw">$0</span></div>
+            <input type="range" data-in="rw" data-def="0" min="0" max="2000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">OpenAI · visión</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="15" value="15" placeholder="USD">
+              <span class="ctrl-val" data-out="oa">$0</span></div>
+            <input type="range" data-in="oa" data-def="0" min="0" max="5000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Supabase</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="25" value="25" placeholder="USD">
+              <span class="ctrl-val" data-out="sb">$0</span></div>
+            <input type="range" data-in="sb" data-def="0" min="0" max="3000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Otros costos</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" value="" placeholder="USD">
+              <span class="ctrl-val" data-out="ot">$0</span></div>
+            <input type="range" data-in="ot" data-def="0" min="0" max="10000" step="1" value="0">
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="ctrl" style="margin-bottom:0">
+            <div class="ctrl-head"><span class="ctrl-label">Ingreso</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
+              <span class="ctrl-val" data-out="rt">$7,000</span></div>
+            <input type="range" data-in="rt" data-def="7000" data-role="renta" min="0" max="60000" step="50" value="7000">
+          </div>
+
+          <div class="result">
+            <div class="result-row hl"><span class="lbl">Ingreso</span><span class="val" data-res="renta">—</span></div>
+            <div class="result-row hl"><span class="lbl">Costo</span><span class="val" data-res="costo">—</span></div>
+            <div class="result-row big"><span class="lbl">Margen</span><span class="val" data-res="margen">—</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ---------- SIMULADOR ---------- -->
+      <div class="sub open">
+        <div class="sub-head" data-toggle="sub">
+          <span class="sub-chev">▶</span>
+          <span class="sub-name">Simulador</span>
+        </div>
+        <div class="sub-body" data-scope="sim">
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Servidor n8n · DigitalOcean</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="30" value="30" placeholder="USD">
+              <span class="ctrl-val" data-out="do">$0</span></div>
+            <input type="range" data-in="do" data-def="0" min="0" max="3000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Railway · servidor Word</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="5" value="5" placeholder="USD">
+              <span class="ctrl-val" data-out="rw">$0</span></div>
+            <input type="range" data-in="rw" data-def="0" min="0" max="2000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">OpenAI · visión</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="15" value="15" placeholder="USD">
+              <span class="ctrl-val" data-out="oa">$0</span></div>
+            <input type="range" data-in="oa" data-def="0" min="0" max="5000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Supabase</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="25" value="25" placeholder="USD">
+              <span class="ctrl-val" data-out="sb">$0</span></div>
+            <input type="range" data-in="sb" data-def="0" min="0" max="3000" step="1" value="0">
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">Otros costos</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" value="" placeholder="USD">
+              <span class="ctrl-val" data-out="ot">$0</span></div>
+            <input type="range" data-in="ot" data-def="0" min="0" max="10000" step="1" value="0">
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="ctrl" style="margin-bottom:0">
+            <div class="ctrl-head"><span class="ctrl-label">Ingreso</span>
+              <input class="usd-in" type="number" step="0.01" data-usd data-def-usd="" placeholder="USD">
+              <span class="ctrl-val" data-out="rt">$7,000</span></div>
+            <input type="range" data-in="rt" data-def="7000" data-role="renta" min="0" max="60000" step="50" value="7000">
+          </div>
+
+          <div class="result">
+            <div class="result-row hl"><span class="lbl">Ingreso</span><span class="val" data-res="renta">—</span></div>
+            <div class="result-row hl"><span class="lbl">Costo simulador</span><span class="val" data-res="costo">—</span></div>
+            <div class="result-row big"><span class="lbl">Margen</span><span class="val" data-res="margen">—</span></div>
+          </div>
+
+          <div class="util">
+            <div class="util-title">Utilidad por socio</div>
+            <div class="util-row">
+              <span class="util-lbl">Utilidad con costo real<small>Ingreso menos costo real, entre 3</small></span>
+              <span class="util-val" data-util="real">—</span>
+            </div>
+            <div class="util-row">
+              <span class="util-lbl">Utilidad con Simulador<small>Ingreso menos costo simulado, entre 3</small></span>
               <span class="util-val" data-util="sim">—</span>
             </div>
             <div class="util-row">
@@ -445,6 +654,7 @@
     const m=parseFloat(fxMonto.value)||0;
     fxOut.textContent=mxn(m*tc);
     try{ localStorage.setItem(KEY,JSON.stringify({usd:tcUsd.value,eur:tcEur.value})); }catch(e){}
+    document.dispatchEvent(new Event('tc-change'));
   }
   function renderFk(){
     const m=parseFloat(fkMonto.value)||0;
@@ -494,59 +704,94 @@
     t.closest(kind === 'proj' ? '.proj' : '.sub').classList.toggle('open');
   });
 
-  /* ---------- UN SIMULADOR POR PROYECTO ---------- */
-  document.querySelectorAll('.proj').forEach(proj => {
-    const id    = proj.getAttribute('data-proj');
-    const KEY   = 'excelentia_costos_' + id;
-    const inputs= [...proj.querySelectorAll('[data-in]')];
-    const outs  = {};
-    proj.querySelectorAll('[data-out]').forEach(el => outs[el.getAttribute('data-out')] = el);
-    const res   = {};
-    proj.querySelectorAll('[data-res]').forEach(el => res[el.getAttribute('data-res')] = el);
-    const sumEl = proj.querySelector('[data-sum]');
-    const util  = {};
-    proj.querySelectorAll('[data-util]').forEach(el => util[el.getAttribute('data-util')] = el);
-    const costoReal = parseFloat(proj.getAttribute('data-costo-real')) || 0;
-    const rentaFija = parseFloat(proj.getAttribute('data-renta-fija')) || 0;
-    const msgEl = proj.querySelector('[data-msg]');
-    if(!inputs.length) return;
+  /* ---------- MOTOR POR PROYECTO ---------- */
+  const tcUsdEl = document.getElementById('tcUsd');
+  const getTc = () => parseFloat(tcUsdEl && tcUsdEl.value) || 0;
 
-    function render(){
+  const renders = [];
+
+  document.querySelectorAll('.proj').forEach(proj => {
+    const id  = proj.getAttribute('data-proj');
+    const KEY = 'excelentia_costos_' + id;
+
+    const util = {};
+    proj.querySelectorAll('[data-util]').forEach(el => util[el.getAttribute('data-util')] = el);
+    const msgEl = proj.querySelector('[data-msg]');
+
+    const scopes = {};
+    ['real','sim'].forEach(sc => {
+      const root = proj.querySelector('[data-scope="' + sc + '"]');
+      if(!root) return;
+      const o = { root, inputs: [...root.querySelectorAll('[data-in]')], outs:{}, res:{} };
+      root.querySelectorAll('[data-out]').forEach(el => o.outs[el.getAttribute('data-out')] = el);
+      root.querySelectorAll('[data-res]').forEach(el => o.res[el.getAttribute('data-res')] = el);
+      scopes[sc] = o;
+    });
+    if(!scopes.real && !scopes.sim) return;
+
+    function calc(sc){
+      const s = scopes[sc];
       let costo = 0, renta = 0;
-      inputs.forEach(inp => {
-        const k = inp.getAttribute('data-in');
-        const v = parseFloat(inp.value) || 0;
-        if(outs[k]) outs[k].textContent = mxn(v);
+      const tc = getTc();
+      s.inputs.forEach(inp => {
+        const k    = inp.getAttribute('data-in');
+        const ctrl = inp.closest('.ctrl');
+        const uEl  = ctrl ? ctrl.querySelector('[data-usd]') : null;
+        const usd  = (uEl && uEl.value !== '') ? (parseFloat(uEl.value) || 0) : null;
+        let v;
+        if(usd !== null){
+          v = usd * tc;
+          if(ctrl) ctrl.classList.add('usd-on');
+        } else {
+          v = parseFloat(inp.value) || 0;
+          if(ctrl) ctrl.classList.remove('usd-on');
+        }
+        if(s.outs[k]){
+          s.outs[k].innerHTML = mxn(v) + (usd !== null ? ' <span class="usd-tag">' + usd + ' USD</span>' : '');
+        }
         if(inp.getAttribute('data-role') === 'renta') renta = v; else costo += v;
       });
       const margen = renta - costo;
       const pct = renta > 0 ? (margen / renta) * 100 : 0;
+      if(s.res.costo)  s.res.costo.textContent = mxn(costo);
+      if(s.res.renta)  s.res.renta.textContent = mxn(renta);
+      if(s.res.margen) s.res.margen.textContent = mxn(margen) + '  ·  ' + pct.toFixed(1) + '%';
+      return { costo, renta };
+    }
 
-      if(res.costo)  res.costo.textContent = mxn(costo);
-      if(res.renta)  res.renta.textContent = mxn(renta);
-      if(res.margen){
-        res.margen.textContent = mxn(margen) + '  ·  ' + pct.toFixed(1) + '%';
-        res.margen.style.color = margen < 0 ? 'var(--red)' : 'var(--green)';
-      }
-      /* utilidad por socio: siempre contra la renta fija, con decimales */
+    function render(){
+      const real = scopes.real ? calc('real') : null;
+      const sim  = scopes.sim  ? calc('sim')  : real;
+      const costoReal = real ? real.costo : sim.costo;
+      const rentaFija = real ? real.renta : sim.renta;
       const dec = n => '$' + n.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
-      const utilSim = (rentaFija - costo) / 3;
+      const utilSim = (rentaFija - sim.costo) / 3;
       if(util.real)      util.real.textContent      = dec((rentaFija - costoReal) / 3);
       if(util.sim)       util.sim.textContent       = dec(utilSim);
       if(util.costoreal) util.costoreal.textContent = dec(costoReal);
       if(util.neta)      util.neta.textContent      = dec(utilSim - costoReal);
-      if(util.final)     util.final.textContent     = dec((utilSim - costoReal) + costo);
-
-      if(sumEl){
-        sumEl.textContent = mxn(margen);
-        sumEl.style.color = margen < 0 ? 'var(--red)' : 'var(--green)';
-      }
+      if(util.final)     util.final.textContent     = dec((utilSim - costoReal) + sim.costo);
     }
+    renders.push(render);
+
+    const allInputs = [];
+    Object.values(scopes).forEach(s => {
+      s.inputs.forEach(i => allInputs.push(i));
+      s.root.querySelectorAll('[data-usd]').forEach(i => allInputs.push(i));
+    });
 
     function save(){
       try{
         const o = {};
-        inputs.forEach(i => o[i.getAttribute('data-in')] = parseFloat(i.value));
+        Object.keys(scopes).forEach(sc => {
+          scopes[sc].inputs.forEach(i => {
+            const k = i.getAttribute('data-in');
+            o[sc + ':' + k] = i.value;
+            const ctrl = i.closest('.ctrl');
+            const uEl  = ctrl ? ctrl.querySelector('[data-usd]') : null;
+            if(uEl) o[sc + ':' + k + ':usd'] = uEl.value;
+          });
+        });
         localStorage.setItem(KEY, JSON.stringify(o));
         if(msgEl){ msgEl.style.display = 'block'; setTimeout(() => msgEl.style.display = 'none', 2200); }
       }catch(e){
@@ -559,27 +804,46 @@
         const raw = localStorage.getItem(KEY);
         if(!raw) return;
         const o = JSON.parse(raw);
-        inputs.forEach(i => {
-          const k = i.getAttribute('data-in');
-          if(typeof o[k] === 'number') i.value = o[k];
+        Object.keys(scopes).forEach(sc => {
+          scopes[sc].inputs.forEach(i => {
+            const k = i.getAttribute('data-in');
+            if(o[sc + ':' + k] !== undefined) i.value = o[sc + ':' + k];
+            const ctrl = i.closest('.ctrl');
+            const uEl  = ctrl ? ctrl.querySelector('[data-usd]') : null;
+            if(uEl && o[sc + ':' + k + ':usd'] !== undefined) uEl.value = o[sc + ':' + k + ':usd'];
+          });
         });
       }catch(e){}
     }
 
     function reset(){
-      inputs.forEach(i => i.value = i.getAttribute('data-def') || 0);
+      Object.keys(scopes).forEach(sc => {
+        scopes[sc].inputs.forEach(i => {
+          i.value = i.getAttribute('data-def') || 0;
+          const ctrl = i.closest('.ctrl');
+          const uEl  = ctrl ? ctrl.querySelector('[data-usd]') : null;
+          if(uEl) uEl.value = uEl.getAttribute('data-def-usd') || '';
+        });
+      });
       try{ localStorage.removeItem(KEY); }catch(e){}
       render();
     }
 
-    inputs.forEach(i => i.addEventListener('input', render));
+    allInputs.forEach(i => i.addEventListener('input', render));
     proj.querySelectorAll('[data-act]').forEach(b => {
-      b.addEventListener('click', () => b.getAttribute('data-act') === 'save' ? save() : reset());
+      b.addEventListener('click', e => {
+        e.stopPropagation();
+        b.getAttribute('data-act') === 'save' ? save() : reset();
+      });
     });
 
     load();
     render();
   });
+
+  /* recalcular todo cuando cambia el tipo de cambio */
+  document.addEventListener('tc-change', () => renders.forEach(r => r()));
+
 })();
 </script>
 
