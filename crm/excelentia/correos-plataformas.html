@@ -156,6 +156,23 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 .ci-off{opacity:.5}
 .ci-err{color:#dc2626;font-weight:700}
 .ci-nota{background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;padding:.65rem .8rem;font-size:.74rem;color:#4a5068;margin-top:.9rem;line-height:1.5}
+.ci-grupo{margin-bottom:.7rem}
+.ci-grupo-head{display:flex;align-items:center;gap:.5rem;background:#dce8f7;border:1px solid #c8d9f0;border-radius:10px;padding:.55rem .75rem;cursor:pointer;user-select:none;transition:.15s}
+.ci-grupo-head:hover{background:#cfe0f4}
+.ci-caret{font-size:.8rem;color:#1a3a6b;width:1rem;flex-shrink:0}
+.ci-grupo-tit{font-size:.84rem;font-weight:800;color:#1a2035;flex:1}
+.ci-grupo-cont{font-size:.72rem;font-weight:700;color:#1a3a6b;background:#fff;border:1px solid #c8d9f0;border-radius:20px;padding:.05rem .5rem;flex-shrink:0}
+.ci-grupo-body{padding-top:.55rem}
+.ci-grupo{margin-bottom:.7rem}
+.ci-grupo-head{display:flex;align-items:center;gap:.5rem;background:#dce8f7;border:1px solid #c8d9f0;border-radius:10px;padding:.6rem .8rem;cursor:pointer;user-select:none;transition:.15s}
+.ci-grupo-head:hover{background:#cfe0f4}
+.ci-grupo-head .tit{flex:1;font-size:.82rem;font-weight:800;color:#1a3a6b}
+.ci-grupo-head .cnt{font-size:.72rem;font-weight:700;color:#4a5068;background:#fff;border:1px solid #c8d9f0;border-radius:20px;padding:.1rem .5rem}
+.ci-grupo-head .arrow{font-size:.7rem;color:#4a5068;transition:transform .2s}
+.ci-grupo.open .ci-grupo-head .arrow{transform:rotate(90deg)}
+.ci-grupo-body{display:none;padding-top:.55rem}
+.ci-grupo.open .ci-grupo-body{display:block}
+.ci-grupo-vacio{font-size:.76rem;color:#8a90a0;padding:.5rem .2rem;font-style:italic}
 
 @media(max-width:600px){
   body{padding:.75rem}
@@ -747,11 +764,62 @@ async function cargarConsumo(){
   }
 }
 
+function toggleGrupo(id){
+  const b = document.getElementById('body-'+id);
+  const c = document.getElementById('car-'+id);
+  if(!b) return;
+  const abierto = b.style.display !== 'none';
+  b.style.display = abierto ? 'none' : 'block';
+  if(c) c.textContent = abierto ? '▸' : '▾';
+}
+
+function tarjetaWF(w){
+  const off = w.activo ? '' : ' ci-off';
+  const badge = w.activo ? '' : '<span class="ci-badge">apagado</span>';
+  const err = (w.errores>0) ? ' · <span class="ci-err">'+w.errores+' err</span>' : '';
+  return ''
+    + '<div class="ci-card'+off+'">'
+    +   '<span class="dot" style="background:'+modeloColor(w.modeloKey)+'"></span>'
+    +   '<div class="info">'
+    +     '<div class="nom">'+esc(w.nombre)+badge+'</div>'
+    +     '<div class="meta">'+esc(w.modelo)+err+'</div>'
+    +   '</div>'
+    +   '<div class="ejec">'
+    +     '<div class="big">'+w.ejecuciones+'</div>'
+    +     '<div class="cost">$'+(w.costoUSD!=null?w.costoUSD.toFixed(2):'0.00')+'</div>'
+    +   '</div>'
+    + '</div>';
+}
+
+function grupoAcordeon(id, titulo, lista, abierto){
+  if(lista.length === 0) return '';
+  const flecha = abierto ? '▾' : '▸';
+  const disp = abierto ? 'block' : 'none';
+  return ''
+    + '<div class="ci-grupo">'
+    +   '<div class="ci-grupo-head" onclick="toggleGrupo(\''+id+'\')">'
+    +     '<span class="ci-caret" id="car-'+id+'">'+flecha+'</span>'
+    +     '<span class="ci-grupo-tit">'+titulo+'</span>'
+    +     '<span class="ci-grupo-cont">'+lista.length+'</span>'
+    +   '</div>'
+    +   '<div class="ci-grupo-body" id="body-'+id+'" style="display:'+disp+'">'
+    +     lista.map(tarjetaWF).join('')
+    +   '</div>'
+    + '</div>';
+}
+
 function renderConsumo(){
   const panel = document.getElementById('consumo');
   const d = consumoData || {};
   const t = d.totales || {};
   const wfs = Array.isArray(d.workflows) ? d.workflows : [];
+
+  // Clasificar en 3 grupos
+  const porNombre = function(a,b){ return (a.nombre||'').localeCompare(b.nombre||'', 'es'); };
+  const activosCon = wfs.filter(function(w){ return w.activo && w.ejecuciones > 0; })
+                        .sort(function(a,b){ return b.ejecuciones - a.ejecuciones; });
+  const activosCero = wfs.filter(function(w){ return w.activo && w.ejecuciones === 0; }).sort(porNombre);
+  const inactivos   = wfs.filter(function(w){ return !w.activo; }).sort(porNombre);
 
   const periodos = [7,15,30].map(function(p){
     return '<button class="ci-per'+(p===consumoDias?' active':'')+'" onclick="setConsumoDias('+p+')">'+p+' días</button>';
@@ -773,23 +841,9 @@ function renderConsumo(){
   if(wfs.length === 0){
     html += '<div class="alert">No se encontraron workflows con IA.</div>';
   } else {
-    html += wfs.map(function(w){
-      const off = w.activo ? '' : ' ci-off';
-      const badge = w.activo ? '' : '<span class="ci-badge">apagado</span>';
-      const err = (w.errores>0) ? ' · <span class="ci-err">'+w.errores+' err</span>' : '';
-      return ''
-        + '<div class="ci-card'+off+'">'
-        +   '<span class="dot" style="background:'+modeloColor(w.modeloKey)+'"></span>'
-        +   '<div class="info">'
-        +     '<div class="nom">'+esc(w.nombre)+badge+'</div>'
-        +     '<div class="meta">'+esc(w.modelo)+err+'</div>'
-        +   '</div>'
-        +   '<div class="ejec">'
-        +     '<div class="big">'+w.ejecuciones+'</div>'
-        +     '<div class="cost">$'+(w.costoUSD!=null?w.costoUSD.toFixed(2):'0.00')+'</div>'
-        +   '</div>'
-        + '</div>';
-    }).join('');
+    html += grupoAcordeon('activos', '🟢 Activos con ejecuciones', activosCon, true);
+    html += grupoAcordeon('cero', '⚪ Activos sin actividad', activosCero, false);
+    html += grupoAcordeon('inactivos', '⏸️ Inactivos (apagados)', inactivos, false);
   }
 
   const sup = d.supuestos || {};
