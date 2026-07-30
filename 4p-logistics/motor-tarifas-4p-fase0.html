@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motor de Tarifas · 4P Logistics · Fase 0</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.6;padding-bottom:3rem}
+.header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:4px solid #4a9fd4;padding:1.5rem 1.5rem 1.8rem}
+.header-inner{max-width:1060px;margin:0 auto}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;display:block}
+.logo-fallback{font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+.header h1{color:#fff;font-size:1.5rem;font-weight:800;margin-top:1.1rem}
+.header p{color:#c8d9f0;font-size:.9rem;margin-top:.2rem}
+.badge{display:inline-block;background:#4a9fd4;color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.6px;padding:.25rem .6rem;border-radius:5px;margin-top:.7rem;text-transform:uppercase}
+.wrap{max-width:1060px;margin:0 auto;padding:0 1.5rem}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;margin-top:1.4rem;overflow:hidden}
+.card-head{background:#dce8f7;padding:.85rem 1.2rem;font-weight:700;font-size:.95rem;color:#0d1b3e;border-bottom:1px solid #c8d9f0;display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap}
+.card-body{padding:1.2rem}
+p{font-size:.9rem;color:#4a5068;margin-bottom:.7rem}
+.narrow{max-width:720px}
+li{font-size:.88rem;color:#4a5068;margin-bottom:.35rem}
+ul{margin:.4rem 0 .8rem 1.2rem}
+strong{color:#1a2035;font-weight:700}
+.muted{color:#8a90a0;font-size:.82rem;font-weight:500}
+.nota{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.85rem 1rem;margin:.8rem 0;font-size:.87rem;color:#4a5068;max-width:720px}
+.nota strong{color:#0d1b3e}
+.warn{background:#fff8f0;border:1px solid #f0d9c8;border-left:4px solid #e08a4a;border-radius:8px;padding:.85rem 1rem;margin:.8rem 0;font-size:.87rem;color:#4a5068}
+.warn strong{color:#a35a1a}
+.ok{background:#eef9f2;border:1px solid #c6e8d5;border-left:4px solid #2f9e63;border-radius:8px;padding:.85rem 1rem;margin:.8rem 0;font-size:.87rem;color:#4a5068}
+.ok strong{color:#1f7a4a}
+.drop{border:2px dashed #c8d9f0;background:#f0f6ff;border-radius:12px;padding:2.6rem 1.2rem;text-align:center;cursor:pointer;transition:.15s;max-width:720px;margin:0 auto}
+.drop:hover,.drop.hot{background:#e8f0fb;border-color:#4a9fd4}
+.drop .big{font-size:1.1rem;font-weight:800;color:#1a3a6b}
+.drop .sm{font-size:.83rem;color:#8a90a0;margin-top:.35rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;background:#1e5096;color:#fff;border:none;border-radius:8px;padding:.6rem 1.1rem;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;transition:.15s}
+.btn:hover{background:#1a3a6b}
+.btn.ghost{background:#fff;color:#1a3a6b;border:1px solid #c8d9f0}
+.btn.ghost:hover{background:#e8f0fb}
+.btn.green{background:#2f9e63}.btn.green:hover{background:#25804f}
+.btn.sm{padding:.35rem .7rem;font-size:.76rem}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;justify-content:center}
+.tablebox{overflow-x:auto;border:1px solid #dde1e9;border-radius:10px;margin-top:.8rem}
+table{border-collapse:collapse;width:100%;font-size:.79rem;min-width:900px}
+th{background:#dce8f7;color:#0d1b3e;font-weight:700;text-align:left;padding:.5rem .55rem;border-bottom:1px solid #c8d9f0;white-space:nowrap;position:sticky;top:0;z-index:2}
+td{padding:.4rem .55rem;border-bottom:1px solid #eef1f6;color:#4a5068;white-space:nowrap}
+tr:hover td{background:#f7fafe}
+tr.sub td{background:#eef4fc;font-weight:800;color:#0d1b3e}
+tr.grp td{background:#1a3a6b;color:#fff;font-weight:800;font-size:.76rem;letter-spacing:.5px;text-transform:uppercase}
+tr.neg td{background:#fff4f4}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.neg{color:#c0392b;font-weight:800}
+td.pos{color:#2f9e63;font-weight:700}
+.sug{color:#1e5096;font-weight:700}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#4a9fd4;margin-left:.25rem;vertical-align:middle}
+.dot.q{background:#e08a4a}
+.cellinput{width:92px;border:1px solid #dde1e9;border-radius:6px;padding:.18rem .3rem;font-family:inherit;font-size:.77rem;text-align:right;background:#fff}
+.cellinput:focus{outline:2px solid #4a9fd4;outline-offset:-1px}
+select,input[type=number]{font-family:inherit;font-size:.83rem;border:1px solid #dde1e9;border-radius:7px;padding:.35rem .5rem;background:#fff;color:#1a2035}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
+.panel{background:#0d1b3e;border-radius:12px;margin-top:1.4rem;padding:1.3rem;color:#fff}
+.panel h2{font-size:1.05rem;margin-bottom:.2rem}
+.panel .sub{font-size:.8rem;color:#9db3d6;margin-bottom:1rem}
+.tot{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.9rem;text-align:center}
+.tot-num{font-size:1.3rem;font-weight:800;color:#7fc4f0}
+.tot-lbl{font-size:.7rem;color:#9db3d6;margin-top:.15rem;text-transform:uppercase;letter-spacing:.4px}
+.tot.green .tot-num{color:#6ee7a8}
+.tot.red .tot-num{color:#ff9c9c}
+.tot.amber .tot-num{color:#ffcf8a}
+.chips{display:flex;gap:.35rem;flex-wrap:wrap}
+.chip{font-size:.75rem;font-weight:700;padding:.3rem .6rem;border-radius:6px;border:1px solid #dde1e9;background:#fff;color:#8a90a0;cursor:pointer;transition:.12s}
+.chip:hover{background:#e8f0fb}
+.chip.on{background:#1e5096;color:#fff;border-color:#1e5096}
+.acc{border:1px solid #dde1e9;border-radius:12px;margin-top:1rem;background:#fff;overflow:hidden}
+.acc-head{padding:.8rem 1.1rem;background:#f0f6ff;font-size:.88rem;font-weight:700;color:#1a3a6b;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.acc-head:hover{background:#e8f0fb}
+.acc-body{padding:1.1rem;border-top:1px solid #e3e8f0;display:none}
+.acc.open .acc-body{display:block}
+.acc-head .arw{transition:.2s;color:#8a90a0}
+.acc.open .acc-head .arw{transform:rotate(90deg)}
+.clasrow{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:center;padding:.4rem .5rem;border-bottom:1px dashed #eef1f6;max-width:720px}
+.clasrow .dest{font-size:.84rem;font-weight:600;color:#1a2035}
+.clasrow .dest small{display:block;font-weight:500;color:#8a90a0;font-size:.72rem}
+.hide{display:none!important}
+.footer{text-align:center;font-size:.78rem;color:#8a90a0;margin-top:2rem}
+@media(max-width:600px){
+.header h1{font-size:1.2rem}
+.logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+.logo-slogan{font-size:11px}
+.wrap{padding:0 1rem}
+.kpis{grid-template-columns:1fr 1fr}
+.clasrow{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <h1>Motor de Tarifas · 4P Logistics</h1>
+    <p>Carga el reporte tal como lo descargas. Nada más.</p>
+    <span class="badge">Prototipo · Fase 0</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- PANTALLA INICIAL -->
+  <div id="inicio">
+    <div class="card">
+      <div class="card-body">
+        <div class="drop" id="drop">
+          <div class="big">📄 Arrastra aquí el Reporte 4PL</div>
+          <div class="sm">o haz clic para elegirlo · funciona con el .csv tal como baja de la plataforma</div>
+          <input type="file" id="file" accept=".csv,.xlsx,.xls" class="hide">
+        </div>
+        <div class="btnrow"><button class="btn ghost" onclick="cargarDemo()">▶ Ver con datos de ejemplo</button></div>
+        <div class="nota" style="margin:1.2rem auto 0">No hay que configurar nada: el sistema reconoce solo las columnas, tira las que vienen vacías, identifica el destino de cada viaje, lo clasifica en local / local largo / foráneo, aplica el tarifario, calcula el margen y arma el Excel. Todo corre <strong>dentro de tu navegador</strong>: ningún dato sale de esta computadora.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div id="app" class="hide">
+
+    <div id="diag"></div>
+
+    <div class="panel">
+      <h2 id="periodoTit">Resumen del periodo</h2>
+      <div class="sub" id="periodo">—</div>
+      <div class="kpis">
+        <div class="tot"><div class="tot-num" id="t-venta">$0</div><div class="tot-lbl">A facturar al cliente</div></div>
+        <div class="tot"><div class="tot-num" id="t-costo">$0</div><div class="tot-lbl">Costo de proveedores</div></div>
+        <div class="tot green"><div class="tot-num" id="t-util">$0</div><div class="tot-lbl">Utilidad</div></div>
+        <div class="tot green"><div class="tot-num" id="t-margen">0%</div><div class="tot-lbl">Margen</div></div>
+      </div>
+      <div class="kpis" style="margin-top:.8rem">
+        <div class="tot"><div class="tot-num" id="t-viajes" style="color:#fff">0</div><div class="tot-lbl">Viajes</div></div>
+        <div class="tot red"><div class="tot-num" id="t-perdidas">0</div><div class="tot-lbl">En pérdida</div></div>
+        <div class="tot amber"><div class="tot-num" id="t-rev">0</div><div class="tot-lbl">Por revisar</div></div>
+        <div class="tot"><div class="tot-num" id="t-ahorro" style="color:#fff">—</div><div class="tot-lbl">Tiempo de armado</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span>📊 Reporte armado</span>
+        <span style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <button class="btn green sm" onclick="exportarExcel()">⬇ Descargar Excel</button>
+          <button class="btn ghost sm" onclick="reiniciar()">↺ Cargar otro archivo</button>
+        </span>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:.5rem">
+          <div><span class="muted">Periodo:</span> <span class="chips" id="mesChips" style="display:inline-flex"></span></div>
+          <label class="muted" style="cursor:pointer"><input type="checkbox" id="chkPend" onchange="render()" style="vertical-align:middle"> incluir viajes no entregados</label>
+        </div>
+        <div class="tablebox" style="max-height:620px;overflow-y:auto">
+          <table id="tabla"><thead id="rhead"></thead><tbody id="rbody"></tbody></table>
+        </div>
+        <p class="muted" style="margin-top:.6rem">Los montos en <span class="sug">azul</span> son tarifas propuestas por el motor porque el reporte no las trae. Puedes escribir encima de cualquiera y todo se recalcula. Las filas en rojo pierden dinero.</p>
+      </div>
+    </div>
+
+    <!-- AJUSTES OPCIONALES -->
+    <div class="acc" id="acc1">
+      <div class="acc-head" onclick="this.parentElement.classList.toggle('open')"><span>💲 Tarifario — ajústalo una vez y ya no vuelve a preguntar</span><span class="arw">▸</span></div>
+      <div class="acc-body">
+        <p class="narrow">Estas son las tarifas que el motor aplica cuando el reporte llega sin precio de venta. Arrancan calculadas sobre el costo real de tu propio archivo; corrígelas y quedan guardadas para las próximas quincenas.</p>
+        <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;margin:.6rem 0">
+          <span class="muted">Utilidad objetivo sobre el costo:</span>
+          <input type="number" id="markup" value="15" min="0" max="100" step="1" style="width:80px"> %
+          <button class="btn ghost sm" onclick="recalcularTarifario()">Recalcular tarifas</button>
+        </div>
+        <div class="tablebox">
+          <table><thead><tr><th>Tipo de unidad</th><th>Clasificación</th><th class="num">Costo típico</th><th class="num">Tarifa de venta</th><th class="num">Margen</th><th class="num">Viajes</th></tr></thead><tbody id="tarifabody"></tbody></table>
+        </div>
+        <label class="muted" style="display:block;margin-top:.7rem;cursor:pointer"><input type="checkbox" id="chkManio" checked onchange="render()" style="vertical-align:middle"> Las maniobras y estadías se le cobran al cliente al mismo monto que cuestan</label>
+      </div>
+    </div>
+
+    <div class="acc" id="acc2">
+      <div class="acc-head" onclick="this.parentElement.classList.toggle('open')"><span>🗺️ Clasificación de destinos <span class="muted" id="clasResumen"></span></span><span class="arw">▸</span></div>
+      <div class="acc-body">
+        <p class="narrow">El motor ya clasificó cada destino solo. Los marcados con <span class="dot q"></span> los dedujo por el monto del flete porque no reconoció la ciudad en el nombre de la tienda — vale la pena confirmarlos. Cualquier cambio queda guardado.</p>
+        <div class="chips" style="margin-bottom:.7rem"><span class="chip on" onclick="filtroClas('todos',this)">Todos</span><span class="chip" onclick="filtroClas('dudosos',this)">Solo los dudosos</span></div>
+        <div id="clasbox" style="max-height:460px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">🧠 Lo que el motor encontró en tu operación</div>
+      <div class="card-body"><div id="aprendizajes"></div></div>
+    </div>
+  </div>
+
+  <div class="footer">ExcelentIA · Prototipo Fase 0 para 4P Logistics · Julio 2026<br>
+  <span class="muted">Procesamiento 100% local · Ningún dato se envía a servidores</span></div>
+</div>
+
+<script>
+/* ================= ESTADO ================= */
+let raw=[],headers=[],C={},vacias=[],clas={},clasFuente={},tarifario={},edits={},mesSel='todos',clasFiltro='todos';
+const CLASES=[['local','Local'],['largo','Local largo'],['foraneo','Foráneo']];
+const NOM={local:'LOCAL',largo:'LOCAL LARGO',foraneo:'FORÁNEO'};
+
+/* ================= DICCIONARIO DE CIUDADES ================= */
+const DIC={
+local:['perisur','polanco','cd jardin','ciudad jardin','coacalco','tlahuac','vallejo','lindavista','tepeyac','insurgentes','del valle','coyoacan','mitikah','parque delta','iztapalapa','las antenas','santa fe','sta fe','quiroga','satelite','satélite','tlanepantla','tlalnepantla','ecatepec','atizapan','cuautitlan','cuautitlán','tultitlan','tultitlán','chalco','sta barbara','santa barbara','san martin obispo','gavilan','naucalpan','azcapotzalco','madero','nezahualcoyotl','texcoco','huixquilucan','interlomas','lomas verdes','cuajimalpa','tlalpan','xochimilco','mixcoac','universidad','aragon','la villa','oceania','miramontes','gran sur','coapa','portal','centro','supercenter','almacen','corporativo','naranja','delta','patio','forum buenavista','plaza oriente','artz','antara','reforma','narvarte','del carmen','pedregal','san jeronimo','magdalena','iztacalco','venustiano','azteca','plaza aragon','mundo e','perinorte','tepotzotlan','nicolas romero','los reyes','la paz edomex','valle dorado','echegaray','bosques','toreo'],
+largo:['jilotepec','toluca','metepec','tlapaltitlan','pachuca','cuernavaca','domingo diez','puebla','serdan','queretaro','querétaro','qro','antea','tula','san juan del rio','tepeji','apizaco','tlaxcala','lerma','atlacomulco','ixtlahuaca','cholula','atlixco','tulancingo','actopan','huejutla','zumpango','tequisquiapan','san miguel de allende','celaya'],
+foraneo:['guadalajara','gdl','zapopan','tlaquepaque','gran plaza','rio nilo','galerias','monterrey','mty','lechugal','san pedro','san nicolas','merida','mérida','leon','león','morelia','san luis potosi','san luis potosí','slp','aguascalientes','veracruz','tijuana','hermosillo','culiacan','chihuahua','torreon','saltillo','durango','mazatlan','cancun','cancún','villahermosa','oaxaca','tuxtla','campeche','la paz bcs','tampico','cd juarez','ciudad juarez','mexicali','colima','tepic','zacatecas','irapuato','salamanca','uruapan','acapulco','ixtapa','playa del carmen','matamoros','reynosa','nuevo laredo','chetumal','coatzacoalcos','xalapa','cordoba','orizaba','minatitlan','poza rica','ciudad victoria','los mochis','guasave','ciudad obregon','cd obregon','navojoa','nogales','ensenada','cabo','loreto','manzanillo','puerto vallarta','vallarta','guanajuato','sonora','sinaloa','yucatan','quintana roo','chiapas','tabasco','nayarit','michoacan','jalisco','nuevo leon','coahuila','tamaulipas']
+};
+
+/* ================= UTILIDADES ================= */
+function norm(s){return (s==null?'':''+s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();}
+function num(v){if(v==null||v==='')return 0;if(typeof v==='number')return isFinite(v)?v:0;
+  const c=(''+v).replace(/[^0-9.\-]/g,'');const n=parseFloat(c);return isFinite(n)?n:0;}
+function fmt(n){return '$'+Math.round(n||0).toLocaleString('es-MX');}
+function pct(n){return n==null?'—':Math.round(n)+'%';}
+function guarda(){try{localStorage.setItem('4p_motor',JSON.stringify({clas,tarifario}));}catch(e){}}
+function lee(){try{const v=JSON.parse(localStorage.getItem('4p_motor')||'null');if(v){clas=v.clas||{};tarifario=v.tarifario||{};}}catch(e){}}
+
+/* ================= CARGA ================= */
+const drop=document.getElementById('drop'),fileInput=document.getElementById('file');
+drop.onclick=()=>fileInput.click();
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('hot');};
+drop.ondragleave=()=>drop.classList.remove('hot');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('hot');if(e.dataTransfer.files[0])leer(e.dataTransfer.files[0]);};
+fileInput.onchange=e=>{if(e.target.files[0])leer(e.target.files[0]);};
+
+function leer(f){
+  const fr=new FileReader();
+  fr.onload=ev=>{
+    try{
+      const buf=new Uint8Array(ev.target.result);let wb;
+      if(/\.csv$/i.test(f.name)){
+        let t;try{t=new TextDecoder('utf-8',{fatal:true}).decode(buf);}catch(e){t=new TextDecoder('windows-1252').decode(buf);}
+        t=t.replace(/^\uFEFF/,'');
+        wb=XLSX.read(t,{type:'string',raw:false});
+      }else wb=XLSX.read(buf,{type:'array',cellDates:false});
+      const datos=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});
+      if(!datos.length){alert('El archivo no trae filas.');return;}
+      raw=datos;headers=Object.keys(datos[0]);arrancar(f.name);
+    }catch(err){alert('No se pudo leer el archivo: '+err.message);}
+  };
+  fr.readAsArrayBuffer(f);
+}
+
+/* ================= RECONOCIMIENTO AUTOMÁTICO ================= */
+const CAMPOS=[
+ ['folio',    [/^id viaje$/,/^folio$/,/id.*viaje/]],
+ ['folioCli', [/folio de cliente/,/folio.*cliente/]],
+ ['oc',       [/pedido/,/^oc$/]],
+ ['origen',   [/direccion de origen/,/origen/]],
+ ['cliente',  [/^cliente$/,/cuenta/]],
+ ['destino',  [/direccion de destino/,/destino/]],
+ ['fecha',    [/fecha cita/,/^fecha/]],
+ ['unidad',   [/tipo de unidad/,/unidad/]],
+ ['manioV',   [/costo maniobra 4pl/,/maniobra.*4pl/]],
+ ['manioC2',  [/costo maniobra complemento/,/maniobra complemento/]],
+ ['manioC',   [/^costo maniobra$/,/^maniobra$/]],
+ ['estaV',    [/costo estadia 4pl/,/estadia.*4pl/]],
+ ['estaC2',   [/costo estadia complemento/,/estadia complemento/]],
+ ['estaC',    [/^costo estadia$/,/^estadia$/]],
+ ['fleteV',   [/costo flete 4pl/,/flete.*4pl/,/tarifa armada/]],
+ ['rechazo',  [/costo rechazo/,/rechazo$/]],
+ ['fleteC',   [/^costo flete$/,/^flete$/]],
+ ['status',   [/^status$/,/estatus/,/estado/]]
+];
+function reconocer(){
+  C={};const usados=[];
+  CAMPOS.forEach(([k,pats])=>{
+    for(const p of pats){
+      const h=headers.find(x=>p.test(norm(x))&&!usados.includes(x));
+      if(h){C[k]=h;usados.push(h);break;}
+    }
+  });
+  vacias=headers.filter(h=>raw.every(r=>(''+r[h]).trim()===''));
+}
+function V(r,k){return C[k]?r[C[k]]:'';}
+
+/* ================= CLASIFICACIÓN AUTOMÁTICA ================= */
+function clasificarTodo(){
+  // 1) por nombre de ciudad dentro del destino
+  const pend=[];
+  destinos().forEach(d=>{
+    const key=norm(d);
+    if(clas[key])return;                       // respeta lo que el usuario ya corrigió
+    const n=' '+key+' ';
+    let hit='';
+    for(const [cl,lista] of Object.entries(DIC)){
+      if(lista.some(c=>n.includes(' '+c)||n.includes(c+' ')||key.includes(c))){hit=cl;break;}
+    }
+    // prioridad: foráneo gana sobre local si aparecen ambos (ej. "LIVERPOOL GUADALAJARA GALERIAS")
+    if(DIC.foraneo.some(c=>key.includes(c)))hit='foraneo';
+    else if(!hit&&DIC.largo.some(c=>key.includes(c)))hit='largo';
+    if(hit){clas[key]=hit;clasFuente[key]='ciudad';}
+    else pend.push(key);
+  });
+  // 2) lo que no se reconoció, por monto del flete
+  pend.forEach(key=>{
+    const fl=raw.filter(r=>norm(V(r,'destino'))===key).map(r=>num(V(r,'fleteC'))).filter(x=>x>0);
+    const med=fl.length?fl.sort((a,b)=>a-b)[Math.floor(fl.length/2)]:0;
+    clas[key]=med>9500?'foraneo':(med>3500?'largo':'local');
+    clasFuente[key]='costo';
+  });
+  guarda();
+}
+function destinos(){const s=new Set();raw.forEach(r=>s.add((''+V(r,'destino')).trim()||'(sin destino)'));return [...s];}
+function clOf(r){return clas[norm((''+V(r,'destino')).trim())]||'local';}
+function unidadOf(r){return (''+V(r,'unidad')).trim()||'(sin unidad)';}
+function key(u,c){return u+'||'+c;}
+
+/* ================= TARIFARIO AUTOMÁTICO ================= */
+function costosPorGrupo(){
+  const g={};
+  raw.forEach(r=>{
+    const k=key(unidadOf(r),clOf(r)),f=num(V(r,'fleteC'));
+    g[k]=g[k]||{v:[],n:0};g[k].n++;if(f>0)g[k].v.push(f);
+  });
+  Object.values(g).forEach(x=>{x.v.sort((a,b)=>a-b);x.med=x.v.length?x.v[Math.floor(x.v.length/2)]:0;});
+  return g;
+}
+function recalcularTarifario(forzar){
+  const mk=1+(num(document.getElementById('markup').value)||15)/100;
+  const g=costosPorGrupo();
+  Object.entries(g).forEach(([k,x])=>{
+    if(!forzar&&tarifario[k]&&tarifario[k].manual)return;
+    tarifario[k]={venta:Math.round(x.med*mk/10)*10,manual:false};
+  });
+  guarda();render();
+}
+function setTar(k,val){tarifario[k]={venta:num(val),manual:true};guarda();clearTimeout(window._t1);window._t1=setTimeout(render,400);}
+
+/* ================= ARRANQUE ================= */
+function arrancar(nombre){
+  lee();reconocer();clasificarTodo();
+  const g=costosPorGrupo(),mk=1.15;
+  Object.entries(g).forEach(([k,x])=>{if(!tarifario[k])tarifario[k]={venta:Math.round(x.med*mk/10)*10,manual:false};});
+  document.getElementById('inicio').classList.add('hide');
+  document.getElementById('app').classList.remove('hide');
+  diagnostico(nombre);
+  chipsMes();
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function reiniciar(){location.reload();}
+
+function diagnostico(nombre){
+  const sinVenta=!C.fleteV||raw.every(r=>num(V(r,'fleteV'))===0);
+  const nMan=raw.filter(r=>num(V(r,'manioC'))+num(V(r,'manioC2'))>0).length;
+  let h='<div class="ok"><strong>✔ '+nombre+' leído sin configurar nada.</strong> '+raw.length+' viajes · '+headers.length+' columnas · '+
+    (vacias.length?vacias.length+' columnas vacías descartadas automáticamente ('+vacias.slice(0,3).join(', ')+(vacias.length>3?'…':'')+')':'sin columnas vacías')+
+    ' · '+destinos().length+' destinos identificados y clasificados.</div>';
+  if(sinVenta){
+    h+='<div class="warn"><strong>⚠ Hallazgo: el reporte no trae ni una sola tarifa de venta.</strong> Las columnas <em>Costo Flete 4PL, Costo Maniobra 4PL, Costo Estadía 4PL y Tarifa Armada</em> vienen vacías al 100%. Es decir: la plataforma sabe lo que <strong>cuesta</strong> cada viaje, pero no lo que se le <strong>cobra</strong> al cliente — ese dato hoy solo existe en la cabeza de quien factura. <strong>Aquí es donde se van las 3 horas.</strong> El motor las llena por ti con el tarifario de abajo.</div>';
+  }
+  if(nMan)h+='<div class="nota">Se detectaron maniobras cargadas en '+nMan+' de '+raw.length+' viajes ('+Math.round(nMan/raw.length*100)+'%). El resto probablemente sí ocurrió pero no se capturó — vale la pena revisarlo con operaciones.</div>';
+  document.getElementById('diag').innerHTML=h;
+}
+
+function chipsMes(){
+  const ms={};
+  raw.forEach(r=>{const f=(''+V(r,'fecha')).trim();if(f.length>=7)ms[f.slice(0,7)]=(ms[f.slice(0,7)]||0)+1;});
+  const MES=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  let h='<span class="chip'+(mesSel==='todos'?' on':'')+'" onclick="setMes(\'todos\',this)">Todo ('+raw.length+')</span>';
+  Object.keys(ms).sort().forEach(m=>{
+    const [y,mm]=m.split('-');
+    h+='<span class="chip'+(mesSel===m?' on':'')+'" onclick="setMes(\''+m+'\',this)">'+MES[+mm]+' '+y+' ('+ms[m]+')</span>';
+  });
+  document.getElementById('mesChips').innerHTML=h;
+}
+function setMes(m,el){mesSel=m;document.querySelectorAll('#mesChips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');render();}
+
+/* ================= CÁLCULO ================= */
+const PENDIENTES=['asignado','iniciado','en ruta','programado','cancelado'];
+function calcular(){
+  const incPend=document.getElementById('chkPend').checked;
+  const pass=document.getElementById('chkManio').checked;
+  return raw.map((r,i)=>{
+    const e=edits[i]||{};
+    const cl=clOf(r),u=unidadOf(r),t=tarifario[key(u,cl)]||{venta:0};
+    const fc=num(V(r,'fleteC')),mc=num(V(r,'manioC'))+num(V(r,'manioC2')),
+          ec=num(V(r,'estaC'))+num(V(r,'estaC2')),rz=num(V(r,'rechazo'));
+    const costo=fc+mc+ec+rz;
+    let fv=num(V(r,'fleteV')),fvSug=false;
+    if(e.fleteV!=null)fv=e.fleteV; else if(!fv){fv=t.venta||0;fvSug=true;}
+    let mv=num(V(r,'manioV')),mvSug=false;
+    if(e.manioV!=null)mv=e.manioV; else if(!mv&&pass){mv=mc;mvSug=mc>0;}
+    let ev=num(V(r,'estaV'));
+    if(!ev&&pass)ev=ec;
+    const venta=fv+mv+ev;
+    const util=venta-costo,mg=venta>0?util/venta*100:null;
+    const st=norm(V(r,'status'));
+    const pend=PENDIENTES.some(x=>st.includes(x));
+    const rev=(fc===0?1:0)+(fvSug&&!t.venta?1:0);
+    return {i,folio:V(r,'folio'),folioCli:V(r,'folioCli'),fecha:(''+V(r,'fecha')).trim(),
+      destino:(''+V(r,'destino')).trim()||'(sin destino)',unidad:u,cl,status:V(r,'status'),pend,
+      fc,mc,ec,rz,costo,fv,fvSug,mv,mvSug,ev,venta,util,mg,rev,
+      incluir:(incPend||!pend)&&(mesSel==='todos'||(''+V(r,'fecha')).startsWith(mesSel))};
+  });
+}
+
+/* ================= RENDER ================= */
+function render(){
+  const todos=calcular(),rows=todos.filter(r=>r.incluir);
+  document.getElementById('rhead').innerHTML='<tr><th>Folio</th><th>Fecha</th><th>Destino</th><th>Unidad</th>'+
+    '<th class="num">Flete costo</th><th class="num">Maniobra</th><th class="num">Otros</th><th class="num">Costo total</th>'+
+    '<th class="num">Flete venta</th><th class="num">Maniobra venta</th><th class="num">Total a facturar</th>'+
+    '<th class="num">Utilidad</th><th class="num">Margen</th></tr>';
+  let h='';
+  ['local','largo','foraneo'].forEach(g=>{
+    const l=rows.filter(r=>r.cl===g);if(!l.length)return;
+    h+='<tr class="grp"><td colspan="13">'+NOM[g]+' · '+l.length+' viajes</td></tr>';
+    l.forEach(r=>{
+      h+='<tr'+(r.util<0?' class="neg"':'')+'><td>'+(r.folio||'')+'</td><td>'+r.fecha+'</td>'+
+        '<td title="'+r.destino.replace(/"/g,'')+'">'+(r.destino.length>30?r.destino.slice(0,30)+'…':r.destino)+
+        (clasFuente[norm(r.destino)]==='costo'?'<span class="dot q" title="Clasificado por monto — confirmar"></span>':'')+'</td>'+
+        '<td>'+r.unidad+'</td>'+
+        '<td class="num">'+fmt(r.fc)+'</td><td class="num">'+(r.mc?fmt(r.mc):'—')+'</td><td class="num">'+((r.ec+r.rz)?fmt(r.ec+r.rz):'—')+'</td>'+
+        '<td class="num"><strong>'+fmt(r.costo)+'</strong></td>'+
+        '<td class="num"><input class="cellinput'+(r.fvSug?' sug':'')+'" type="number" value="'+Math.round(r.fv)+'" '+
+          (r.fvSug?'style="color:#1e5096;font-weight:700" title="Tarifa propuesta por el motor"':'')+' oninput="setEdit('+r.i+',\'fleteV\',this.value)"></td>'+
+        '<td class="num'+(r.mvSug?' sug':'')+'">'+(r.mv?fmt(r.mv):'—')+'</td>'+
+        '<td class="num"><strong>'+fmt(r.venta)+'</strong></td>'+
+        '<td class="num '+(r.util<0?'neg':'pos')+'">'+fmt(r.util)+'</td>'+
+        '<td class="num '+(r.mg!=null&&r.mg<0?'neg':'')+'">'+pct(r.mg)+'</td></tr>';
+    });
+    const sc=l.reduce((a,r)=>a+r.costo,0),sv=l.reduce((a,r)=>a+r.venta,0);
+    h+='<tr class="sub"><td colspan="7">Subtotal '+NOM[g]+'</td><td class="num">'+fmt(sc)+'</td><td colspan="2"></td>'+
+       '<td class="num">'+fmt(sv)+'</td><td class="num">'+fmt(sv-sc)+'</td><td class="num">'+(sv>0?pct((sv-sc)/sv*100):'—')+'</td></tr>';
+  });
+  const TC=rows.reduce((a,r)=>a+r.costo,0),TV=rows.reduce((a,r)=>a+r.venta,0);
+  h+='<tr class="sub" style="border-top:2px solid #1a3a6b"><td colspan="7"><strong>TOTAL GENERAL</strong></td><td class="num">'+fmt(TC)+
+     '</td><td colspan="2"></td><td class="num">'+fmt(TV)+'</td><td class="num">'+fmt(TV-TC)+'</td><td class="num">'+(TV>0?pct((TV-TC)/TV*100):'—')+'</td></tr>';
+  document.getElementById('rbody').innerHTML=h||'<tr><td colspan="13" style="text-align:center;padding:1.5rem">Sin viajes en este periodo.</td></tr>';
+
+  document.getElementById('t-venta').textContent=fmt(TV);
+  document.getElementById('t-costo').textContent=fmt(TC);
+  document.getElementById('t-util').textContent=fmt(TV-TC);
+  document.getElementById('t-margen').textContent=TV>0?pct((TV-TC)/TV*100):'—';
+  document.getElementById('t-viajes').textContent=rows.length;
+  document.getElementById('t-perdidas').textContent=rows.filter(r=>r.util<0).length;
+  document.getElementById('t-rev').textContent=rows.filter(r=>r.rev>0||r.pend).length;
+  document.getElementById('t-ahorro').textContent='segundos';
+  const fs=rows.map(r=>r.fecha).filter(Boolean).sort();
+  document.getElementById('periodo').textContent=rows.length+' viajes'+(fs.length?' · del '+fs[0]+' al '+fs[fs.length-1]:'')+
+    ' · '+(todos.length-rows.length)+' fuera del filtro';
+  renderTarifario();renderClas();renderAprend(rows);
+}
+function setEdit(i,c,v){edits[i]=edits[i]||{};edits[i][c]=num(v);clearTimeout(window._t2);window._t2=setTimeout(render,450);}
+
+function renderTarifario(){
+  const g=costosPorGrupo();let h='';
+  const us=[...new Set(raw.map(unidadOf))];
+  us.forEach(u=>CLASES.forEach(([cv,cl])=>{
+    const k=key(u,cv),x=g[k]||{n:0,med:0},t=tarifario[k]||{venta:0};
+    const mg=t.venta>0?Math.round((t.venta-x.med)/t.venta*100):null;
+    h+='<tr'+(x.n===0?' style="opacity:.4"':'')+'><td><strong>'+u+'</strong></td><td>'+cl+'</td>'+
+      '<td class="num">'+(x.med?fmt(x.med):'—')+'</td>'+
+      '<td class="num"><input class="cellinput" type="number" value="'+(t.venta||'')+'" oninput="setTar(\''+k.replace(/'/g,"\\'")+'\',this.value)"></td>'+
+      '<td class="num '+(mg!=null&&mg<0?'neg':'pos')+'">'+(mg==null?'—':mg+'%')+'</td><td class="num">'+x.n+'</td></tr>';
+  }));
+  document.getElementById('tarifabody').innerHTML=h;
+}
+function renderClas(){
+  const ds=destinos(),cnt={};
+  raw.forEach(r=>{const d=(''+V(r,'destino')).trim()||'(sin destino)';cnt[d]=(cnt[d]||0)+1;});
+  const dud=ds.filter(d=>clasFuente[norm(d)]==='costo').length;
+  document.getElementById('clasResumen').textContent='· '+ds.length+' destinos · '+dud+' por confirmar';
+  const lista=clasFiltro==='dudosos'?ds.filter(d=>clasFuente[norm(d)]==='costo'):ds;
+  document.getElementById('clasbox').innerHTML=lista.sort((a,b)=>(cnt[b]||0)-(cnt[a]||0)).map(d=>{
+    const k=norm(d),cur=clas[k]||'';
+    return '<div class="clasrow"><div class="dest">'+d+(clasFuente[k]==='costo'?'<span class="dot q"></span>':'')+
+      '<small>'+(cnt[d]||0)+' viaje'+((cnt[d]||0)>1?'s':'')+'</small></div><div class="chips">'+
+      CLASES.map(([v,l])=>'<span class="chip'+(cur===v?' on':'')+'" onclick="setClas(\''+k.replace(/'/g,"\\'")+'\',\''+v+'\')">'+l+'</span>').join('')+'</div></div>';
+  }).join('');
+}
+function setClas(k,v){clas[k]=v;clasFuente[k]='manual';guarda();render();}
+function filtroClas(f,el){clasFiltro=f;document.querySelectorAll('#acc2 .chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderClas();}
+
+function renderAprend(rows){
+  const porU={},porD={};
+  rows.forEach(r=>{
+    porU[r.unidad]=porU[r.unidad]||{n:0,c:0,v:0};porU[r.unidad].n++;porU[r.unidad].c+=r.costo;porU[r.unidad].v+=r.venta;
+    porD[r.destino]=porD[r.destino]||{n:0,c:0,v:0};porD[r.destino].n++;porD[r.destino].c+=r.costo;porD[r.destino].v+=r.venta;
+  });
+  const neg=Object.entries(porD).filter(([,d])=>d.v-d.c<0).sort((a,b)=>(a[1].v-a[1].c)-(b[1].v-b[1].c)).slice(0,3);
+  const top=Object.entries(porD).sort((a,b)=>(b[1].v-b[1].c)-(a[1].v-a[1].c)).slice(0,3);
+  let h='<ul>';
+  h+='<li><strong>'+rows.length+' viajes</strong> procesados, clasificados y tarifados en segundos. El mismo trabajo a mano toma alrededor de 3 horas.</li>';
+  const sinMan=rows.filter(r=>r.mc===0).length;
+  h+='<li><strong>'+sinMan+' viajes sin maniobra capturada</strong> ('+Math.round(sinMan/Math.max(rows.length,1)*100)+'%). Si alguna sí ocurrió, ahí se está regalando dinero.</li>';
+  if(top.length)h+='<li><strong>Destinos más rentables:</strong> '+top.map(([d,x])=>d+' ('+fmt(x.v-x.c)+')').join(' · ')+'</li>';
+  if(neg.length)h+='<li><strong style="color:#c0392b">Destinos en pérdida:</strong> '+neg.map(([d,x])=>d+' ('+fmt(x.v-x.c)+')').join(' · ')+'</li>';
+  Object.entries(porU).sort((a,b)=>b[1].n-a[1].n).forEach(([u,d])=>{
+    h+='<li><strong>'+u+':</strong> '+d.n+' viajes · costo '+fmt(d.c)+' · facturable '+fmt(d.v)+' · margen '+(d.v>0?Math.round((d.v-d.c)/d.v*100)+'%':'—')+'</li>';
+  });
+  h+='</ul><div class="nota"><strong>Esto es lo que alimenta la Fase 1.</strong> Cada tarifa que se ajusta aquí queda guardada. Ese catálogo —que hoy no existe en ninguna parte del sistema— es exactamente la materia prima del Motor de Tarifas completo, donde el dato ya no se vuelve a pedir nunca.</div>';
+  document.getElementById('aprendizajes').innerHTML=h;
+}
+
+/* ================= EXPORTAR EXCEL ================= */
+function exportarExcel(){
+  const rows=calcular().filter(r=>r.incluir);
+  const wb=XLSX.utils.book_new();
+  const enc=['ID Viaje','Folio de Cliente','Fecha','Destino','Tipo de Unidad','Clasificación',
+    'Costo Flete','Costo Maniobra','Otros Costos','COSTO TOTAL',
+    'Flete 4PL','Maniobra 4PL','Estadía 4PL','TOTAL A FACTURAR','Utilidad','Margen'];
+  const aoa=[enc];let TC=0,TV=0;
+  ['local','largo','foraneo'].forEach(g=>{
+    const l=rows.filter(r=>r.cl===g);if(!l.length)return;
+    aoa.push([NOM[g]]);
+    l.forEach(r=>aoa.push([r.folio,r.folioCli,r.fecha,r.destino,r.unidad,NOM[g],
+      r.fc,r.mc,r.ec+r.rz,r.costo,r.fv,r.mv,r.ev,r.venta,r.util,r.mg!=null?Math.round(r.mg)/100:'']));
+    const sc=l.reduce((a,r)=>a+r.costo,0),sv=l.reduce((a,r)=>a+r.venta,0);TC+=sc;TV+=sv;
+    aoa.push(['','','','','','SUBTOTAL '+NOM[g],'','','',sc,'','','',sv,sv-sc,sv>0?Math.round((sv-sc)/sv*100)/100:'']);
+    aoa.push([]);
+  });
+  aoa.push(['','','','','','TOTAL GENERAL','','','',TC,'','','',TV,TV-TC,TV>0?Math.round((TV-TC)/TV*100)/100:'']);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:10},{wch:14},{wch:11},{wch:34},{wch:14},{wch:13},{wch:12},{wch:12},{wch:12},{wch:13},{wch:12},{wch:12},{wch:11},{wch:15},{wch:12},{wch:9}];
+  const R=XLSX.utils.decode_range(ws['!ref']);
+  for(let r=1;r<=R.e.r;r++){
+    for(let c=6;c<=14;c++){const ref=XLSX.utils.encode_cell({r,c});if(ws[ref]&&typeof ws[ref].v==='number')ws[ref].z='"$"#,##0.00';}
+    const p=XLSX.utils.encode_cell({r,c:15});if(ws[p]&&typeof ws[p].v==='number')ws[p].z='0.0%';
+  }
+  XLSX.utils.book_append_sheet(wb,ws,'Reporte');
+
+  const rev=[['ID Viaje','Destino','Unidad','Qué revisar']];
+  rows.forEach(r=>{const l=[];
+    if(r.fc===0)l.push('Viaje sin costo de flete cargado');
+    if(r.fvSug)l.push('Tarifa de venta propuesta por el motor — confirmar');
+    if(r.mc===0)l.push('Sin maniobra capturada');
+    if(r.pend)l.push('Estatus: '+r.status);
+    if(clasFuente[norm(r.destino)]==='costo')l.push('Clasificación deducida por monto');
+    if(l.length)rev.push([r.folio,r.destino,r.unidad,l.join(' · ')]);});
+  const wr=XLSX.utils.aoa_to_sheet(rev);wr['!cols']=[{wch:10},{wch:34},{wch:14},{wch:60}];
+  XLSX.utils.book_append_sheet(wb,wr,'Por revisar');
+
+  const p=[['ID Viaje','Destino','Unidad','A facturar','Costo','Pérdida']];
+  rows.filter(r=>r.util<0).sort((a,b)=>a.util-b.util).forEach(r=>p.push([r.folio,r.destino,r.unidad,r.venta,r.costo,r.util]));
+  const wp=XLSX.utils.aoa_to_sheet(p);wp['!cols']=[{wch:10},{wch:34},{wch:14},{wch:13},{wch:13},{wch:13}];
+  XLSX.utils.book_append_sheet(wb,wp,'Pérdidas');
+
+  const MES=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  let etiqueta;
+  if(mesSel!=='todos'){const [y,m]=mesSel.split('-');etiqueta=MES[+m-1]+' '+y;}
+  else{const d=new Date();etiqueta=MES[d.getMonth()]+' '+d.getFullYear();}
+  XLSX.writeFile(wb,'REPORTE DISTRIBUCION '+etiqueta+'.xlsx');
+}
+
+/* ================= DEMO ================= */
+function cargarDemo(){
+  const cols=['ID Viaje','Folio de Cliente','Dirección de Origen','Cliente','Pedido (OC)','Dirección de Destino','Fecha Cita','Hora Cita','Tipo de Unidad','Costo Maniobra','Costo Maniobra Complemento','Costo Maniobra 4PL',' Costo Estadía','Costo Estadia Complemento','Costo Estadía 4PL','Costo Flete','Costo Rechazo','Costo Flete 4PL','Tarifa Armada','Con Rechazo','Status'];
+  const d=[
+   ['01590','S-00088647','4PL ALMACEN','4pl- Playmobill','4000182707','Danhos Cuautitlán','2026-06-23','07:30:00','1.5 toneladas','','','','','','','2000.00','','','','','Completado'],
+   ['01599','S-00088945','4PL ALMACEN','4pl- Playmobill','33598801','TOYS R US PERISUR','2026-06-22','11:00:00','1.5 toneladas','','','','','','','2160.00','','','','','Completado'],
+   ['01602','S-00088951','4PL ALMACEN','4pl- Playmobill','33598806','Toys R US MONTERREY','2026-06-22','11:00:00','1.5 toneladas','500.00','','','','','','15468.00','','','','','Completado'],
+   ['01604','S-00088973','4PL ALMACEN','4pl- Playmobill','33597748','LIVERPOOL ECATEPEC','2026-06-23','09:00:00','1.5 toneladas','','','','','','','1840.00','','','','','Completado'],
+   ['01611','S-00089002','4PL ALMACEN','4pl- Playmobill','33598120','WALMART 7471-7459 CHALCO','2026-06-24','08:00:00','3.5 toneladas','400.00','','','','','','3450.00','','','','','Completado'],
+   ['01615','S-00089044','4PL ALMACEN','4pl- Playmobill','33598333','LIVERPOOL CEDIS JILOTEPEC','2026-06-25','07:00:00','Torton / rabon','2500.00','600.00','','','','','4000.00','','','','','Completado'],
+   ['01620','S-00089101','4PL ALMACEN','4pl- Playmobill','33598400','LIVERPOOL GUADALAJARA GALERIAS','2026-06-26','10:00:00','Torton / rabon','','','','','','','22000.00','','','','','Completado'],
+   ['01633','S-00089200','4PL ALMACEN','4pl- Playmobill','33598512','LIVERPOOL PUEBLA','2026-07-01','09:30:00','3.5 toneladas','','','','','','','6590.00','','','','','Completado'],
+   ['01641','S-00089288','4PL ALMACEN','4pl- Playmobill','33598655','LIVERPOOL MERIDA','2026-07-03','08:00:00','Trailer','','','','','1200.00','','33480.00','','','','','Completado'],
+   ['01655','S-00089341','4PL ALMACEN','4pl- Playmobill','33598712','PORTEO','2026-07-07','07:30:00','1.5 toneladas','','','','','','','4400.00','','','','','Completado'],
+   ['01662','S-00089400','4PL ALMACEN','4pl- Playmobill','33598799','LIVERPOOL QUERETARO','2026-07-09','11:00:00','3.5 toneladas','','','','','','','8000.00','','','','','Completado'],
+   ['01670','S-00089455','4PL ALMACEN','4pl- Playmobill','33598840','3B CEDIS VALLEJO','2026-07-14','06:30:00','1.5 toneladas','','','','','','','2300.00','','','','','Completado'],
+   ['01688','S-00089501','4PL ALMACEN','4pl- Playmobill','33598901','LIVERPOOL MORELIA','2026-07-20','09:00:00','Torton / rabon','','','','','','','0.00','','','','','Asignado'],
+   ['01690','S-00089522','4PL ALMACEN','4pl- Playmobill','33598933','WALMART 7494- BODEGA CUAUTITLÁN','2026-07-22','08:00:00','1.5 toneladas','','','','','','','1840.00','','','','','Entregado'],
+   ['01701','S-00089600','WM LA NARANJA','4pl- Playmobill','33599011','LIVERPOOL TOLUCA TLAPALTITLAN','2026-07-28','10:00:00','3.5 toneladas','','','','','','','4400.00','','','','','Completado']
+  ];
+  raw=d.map(f=>{const o={};cols.forEach((c,i)=>o[c]=f[i]);return o;});
+  headers=cols;arrancar('datos-de-ejemplo.csv');
+}
+</script>
+</body>
+</html>
