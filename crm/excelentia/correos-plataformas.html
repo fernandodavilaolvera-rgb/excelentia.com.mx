@@ -131,9 +131,36 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 .addbox input:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
 .hint{font-size:.72rem;color:#8a90a0;line-height:1.4}
 
+/* ── Consumo IA ── */
+.ci-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem}
+.ci-head h2{font-size:1rem;color:#1a2035;font-weight:800}
+.ci-periodos{display:flex;gap:.35rem;flex-wrap:wrap}
+.ci-per{padding:.32rem .7rem;border-radius:20px;font-size:.78rem;font-weight:700;color:#4a5068;background:#f0f4ff;border:1px solid #dde1e9;cursor:pointer;transition:.15s;font-family:'Manrope',sans-serif}
+.ci-per:hover{background:#dce8f7}
+.ci-per.active{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
+.ci-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.ci-stat{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.75rem .6rem;text-align:center}
+.ci-stat .n{font-size:1.35rem;font-weight:800;color:#1a3a6b;line-height:1.1}
+.ci-stat .l{font-size:.7rem;color:#8a90a0;font-weight:600;margin-top:.2rem}
+.ci-total-cost{background:#eef4fc;border:1px solid #c8d9f0;border-radius:12px;padding:.6rem .85rem;text-align:center;margin-bottom:1rem;font-size:.82rem;color:#1a2035;font-weight:600}
+.ci-total-cost b{color:#1a3a6b;font-size:1.05rem}
+.ci-card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.75rem .85rem;margin-bottom:.55rem;display:flex;align-items:center;gap:.7rem}
+.ci-card .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ci-card .info{flex:1;min-width:0}
+.ci-card .nom{font-size:.86rem;font-weight:700;color:#1a2035;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-card .meta{font-size:.72rem;color:#8a90a0;font-weight:500;margin-top:.15rem}
+.ci-card .ejec{text-align:right;flex-shrink:0}
+.ci-card .ejec .big{font-size:1.15rem;font-weight:800;color:#1a3a6b;line-height:1}
+.ci-card .ejec .cost{font-size:.72rem;color:#4a5068;font-weight:600;margin-top:.15rem}
+.ci-badge{display:inline-block;font-size:.66rem;font-weight:700;padding:.1rem .4rem;border-radius:6px;background:#eef4fc;color:#1a3a6b;margin-left:.35rem}
+.ci-off{opacity:.5}
+.ci-err{color:#dc2626;font-weight:700}
+.ci-nota{background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;padding:.65rem .8rem;font-size:.74rem;color:#4a5068;margin-top:.9rem;line-height:1.5}
+
 @media(max-width:600px){
   body{padding:.75rem}
   .topbar h1{font-size:.98rem}
+  .ci-stats{grid-template-columns:repeat(2,1fr)}
   .daynav .day-label{font-size:.85rem}
   .msg{padding:.6rem .55rem;gap:.45rem}
   .msg-tools{flex-direction:row}
@@ -163,12 +190,16 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
       </select>
       <button class="btn btn-ghost" onclick="abrirPlataformas()" title="Configurar plataformas vigiladas">⚙️</button>
       <button class="btn btn-primary" id="btnGenerar" onclick="generarAhora()">🔄 Generar ahora</button>
+      <button class="btn btn-ghost" id="btnConsumo" onclick="toggleConsumo()" title="Ver consumo de IA de tus workflows">🤖 Consumo IA</button>
     </div>
   </div>
 
   <div id="app">
     <div class="loading"><span class="spinner"></span>Cargando resúmenes…</div>
   </div>
+
+  <!-- ── PANEL: CONSUMO IA (oculto por defecto) ── -->
+  <div id="consumo" style="display:none"></div>
 
 </div>
 
@@ -662,6 +693,112 @@ async function borrarPlataforma(id, nombre){
 }
 
 function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// ═══════════════════════════════════════
+// CONSUMO IA
+// ═══════════════════════════════════════
+const CONSUMO_URL = 'https://n8n.excelentia.com.mx/webhook/dashboard-uso-ia';
+let consumoVisible = false;
+let consumoDias = 7;
+let consumoData = null;
+
+// Color del punto según el proveedor del modelo
+function modeloColor(key){
+  key = (key||'').toLowerCase();
+  if(key.indexOf('claude')===0) return '#d97757';   // Anthropic
+  if(key.indexOf('gemini')===0) return '#4a9fd4';    // Google
+  if(key.indexOf('gpt')===0) return '#10a37f';       // OpenAI
+  return '#8a90a0';
+}
+
+function toggleConsumo(){
+  consumoVisible = !consumoVisible;
+  const panel = document.getElementById('consumo');
+  const app = document.getElementById('app');
+  const btn = document.getElementById('btnConsumo');
+  if(consumoVisible){
+    app.style.display = 'none';
+    panel.style.display = 'block';
+    btn.classList.remove('btn-ghost'); btn.classList.add('btn-primary');
+    if(!consumoData) cargarConsumo();
+    else renderConsumo();
+  } else {
+    panel.style.display = 'none';
+    app.style.display = 'block';
+    btn.classList.remove('btn-primary'); btn.classList.add('btn-ghost');
+  }
+}
+
+function setConsumoDias(d){
+  consumoDias = d;
+  cargarConsumo();
+}
+
+async function cargarConsumo(){
+  const panel = document.getElementById('consumo');
+  panel.innerHTML = '<div class="loading"><span class="spinner"></span>Analizando tus workflows…</div>';
+  try {
+    const res = await fetch(CONSUMO_URL + '?dias=' + consumoDias, { method:'GET' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    consumoData = await res.json();
+    renderConsumo();
+  } catch(e){
+    panel.innerHTML = '<div class="alert">No se pudo cargar el consumo de IA. Revisa que el workflow «Dashboard · Uso de IA» esté activo e inténtalo de nuevo.</div>';
+  }
+}
+
+function renderConsumo(){
+  const panel = document.getElementById('consumo');
+  const d = consumoData || {};
+  const t = d.totales || {};
+  const wfs = Array.isArray(d.workflows) ? d.workflows : [];
+
+  const periodos = [7,15,30].map(function(p){
+    return '<button class="ci-per'+(p===consumoDias?' active':'')+'" onclick="setConsumoDias('+p+')">'+p+' días</button>';
+  }).join('');
+
+  let html = ''
+    + '<div class="ci-head">'
+    +   '<h2>🤖 Consumo de IA</h2>'
+    +   '<div class="ci-periodos">'+periodos+'</div>'
+    + '</div>'
+    + '<div class="ci-stats">'
+    +   '<div class="ci-stat"><div class="n">'+(t.workflowsConIA||0)+'</div><div class="l">Agentes con IA</div></div>'
+    +   '<div class="ci-stat"><div class="n">'+(t.ejecuciones||0)+'</div><div class="l">Ejecuciones</div></div>'
+    +   '<div class="ci-stat"><div class="n'+((t.errores||0)>0?' ci-err':'')+'">'+(t.errores||0)+'</div><div class="l">Errores</div></div>'
+    +   '<div class="ci-stat"><div class="n">'+(t.workflowsTotales||0)+'</div><div class="l">WF totales</div></div>'
+    + '</div>'
+    + '<div class="ci-total-cost">Costo estimado del periodo: <b>$'+(t.costoUSDEstimado!=null?t.costoUSDEstimado.toFixed(2):'0.00')+' USD</b></div>';
+
+  if(wfs.length === 0){
+    html += '<div class="alert">No se encontraron workflows con IA.</div>';
+  } else {
+    html += wfs.map(function(w){
+      const off = w.activo ? '' : ' ci-off';
+      const badge = w.activo ? '' : '<span class="ci-badge">apagado</span>';
+      const err = (w.errores>0) ? ' · <span class="ci-err">'+w.errores+' err</span>' : '';
+      return ''
+        + '<div class="ci-card'+off+'">'
+        +   '<span class="dot" style="background:'+modeloColor(w.modeloKey)+'"></span>'
+        +   '<div class="info">'
+        +     '<div class="nom">'+esc(w.nombre)+badge+'</div>'
+        +     '<div class="meta">'+esc(w.modelo)+err+'</div>'
+        +   '</div>'
+        +   '<div class="ejec">'
+        +     '<div class="big">'+w.ejecuciones+'</div>'
+        +     '<div class="cost">$'+(w.costoUSD!=null?w.costoUSD.toFixed(2):'0.00')+'</div>'
+        +   '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  const sup = d.supuestos || {};
+  html += '<div class="ci-nota">💡 <strong>Costo estimado</strong>, no es tu factura real: se calcula como ejecuciones × '
+    + (sup.tokensInPorEjec||1500) + '/' + (sup.tokensOutPorEjec||500)
+    + ' tokens promedio × precio del modelo. El historial de n8n se limpia solo cada cierto tiempo, así que el conteo refleja lo que sigue guardado. Para el gasto exacto revisa los paneles de OpenAI y Anthropic.</div>';
+
+  panel.innerHTML = html;
+}
 
 cargarPlataformas(true).then(cargar);
 </script>
