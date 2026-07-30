@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4P Logistics · Propuesta Modular (Interno)</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.6;padding-bottom:3rem}
+.header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:4px solid #4a9fd4;padding:1.5rem 1.5rem 1.8rem}
+.header-inner{max-width:960px;margin:0 auto}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+.header h1{color:#fff;font-size:1.5rem;font-weight:800;margin-top:1.1rem}
+.header p{color:#c8d9f0;font-size:.9rem;margin-top:.2rem}
+.badge-interno{display:inline-block;background:#4a9fd4;color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.6px;padding:.25rem .6rem;border-radius:5px;margin-top:.7rem;text-transform:uppercase}
+.wrap{max-width:960px;margin:0 auto;padding:0 1.5rem}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;margin-top:1.4rem;overflow:hidden;max-width:960px}
+.card-head{background:#dce8f7;padding:.85rem 1.2rem;font-weight:700;font-size:.95rem;color:#0d1b3e;border-bottom:1px solid #c8d9f0;display:flex;justify-content:space-between;align-items:center}
+.card-body{padding:1.2rem}
+h3{font-size:.95rem;font-weight:700;margin:1.1rem 0 .5rem;color:#1a3a6b}
+h3:first-child{margin-top:0}
+p{font-size:.9rem;color:#4a5068;margin-bottom:.7rem}
+ul,ol{margin:.4rem 0 .8rem 1.2rem}
+li{font-size:.88rem;color:#4a5068;margin-bottom:.35rem}
+strong{color:#1a2035;font-weight:700}
+.nota{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.85rem 1rem;margin:.8rem 0;font-size:.87rem;color:#4a5068}
+.nota strong{color:#0d1b3e}
+.warn{background:#fff8f0;border:1px solid #f0d9c8;border-left:4px solid #e08a4a;border-radius:8px;padding:.85rem 1rem;margin:.8rem 0;font-size:.87rem;color:#4a5068}
+.warn strong{color:#a35a1a}
+/* Panel de control global */
+.panel{background:#0d1b3e;border-radius:12px;margin-top:1.4rem;padding:1.3rem;color:#fff}
+.panel h2{font-size:1.05rem;margin-bottom:.3rem}
+.panel .sub{font-size:.8rem;color:#9db3d6;margin-bottom:1rem}
+.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
+.tot{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.9rem;text-align:center}
+.tot-num{font-size:1.35rem;font-weight:800;color:#7fc4f0}
+.tot-lbl{font-size:.7rem;color:#9db3d6;margin-top:.15rem;text-transform:uppercase;letter-spacing:.4px}
+.tot.green .tot-num{color:#6ee7a8}
+/* Módulos */
+.mod{border:1px solid #dde1e9;border-radius:12px;margin-top:1.1rem;overflow:hidden;background:#fff}
+.mod.anchor{border:2px solid #4a9fd4}
+.mod-head{padding:.9rem 1.1rem;background:#dce8f7;display:flex;justify-content:space-between;align-items:center;gap:.6rem;cursor:pointer}
+.mod.anchor .mod-head{background:#d3e6fb}
+.mod-title{font-weight:700;font-size:.95rem;color:#0d1b3e}
+.mod-title .tag{font-size:.65rem;background:#4a9fd4;color:#fff;padding:.12rem .45rem;border-radius:4px;margin-left:.4rem;vertical-align:middle;text-transform:uppercase;letter-spacing:.4px}
+.mod-title .tag.dep{background:#e08a4a}
+.mod-title .tag.later{background:#8a90a0}
+.mod-toggle{display:flex;align-items:center;gap:.5rem}
+.switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider-sw{position:absolute;cursor:pointer;inset:0;background:#c0c6d2;border-radius:24px;transition:.2s}
+.slider-sw:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked+.slider-sw{background:#3aaa6b}
+.switch input:checked+.slider-sw:before{transform:translateX(20px)}
+.mod-body{padding:1.1rem;border-top:1px solid #e3e8f0}
+.mod-body.collapsed{display:none}
+.mod-pts{font-size:.82rem;color:#8a90a0;margin-bottom:.7rem}
+.mod-desc{font-size:.88rem;color:#4a5068;margin-bottom:.9rem}
+.sliderrow{margin:.9rem 0}
+.sliderrow label{display:flex;justify-content:space-between;font-size:.82rem;font-weight:600;color:#1a3a6b;margin-bottom:.3rem}
+.sliderrow label .val{color:#0d1b3e;font-weight:800}
+input[type=range]{width:100%;height:6px;border-radius:5px;background:#dde1e9;outline:none;-webkit-appearance:none;appearance:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:#1e5096;cursor:pointer;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#1e5096;cursor:pointer;border:3px solid #fff}
+input[type=range].cost::-webkit-slider-thumb{background:#e08a4a}
+input[type=range].cost::-moz-range-thumb{background:#e08a4a}
+.mod-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.9rem;padding-top:.9rem;border-top:1px dashed #dde1e9}
+.metric{text-align:center;background:#f0f6ff;border-radius:8px;padding:.55rem}
+.metric-num{font-size:1rem;font-weight:800;color:#1a3a6b}
+.metric.green .metric-num{color:#2f9e63}
+.metric-lbl{font-size:.66rem;color:#8a90a0;text-transform:uppercase;letter-spacing:.3px;margin-top:.1rem}
+.mens{font-size:.82rem;color:#4a5068;margin-top:.8rem;padding-top:.6rem;border-top:1px dashed #dde1e9;display:flex;justify-content:space-between;align-items:center}
+.mens .mens-val{font-weight:800;color:#1a3a6b}
+.footer{text-align:center;font-size:.78rem;color:#8a90a0;margin-top:2rem}
+.pill{display:inline-block;font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:5px;margin-right:.3rem}
+.pill.f0{background:#e8f7ee;color:#2f9e63}
+.pill.f1{background:#e8f0fb;color:#1e5096}
+.pill.f2{background:#f3eefb;color:#7a4fb0}
+/* Bloques de preguntas */
+.qgroup{border:1px solid #dde1e9;border-radius:10px;margin-top:.9rem;overflow:hidden}
+.qgroup-head{background:#eef4fc;padding:.6rem .9rem;font-size:.85rem;font-weight:700;color:#0d1b3e;border-bottom:1px solid #dde1e9;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.qgroup-head .why{font-size:.72rem;font-weight:600;color:#8a90a0;text-transform:uppercase;letter-spacing:.4px}
+.qgroup-body{padding:.7rem .9rem}
+.q{display:flex;gap:.55rem;align-items:flex-start;padding:.4rem 0;border-bottom:1px dashed #eef1f6;font-size:.86rem;color:#4a5068}
+.q:last-child{border-bottom:none}
+.q input[type=checkbox]{margin-top:.28rem;width:15px;height:15px;accent-color:#1e5096;flex-shrink:0;cursor:pointer}
+.q strong{color:#1a2035}
+.q em{color:#8a90a0;font-style:normal;font-size:.79rem;display:block;margin-top:.1rem}
+.qtag{display:inline-block;font-size:.62rem;font-weight:800;padding:.1rem .35rem;border-radius:4px;margin-left:.25rem;vertical-align:middle;letter-spacing:.3px}
+.qtag.block{background:#fdeaea;color:#c0392b}
+.qtag.m1{background:#e8f0fb;color:#1e5096}
+.qtag.m3{background:#f3eefb;color:#7a4fb0}
+.qtag.m4{background:#fff2e2;color:#a35a1a}
+@media(max-width:600px){
+.header h1{font-size:1.2rem}
+.logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+.logo-slogan{font-size:11px}
+.totals{grid-template-columns:1fr 1fr}
+.mod-metrics{grid-template-columns:1fr}
+.wrap{padding:0 1rem}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <h1>4P Logistics · Propuesta Modular</h1>
+    <p>Simulador de escenarios — precio al cliente y margen interno por módulo</p>
+    <span class="badge-interno">Documento interno · No enviar al cliente</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+    <div class="card-head">🧭 Cómo usar este documento</div>
+    <div class="card-body">
+      <p>Prende o apaga módulos con el switch verde para ver el total según qué incluyas. Mueve el <strong>slider azul</strong> para el precio que le cobras al cliente y el <strong>slider naranja</strong> para tu costo interno estimado. Arriba se recalcula todo: total al cliente, tu costo, tu utilidad y el margen %.</p>
+      <div class="nota"><strong>Regla de negocio decidida:</strong> Setup único por módulo, pagado 50% al iniciar el desarrollo y 50% al entregar, más una mensualidad de mantenimiento. Los módulos marcados con rango traen precio "a confirmar" tras la sesión técnica con Luis y José.</div>
+    </div>
+  </div>
+
+  <!-- PANEL DE TOTALES -->
+  <div class="panel">
+    <h2>Escenario actual</h2>
+    <div class="sub">Suma solo de los módulos activos</div>
+    <div class="totals">
+      <div class="tot"><div class="tot-num" id="t-cliente">$0</div><div class="tot-lbl">Setup al cliente</div></div>
+      <div class="tot"><div class="tot-num" id="t-costo">$0</div><div class="tot-lbl">Tu costo interno</div></div>
+      <div class="tot green"><div class="tot-num" id="t-util">$0</div><div class="tot-lbl">Tu utilidad</div></div>
+      <div class="tot green"><div class="tot-num" id="t-margen">0%</div><div class="tot-lbl">Margen</div></div>
+    </div>
+    <div class="totals" style="margin-top:.8rem">
+      <div class="tot"><div class="tot-num" id="t-ini" style="color:#fff">$0</div><div class="tot-lbl">50% al iniciar</div></div>
+      <div class="tot"><div class="tot-num" id="t-fin" style="color:#fff">$0</div><div class="tot-lbl">50% al entregar</div></div>
+      <div class="tot"><div class="tot-num" id="t-mens" style="color:#7fc4f0">$0</div><div class="tot-lbl">Mensualidad total</div></div>
+      <div class="tot"><div class="tot-num" id="t-count" style="color:#fff">0</div><div class="tot-lbl">Módulos activos</div></div>
+    </div>
+  </div>
+
+  <div class="warn" style="max-width:960px;margin-left:auto;margin-right:auto">
+    <strong>Hallazgo que ordena todo el proyecto:</strong> el video de facturación confirmó que las 3 horas de Luis no se van en "armar el Excel", sino en <strong>buscar tarifas y maniobras que la plataforma no tiene</strong> (las saca de su memoria y de WhatsApp). Por eso el cotizador y la facturación son el mismo problema de raíz. Un agente no puede automatizar bien la facturación hasta que la tarifa se cargue correctamente desde el origen. <strong>Primero la fuente de información, luego el agente.</strong>
+  </div>
+
+  <!-- FASE 0 -->
+  <div class="mod anchor" data-cliente="18000" data-costo="6000" data-mens="0">
+    <div class="mod-head" onclick="toggleBody(this)">
+      <div class="mod-title"><span class="pill f0">FASE 0</span> Prototipo del Motor de Tarifas <span class="tag">Gancho 50%</span></div>
+      <div class="mod-toggle" onclick="event.stopPropagation()">
+        <label class="switch"><input type="checkbox" checked onchange="recalc()"><span class="slider-sw"></span></label>
+      </div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-pts">Entregable de los primeros 4 días · lo que justifica el anticipo</div>
+      <div class="mod-desc">Toma el reporte descargado de la plataforma y automatiza el formateo, limpieza de columnas, clasificación inicial y armado del 80% del Excel — lo que hoy toma 3 horas, en minutos. La primera vez Luis todavía mete a mano las tarifas faltantes; eso se elimina en la Fase 1. Es demostrable, honesto y vendible: "ya te ahorré 2 de 3 horas".</div>
+      <div class="nota" style="background:#eef9f2;border-color:#c6e8d5;border-left-color:#2f9e63"><strong style="color:#1f7a4a">✔ Prototipo ya construido:</strong> <code>motor-tarifas-4p-fase0.html</code> — corre en el navegador sin instalar nada. Lee el reporte tal como baja de armadamyl, tira las columnas vacías, saca la regla local/foráneo preguntándola una sola vez, aplica tarifario, marca en ámbar lo que falta, detecta viajes en pérdida y exporta el Excel con subtotales. Trae botón de <em>datos de ejemplo</em> para demostrarlo aunque Luis no tenga el archivo a la mano.<br><strong style="color:#1f7a4a">Jugada extra:</strong> cada tarifa y maniobra que Luis capture en el prototipo queda registrada — ese es el catálogo que hoy no existe y que se vuelve la materia prima del Módulo 1. La Fase 0 no solo cobra: <em>recolecta el insumo que necesitamos para lo grande</em>.</div>
+      <div class="sliderrow"><label>Precio al cliente <span class="val" id="v-c-0">$18,000</span></label><input type="range" min="10000" max="30000" step="1000" value="18000" oninput="setC(this,0)"></div>
+      <div class="sliderrow"><label>Tu costo interno <span class="val" id="v-k-0">$6,000</span></label><input type="range" class="cost" min="3000" max="15000" step="500" value="6000" oninput="setK(this,0)"></div>
+      <div class="mod-metrics">
+        <div class="metric"><div class="metric-num" id="m-c-0">$18,000</div><div class="metric-lbl">Cliente</div></div>
+        <div class="metric green"><div class="metric-num" id="m-u-0">$12,000</div><div class="metric-lbl">Utilidad</div></div>
+        <div class="metric green"><div class="metric-num" id="m-m-0">67%</div><div class="metric-lbl">Margen</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULO 1 -->
+  <div class="mod anchor" data-cliente="70000" data-costo="24000" data-mens="4500">
+    <div class="mod-head" onclick="toggleBody(this)">
+      <div class="mod-title"><span class="pill f1">FASE 1</span> Módulo 1 · Motor de Tarifas completo <span class="tag">Ancla</span></div>
+      <div class="mod-toggle" onclick="event.stopPropagation()">
+        <label class="switch"><input type="checkbox" checked onchange="recalc()"><span class="slider-sw"></span></label>
+      </div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-pts">Requerimientos #4 (facturación) + #6 (cotizador) · el corazón del proyecto</div>
+      <div class="mod-desc">Cotizador con las variables reales (combustible, casetas vía API INEGI, kms, operador, mantenimiento, depreciación, utilidad) + carga de la tarifa correcta desde el origen para que la facturación se resuelva sola. Incluye la regla local/local largo/foráneo y comparación de rutas alternativas. Elimina la 3ª hora de facturación y el cotizar a ciegas.</div>
+      <div class="warn">Precio en rango hasta confirmar en junta: la regla de clasificación local/foráneo y el Excel de Fernanda. Slider ajustable.</div>
+      <div class="sliderrow"><label>Precio al cliente <span class="val" id="v-c-1">$70,000</span></label><input type="range" min="55000" max="95000" step="2500" value="70000" oninput="setC(this,1)"></div>
+      <div class="sliderrow"><label>Tu costo interno <span class="val" id="v-k-1">$24,000</span></label><input type="range" class="cost" min="12000" max="45000" step="1000" value="24000" oninput="setK(this,1)"></div>
+      <div class="mod-metrics">
+        <div class="metric"><div class="metric-num" id="m-c-1">$70,000</div><div class="metric-lbl">Cliente</div></div>
+        <div class="metric green"><div class="metric-num" id="m-u-1">$46,000</div><div class="metric-lbl">Utilidad</div></div>
+        <div class="metric green"><div class="metric-num" id="m-m-1">66%</div><div class="metric-lbl">Margen</div></div>
+      </div>
+      <div class="mens">Mensualidad de mantenimiento <span class="mens-val">$4,500</span></div>
+    </div>
+  </div>
+
+  <!-- MÓDULO 2 -->
+  <div class="mod" data-cliente="45000" data-costo="16000" data-mens="3000">
+    <div class="mod-head" onclick="toggleBody(this)">
+      <div class="mod-title"><span class="pill f1">FASE 1</span> Módulo 2 · Conciliación de Pagos <span class="tag dep">Riesgo formato</span></div>
+      <div class="mod-toggle" onclick="event.stopPropagation()">
+        <label class="switch"><input type="checkbox" checked onchange="recalc()"><span class="slider-sw"></span></label>
+      </div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-pts">Requerimiento #1 · el segundo cuello de botella de Luis</div>
+      <div class="mod-desc">Match automático entre los Excel de proveedores y la plataforma (fuente de verdad). Aparta discrepancias, marca lo que sí cuadra para pago, genera el estado de cuenta por proveedor y lo envía automático (botón o programado antes del corte).</div>
+      <div class="warn">Riesgo medio: depende de que los Excel de proveedores tengan formato consistente. Confirmar en junta antes de cerrar precio.</div>
+      <div class="sliderrow"><label>Precio al cliente <span class="val" id="v-c-2">$45,000</span></label><input type="range" min="30000" max="65000" step="2500" value="45000" oninput="setC(this,2)"></div>
+      <div class="sliderrow"><label>Tu costo interno <span class="val" id="v-k-2">$16,000</span></label><input type="range" class="cost" min="8000" max="30000" step="1000" value="16000" oninput="setK(this,2)"></div>
+      <div class="mod-metrics">
+        <div class="metric"><div class="metric-num" id="m-c-2">$45,000</div><div class="metric-lbl">Cliente</div></div>
+        <div class="metric green"><div class="metric-num" id="m-u-2">$29,000</div><div class="metric-lbl">Utilidad</div></div>
+        <div class="metric green"><div class="metric-num" id="m-m-2">64%</div><div class="metric-lbl">Margen</div></div>
+      </div>
+      <div class="mens">Mensualidad de mantenimiento <span class="mens-val">$3,000</span></div>
+    </div>
+  </div>
+
+  <!-- MÓDULO 3 -->
+  <div class="mod" data-cliente="40000" data-costo="14000" data-mens="3000">
+    <div class="mod-head" onclick="toggleBody(this)">
+      <div class="mod-title"><span class="pill f2">FASE 2</span> Módulo 3 · Inteligencia de Rentabilidad <span class="tag dep">Requiere José</span></div>
+      <div class="mod-toggle" onclick="event.stopPropagation()">
+        <label class="switch"><input type="checkbox" checked onchange="recalc()"><span class="slider-sw"></span></label>
+      </div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-pts">Requerimientos #2 (márgenes por ruta) + #3 (historial de cambios)</div>
+      <div class="mod-desc">Reporte de rentabilidad por ruta (a favor y en contra) con el motivo de la pérdida, destinos más rentables para negociar, y un histórico de modificaciones de viaje que hoy la plataforma sobrescribe. En gráfica y en Excel. Depende del acceso a base de datos que dará José.</div>
+      <div class="sliderrow"><label>Precio al cliente <span class="val" id="v-c-3">$40,000</span></label><input type="range" min="28000" max="60000" step="2500" value="40000" oninput="setC(this,3)"></div>
+      <div class="sliderrow"><label>Tu costo interno <span class="val" id="v-k-3">$14,000</span></label><input type="range" class="cost" min="7000" max="28000" step="1000" value="14000" oninput="setK(this,3)"></div>
+      <div class="mod-metrics">
+        <div class="metric"><div class="metric-num" id="m-c-3">$40,000</div><div class="metric-lbl">Cliente</div></div>
+        <div class="metric green"><div class="metric-num" id="m-u-3">$26,000</div><div class="metric-lbl">Utilidad</div></div>
+        <div class="metric green"><div class="metric-num" id="m-m-3">65%</div><div class="metric-lbl">Margen</div></div>
+      </div>
+      <div class="mens">Mensualidad de mantenimiento <span class="mens-val">$3,000</span></div>
+    </div>
+  </div>
+
+  <!-- MÓDULO 4 -->
+  <div class="mod" data-cliente="65000" data-costo="26000" data-mens="5000">
+    <div class="mod-head" onclick="toggleBody(this)">
+      <div class="mod-title"><span class="pill f2">FASE 3</span> Módulo 4 · Torre de Control Operativa <span class="tag later">Más adelante</span></div>
+      <div class="mod-toggle" onclick="event.stopPropagation()">
+        <label class="switch"><input type="checkbox" onchange="recalc()"><span class="slider-sw"></span></label>
+      </div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-pts">Requerimientos #5 (GPS) + #7 (semáforos) + #8 (alertas carretera) + #9 (tarjeta de incidencias)</div>
+      <div class="mod-desc">El módulo más vistoso: integración GPS vía API de terceros, semáforos de carga por fecha de entrega, alertas de cierres/accidentes en ruta con IA, y tarjeta de detalle de viaje con botones de WhatsApp para reaccionar ante incidencias. Más dependencias externas (APIs de GPS), por eso va después.</div>
+      <h3>¿Qué resuelve, en corto?</h3>
+      <ul>
+        <li><strong>GPS (#5):</strong> hoy el seguimiento es "de percepción" — Luis mismo dijo que cree que va checando seguido pero no tiene el dato duro. Esto conecta los GPS de los proveedores a la plataforma para ver posición real, sin llamadas ni WhatsApp.</li>
+        <li><strong>Semáforos de carga (#7):</strong> verde/amarillo/rojo según fecha de entrega, para saber qué viajes se cargan hoy/mañana/en 2-3 días y no llegar tarde. Monitoreo preventivo.</li>
+        <li><strong>Alertas de carretera (#8):</strong> un agente que vigila noticias de cierres o accidentes en las rutas activas y avisa con tiempo para reaccionar.</li>
+        <li><strong>Tarjeta de incidencias (#9):</strong> ante un paro, robo o desvío, buscas por placa/conductor/ruta y sale una tarjeta con todo (conductor, contacto, documentos del embarque, botones de WhatsApp) para reaccionar en segundos, no en minutos.</li>
+      </ul>
+      <h3>Por qué va después (no es capricho de precio)</h3>
+      <p>Es el módulo con más piezas externas fuera de nuestro control: depende de que la plataforma GPS de los proveedores tenga API abierta, y de coordinar con terceros. También es el que más valor da <em>después</em> de que la operación ya está ordenada por los módulos 1-3. Sembrarlo ahora, cerrarlo cuando la base esté firme.</p>
+      <h3>Cómo cobrarlo a futuro</h3>
+      <p>Por su naturaleza, este módulo se presta a <strong>cobrarse por sub-piezas</strong> en vez de todo junto — así el cliente entra por lo que más le urge (ej. la tarjeta de incidencias, que es la de mayor impacto emocional) y suma las demás después. Sugerencia de desglose: Tarjeta de incidencias $20-28k · Semáforos de carga $15-20k · Alertas de carretera $12-18k · Integración GPS $18-30k (la más variable, depende del tercero). La mensualidad sube aquí porque hay APIs externas que mantener y vigilar.</p>
+      <div class="warn">Depende de la documentación/API de la plataforma GPS que usan los proveedores. Rango amplio hasta validar viabilidad. <strong>Antes de cotizar en firme:</strong> pedir a Luis el nombre de su plataforma GPS y revisar si permite conexión por API.</div>
+      <div class="sliderrow"><label>Precio al cliente <span class="val" id="v-c-4">$65,000</span></label><input type="range" min="45000" max="110000" step="5000" value="65000" oninput="setC(this,4)"></div>
+      <div class="sliderrow"><label>Tu costo interno <span class="val" id="v-k-4">$26,000</span></label><input type="range" class="cost" min="15000" max="55000" step="1000" value="26000" oninput="setK(this,4)"></div>
+      <div class="mod-metrics">
+        <div class="metric"><div class="metric-num" id="m-c-4">$65,000</div><div class="metric-lbl">Cliente</div></div>
+        <div class="metric green"><div class="metric-num" id="m-u-4">$39,000</div><div class="metric-lbl">Utilidad</div></div>
+        <div class="metric green"><div class="metric-num" id="m-m-4">60%</div><div class="metric-lbl">Margen</div></div>
+      </div>
+      <div class="mens">Mensualidad de mantenimiento <span class="mens-val">$5,000</span></div>
+    </div>
+  </div>
+
+  <!-- MÓDULO 5 -->
+  <div class="mod" data-cliente="30000" data-costo="11000" data-mens="2500">
+    <div class="mod-head" onclick="toggleBody(this)">
+      <div class="mod-title"><span class="pill f2">FASE 4</span> Módulo 5 · Prospección de Clientes <span class="tag later">Bonus</span></div>
+      <div class="mod-toggle" onclick="event.stopPropagation()">
+        <label class="switch"><input type="checkbox" onchange="recalc()"><span class="slider-sw"></span></label>
+      </div>
+    </div>
+    <div class="mod-body">
+      <div class="mod-pts">El bonus que Luis dejó al final</div>
+      <div class="mod-desc">Búsqueda segmentada de clientes potenciales por tipo de servicio (seco, refrigerado, etc.). El menos urgente; se define con los parámetros que Luis nos mande.</div>
+      <h3>¿Qué resuelve, en corto?</h3>
+      <p>Luis quiere dejar de buscar clientes "por feeling". La idea es un buscador que, con los criterios que él defina (sector, zona, tipo de carga que sí puede mover vs. la que no), le arroje prospectos alineados a su capacidad real — sobre todo carga seca, que es su fuerte, y filtrando lo que no le conviene. También busca clientes que valoren su diferenciador (la plataforma + el know-how + estas herramientas), no solo precio.</p>
+      <h3>Por qué es el último</h3>
+      <p>No ataca un dolor operativo diario como los otros; es crecimiento comercial. Tiene sentido cuando la operación ya está ordenada y Luis puede recibir más volumen sin ahogarse. Además necesitamos que él nos dé primero los criterios de segmentación — sin eso, no arranca.</p>
+      <h3>Cómo cobrarlo a futuro</h3>
+      <p>Este módulo se presta a un <strong>modelo distinto</strong> a los demás: en vez de setup grande, puede ir como <strong>setup chico + mensualidad más alta</strong> (es un servicio que corre y entrega prospectos de forma recurrente, no un desarrollo que se entrega y ya). Alternativa atractiva: un esquema de <strong>éxito compartido</strong> — cuota base baja + un bono si un prospecto entregado se vuelve cliente. Eso alinea intereses y es más fácil de vender porque el riesgo se comparte. Conviene proponerlo <em>después</em> de tener resultados en los otros módulos, cuando ya hay confianza.</p>
+      <div class="warn">Antes de cotizar: pedir a Luis los criterios de segmentación (sectores objetivo, zonas, tipo de carga que sí/no mueve). Él quedó de mandarlos.</div>
+      <div class="sliderrow"><label>Precio al cliente <span class="val" id="v-c-5">$30,000</span></label><input type="range" min="18000" max="50000" step="2000" value="30000" oninput="setC(this,5)"></div>
+      <div class="sliderrow"><label>Tu costo interno <span class="val" id="v-k-5">$11,000</span></label><input type="range" class="cost" min="6000" max="22000" step="1000" value="11000" oninput="setK(this,5)"></div>
+      <div class="mod-metrics">
+        <div class="metric"><div class="metric-num" id="m-c-5">$30,000</div><div class="metric-lbl">Cliente</div></div>
+        <div class="metric green"><div class="metric-num" id="m-u-5">$19,000</div><div class="metric-lbl">Utilidad</div></div>
+        <div class="metric green"><div class="metric-num" id="m-m-5">63%</div><div class="metric-lbl">Margen</div></div>
+      </div>
+      <div class="mens">Mensualidad de mantenimiento <span class="mens-val">$2,500</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">🛠️ Junta técnica con José (Desarrollo Web Mx) — guion y preguntas</div>
+    <div class="card-body">
+      <p>Esta junta es <strong>la que destraba el proyecto</strong>. Sin acceso a los datos de armadamyl, el Módulo 3 no existe y los Módulos 1 y 2 se vuelven mucho más caros de construir (habría que hacer scraping y mantenerlo). Luis ya sentó la postura: <em>“la plataforma es de nosotros, no puede decir que no”</em> — pero conviene <strong>no llegar con esa carta</strong>: se gana más con José de aliado que de obligado.</p>
+
+      <div class="nota"><strong>Cómo abrir la conversación (los primeros 2 minutos deciden el tono):</strong><br>
+      1. Reconocerle el sistema — está hecho a la medida, funciona y lleva la operación completa.<br>
+      2. Dejar clarísimo que <strong>no venimos a reemplazar su plataforma ni a auditar su trabajo</strong>: construimos una capa <em>encima</em> de lo que él ya hizo.<br>
+      3. Venderle el beneficio propio: cada reporte y cada consulta que resolvamos nosotros es una petición menos que le cae a él.<br>
+      4. Dejar que <strong>él elija el mecanismo de acceso</strong> (usuario de lectura, vistas, endpoint, respaldo periódico). Sentirse en control baja la resistencia a la mitad.</div>
+
+      <div class="qgroup">
+        <div class="qgroup-head"><span>A · Acceso a los datos</span><span class="why">Bloqueante</span></div>
+        <div class="qgroup-body">
+          <div class="q"><input type="checkbox"><div>¿Qué motor de base de datos usa la plataforma y en qué versión? <span class="qtag block">Clave</span><em>Define si nos conectamos directo desde n8n o necesitamos intermediario.</em></div></div>
+          <div class="q"><input type="checkbox"><div>¿Nos puedes dar un <strong>usuario de solo lectura</strong>, o prefieres exponernos un endpoint / vistas específicas? <span class="qtag block">Clave</span><em>Las dos nos sirven. Que elija él.</em></div></div>
+          <div class="q"><input type="checkbox"><div>¿El servidor acepta conexiones externas o hay que pedir whitelist de IP, túnel o VPN?</div></div>
+          <div class="q"><input type="checkbox"><div>¿Existe ambiente de <strong>pruebas</strong> o solo producción?<em>Nunca probamos contra producción; si no hay staging, lo planteamos como riesgo desde hoy.</em></div></div>
+          <div class="q"><input type="checkbox"><div>¿Con qué frecuencia se respalda la base y quién la administra?</div></div>
+        </div>
+      </div>
+
+      <div class="qgroup">
+        <div class="qgroup-head"><span>B · Estructura y significado de los campos</span><span class="why">Alimenta M1</span></div>
+        <div class="qgroup-body">
+          <div class="q"><input type="checkbox"><div>¿Cuál es la tabla de viajes y cuál es su identificador único? ¿Hay diccionario de datos, aunque sea parcial? <span class="qtag m1">M1</span></div></div>
+          <div class="q"><input type="checkbox"><div>¿Cómo se modela el <strong>viaje padre / hijo</strong>? ¿Relación entre registros o registros sueltos? <span class="qtag m1">M1</span><em>Luis lo mencionó en el requerimiento de facturación; si no está bien modelado, se factura mal.</em></div></div>
+          <div class="q"><input type="checkbox"><div>“Costo Flete” vs “Costo Flete 4PL”: ¿cuál es <strong>venta al cliente</strong> y cuál <strong>costo al proveedor</strong>? ¿Quién las captura y en qué momento del viaje? <span class="qtag block">Clave</span><em>Todo el cálculo de margen depende de esta respuesta. En el CSV de junio venían vacías y en las capturas de julio ya traen valores.</em></div></div>
+          <div class="q"><input type="checkbox"><div>¿Los montos incluyen IVA? ¿Hay campo de moneda?</div></div>
+          <div class="q"><input type="checkbox"><div>¿<strong>Tarifario</strong> y <strong>Tarifario 4PL</strong> son tablas distintas? ¿Quién las edita y por qué 18 de 35 ciudades no tienen tarifa cargada? <span class="qtag m1">M1</span></div></div>
+          <div class="q"><input type="checkbox"><div>¿Existe campo de <strong>kilómetros</strong>, zona o ruta? <span class="qtag m1">M1</span><em>Sin kms, el cotizador tiene que calcularlos por fuera (API de rutas) — cambia el costo del módulo.</em></div></div>
+          <div class="q"><input type="checkbox"><div>¿Dónde viven las <strong>maniobras</strong> y por qué a veces no llegan al reporte? <span class="qtag m1">M1</span><em>Este es el dato que Luis termina buscando en WhatsApp. Es el corazón del problema.</em></div></div>
+        </div>
+      </div>
+
+      <div class="qgroup">
+        <div class="qgroup-head"><span>C · Historial de cambios</span><span class="why">Alimenta M3</span></div>
+        <div class="qgroup-body">
+          <div class="q"><input type="checkbox"><div>Hoy la plataforma sobrescribe: ¿existe alguna tabla de log o auditoría, o campos tipo <em>fecha de modificación</em> y <em>usuario que modificó</em>? <span class="qtag m3">M3</span></div></div>
+          <div class="q"><input type="checkbox"><div>Si no existe, ¿estarías dispuesto a agregar una tabla de histórico con triggers, o prefieres que lo capturemos nosotros desde afuera? <span class="qtag m3">M3</span><em>Si él lo hace, M3 baja de costo. Si lo hacemos nosotros, sube. Esto define el precio final del módulo.</em></div></div>
+          <div class="q"><input type="checkbox"><div>Cuando alguien modifica una tarifa, ¿se guarda el <strong>comentario o motivo</strong>? <span class="qtag m3">M3</span><em>Luis lo pidió textual: quiere saber por qué se perdió el margen.</em></div></div>
+        </div>
+      </div>
+
+      <div class="qgroup">
+        <div class="qgroup-head"><span>D · Limitaciones que ya detectamos</span><span class="why">Credibilidad técnica</span></div>
+        <div class="qgroup-body">
+          <div class="q"><input type="checkbox"><div>El export <em>reporte-exportar?4pl=si</em> nos devolvió <strong>error 503</strong>. ¿Es límite de tiempo o de memoria? ¿Conviene arreglarlo o mejor no dependemos de él?<em>Mencionarlo con tacto: no es un reclamo, es que ya nos metimos a fondo. Genera respeto.</em></div></div>
+          <div class="q"><input type="checkbox"><div>El filtro de reportes trae 30 días por default: ¿es límite duro o solo el valor inicial? ¿Cuánto historial hay realmente en la base?</div></div>
+          <div class="q"><input type="checkbox"><div>¿Se puede filtrar por <strong>cliente / cuenta</strong> del lado del servidor? Hoy hay que separar a mano después de bajar todo.</div></div>
+          <div class="q"><input type="checkbox"><div>El reporte, ¿se arma en vivo contra la base o hay una vista o tabla intermedia?</div></div>
+        </div>
+      </div>
+
+      <div class="qgroup">
+        <div class="qgroup-head"><span>E · Integración y convivencia</span><span class="why">Define arquitectura</span></div>
+        <div class="qgroup-body">
+          <div class="q"><input type="checkbox"><div>¿Podemos <strong>escribir de vuelta</strong> (dejar la tarifa correcta cargada en el viaje) o prefieres solo lectura y tú expones el punto de escritura? <span class="qtag block">Clave</span><em>Escribir de vuelta es lo que convierte el Motor de Tarifas en solución permanente y no en parche.</em></div></div>
+          <div class="q"><input type="checkbox"><div>¿La plataforma puede disparar un <strong>webhook</strong> al crear o modificar un viaje? Si no, ¿te incomoda que consultemos cada X minutos?</div></div>
+          <div class="q"><input type="checkbox"><div>¿La plataforma GPS de los proveedores ya está conectada de algún modo, o sería integración nueva? <span class="qtag m4">M4</span></div></div>
+          <div class="q"><input type="checkbox"><div>¿Qué estás desarrollando ahora y qué traes en tu plan?<em>Para no chocar, no duplicar y no quedar como los que llegaron a pisarle el trabajo.</em></div></div>
+          <div class="q"><input type="checkbox"><div>¿Cómo prefieres que te pidamos cosas o te reportemos hallazgos? ¿Quién cubre tus horas si necesitamos algo de tu lado?<em>Importante: si él tiene que trabajar gratis para nosotros, el proyecto se atora solo.</em></div></div>
+        </div>
+      </div>
+
+      <div class="ok" style="background:#eef9f2;border:1px solid #c6e8d5;border-left:4px solid #2f9e63;border-radius:8px;padding:.85rem 1rem;margin:.9rem 0;font-size:.87rem;color:#4a5068">
+        <strong style="color:#1f7a4a">No salir de esa junta sin estas 3 cosas:</strong> (1) el <strong>mecanismo de acceso</strong> definido, (2) una <strong>fecha comprometida</strong> para las credenciales o el respaldo, y (3) el <strong>diccionario de campos</strong> — aunque sea un Excel improvisado o una captura del esquema de tablas.
+      </div>
+
+      <div class="warn"><strong>Qué NO hacer en esa junta:</strong> no hablar de precios ni de módulos delante de José (es conversación técnica, no comercial) · no criticar la plataforma, ni siquiera de broma · no usar la carta de “Luis dijo que nos tienes que dar acceso” salvo que se cierre de plano · no prometerle que la IA hará cosas que aún no validamos.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">📋 Insumos que faltan de Luis — checklist de la junta</div>
+    <div class="card-body">
+      <p>Cada punto de esta lista está bloqueando un precio o un módulo. Mientras no los tengamos, los números con rango <strong>no se cierran</strong>.</p>
+      <div class="qgroup">
+        <div class="qgroup-body">
+          <div class="q"><input type="checkbox"><div>La regla exacta de <strong>local / local largo / foráneo</strong> <span class="qtag m1">M1</span><em>Hoy vive en su cabeza. El prototipo de la Fase 0 se la saca preguntando destino por destino, y la deja guardada.</em></div></div>
+          <div class="q"><input type="checkbox"><div>De dónde saca la tarifa cuando <strong>no está en la plataforma</strong>: ¿tarifario propio, mensajes, memoria? <span class="qtag m1">M1</span></div></div>
+          <div class="q"><input type="checkbox"><div>Las <strong>maniobras faltantes</strong>: ¿siempre llegan por chat o hay otra fuente? <span class="qtag m1">M1</span></div></div>
+          <div class="q"><input type="checkbox"><div>Su <strong>plantilla de facturación</strong> — el molde exacto del resultado que espera. <span class="qtag m1">M1</span></div></div>
+          <div class="q"><input type="checkbox"><div>El <strong>Excel de Fernanda</strong> (cálculo de tarifas). <span class="qtag block">Clave</span><em>Es el que define las variables reales del cotizador: combustible, casetas, operador, mantenimiento, depreciación.</em></div></div>
+          <div class="q"><input type="checkbox"><div>Un <strong>Excel real de proveedor</strong> de los que concilia hoy. <span class="qtag m1" style="background:#fff2e2;color:#a35a1a">M2</span><em>Es el que baja o sube el riesgo del Módulo 2. Sin verlo, el precio queda en rango.</em></div></div>
+          <div class="q"><input type="checkbox"><div>Nombre de su plataforma <strong>GPS</strong> y si tiene API. <span class="qtag m4">M4</span></div></div>
+          <div class="q"><input type="checkbox"><div>Criterios de <strong>segmentación de clientes</strong> (sectores, zonas, carga que sí y que no mueve). <span class="qtag m3" style="background:#f3eefb;color:#7a4fb0">M5</span></div></div>
+          <div class="q"><input type="checkbox"><div>Confirmar si las columnas de <strong>costo 4PL ya se están capturando</strong> y quién lo hace.<em>En el CSV de junio venían vacías; en las capturas de julio ya traen valores. Cambia por completo el reporte de márgenes.</em></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">🎤 Guion para la junta de mañana</div>
+    <div class="card-body">
+      <ol>
+        <li><strong>Abrir con el hallazgo:</strong> "Analizamos tu proceso de facturación a fondo. Las 3 horas no se van en el Excel — se van en buscar tarifas y maniobras que la plataforma no guarda. Ese es el problema raíz."</li>
+        <li><strong>Proponer la Fase 0:</strong> "En 4 días te entregamos un primer prototipo funcional que te ahorra 2 de esas 3 horas. Eso arranca con el 50%."</li>
+        <li><strong>Mostrar el mapa modular:</strong> presentar los 5 módulos como un camino, no como un precio único. Él elige por dónde y a qué ritmo.</li>
+        <li><strong>Aterrizar el modelo:</strong> setup por módulo, 50% al iniciar / 50% al entregar, más mantenimiento mensual.</li>
+        <li><strong>Cerrar pidiendo insumos:</strong> la regla local/foráneo, el Excel de Fernanda, la plantilla, y agendar la junta con José para el acceso a la base de datos.</li>
+      </ol>
+      <div class="nota"><strong>Proteger:</strong> los módulos con rango se cierran de precio <em>después</em> de la sesión técnica. Mañana se vende la Fase 0 y la visión; los números finos de los módulos grandes se confirman con la info que falta.</div>
+    </div>
+  </div>
+
+  <div class="footer">ExcelentIA · Documento de consulta interna · Julio 2026</div>
+
+</div>
+
+<script>
+const N=6;
+const cliente=[18000,70000,45000,40000,65000,30000];
+const costo=[6000,24000,16000,14000,26000,11000];
+const mens=[0,4500,3000,3000,5000,2500];
+const active=[true,true,true,true,false,false];
+
+function fmt(n){return '$'+n.toLocaleString('es-MX');}
+
+function setC(el,i){cliente[i]=+el.value;document.getElementById('v-c-'+i).textContent=fmt(cliente[i]);recalc();}
+function setK(el,i){costo[i]=+el.value;document.getElementById('v-k-'+i).textContent=fmt(costo[i]);recalc();}
+
+function toggleBody(head){
+  const body=head.parentElement.querySelector('.mod-body');
+  body.classList.toggle('collapsed');
+}
+
+function recalc(){
+  // leer estado de switches
+  document.querySelectorAll('.mod').forEach((m,i)=>{
+    const chk=m.querySelector('input[type=checkbox]');
+    active[i]=chk.checked;
+    m.style.opacity=chk.checked?'1':'.55';
+  });
+  let tc=0,tk=0,tm=0,count=0;
+  for(let i=0;i<N;i++){
+    // métricas por módulo (siempre visibles)
+    const u=cliente[i]-costo[i];
+    const mg=cliente[i]>0?Math.round(u/cliente[i]*100):0;
+    document.getElementById('m-c-'+i).textContent=fmt(cliente[i]);
+    document.getElementById('m-u-'+i).textContent=fmt(u);
+    document.getElementById('m-m-'+i).textContent=mg+'%';
+    if(active[i]){tc+=cliente[i];tk+=costo[i];tm+=mens[i];count++;}
+  }
+  const tu=tc-tk;
+  const tmg=tc>0?Math.round(tu/tc*100):0;
+  document.getElementById('t-cliente').textContent=fmt(tc);
+  document.getElementById('t-costo').textContent=fmt(tk);
+  document.getElementById('t-util').textContent=fmt(tu);
+  document.getElementById('t-margen').textContent=tmg+'%';
+  document.getElementById('t-ini').textContent=fmt(Math.round(tc/2));
+  document.getElementById('t-fin').textContent=fmt(Math.round(tc/2));
+  document.getElementById('t-mens').textContent=fmt(tm);
+  document.getElementById('t-count').textContent=count;
+}
+recalc();
+
+// Los checks de las preguntas se recuerdan al volver a abrir el archivo
+(function(){
+  const chks=document.querySelectorAll('.q input[type=checkbox]');
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem('4p_checks')||'{}');}catch(e){}
+  chks.forEach((c,i)=>{
+    if(saved[i])c.checked=true;
+    c.addEventListener('change',()=>{
+      const st={};chks.forEach((x,j)=>{if(x.checked)st[j]=1;});
+      try{localStorage.setItem('4p_checks',JSON.stringify(st));}catch(e){}
+    });
+  });
+})();
+</script>
+</body>
+</html>
