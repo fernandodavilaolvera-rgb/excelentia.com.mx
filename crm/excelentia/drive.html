@@ -26,6 +26,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .btn-danger{background:#fee2e2;color:#991b1b}.btn-danger:hover{background:#fecaca}
 .btn-sm{padding:.32rem .6rem;font-size:.75rem}
 .btn-icon{padding:.32rem .42rem;border-radius:6px;width:26px;height:26px;justify-content:center}
+.btn-icon.copiado{background:#d1fae5;color:#065f46;border-color:#6ee7b7}
 
 /* ── CARD ── */
 .card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden}
@@ -75,21 +76,26 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 /* ── NOTA DE LOS 15 ── */
 .nota-15{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.5rem .7rem;font-size:.72rem;color:#4a5068;margin-bottom:.85rem;line-height:1.5;max-width:720px}
 
-/* ── LISTA DE ARCHIVOS ── */
-.arch-item{display:flex;align-items:center;gap:.6rem;padding:.65rem .3rem;border-bottom:1px solid #eef2f8}
-.arch-item:last-child{border-bottom:none}
-.arch-ico{width:36px;height:36px;border-radius:8px;background:#dce8f7;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0}
-.arch-info{flex:1;min-width:0}
-.arch-nombre{font-size:.85rem;font-weight:700;color:#1a2035;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.arch-meta{font-size:.72rem;color:#8a90a0;margin-top:.15rem;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
-.arch-badge{font-size:.65rem;font-weight:700;padding:.1rem .45rem;border-radius:10px}
-.arch-badge.subido{background:#d1fae5;color:#065f46}
-.arch-badge.ligado{background:#ede9fe;color:#5b21b6}
-.arch-proj{font-size:.68rem;font-weight:700;color:#1a3a6b;background:#eef4fc;border:1px solid #c8d9f0;border-radius:10px;padding:.1rem .45rem;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:.2rem}
+/* ── TABLA DE ARCHIVOS ── */
+.tabla-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:860px;border:1px solid #dde1e9;border-radius:8px}
+.arch-tabla{width:100%;border-collapse:collapse;font-size:.8rem}
+.arch-tabla thead th{text-align:left;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#8a90a0;background:#f8fafd;padding:.4rem .6rem;border-bottom:1px solid #dde1e9;white-space:nowrap}
+.arch-tabla tbody tr{border-bottom:1px solid #eef2f8;transition:.12s}
+.arch-tabla tbody tr:last-child{border-bottom:none}
+.arch-tabla tbody tr:hover{background:#e8f0fb}
+.arch-tabla td{padding:.28rem .6rem;vertical-align:middle}
+.arch-tabla .btn-icon{width:24px;height:24px;padding:.22rem}
+.td-nombre{display:flex;align-items:center;gap:.45rem;min-width:0}
+.td-ico{font-size:.95rem;line-height:1;flex-shrink:0;cursor:help}
+.td-nom{font-weight:700;color:#1a2035;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+.col-proy{width:1%;white-space:nowrap}
+.col-fecha{width:1%;white-space:nowrap;color:#8a90a0;font-size:.75rem}
+.col-acc{width:1%;white-space:nowrap}
+.acc-wrap{display:flex;gap:.3rem;justify-content:flex-end}
+.arch-proj{font-size:.68rem;font-weight:700;color:#1a3a6b;background:#eef4fc;border:1px solid #c8d9f0;border-radius:10px;padding:.1rem .45rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:.2rem;vertical-align:middle}
 .arch-proj:hover{background:#dce8f7;border-color:#4a9fd4;color:#0d1b3e}
 .arch-proj.sin{color:#8a90a0;background:#f5f6f8;border-color:#dde1e9}
 .arch-proj.sin:hover{background:#eef4fc;border-color:#4a9fd4;color:#1a3a6b}
-.arch-acc{display:flex;gap:.35rem;flex-shrink:0}
 
 /* ── ESTADOS ── */
 .empty-state{text-align:center;padding:2.5rem 1rem;color:#8a90a0}
@@ -140,6 +146,8 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
   .scope-tag{align-self:flex-start}
   .url-form input,.url-form select{flex:1 1 100%}
   .arch-proj{max-width:130px}
+  .arch-tabla{min-width:480px}
+  .td-nom{max-width:180px}
 }
 </style>
 </head>
@@ -521,7 +529,7 @@ function renderArchivos(){
 
   const mostrarProy = (vista === 'todos' || vista === 'sin' || q);
 
-  el.innerHTML = lista.map(a => {
+  const filas = lista.map(a => {
     const id     = toStr(a.ID);
     const origen = toStr(a.Origen) || 'subido';
     const link   = toStr(a.Link);
@@ -530,31 +538,91 @@ function renderArchivos(){
     const sinP   = !toStr(a.ProyectoID);
     const fecha  = toStr(a.Fecha).slice(0,10);
     const carp   = toStr(a.DriveFolderID);
+    const ligado = origen === 'ligado';
     const tipChip= carp
       ? `Abrir la carpeta de «${proy}» en Drive`
       : (sinP ? 'Abrir la carpeta madre «Drive ExcelentIA»'
               : `«${proy}» aún no tiene carpeta propia · abre la carpeta madre`);
-    return `<div class="arch-item">
-      <div class="arch-ico">${iconoPorTipo(a.Tipo, a.Nombre)}</div>
-      <div class="arch-info">
-        <div class="arch-nombre" title="${escAttr(a.Nombre)}">${escHtml(a.Nombre)}</div>
-        <div class="arch-meta">
-          ${mostrarProy ? `<span class="arch-proj${sinP ? ' sin' : ''}" title="${escAttr(tipChip)}" onclick="abrirCarpeta('${escAttr(carp)}', event)">📁 ${escHtml(proy)}</span>` : ''}
-          <span class="arch-badge ${origen === 'ligado' ? 'ligado' : 'subido'}">${origen === 'ligado' ? 'Ligado' : 'Subido'}</span>
-          ${fecha ? `<span>${fmtDate(fecha)}</span>` : ''}
+    const tipIco = ligado
+      ? 'Link ligado · el archivo vive fuera de este módulo. Borrarlo aquí NO toca el original.'
+      : 'Archivo subido desde este módulo · al borrarlo puedes mandarlo también a la papelera de Drive.';
+    return `<tr>
+      <td>
+        <div class="td-nombre">
+          <span class="td-ico" title="${escAttr(tipIco)}">${iconoPorTipo(a.Tipo, a.Nombre)}</span>
+          <span class="td-nom" title="${escAttr(a.Nombre)}">${escHtml(a.Nombre)}</span>
         </div>
-      </div>
-      <div class="arch-acc">
-        ${link ? `<a href="${escAttr(link)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm btn-icon" title="Abrir">↗</a>` : ''}
-        <button class="btn btn-danger btn-sm btn-icon" title="Eliminar" onclick="eliminarArchivo('${escAttr(id)}','${escAttr(driveId)}','${escAttr(origen)}')">✕</button>
-      </div>
-    </div>`;
+      </td>
+      ${mostrarProy ? `<td class="col-proy"><span class="arch-proj${sinP ? ' sin' : ''}" title="${escAttr(tipChip)}" onclick="abrirCarpeta('${escAttr(carp)}', event)">📁 ${escHtml(proy)}</span></td>` : ''}
+      <td class="col-fecha">${fecha ? fmtDate(fecha) : '—'}</td>
+      <td class="col-acc">
+        <div class="acc-wrap">
+          ${link ? `<a href="${escAttr(link)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm btn-icon" title="Abrir">↗</a>` : ''}
+          ${link ? `<button class="btn btn-secondary btn-sm btn-icon" title="Copiar link para compartir" onclick="copiarLink('${escAttr(link)}', event)">📋</button>` : ''}
+          <button class="btn btn-danger btn-sm btn-icon" title="Eliminar" onclick="eliminarArchivo('${escAttr(id)}','${escAttr(driveId)}','${escAttr(origen)}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
   }).join('');
+
+  el.innerHTML = `<div class="tabla-wrap"><table class="arch-tabla">
+    <thead><tr>
+      <th>Nombre</th>
+      ${mostrarProy ? '<th>Proyecto</th>' : ''}
+      <th>Fecha</th>
+      <th></th>
+    </tr></thead>
+    <tbody>${filas}</tbody>
+  </table></div>`;
 }
 
 // ═══════════════════════════════════════
 // ACCIONES
 // ═══════════════════════════════════════
+// Copia el link del archivo al portapapeles.
+// Usa la API moderna y, si el navegador la bloquea (pasa en iframes y en
+// Safari viejo), cae al método clásico del textarea invisible.
+async function copiarLink(link, ev){
+  if(ev) ev.stopPropagation();
+  const btn = ev ? ev.currentTarget : null;   // se captura ANTES del await
+  const url = toStr(link);
+  if(!url){ showToast('Este archivo no tiene link para compartir', 'err'); return; }
+
+  let ok = false;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(url);
+      ok = true;
+    }
+  }catch(e){ ok = false; }
+
+  if(!ok){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:-1000px;left:-1000px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(e){ ok = false; }
+  }
+
+  if(ok){
+    showToast('✅ Link copiado');
+    if(btn){
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      btn.classList.add('copiado');
+      setTimeout(() => { btn.innerHTML = prev; btn.classList.remove('copiado'); }, 1400);
+    }
+  } else {
+    showToast('No se pudo copiar. Abre con ↗ y copia la URL de la barra.', 'err');
+  }
+}
+
 function toggleLigar(){ document.getElementById('arch-ligar').classList.toggle('open'); }
 function seleccionarArchivo(){ document.getElementById('arch-file').click(); }
 
