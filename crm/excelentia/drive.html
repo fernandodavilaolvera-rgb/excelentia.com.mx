@@ -48,6 +48,10 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .proj-empresa{font-size:.67rem;color:#8a90a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15;margin-top:-.03rem}
 .proj-count{background:#eef4fc;color:#1a3a6b;font-size:.66rem;font-weight:800;padding:.05rem .38rem;border-radius:10px;flex-shrink:0;line-height:1.35}
 .proj-sep{height:1px;background:#dde1e9;margin:.32rem .2rem}
+.proj-acc{display:flex;align-items:center;gap:.35rem;padding:.3rem .5rem;margin-top:.15rem;border-radius:7px;cursor:pointer;font-size:.66rem;font-weight:800;color:#8a90a0;text-transform:uppercase;letter-spacing:.3px;transition:.15s;user-select:none}
+.proj-acc:hover{background:#e8f0fb;color:#1a3a6b}
+.proj-acc .flecha{font-size:.55rem;width:9px}
+.proj-acc .n{margin-left:auto;background:#eef4fc;color:#1a3a6b;font-size:.62rem;font-weight:800;padding:.03rem .35rem;border-radius:10px;text-transform:none;letter-spacing:0}
 .side-vacio{font-size:.75rem;color:#8a90a0;padding:.5rem .3rem;text-align:center}
 
 /* ── ACCIONES DE ARCHIVOS ── */
@@ -280,6 +284,7 @@ let PROYECTOS     = [];
 let ARCHIVOS      = [];      // TODOS los archivos (fuente única de verdad)
 let vista         = 'todos'; // 'todos' | 'sin' | <ID de proyecto>
 let proyectoActivo = null;
+let accSinArchivos = false;  // acordeón "sin archivos": cerrado por default
 
 // ═══════════════════════════════════════
 // HELPERS
@@ -388,28 +393,54 @@ function renderProyectos(){
   if(!el) return;
   const q = norm(document.getElementById('buscar-proyecto').value);
 
+  const coincide = p => norm(p.Nombre).includes(q) || norm(p.Empresa).includes(q);
+  const conArch  = PROYECTOS.filter(p => contarDe(p.ID) > 0);
+  const sinArch  = PROYECTOS.filter(p => contarDe(p.ID) === 0);
+
   let html = '';
 
-  // Fijos (no se filtran por el buscador si no hay texto)
-  const mostrarFijos = !q;
-  if(mostrarFijos){
-    html += itemProyecto('todos', '📁 Todos los archivos', '', ARCHIVOS.length);
-    if(contarSinProyecto() > 0){
-      html += itemProyecto('sin', '🗂️ Sin proyecto', 'en la carpeta madre', contarSinProyecto());
-    }
-    html += '<div class="proj-sep"></div>';
+  // ── BUSCANDO: lista plana, con archivos primero ──
+  if(q){
+    const hits = [...conArch.filter(coincide), ...sinArch.filter(coincide)];
+    html = hits.length
+      ? hits.map(p => itemProyecto(toStr(p.ID), '📌 ' + toStr(p.Nombre), toStr(p.Empresa), contarDe(p.ID))).join('')
+      : '<div class="side-vacio">Sin coincidencias</div>';
+    el.innerHTML = html;
+    return;
   }
 
-  const lista = PROYECTOS.filter(p => !q || norm(p.Nombre).includes(q) || norm(p.Empresa).includes(q));
+  // ── VISTA NORMAL ──
+  html += itemProyecto('todos', '📁 Todos los archivos', '', ARCHIVOS.length);
+  if(contarSinProyecto() > 0){
+    html += itemProyecto('sin', '🗂️ Sin proyecto', 'en la carpeta madre', contarSinProyecto());
+  }
+  html += '<div class="proj-sep"></div>';
 
-  if(!lista.length){
-    html += '<div class="side-vacio">' + (q ? 'Sin coincidencias' : 'No hay proyectos') + '</div>';
+  // Con archivos (alfabético, siempre visibles)
+  if(conArch.length){
+    html += conArch.map(p => itemProyecto(toStr(p.ID), '📌 ' + toStr(p.Nombre), toStr(p.Empresa), contarDe(p.ID))).join('');
   } else {
-    html += lista.map(p => itemProyecto(toStr(p.ID), '📌 ' + toStr(p.Nombre), toStr(p.Empresa), contarDe(p.ID))).join('');
+    html += '<div class="side-vacio">Ningún proyecto tiene archivos todavía</div>';
+  }
+
+  // Sin archivos (alfabético, en acordeón). Se abre solo si el activo está adentro.
+  if(sinArch.length){
+    const activoAdentro = sinArch.some(p => toStr(p.ID) === toStr(vista));
+    const abierto = accSinArchivos || activoAdentro;
+    html += `<div class="proj-acc" onclick="toggleAccSin()">
+      <span class="flecha">${abierto ? '▾' : '▸'}</span>
+      <span>Sin archivos</span>
+      <span class="n">${sinArch.length}</span>
+    </div>`;
+    if(abierto){
+      html += sinArch.map(p => itemProyecto(toStr(p.ID), '📌 ' + toStr(p.Nombre), toStr(p.Empresa), 0)).join('');
+    }
   }
 
   el.innerHTML = html;
 }
+
+function toggleAccSin(){ accSinArchivos = !accSinArchivos; renderProyectos(); }
 
 function itemProyecto(id, nombre, empresa, n){
   const act = (vista === id) ? ' active' : '';
