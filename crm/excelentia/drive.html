@@ -57,8 +57,6 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 /* ── ACCIONES DE ARCHIVOS ── */
 .arch-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.55rem}
-.arch-hint{font-size:.72rem;color:#8a90a0;margin-bottom:.75rem;line-height:1.45}
-.arch-hint strong{color:#4a5068}
 
 /* ── FORM LIGAR ── */
 .arch-ligar{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.75rem;margin-bottom:.85rem;display:none;flex-direction:column;gap:.5rem;max-width:720px}
@@ -74,12 +72,15 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .scope-tag{font-size:.68rem;font-weight:700;color:#4a5068;background:#eef4fc;border:1px solid #c8d9f0;border-radius:20px;padding:.25rem .6rem;white-space:nowrap}
 
 /* ── NOTA DE LOS 15 ── */
-.nota-15{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.5rem .7rem;font-size:.72rem;color:#4a5068;margin-bottom:.85rem;line-height:1.5;max-width:720px}
 
 /* ── TABLA DE ARCHIVOS ── */
 .tabla-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:860px;border:1px solid #dde1e9;border-radius:8px}
 .arch-tabla{width:100%;border-collapse:collapse;font-size:.8rem}
 .arch-tabla thead th{text-align:left;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#8a90a0;background:#f8fafd;padding:.4rem .6rem;border-bottom:1px solid #dde1e9;white-space:nowrap}
+.th-orden{cursor:pointer;user-select:none;transition:.15s}
+.th-orden:hover{background:#eef4fc;color:#1a3a6b}
+.orden-ico{font-size:.6rem;opacity:.3;margin-left:.15rem}
+.orden-ico.activo{opacity:1;color:#1a3a6b;font-size:.65rem}
 .arch-tabla tbody tr{border-bottom:1px solid #eef2f8;transition:.12s}
 .arch-tabla tbody tr:last-child{border-bottom:none}
 .arch-tabla tbody tr:hover{background:#e8f0fb}
@@ -186,10 +187,6 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
           <button class="btn btn-secondary btn-sm" onclick="toggleLigar()">🔗 Ligar link de Drive</button>
           <input type="file" id="arch-file" style="display:none" onchange="subirArchivo(this)">
         </div>
-        <div class="arch-hint">
-          Máximo 10&nbsp;MB por archivo. Destino: <strong id="destino-txt">carpeta madre «Drive ExcelentIA»</strong>.
-          Para archivos más pesados usa «Abrir en Drive» y súbelos directo.
-        </div>
 
         <div class="arch-ligar" id="arch-ligar">
           <div class="row">
@@ -206,9 +203,6 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
           <span class="scope-tag" id="scope-tag">en todos los proyectos</span>
         </div>
 
-        <div class="nota-15" id="nota-15">
-          Solo se muestran los <strong>15 archivos más recientes</strong>. Elige un proyecto en el panel izquierdo para ver todos los suyos, o usa el buscador (busca en <strong>todos</strong> los archivos).
-        </div>
 
         <div id="arch-lista">
           <div class="loading"><span class="spinner"></span>Cargando archivos...</div>
@@ -465,18 +459,14 @@ function elegirVista(id){
   vista = id;
   proyectoActivo = PROYECTOS.find(p => toStr(p.ID) === toStr(id)) || null;
 
-  // Encabezado y destino de subida
+  // Encabezado del panel
   const nom = document.getElementById('panel-nombre');
-  const dest = document.getElementById('destino-txt');
   if(vista === 'todos'){
     nom.textContent = '📁 Todos los archivos';
-    dest.textContent = 'carpeta madre «Drive ExcelentIA»';
   } else if(vista === 'sin'){
     nom.textContent = '🗂️ Sin proyecto';
-    dest.textContent = 'carpeta madre «Drive ExcelentIA»';
   } else if(proyectoActivo){
     nom.textContent = '📌 ' + toStr(proyectoActivo.Nombre);
-    dest.textContent = 'carpeta del proyecto «' + toStr(proyectoActivo.Nombre) + '»';
   }
 
   document.getElementById('arch-ligar').classList.remove('open');
@@ -486,6 +476,45 @@ function elegirVista(id){
 
   renderProyectos();
   renderArchivos();
+}
+
+// ═══════════════════════════════════════
+// ORDENAMIENTO DE LA TABLA
+// ═══════════════════════════════════════
+let ordenCampo = 'fecha';   // 'nombre' | 'proyecto' | 'fecha'
+let ordenDir   = 'desc';    // 'asc' | 'desc'
+
+function ordenarPor(campo){
+  if(ordenCampo === campo){
+    ordenDir = (ordenDir === 'asc') ? 'desc' : 'asc';
+  } else {
+    ordenCampo = campo;
+    // Texto arranca A→Z; fecha arranca de la más reciente
+    ordenDir = (campo === 'fecha') ? 'desc' : 'asc';
+  }
+  renderArchivos();
+}
+
+function valorOrden(a, campo){
+  if(campo === 'nombre')   return norm(a.Nombre);
+  if(campo === 'proyecto') return norm(toStr(a.Proyecto) || 'Sin proyecto');
+  return toStr(a.Fecha);   // ISO: el orden alfabético coincide con el cronológico
+}
+
+function aplicarOrden(lista){
+  const dir = (ordenDir === 'asc') ? 1 : -1;
+  return lista.slice().sort((a, b) => {
+    const va = valorOrden(a, ordenCampo);
+    const vb = valorOrden(b, ordenCampo);
+    if(va < vb) return -dir;
+    if(va > vb) return  dir;
+    return norm(a.Nombre).localeCompare(norm(b.Nombre));   // desempate estable
+  });
+}
+
+function flechaOrden(campo){
+  if(ordenCampo !== campo) return '<span class="orden-ico">⇅</span>';
+  return `<span class="orden-ico activo">${ordenDir === 'asc' ? '▲' : '▼'}</span>`;
 }
 
 // ═══════════════════════════════════════
@@ -499,7 +528,6 @@ function archivosDeVista(){
 
 function renderArchivos(){
   const el   = document.getElementById('arch-lista');
-  const nota = document.getElementById('nota-15');
   const tag  = document.getElementById('scope-tag');
   if(!el) return;
 
@@ -515,9 +543,11 @@ function renderArchivos(){
   else if(vista === 'sin')   tag.textContent = 'en «Sin proyecto»';
   else                       tag.textContent = 'en este proyecto';
 
+  // Ordenar ANTES de recortar, para que el recorte respete el orden elegido
+  lista = aplicarOrden(lista);
+
   // Recorte a 15 solo en la vista general y sin búsqueda
   const recortar = (vista === 'todos' && !q && lista.length > TOPE_RECIENTES);
-  nota.style.display = (vista === 'todos' && !q) ? 'block' : 'none';
   if(recortar) lista = lista.slice(0, TOPE_RECIENTES);
 
   if(!lista.length){
@@ -567,9 +597,9 @@ function renderArchivos(){
 
   el.innerHTML = `<div class="tabla-wrap"><table class="arch-tabla">
     <thead><tr>
-      <th>Nombre</th>
-      ${mostrarProy ? '<th>Proyecto</th>' : ''}
-      <th>Fecha</th>
+      <th class="th-orden" onclick="ordenarPor('nombre')" title="Ordenar por nombre">Nombre ${flechaOrden('nombre')}</th>
+      ${mostrarProy ? `<th class="th-orden" onclick="ordenarPor('proyecto')" title="Ordenar por proyecto">Proyecto ${flechaOrden('proyecto')}</th>` : ''}
+      <th class="th-orden" onclick="ordenarPor('fecha')" title="Ordenar por fecha">Fecha ${flechaOrden('fecha')}</th>
       <th></th>
     </tr></thead>
     <tbody>${filas}</tbody>
