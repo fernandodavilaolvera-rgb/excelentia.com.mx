@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matriz de Validaci&oacute;n &mdash; Club Berimbau</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;font-family:'Manrope',sans-serif;color:#1a2035;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:1.2rem 1.4rem}
+.header-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+.header-doc{text-align:right}
+.header-doc .t{font-size:.95rem;font-weight:800;color:#fff}
+.header-doc .s{font-size:.72rem;color:#c8d9f0;margin-top:2px}
+.wrap{max-width:720px;margin:0 auto;padding:1.4rem 1rem 3rem}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;margin:0 auto 1rem;max-width:720px}
+.intro{padding:1.1rem 1.2rem}
+.intro h1{font-size:1.15rem;margin:0 0 .5rem;font-weight:800}
+.intro p{font-size:.86rem;line-height:1.55;color:#4a5068;margin:.45rem 0}
+.aviso{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.75rem .9rem;font-size:.82rem;color:#1a2035;line-height:1.5;margin:.9rem 0 0}
+.alerta{background:#fff6ec;border:1px solid #f0d5b6;border-left:4px solid #d98324;border-radius:8px;padding:.75rem .9rem;font-size:.82rem;color:#8a5a1e;line-height:1.5;margin:.9rem 0 0}
+.bar{position:sticky;top:0;z-index:20;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.7rem .9rem;margin:0 auto 1.2rem;max-width:720px;box-shadow:0 2px 8px rgba(13,27,62,.06)}
+.bar-top{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
+.prog{font-size:.8rem;color:#4a5068;font-weight:600}
+.prog b{color:#1a3a6b;font-weight:800}
+.track{height:6px;background:#dde1e9;border-radius:99px;margin-top:.35rem;width:190px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#1a3a6b,#4a9fd4);width:0%;transition:width .25s}
+.btn{background:#1a3a6b;color:#fff;border:0;border-radius:8px;padding:.6rem 1.05rem;font-family:'Manrope',sans-serif;font-size:.83rem;font-weight:700;cursor:pointer}
+.btn:hover{background:#1e5096}
+.btn.ghost{background:#fff;color:#1a3a6b;border:1px solid #dde1e9}
+.btn.ghost:hover{background:#e8f0fb}
+.bar-tools{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.7rem;padding-top:.7rem;border-top:1px solid #dde1e9}
+.sec{max-width:720px;margin:1.8rem auto .8rem;display:flex;align-items:center;gap:.7rem}
+.sec-l{background:#1a3a6b;color:#fff;font-weight:800;font-size:.95rem;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-t{font-size:1rem;font-weight:800;color:#1a2035}
+.sec-n{font-size:.72rem;color:#8a90a0;font-weight:600;margin-left:auto}
+.pt{background:#fff;border:1px solid #dde1e9;border-radius:12px;margin:0 auto .6rem;max-width:720px;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+.pt-h{background:#dce8f7;padding:.6rem .9rem;display:flex;align-items:center;gap:.6rem;cursor:pointer;user-select:none}
+.pt-h:hover{background:#cfe0f4}
+.pt-c{background:#1a3a6b;color:#fff;font-size:.72rem;font-weight:800;padding:.2rem .5rem;border-radius:6px;flex-shrink:0}
+.pt-t{font-size:.86rem;font-weight:800;color:#1a2035;flex:1;line-height:1.35}
+.chev{color:#1a3a6b;font-size:.8rem;flex-shrink:0;transition:transform .2s}
+.pt.open .chev{transform:rotate(90deg)}
+.chk{width:22px;height:22px;accent-color:#1a3a6b;cursor:pointer;flex-shrink:0}
+.pt-b{padding:.85rem .9rem;display:none;border-top:1px solid #dde1e9}
+.pt.open .pt-b{display:block}
+.f{margin-bottom:.7rem}
+.f:last-child{margin-bottom:0}
+.f .lab{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#8a90a0;margin-bottom:.22rem}
+.f .val{font-size:.84rem;line-height:1.55;color:#4a5068}
+.f .val b{color:#1a2035}
+.paso{display:inline-flex;align-items:center;justify-content:center;background:#1a3a6b;color:#fff;font-size:.66rem;font-weight:800;min-width:17px;height:17px;padding:0 5px;border-radius:20px;margin-right:.35rem;vertical-align:1px}
+.esperado{background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:6px;padding:.6rem .75rem}
+.esperado .lab{color:#1a3a6b}
+.tip{display:block;background:#fff6ec;border:1px solid #f0d5b6;border-radius:6px;padding:.55rem .7rem;font-size:.78rem;color:#8a5a1e;line-height:1.45;margin-top:.55rem}
+.nota{margin-top:.85rem;border-top:1px dashed #dde1e9;padding-top:.75rem}
+textarea{width:100%;max-width:100%;min-height:52px;border:1px solid #dde1e9;border-radius:8px;padding:.55rem .65rem;font-family:'Manrope',sans-serif;font-size:.82rem;color:#1a2035;background:#fcfdff;resize:vertical;line-height:1.45}
+textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
+.pt.done{border-color:#4a9fd4}
+.pt.done .pt-h{background:#e8f0fb}
+.pt.hide{display:none}
+.firma{max-width:720px;margin:2rem auto 0;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1.1rem 1.2rem}
+.firma h3{font-size:.9rem;margin:0 0 .8rem;font-weight:800}
+.fila{display:flex;gap:1rem;flex-wrap:wrap}
+.fila>div{flex:1;min-width:180px}
+.fila .lab{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#8a90a0;margin-bottom:.5rem}
+.linea{border:0;border-bottom:1px solid #8a90a0;height:34px;width:100%;background:transparent;font-family:'Manrope',sans-serif;font-size:.85rem;color:#1a2035;padding:0 2px;outline:none}
+.linea:focus{border-bottom-color:#4a9fd4}
+.foot{max-width:720px;margin:1.4rem auto 0;text-align:center;font-size:.72rem;color:#8a90a0}
+code{background:#eef4fc;padding:.05rem .3rem;border-radius:4px;font-size:.8rem;font-family:ui-monospace,Menlo,monospace;color:#1a3a6b}
+@media (max-width:600px){
+  .header-inner{flex-direction:column;align-items:flex-start}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .logo-slogan{font-size:11px}
+  .header-doc{text-align:left}
+  .wrap{padding:1rem .7rem 2.5rem}
+  .bar{position:static}
+  .track{width:100%}
+  .bar-top .btn{width:100%}
+  .pt-t{font-size:.82rem}
+  .fila{flex-direction:column}
+}
+@media print{
+  body{background:#fff}
+  .bar,.no-print{display:none!important}
+  .header{padding:.8rem 1rem}
+  .wrap{padding:.5rem 0}
+  .pt,.card,.firma{box-shadow:none}
+  .pt-b{display:block!important}
+  .pt.hide{display:block!important}
+  .chev{display:none}
+  textarea{border:1px solid #c8d9f0;background:#fff;overflow:hidden}
+  .sec{page-break-after:avoid}
+  @page{margin:14mm}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="header-doc">
+      <div class="t">Matriz de Pruebas</div>
+      <div class="s">Club Berimbau &middot; Reglas del Dashboard &middot; 31-jul-2026</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="bar no-print">
+    <div class="bar-top">
+      <div>
+        <div class="prog"><b id="hechos">0</b> de <b id="total">0</b> puntos validados</div>
+        <div class="track"><div class="fill" id="fill"></div></div>
+      </div>
+      <button class="btn" onclick="window.print()">&#128424; Exportar a PDF</button>
+    </div>
+    <div class="bar-tools">
+      <button class="btn ghost" id="abrir">Abrir todo</button>
+      <button class="btn ghost" id="cerrar">Cerrar todo</button>
+    </div>
+  </div>
+
+  <div class="sec"><div class="sec-l">A</div><div class="sec-t">Directorio</div></div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">A1</span><span class="pt-t">La b&uacute;squeda ignora los acentos</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que puedas encontrar a alguien aunque escribas sin acentos.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>En <b>&#128203; Directorio</b>, escribe <code>Andres</code> sin acento en la caja de b&uacute;squeda. <span class="paso">2</span>Ahora escr&iacute;belo con acento. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Las dos b&uacute;squedas devuelven los mismos socios.</div></div>
+      
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">A2</span><span class="pt-t">Desde la ficha del titular se abre la del dependiente</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que al dar clic en un dependiente se abra su tarjeta con datos completos.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Abre la ficha de la membres&iacute;a <b>8367</b>. <span class="paso">2</span>Abajo ver&aacute;s <b>Dependientes (3)</b>. <span class="paso">3</span>Dale clic a un nombre subrayado. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Se abre otra tarjeta con tipo de membres&iacute;a, titular, edad, situaci&oacute;n, responsable de pago, tipo de cuota, periodo y fechas de pago.</div></div>
+      
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">A3</span><span class="pt-t">La baja temporal se ve en la ficha, con su periodo</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que un dependiente en baja temporal se distinga a simple vista y que su ficha diga desde cu&aacute;ndo lo est&aacute;.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Abre la ficha de la membres&iacute;a <b>4862</b>. <span class="paso">2</span>En la lista de dependientes localiza la etiqueta <b>Baja temporal</b>. <span class="paso">3</span>Dale clic a esa persona. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">En la lista aparece la pastilla amarilla <b>Baja temporal</b>. En su ficha se ve el <b>periodo de baja</b> completo y un recuadro <b>Baja vigente</b> con desde cu&aacute;ndo y cu&aacute;ntos d&iacute;as lleva.</div></div>
+      
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="sec-l">B</div><div class="sec-t">Cobranza</div></div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">B1</span><span class="pt-t">Los inactivos se consultan, pero no se les cobra</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que un socio inactivo siga siendo consultable en el Directorio, pero ya no aparezca como deudor.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>En <b>&#128203; Directorio</b> busca la membres&iacute;a <b>4726</b>. <span class="paso">2</span>Ahora busca la misma en <b>&#128176; Cobranza</b>. <span class="paso">3</span>Abre su ficha y mira los d&iacute;as de atraso. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">En Directorio aparece con punto gris. En Cobranza dice <i>"No hay membres&iacute;as con los filtros seleccionados"</i>. En su ficha se lee <b>Inactivo &mdash; no genera cobro</b> en gris, no un n&uacute;mero en rojo.</div></div>
+      <div class="tip">&#128161; Otras membres&iacute;as con este mismo caso: 533, 3054, 7311, 10043 y 7909.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">B2</span><span class="pt-t">Los deudores en baja temporal s&iacute; aparecen en Cobranza</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que la baja temporal no borre un adeudo anterior. Es distinto del caso de los inactivos.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>En <b>&#128176; Cobranza</b> busca la membres&iacute;a <b>1342</b>. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Aparece con sus d&iacute;as de adeudo y una insignia <b>BT</b> junto al nombre.</div></div>
+      
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">B3</span><span class="pt-t">Las trimestrales tienen su mes completo de tolerancia</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que a quien paga por adelantado se le respete el <b>mes completo</b> siguiente, y no los cinco d&iacute;as que aplican a los pagos mensuales.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Abre la ficha de las tres membres&iacute;as de abajo. <span class="paso">2</span>En cada una compara <b>&Uacute;lt. pago cubre hasta</b> contra <b>Fecha l&iacute;mite de pago</b>. <span class="paso">3</span>Comprueba que ninguna aparezca en <b>&#128176; Cobranza</b>.</div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Las tres cubren hasta el <b>30 de junio</b> y su fecha l&iacute;mite es el <b>31 de julio</b>: el mes completo siguiente. Las tres marcan <b>0 d&iacute;as</b> y <b>Al corriente</b>, y ninguna aparece en Cobranza.<br><br>
+      <b>10</b> Ma. Esthela D&iacute;az Barriga de Garza<br>
+      <b>551</b> &Oacute;scar Fernando Jim&eacute;nez Alc&aacute;ntara<br>
+      <b>859</b> Felipe Gerardo Carmona Rivas</div></div>
+      <div class="tip">&#128161; Si el Dashboard les diera solo los cinco d&iacute;as de tolerancia del pago mensual, estas tres membres&iacute;as &mdash; y todas las trimestrales &mdash; <b>aparecer&iacute;an como deudoras desde el 6 de julio</b>. Ese es justo el error que este punto descarta.<br><br>
+      &#128197; Si al <b>1 de agosto</b> no han pagado el siguiente trimestre, empezar&aacute;n a contar d&iacute;as de atraso y aparecer&aacute;n en Cobranza. Es correcto: la fecha l&iacute;mite <b>solo se recorre cuando entra un pago nuevo</b>.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">B4</span><span class="pt-t">Una fila por membres&iacute;a y el sem&aacute;foro de d&iacute;as</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que Cobranza liste membres&iacute;as, no personas, y que el color se intensifique con el atraso.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>&#128176; Cobranza</b> sin filtros. <span class="paso">2</span>Ordena por <b>D&iacute;as adeudo</b>. <span class="paso">3</span>Revisa que una membres&iacute;a con varios deudores aparezca una sola vez. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Cada rengl&oacute;n es una membres&iacute;a, representada por su titular, con el mayor atraso del grupo. El sem&aacute;foro va de verde-azulado (0&ndash;30) a rojo (+90).</div></div>
+      
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">B5</span><span class="pt-t">El responsable de pago se puede cambiar</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que el Club pueda designar a otro integrante de la misma membres&iacute;a para recibir el cobro, en lugar del titular.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Abre la ficha de un socio de una membres&iacute;a familiar. <span class="paso">2</span>En <b>Responsable de pago</b> dale a <b>&#9999;&#65039; Cambiar</b>. <span class="paso">3</span>Elige a otro integrante y guarda. <span class="paso">4</span>Vuelve a abrir la ficha. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Queda guardado y aparece con la marca <b>(asignado)</b>. Al quitarlo, regresa al titular.</div></div>
+      
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="sec-l">C</div><div class="sec-t">Las dem&aacute;s pesta&ntilde;as</div></div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">C1</span><span class="pt-t">Accesos: la tarjeta de Baja temporal y la columna Adeudo</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que exista el indicador de socios en baja sin visitas, y que la columna de adeudo distinga a los inactivos.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>&#127939; Accesos</b>. <span class="paso">2</span>Revisa las tarjetas de arriba. <span class="paso">3</span>En <b>Buscar socio</b> escribe <b>10043</b>, luego <b>6028</b> y luego <b>8018</b>, y mira la columna <b>Adeudo</b> de cada una. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Est&aacute; la tarjeta <b>Baja Temporal</b>, junto a Socios en base, Visitaron, Actividad alta/media/baja y Sin visitas.<br><br>Las tres membres&iacute;as muestran <b>&#9898; No genera cobro</b> en la columna Adeudo:<br><br><b>10043</b> M&oacute;nica Aceves Montesinos<br><b>6028</b> Delia Flores Col&iacute;n<br><b>8018</b> Ver&oacute;nica Paulina Meneses Navarrete</div></div>
+      <div class="tip">&#128161; Esta pesta&ntilde;a no tiene filtro por situaci&oacute;n, por eso se buscan por n&uacute;mero. Si quieres ver la lista completa de inactivos, se hace en <b>&#128203; Directorio</b> con el filtro <b>Situaci&oacute;n &rarr; Inactivo</b>.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">C2</span><span class="pt-t">Gr&aacute;ficas: la barra de edades</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que exista la distribuci&oacute;n de la comunidad por rango de edad.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>&#128202; Gr&aacute;ficas</b>. <span class="paso">2</span>Busca <b>Socios activos por rango de edad</b>. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Siete barras, de Menor (0&ndash;5) a Ag. Mayor (65&ndash;100), cada una con su n&uacute;mero y porcentaje, y el total de socios activos al pie.</div></div>
+      
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">C3</span><span class="pt-t">Notificaciones: periodo que no coincide con el &uacute;ltimo pago</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que se listen los socios con adeudo cuyo <b>periodo base</b> registrado no coincide con lo que realmente pagaron. Son los casos que el Club debe revisar y corregir en el Sistema.<br><br><b>C&oacute;mo lo detecta el Dashboard:</b> agarra dos datos del Sistema y los mete en dos grupos. Por un lado, los que <b>pagan varios meses juntos</b> (anual, semestral, trimestral, mantenimiento); por el otro, los que <b>pagan mes a mes</b>. Si el <b>periodo base</b> de la ficha cae en un grupo y el <b>&uacute;ltimo pago registrado</b> cae en el otro, y adem&aacute;s la persona tiene adeudo, lo marca. No adivina cu&aacute;l de los dos est&aacute; bien: solo avisa que se contradicen.<br><br><b>Por qu&eacute; importa:</b> la fecha l&iacute;mite se calcula con el <b>&uacute;ltimo pago</b>, no con el periodo base. Si la ficha dice trimestral pero en realidad pag&oacute; mensual, el Dashboard le da cinco d&iacute;as de tolerancia en vez de un mes &mdash; o al rev&eacute;s. Por eso los d&iacute;as de atraso de esos socios pueden estar de m&aacute;s o de menos.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>&#128276; Notificaciones</b>. <span class="paso">2</span>Busca la notificaci&oacute;n de socios con adeudo cuyo periodo no coincide. <span class="paso">3</span>Despli&eacute;gala. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Cada rengl&oacute;n muestra membres&iacute;a, nombre, periodo base registrado, &uacute;ltimo pago real y d&iacute;as de atraso, para poder decidir cu&aacute;l de los dos datos corregir. Hoy son <b>22 socios</b>: 8 registrados como trimestral o anual que pagaron mensual, y 14 al rev&eacute;s.</div></div>
+      <div class="tip">&#128161; Al corregirlo en el Sistema, el caso desaparece solo de la lista en la siguiente sincronizaci&oacute;n.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">C4</span><span class="pt-t">Notificaciones: exportar el padr&oacute;n a Excel</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que el Club pueda bajarse la base completa cuando la necesite.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>En <b>&#128276; Notificaciones</b>, arriba a la derecha, dale a <b>&#11015;&#65039; Exportar socios a Excel</b>. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Se descarga el archivo y abre bien en Excel.</div></div>
+      
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="sec-l">D</div><div class="sec-t">Casos concretos con nombre y apellido</div><span class="sec-n">verificados el 29-jul-2026</span></div>
+
+  <div class="card intro" style="margin-bottom:1rem">
+    <p style="margin-top:0"><b>Esta secci&oacute;n es distinta a las anteriores.</b> Arriba se revis&oacute; que el Dashboard <i>funcione</i>.
+    Aqu&iacute; se revisa que <b>los n&uacute;meros cuadren con la realidad del Club</b>: persona por persona, membres&iacute;a por membres&iacute;a.</p>
+    <p>Cada punto trae su lista completa. Ve tach&aacute;ndolos conforme los encuentres y anota <b>solo lo que no cuadre</b>.
+    Si al terminar no hay anotaciones, el Dashboard est&aacute; aplicando bien las reglas acordadas.</p>
+    <div class="aviso">
+      <b>Las cifras son de hoy.</b> La informaci&oacute;n se sincroniza desde el Sistema cada hora: si un socio paga o el Club
+      corrige un caso, el n&uacute;mero cambia y eso <b>no es un error</b>. Los d&iacute;as de atraso suben uno por d&iacute;a.
+      Lo que s&iacute; debe cumplirse siempre es <b>qui&eacute;n aparece y qui&eacute;n no</b>.
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">D1</span><span class="pt-t">Los 11 casos bonificables, uno por uno</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">El Dashboard tiene una l&oacute;gica para detectar a los socios cuyo adeudo cay&oacute; dentro de un periodo de baja temporal &mdash; esos son los &ldquo;bonificables&rdquo;. La prueba es que Nancy abra esa barra y confirme nombre por nombre que la lista cuadra con la realidad que el Club ya tiene registrada.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>&#128176; Cobranza</b>. <span class="paso">2</span>Arriba de los indicadores est&aacute; la <b>barra naranja</b>; dale clic para desplegarla. <span class="paso">3</span>Compara rengl&oacute;n por rengl&oacute;n contra la lista de abajo. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">El encabezado dice <b>11 casos bonificables pendientes en el Sistema</b> y <b>7 membres&iacute;as</b>. La lista trae a estas once personas:<br><br>
+      <b>400</b> &middot; Ma. del Carmen Irma Melo Jarillo &middot; <i>Agregado</i><br>
+      <b>6439</b> &middot; Mar&iacute;a de los &Aacute;ngeles P&eacute;rez Flores &middot; <i>Agregado</i><br>
+      <b>7013</b> &middot; Leonardo P&eacute;rez Romero &middot; <i>Juvenil</i><br>
+      <b>7013</b> &middot; Daniela P&eacute;rez Romero &middot; <i>Infantil</i><br>
+      <b>7833</b> &middot; Edmundo Erazo Vargas &middot; <i>Agregado</i><br>
+      <b>7833</b> &middot; Alma Rosa Tapia Pancardo &middot; <i>Agregado</i><br>
+      <b>7833</b> &middot; Sebasti&aacute;n Olgu&iacute;n Erazo &middot; <i>Juvenil</i><br>
+      <b>7833</b> &middot; Santiago Hern&aacute;ndez Erazo &middot; <i>Infantil</i><br>
+      <b>8020</b> &middot; Ruy Ferriz Roa &middot; <i>Juvenil</i><br>
+      <b>8271</b> &middot; Catalina Ibarra Nicosia &middot; <i>Infantil</i><br>
+      <b>10049</b> &middot; Jimena &Aacute;lvarez del Castillo Naveja &middot; <i>Juvenil</i><br><br>
+      Diez de ellos llevan <b>24 d&iacute;as</b> de atraso y Jimena <b>205</b>. <b>El importe no cambia en ninguno</b>.</div></div>
+      <div class="tip">&#128161; Dos aclaraciones para que no las reportes como error:<br>
+      &bull; Los d&iacute;as <b>suben uno cada d&iacute;a</b>. Ma&ntilde;ana ser&aacute;n 25 y 206.<br>
+      &bull; La membres&iacute;a <b>8020</b> no aparece en el listado de Cobranza porque su titular est&aacute; inactivo, pero <b>Ruy s&iacute; sale en la barra naranja</b>. Es correcto: la barra revisa a todas las personas, no solo a las membres&iacute;as que se cobran.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">D2</span><span class="pt-t">Las 23 personas de cuota base en baja s&iacute; siguen en Cobranza</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que la baja temporal de un <b>titular, c&oacute;nyuge o individual</b> <b>no borre</b> su adeudo. Es el caso opuesto al de los dependientes: aqu&iacute; la deuda procede y el Club decide despu&eacute;s si aplica el 75% o el 50%.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Entra a <b>&#128176; Cobranza</b> sin filtros. <span class="paso">2</span>Busca una por una las membres&iacute;as de la lista. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Son <b>23 personas de cuota base repartidas en 18 membres&iacute;as</b>, y <b>las 18 aparecen</b> en Cobranza con su insignia <b>BT</b>:<br><br>
+      <b>8333</b> Ximena Ganado Vel&aacute;zquez &middot; 236 d&iacute;as<br>
+      <b>10049</b> Hugo &Aacute;lvarez del Castillo Covarrubias &middot; 205<br>
+      <b>8279</b> Sandra Lilia Palomino Aguilar &middot; 205<br>
+      <b>7627</b> Denisse L&oacute;pez Hern&aacute;ndez &middot; 205<br>
+      <b>8785</b> Saray N&uacute;&ntilde;ez Mart&iacute;nez &middot; 179<br>
+      <b>4035</b> Euclides M&aacute;rquez Lucero &middot; 146<br>
+      <b>8244</b> Agust&iacute;n Alberto Pacheco Sol&iacute;s &middot; 146<br>
+      <b>5873</b> H&eacute;ctor Hugo Castillo Mart&iacute;nez &middot; 115<br>
+      <b>8726</b> Liliana L&oacute;pez Lovera &middot; 85<br>
+      <b>6774</b> Ma. de los &Aacute;ngeles Mart&iacute;nez Checa &middot; 85<br>
+      <b>1342</b> Alicia Cejudo V&aacute;zquez &middot; 54<br>
+      <b>8295</b> Gia Hern&aacute;ndez Olvera &middot; 54<br>
+      <b>7625</b> H&eacute;ctor Gerardo Rodr&iacute;guez Hern&aacute;ndez &middot; 54<br>
+      <b>7013</b> Mauricio P&eacute;rez Ter&aacute;n &middot; 24<br>
+      <b>7833</b> Martha Vanesa Erazo Tapia &middot; 24<br>
+      <b>8271</b> Mar&iacute;a Paula Nicosia &middot; 24<br>
+      <b>7773</b> Salom&oacute;n S&aacute;nchez Vilchis &middot; 24<br>
+      <b>8736</b> Eugenio Guillermo Ugalde Garc&iacute;a &middot; 24<br><br>
+      <b>Ninguna de estas 23 personas lleva la insignia Bonificable</b>: esa marca es solo para dependientes.</div></div>
+      <div class="tip">&#128161; La membres&iacute;a <b>8736</b> aparece a nombre de Eugenio Guillermo Ugalde Garc&iacute;a porque &eacute;l es el titular; la persona en baja es su c&oacute;nyuge, <b>Pollet Berm&uacute;dez L&oacute;pez</b>. Cobranza muestra <b>una fila por membres&iacute;a</b>, siempre a nombre de quien paga.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">D3</span><span class="pt-t">Los 6 inactivos no generan cobro</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que a nadie que ya no es socio se le est&eacute; arrastrando una deuda vieja. Son los seis &uacute;nicos inactivos con d&iacute;as de atraso en toda la base.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Busca cada nombre en <b>&#128203; Directorio</b> y abre su ficha. <span class="paso">2</span>Luego busca su membres&iacute;a en <b>&#128176; Cobranza</b>. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Los seis salen con <b>punto gris</b> en Directorio y en su ficha se lee <b>Inactivo &mdash; no genera cobro</b>. <b>Ninguna de las seis membres&iacute;as aparece en Cobranza.</b><br><br>
+      <b>533</b> Jorge Jerome Mondrag&oacute;n L&oacute;pez &middot; <i>Junior</i> &middot; 3,558 d&iacute;as<br>
+      <b>3054</b> Jos&eacute; Mar&iacute;a Bulnes Alacid &middot; <i>Junior</i> &middot; 2,647<br>
+      <b>7311</b> Margarita Olivia J. Cabrero Garc&iacute;a &middot; <i>Agregado</i> &middot; 2,371<br>
+      <b>10043</b> M&oacute;nica Aceves Montesinos &middot; <i>Titular</i> &middot; 936<br>
+      <b>4726</b> H&eacute;ctor Ch&aacute;vez Urincho &middot; <i>Titular</i> &middot; 905<br>
+      <b>7909</b> Fernando Aguirre Tenorio &middot; <i>Individual Junior</i> &middot; 636</div></div>
+      <div class="tip">&#9888;&#65039; Los 3,558 d&iacute;as del primer caso son <b>casi diez a&ntilde;os</b>. Si alguno de estos seis apareciera en Cobranza, el Club estar&iacute;a a punto de reclamarle una d&eacute;cada de cuotas a alguien que ya no pertenece al club. Por eso este punto importa m&aacute;s de lo que parece.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">D4</span><span class="pt-t">El cobro apunta a la persona correcta en las cuotas individuales</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Normalmente el responsable de pago es el <b>Titular</b>. Pero hay membres&iacute;as familiares donde <b>nadie est&aacute; registrado como Titular</b>: son las que tienen una <b>cuota individual autorizada</b>, y ah&iacute; el Club indic&oacute; que manda quien trae esa cuota Individual.<br><br>El riesgo real es que el Dashboard, al no encontrar Titular, <b>agarre a quien caiga</b>: un Agregado, un menor, un Individual Junior. Eso significar&iacute;a mandarle el cobro a la persona equivocada de la familia. Este punto comprueba que eso no pase.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>Abre la ficha de cada una de las cuatro membres&iacute;as. <span class="paso">2</span>Revisa el campo <b>Responsable de pago</b>. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val">Cada una apunta a esta persona:<br><br>
+      <b>991</b> &rarr; Laura Mora S&aacute;nchez &middot; <i>Individual</i><br>
+      <b>6673</b> &rarr; Patricia Delgado Monroy &middot; <i>Individual</i><br>
+      <b>2567</b> &rarr; Ma. Guadalupe Elizundia de Pel&aacute;ez &middot; <i>Titular</i><br>
+      <b>7538</b> &rarr; Gerardo Alvarado Carabez &middot; <i>Titular</i><br><br>
+      <b>En ninguna de las cuatro debe aparecer un Agregado, un Junior ni un Individual Junior</b> como responsable de pago.</div></div>
+      <div class="tip">&#128161; Las dos primeras son el caso especial: <b>no tienen a nadie registrado como Titular</b>, as&iacute; que manda quien trae la cuota Individual, tal como indic&oacute; el Club. Las dos &uacute;ltimas s&iacute; tienen titular y por eso es &eacute;l quien aparece. Las cuatro deben resolverse solas, sin que nadie las configure a mano.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="pt">
+    <div class="pt-h"><span class="chev">&#9654;</span><span class="pt-c">D5</span><span class="pt-t">Los 45 becados no pueden entrar a una lista de env&iacute;o</span><input type="checkbox" class="chk"></div>
+    <div class="pt-b">
+      <div class="f"><div class="lab">Qu&eacute; se prueba</div><div class="val">Que ning&uacute;n becado pueda colarse a una lista de env&iacute;o, tal como pidi&oacute; el Club, aunque tenga adeudo y contacto propio.</div></div>
+      <div class="f"><div class="lab">C&oacute;mo hacerlo</div><div class="val"><span class="paso">1</span>En <b>&#128203; Directorio</b> busca la membres&iacute;a <b>10023</b> y abre su ficha. <span class="paso">2</span>Entra a <b>&#128276; Notificaciones</b> y busca la tarjeta de <b>membres&iacute;as de becados fuera de avisos</b>; despli&eacute;gala. <span class="paso">3</span>Entra a <b>&#9993;&#65039; M&oacute;dulo de Avisos</b>, en <b>&#128640; Env&iacute;o manual</b> abre el desplegable <b>Segmento destino</b> y elige <b>&#9999;&#65039; Selecci&oacute;n manual de destinatarios</b>. <span class="paso">4</span>En la caja de b&uacute;squeda escribe <b>10023</b>, luego <b>10000</b> y luego <b>10025</b>. </div></div>
+      <div class="f esperado"><div class="lab">Qu&eacute; debe pasar</div><div class="val"><b>Paso 1:</b> Karol Sebasti&aacute;n Silva Mu&ntilde;oz aparece con la etiqueta <b>&#127891; Becado &mdash; no notificar</b>.<br><br>
+      <b>Paso 2:</b> la tarjeta lista <b>9 membres&iacute;as de becados</b>, que son las 9 en las que est&aacute;n repartidas las 45 personas.<br><br>
+      <b>Pasos 3 y 4:</b> <b>ninguna de las tres b&uacute;squedas devuelve resultados</b>, aunque las tres tienen adeudo:<br><br>
+      <b>10025</b> Julia Mar&iacute;a Margaleff Ruiz &middot; 358 d&iacute;as<br>
+      <b>10000</b> Mateo Andr&eacute;s Notario Bernal &middot; 179 d&iacute;as<br>
+      <b>10023</b> Karol Sebasti&aacute;n Silva Mu&ntilde;oz &middot; 146 d&iacute;as &middot; <b>tiene WhatsApp propio</b></div></div>
+      <div class="tip">&#128161; Karol es el caso decisivo: es el <b>&uacute;nico becado con WhatsApp propio y adeudo</b>. Si el candado fallara, ser&iacute;a el primero en recibir un mensaje.</div>
+      <div class="nota"><div class="lab">Anotaciones</div><textarea placeholder="Escribe aqu&iacute; si algo no cuadr&oacute;..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="firma">
+    <h3>Cierre de la validaci&oacute;n</h3>
+    <div class="fila">
+      <div><div class="lab">Club Berimbau &middot; Nombre y fecha</div><input class="linea" type="text"></div>
+      <div><div class="lab">ExcelentIA &middot; Nombre y fecha</div><input class="linea" type="text"></div>
+    </div>
+    <div class="fila" style="margin-top:1.1rem">
+      <div><div class="lab">Observaciones generales</div><textarea placeholder="Lo que haya quedado pendiente..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="foot">ExcelentIA &middot; Inteligencia Artificial con esencia Humana &middot; Documento de trabajo</div>
+
+</div>
+
+<script>
+(function(){
+  var pts = Array.prototype.slice.call(document.querySelectorAll('.pt'));
+  var hechos = document.getElementById('hechos');
+  var totalEl = document.getElementById('total');
+  var fill = document.getElementById('fill');
+
+  function visibles(){ return pts.filter(function(p){ return !p.classList.contains('hide'); }); }
+
+  function refresca(){
+    pts.forEach(function(p){
+      if(p.querySelector('.chk').checked) p.classList.add('done'); else p.classList.remove('done');
+    });
+    var vis = visibles(), n = 0;
+    vis.forEach(function(p){ if(p.querySelector('.chk').checked) n++; });
+    if(totalEl) totalEl.textContent = vis.length;
+    if(hechos) hechos.textContent = n;
+    if(fill) fill.style.width = (vis.length ? (n/vis.length*100) : 0) + '%';
+  }
+
+  pts.forEach(function(p){
+    p.querySelector('.pt-h').addEventListener('click', function(e){
+      if(e.target.classList.contains('chk')) return;
+      p.classList.toggle('open');
+    });
+    var c = p.querySelector('.chk');
+    c.addEventListener('click', function(e){ e.stopPropagation(); });
+    c.addEventListener('change', function(e){ e.stopPropagation(); refresca(); });
+  });
+
+  document.getElementById('abrir').addEventListener('click', function(){
+    visibles().forEach(function(p){ p.classList.add('open'); });
+  });
+  document.getElementById('cerrar').addEventListener('click', function(){
+    pts.forEach(function(p){ p.classList.remove('open'); });
+  });
+
+  function crece(t){ t.style.height='auto'; t.style.height=(t.scrollHeight+4)+'px'; }
+  document.querySelectorAll('textarea').forEach(function(t){
+    t.addEventListener('input', function(){ crece(t); });
+  });
+  window.addEventListener('beforeprint', function(){
+    document.querySelectorAll('textarea').forEach(crece);
+  });
+
+  refresca();
+})();
+</script>
+</body>
+</html>
