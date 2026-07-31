@@ -36,8 +36,6 @@ body{margin:0;background:#f5f6f8;font-family:'Manrope',sans-serif;color:#1a2035;
 .btn.ghost{background:#fff;color:#1a3a6b;border:1px solid #dde1e9}
 .btn.ghost:hover{background:#e8f0fb}
 .bar-tools{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.7rem;padding-top:.7rem;border-top:1px solid #dde1e9}
-.fbtn{background:#fff;color:#4a5068;border:1px solid #dde1e9;border-radius:8px;padding:.42rem .7rem;font-family:'Manrope',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer}
-.fbtn.on{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
 .sec{max-width:720px;margin:1.8rem auto .8rem;display:flex;align-items:center;gap:.7rem}
 .sec-l{background:#1a3a6b;color:#fff;font-weight:800;font-size:.95rem;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sec-t{font-size:1rem;font-weight:800;color:#1a2035}
@@ -67,16 +65,6 @@ textarea:focus{outline:0;border-color:#4a9fd4;background:#fff}
 .pt.done{border-color:#4a9fd4}
 .pt.done .pt-h{background:#e8f0fb}
 .pt.hide{display:none}
-.sig{max-width:720px;margin:2rem auto 0;background:#fff;border:1px solid #dde1e9;border-left:4px solid #4a9fd4;border-radius:12px;padding:1.1rem 1.2rem}
-.sig h3{font-size:.9rem;margin:0 0 .35rem;font-weight:800;color:#1a2035}
-.sig .sub{font-size:.79rem;color:#4a5068;margin:0 0 1rem;line-height:1.6}
-.sig ol{margin:0;padding:0;list-style:none;counter-reset:req}
-.sig li{counter-increment:req;position:relative;padding-left:2.2rem;margin-bottom:.9rem;font-size:.8rem;color:#4a5068;line-height:1.6}
-.sig li:last-child{margin-bottom:0}
-.sig li::before{content:counter(req);position:absolute;left:0;top:.1rem;width:1.45rem;height:1.45rem;border-radius:50%;background:#dce8f7;color:#1a3a6b;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center}
-.sig li b{color:#1a2035}
-.sig .cierre{margin-top:1.1rem;padding:.75rem .9rem;background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:6px;font-size:.78rem;color:#4a5068;line-height:1.6}
-@media(max-width:600px){.sig{margin-left:.6rem;margin-right:.6rem;padding:.9rem 1rem}.sig li{padding-left:2rem}}
 .firma{max-width:720px;margin:2rem auto 0;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1.1rem 1.2rem}
 .firma h3{font-size:.9rem;margin:0 0 .8rem;font-weight:800}
 .fila{display:flex;gap:1rem;flex-wrap:wrap}
@@ -133,27 +121,6 @@ code{background:#eef4fc;padding:.05rem .3rem;border-radius:4px;font-size:.8rem;f
 
 <div class="wrap">
 
-  <div class="card intro">
-    <h1>Gu&iacute;a de validaci&oacute;n del Dashboard</h1>
-    <p>Esta gu&iacute;a re&uacute;ne <b>solo lo que falta por validar</b>. Sirve para revisar, punto por punto, que el Dashboard <b>aplique bien las reglas acordadas con el Club</b>:
-     que no se le cobre a quien no se debe, que titulares y familiares se manejen como corresponde, que las bajas apliquen
-     y que los becados queden fuera de los avisos.</p>
-  <p><b>En esta ronda no se env&iacute;a ning&uacute;n correo ni WhatsApp.</b> Todo se hace dentro del Dashboard, dando clics.
-     Las pruebas de env&iacute;o se corren en una segunda ronda, m&aacute;s adelante.</p>
-  <p>Toca el encabezado de cada punto para abrirlo. Adentro encontrar&aacute;s <b>qu&eacute; se prueba</b>, <b>c&oacute;mo hacerlo</b>
-     paso a paso y <b>qu&eacute; debe pasar</b>. Cuando el resultado sea el esperado, marca la casilla; si algo no cuadra,
-     escr&iacute;belo en el espacio de anotaciones.</p>
-    <div class="aviso">
-      <b>Antes de empezar, tres cosas:</b><br>
-      1. Las secciones <b>A a D</b> revisan reglas del Dashboard. La secci&oacute;n <b>E</b> es la m&aacute;s importante:
-      lleva <b>casos reales con nombre y membres&iacute;a</b> para comprobar que los n&uacute;meros cuadran con la realidad.<br>
-      2. La informaci&oacute;n se actualiza desde el Sistema cada hora, as&iacute; que es normal que las cifras cambien de una
-      sesi&oacute;n a otra. Lo importante es que sean coherentes entre s&iacute;.<br>
-      3. Al terminar, usa el bot&oacute;n <b>Exportar a PDF</b> para guardar tus anotaciones y palomitas. Si cierras la
-      pesta&ntilde;a antes de exportar, lo escrito se pierde.
-    </div>
-  </div>
-
   <div class="bar no-print">
     <div class="bar-top">
       <div>
@@ -163,8 +130,6 @@ code{background:#eef4fc;padding:.05rem .3rem;border-radius:4px;font-size:.8rem;f
       <button class="btn" onclick="window.print()">&#128424; Exportar a PDF</button>
     </div>
     <div class="bar-tools">
-      <button class="fbtn on" data-f="all">Todos</button>
-      <button class="fbtn" data-f="pend">Solo pendientes</button>
       <button class="btn ghost" id="abrir">Abrir todo</button>
       <button class="btn ghost" id="cerrar">Cerrar todo</button>
     </div>
@@ -454,22 +419,6 @@ code{background:#eef4fc;padding:.05rem .3rem;border-radius:4px;font-size:.8rem;f
     </div>
   </div>
 
-  <div class="sig">
-    <h3>&#128231; Antes de probar los env&iacute;os</h3>
-    <p class="sub">Esta gu&iacute;a revisa <b>las reglas</b>: a qui&eacute;n se le cobra, a qui&eacute;n no y con qu&eacute; criterio.
-    Los <b>env&iacute;os de correo y WhatsApp se prueban en una segunda ronda</b>, y para poder correrla hacen falta tres cosas:</p>
-    <ol>
-      <li><b>Plantillas de WhatsApp aprobadas.</b> Los mensajes de WhatsApp no se pueden escribir libremente: la propia plataforma los revisa y autoriza uno por uno antes de permitir que salgan. Hasta que cada plantilla est&eacute; en verde, no hay forma de enviar nada por ese canal.</li>
-      <li><b>Saldo en la cuenta de mensajer&iacute;a.</b> Cada mensaje de WhatsApp tiene un costo por env&iacute;o. La cuenta desde la que sale la mensajer&iacute;a necesita saldo cargado; sin saldo los env&iacute;os se rechazan, aunque todo lo dem&aacute;s est&eacute; bien configurado.</li>
-      <li><b>Definir el correo remitente.</b> Falta que el Club indique <b>desde qu&eacute; direcci&oacute;n</b> quiere que salgan los avisos, <b>con qu&eacute; nombre</b> debe verse el remitente y <b>a d&oacute;nde</b> deben llegar las respuestas de los socios. Ese dato se carga en el Dashboard y es justo lo que cada socio ver&aacute; en su bandeja de entrada.</li>
-    </ol>
-    <div class="cierre">
-      <b>Mientras tanto, del Dashboard no sale nada.</b> Durante esta validaci&oacute;n ning&uacute;n socio recibe correos ni mensajes:
-      todo lo que se revisa aqu&iacute; ocurre en pantalla. Cuando los tres puntos est&eacute;n cubiertos se agenda la segunda ronda,
-      y las primeras pruebas se hacen contra contactos del propio Club, nunca contra socios reales.
-    </div>
-  </div>
-
   <div class="firma">
     <h3>Cierre de la validaci&oacute;n</h3>
     <div class="fila">
@@ -520,19 +469,6 @@ code{background:#eef4fc;padding:.05rem .3rem;border-radius:4px;font-size:.8rem;f
   });
   document.getElementById('cerrar').addEventListener('click', function(){
     pts.forEach(function(p){ p.classList.remove('open'); });
-  });
-
-  Array.prototype.slice.call(document.querySelectorAll('.fbtn')).forEach(function(b){
-    b.addEventListener('click', function(){
-      document.querySelectorAll('.fbtn').forEach(function(x){ x.classList.remove('on'); });
-      b.classList.add('on');
-      var f = b.getAttribute('data-f');
-      pts.forEach(function(p){
-        var listo = p.querySelector('.chk').checked;
-        p.classList.toggle('hide', f === 'pend' && listo);
-      });
-      refresca();
-    });
   });
 
   function crece(t){ t.style.height='auto'; t.style.height=(t.scrollHeight+4)+'px'; }
