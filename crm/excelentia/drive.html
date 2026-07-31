@@ -156,11 +156,6 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 <main class="page">
 
-  <div class="toolbar">
-    <h2>📂 Archivos de Proyectos</h2>
-    <span class="resumen-pill">📎 <strong id="resumen-total">0</strong>&nbsp;archivos en total</span>
-  </div>
-
   <div class="layout">
 
     <!-- ══════════ PANEL IZQUIERDO ══════════ -->
@@ -379,7 +374,8 @@ async function cargarProyectos(){
 async function cargarArchivos(){
   const res = await apiArchivos('listarTodos');
   ARCHIVOS = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
-  document.getElementById('resumen-total').textContent = ARCHIVOS.length;
+  const resTotal = document.getElementById('resumen-total');
+  if (resTotal) resTotal.textContent = ARCHIVOS.length;
   renderProyectos();
   renderArchivos();
 }
