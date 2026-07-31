@@ -209,15 +209,17 @@ input[readonly]{background:#f5f6f8;color:#8a90a0;cursor:not-allowed}
             <tr>
               <th class="sortable" data-col="Titulo" onclick="ordenarPor('Titulo')">Título <span class="sort-arrow"></span></th>
               <th class="sortable" data-col="ProyectoID" onclick="ordenarPor('ProyectoID')">Proyecto <span class="sort-arrow"></span></th>
+              <th class="sortable" data-col="Empresa" onclick="ordenarPor('Empresa')">Empresa <span class="sort-arrow"></span></th>
               <th class="sortable" data-col="Asignado" onclick="ordenarPor('Asignado')">Asignado <span class="sort-arrow"></span></th>
               <th class="sortable" data-col="Prioridad" onclick="ordenarPor('Prioridad')">Prioridad <span class="sort-arrow"></span></th>
               <th class="sortable" data-col="FechaLimite" onclick="ordenarPor('FechaLimite')">Fecha límite <span class="sort-arrow"></span></th>
+              <th class="sortable" data-col="Hora" onclick="ordenarPor('Hora')">Hora <span class="sort-arrow"></span></th>
               <th class="sortable" data-col="Status" onclick="ordenarPor('Status')">Status <span class="sort-arrow"></span></th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="tablaTareas">
-            <tr><td colspan="7"><div class="loading"><span class="spinner"></span>Cargando tareas...</div></td></tr>
+            <tr><td colspan="9"><div class="loading"><span class="spinner"></span>Cargando tareas...</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -266,6 +268,10 @@ input[readonly]{background:#f5f6f8;color:#8a90a0;cursor:not-allowed}
         <div class="form-group">
           <label>Fecha límite</label>
           <input type="date" id="mFechaLimite">
+        </div>
+        <div class="form-group">
+          <label>Hora</label>
+          <input type="time" id="mHora">
         </div>
         <div class="form-group">
           <label>Proyecto</label>
@@ -328,6 +334,7 @@ const CONT_ENDPOINT = 'https://n8n.excelentia.com.mx/webhook/crm-contactos';
 let PROYECTOS = [];
 let CONTACTOS = [];
 const PROY_NOMBRE = {};   // { 'P-123': 'Página Web' }
+const PROY_EMPRESA = {};  // { 'P-123': 'Club Berimbau' } — la Empresa se HEREDA del proyecto
 const CONT_NOMBRE = {};   // { 'C-123': 'Juan Pérez' }
 
 const USERS = {
@@ -389,6 +396,7 @@ async function cargarCatalogos() {
     const id = p.ID || p.id;
     const nom = p.Nombre || p.nombre || p.Proyecto || '';
     if (id) PROY_NOMBRE[id] = nom || id;
+    if (id) PROY_EMPRESA[id] = p.Empresa || p.empresa || '';
   });
   CONTACTOS.forEach(c => {
     const id = c.ID || c.id;
@@ -752,6 +760,7 @@ function normalizar(raw) {
     Asignado:    toStr(raw.Asignado),
     Prioridad:   toStr(raw.Prioridad)   || 'Media',
     FechaLimite: toStr(raw.FechaLimite),
+    Hora:        toStr(raw.Hora),
     Status:      toStr(raw.Status)      || 'Pendiente'
   };
 }
@@ -792,7 +801,7 @@ async function logHistorial(accion, titulo) {
 // ═══════════════════════════════════
 async function cargarTareas() {
   document.getElementById('tablaTareas').innerHTML =
-    '<tr><td colspan="7"><div class="loading"><span class="spinner"></span>Cargando tareas...</div></td></tr>';
+    '<tr><td colspan="9"><div class="loading"><span class="spinner"></span>Cargando tareas...</div></td></tr>';
   try {
     const data = await api(ENDPOINT, { accion: 'get' });
     ITEMS = Array.isArray(data) ? data.map(normalizar) : [];
@@ -846,6 +855,15 @@ function ordenarFiltered() {
     let va = a[sortCol] || '';
     let vb = b[sortCol] || '';
 
+    if (sortCol === 'Empresa') {
+      va = (a.ProyectoID ? PROY_EMPRESA[a.ProyectoID] : '') || 'zzzz';
+      vb = (b.ProyectoID ? PROY_EMPRESA[b.ProyectoID] : '') || 'zzzz';
+    }
+    if (sortCol === 'Hora') {
+      va = va || '99:99';
+      vb = vb || '99:99';
+    }
+
     if (sortCol === 'Prioridad') {
       va = PRIOR_ORDER[va] ?? 99;
       vb = PRIOR_ORDER[vb] ?? 99;
@@ -872,7 +890,7 @@ function ordenarFiltered() {
 function renderTabla() {
   const tbody = document.getElementById('tablaTareas');
   if (!FILTERED.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><span>☑️</span>Sin tareas${ITEMS.length ? ' con esos filtros' : ' aún'}</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><span>☑️</span>Sin tareas${ITEMS.length ? ' con esos filtros' : ' aún'}</div></td></tr>`;
     return;
   }
 
@@ -883,13 +901,19 @@ function renderTabla() {
     const vencidaIco = vencida ? '⚠️ ' : '';
     const proyNom = t.ProyectoID ? (PROY_NOMBRE[t.ProyectoID] || t.ProyectoID) : '';
     const proyLabel = proyNom ? escHtml(proyNom) : '<span class="text-muted">—</span>';
+    // La Empresa se HEREDA del proyecto: se lee del mapa, nunca se guarda en la tarea
+    const empNom = t.ProyectoID ? (PROY_EMPRESA[t.ProyectoID] || '') : '';
+    const empLabel = empNom ? escHtml(empNom) : '<span class="text-muted">—</span>';
+    const horaLabel = t.Hora ? escHtml(t.Hora) : '<span class="text-muted">—</span>';
 
     return `<tr>
       <td><strong>${escHtml(t.Titulo)}</strong></td>
       <td style="font-size:.78rem;color:#4a5068">${proyLabel}</td>
+      <td style="font-size:.78rem;color:#4a5068">${empLabel}</td>
       <td>${badgeAsignado(t.Asignado)}</td>
       <td>${badgePrioridad(t.Prioridad)}</td>
       <td class="${fechaClass}" style="font-size:.78rem;white-space:nowrap">${vencidaIco}${fechaTxt}</td>
+      <td style="font-size:.78rem;color:#4a5068;white-space:nowrap">${horaLabel}</td>
       <td>${badgeStatus(t.Status)}</td>
       <td>
         <div class="actions-cell">
@@ -935,6 +959,7 @@ function abrirModalNuevo() {
   document.getElementById('mPrioridad').value   = 'Media';
   document.getElementById('mStatus').value      = 'Pendiente';
   document.getElementById('mFechaLimite').value = '';
+  document.getElementById('mHora').value        = '';
   document.getElementById('mProyectoID').value  = '';
   document.getElementById('mContactoID').value  = '';
   contactoPrevio = '';
@@ -956,6 +981,7 @@ function abrirModalEditar(id) {
   document.getElementById('mPrioridad').value   = t.Prioridad || 'Media';
   document.getElementById('mStatus').value      = t.Status || 'Pendiente';
   document.getElementById('mFechaLimite').value = t.FechaLimite || '';
+  document.getElementById('mHora').value        = t.Hora || '';
   llenarSelectProyectos();
   llenarSelectContactos();
   fijarSelect('mProyectoID', t.ProyectoID, PROY_NOMBRE);
@@ -1006,6 +1032,7 @@ async function guardarTarea() {
     Prioridad:   document.getElementById('mPrioridad').value,
     Status:      document.getElementById('mStatus').value,
     FechaLimite: document.getElementById('mFechaLimite').value,
+    Hora:        document.getElementById('mHora').value,
     ProyectoID:  document.getElementById('mProyectoID').value || '',
     ContactoID:  (document.getElementById('mContactoID').value === '__nuevo__' ? '' : document.getElementById('mContactoID').value) || ''
   };
