@@ -54,6 +54,49 @@ nav{background:var(--header-grad);border-bottom:2px solid var(--header-accent);p
 .pill.active{background:var(--accent-dark);color:#fff;border-color:var(--accent-dark);}
 .pill:hover:not(.active){border-color:var(--accent);color:var(--accent);}
 
+/* ── MIS URLs ───────────────────────────────────── */
+.pill-fav{font-size:11px;font-weight:700;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;user-select:none;display:inline-flex;align-items:center;gap:5px;}
+.pill-fav:hover:not(.active){border-color:var(--accent);color:var(--accent);}
+.pill-fav.active{background:var(--accent-dark);color:#fff;border-color:var(--accent-dark);}
+
+#favPanel{display:none;max-width:720px;margin:0 auto;padding:20px 20px 44px;}
+.fav-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.fav-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--card-head);border-bottom:1px solid var(--border);}
+.fav-head-t{font-size:13px;font-weight:700;color:var(--text);flex:1;}
+.fav-chip{font-size:10px;font-weight:700;color:var(--accent-dark);background:var(--bg);border:1px solid var(--border);padding:2px 9px;border-radius:10px;}
+.fav-list{padding:6px 8px 8px;}
+.fav-row{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;border:1px solid transparent;transition:background .12s;}
+.fav-row:hover{background:var(--hover-bg);border-color:var(--border);}
+.fav-ico{width:18px;height:18px;flex-shrink:0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;background:var(--bg);}
+.fav-ico img{width:16px;height:16px;display:block;}
+.fav-txt{flex:1;min-width:0;}
+.fav-name{font-size:12px;font-weight:600;color:var(--text);text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.fav-name:hover{color:var(--accent);}
+.fav-dom{font-size:10px;color:var(--text3);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fav-cat{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--accent-dark);background:var(--card-head);border-radius:4px;padding:2px 6px;flex-shrink:0;}
+.fav-acts{display:flex;gap:2px;flex-shrink:0;}
+.fav-btn{width:26px;height:26px;border:1px solid transparent;background:transparent;border-radius:6px;cursor:pointer;color:var(--text3);font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .12s;font-family:'Manrope',sans-serif;}
+.fav-btn:hover{background:var(--surface);border-color:var(--border);color:var(--accent);}
+.fav-btn.danger:hover{color:#b83232;border-color:#f0c8c8;}
+.fav-btn:disabled{opacity:.22;cursor:default;pointer-events:none;}
+.fav-foot{padding:10px 14px;border-top:1px solid var(--border);background:#fafbfd;}
+.fav-add-btn{width:100%;padding:9px;font-family:'Manrope',sans-serif;font-size:12px;font-weight:700;color:var(--accent-dark);background:var(--bg);border:1px dashed var(--border);border-radius:8px;cursor:pointer;transition:all .15s;}
+.fav-add-btn:hover{background:var(--hover-bg);border-color:var(--accent);color:var(--accent);}
+.fav-form{display:none;padding:12px 14px;border-top:1px solid var(--border);background:#fafbfd;}
+.fav-form.open{display:block;}
+.fav-form label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin:0 0 4px;}
+.fav-form input{width:100%;padding:8px 11px;font-family:'Manrope',sans-serif;font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);outline:none;margin-bottom:10px;}
+.fav-form input:focus{border-color:var(--accent);}
+.fav-form-btns{display:flex;gap:8px;}
+.fav-save{flex:1;padding:9px;font-family:'Manrope',sans-serif;font-size:12px;font-weight:700;color:#fff;background:var(--accent-dark);border:none;border-radius:7px;cursor:pointer;transition:opacity .15s;}
+.fav-save:hover{opacity:.88;}
+.fav-save:disabled{opacity:.45;cursor:default;}
+.fav-cancel{padding:9px 16px;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;color:var(--text2);background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;}
+.fav-cancel:hover{background:var(--bg);}
+.fav-msg{padding:26px 14px;text-align:center;color:var(--text3);font-size:12px;}
+.fav-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--accent-dark);color:#fff;font-size:12px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:999;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 4px 18px rgba(13,27,62,.25);}
+.fav-toast.show{opacity:1;}
+
 /* MAIN GRID */
 .main{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 24px 40px;}
 .col{display:flex;flex-direction:column;gap:12px;}
@@ -134,6 +177,9 @@ footer{border-top:1px solid var(--border);padding:14px 24px;display:flex;align-i
   .stat:nth-child(4){border-top:1px solid var(--border);border-right:none;}
   .search-bar{padding:10px 14px;flex-wrap:wrap;}
   .filter-pills{display:none;}
+  #favPanel{padding:12px 14px 32px;}
+  .fav-cat{display:none;}
+  .fav-btn{width:30px;height:30px;font-size:13px;}
   .main{grid-template-columns:1fr;padding:12px 14px 32px;}
   footer{padding:12px 14px;flex-direction:column;gap:6px;text-align:center;}
   .folder-tabs{gap:3px;}
@@ -161,7 +207,38 @@ footer{border-top:1px solid var(--border);padding:14px 24px;display:flex;align-i
     <span class="pill" data-ext="img"  onclick="setExt(this)">Imágenes</span>
     <span class="pill" data-ext="other" onclick="setExt(this)">Otros</span>
   </div>
+  <span class="pill-fav" id="favToggle" onclick="toggleFavs()">🔗 Mis URLs</span>
 </div>
+
+<div id="favPanel">
+  <div class="fav-card">
+    <div class="fav-head">
+      <div class="fav-head-t">🔗 Mis URLs</div>
+      <span class="fav-chip" id="favCount">—</span>
+    </div>
+    <div class="fav-list" id="favList">
+      <div class="fav-msg">Cargando…</div>
+    </div>
+    <div class="fav-foot" id="favFoot">
+      <button class="fav-add-btn" onclick="favOpenForm()">+ Agregar liga</button>
+    </div>
+    <div class="fav-form" id="favForm">
+      <label>Nombre</label>
+      <input type="text" id="favNombre" placeholder="Ej. Balance de OpenAI" oninput="favValidar()">
+      <label>URL</label>
+      <input type="text" id="favUrl" placeholder="https://…" oninput="favValidar()">
+      <label>Categoría</label>
+      <input type="text" id="favCat" placeholder="General" list="favCats">
+      <datalist id="favCats"></datalist>
+      <div class="fav-form-btns">
+        <button class="fav-save" id="favSave" onclick="favGuardar()" disabled>Guardar</button>
+        <button class="fav-cancel" onclick="favCerrarForm()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="fav-toast" id="favToast"></div>
 
 <div class="main" id="mainGrid">
   <div class="status-wrap" id="statusEl">
@@ -517,6 +594,220 @@ async function loadRepo() {
 }
 
 loadRepo();
+
+/* ═══════════════════════════════════════════════════
+   🔗 MIS URLs — favoritos personales (Supabase vía n8n)
+   ═══════════════════════════════════════════════════ */
+const FAV_API    = 'https://n8n.excelentia.com.mx/webhook/urls-interes';
+const FAV_AMBITO = 'personal';
+const FAV_USER   = 'fernando';
+
+let favs = [];
+let favCargado = false;
+let favEditId = null;
+
+function favToast(txt){
+  const t = document.getElementById('favToast');
+  t.textContent = txt;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+async function favApi(body){
+  const r = await fetch(FAV_API, {
+    method : 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body   : JSON.stringify(Object.assign({ ambito: FAV_AMBITO, userId: FAV_USER }, body))
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const txt = await r.text();
+  try { return txt ? JSON.parse(txt) : null; } catch(e){ return null; }
+}
+
+function toggleFavs(){
+  const panel = document.getElementById('favPanel');
+  const btn   = document.getElementById('favToggle');
+  const grid  = document.getElementById('mainGrid');
+  const abrir = panel.style.display !== 'block';
+
+  panel.style.display = abrir ? 'block' : 'none';
+  grid.style.display  = abrir ? 'none'  : '';
+  btn.classList.toggle('active', abrir);
+
+  if (abrir && !favCargado) favCargar();
+}
+
+async function favCargar(){
+  const cont = document.getElementById('favList');
+  cont.innerHTML = '<div class="fav-msg">Cargando…</div>';
+  try {
+    const data = await favApi({ accion:'listar' });
+    favs = Array.isArray(data) ? data : (data && data.data) || [];
+    favCargado = true;
+    favRender();
+  } catch(e){
+    cont.innerHTML = '<div class="fav-msg" style="color:#b83232">No se pudieron cargar tus ligas.<br><span style="font-size:11px;font-family:monospace">' + e.message + '</span></div>';
+  }
+}
+
+function favDominio(u){
+  try { return new URL(u).hostname.replace(/^www\./,''); } catch(e){ return u; }
+}
+
+function favRender(){
+  const cont = document.getElementById('favList');
+  document.getElementById('favCount').textContent = favs.length + (favs.length === 1 ? ' liga' : ' ligas');
+
+  // categorías para el datalist
+  const cats = [...new Set(favs.map(f => f.categoria).filter(Boolean))];
+  document.getElementById('favCats').innerHTML = cats.map(c => '<option value="' + c + '">').join('');
+
+  if (!favs.length){
+    cont.innerHTML = '<div class="fav-msg">Todavía no tienes ligas guardadas.</div>';
+    return;
+  }
+
+  cont.innerHTML = favs.map((f, i) => {
+    const dom = favDominio(f.url);
+    return '<div class="fav-row">' +
+      '<span class="fav-ico"><img src="https://www.google.com/s2/favicons?domain=' + encodeURIComponent(dom) + '&sz=32" alt="" ' +
+        'onerror="this.parentNode.textContent=\'🔗\'"></span>' +
+      '<div class="fav-txt">' +
+        '<a class="fav-name" href="' + f.url + '" target="_blank" rel="noopener">' + favEsc(f.nombre) + '</a>' +
+        '<div class="fav-dom">' + favEsc(dom) + '</div>' +
+      '</div>' +
+      (f.categoria ? '<span class="fav-cat">' + favEsc(f.categoria) + '</span>' : '') +
+      '<div class="fav-acts">' +
+        '<button class="fav-btn" onclick="favMover(' + i + ',-1)" title="Subir"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button class="fav-btn" onclick="favMover(' + i + ',1)" title="Bajar"' + (i === favs.length-1 ? ' disabled' : '') + '>↓</button>' +
+        '<button class="fav-btn" onclick="favCopiar(event,\'' + f.id + '\')" title="Copiar liga">📋</button>' +
+        '<button class="fav-btn" onclick="favEditar(\'' + f.id + '\')" title="Editar">✏️</button>' +
+        '<button class="fav-btn danger" onclick="favEliminar(\'' + f.id + '\')" title="Eliminar">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function favEsc(s){
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+/* ── Copiar liga ────────────────────────────────── */
+async function favCopiar(ev, id){
+  const btn = ev.currentTarget;            // capturar ANTES del await
+  const f = favs.find(x => x.id === id);
+  if (!f) return;
+  let ok = false;
+  try { await navigator.clipboard.writeText(f.url); ok = true; }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = f.url;
+    ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch(e2){}
+    document.body.removeChild(ta);
+  }
+  if (ok){
+    btn.style.color = '#2d9e5f';
+    btn.textContent = '✓';
+    setTimeout(() => { btn.style.color = ''; btn.textContent = '📋'; }, 1400);
+    favToast('Liga copiada');
+  } else favToast('No se pudo copiar');
+}
+
+/* ── Formulario ─────────────────────────────────── */
+function favOpenForm(){
+  favEditId = null;
+  document.getElementById('favNombre').value = '';
+  document.getElementById('favUrl').value    = '';
+  document.getElementById('favCat').value    = '';
+  document.getElementById('favForm').classList.add('open');
+  document.getElementById('favFoot').style.display = 'none';
+  document.getElementById('favNombre').focus();
+  favValidar();
+}
+
+function favEditar(id){
+  const f = favs.find(x => x.id === id);
+  if (!f) return;
+  favEditId = id;
+  document.getElementById('favNombre').value = f.nombre || '';
+  document.getElementById('favUrl').value    = f.url || '';
+  document.getElementById('favCat').value    = f.categoria || '';
+  document.getElementById('favForm').classList.add('open');
+  document.getElementById('favFoot').style.display = 'none';
+  document.getElementById('favNombre').focus();
+  favValidar();
+}
+
+function favCerrarForm(){
+  favEditId = null;
+  document.getElementById('favForm').classList.remove('open');
+  document.getElementById('favFoot').style.display = '';
+}
+
+function favValidar(){
+  const n = document.getElementById('favNombre').value.trim();
+  const u = document.getElementById('favUrl').value.trim();
+  document.getElementById('favSave').disabled = !(n.length >= 2 && u.length >= 4);
+}
+
+async function favGuardar(){
+  const btn = document.getElementById('favSave');
+  const nombre    = document.getElementById('favNombre').value.trim();
+  const url       = document.getElementById('favUrl').value.trim();
+  const categoria = document.getElementById('favCat').value.trim() || 'General';
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    if (favEditId){
+      const f = favs.find(x => x.id === favEditId) || {};
+      await favApi({ accion:'editar', id:favEditId, nombre, url, categoria, notas:f.notas || '' });
+      favToast('Liga actualizada');
+    } else {
+      await favApi({ accion:'crear', nombre, url, categoria, notas:'' });
+      favToast('Liga guardada');
+    }
+    favCerrarForm();
+    await favCargar();
+  } catch(e){
+    favToast('Error al guardar');
+  }
+  btn.textContent = 'Guardar'; favValidar();
+}
+
+async function favEliminar(id){
+  const f = favs.find(x => x.id === id);
+  if (!f) return;
+  if (!confirm('¿Eliminar "' + f.nombre + '"?')) return;
+  try {
+    await favApi({ accion:'eliminar', id });
+    favs = favs.filter(x => x.id !== id);
+    favRender();
+    favToast('Liga eliminada');
+  } catch(e){ favToast('Error al eliminar'); }
+}
+
+/* ── Reordenar: intercambia el campo `orden` de dos filas ── */
+async function favMover(i, dir){
+  const j = i + dir;
+  if (j < 0 || j >= favs.length) return;
+  const a = favs[i], b = favs[j];
+  const ordenA = (a.orden != null ? a.orden : i + 1);
+  const ordenB = (b.orden != null ? b.orden : j + 1);
+
+  // optimista en pantalla
+  favs[i] = b; favs[j] = a;
+  favs[i].orden = ordenA; favs[j].orden = ordenB;
+  favRender();
+
+  try {
+    await favApi({ accion:'editar', id:a.id, nombre:a.nombre, url:a.url, categoria:a.categoria, notas:a.notas || '', orden:ordenB });
+    await favApi({ accion:'editar', id:b.id, nombre:b.nombre, url:b.url, categoria:b.categoria, notas:b.notas || '', orden:ordenA });
+  } catch(e){
+    favToast('No se guardó el orden');
+    favCargar();
+  }
+}
 </script>
 </body>
 </html>
