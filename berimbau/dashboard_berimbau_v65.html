@@ -3523,7 +3523,12 @@ function histAgrupar(filas){
     const memb = String(h.membresia||h.Membresia||'');
     const mod  = h.modulo || moduloDeFila(h).label;
     const dia  = histKey(h);
-    const llave = dia+'|'+memb+'|'+mod+'|'+norm(h.nombre||h.Nombre||'');
+    // El nombre NO entra en la llave: el correo guarda el nombre completo
+    // ('Fernando Davila Test') y el WhatsApp solo el primero ('Fernando'),
+    // porque la plantilla de Meta se saluda con el nombre de pila. Si el nombre
+    // formara parte de la llave, un mismo socio se partiria en dos renglones y
+    // la etiqueta "Ambos" no aparecería nunca.
+    const llave = dia+'|'+memb+'|'+mod;
     if(!mapa.has(llave)){
       mapa.set(llave, {
         dia, membresia: memb, mod: moduloDeFila(h),
@@ -3532,6 +3537,9 @@ function histAgrupar(filas){
       });
     }
     const g = mapa.get(llave);
+    // Se conserva el nombre mas largo: el del correo viene completo.
+    const nomFila = String(h.nombre||h.Nombre||'');
+    if(nomFila.length > String(g.nombre||'').length) g.nombre = nomFila;
     const canal = (h.canal === 'whatsapp') ? 'whatsapp' : 'correo';
     g.canales[canal] = true;
     if(!g.correo   && (h.correo||h.Correo)) g.correo   = h.correo||h.Correo;
