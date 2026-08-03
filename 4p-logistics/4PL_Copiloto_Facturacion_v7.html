@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4PL · Copiloto de Facturación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',-apple-system,sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.42;font-size:14px}
+.wrap{max-width:1360px;margin:0 auto;padding:0 1rem 3rem}
+.narrow{max-width:720px;margin:0 auto}
+
+/* HEADER (20% mas compacto, logo intacto 48px) */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.7rem 0;margin-bottom:1.1rem}
+.hd{max-width:1360px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.7rem}
+.logo-box{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;min-width:70px;min-height:44px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:11px;font-weight:500;color:#fff;letter-spacing:.2px}
+.hd-title{text-align:right}
+.hd-title h1{font-size:14px;font-weight:800;color:#fff;letter-spacing:.2px}
+.hd-title p{font-size:10.5px;color:#b9d3ec;font-weight:500}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:1.1rem}
+.card h2{font-size:15px;font-weight:800;color:#1a2035;margin-bottom:.15rem}
+.card h2 .n{color:#4a9fd4;font-weight:700}
+.card .sub{font-size:12.5px;color:#4a5068;margin-bottom:.9rem}
+.memline{font-size:11.5px;color:#8a90a0;margin-top:.9rem;text-align:center}
+.memline .dot{width:7px;height:7px;border-radius:50%;background:#2e9e5b;display:inline-block;margin-right:.3rem;animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* DROP */
+.drop{max-width:720px;margin:0 auto;border:2px dashed #c8d9f0;background:#f0f6ff;border-radius:12px;padding:1.6rem 1.2rem;text-align:center;transition:.18s;cursor:pointer}
+.drop:hover,.drop.over{background:#e8f0fb;border-color:#4a9fd4}
+.drop .ico{font-size:28px;line-height:1;margin-bottom:.3rem}
+.drop h3{font-size:15px;font-weight:800;margin-bottom:.15rem}
+.drop p{font-size:12.5px;color:#4a5068}
+.drop.sm{padding:1.1rem;background:#fff}
+
+/* BOTONES */
+.btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:.45rem .85rem;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{background:#1e5096}
+.btn.ghost{background:#fff;color:#1a3a6b}
+.btn.ghost:hover{background:#e8f0fb}
+.btn.green{background:#2e9e5b;border-color:#2e9e5b}
+.btn.green:hover{background:#268a4e}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+select.sel{font-family:inherit;font-size:12.5px;font-weight:600;border:1px solid #dde1e9;border-radius:8px;padding:.45rem .5rem;background:#fff;color:#1a2035;cursor:pointer}
+
+/* TABS */
+.tabs{display:flex;gap:.35rem;border-bottom:1px solid #dde1e9;margin-bottom:1.1rem;flex-wrap:wrap}
+.tab{font-size:13px;font-weight:700;padding:.5rem .9rem;border:1px solid transparent;border-bottom:none;border-radius:9px 9px 0 0;color:#4a5068;cursor:pointer;margin-bottom:-1px;background:transparent}
+.tab:hover{background:#e8f0fb}
+.tab.on{background:#fff;border-color:#dde1e9;color:#1a3a6b}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-bottom:1.1rem}
+.kpi{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.7rem .85rem}
+.kpi .lb{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a90a0}
+.kpi .vl{font-size:19px;font-weight:800;color:#1a2035;margin-top:.1rem;letter-spacing:-.3px}
+.kpi .hint{font-size:11px;color:#4a5068}
+.kpi.acc{background:#eef4fc;border-color:#c8d9f0}
+.kpi.acc .vl{color:#1a3a6b}
+.kpi.warn{background:#fff8ec;border-color:#f0dcb4}
+.kpi.warn .vl{color:#a06a12}
+
+/* ALERTAS */
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:.6rem}
+.alert{border-radius:10px;padding:.6rem .8rem;font-size:12.5px;border:1px solid #c8d9f0;background:#f0f6ff;border-left:3px solid #4a9fd4}
+.alert.red{background:#fdf0ef;border-color:#f2c9c4;border-left-color:#c9392b}
+.alert.amber{background:#fff8ec;border-color:#f0dcb4;border-left-color:#e0a02c}
+.alert.grey{background:#f6f7f9;border-color:#e3e6ec;border-left-color:#8a90a0}
+.alert .t{font-weight:800;margin-bottom:.1rem}
+.alert .m{color:#4a5068}
+.alert[data-sig]{cursor:pointer;transition:.15s}
+.alert[data-sig]:hover{filter:brightness(.985);transform:translateY(-1px)}
+.alert .lnk{font-size:11px;font-weight:700;color:#1a3a6b;margin-top:.3rem;opacity:.75}
+.alert.on{box-shadow:0 0 0 2px #1a3a6b inset}
+details.auto{margin-top:.9rem;border:1px solid #e3e6ec;border-radius:10px;background:#fafbfc}
+details.auto summary{cursor:pointer;font-size:12.5px;font-weight:700;color:#4a5068;padding:.55rem .8rem;list-style:none}
+details.auto summary::-webkit-details-marker{display:none}
+details.auto summary::before{content:'▸ ';color:#8a90a0}
+details.auto[open] summary::before{content:'▾ '}
+details.auto .bd{padding:0 .8rem .8rem}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.7rem}
+.toolbar .spacer{flex:1 1 auto}
+.chip{font-size:12px;font-weight:700;border-radius:20px;padding:.28rem .65rem;border:1px solid #dde1e9;background:#fff;cursor:pointer;color:#4a5068;white-space:nowrap}
+.chip.on{background:#1a3a6b;border-color:#1a3a6b;color:#fff}
+.chip .c{opacity:.75;font-weight:600}
+.sep{width:1px;height:20px;background:#dde1e9;margin:0 .15rem}
+.fechas{display:inline-flex;align-items:center;gap:.3rem;font-size:11.5px;color:#8a90a0;font-weight:600;
+  border:1px solid #dde1e9;border-radius:20px;padding:.15rem .55rem;background:#fff}
+.dt{font-family:inherit;font-size:11.5px;font-weight:700;color:#1a2035;border:none;background:transparent;padding:.1rem;cursor:pointer}
+.dt:focus{outline:none;color:#1a3a6b}
+
+/* TABLA */
+.tblwrap{overflow-x:auto;border:1px solid #dde1e9;border-radius:10px;background:#fff}
+table{border-collapse:collapse;width:100%;min-width:1020px;font-size:12.5px}
+th{background:#dce8f7;color:#1a2035;font-weight:700;text-align:left;padding:.45rem .55rem;position:sticky;top:0;white-space:nowrap;font-size:11.5px;border-bottom:1px solid #c8d9f0;cursor:pointer;user-select:none}
+th:hover{background:#cfe0f4}
+th .ar{color:#4a9fd4;font-size:9px}
+td{padding:.38rem .55rem;border-bottom:1px solid #eef1f6;vertical-align:middle}
+tbody tr:hover{background:#e8f0fb}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th.num{text-align:right}
+td.dest{max-width:225px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sem{display:inline-block;width:9px;height:9px;border-radius:50%}
+.sem.g{background:#2e9e5b}.sem.a{background:#e0a02c}.sem.r{background:#c9392b}
+tr.st-a{background:#fffbf2}tr.st-r{background:#fdf3f2}
+.inp{width:80px;font-family:inherit;font-size:12.5px;font-weight:700;text-align:right;border:1px solid #dde1e9;border-radius:6px;padding:.15rem .3rem;background:#fff;color:#1a2035}
+.inp:focus{outline:none;border-color:#4a9fd4;background:#f0f6ff}
+.inp.edited{border-color:#2e9e5b;background:#f1faf4}
+.src{font-size:10.5px;color:#8a90a0;display:block;line-height:1.3}
+.flag{display:inline-block;font-size:10px;font-weight:800;border-radius:4px;padding:.05rem .3rem;margin-right:.2rem;white-space:nowrap}
+.flag.r{background:#fbe3e0;color:#a02a1e}
+.flag.a{background:#fdf0d8;color:#8a5a0c}
+.flag.b{background:#eceef2;color:#5a6070}
+td.hi{background:#fff6e4}
+th.hi{background:#f5dfae}
+tr:hover td.hi{background:#fdf0d8}
+.marg-neg{color:#c9392b;font-weight:800}
+.marg-ok{color:#2e9e5b;font-weight:700}
+tfoot td{background:#dce8f7;font-weight:800;border-top:2px solid #c8d9f0}
+
+/* GRAFICAS */
+.chart{margin-bottom:1.4rem}
+.chart h3{font-size:13.5px;font-weight:800;margin-bottom:.1rem}
+.chart .q{font-size:12px;color:#4a5068;margin-bottom:.7rem}
+.bars{display:flex;flex-direction:column;gap:.32rem}
+.bar{display:grid;grid-template-columns:minmax(120px,210px) 1fr auto;gap:.6rem;align-items:center;font-size:12px}
+.bar .lb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4a5068}
+.bar .tr{background:#eef1f6;border-radius:5px;height:16px;position:relative;overflow:hidden}
+.bar .fl{height:100%;border-radius:5px;background:#4a9fd4;transition:width .5s}
+.bar .fl.neg{background:#c9392b}
+.bar .fl.warn{background:#e0a02c}
+.bar .fl.good{background:#2e9e5b}
+.bar .vl{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:74px;text-align:right}
+.rng{background:#eef1f6;border-radius:5px;height:16px;position:relative}
+.rng .seg{position:absolute;height:100%;background:#e0a02c;border-radius:5px;opacity:.85}
+
+/* VALIDACION */
+.cmp-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.7rem;margin-bottom:.9rem}
+.cmp-box{border:1px solid #dde1e9;border-radius:12px;padding:.8rem;background:#fff;text-align:center}
+.cmp-box .big{font-size:26px;font-weight:800;letter-spacing:-.5px;color:#2e9e5b}
+.cmp-box .big.amber{color:#e0a02c}
+.cmp-box .lb{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a90a0}
+.cmp-box .hint{font-size:11.5px;color:#4a5068;margin-top:.2rem}
+.ok{color:#2e9e5b;font-weight:800}.no{color:#c9392b;font-weight:800}
+
+.note{background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:8px;padding:.55rem .8rem;font-size:12px;color:#4a5068;margin-top:.9rem}
+.note b{color:#1a2035}
+.hidden{display:none!important}
+.empty{text-align:center;color:#8a90a0;font-size:12.5px;padding:1.6rem}
+footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
+
+@media(max-width:600px){
+  .hd{flex-direction:column;align-items:flex-start}
+  .hd-title{text-align:left}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.25rem}
+  .card{padding:.9rem}
+  .kpi .vl{font-size:16px}
+  .toolbar .spacer{display:none}
+  .toolbar{gap:.4rem}
+  .bar{grid-template-columns:1fr;gap:.15rem}
+  .bar .vl{text-align:left}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="hd-title">
+      <h1>Copiloto de Facturación · 4P Logistics</h1>
+      <p>Motor de Tarifas</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- CARGA -->
+  <section class="card" id="cardLoad">
+    <h2>Carga el reporte de Armadamyl</h2>
+    <div class="drop" id="drop">
+      <div class="ico">📥</div>
+      <h3>Arrastra el CSV aquí</h3>
+      <p>o haz clic para buscarlo en tu computadora</p>
+      <input type="file" id="file" accept=".csv,text/csv" class="hidden">
+    </div>
+    <p class="memline" id="memLine"></p>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section id="results" class="hidden">
+    <div class="kpis" id="kpis"></div>
+
+    <div class="tabs">
+      <button class="tab on" data-tab="fact">Facturación</button>
+      <button class="tab" data-tab="ana">Análisis</button>
+      <button class="tab" data-tab="val">Validación</button>
+    </div>
+
+    <!-- TAB FACTURACION -->
+    <div id="tab-fact">
+      <div class="card">
+        <h2>Lo que requiere atención</h2>
+        <p class="sub" id="alertSub"></p>
+        <div class="alerts" id="alerts"></div>
+        <details class="auto" id="autoBox">
+          <summary id="autoSum"></summary>
+          <div class="bd"><div class="alerts" id="alertsAuto"></div></div>
+        </details>
+      </div>
+
+      <div class="card">
+        <h2 id="tblAnchor">Viajes <span class="n" id="periodo"></span></h2>
+        <div class="toolbar" id="toolbar"></div>
+        <div class="tblwrap"><table id="tbl"></table></div>
+        <p class="memline" style="text-align:left" id="tblFoot"></p>
+      </div>
+    </div>
+
+    <!-- TAB ANALISIS -->
+    <div id="tab-ana" class="hidden">
+      <div class="card">
+        <h2>Análisis del periodo</h2>
+        <p class="sub">Tres preguntas que los números del archivo ya pueden contestar.</p>
+        <div id="charts"></div>
+      </div>
+    </div>
+
+    <!-- TAB VALIDACION -->
+    <div id="tab-val" class="hidden">
+      <div class="card">
+        <h2>Compara contra tu Excel</h2>
+        <p class="sub">Si ya tienes trabajado el Excel de este periodo, súbelo. Te digo renglón por renglón dónde coincidimos y dónde no.</p>
+        <div class="drop sm" id="dropX">
+          <div class="ico">📊</div>
+          <h3>Arrastra tu Excel aquí</h3>
+          <p>archivo .xlsx del reporte de distribución</p>
+          <input type="file" id="fileX" accept=".xlsx,.xls" class="hidden">
+        </div>
+        <div id="cmpOut" class="hidden">
+          <div style="height:1rem"></div>
+          <div class="cmp-hero" id="cmpHero"></div>
+          <div class="tblwrap"><table id="tblCmp"></table></div>
+          <div class="note">
+            <b>Cómo leerlo:</b> la <b>venta</b> es la capa que el motor reproduce solo — dada la tarifa de costo, sabe exactamente
+            cuánto se cobra. El <b>costo</b> es donde vive tu criterio: el motor propone con base en el histórico de la ruta,
+            y las diferencias suelen ser tarifas que cambiaron.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>ExcelentIA · Copiloto de Facturación 4PL</footer>
+</div>
+
+<script>
+const DATA={"memoria":{"ventaFlete":{"523":545.0,"800":900.0,"840":880.0,"900":1000.0,"1100":1200.0,"1500":1600.0,"1674":1725.0,"2257.2":2337.2,"2268":2359.72,"2778":2863.0,"2778.3":2862.65,"3344":3488.0,"4167":4295.0,"4200":4400.0,"4762":4906.0,"5016":5192.56,"5304":5533.0,"5304.42":5532.84,"5692.5":5864.27,"6300":6600.0,"6750":6929.0,"6760":6929.0,"7245":7463.35,"7938":8316.0,"8464.5":8829.0,"8465":8829.0,"9315":9594.0,"9501":9786.0,"9501.3":9786.34,"10293.98":10603.8,"10294":10604.0,"10690":11012.0,"10972.5":11445.0,"10973":11445.0,"14490":14924.7,"14671.8":15303.6,"15675":16224.62,"16000":16100.0,"17500":18333.0,"18287.5":18928.56,"18288":18929.0,"18375":19250.0,"18500":19000.0,"18630":19189.9,"20700":21800.0,"21000":22000.0,"21149.9":21785.39,"22770":23454.1,"24035":24877.22,"25278":26038.0,"27000":27300.0,"27945":28783.35,"28350":29700.0,"28980":29849.0,"31298":32237.0,"31298.4":32237.35,"34155":35181.0,"34986.6":36493.2,"34987":36352.67,"36115.2":37670.4,"37200":37300.0,"40824":42768.0,"40950":42900.0,"46947.6":48357.03,"47610":49039.0,"87162.4":90915.81,"95013":97864.0},"ventaManiobra":{"1145":1211.0,"2440":2880.0,"2700":2900.0,"3000":3100.0},"ventaEstadia":{"1700":1800.0,"2600":2700.0,"4000":4100.0,"5500":5600.0},"ratioUnidad":{"1 5 TONELADAS":1.0404,"3 5 TONELADAS":1.0431,"TORTON RABON":1.0302,"TRAILER":1.03},"ratioGlobal":1.0404,"tarifario":{"3B 1016 CEDIS VERACRUZ||TORTON RABON":{"m":21149.9,"p":1.0,"n":1,"nv":1,"min":21149.9,"max":21149.9,"man":2440.0,"pman":1.0},"3B 1017 CEDIS ACAPULCO||TRAILER":{"m":31298.4,"p":1.0,"n":1,"nv":1,"min":31298.4,"max":31298.4,"man":null,"pman":0.0},"3B 1018 CEDIS TEHUACAN||TRAILER":{"m":27945.0,"p":1.0,"n":1,"nv":1,"min":27945.0,"max":27945.0,"man":2700.0,"pman":1.0},"3B 1019 CEDIS ATLACOMULCO||TORTON RABON":{"m":10293.98,"p":1.0,"n":1,"nv":1,"min":10293.98,"max":10293.98,"man":null,"pman":0.0},"3B 1020 CEDIS QUERETARO||TRAILER":{"m":14490.0,"p":1.0,"n":1,"nv":1,"min":14490.0,"max":14490.0,"man":null,"pman":0.0},"3B 1022 CEDIS IXTAPALUCA||TORTON RABON":{"m":7245.0,"p":1.0,"n":1,"nv":1,"min":7245.0,"max":7245.0,"man":null,"pman":0.0},"3B CEDIS AGUASCALIENTES||TORTON RABON":{"m":22770.0,"p":1.0,"n":1,"nv":1,"min":22770.0,"max":22770.0,"man":2440.0,"pman":1.0},"3B CEDIS CELAYA||TORTON RABON":{"m":18630.0,"p":1.0,"n":1,"nv":1,"min":18630.0,"max":18630.0,"man":null,"pman":0.0},"3B CEDIS LOS REYES||TORTON RABON":{"m":7245.0,"p":1.0,"n":1,"nv":1,"min":7245.0,"max":7245.0,"man":2440.0,"pman":1.0},"3B CEDIS METEPEC||TORTON RABON":{"m":7245.0,"p":1.0,"n":1,"nv":1,"min":7245.0,"max":7245.0,"man":null,"pman":0.0},"3B CEDIS MORELIA||TORTON RABON":{"m":21149.9,"p":1.0,"n":1,"nv":1,"min":21149.9,"max":21149.9,"man":null,"pman":0.0},"3B CEDIS PUEBLA||TORTON RABON":{"m":10293.98,"p":1.0,"n":1,"nv":1,"min":10293.98,"max":10293.98,"man":null,"pman":0.0},"3B CEDIS TEPOTZOTLAN||TORTON RABON":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"3B CEDIS TEZOYUCA||TORTON RABON":{"m":7245.0,"p":1.0,"n":1,"nv":1,"min":7245.0,"max":7245.0,"man":2440.0,"pman":1.0},"3B CEDIS TLAHUAC||TRAILER":{"m":9501.3,"p":1.0,"n":1,"nv":1,"min":9501.3,"max":9501.3,"man":null,"pman":0.0},"3B CEDIS TULANCINGO||TORTON RABON":{"m":10293.98,"p":1.0,"n":1,"nv":1,"min":10293.98,"max":10293.98,"man":null,"pman":0.0},"3B CEDIS TULTITLAN||TORTON RABON":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"3B CEDIS VALLEJO||TRAILER":{"m":6750.0,"p":1.0,"n":1,"nv":1,"min":6750.0,"max":6750.0,"man":2700.0,"pman":1.0},"3B CEDIS YAUTEPEC||TORTON RABON":{"m":16000.0,"p":1.0,"n":1,"nv":1,"min":16000.0,"max":16000.0,"man":2440.0,"pman":1.0},"4PL ALMACEN||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":4,"nv":1,"min":2268.0,"max":2268.0,"man":1145.0,"pman":0.25},"CEDIS 3B ECATEPEC 1009||TORTON RABON":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":2440.0,"pman":1.0},"CEDIS MARTI TULTITLAN||TRAILER":{"m":6750.0,"p":1.0,"n":2,"nv":1,"min":6750.0,"max":6750.0,"man":3000.0,"pman":1.0},"CHEDRAUI CEDIS TEOLOYUCAN||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"CHEDRAUI PALOMAS||TORTON RABON":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"CITY FRESKO CEDIS VALLEJO||TORTON RABON":{"m":4762.0,"p":1.0,"n":2,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"CORPORATIVO TIENDAS 3B||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":1145.0,"pman":1.0},"DANHOS CUAUTITLAN||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":6,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"DANHOS CUAUTITLAN||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":4,"nv":1,"min":2778.0,"max":2778.0,"man":null,"pman":0.0},"DANHOS CUAUTITLAN||TORTON RABON":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"DANHOS CUAUTITLAN||TRAILER":{"m":6750.0,"p":1.0,"n":1,"nv":1,"min":6750.0,"max":6750.0,"man":null,"pman":0.0},"DECO AMEXPLAY||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"JUGETRON CITADINA||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETEGA OBREGON||1 5 TONELADAS":{"m":15675.0,"p":1.0,"n":1,"nv":1,"min":15675.0,"max":15675.0,"man":1145.0,"pman":1.0},"JUGUETIBICI ACOXPA||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":null,"pman":0.0},"JUGUETIBICI BUENAVISTA||3 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETIBICI CEDIS ECOMMERCE||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETIBICI COSMOPOL||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":null,"pman":0.0},"JUGUETIBICI DELTA||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETIBICI EXPLANDA PUEBLA||1 5 TONELADAS":{"m":8464.5,"p":1.0,"n":1,"nv":1,"min":8464.5,"max":8464.5,"man":1145.0,"pman":1.0},"JUGUETIBICI INTERLOMAS||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":1145.0,"pman":1.0},"JUGUETIBICI LA PERLA||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETIBICI LAS ANTENAS||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":null,"pman":0.0},"JUGUETIBICI LINDA VISTA||3 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETIBICI OASIS||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":null,"pman":0.0},"JUGUETIBICI PACHUCA||1 5 TONELADAS":{"m":5016.0,"p":1.0,"n":1,"nv":1,"min":5016.0,"max":5016.0,"man":1145.0,"pman":1.0},"JUGUETIBICI PARQUE PUEBLA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETIBICI PASEO INTERLOMAS||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETIBICI PLAZA PATRIA||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETIBICI SAN ANGEL PORTAL||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETIBICI TEPEYAC||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":null,"pman":0.0},"JUGUETIBICI TEPEYAC||3 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":1145.0,"pman":1.0},"JUGUETIBICI TEZONTLE||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETIBICI TLAQUEPAQUE||3 5 TONELADAS":{"m":18375.0,"p":1.0,"n":1,"nv":1,"min":18375.0,"max":18375.0,"man":1145.0,"pman":1.0},"JUGUETIBICI TOREO||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRO 120 PUEBLA PUEBLA||3 5 TONELADAS":{"m":1500.0,"p":1.0,"n":1,"nv":1,"min":1500.0,"max":1500.0,"man":1145.0,"pman":1.0},"JUGUETRON 101 GALERIAS QUERETARO||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON 105 GALERIAS METEPEC||3 5 TONELADAS":{"m":5016.0,"p":1.0,"n":1,"nv":1,"min":5016.0,"max":5016.0,"man":1145.0,"pman":1.0},"JUGUETRON 114 SANTA FE||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON 116 ANGELOPOLIS||3 5 TONELADAS":{"m":8464.5,"p":1.0,"n":1,"nv":1,"min":8464.5,"max":8464.5,"man":1145.0,"pman":1.0},"JUGUETRON 121 OUTLET PUEBLA||3 5 TONELADAS":{"m":1500.0,"p":1.0,"n":1,"nv":1,"min":1500.0,"max":1500.0,"man":1145.0,"pman":1.0},"JUGUETRON 123 GALERIAS GUADALAJARA||TORTON RABON":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON 124 GALERIAS PACHUCA||1 5 TONELADAS":{"m":5016.0,"p":1.0,"n":1,"nv":1,"min":5016.0,"max":5016.0,"man":1145.0,"pman":1.0},"JUGUETRON 125 LEON GUANAJUATO||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON 126 GALERIAS CUERNAVACA||1 5 TONELADAS":{"m":5016.0,"p":1.0,"n":1,"nv":1,"min":5016.0,"max":5016.0,"man":1145.0,"pman":1.0},"JUGUETRON 140 SAN LUIS EL DORADO||3 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON 146 ALTABRISA TABASCO||1 5 TONELADAS":{"m":28350.0,"p":1.0,"n":1,"nv":1,"min":28350.0,"max":28350.0,"man":null,"pman":0.0},"JUGUETRON 152 SAN LUIS CARSO||3 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON 153 TUXTLA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETRON 160 GALERIAS ZACATECAS||3 5 TONELADAS":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":1145.0,"pman":1.0},"JUGUETRON 163 ANTEA QUERETARO||3 5 TONELADAS":{"m":7938.0,"p":1.0,"n":1,"nv":1,"min":7938.0,"max":7938.0,"man":1145.0,"pman":1.0},"JUGUETRON 167 TECNOLOGICO METEPEC||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON 168 OAXACA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETRON 169 GALERIAS CAMPECHE||3 5 TONELADAS":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":1145.0,"pman":1.0},"JUGUETRON 170 METROPOLI PATRIOTISMO||3 5 TONELADAS":{"m":900.0,"p":1.0,"n":1,"nv":1,"min":900.0,"max":900.0,"man":1145.0,"pman":1.0},"JUGUETRON 173 GALERIAS SERDAN||1 5 TONELADAS":{"m":8464.5,"p":1.0,"n":1,"nv":1,"min":8464.5,"max":8464.5,"man":1145.0,"pman":1.0},"JUGUETRON 173 GALERIAS SERDAN||3 5 TONELADAS":{"m":1500.0,"p":1.0,"n":1,"nv":1,"min":1500.0,"max":1500.0,"man":1145.0,"pman":1.0},"JUGUETRON 176 VIA VALLEJO||3 5 TONELADAS":{"m":900.0,"p":1.0,"n":1,"nv":1,"min":900.0,"max":900.0,"man":1145.0,"pman":1.0},"JUGUETRON 178 RUIZ CORTINEZ||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON 179 AVERANDA CUERNAVACA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON 184 SANTA ANITA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON 186 GALERIAS TLAXCALA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETRON 187 TAMPICO||1 5 TONELADAS":{"m":18500.0,"p":1.0,"n":1,"nv":1,"min":18500.0,"max":18500.0,"man":null,"pman":0.0},"JUGUETRON 189 ENCUENTRO FORTUNA||3 5 TONELADAS":{"m":2778.3,"p":1.0,"n":1,"nv":1,"min":2778.3,"max":2778.3,"man":1145.0,"pman":1.0},"JUGUETRON 191 GALERIAS VALLE ORIENTE||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETRON 194 FASHION DRIVE||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETRON 216 AMBAR TUXTLA||1 5 TONELADAS":{"m":37200.0,"p":1.0,"n":1,"nv":1,"min":37200.0,"max":37200.0,"man":null,"pman":0.0},"JUGUETRON 226 CANCUN LAS AMERICAS||3 5 TONELADAS":{"m":47610.0,"p":1.0,"n":1,"nv":1,"min":47610.0,"max":47610.0,"man":1145.0,"pman":1.0},"JUGUETRON 230 MITIKAH||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETRON 232 PERISUR||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON 234 LA GRAN PLAZA GUADALAJARA||3 5 TONELADAS":{"m":18375.0,"p":1.0,"n":1,"nv":1,"min":18375.0,"max":18375.0,"man":1145.0,"pman":1.0},"JUGUETRON 235 PLAZA SATELITE||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON ALTABRISA MERIDA||3 5 TONELADAS":{"m":7245.0,"p":1.0,"n":1,"nv":1,"min":7245.0,"max":7245.0,"man":1145.0,"pman":1.0},"JUGUETRON ALTARIA AGUASCALIENTES||1 5 TONELADAS":{"m":15675.0,"p":1.0,"n":1,"nv":1,"min":15675.0,"max":15675.0,"man":null,"pman":0.0},"JUGUETRON ANDARES GDL||TORTON RABON":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON CEDIS TULTITLAN||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON CEDIS TULTITLAN||TRAILER":{"m":6760.0,"p":1.0,"n":2,"nv":1,"min":6760.0,"max":6760.0,"man":3000.0,"pman":1.0},"JUGUETRON CUMBRES MONTERREY||3 5 TONELADAS":{"m":21000.0,"p":1.0,"n":1,"nv":1,"min":21000.0,"max":21000.0,"man":null,"pman":0.0},"JUGUETRON EL CORTIJO IXTAPALUCA||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON FASHION MALL CHIHUAHUA||TORTON RABON":{"m":46947.6,"p":1.0,"n":1,"nv":1,"min":46947.6,"max":46947.6,"man":1145.0,"pman":1.0},"JUGUETRON GALERIAS ATIZAPAN||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON GALERIAS CELAYA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON GALERIAS COAPA||3 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON GALERIAS MALL SONORA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETRON GALERIAS MAZATLAN||1 5 TONELADAS":{"m":27000.0,"p":1.0,"n":1,"nv":1,"min":27000.0,"max":27000.0,"man":1145.0,"pman":1.0},"JUGUETRON GALERIAS PERINORTE||3 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":1145.0,"pman":1.0},"JUGUETRON GALERIAS TOLUCA||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON GALERIAS TORREON LAGUNA||1 5 TONELADAS":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"JUGUETRON JURIQUILLA||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON LAS AMERICAS BOCA DEL RIO||1 5 TONELADAS":{"m":14671.8,"p":1.0,"n":1,"nv":1,"min":14671.8,"max":14671.8,"man":1145.0,"pman":1.0},"JUGUETRON LEON SUR||1 5 TONELADAS":{"m":10972.5,"p":1.0,"n":1,"nv":1,"min":10972.5,"max":10972.5,"man":1145.0,"pman":1.0},"JUGUETRON LERMA||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON MUNDO E||3 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":1145.0,"pman":1.0},"JUGUETRON PARQUE LAS ANTENAS||1 5 TONELADAS":{"m":5016.0,"p":1.0,"n":1,"nv":1,"min":5016.0,"max":5016.0,"man":null,"pman":0.0},"JUGUETRON PARQUE PUEBLA||3 5 TONELADAS":{"m":1500.0,"p":1.0,"n":1,"nv":1,"min":1500.0,"max":1500.0,"man":1145.0,"pman":1.0},"JUGUETRON PATIO CHALCO||3 5 TONELADAS":{"m":6300.0,"p":1.0,"n":1,"nv":1,"min":6300.0,"max":6300.0,"man":1145.0,"pman":1.0},"JUGUETRON PATRIA||TORTON RABON":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON PEDREGAL||3 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON PLAZA CIBELES IRAPUATO||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON PLAZA LAS AMERICAS||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON PLAZA NEZA CD JARDIN||3 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":1145.0,"pman":1.0},"JUGUETRON PLAZA PATRIA||TORTON RABON":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON PLAZA TLALNEPLANTLA||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":null,"pman":0.0},"JUGUETRON PLAZA VALLE ORIZABA||1 5 TONELADAS":{"m":5304.42,"p":1.0,"n":1,"nv":1,"min":5304.42,"max":5304.42,"man":1145.0,"pman":1.0},"JUGUETRON PREMIUM OUTLET||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":1145.0,"pman":1.0},"JUGUETRON PREMIUM OUTLET QUERETARO||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON PUNTO SUR||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON PUNTO VALLE||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"JUGUETRON REAL CENTER GDL||TORTON RABON":{"m":22770.0,"p":1.0,"n":1,"nv":1,"min":22770.0,"max":22770.0,"man":1145.0,"pman":1.0},"JUGUETRON TOWN SQUARE METEPEC||3 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JUGUETRON URUAPAN AGORA||1 5 TONELADAS":{"m":10972.5,"p":1.0,"n":1,"nv":1,"min":10972.5,"max":10972.5,"man":null,"pman":0.0},"JUGUETRON VISTA HERMOSA||3 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"JUGUETRON XALAPA LAS AMERICAS||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"JULIO CEPEDA 69 RIO NILO GDL||1 5 TONELADAS":{"m":15675.0,"p":1.0,"n":2,"nv":1,"min":15675.0,"max":15675.0,"man":1145.0,"pman":0.5},"JULIO CEPEDA CENTRO DE DISTRIBUCION EL LECHUGAL||1 5 TONELADAS":{"m":18288.0,"p":0.5,"n":2,"nv":2,"min":18287.5,"max":18288.0,"man":1145.0,"pman":1.0},"LIVERPOOL ANTEA QRO||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"LIVERPOOL ATIZAPAN||1 5 TONELADAS":{"m":523.0,"p":1.0,"n":1,"nv":1,"min":523.0,"max":523.0,"man":1145.0,"pman":1.0},"LIVERPOOL ATIZAPAN||3 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":null,"pman":0.0},"LIVERPOOL CD JARDIN||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":null,"pman":0.0},"LIVERPOOL CD JARDIN||3 5 TONELADAS":{"m":523.0,"p":1.0,"n":1,"nv":1,"min":523.0,"max":523.0,"man":1145.0,"pman":1.0},"LIVERPOOL CEDIS JILOTEPEC||1 5 TONELADAS":{"m":3344.0,"p":1.0,"n":6,"nv":1,"min":3344.0,"max":3344.0,"man":null,"pman":0.0},"LIVERPOOL CEDIS JILOTEPEC||3 5 TONELADAS":{"m":4200.0,"p":1.0,"n":3,"nv":1,"min":4200.0,"max":4200.0,"man":null,"pman":0.0},"LIVERPOOL CEDIS JILOTEPEC||TORTON RABON":{"m":5692.5,"p":1.0,"n":1,"nv":1,"min":5692.5,"max":5692.5,"man":null,"pman":0.0},"LIVERPOOL CEDIS JILOTEPEC||TRAILER":{"m":9315.0,"p":1.0,"n":10,"nv":1,"min":9315.0,"max":9315.0,"man":null,"pman":0.0},"LIVERPOOL CENTRO||3 5 TONELADAS":{"m":523.0,"p":0.5,"n":2,"nv":2,"min":523.0,"max":800.0,"man":1145.0,"pman":0.5},"LIVERPOOL COACALCO||1 5 TONELADAS":{"m":1674.0,"p":0.5,"n":2,"nv":2,"min":800.0,"max":1674.0,"man":1145.0,"pman":0.5},"LIVERPOOL COAPAN||1 5 TONELADAS":{"m":523.0,"p":0.5,"n":2,"nv":2,"min":523.0,"max":1100.0,"man":1145.0,"pman":0.5},"LIVERPOOL COYOACAN MITIKAH||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":null,"pman":0.0},"LIVERPOOL COYOACAN MITIKAH||3 5 TONELADAS":{"m":523.0,"p":1.0,"n":1,"nv":1,"min":523.0,"max":523.0,"man":1145.0,"pman":1.0},"LIVERPOOL CUERNAVACA||1 5 TONELADAS":{"m":5304.0,"p":0.5,"n":2,"nv":2,"min":5304.0,"max":8464.5,"man":1145.0,"pman":1.0},"LIVERPOOL ECATEPEC||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"LIVERPOOL ECATEPEC||3 5 TONELADAS":{"m":1674.0,"p":1.0,"n":1,"nv":1,"min":1674.0,"max":1674.0,"man":1145.0,"pman":1.0},"LIVERPOOL GUADALAJARA GALERIAS||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"LIVERPOOL GUADALAJARA GALERIAS||TORTON RABON":{"m":22770.0,"p":1.0,"n":1,"nv":1,"min":22770.0,"max":22770.0,"man":2440.0,"pman":1.0},"LIVERPOOL GUADALAJARA GRAN PLAZA||3 5 TONELADAS":{"m":523.0,"p":1.0,"n":1,"nv":1,"min":523.0,"max":523.0,"man":1145.0,"pman":1.0},"LIVERPOOL GUADALAJARA GRAN PLAZA||TORTON RABON":{"m":22770.0,"p":1.0,"n":1,"nv":1,"min":22770.0,"max":22770.0,"man":1145.0,"pman":1.0},"LIVERPOOL INSURGENTES DEL VALLE||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":null,"pman":0.0},"LIVERPOOL INSURGENTES DEL VALLE||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"LIVERPOOL LA PERLA MARIANO OTERO||3 5 TONELADAS":{"m":523.0,"p":1.0,"n":1,"nv":1,"min":523.0,"max":523.0,"man":1145.0,"pman":1.0},"LIVERPOOL LAS ANTENAS IZTAPALAPA||1 5 TONELADAS":{"m":523.0,"p":1.0,"n":1,"nv":1,"min":523.0,"max":523.0,"man":1145.0,"pman":1.0},"LIVERPOOL LAS ANTENAS IZTAPALAPA||3 5 TONELADAS":{"m":6300.0,"p":1.0,"n":1,"nv":1,"min":6300.0,"max":6300.0,"man":null,"pman":0.0},"LIVERPOOL LEON||3 5 TONELADAS":{"m":840.0,"p":0.5,"n":2,"nv":2,"min":840.0,"max":10972.5,"man":1145.0,"pman":0.5},"LIVERPOOL LINDAVISTA||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":null,"pman":0.0},"LIVERPOOL LINDAVISTA||3 5 TONELADAS":{"m":1674.0,"p":1.0,"n":1,"nv":1,"min":1674.0,"max":1674.0,"man":1145.0,"pman":1.0},"LIVERPOOL MERIDA||1 5 TONELADAS":{"m":34986.6,"p":1.0,"n":1,"nv":1,"min":34986.6,"max":34986.6,"man":1145.0,"pman":1.0},"LIVERPOOL MERIDA||3 5 TONELADAS":{"m":40950.0,"p":1.0,"n":1,"nv":1,"min":40950.0,"max":40950.0,"man":1145.0,"pman":1.0},"LIVERPOOL METEPEC LA PURISIMA||1 5 TONELADAS":{"m":5016.0,"p":1.0,"n":2,"nv":1,"min":5016.0,"max":5016.0,"man":1145.0,"pman":1.0},"LIVERPOOL MORELIA||1 5 TONELADAS":{"m":523.0,"p":1.0,"n":1,"nv":1,"min":523.0,"max":523.0,"man":1145.0,"pman":1.0},"LIVERPOOL MORELIA||TORTON RABON":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":null,"pman":0.0},"LIVERPOOL PACHUCA||1 5 TONELADAS":{"m":5016.0,"p":1.0,"n":1,"nv":1,"min":5016.0,"max":5016.0,"man":null,"pman":0.0},"LIVERPOOL PACHUCA||TORTON RABON":{"m":10294.0,"p":1.0,"n":1,"nv":1,"min":10294.0,"max":10294.0,"man":2440.0,"pman":1.0},"LIVERPOOL PARQUE DELTA||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":null,"pman":0.0},"LIVERPOOL PARQUE DELTA||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"LIVERPOOL PERISUR||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"LIVERPOOL PERISUR||TORTON RABON":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"LIVERPOOL POLANCO||1 5 TONELADAS":{"m":2257.2,"p":1.0,"n":1,"nv":1,"min":2257.2,"max":2257.2,"man":1145.0,"pman":1.0},"LIVERPOOL POLANCO||3 5 TONELADAS":{"m":523.0,"p":0.5,"n":2,"nv":2,"min":523.0,"max":2778.3,"man":1145.0,"pman":0.5},"LIVERPOOL PUEBLA||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"LIVERPOOL PUEBLA||3 5 TONELADAS":{"m":840.0,"p":1.0,"n":1,"nv":1,"min":840.0,"max":840.0,"man":1145.0,"pman":1.0},"LIVERPOOL PUEBLA SERDAN||1 5 TONELADAS":{"m":8465.0,"p":0.5,"n":2,"nv":2,"min":8464.5,"max":8465.0,"man":1145.0,"pman":1.0},"LIVERPOOL QUERETARO||1 5 TONELADAS":{"m":840.0,"p":0.5,"n":2,"nv":2,"min":840.0,"max":1100.0,"man":1145.0,"pman":0.5},"LIVERPOOL QUERETARO ANTEA JURIQUILLA||3 5 TONELADAS":{"m":7938.0,"p":1.0,"n":1,"nv":1,"min":7938.0,"max":7938.0,"man":1145.0,"pman":1.0},"LIVERPOOL SANTA FE QUIROGA||1 5 TONELADAS":{"m":2268.0,"p":0.5,"n":2,"nv":2,"min":800.0,"max":2268.0,"man":1145.0,"pman":0.5},"LIVERPOOL SATELITE||1 5 TONELADAS":{"m":800.0,"p":1.0,"n":1,"nv":1,"min":800.0,"max":800.0,"man":1145.0,"pman":1.0},"LIVERPOOL SATELITE||TORTON RABON":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":2440.0,"pman":1.0},"LIVERPOOL TEPEYAC||1 5 TONELADAS":{"m":1674.0,"p":0.5,"n":2,"nv":2,"min":1674.0,"max":2257.2,"man":1145.0,"pman":0.5},"LIVERPOOL TLANEPANTLA||1 5 TONELADAS":{"m":523.0,"p":0.5,"n":2,"nv":2,"min":523.0,"max":2257.2,"man":1145.0,"pman":1.0},"LIVERPOOL TLAQUEPAQUE||1 5 TONELADAS":{"m":523.0,"p":0.5,"n":2,"nv":2,"min":523.0,"max":1100.0,"man":1145.0,"pman":1.0},"LIVERPOOL TOLUCA TLAPALTITLAN||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":1,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"LIVERPOOL TOLUCA TLAPALTITLAN||3 5 TONELADAS":{"m":840.0,"p":1.0,"n":1,"nv":1,"min":840.0,"max":840.0,"man":1145.0,"pman":1.0},"LIVERPOOL ZAPOPAN||1 5 TONELADAS":{"m":1100.0,"p":1.0,"n":2,"nv":1,"min":1100.0,"max":1100.0,"man":1145.0,"pman":1.0},"LIVERPOOL ZAPOPAN||3 5 TONELADAS":{"m":523.0,"p":1.0,"n":1,"nv":1,"min":523.0,"max":523.0,"man":1145.0,"pman":1.0},"MAROMA||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"MAROMA||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1000.0,"pman":1.0},"MUESTRAS FIGURAS ARQUIMEDES||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"MUESTRAS FIGURAS TAQUENA||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"OFICINA PLAYMOBIL CORPORATIVO||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":11,"nv":1,"min":2268.0,"max":2268.0,"man":1145.0,"pman":0.09},"OFICINA PLAYMOBIL CORPORATIVO||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":3,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":0.33},"PALACIO DE HIERRO CEDIS SAN MARTIN OBISPO||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"PALACIO DE HIERRO CEDIS SAN MARTIN OBISPO||TRAILER":{"m":6750.0,"p":1.0,"n":1,"nv":1,"min":6750.0,"max":6750.0,"man":2700.0,"pman":1.0},"PEDIDO EFRA||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"PORTEO||TORTON RABON":{"m":4762.0,"p":1.0,"n":10,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"SANBORN PLAZA CARSO||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"SANBORNS ALMACEN GAVILAN||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"SANBORNS ALMACEN GAVILAN||TORTON RABON":{"m":7245.0,"p":1.0,"n":1,"nv":1,"min":7245.0,"max":7245.0,"man":null,"pman":0.0},"SEARS 850 CEDIS SILAO||1 5 TONELADAS":{"m":10973.0,"p":1.0,"n":1,"nv":1,"min":10973.0,"max":10973.0,"man":1145.0,"pman":1.0},"SEARS 850 CEDIS SILAO||TRAILER":{"m":20700.0,"p":1.0,"n":1,"nv":1,"min":20700.0,"max":20700.0,"man":3000.0,"pman":1.0},"SEARS 870 CEDIS VALLEJO||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"SEARS 870 CEDIS VALLEJO||TRAILER":{"m":6750.0,"p":1.0,"n":1,"nv":1,"min":6750.0,"max":6750.0,"man":3000.0,"pman":1.0},"SEARS BUENAVISTA||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":null,"pman":0.0},"SEARS PLAZA MAYOR||1 5 TONELADAS":{"m":10973.0,"p":1.0,"n":1,"nv":1,"min":10973.0,"max":10973.0,"man":1145.0,"pman":1.0},"SEARS SANTA FE||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"SEARS TORRE WTC||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"SORIANA 5537 CEDIS ALMACEN CENTRAL QUERETARO||3 5 TONELADAS":{"m":7938.0,"p":1.0,"n":1,"nv":1,"min":7938.0,"max":7938.0,"man":null,"pman":0.0},"SORIANA 5537 CEDIS ALMACEN CENTRAL QUERETARO||TORTON RABON":{"m":10690.0,"p":1.0,"n":1,"nv":1,"min":10690.0,"max":10690.0,"man":null,"pman":0.0},"SORIANA 5548 CEDIS ALMACEN CENTRAL TULTITLAN||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":2,"nv":1,"min":2778.0,"max":2778.0,"man":null,"pman":0.0},"SORIANA 5548 CEDIS ALMACEN CENTRAL TULTITLAN||TORTON RABON":{"m":4762.0,"p":1.0,"n":1,"nv":1,"min":4762.0,"max":4762.0,"man":null,"pman":0.0},"SORIANA 5549 CEDIS SALINAS BANDAS||TORTON RABON":{"m":25278.0,"p":1.0,"n":2,"nv":1,"min":25278.0,"max":25278.0,"man":null,"pman":0.0},"SORIANA 5557 CEDIS ALMACEN CENTRAL GUADALAJARA||3 5 TONELADAS":{"m":18375.0,"p":1.0,"n":2,"nv":1,"min":18375.0,"max":18375.0,"man":null,"pman":0.0},"SUBURBIA JILOTEPEC||1 5 TONELADAS":{"m":3344.0,"p":1.0,"n":1,"nv":1,"min":3344.0,"max":3344.0,"man":null,"pman":0.0},"SUBURBIA JILOTEPEC||3 5 TONELADAS":{"m":4200.0,"p":1.0,"n":1,"nv":1,"min":4200.0,"max":4200.0,"man":null,"pman":0.0},"SUBURBIA JILOTEPEC||TORTON RABON":{"m":5692.5,"p":1.0,"n":1,"nv":1,"min":5692.5,"max":5692.5,"man":null,"pman":0.0},"TOYS R US BABIES||1 5 TONELADAS":{"m":18288.0,"p":0.5,"n":2,"nv":2,"min":15675.0,"max":18288.0,"man":1145.0,"pman":0.5},"TOYS R US INSURGENTES||1 5 TONELADAS":{"m":523.0,"p":0.5,"n":2,"nv":2,"min":523.0,"max":2268.0,"man":1145.0,"pman":0.5},"TOYS R US METEPEC||1 5 TONELADAS":{"m":5016.0,"p":1.0,"n":1,"nv":1,"min":5016.0,"max":5016.0,"man":null,"pman":0.0},"TOYS R US METEPEC||3 5 TONELADAS":{"m":6300.0,"p":1.0,"n":1,"nv":1,"min":6300.0,"max":6300.0,"man":1145.0,"pman":1.0},"TOYS R US MONTERREY||1 5 TONELADAS":{"m":18288.0,"p":0.5,"n":2,"nv":2,"min":18287.5,"max":18288.0,"man":1145.0,"pman":0.5},"TOYS R US MUNDO E||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"TOYS R US MUNDO E||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"TOYS R US PARK SLP||1 5 TONELADAS":{"m":14671.8,"p":1.0,"n":1,"nv":1,"min":14671.8,"max":14671.8,"man":null,"pman":0.0},"TOYS R US PARK SLP||3 5 TONELADAS":{"m":17500.0,"p":1.0,"n":1,"nv":1,"min":17500.0,"max":17500.0,"man":1145.0,"pman":1.0},"TOYS R US PERISUR||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"TOYS R US PERISUR||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":1,"nv":1,"min":2778.0,"max":2778.0,"man":1145.0,"pman":1.0},"TOYS R US SANTA FE||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":1,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"TOYS R US SANTA FE||3 5 TONELADAS":{"m":6300.0,"p":1.0,"n":1,"nv":1,"min":6300.0,"max":6300.0,"man":1145.0,"pman":1.0},"TOYSRUS QUERETARO||1 5 TONELADAS":{"m":5304.42,"p":1.0,"n":1,"nv":1,"min":5304.42,"max":5304.42,"man":1145.0,"pman":1.0},"TOYSRUS QUERETARO||3 5 TONELADAS":{"m":7938.0,"p":1.0,"n":1,"nv":1,"min":7938.0,"max":7938.0,"man":1145.0,"pman":1.0},"WALMART 4188 CEDIS MERIDA SECOS||1 5 TONELADAS":{"m":34987.0,"p":1.0,"n":1,"nv":1,"min":34987.0,"max":34987.0,"man":null,"pman":0.0},"WALMART 4188 CEDIS MERIDA SECOS||TORTON RABON":{"m":47610.0,"p":1.0,"n":1,"nv":1,"min":47610.0,"max":47610.0,"man":null,"pman":0.0},"WALMART 4640 CEDIS CHIHUAHUA WBS SECOS||1 5 TONELADAS":{"m":36115.2,"p":1.0,"n":1,"nv":1,"min":36115.2,"max":36115.2,"man":null,"pman":0.0},"WALMART 4640 CEDIS CHIHUAHUA WBS SECOS||3 5 TONELADAS":{"m":40824.0,"p":1.0,"n":1,"nv":1,"min":40824.0,"max":40824.0,"man":null,"pman":0.0},"WALMART 6191 CEDIS MEXICALI WBS SECOS||1 5 TONELADAS":{"m":87162.4,"p":1.0,"n":1,"nv":1,"min":87162.4,"max":87162.4,"man":null,"pman":0.0},"WALMART 6191 CEDIS MEXICALI WBS SECOS||TORTON RABON":{"m":95013.0,"p":1.0,"n":1,"nv":1,"min":95013.0,"max":95013.0,"man":1145.0,"pman":1.0},"WALMART 7464 SUPERCENTER||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":8,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"WALMART 7464 SUPERCENTER||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":3,"nv":1,"min":2778.0,"max":2778.0,"man":400.0,"pman":0.33},"WALMART 7464 SUPERCENTER||TRAILER":{"m":6750.0,"p":1.0,"n":1,"nv":1,"min":6750.0,"max":6750.0,"man":null,"pman":0.0},"WALMART 7468 CEDIS VILLAHERMOSA||1 5 TONELADAS":{"m":24035.0,"p":1.0,"n":1,"nv":1,"min":24035.0,"max":24035.0,"man":null,"pman":0.0},"WALMART 7468 CEDIS VILLAHERMOSA||TORTON RABON":{"m":34155.0,"p":1.0,"n":1,"nv":1,"min":34155.0,"max":34155.0,"man":1145.0,"pman":1.0},"WALMART 7471 7459 CHALCO||1 5 TONELADAS":{"m":5016.0,"p":0.88,"n":8,"nv":2,"min":2268.0,"max":5016.0,"man":null,"pman":0.0},"WALMART 7471 7459 CHALCO||3 5 TONELADAS":{"m":6300.0,"p":1.0,"n":2,"nv":1,"min":6300.0,"max":6300.0,"man":null,"pman":0.0},"WALMART 7471 7459 CHALCO||TORTON RABON":{"m":7245.0,"p":1.0,"n":1,"nv":1,"min":7245.0,"max":7245.0,"man":null,"pman":0.0},"WALMART 7471 7459 CHALCO||TRAILER":{"m":9501.0,"p":1.0,"n":1,"nv":1,"min":9501.0,"max":9501.0,"man":null,"pman":0.0},"WALMART 7482 CEDIS STA BARBARA BAE NORTE||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":7,"nv":1,"min":2268.0,"max":2268.0,"man":null,"pman":0.0},"WALMART 7482 CEDIS STA BARBARA BAE NORTE||3 5 TONELADAS":{"m":2778.0,"p":1.0,"n":2,"nv":1,"min":2778.0,"max":2778.0,"man":null,"pman":0.0},"WALMART 7482 CEDIS STA BARBARA BAE NORTE||TRAILER":{"m":6750.0,"p":1.0,"n":1,"nv":1,"min":6750.0,"max":6750.0,"man":null,"pman":0.0},"WALMART 7487 CEDIS CULIACAN||1 5 TONELADAS":{"m":34987.0,"p":1.0,"n":1,"nv":1,"min":34987.0,"max":34987.0,"man":null,"pman":0.0},"WALMART 7487 CEDIS CULIACAN||TORTON RABON":{"m":47610.0,"p":1.0,"n":1,"nv":1,"min":47610.0,"max":47610.0,"man":1145.0,"pman":1.0},"WALMART 7490 CEDIS MONTERREY||1 5 TONELADAS":{"m":18287.5,"p":1.0,"n":1,"nv":1,"min":18287.5,"max":18287.5,"man":null,"pman":0.0},"WALMART 7490 CEDIS MONTERREY||TRAILER":{"m":31298.0,"p":1.0,"n":1,"nv":1,"min":31298.0,"max":31298.0,"man":null,"pman":0.0},"WALMART 7493 CEDIS GUADALAJARA AUTOSERVICIO||1 5 TONELADAS":{"m":15675.0,"p":1.0,"n":2,"nv":1,"min":15675.0,"max":15675.0,"man":null,"pman":0.0},"WALMART 7493 CEDIS GUADALAJARA AUTOSERVICIO||TORTON RABON":{"m":22770.0,"p":1.0,"n":1,"nv":1,"min":22770.0,"max":22770.0,"man":null,"pman":0.0},"WALMART 7493 CEDIS GUADALAJARA AUTOSERVICIO||TRAILER":{"m":28980.0,"p":1.0,"n":1,"nv":1,"min":28980.0,"max":28980.0,"man":null,"pman":0.0},"WALMART 7494 BODEGA CUAUTITLAN||1 5 TONELADAS":{"m":2268.0,"p":1.0,"n":7,"nv":1,"min":2268.0,"max":2268.0,"man":1145.0,"pman":0.14},"WALMART 7494 BODEGA CUAUTITLAN||3 5 TONELADAS":{"m":4167.0,"p":0.5,"n":2,"nv":2,"min":2778.0,"max":4167.0,"man":null,"pman":0.0},"WALMART 7494 BODEGA CUAUTITLAN||TRAILER":{"m":6750.0,"p":1.0,"n":1,"nv":1,"min":6750.0,"max":6750.0,"man":null,"pman":0.0}},"cadena":{"3B||TORTON RABON":{"m":7245.0,"n":14},"3B||TRAILER":{"m":14490.0,"n":5},"4PL||1 5 TONELADAS":{"m":2268.0,"n":4},"CEDIS||TRAILER":{"m":6750.0,"n":2},"CITY||TORTON RABON":{"m":4762.0,"n":2},"DANHOS||1 5 TONELADAS":{"m":2268.0,"n":6},"DANHOS||3 5 TONELADAS":{"m":2778.0,"n":4},"JUGUETIBICI||1 5 TONELADAS":{"m":2257.2,"n":15},"JUGUETIBICI||3 5 TONELADAS":{"m":1100.0,"n":6},"JUGUETRON||1 5 TONELADAS":{"m":1100.0,"n":36},"JUGUETRON||3 5 TONELADAS":{"m":1100.0,"n":34},"JUGUETRON||TORTON RABON":{"m":1100.0,"n":6},"JUGUETRON||TRAILER":{"m":6760.0,"n":2},"JULIO||1 5 TONELADAS":{"m":15675.0,"n":4},"LIVERPOOL||1 5 TONELADAS":{"m":1100.0,"n":45},"LIVERPOOL||3 5 TONELADAS":{"m":523.0,"n":25},"LIVERPOOL||TORTON RABON":{"m":22770.0,"n":7},"LIVERPOOL||TRAILER":{"m":9315.0,"n":10},"MUESTRAS||1 5 TONELADAS":{"m":2268.0,"n":2},"OFICINA||1 5 TONELADAS":{"m":2268.0,"n":11},"OFICINA||3 5 TONELADAS":{"m":2778.0,"n":3},"PORTEO||TORTON RABON":{"m":4762.0,"n":10},"SEARS||1 5 TONELADAS":{"m":10973.0,"n":2},"SEARS||3 5 TONELADAS":{"m":2778.0,"n":4},"SEARS||TRAILER":{"m":6750.0,"n":2},"SORIANA||3 5 TONELADAS":{"m":2778.0,"n":5},"SORIANA||TORTON RABON":{"m":25278.0,"n":4},"TOYS||1 5 TONELADAS":{"m":2268.0,"n":11},"TOYS||3 5 TONELADAS":{"m":6300.0,"n":5},"WALMART||1 5 TONELADAS":{"m":2268.0,"n":38},"WALMART||3 5 TONELADAS":{"m":2778.0,"n":10},"WALMART||TORTON RABON":{"m":47610.0,"n":6},"WALMART||TRAILER":{"m":6750.0,"n":6}},"stats":{"viajes":369,"meses":"mayo y junio 2026","destinos":203,"rutas":264}},"demoCsv":[{"ID Viaje":"01677","Folio de Cliente":"S-00089307","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"4000196845","Dirección de Destino":"Danhos Cuautitlán","Fecha Cita":"2026-07-03","Hora Cita":"18:45:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01678","Folio de Cliente":"S-00089516","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"26000074  -  26","Dirección de Destino":"JULIO CEPEDA CEDIS LECHUGAL MTY","Fecha Cita":"2026-07-02","Hora Cita":"09:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"15468.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01679","Folio de Cliente":"S-00089517","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"260000-69","Dirección de Destino":"JULIO CEPEDA  69 - RIO NILO GDL.","Fecha Cita":"2026-07-02","Hora Cita":"10:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"13025.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01681","Folio de Cliente":"S-00088349-S-00088350","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"4518587466-4518587469","Dirección de Destino":"PALACIO DE HIERRO CEDIS SAN MARTIN OBISPO","Fecha Cita":"2026-07-02","Hora Cita":"06:00:00","Tipo de Unidad":"Trailer","Costo Maniobra":"2500.00","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"6200.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01682","Folio de Cliente":"S-00089635-S-00089553-S-00089198","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"33675995-33674010-33688563","Dirección de Destino":"LIVERPOOL CEDIS JILOTEPEC","Fecha Cita":"2026-07-10","Hora Cita":"07:00:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4000.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01683","Folio de Cliente":"S-00089768//S-00089758//S-00089760//S-00089762//S-00089763/S-00089765//S-00089849//S-00089850//S-00089852//S-00089854//S-00089857//S-00089858","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"1624465578//8477974778//8932774458//9132774647//9177974695//8577975061//1624465579//8477974780//8577975063//8932774460//9132774649//9177974696","Dirección de Destino":"PORTEO","Fecha Cita":"2026-07-06","Hora Cita":"22:00:00","Tipo de Unidad":"Trailer","Costo Maniobra":"","Costo Maniobra Complemento":"1000.00","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"6500.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01687","Folio de Cliente":"S-00089764//S-00089859","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"9227975559//9227975562","Dirección de Destino":"WALMART 7493- CEDIS GUADALAJARA AUTOSERVICIO","Fecha Cita":"2026-07-09","Hora Cita":"02:00:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"17500.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01688","Folio de Cliente":"S-00089759//S-00089853","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8877975767//8877975769","Dirección de Destino":"WALMART 7471-7459 CHALCO","Fecha Cita":"2026-07-09","Hora Cita":"00:00:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4025.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01689","Folio de Cliente":"S-00089761//S-00089856","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"9077975389//9077975392","Dirección de Destino":"WALMART 7464-SUPERCENTER","Fecha Cita":"2026-07-09","Hora Cita":"17:00:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"400.00","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2300.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01690","Folio de Cliente":"S-00089851","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8532774617","Dirección de Destino":"WALMART 7494- BODEGA CUAUTITLÁN","Fecha Cita":"2026-07-09","Hora Cita":"23:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01691","Folio de Cliente":"S-00089855","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8977974508","Dirección de Destino":"WALMART 7482-CEDIS STA BARBARA (BAE NORTE)","Fecha Cita":"2026-07-09","Hora Cita":"18:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2257.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01692","Folio de Cliente":"S-00089791","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"4000198888","Dirección de Destino":"Danhos Cuautitlán","Fecha Cita":"2026-07-09","Hora Cita":"19:00:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2300.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01693","Folio de Cliente":"S-00088866","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"MUESTRAS WALMART","Dirección de Destino":"WM LA NARANJA","Fecha Cita":"2026-07-08","Hora Cita":"07:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4400.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01694","Folio de Cliente":"123","Dirección de Origen":"WM LA NARANJA","Cliente":"4pl- Playmobill","Pedido (OC)":"MUESTRAS LOR FALL","Dirección de Destino":"4PL ALMACEN","Fecha Cita":"2026-07-10","Hora Cita":"14:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"1700.00","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4600.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01695","Folio de Cliente":"S-00090189","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"1624465602//8477974794//8577975081//8932774480//9132774668//9227975584//9177974714","Dirección de Destino":"PORTEO","Fecha Cita":"2026-07-12","Hora Cita":"10:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"800.00","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4600.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01699","Folio de Cliente":"S-00090304-S-00090303","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":": Solicitud Muestras y Deco - Activaciones Juguetron y TRU Soccer","Dirección de Destino":"OFICINA PLAYMOBIL CORPORATIVO","Fecha Cita":"2026-07-14","Hora Cita":"12:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2257.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01700","Folio de Cliente":"S-00090061","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"4000201733","Dirección de Destino":"Danhos Cuautitlán","Fecha Cita":"2026-07-15","Hora Cita":"14:45:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01703","Folio de Cliente":"S-00090191","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8532774639","Dirección de Destino":"WALMART 7494- BODEGA CUAUTITLÁN","Fecha Cita":"2026-07-15","Hora Cita":"17:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01704","Folio de Cliente":"S-00090193","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8877975792","Dirección de Destino":"WALMART 7471-7459 CHALCO","Fecha Cita":"2026-07-16","Hora Cita":"00:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2875.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01705","Folio de Cliente":"S-00090196","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8977974530","Dirección de Destino":"WALMART 7482-CEDIS STA BARBARA (BAE NORTE)","Fecha Cita":"2026-07-15","Hora Cita":"17:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1500.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01706","Folio de Cliente":"S-00090197","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"9077975413","Dirección de Destino":"WALMART 7464-SUPERCENTER","Fecha Cita":"2026-07-16","Hora Cita":"00:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2257.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01707","Folio de Cliente":"S-00090299","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"26300169061","Dirección de Destino":"CITYFRESKO LA COMER DOMINGO DIEZ Sucursal 463","Fecha Cita":"2026-07-15","Hora Cita":"10:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"8600.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01708","Folio de Cliente":"S-00089901","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"17427712","Dirección de Destino":"SEARS 870- CEDIS VALLEJO","Fecha Cita":"2026-07-21","Hora Cita":"12:30:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4400.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01710","Folio de Cliente":"S-00089898","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"1847281","Dirección de Destino":"SANBORNS (ALMACEN GAVILAN)","Fecha Cita":"2026-07-16","Hora Cita":"12:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"1200.00","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2100.00","Costo Rechazo":"1050.00","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"Con Rechazo","Status":"Completado"},{"ID Viaje":"01711","Folio de Cliente":"S-00090390","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"4000205059","Dirección de Destino":"Danhos Cuautitlán","Fecha Cita":"2026-07-22","Hora Cita":"18:45:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2300.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01712","Folio de Cliente":"S-00090458","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"26300170345","Dirección de Destino":"CITY FRESKO CEDIS VALLEJO","Fecha Cita":"2026-07-17","Hora Cita":"15:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01713","Folio de Cliente":"S-00090526","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"1624465626 / 8477974815 / 8577975105  / 9177974738 / 9227975609 /  8932774497 /  9132774686","Dirección de Destino":"PORTEO","Fecha Cita":"2026-07-20","Hora Cita":"15:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4400.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01716","Folio de Cliente":"S-00090528","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8532774656","Dirección de Destino":"WALMART 7494- BODEGA CUAUTITLÁN","Fecha Cita":"2026-07-22","Hora Cita":"17:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01717","Folio de Cliente":"S-00090530","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8877975818","Dirección de Destino":"WALMART 7471-7459 CHALCO","Fecha Cita":"2026-07-22","Hora Cita":"00:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2875.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01718","Folio de Cliente":"S-00090531","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8977974548","Dirección de Destino":"WALMART 7482-CEDIS STA BARBARA (BAE NORTE)","Fecha Cita":"2026-07-22","Hora Cita":"16:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1500.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01719","Folio de Cliente":"S-00090532","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"9077975438","Dirección de Destino":"WALMART 7464-SUPERCENTER","Fecha Cita":"2026-07-22","Hora Cita":"15:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01720","Folio de Cliente":"S-00089957-S-00090038","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"33703623-33707458","Dirección de Destino":"LIVERPOOL CEDIS JILOTEPEC","Fecha Cita":"2026-07-24","Hora Cita":"10:00:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4000.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01723","Folio de Cliente":"S-00090927","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"Garantías muestra 17 julio 2026","Dirección de Destino":"OFICINA PLAYMOBIL CORPORATIVO","Fecha Cita":"2026-07-22","Hora Cita":"12:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Completado"},{"ID Viaje":"01724","Folio de Cliente":"S-00090882","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"1849480","Dirección de Destino":"SANBORNS (ALMACEN GAVILAN)","Fecha Cita":"2026-07-24","Hora Cita":"13:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2100.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01725","Folio de Cliente":"S-00090959","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"4000208891","Dirección de Destino":"Danhos Cuautitlán","Fecha Cita":"2026-07-25","Hora Cita":"08:15:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2300.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01726","Folio de Cliente":"S-00090398","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"33719175","Dirección de Destino":"LIVERPOOL CEDIS JILOTEPEC","Fecha Cita":"2026-07-29","Hora Cita":"09:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"3200.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01727","Folio de Cliente":"S-00090869","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8477974838 / 8577975127 / 8932774516 / 9132774709 / 9177974758 /","Dirección de Destino":"PORTEO","Fecha Cita":"2026-07-28","Hora Cita":"00:00:00","Tipo de Unidad":"Trailer","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"6200.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01728","Folio de Cliente":"S-00091471","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"1624465697 / 8477974880 / 8577975170 / 9132774751 / 9227975678 /","Dirección de Destino":"PORTEO","Fecha Cita":"2026-07-25","Hora Cita":"08:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4400.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01729","Folio de Cliente":"S-00090870","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8532774671","Dirección de Destino":"WALMART 7494- BODEGA CUAUTITLÁN","Fecha Cita":"2026-07-29","Hora Cita":"17:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4400.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01730","Folio de Cliente":"S-00090872","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8877975842","Dirección de Destino":"WALMART 7471-7459 CHALCO","Fecha Cita":"2026-07-29","Hora Cita":"00:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"6600.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01731","Folio de Cliente":"S-00090874","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"9077975459","Dirección de Destino":"WALMART 7464-SUPERCENTER","Fecha Cita":"2026-07-29","Hora Cita":"09:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"4400.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01732","Folio de Cliente":"S-00090877","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"9227975633","Dirección de Destino":"WALMART 7493- CEDIS GUADALAJARA AUTOSERVICIO","Fecha Cita":"2026-07-29","Hora Cita":"14:00:00","Tipo de Unidad":"Torton / rabon","Costo Maniobra":"","Costo Maniobra Complemento":"800.00","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"22000.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01733","Folio de Cliente":"S-00090884","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"8977974562","Dirección de Destino":"WALMART 7482-CEDIS STA BARBARA (BAE NORTE)","Fecha Cita":"2026-07-29","Hora Cita":"17:00:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2300.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01734","Folio de Cliente":"S-00090898","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"121194","Dirección de Destino":"3B CEDIS TLAHUAC","Fecha Cita":"2026-07-28","Hora Cita":"09:30:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2100.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01736","Folio de Cliente":"S-00090904","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"121200","Dirección de Destino":"3B CEDIS TULTITLÁN","Fecha Cita":"2026-07-27","Hora Cita":"07:30:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"1840.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01737","Folio de Cliente":"S-00090912","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"121208","Dirección de Destino":"3B CEDIS SAN LUIS POTOSI","Fecha Cita":"2026-07-28","Hora Cita":"09:30:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"10000.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01739","Folio de Cliente":"S-00090899","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"121195","Dirección de Destino":"3B CEDIS PUEBLA","Fecha Cita":"2026-07-29","Hora Cita":"10:00:00","Tipo de Unidad":"1.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"400.00","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"6590.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"},{"ID Viaje":"01740","Folio de Cliente":"S-00090902","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"121198","Dirección de Destino":"3B CEDIS VALLEJO","Fecha Cita":"2026-07-29","Hora Cita":"07:30:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"2300.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Asignado"},{"ID Viaje":"01741","Folio de Cliente":"S-00090903","Dirección de Origen":"4PL ALMACEN","Cliente":"4pl- Playmobill","Pedido (OC)":"121199","Dirección de Destino":"3B CEDIS AGUASCALIENTES","Fecha Cita":"2026-07-29","Hora Cita":"08:30:00","Tipo de Unidad":"3.5 toneladas","Costo Maniobra":"","Costo Maniobra Complemento":"","Costo Maniobra 4PL":"","Costo Estadía":"","Costo Estadia Complemento":"","Costo Estadía 4PL":"","Costo Flete":"14000.00","Costo Rechazo":"","Costo Flete 4PL":"","Tarifa Armada":"","Con Rechazo":"","Status":"Entregado"}],"realJulio":{"1677":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1678":{"fc":18287.5,"fv":18928.56,"mc":1145.0,"mv":1211.0},"1679":{"fc":15675.0,"fv":16224.62,"mc":1145.0,"mv":1211.0},"1681":{"fc":6750.0,"fv":6929.0,"mc":2700.0,"mv":2900.0},"1682":{"fc":4200.0,"fv":4400.0,"mc":null,"mv":null},"1683":{"fc":6750.0,"fv":6929.0,"mc":2700.0,"mv":2900.0},"1687":{"fc":18375.0,"fv":19250.0,"mc":null,"mv":null},"1688":{"fc":6300.0,"fv":6600.0,"mc":null,"mv":null},"1689":{"fc":2778.0,"fv":2863.0,"mc":1145.0,"mv":1211.0},"1690":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1691":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1692":{"fc":2778.0,"fv":2863.0,"mc":null,"mv":null},"1693":{"fc":4762.0,"fv":4906.0,"mc":2440.0,"mv":2880.0},"1694":{"fc":4762.0,"fv":4906.0,"mc":2440.0,"mv":2880.0},"1695":{"fc":4762.0,"fv":4906.0,"mc":2440.0,"mv":2880.0},"1699":{"fc":2257.2,"fv":2337.2,"mc":1145.0,"mv":1211.0},"1700":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1703":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1704":{"fc":5016.0,"fv":5192.56,"mc":null,"mv":null},"1705":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1706":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1707":{"fc":10294.0,"fv":10604.0,"mc":2440.0,"mv":2880.0},"1708":{"fc":4762.0,"fv":4906.0,"mc":2440.0,"mv":2880.0},"1710":{"fc":5016.0,"fv":5192.56,"mc":1145.0,"mv":1211.0},"1711":{"fc":2778.0,"fv":2863.0,"mc":null,"mv":null},"1712":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1713":{"fc":4762.0,"fv":4906.0,"mc":null,"mv":null},"1716":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1717":{"fc":5016.0,"fv":5192.56,"mc":null,"mv":null},"1718":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1719":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1720":{"fc":4200.0,"fv":4400.0,"mc":null,"mv":null},"1723":{"fc":2257.2,"fv":2337.2,"mc":1145.0,"mv":1211.0},"1724":{"fc":5016.0,"fv":5192.56,"mc":1145.0,"mv":1211.0},"1725":{"fc":2778.0,"fv":2863.0,"mc":null,"mv":null},"1726":{"fc":3344.0,"fv":3488.0,"mc":null,"mv":null},"1727":{"fc":6750.0,"fv":6929.0,"mc":null,"mv":null},"1728":{"fc":4762.0,"fv":4906.0,"mc":null,"mv":null},"1729":{"fc":4762.0,"fv":4906.0,"mc":2440.0,"mv":2880.0},"1730":{"fc":7245.0,"fv":7463.35,"mc":null,"mv":null},"1731":{"fc":4762.0,"fv":4906.0,"mc":null,"mv":null},"1732":{"fc":22770.0,"fv":23454.1,"mc":2440.0,"mv":2880.0},"1733":{"fc":2778.0,"fv":2863.0,"mc":null,"mv":null},"1734":{"fc":5016.0,"fv":5192.56,"mc":null,"mv":null},"1736":{"fc":2257.2,"fv":2337.2,"mc":null,"mv":null},"1737":{"fc":14671.8,"fv":15303.6,"mc":null,"mv":null},"1738":{"fc":9500.0,"fv":9600.0,"mc":1145.0,"mv":1211.0},"1739":{"fc":8465.0,"fv":8829.0,"mc":1145.0,"mv":1211.0},"1740":{"fc":2778.0,"fv":2863.0,"mc":null,"mv":null},"1741":{"fc":15675.0,"fv":16224.62,"mc":null,"mv":null}}};
+</script>
+<script>
+/* ============ Copiloto de Facturación 4PL · v2 ============ */
+const M = DATA.memoria;
+const RATIO_MAN = 1.057;
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+const $ = s => document.querySelector(s);
+const norm = s => String(s == null ? '' : s).trim().toUpperCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+const cadenaDe = d => { const w = norm(d).split(' '); return w.length ? w[0] : ''; };
+const num = v => {
+  if (v === null || v === undefined) return null;
+  const s = String(v).replace(/[$,\s]/g, '');
+  if (s === '' || s === '-') return null;
+  const n = parseFloat(s); return isNaN(n) ? null : n;
+};
+const mny = n => n == null ? '' : '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const mny0 = n => n == null ? '—' : '$' + Math.round(n).toLocaleString('es-MX');
+const k2 = n => (Math.round(n * 100) / 100).toString();
+const mesLabel = ym => { if (!ym || ym.length < 7) return 'sin fecha'; const p = ym.split('-'); return MESES[parseInt(p[1], 10) - 1] + ' ' + p[0]; };
+
+/* ---------- CSV ---------- */
+function parseCSV(text) {
+  text = text.replace(/^\uFEFF/, '');
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+    else if (c !== '\r') cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  if (!rows.length) return [];
+  const head = rows[0].map(h => h.trim());
+  return rows.slice(1).filter(r => r.some(v => String(v).trim() !== ''))
+    .map(r => { const o = {}; head.forEach((h, i) => o[h] = r[i] === undefined ? '' : r[i]); return o; });
+}
+
+/* ---------- motor ---------- */
+function ventaFlete(costo, uni) {
+  if (costo == null) return { v: null, s: 'r', src: 'sin costo' };
+  const hit = M.ventaFlete[k2(costo)];
+  if (hit != null) return { v: hit, s: 'g', src: 'tarifa de venta conocida' };
+  const r = M.ratioUnidad[uni] || M.ratioGlobal;
+  return { v: Math.round(costo * r * 100) / 100, s: 'a', src: 'estimada (+' + ((r - 1) * 100).toFixed(2) + '%)' };
+}
+function ventaManiobra(costo) {
+  if (costo == null) return { v: null, s: 'g', src: '' };
+  const hit = M.ventaManiobra[k2(costo)];
+  if (hit != null) return { v: hit, s: 'g', src: 'tabla de maniobras' };
+  return { v: Math.round(costo * RATIO_MAN * 100) / 100, s: 'a', src: 'estimada' };
+}
+
+function procesar(rows) {
+  return rows.map(r => {
+    const dest = norm(r['Dirección de Destino']), uni = norm(r['Tipo de Unidad']);
+    const t = M.tarifario[dest + '||' + uni];
+    const c = M.cadena[cadenaDe(r['Dirección de Destino']) + '||' + uni];
+    const costoPlat = num(r['Costo Flete']);
+    const flags = [];
+    let costo, sC, srcC;
+    if (t && (t.nv === 1 || t.p >= 0.7)) {
+      costo = t.m; sC = 'g';
+      srcC = t.nv === 1 ? 'tarifario · ' + t.n + ' viaje(s) a esta tarifa' : 'tarifario · ' + Math.round(t.p * 100) + '% de ' + t.n + ' viajes';
+      if (t.nv > 1) flags.push({ c: 'a', t: 'tarifa inconsistente', d: 'Esta ruta se ha cobrado entre ' + mny0(t.min) + ' y ' + mny0(t.max) + '.' });
+    } else if (t) {
+      costo = t.m; sC = 'a'; srcC = 'ruta con ' + t.nv + ' tarifas distintas';
+      flags.push({ c: 'a', t: 'tarifa inconsistente', d: 'Esta ruta se ha cobrado entre ' + mny0(t.min) + ' y ' + mny0(t.max) + '.' });
+    } else if (c) {
+      costo = c.m; sC = 'a'; srcC = 'estimado por la cadena (' + c.n + ' viajes)';
+      flags.push({ c: 'a', t: 'destino sin histórico', d: 'Tarifa estimada con otras sucursales de la misma cadena.' });
+    } else {
+      costo = costoPlat; sC = 'r'; srcC = 'sin antecedente requiere confirmación';
+      flags.push({ c: 'r', t: 'destino nuevo', d: 'No hay antecedente de esta ruta con esta unidad.' });
+    }
+    if (costoPlat != null && costo != null && Math.abs(costoPlat - costo) / Math.max(costo, 1) > 0.05)
+      flags.push({ c: 'b', auto: 1, t: 'viaje padre repartido', d: 'La plataforma trae ' + mny0(costoPlat) + '; suele ser el flete completo de un viaje padre repartido entre entregas.' });
+
+    const manRep = (num(r['Costo Maniobra']) || 0) + (num(r['Costo Maniobra Complemento']) || 0);
+    let man = manRep > 0 ? manRep : null, sM = 'g', srcM = manRep > 0 ? 'viene en el reporte' : '';
+    if (man == null && t && t.pman >= 0.5 && t.man) {
+      man = t.man; sM = 'a'; srcM = 'probable, no venía en el reporte';
+      flags.push({ c: 'a', t: 'maniobra faltante', d: 'El ' + Math.round(t.pman * 100) + '% de los viajes a este destino llevó maniobra de ' + mny0(t.man) + '.' });
+    }
+    const est = num(r[' Costo Estadía']) || num(r['Costo Estadía']) || null;
+    const fecha = String(r['Fecha Cita'] || '').slice(0, 10);
+    const o = {
+      id: String(r['ID Viaje'] || '').replace(/^0+/, ''), folio: r['Folio de Cliente'] || '',
+      origen: r['Dirección de Origen'] || '', cliente: r['Cliente'] || '', pedido: r['Pedido (OC)'] || '',
+      destino: r['Dirección de Destino'] || '', fecha, mes: fecha.slice(0, 7), hora: r['Hora Cita'] || '',
+      unidad: r['Tipo de Unidad'] || '', status: r['Status'] || '',
+      dest, uni, costoPlat, costo, sC, srcC, man, sM, srcM, est, flags, editC: false, editM: false
+    };
+    recalcular(o); return o;
+  });
+}
+
+function recalcular(o) {
+  const vf = ventaFlete(o.costo, o.uni);
+  o.venta = vf.v; o.sV = o.editC ? 'g' : vf.s; o.srcV = vf.src;
+  const vm = ventaManiobra(o.man);
+  o.manVenta = vm.v; o.srcMV = vm.src;
+  o.estVenta = o.est != null ? Math.round(o.est * M.ratioGlobal * 100) / 100 : null;
+  o.margen = (o.venta || 0) - (o.costo || 0) + (o.manVenta || 0) - (o.man || 0) + (o.estVenta || 0) - (o.est || 0);
+  o.totalVenta = (o.venta || 0) + (o.manVenta || 0) + (o.estVenta || 0);
+  o.totalCosto = (o.costo || 0) + (o.man || 0) + (o.est || 0);
+  o.margenPct = o.totalVenta ? o.margen / o.totalVenta * 100 : 0;
+  const ord = { g: 0, a: 1, r: 2 };
+  let peor = Math.max(ord[o.sC], ord[o.sV], ord[o.sM]);
+  if (o.margen <= 0) peor = 2;
+  o.sem = ['g', 'a', 'r'][peor];
+  o.atencion = o.sem !== 'g';
+}
+
+/* ---------- estado ---------- */
+let VIAJES = [], FMES = 'todos', FEST = 'todos', FSIG = null, FD1 = '', FD2 = '', SORT = { k: 'id', dir: 1 };
+// base = filtro de mes + estado (alimenta KPIs, tarjetas y gráficas)
+const base = () => VIAJES.filter(v =>
+  (!FD1 || (v.fecha && v.fecha >= FD1)) &&
+  (!FD2 || (v.fecha && v.fecha <= FD2)) &&
+  (FEST === 'todos' || (FEST === 'atencion' ? v.atencion : !v.atencion)));
+// etiqueta legible del periodo activo
+function periodoTxt() {
+  if (!FD1 && !FD2) return 'del archivo';
+  const meses = [...new Set(base().map(v => v.mes))];
+  if (meses.length === 1 && esMesCompleto()) return 'de ' + mesLabel(meses[0]);
+  if (FD1 && FD2) return 'del ' + FD1 + ' al ' + FD2;
+  return FD1 ? 'desde el ' + FD1 : 'hasta el ' + FD2;
+}
+function esMesCompleto() {
+  if (!FD1 || !FD2) return false;
+  const d = new Date(FD2 + 'T12:00:00');
+  return FD1.slice(8) === '01' && FD1.slice(0, 7) === FD2.slice(0, 7) &&
+    FD2.slice(8) === String(new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()).padStart(2, '0');
+}
+function setMes(m) {
+  if (m === 'todos') { FD1 = ''; FD2 = ''; FMES = 'todos'; return; }
+  const [y, mm] = m.split('-').map(Number);
+  FD1 = m + '-01';
+  FD2 = m + '-' + String(new Date(y, mm, 0).getDate()).padStart(2, '0');
+  FMES = m;
+}
+const COL_SIG = { 'destino nuevo': 'costo', 'destino sin histórico': 'costo', 'tarifa inconsistente': 'costo', '__neg': 'costo', 'maniobra faltante': 'man' };
+const tieneSenal = (v, s) => s === '__neg' ? v.margen <= 0 : v.flags.some(f => f.t === s);
+// vistos = base + filtro por tipo de señal (alimenta la tabla y la exportación)
+const vistos = () => base().filter(v => !FSIG || tieneSenal(v, FSIG));
+
+/* ---------- KPIs ---------- */
+function renderKpis() {
+  const v = base();
+  const venta = v.reduce((a, x) => a + x.totalVenta, 0);
+  const costo = v.reduce((a, x) => a + x.totalCosto, 0);
+  const marg = venta - costo, at = v.filter(x => x.atencion).length;
+  $('#kpis').innerHTML = `
+  <div class="kpi acc"><div class="lb">Viajes ${periodoTxt()}</div><div class="vl">${v.length}</div>
+    <div class="hint">${v.length - at} listos sin tocarse</div></div>
+  <div class="kpi"><div class="lb">Venta a facturar</div><div class="vl">${mny0(venta)}</div><div class="hint">flete + maniobras + estadías</div></div>
+  <div class="kpi"><div class="lb">Costo</div><div class="vl">${mny0(costo)}</div><div class="hint">lo que se paga a transportistas</div></div>
+  <div class="kpi ${marg <= 0 ? 'warn' : ''}"><div class="lb">Margen</div><div class="vl">${mny0(marg)}</div>
+    <div class="hint">${venta ? (marg / venta * 100).toFixed(2) : '0'}% sobre la venta</div></div>
+  <div class="kpi ${at ? 'warn' : ''}"><div class="lb">Requieren atención</div><div class="vl">${at}</div>
+    <div class="hint">viajes por revisar · ${(at / (v.length || 1) * 100).toFixed(0)}% del total</div></div>
+`;
+}
+
+/* ---------- alertas ---------- */
+function agrupa(fl) {
+  const g = {};
+  base().forEach(v => v.flags.filter(fl).forEach(f => {
+    if (!g[f.t]) g[f.t] = { c: f.c, t: f.t, d: f.d, n: 0, vj: new Set() };
+    g[f.t].n++; g[f.t].vj.add(v.id);
+  }));
+  return Object.values(g).map(x => ({ ...x, v: x.vj.size }))
+    .sort((a, b) => (a.c === 'r' ? -1 : 1) - (b.c === 'r' ? -1 : 1) || b.n - a.n);
+}
+const cardAlert = i => `<div class="alert ${i.c === 'r' ? 'red' : (i.c === 'a' ? 'amber' : 'grey')}${FSIG === i.t ? ' on' : ''}" data-sig="${i.t}">
+  <div class="t">${i.n} · ${i.t === '__neg' ? 'viaje(s) sin margen' : i.t}</div><div class="m">${i.d}</div>
+  <div class="lnk">${FSIG === i.t ? 'quitar filtro' : 'ver los ' + i.v + ' viaje(s)'}</div></div>`;
+
+function renderAlerts() {
+  const dec = agrupa(f => !f.auto), aut = agrupa(f => f.auto);
+  const neg = base().filter(v => v.margen <= 0);
+  if (neg.length) dec.unshift({ c: 'r', t: '__neg', n: neg.length, v: neg.length, d: 'Se factura igual o por debajo del costo.' });
+  const tot = dec.reduce((a, x) => a + x.n, 0);
+  const vj = new Set(); base().forEach(v => { if (v.flags.some(f => !f.auto) || v.margen <= 0) vj.add(v.id); });
+  $('#alertSub').textContent = dec.length
+    ? 'El motor resolvió lo mecánico. Quedan ' + tot + ' señales repartidas en ' + vj.size + ' viajes. Haz clic en una tarjeta para verlos en la tabla.'
+    : 'Nada pendiente: todos los viajes tienen tarifa confirmada por histórico.';
+  $('#alerts').innerHTML = dec.length ? dec.map(cardAlert).join('')
+    : '<div class="alert"><div class="t">Todo en verde</div><div class="m">Puedes descargar el Excel directo.</div></div>';
+  const nAut = aut.reduce((a, x) => a + x.n, 0);
+  $('#autoBox').classList.toggle('hidden', !aut.length);
+  $('#autoSum').textContent = 'Detectado automáticamente · ' + nAut + ' aviso(s) que el motor ya resolvió';
+  $('#alertsAuto').innerHTML = aut.map(cardAlert).join('');
+  document.querySelectorAll('.alert[data-sig]').forEach(el => el.onclick = () => {
+    FSIG = FSIG === el.dataset.sig ? null : el.dataset.sig;
+    redraw();
+    const t = $('#tblAnchor'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+/* ---------- toolbar ---------- */
+function renderToolbar() {
+  const meses = [...new Set(VIAJES.map(v => v.mes))].filter(Boolean).sort();
+  const cm = m => VIAJES.filter(v => v.mes === m).length;
+  const mesOn = m => m === 'todos' ? (!FD1 && !FD2) : (esMesCompleto() && FD1.slice(0, 7) === m);
+  const est = { todos: VIAJES.length, atencion: VIAJES.filter(v => v.atencion).length, listos: VIAJES.filter(v => !v.atencion).length };
+  $('#toolbar').innerHTML =
+    `<span class="chip ${mesOn('todos') ? 'on' : ''}" data-m="todos">Todos <span class="c">${VIAJES.length}</span></span>` +
+    meses.map(m => `<span class="chip ${mesOn(m) ? 'on' : ''}" data-m="${m}">${mesLabel(m)} <span class="c">${cm(m)}</span></span>`).join('') +
+    `<span class="fechas">del <input type="date" class="dt" id="fd1" value="${FD1}"> al <input type="date" class="dt" id="fd2" value="${FD2}"></span>
+     <span class="sep"></span>` +
+    `<span class="chip ${FEST === 'todos' ? 'on' : ''}" data-e="todos">Todos</span>
+     <span class="chip ${FEST === 'atencion' ? 'on' : ''}" data-e="atencion">Requieren atención <span class="c">${est.atencion}</span></span>
+     <span class="chip ${FEST === 'listos' ? 'on' : ''}" data-e="listos">Listos <span class="c">${est.listos}</span></span>
+     ${FSIG ? `<span class="sep"></span><span class="chip on" id="chipSig">${FSIG === '__neg' ? 'sin margen' : FSIG} ✕</span>` : ''}
+     <span class="spacer"></span>
+     <button class="btn green" id="btnXlsx">Descargar Excel (${vistos().length})</button>
+     <button class="btn ghost" id="btnReset">Cargar otro archivo</button>`;
+  document.querySelectorAll('#toolbar [data-m]').forEach(c => c.onclick = () => { setMes(c.dataset.m); redraw(); });
+  const f1 = $('#fd1'), f2 = $('#fd2');
+  if (f1) f1.onchange = e => { FD1 = e.target.value; redraw(); };
+  if (f2) f2.onchange = e => { FD2 = e.target.value; redraw(); };
+  document.querySelectorAll('#toolbar [data-e]').forEach(c => c.onclick = () => { FEST = c.dataset.e; redraw(); });
+  const cs = $('#chipSig'); if (cs) cs.onclick = () => { FSIG = null; redraw(); };
+  $('#btnXlsx').onclick = () => exportar(vistos());
+  $('#btnReset').onclick = reset;
+}
+
+/* ---------- tabla ---------- */
+const COLS = [
+  { k: 'sem', t: '', w: '' }, { k: 'id', t: 'ID' }, { k: 'destino', t: 'Destino' },
+  { k: 'unidad', t: 'Unidad' }, { k: 'fecha', t: 'Fecha' },
+  { k: 'man', t: 'Maniobra', n: 1 }, { k: 'manVenta', t: 'Maniobra 4PL', n: 1 },
+  { k: 'costo', t: 'Flete', n: 1 }, { k: 'venta', t: 'Flete 4PL', n: 1 },
+  { k: 'margen', t: 'Margen', n: 1 }, { k: 'flags', t: 'Notas' }
+];
+const PRIO = ['__neg', 'destino nuevo', 'tarifa inconsistente', 'maniobra faltante', 'destino sin histórico'];
+function prioridad(v) {
+  if (v.margen <= 0) return 0;
+  let p = 99;
+  v.flags.filter(f => !f.auto).forEach(f => { const i = PRIO.indexOf(f.t); if (i >= 0 && i < p) p = i; });
+  return p;
+}
+function ordenar(a, b) {
+  const k = SORT.k, d = SORT.dir;
+  if (k === 'sem') return (prioridad(a) - prioridad(b) || String(a.id).localeCompare(String(b.id))) * d;
+  if (k === 'flags') return (a.flags.length - b.flags.length) * d;
+  let x = a[k], y = b[k];
+  if (x == null) x = -Infinity; if (y == null) y = -Infinity;
+  if (typeof x === 'number' || typeof y === 'number') return ((x || 0) - (y || 0)) * d;
+  return String(x).localeCompare(String(y), 'es') * d;
+}
+function renderTabla() {
+  const v = vistos().slice().sort(ordenar);
+  const hi = FSIG ? COL_SIG[FSIG] : null;
+  const sum = f => v.reduce((a, x) => a + (x[f] || 0), 0);
+  const ar = k => SORT.k === k ? `<span class="ar">${SORT.dir === 1 ? '▲' : '▼'}</span>` : '';
+  $('#tbl').innerHTML = `
+  <thead><tr>${COLS.map(c => `<th class="${c.n ? 'num' : ''}${hi === c.k ? ' hi' : ''}" data-k="${c.k}">${c.t} ${ar(c.k)}</th>`).join('')}</tr></thead>
+  <tbody>${v.length ? v.map(o => `
+    <tr class="st-${o.sem}" data-id="${o.id}">
+      <td><span class="sem ${o.sem}"></span></td>
+      <td><b>${o.id}</b></td>
+      <td class="dest" title="${o.destino}">${o.destino}</td>
+      <td style="white-space:nowrap">${o.unidad}</td>
+      <td style="white-space:nowrap">${o.fecha}</td>
+      <td class="num${hi === 'man' ? ' hi' : ''}"><input class="inp ${o.editM ? 'edited' : ''}" data-k="man" value="${o.man == null ? '' : o.man}"></td>
+      <td class="num">${mny(o.manVenta)}</td>
+      <td class="num${hi === 'costo' ? ' hi' : ''}"><input class="inp ${o.editC ? 'edited' : ''}" data-k="costo" value="${o.costo == null ? '' : o.costo}"><span class="src">${o.srcC}</span></td>
+      <td class="num">${mny(o.venta)}<span class="src">${o.srcV}</span></td>
+      <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
+      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.t}</span>`).join('')}</td>
+    </tr>`).join('') : '<tr><td colspan="11" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
+  <tfoot><tr>
+    <td colspan="5">Subtotales (${v.length} viajes)</td>
+    <td class="num">${mny(sum('man'))}</td><td class="num">${mny(sum('manVenta'))}</td>
+    <td class="num">${mny(sum('costo'))}</td><td class="num">${mny(sum('venta'))}</td>
+    <td class="num">${mny(sum('margen'))}</td><td></td></tr></tfoot>`;
+  document.querySelectorAll('#tbl th').forEach(th => th.onclick = () => {
+    const k = th.dataset.k;
+    SORT = { k, dir: SORT.k === k ? -SORT.dir : 1 };
+    renderTabla();
+  });
+  document.querySelectorAll('#tbl .inp').forEach(inp => inp.addEventListener('change', e => {
+    const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
+    const n = num(e.target.value), k = e.target.dataset.k;
+    if (k === 'costo') { o.costo = n; o.editC = true; o.sC = 'g'; o.srcC = 'confirmado por ti'; }
+    else { o.man = n; o.editM = true; o.sM = 'g'; o.srcM = 'confirmado por ti'; }
+    o.flags = o.flags.filter(f => f.auto);
+    recalcular(o); redraw();
+  }));
+  $('#tblFoot').textContent = hi
+    ? (hi === 'man' ? 'Confirma o borra la columna Maniobra resaltada. La venta se recalcula sola.'
+                    : 'Corrige la columna Flete resaltada. El Flete 4PL y el margen se recalculan solos.')
+    : 'Las celdas blancas son editables. Al cambiar un costo, la venta se recalcula sola. Haz clic en cualquier encabezado para ordenar (el primero ordena por prioridad de atención).';
+}
+
+/* ---------- gráficas ---------- */
+function bar(lb, pct, val, cls) {
+  return `<div class="bar"><div class="lb" title="${lb}">${lb}</div>
+    <div class="tr"><div class="fl ${cls || ''}" style="width:${Math.max(1, Math.min(100, pct))}%"></div></div>
+    <div class="vl">${val}</div></div>`;
+}
+function renderCharts() {
+  const v = base();
+  const byDest = {};
+  v.forEach(o => {
+    const k = o.destino || '(sin destino)';
+    if (!byDest[k]) byDest[k] = { n: 0, venta: 0, margen: 0 };
+    byDest[k].n++; byDest[k].venta += o.totalVenta; byDest[k].margen += o.margen;
+  });
+  const arr = Object.entries(byDest).map(([k, d]) => ({ k, ...d, pct: d.venta ? d.margen / d.venta * 100 : 0 }));
+
+  const peores = arr.slice().sort((a, b) => a.pct - b.pct).slice(0, 12);
+  const maxAbs = Math.max(...peores.map(x => Math.abs(x.pct)), 1);
+  const c1 = `<div class="chart"><h3>Margen por destino</h3>
+    <div class="q">¿Qué rutas se están comiendo el negocio? Los 12 destinos con menor margen del periodo.</div>
+    <div class="bars">${peores.map(x => bar(x.k + ' · ' + x.n + ' viaje(s)', Math.abs(x.pct) / maxAbs * 100,
+    x.pct.toFixed(1) + '% · ' + mny0(x.margen), x.pct <= 0 ? 'neg' : (x.pct < 3 ? 'warn' : 'good'))).join('')}</div></div>`;
+
+  const inc = [];
+  v.forEach(o => {
+    const t = M.tarifario[o.dest + '||' + o.uni];
+    if (t && t.nv > 1 && !inc.find(x => x.k === o.destino + ' · ' + o.unidad))
+      inc.push({ k: o.destino + ' · ' + o.unidad, min: t.min, max: t.max, n: t.n, nv: t.nv });
+  });
+  inc.sort((a, b) => (b.max - b.min) - (a.max - a.min));
+  const top = inc.slice(0, 12), gmax = Math.max(...top.map(x => x.max), 1);
+  const c2 = `<div class="chart"><h3>Rutas con tarifa inestable</h3>
+    <div class="q">¿Cuánto varía el precio de una misma ruta? La barra muestra el rango entre lo mínimo y lo máximo cobrado.</div>
+    ${top.length ? `<div class="bars">${top.map(x => `<div class="bar">
+      <div class="lb" title="${x.k}">${x.k}</div>
+      <div class="rng"><div class="seg" style="left:${x.min / gmax * 100}%;width:${Math.max(1.5, (x.max - x.min) / gmax * 100)}%"></div></div>
+      <div class="vl">${mny0(x.min)} – ${mny0(x.max)}</div></div>`).join('')}</div>`
+      : '<div class="empty">Ninguna ruta del periodo tiene tarifas contradictorias.</div>'}</div>`;
+
+  const tops = arr.slice().sort((a, b) => b.venta - a.venta).slice(0, 12);
+  const vmax = Math.max(...tops.map(x => x.venta), 1);
+  const c3 = `<div class="chart"><h3>Dónde está concentrado el negocio</h3>
+    <div class="q">¿Qué destinos mueven más dinero? Son los primeros que conviene negociar o renegociar.</div>
+    <div class="bars">${tops.map(x => bar(x.k + ' · ' + x.n + ' viaje(s)', x.venta / vmax * 100, mny0(x.venta))).join('')}</div></div>`;
+
+  $('#charts').innerHTML = c1 + c2 + c3;
+}
+
+/* ---------- Excel (formato de la plantilla de Luis) ---------- */
+const FMT_CONT = '_("$"* #,##0.00_);_("$"* \\(#,##0.00\\);_("$"* "-"??_);_(@_)';
+const ANCHOS = [8.2, 14.8, 17, 13, 18.8, 41.2, 10, 9, 14, 14.2, 17.3, 12.7, 15.7, 12.5, 13.7];
+const FILLS = ['FFFFE598','FFFFE598','FFFFE598','FFFFE699','FFFFE699','FFFFE598','FFFFE598','FFFFE598','FFFFE699','FFFFE598','FF8EAADB','FFFFE699','FF8EA9DB','FFFFE699','FF8EA9DB'];
+const HEAD = ['ID Viaje', 'Folio de Cliente', 'Dirección de Origen', 'Cliente', 'Pedido (OC)', 'Dirección de Destino',
+  'Fecha Cita', 'Hora Cita', 'Tipo de Unidad', 'Costo Maniobra', 'Costo Maniobra 4PL', ' Costo Estadía',
+  'Costo Estadía 4PL', 'Costo Flete', 'Costo Flete 4PL'];
+
+async function exportar(lista) {
+  if (!lista.length) { alert('No hay viajes que exportar con este filtro.'); return; }
+  if (typeof ExcelJS === 'undefined') { alert('No cargó la librería de Excel. Revisa tu conexión y recarga la página.'); return; }
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('REPORTE DISTRIBUCION', { views: [{ state: 'frozen', ySplit: 4 }] });
+  ws.columns = ANCHOS.map(w => ({ width: w }));
+
+  const last = 4 + lista.length;
+  // fila 3: subtotales
+  const r3 = ws.getRow(3);
+  for (let c = 10; c <= 15; c++) {
+    const L = String.fromCharCode(64 + c);
+    const cell = r3.getCell(c);
+    cell.value = { formula: `SUBTOTAL(9,${L}5:${L}${last})` };
+    cell.numFmt = FMT_CONT; cell.font = { size: 12 };
+  }
+  // fila 4: encabezados
+  const r4 = ws.getRow(4);
+  HEAD.forEach((h, i) => {
+    const cell = r4.getCell(i + 1);
+    cell.value = h;
+    cell.font = { bold: true, size: 11 };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: FILLS[i] } };
+    cell.border = { top: { style: 'thin', color: { argb: 'FFBFBFBF' } }, bottom: { style: 'thin', color: { argb: 'FFBFBFBF' } }, left: { style: 'thin', color: { argb: 'FFBFBFBF' } }, right: { style: 'thin', color: { argb: 'FFBFBFBF' } } };
+    cell.alignment = { vertical: 'middle', wrapText: true };
+    if (i >= 9) cell.numFmt = FMT_CONT;
+  });
+  r4.height = 30;
+  // datos desde la fila 5
+  lista.forEach((o, i) => {
+    const r = ws.getRow(5 + i);
+    [o.id, o.folio, o.origen, o.cliente, o.pedido, o.destino, o.fecha, o.hora, o.unidad,
+    o.man, o.manVenta, o.est, o.estVenta, o.costo, o.venta].forEach((v, c) => {
+      const cell = r.getCell(c + 1);
+      cell.value = v == null || v === '' ? null : v;
+      cell.font = { size: 12 };
+      if (c >= 9) cell.numFmt = FMT_CONT;
+    });
+  });
+  ws.autoFilter = { from: { row: 4, column: 1 }, to: { row: last, column: 15 } };
+
+  const tag = (FD1 || FD2)
+    ? (esMesCompleto() ? FD1.slice(0, 7) : (FD1 || 'inicio') + '_a_' + (FD2 || 'fin'))
+    : new Date().toISOString().slice(0, 10);
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'REPORTE_DISTRIBUCION_' + tag + '.xlsx';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+/* ---------- validación contra Excel ---------- */
+function leerExcel(buf) {
+  const wb = XLSX.read(buf, { type: 'array' });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
+  let hr = -1;
+  for (let i = 0; i < Math.min(12, aoa.length); i++)
+    if ((aoa[i] || []).some(c => String(c).trim().toUpperCase() === 'ID VIAJE')) { hr = i; break; }
+  if (hr < 0) throw new Error('No encontré la fila de encabezados (ID Viaje).');
+  const head = aoa[hr].map(h => String(h == null ? '' : h).trim());
+  const col = n => head.findIndex(h => h.toUpperCase().replace(/\s+/g, ' ').trim() === n);
+  const iId = col('ID VIAJE'), iFc = col('COSTO FLETE'), iFv = col('COSTO FLETE 4PL'),
+    iMc = col('COSTO MANIOBRA'), iMv = col('COSTO MANIOBRA 4PL');
+  const out = {};
+  for (let i = hr + 1; i < aoa.length; i++) {
+    const r = aoa[i] || []; const id = num(r[iId]); if (id == null) continue;
+    out[String(id)] = { fc: num(r[iFc]), fv: num(r[iFv]), mc: num(r[iMc]), mv: num(r[iMv]) };
+  }
+  return out;
+}
+function comparar(real) {
+  const filas = VIAJES.filter(o => real[o.id]).map(o => {
+    const r = real[o.id], vp = ventaFlete(r.fc, o.uni).v;
+    return {
+      id: o.id, dest: o.destino, fcR: r.fc, fcM: o.costo, fvR: r.fv, fvM: vp,
+      okV: r.fv != null && vp != null && Math.abs(r.fv - vp) < 0.51,
+      okC: r.fc != null && o.costo != null && Math.abs(r.fc - o.costo) < 0.51,
+      cerca: r.fc != null && o.costo != null && Math.abs(r.fc - o.costo) / Math.max(r.fc, 1) < 0.01,
+      conoce: !!M.tarifario[o.dest + '||' + o.uni]
+    };
+  });
+  const n = filas.length;
+  if (!n) { alert('Ese Excel no tiene viajes en común con el CSV cargado. ¿Es el mismo periodo?'); return; }
+  const okV = filas.filter(f => f.okV).length, okC = filas.filter(f => f.okC).length;
+  const con = filas.filter(f => f.conoce), cerca = con.filter(f => f.cerca).length;
+  const difV = filas.filter(f => !f.okV).reduce((a, f) => a + Math.abs((f.fvR || 0) - (f.fvM || 0)), 0);
+  $('#cmpHero').innerHTML = `
+    <div class="cmp-box"><div class="lb">Venta calculada</div><div class="big">${(okV / n * 100).toFixed(0)}%</div>
+      <div class="hint">${okV} de ${n} al centavo · diferencia total ${mny0(difV)}</div></div>
+    <div class="cmp-box"><div class="lb">Tarifa en rutas conocidas</div><div class="big amber">${con.length ? (cerca / con.length * 100).toFixed(0) : 0}%</div>
+      <div class="hint">${cerca} de ${con.length} a menos de 1% · ${okC} idénticas</div></div>
+    <div class="cmp-box"><div class="lb">Viajes cotejados</div><div class="big">${n}</div>
+      <div class="hint">de ${VIAJES.length} en el CSV</div></div>
+    <div class="cmp-box"><div class="lb">Captura evitada</div><div class="big">${n * 2}</div>
+      <div class="hint">celdas que ya no se teclean</div></div>`;
+  $('#tblCmp').innerHTML = `
+  <thead><tr><th>ID</th><th>Destino</th><th class="num">Costo tuyo</th><th class="num">Costo motor</th>
+  <th class="num">Venta tuya</th><th class="num">Venta motor</th><th>Venta</th><th>Costo</th></tr></thead>
+  <tbody>${filas.map(f => `<tr>
+    <td><b>${f.id}</b></td><td class="dest" title="${f.dest}">${f.dest}</td>
+    <td class="num">${mny(f.fcR)}</td><td class="num">${mny(f.fcM)}</td>
+    <td class="num">${mny(f.fvR)}</td><td class="num">${mny(f.fvM)}</td>
+    <td class="${f.okV ? 'ok' : 'no'}">${f.okV ? '✓ exacta' : '✕ ' + mny0(Math.abs((f.fvR || 0) - (f.fvM || 0)))}</td>
+    <td class="${f.okC || f.cerca ? 'ok' : 'no'}">${f.okC ? '✓ igual' : (f.cerca ? '≈ &lt;1%' : (f.conoce ? '✕ cambió' : '— ruta nueva'))}</td></tr>`).join('')}</tbody>`;
+  $('#cmpOut').classList.remove('hidden');
+}
+
+/* ---------- flujo ---------- */
+function redraw() { renderKpis(); renderAlerts(); renderToolbar(); renderTabla(); renderCharts(); }
+function reset() {
+  $('#results').classList.add('hidden'); $('#cardLoad').classList.remove('hidden');
+  $('#cmpOut').classList.add('hidden'); $('#file').value = ''; $('#fileX').value = '';
+  VIAJES = []; FMES = 'todos'; FEST = 'todos'; FSIG = null; FD1 = ''; FD2 = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function cargar(rows) {
+  VIAJES = procesar(rows);
+  if (!VIAJES.length) { alert('No encontré viajes en ese archivo. ¿Es el Reporte 4PL de Armadamyl?'); return; }
+  const fs = VIAJES.map(v => v.fecha).filter(Boolean).sort();
+  $('#periodo').textContent = fs.length ? '· ' + fs[0] + ' a ' + fs[fs.length - 1] : '';
+  $('#cardLoad').classList.add('hidden'); $('#results').classList.remove('hidden');
+  redraw(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+$('#memLine').innerHTML = `<span class="dot"></span>Memoria activa · ${M.stats.viajes} viajes aprendidos (${M.stats.meses}) ·
+  ${Object.keys(M.tarifario).length} rutas · ${Object.keys(M.ventaFlete).length} tarifas de venta`;
+
+const drop = $('#drop'), file = $('#file');
+drop.onclick = () => file.click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) leerCsv(e.dataTransfer.files[0]); };
+file.onchange = e => { if (e.target.files[0]) leerCsv(e.target.files[0]); };
+function leerCsv(f) {
+  const rd = new FileReader();
+  rd.onload = ev => { try { cargar(parseCSV(ev.target.result)); } catch (err) { alert('No pude leer el archivo: ' + err.message); } };
+  rd.readAsText(f, 'UTF-8');
+}
+const dropX = $('#dropX'), fileX = $('#fileX');
+dropX.onclick = () => fileX.click();
+dropX.ondragover = e => { e.preventDefault(); dropX.classList.add('over'); };
+dropX.ondragleave = () => dropX.classList.remove('over');
+dropX.ondrop = e => { e.preventDefault(); dropX.classList.remove('over'); if (e.dataTransfer.files[0]) leerXls(e.dataTransfer.files[0]); };
+fileX.onchange = e => { if (e.target.files[0]) leerXls(e.target.files[0]); };
+function leerXls(f) {
+  const rd = new FileReader();
+  rd.onload = ev => { try { comparar(leerExcel(new Uint8Array(ev.target.result))); } catch (err) { alert('No pude leer el Excel: ' + err.message); } };
+  rd.readAsArrayBuffer(f);
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+  ['fact', 'ana', 'val'].forEach(k => $('#tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
+});
+
+</script>
+</body>
+</html>
