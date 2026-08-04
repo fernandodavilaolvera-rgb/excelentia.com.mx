@@ -88,7 +88,19 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .arch-tabla .btn-icon{width:24px;height:24px;padding:.22rem}
 .td-nombre{display:flex;align-items:center;gap:.45rem;min-width:0}
 .td-ico{font-size:.95rem;line-height:1;flex-shrink:0;cursor:help}
-.td-nom{font-weight:700;color:#1a2035;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+.td-nom{font-weight:700;color:#1a2035;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:var(--w-nom,340px)}
+
+/* ── COLUMNA NOMBRE AJUSTABLE ── */
+.th-nombre{position:relative}
+.resize-grip{position:absolute;top:0;right:0;width:8px;height:100%;cursor:col-resize;user-select:none;touch-action:none;z-index:2}
+.resize-grip::after{content:'';position:absolute;top:20%;bottom:20%;right:3px;width:2px;background:#dde1e9;border-radius:2px;transition:.15s}
+.th-nombre:hover .resize-grip::after,.resize-grip.activo::after{background:#4a9fd4}
+body.resizing{cursor:col-resize;user-select:none}
+
+/* ── PILL DE QUIÉN SUBIÓ ── */
+.td-autor{width:1%;white-space:nowrap}
+.autor-pill{display:inline-flex;align-items:center;gap:.25rem;font-size:.66rem;font-weight:800;color:#fff;border-radius:10px;padding:.08rem .45rem;line-height:1.35;white-space:nowrap}
+.autor-pill.sin{background:#f5f6f8;color:#8a90a0;border:1px solid #dde1e9;font-weight:700}
 .col-proy{width:1%;white-space:nowrap}
 .col-fecha{width:1%;white-space:nowrap;color:#8a90a0;font-size:.75rem}
 .col-acc{width:1%;white-space:nowrap}
@@ -147,8 +159,10 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
   .scope-tag{align-self:flex-start}
   .url-form input,.url-form select{flex:1 1 100%}
   .arch-proj{max-width:130px}
-  .arch-tabla{min-width:480px}
-  .td-nom{max-width:180px}
+  .arch-tabla{min-width:520px;--w-nom:180px !important}
+  .resize-grip{display:none}
+  .td-autor{display:none}
+  .th-autor{display:none}
 }
 </style>
 </head>
@@ -271,10 +285,15 @@ const TOPE_RECIENTES = 15;
 const CARPETA_MADRE_DRIVE = 'https://drive.google.com/drive/folders/1PNsI3kgobXoytYpzZtIvEb9kvAPbeHbv';
 
 const USERS = {
-  fernando: { nombre:'Fernando' },
-  juanjose: { nombre:'Juan José' },
-  adolfo:   { nombre:'Adolfo' }
+  fernando: { nombre:'Fernando',  color:'#1a3a6b' },
+  juanjose: { nombre:'Juan José', color:'#7c3aed' },
+  adolfo:   { nombre:'Adolfo',    color:'#059669' }
 };
+
+// Ancho de la columna Nombre (se recuerda entre sesiones)
+const ANCHO_NOMBRE_KEY = 'drive_ancho_nombre';
+const ANCHO_NOMBRE_MIN = 140;
+let anchoNombre = 0;   // 0 = automático
 
 let currentUser   = 'fernando';
 let PROYECTOS     = [];
@@ -494,6 +513,10 @@ function ordenarPor(campo){
 function valorOrden(a, campo){
   if(campo === 'nombre')   return norm(a.Nombre);
   if(campo === 'proyecto') return norm(toStr(a.Proyecto) || 'Sin proyecto');
+  if(campo === 'autor'){
+    const u = USERS[toStr(a.SubidoPor)];
+    return norm(u ? u.nombre : 'zzz');   // los sin autor se van al final
+  }
   return toStr(a.Fecha);   // ISO: el orden alfabético coincide con el cronológico
 }
 
@@ -572,17 +595,23 @@ function renderArchivos(){
     const tipIco = ligado
       ? 'Link ligado · el archivo vive fuera de este módulo. Borrarlo aquí NO toca el original.'
       : 'Archivo subido desde este módulo · al borrarlo puedes mandarlo también a la papelera de Drive.';
+    const nombre  = toStr(a.Nombre);
+    const esHtml  = !ligado && driveId && /\.html?$/i.test(nombre);
+    const puedeDL = !!driveId;
     return `<tr>
-      <td>
+      <td class="col-nombre">
         <div class="td-nombre">
           <span class="td-ico" title="${escAttr(tipIco)}">${iconoPorTipo(a.Tipo, a.Nombre)}</span>
           <span class="td-nom" title="${escAttr(a.Nombre)}">${escHtml(a.Nombre)}</span>
         </div>
       </td>
       ${mostrarProy ? `<td class="col-proy"><span class="arch-proj${sinP ? ' sin' : ''}" title="${escAttr(tipChip)}" onclick="abrirCarpeta('${escAttr(carp)}', event)">📁 ${escHtml(proy)}</span></td>` : ''}
+      <td class="td-autor">${pillAutor(a.SubidoPor)}</td>
       <td class="col-fecha">${fecha ? fmtDate(fecha) : '—'}</td>
       <td class="col-acc">
         <div class="acc-wrap">
+          ${esHtml ? `<button class="btn btn-secondary btn-sm btn-icon" title="Ver la página como se ve en el navegador" onclick="verHtml('${escAttr(driveId)}','${escAttr(nombre)}', event)">👁️</button>` : ''}
+          ${puedeDL ? `<button class="btn btn-secondary btn-sm btn-icon" title="Descargar archivo" onclick="descargarArchivo('${escAttr(driveId)}','${escAttr(nombre)}', event)">📥</button>` : ''}
           ${link ? `<a href="${escAttr(link)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm btn-icon" title="Abrir">↗</a>` : ''}
           ${link ? `<button class="btn btn-secondary btn-sm btn-icon" title="Copiar link para compartir" onclick="copiarLink('${escAttr(link)}', event)">📋</button>` : ''}
           <button class="btn btn-danger btn-sm btn-icon" title="Eliminar" onclick="eliminarArchivo('${escAttr(id)}','${escAttr(driveId)}','${escAttr(origen)}')">✕</button>
@@ -593,13 +622,113 @@ function renderArchivos(){
 
   el.innerHTML = `<div class="tabla-wrap"><table class="arch-tabla">
     <thead><tr>
-      <th class="th-orden" onclick="ordenarPor('nombre')" title="Ordenar por nombre">Nombre ${flechaOrden('nombre')}</th>
+      <th class="th-orden th-nombre" onclick="ordenarPor('nombre')" title="Ordenar por nombre">Nombre ${flechaOrden('nombre')}<span class="resize-grip" title="Arrastra para ensanchar · doble clic para ajustar al nombre más largo"></span></th>
       ${mostrarProy ? `<th class="th-orden" onclick="ordenarPor('proyecto')" title="Ordenar por proyecto">Proyecto ${flechaOrden('proyecto')}</th>` : ''}
+      <th class="th-autor th-orden" onclick="ordenarPor('autor')" title="Ordenar por quién lo subió">Subió ${flechaOrden('autor')}</th>
       <th class="th-orden" onclick="ordenarPor('fecha')" title="Ordenar por fecha">Fecha ${flechaOrden('fecha')}</th>
       <th></th>
     </tr></thead>
     <tbody>${filas}</tbody>
   </table></div>`;
+
+  aplicarAnchoNombre();
+  activarResize();
+}
+
+// ═══════════════════════════════════════
+// COLUMNA NOMBRE AJUSTABLE
+// ═══════════════════════════════════════
+function thNombre(){ return document.querySelector('.arch-tabla .th-nombre'); }
+
+function aplicarAnchoNombre(){
+  const t = document.querySelector('.arch-tabla');
+  if(!t) return;
+  if(anchoNombre) t.style.setProperty('--w-nom', anchoNombre + 'px');
+  else            t.style.removeProperty('--w-nom');
+}
+
+// Ancho visible hoy de la columna (para arrancar el arrastre desde ahí)
+function anchoActualNombre(){
+  if(anchoNombre) return anchoNombre;
+  const n = document.querySelector('.arch-tabla .td-nom');
+  return n ? Math.round(n.getBoundingClientRect().width) : 340;
+}
+
+function guardarAnchoNombre(){
+  try{ localStorage.setItem(ANCHO_NOMBRE_KEY, String(anchoNombre)); }catch(e){}
+}
+
+function anchoIdealNombre(){
+  // Mide el nombre más largo visible y le deja aire para el ícono y el padding
+  const nodos = document.querySelectorAll('.arch-tabla .td-nom');
+  if(!nodos.length) return 0;
+  const cv = document.createElement('canvas').getContext('2d');
+  cv.font = '700 12px Manrope, sans-serif';   // coincide con el .8rem de la tabla
+  let max = 0;
+  nodos.forEach(n => { max = Math.max(max, cv.measureText(n.getAttribute('title') || n.textContent || '').width); });
+  const wrap = document.querySelector('.tabla-wrap');
+  const tope = wrap ? Math.round(wrap.clientWidth * 0.7) : 600;
+  return Math.min(Math.max(tope, ANCHO_NOMBRE_MIN), Math.max(ANCHO_NOMBRE_MIN, Math.round(max) + 24));
+}
+
+function activarResize(){
+  const th = thNombre();
+  if(!th) return;
+  const grip = th.querySelector('.resize-grip');
+  if(!grip) return;
+
+  // El agarradero no debe disparar el ordenamiento de la columna
+  grip.addEventListener('click', e => { e.stopPropagation(); });
+
+  const iniciar = (xInicial) => {
+    const anchoInicial = anchoActualNombre();
+    grip.classList.add('activo');
+    document.body.classList.add('resizing');
+
+    const mover = (x) => {
+      anchoNombre = Math.max(ANCHO_NOMBRE_MIN, Math.round(anchoInicial + (x - xInicial)));
+      aplicarAnchoNombre();
+    };
+    const soltar = () => {
+      grip.classList.remove('activo');
+      document.body.classList.remove('resizing');
+      guardarAnchoNombre();
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', soltar);
+      document.removeEventListener('touchmove', onTouch);
+      document.removeEventListener('touchend', soltar);
+    };
+    const onMove  = e => mover(e.clientX);
+    const onTouch = e => { if(e.touches[0]){ e.preventDefault(); mover(e.touches[0].clientX); } };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', soltar);
+    document.addEventListener('touchmove', onTouch, { passive:false });
+    document.addEventListener('touchend', soltar);
+  };
+
+  grip.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); iniciar(e.clientX); });
+  grip.addEventListener('touchstart', e => {
+    if(!e.touches[0]) return;
+    e.preventDefault(); e.stopPropagation();
+    iniciar(e.touches[0].clientX);
+  }, { passive:false });
+
+  // Doble clic en el agarradero: ajustar al nombre más largo
+  grip.addEventListener('dblclick', e => {
+    e.preventDefault(); e.stopPropagation();
+    anchoNombre = anchoIdealNombre();
+    aplicarAnchoNombre();
+    guardarAnchoNombre();
+    showToast('Columna ajustada al nombre más largo');
+  });
+}
+
+function pillAutor(quien){
+  const k = toStr(quien);
+  const u = USERS[k];
+  if(!u) return `<span class="autor-pill sin" title="No quedó registrado quién lo subió">—</span>`;
+  return `<span class="autor-pill" style="background:${u.color}" title="Subido por ${escAttr(u.nombre)}">${escHtml(u.nombre)}</span>`;
 }
 
 // ═══════════════════════════════════════
@@ -646,6 +775,71 @@ async function copiarLink(link, ev){
     }
   } else {
     showToast('No se pudo copiar. Abre con ↗ y copia la URL de la barra.', 'err');
+  }
+}
+
+// ── Trae el archivo real desde Drive (vía n8n) y lo devuelve como Blob ──
+async function bajarBlob(driveFileId){
+  const res = await fetch(`${N8N_BASE}${ARCHIVOS_ENDPOINT}`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ accion:'descargar', driveFileId: toStr(driveFileId) })
+  });
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.blob();
+}
+
+// 📥 Descargar: baja el archivo y lo guarda con su nombre real
+async function descargarArchivo(driveFileId, nombre, ev){
+  if(ev) ev.stopPropagation();
+  const btn = ev ? ev.currentTarget : null;   // se captura ANTES del await
+  if(!toStr(driveFileId)){
+    showToast('Este registro no tiene archivo propio. Ábrelo con ↗', 'err');
+    return;
+  }
+  if(btn){ btn.disabled = true; btn.innerHTML = '⏳'; }
+  try{
+    const blob = await bajarBlob(driveFileId);
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = toStr(nombre) || 'archivo';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    showToast('✅ Descargando ' + toStr(nombre));
+  }catch(e){
+    console.error('Descargar:', e);
+    showToast('No se pudo descargar. Ábrelo con ↗ desde Drive.', 'err');
+  }finally{
+    if(btn){ btn.disabled = false; btn.innerHTML = '📥'; }
+  }
+}
+
+// 👁️ Ver HTML renderizado: Drive muestra el código, así que lo abrimos como página
+async function verHtml(driveFileId, nombre, ev){
+  if(ev) ev.stopPropagation();
+  const btn = ev ? ev.currentTarget : null;
+  // La pestaña se abre ANTES del await, si no Safari la bloquea
+  const win = window.open('', '_blank');
+  if(win){
+    win.document.write('<title>Abriendo…</title><body style="font-family:sans-serif;padding:2rem;color:#4a5068">Abriendo ' +
+      String(nombre).replace(/[<>&]/g,'') + '…</body>');
+  }
+  if(btn){ btn.disabled = true; btn.innerHTML = '⏳'; }
+  try{
+    const raw  = await bajarBlob(driveFileId);
+    const blob = new Blob([raw], { type:'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    if(win){ win.location.href = url; }
+    else   { window.open(url, '_blank'); showToast('Si no se abrió, permite las ventanas emergentes', 'err'); }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }catch(e){
+    console.error('Ver HTML:', e);
+    if(win) win.close();
+    showToast('No se pudo abrir la vista. Descárgalo con 📥.', 'err');
+  }finally{
+    if(btn){ btn.disabled = false; btn.innerHTML = '👁️'; }
   }
 }
 
@@ -908,6 +1102,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const u = params.get('user');
   currentUser = USERS[u] ? u : 'fernando';
+
+  try{
+    const g = parseInt(localStorage.getItem(ANCHO_NOMBRE_KEY) || '0', 10);
+    if(g >= ANCHO_NOMBRE_MIN) anchoNombre = g;
+  }catch(e){}
 
   cargarProyectos().then(() => {
     // Si viene ?proyecto=ID en la URL, abrir ese proyecto
