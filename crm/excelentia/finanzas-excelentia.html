@@ -349,7 +349,7 @@ function actualizarDatalistServicios(){
 //  HELPERS
 // ═══════════════════════════════════════════════════════════════
 function fmt$(n){ return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(n||0); }
-function fmtDate(d){ if(!d)return''; const dt=new Date(d+'T12:00:00'); return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
+function fmtDate(d){ if(!d)return''; const dt=new Date(String(d).slice(0,10)+'T12:00:00'); return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function socioBadge(uid){ const u=USERS[uid]||{nombre:uid||'-',color:'#8a90a0'}; return `<span class="badge" style="background:${u.color}20;color:${u.color}">${u.nombre}</span>`; }
 function statusBadge(s){
@@ -362,7 +362,7 @@ function montoCell(moneda,orig,mxn){
   return `<strong>${fmt$(mxn)}</strong><div class="text-muted" style="font-size:.7rem">${MONEDA_SIMB[moneda]||''}${orig} ${moneda}</div>`;
 }
 function mesActual(){ const n=new Date(); return {m:n.getMonth(),y:n.getFullYear()}; }
-function esDelMes(fecha){ const d=new Date(fecha+'T12:00:00'); const {m,y}=mesActual(); return d.getMonth()===m&&d.getFullYear()===y; }
+function esDelMes(fecha){ const d=new Date(String(fecha).slice(0,10)+'T12:00:00'); const {m,y}=mesActual(); return d.getMonth()===m&&d.getFullYear()===y; }
 function nombreMes(){ const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']; const n=new Date(); return `${meses[n.getMonth()]} ${n.getFullYear()}`; }
 
 function showToast(msg,tipo='ok'){
@@ -610,7 +610,7 @@ function pintarIndicadores(tabla){
 const PALETA=['#ea5c0a','#4285f4','#d97706','#10b981','#8b5cf6','#ec4899','#06b6d4','#6b7280','#2563eb','#059669'];
 let CHARTS={};
 function destroyCharts(){ Object.values(CHARTS).forEach(c=>{ if(c) c.destroy(); }); CHARTS={}; }
-function mesKey(f){ const d=new Date(f+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function mesKey(f){ const d=new Date(String(f).slice(0,10)+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 function mesLabel(k){ const [y,m]=k.split('-'); const M=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; return `${M[parseInt(m)]} ${y.slice(2)}`; }
 const FONT={family:'Manrope'};
 
