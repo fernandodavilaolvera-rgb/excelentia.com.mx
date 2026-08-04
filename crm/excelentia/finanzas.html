@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finanzas · ExcelentIA</title>
+<title>Finanzas · ExcelentIA (consulta)</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -11,28 +11,14 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
 
-/* ── HEADER (Ferrock) ── */
-.header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:100;flex-wrap:wrap}
-.logo-header-wrap{display:flex;align-items:center;gap:.9rem}
-.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
-.logo-box img{height:48px;width:auto;display:block}
-.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
-.logo-slogan{font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
-.header-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;min-width:120px}
-.header-title{color:#fff;font-size:1.1rem;font-weight:700;letter-spacing:.3px}
-.header-sub{color:#a8c4e0;font-size:.78rem}
-.header-right{display:flex;align-items:center;gap:.75rem}
-.user-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:.3rem .85rem;color:#fff;font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:.4rem;cursor:pointer;transition:.2s}
-.user-chip:hover{background:rgba(255,255,255,.2)}
-.user-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-
-/* ── BANNER MODO ── */
-.mode-banner{padding:.55rem 1.5rem;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap}
-.mode-local{background:#fef9c3;color:#713f12;border-bottom:1px solid #fde68a}
-.mode-cloud{background:#d1fae5;color:#065f46;border-bottom:1px solid #a7f3d0}
+/* ── BANNER SOLO LECTURA ── */
+.ro-banner{max-width:1400px;margin:.9rem auto 0;padding:0 1.5rem}
+.ro-banner-in{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.6rem .9rem;font-size:.8rem;color:#1a2035;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.ro-banner-in strong{color:#1a3a6b}
+.tc-info{font-size:.73rem;color:#8a90a0;margin-left:auto}
 
 /* ── SUB-NAV ── */
-.sub-nav{background:#fff;border-bottom:2px solid #dde1e9;padding:0 1.5rem;display:flex;gap:0;overflow-x:auto}
+.sub-nav{background:#fff;border-bottom:2px solid #dde1e9;padding:0 1.5rem;display:flex;gap:0;overflow-x:auto;margin-top:.9rem}
 .sub-tab{padding:.75rem 1.1rem;font-size:.85rem;font-weight:600;color:#4a5068;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:.2s;display:flex;align-items:center;gap:.35rem;background:none;border-left:none;border-right:none;border-top:none;font-family:'Manrope',sans-serif}
 .sub-tab:hover{color:#1a3a6b;background:#f0f4ff}
 .sub-tab.active{color:#1a3a6b;border-bottom-color:#4a9fd4;background:#f0f4ff}
@@ -40,13 +26,6 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 /* ── LAYOUT ── */
 .page{display:none;padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
 .page.active{display:block}
-
-/* ── BARRA TIPO DE CAMBIO ── */
-.tc-bar{max-width:1400px;margin:.75rem auto 0;padding:0 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-.tc-box{background:#fff;border:1px solid #dde1e9;border-radius:10px;padding:.5rem .9rem;display:flex;align-items:center;gap:.6rem}
-.tc-box label{font-size:.78rem;font-weight:700;color:#4a5068}
-.tc-box input{width:78px;padding:.35rem .5rem;border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif;font-size:.83rem;font-weight:600;text-align:right}
-.tc-note{font-size:.73rem;color:#8a90a0}
 
 /* ── CARDS ── */
 .card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
@@ -57,12 +36,8 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 /* ── BOTONES ── */
 .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Manrope',sans-serif}
-.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
-.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
-.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
 .btn-secondary{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#dce8f7}
 .btn-sm{padding:.3rem .65rem;font-size:.78rem}
-.btn-icon{padding:.35rem .45rem;border-radius:6px}
 
 /* ── TABLAS ── */
 .table-wrap{overflow-x:auto}
@@ -98,24 +73,7 @@ th[data-col]:hover{background:#c8d9f0}
 .filters{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center}
 .filter-input{width:210px;max-width:100%;padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem}
 .filter-select{width:auto;min-width:140px;padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff}
-
-/* ── MODAL ── */
-.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
-.modal-backdrop.open{display:flex}
-.modal{background:#fff;border-radius:14px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:0 auto}
-.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;position:sticky;top:0}
-.modal-head h3{font-size:.95rem;font-weight:700}
-.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
-.modal-body{padding:1.25rem}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-.form-group{display:flex;flex-direction:column;gap:.3rem}
-.form-group.full{grid-column:1/-1}
-label{font-size:.8rem;font-weight:600;color:#4a5068}
-input,select,textarea{width:100%;padding:.5rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.83rem;color:#1a2035;background:#fff;transition:.2s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
-textarea{resize:vertical;min-height:70px}
-.modal-foot{padding:.85rem 1.25rem;border-top:1px solid #eef2f8;display:flex;gap:.6rem;justify-content:flex-end;position:sticky;bottom:0;background:#fff}
-.help-txt{font-size:.72rem;color:#8a90a0;margin-top:.15rem}
+input:focus,select:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
 
 /* ── MISC ── */
 .empty-state{text-align:center;padding:2.5rem 1rem;color:#8a90a0}
@@ -141,18 +99,12 @@ textarea{resize:vertical;min-height:70px}
 
 /* ── RESPONSIVE ── */
 @media(max-width:600px){
-  .header{padding:.6rem 1rem;top:0}
-  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
-  .logo-slogan{font-size:11px}
-  .header-center{align-items:flex-start}
-  .sub-nav{top:auto;position:static;padding:0 .5rem}
+  .sub-nav{padding:0 .5rem}
   .page{padding:1rem}
-  .tc-bar{padding:0 1rem}
-  .grid-2,.grid-3,.form-grid{grid-template-columns:1fr}
+  .ro-banner{padding:0 1rem}
+  .tc-info{margin-left:0;width:100%}
+  .grid-2,.grid-3{grid-template-columns:1fr}
   .stats-4{grid-template-columns:1fr 1fr}
-  .form-grid .form-group.full{grid-column:1}
-  .modal{max-width:100%;border-radius:14px 14px 0 0;align-self:flex-end;max-height:95vh}
-  .modal-backdrop{align-items:flex-end;padding:0}
   table{font-size:.78rem}
   th,td{padding:.45rem .55rem}
 }
@@ -160,19 +112,14 @@ textarea{resize:vertical;min-height:70px}
 </head>
 <body>
 
-<!-- Header quitado: lo pone el HTML concentrador de iframes. El usuario se toma de ?user=xxx -->
+<!-- Sin header: lo pone el HTML contenedor de iframes. El usuario se toma de ?user=xxx -->
 
-<!-- Barra tipo de cambio -->
-<div class="tc-bar">
-  <div class="tc-box">
-    <label>🇪🇺 EUR → MXN</label>
-    <input type="number" id="tcEur" step="0.01" onchange="setTC()">
+<!-- Banner de solo lectura -->
+<div class="ro-banner">
+  <div class="ro-banner-in">
+    🔒 <strong>Vista de consulta.</strong> Puedes filtrar, ordenar y ver las gráficas, pero no se puede crear, editar ni borrar información.
+    <span class="tc-info" id="tcInfo"></span>
   </div>
-  <div class="tc-box">
-    <label>🇺🇸 USD → MXN</label>
-    <input type="number" id="tcUsd" step="0.01" onchange="setTC()">
-  </div>
-  <span class="tc-note">Editable. Se usa para convertir montos nuevos; cada registro guarda el TC con el que se capturó.</span>
 </div>
 
 <!-- ══════════ SUB-NAV ══════════ -->
@@ -201,9 +148,7 @@ textarea{resize:vertical;min-height:70px}
     <div class="card-head">
       💸 Registro de gastos
       <div class="flex-gap">
-        <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosGastos()">🧹 Limpiar</button>
-        <button class="btn btn-secondary btn-sm" onclick="cargarRecurrentes()">🔁 Cargar recurrentes del mes</button>
-        <button class="btn btn-primary btn-sm" onclick="openGasto()">+ Nuevo gasto</button>
+        <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosGastos()">🧹 Limpiar filtros</button>
       </div>
     </div>
     <div class="card-body" style="padding:.5rem">
@@ -237,9 +182,8 @@ textarea{resize:vertical;min-height:70px}
             <th data-col="origen" onclick="sortTabla('gastos','origen')">Origen fondos <span class="sort-ind"></span></th>
             <th data-col="proyecto_nombre" onclick="sortTabla('gastos','proyecto_nombre')">Proyecto <span class="sort-ind"></span></th>
             <th data-col="status" onclick="sortTabla('gastos','status')">Status <span class="sort-ind"></span></th>
-            <th></th>
           </tr></thead>
-          <tbody id="gastos-tbody"><tr><td colspan="9" class="loading"><span class="spinner"></span>Cargando...</td></tr></tbody>
+          <tbody id="gastos-tbody"><tr><td colspan="8" class="loading"><span class="spinner"></span>Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -257,8 +201,7 @@ textarea{resize:vertical;min-height:70px}
     <div class="card-head">
       💰 Registro de ingresos
       <div class="flex-gap">
-        <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosIngresos()">🧹 Limpiar</button>
-        <button class="btn btn-primary btn-sm" onclick="openIngreso()">+ Nuevo ingreso</button>
+        <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosIngresos()">🧹 Limpiar filtros</button>
       </div>
     </div>
     <div class="card-body" style="padding:.5rem">
@@ -283,9 +226,8 @@ textarea{resize:vertical;min-height:70px}
             <th data-col="monto_mxn" onclick="sortTabla('ingresos','monto_mxn')">Monto <span class="sort-ind"></span></th>
             <th data-col="metodo" onclick="sortTabla('ingresos','metodo')">Método <span class="sort-ind"></span></th>
             <th data-col="status_cobro" onclick="sortTabla('ingresos','status_cobro')">Status <span class="sort-ind"></span></th>
-            <th></th>
           </tr></thead>
-          <tbody id="ingresos-tbody"><tr><td colspan="8" class="loading"><span class="spinner"></span>Cargando...</td></tr></tbody>
+          <tbody id="ingresos-tbody"><tr><td colspan="7" class="loading"><span class="spinner"></span>Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -346,100 +288,15 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<!-- ══════════ MODAL: GASTO ══════════ -->
-<div class="modal-backdrop" id="modal-gasto">
-  <div class="modal">
-    <div class="modal-head"><h3 id="modal-gasto-title">💸 Nuevo gasto</h3><button class="modal-close" onclick="closeModal('modal-gasto')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group full"><label>Descripción *</label><input type="text" id="g-desc" list="dl-servicios" placeholder="Elige de la lista o escribe una nueva" autocomplete="off"></div>
-        <div class="form-group"><label>Moneda *</label>
-          <select id="g-moneda" onchange="calcGastoMXN()"><option value="MXN">MXN (pesos)</option><option value="USD">USD (dólar)</option><option value="EUR">EUR (euro)</option></select>
-        </div>
-        <div class="form-group"><label>Monto (en su moneda) *</label><input type="number" id="g-monto" placeholder="0.00" step="0.01" oninput="calcGastoMXN()"></div>
-        <div class="form-group full"><label>Equivalente en MXN</label><input type="text" id="g-mxn" readonly style="background:#f5f6f8;font-weight:700"><div class="help-txt" id="g-tc-note"></div></div>
-        <div class="form-group"><label>Categoría</label>
-          <select id="g-cat"></select>
-        </div>
-        <div class="form-group"><label>Pagado por *</label>
-          <select id="g-socio"><option value="fernando">Fernando</option><option value="juanjose">Juan José</option><option value="adolfo">Adolfo</option></select>
-        </div>
-        <div class="form-group"><label>Método de pago</label>
-          <select id="g-metodo"><option>Tarjeta</option><option>Transferencia</option><option>Efectivo</option><option>PayPal</option><option>Domiciliado</option><option>Otro</option></select>
-        </div>
-        <div class="form-group"><label>Status</label>
-          <select id="g-status"><option>Pagado</option><option>Pendiente</option><option>Por reembolsar</option></select>
-        </div>
-        <div class="form-group full"><label>Origen de los fondos (de qué ingreso/cliente salió)</label>
-          <select id="g-origen"><option value="">— No aplica / fondos propios —</option></select>
-          <div class="help-txt">Liga este gasto a un ingreso de un cliente para saber con qué dinero se cubrió.</div>
-        </div>
-        <div class="form-group full"><label>Proyecto relacionado (opcional)</label>
-          <select id="g-proyecto"></select>
-        </div>
-        <div class="form-group"><label>Fecha *</label><input type="date" id="g-fecha"></div>
-        <div class="form-group"><label>¿Recurrente cada mes?</label>
-          <select id="g-recur"><option value="false">No</option><option value="true">Sí, se repite mensual</option></select>
-        </div>
-        <div class="form-group full"><label>Notas</label><textarea id="g-notas" placeholder="Detalle adicional..."></textarea></div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-secondary" onclick="closeModal('modal-gasto')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveGasto()">Guardar gasto</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ MODAL: INGRESO ══════════ -->
-<div class="modal-backdrop" id="modal-ingreso">
-  <div class="modal">
-    <div class="modal-head"><h3 id="modal-ingreso-title">💰 Nuevo ingreso</h3><button class="modal-close" onclick="closeModal('modal-ingreso')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group full"><label>Concepto *</label><input type="text" id="i-concepto" placeholder="Ej: Mensualidad dashboard Berimbau"></div>
-        <div class="form-group full"><label>Proyecto (del CRM) *</label>
-          <select id="i-proyecto" onchange="heredarCliente()"></select>
-          <div class="help-txt">Al elegir el proyecto se hereda el cliente automáticamente.</div>
-        </div>
-        <div class="form-group full"><label>Cliente / empresa</label><input type="text" id="i-cliente" placeholder="Se llena solo desde el proyecto (o escríbelo)"></div>
-        <div class="form-group"><label>Moneda *</label>
-          <select id="i-moneda" onchange="calcIngresoMXN()"><option value="MXN">MXN (pesos)</option><option value="USD">USD (dólar)</option><option value="EUR">EUR (euro)</option></select>
-        </div>
-        <div class="form-group"><label>Monto (en su moneda) *</label><input type="number" id="i-monto" placeholder="0.00" step="0.01" oninput="calcIngresoMXN()"></div>
-        <div class="form-group full"><label>Equivalente en MXN</label><input type="text" id="i-mxn" readonly style="background:#f5f6f8;font-weight:700"><div class="help-txt" id="i-tc-note"></div></div>
-        <div class="form-group"><label>Método de cobro</label>
-          <select id="i-metodo"><option>Transferencia</option><option>Tarjeta</option><option>Efectivo</option><option>PayPal</option><option>Domiciliado</option><option>Otro</option></select>
-        </div>
-        <div class="form-group"><label>Status de cobro</label>
-          <select id="i-status"><option>Cobrado</option><option>Pendiente</option><option>Facturado</option></select>
-        </div>
-        <div class="form-group"><label>Fecha *</label><input type="date" id="i-fecha"></div>
-        <div class="form-group full"><label>Notas</label><textarea id="i-notas" placeholder="Detalle adicional..."></textarea></div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-secondary" onclick="closeModal('modal-ingreso')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveIngreso()">Guardar ingreso</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  API DE FINANZAS (n8n)  —  sin llaves de base de datos en el HTML
-//  Workflow: "ExcelentIA - Finanzas API"  ·  webhook POST /finanzas
-//  Acciones: get · crear · editar · eliminar
+//  FINANZAS — VERSIÓN DE SOLO LECTURA
+//  Réplica de finanzas.html sin crear / editar / borrar.
+//  Los datos vienen del webhook de n8n (accion: 'get'). Sin llaves en el HTML.
 // ═══════════════════════════════════════════════════════════════
 const N8N_BASE = 'https://n8n.excelentia.com.mx/webhook';
 const ENDPOINT = '/finanzas';
 
-// Nombres de tabla que entiende el webhook
-const TABLA_API = { finanzas_gastos: 'gastos', finanzas_ingresos: 'ingresos' };
-
-// ═══════════════════════════════════════════════════════════════
-//  CONSTANTES
-// ═══════════════════════════════════════════════════════════════
 const USERS = {
   fernando: { nombre:'Fernando',  color:'#1a3a6b' },
   juanjose: { nombre:'Juan José', color:'#7c3aed' },
@@ -452,16 +309,12 @@ const CAT_COLOR = {
 };
 const MONEDA_SIMB = { MXN:'$', USD:'US$', EUR:'€' };
 
-
-// ═══════════════════════════════════════════════════════════════
-//  ESTADO
-// ═══════════════════════════════════════════════════════════════
+// ── ESTADO ──
 let currentUser = 'fernando';
-let TC = { EUR:20.17, USD:17.35 };
+let TC = { EUR:20.17, USD:17.35 };   // solo informativo en esta vista
 let GASTOS = [];
 let INGRESOS = [];
-let PROYECTOS = [];            // {id, nombre, empresa}
-let EDIT = { tipo:null, id:null };
+let PROYECTOS = [];
 
 // ═══════════════════════════════════════════════════════════════
 //  INIT
@@ -470,45 +323,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(location.search);
   const u = params.get('user');
   if (u && USERS[u]) currentUser = u;
-  updateUserUI();
 
-  // Tipo de cambio (persistente en este navegador)
   const savedTC = JSON.parse(localStorage.getItem('fin_tc') || 'null');
   if (savedTC) TC = savedTC;
-  document.getElementById('tcEur').value = TC.EUR;
-  document.getElementById('tcUsd').value = TC.USD;
+  const tcInfo = document.getElementById('tcInfo');
+  if (tcInfo) tcInfo.textContent = `TC de referencia · EUR ${TC.EUR} · USD ${TC.USD}`;
 
-  updateClock();
-  setInterval(updateClock, 60000);
-
-  // Llenar selects de categorías
   fillCategorias();
-
-  const b = document.getElementById('modeBanner');
-  if(b){ b.className = 'mode-banner mode-cloud'; b.innerHTML = '☁️ Conectado — datos sincronizados en la nube.'; }
 
   await cargarTodo();
 });
 
-function updateClock(){
-  const now = new Date();
-  const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const f=`${dias[now.getDay()]} ${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
-  const el=document.getElementById('headerDate');
-  if(el) el.textContent=f.charAt(0).toUpperCase()+f.slice(1);
-  const hoy=new Date().toISOString().split('T')[0];
-  ['g-fecha','i-fecha'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=hoy;});
-}
-function updateUserUI(){
-  const u=USERS[currentUser];
-  const dot=document.getElementById('userDot'); if(dot) dot.style.background=u.color;
-  const chip=document.getElementById('userChipName'); if(chip) chip.textContent=u.nombre;
-}
 function fillCategorias(){
-  const opts=CATEGORIAS.map(c=>`<option>${c}</option>`).join('');
-  document.getElementById('g-cat').innerHTML=opts;
-  document.getElementById('g-fCat').innerHTML='<option value="">Categoría</option>'+opts;
+  const opts = CATEGORIAS.map(c=>`<option>${c}</option>`).join('');
+  document.getElementById('g-fCat').innerHTML = '<option value="">Categoría</option>' + opts;
 }
 function actualizarDatalistServicios(){
   const dl=document.getElementById('dl-servicios');
@@ -518,41 +346,23 @@ function actualizarDatalistServicios(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  TIPO DE CAMBIO
-// ═══════════════════════════════════════════════════════════════
-function setTC(){
-  TC.EUR=parseFloat(document.getElementById('tcEur').value)||TC.EUR;
-  TC.USD=parseFloat(document.getElementById('tcUsd').value)||TC.USD;
-  localStorage.setItem('fin_tc',JSON.stringify(TC));
-  calcGastoMXN(); calcIngresoMXN();
-  showToast('✅ Tipo de cambio actualizado');
-}
-function aMXN(moneda, monto, tc){
-  monto=parseFloat(monto)||0;
-  if(moneda==='MXN') return monto;
-  const rate = tc || TC[moneda] || 1;
-  return monto*rate;
-}
-
-// ═══════════════════════════════════════════════════════════════
 //  HELPERS
 // ═══════════════════════════════════════════════════════════════
 function fmt$(n){ return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(n||0); }
-function fmtDate(d){ if(!d)return''; const dt=new Date(d+'T12:00:00'); return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
-function genId(p){ return `${p}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`; }
+function fmtDate(d){ if(!d)return''; const dt=new Date(String(d).slice(0,10)+'T12:00:00'); return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function socioBadge(uid){ const u=USERS[uid]||{nombre:uid||'-',color:'#8a90a0'}; return `<span class="badge" style="background:${u.color}20;color:${u.color}">${u.nombre}</span>`; }
 function statusBadge(s){
   const map={'Pagado':'badge-green','Pendiente':'badge-yellow','Por reembolsar':'badge-orange','Cobrado':'badge-green','Facturado':'badge-blue'};
-  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+  return `<span class="badge ${map[s]||'badge-gray'}">${s||'-'}</span>`;
 }
 function catBadge(c){ const col=CAT_COLOR[c]||'#8a90a0'; return `<span class="badge" style="background:${col}20;color:${col}">${c||'-'}</span>`; }
 function montoCell(moneda,orig,mxn){
   if(moneda==='MXN') return `<strong>${fmt$(mxn)}</strong>`;
-  return `<strong>${fmt$(mxn)}</strong><div class="text-muted" style="font-size:.7rem">${MONEDA_SIMB[moneda]}${orig} ${moneda}</div>`;
+  return `<strong>${fmt$(mxn)}</strong><div class="text-muted" style="font-size:.7rem">${MONEDA_SIMB[moneda]||''}${orig} ${moneda}</div>`;
 }
 function mesActual(){ const n=new Date(); return {m:n.getMonth(),y:n.getFullYear()}; }
-function esDelMes(fecha){ const d=new Date(fecha+'T12:00:00'); const {m,y}=mesActual(); return d.getMonth()===m&&d.getFullYear()===y; }
+function esDelMes(fecha){ const d=new Date(String(fecha).slice(0,10)+'T12:00:00'); const {m,y}=mesActual(); return d.getMonth()===m&&d.getFullYear()===y; }
 function nombreMes(){ const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']; const n=new Date(); return `${meses[n.getMonth()]} ${n.getFullYear()}`; }
 
 function showToast(msg,tipo='ok'){
@@ -572,13 +382,11 @@ function showTab(tab){
   document.getElementById(`tab-${tab}`).classList.add('active');
   if(tab==='resumen') renderResumen();
 }
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
 // ═══════════════════════════════════════════════════════════════
-//  PERSISTENCIA (Supabase o localStorage)
+//  LECTURA (única operación permitida)
 // ═══════════════════════════════════════════════════════════════
+// Una sola llamada al webhook trae gastos, ingresos y proyectos.
 async function apiCall(accion, payload = {}){
   try{
     const res = await fetch(`${N8N_BASE}${ENDPOINT}`, {
@@ -594,33 +402,12 @@ async function apiCall(accion, payload = {}){
   }
 }
 
-async function dbInsert(tabla,row){
-  const r = await apiCall('crear', { tabla: TABLA_API[tabla], data: row });
-  if(!r || r.ok === false){ showToast('Error guardando','err'); return null; }
-  return (r.rows && r.rows[0]) || row;
-}
-async function dbUpdate(tabla,id,row){
-  const r = await apiCall('editar', { tabla: TABLA_API[tabla], id, data: row });
-  if(!r || r.ok === false){ showToast('Error actualizando','err'); return false; }
-  return true;
-}
-async function dbDelete(tabla,id){
-  const r = await apiCall('eliminar', { tabla: TABLA_API[tabla], id });
-  if(!r || r.ok === false){ showToast('Error eliminando','err'); return false; }
-  return true;
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  CARGA DE DATOS
-// ═══════════════════════════════════════════════════════════════
 function llenarProyectos(){
-  const optsProy = '<option value="">— Sin proyecto —</option>'+PROYECTOS.map(p=>`<option value="${p.id}">${escHtml(p.nombre)}${p.empresa?' · '+escHtml(p.empresa):''}</option>`).join('');
-  document.getElementById('g-proyecto').innerHTML=optsProy;
-  document.getElementById('i-proyecto').innerHTML='<option value="">— Elige un proyecto —</option>'+PROYECTOS.map(p=>`<option value="${p.id}">${escHtml(p.nombre)}${p.empresa?' · '+escHtml(p.empresa):''}</option>`).join('');
-  document.getElementById('i-fProyecto').innerHTML='<option value="">Proyecto</option>'+PROYECTOS.map(p=>`<option value="${p.id}">${escHtml(p.nombre)}</option>`).join('');
+  document.getElementById('i-fProyecto').innerHTML =
+    '<option value="">Proyecto</option>' +
+    PROYECTOS.map(p=>`<option value="${p.id}">${escHtml(p.nombre)}</option>`).join('');
 }
 
-// Una sola llamada al webhook trae gastos, ingresos y proyectos
 async function cargarTodo(){
   const data = await apiCall('get');
   if(!data){
@@ -632,20 +419,10 @@ async function cargarTodo(){
     PROYECTOS = (data.proyectos || []).map(p=>({ id:p.id, nombre:p.nombre||'(sin nombre)', empresa:p.empresa||'' }));
   }
   llenarProyectos();
-  actualizarOrigenFondos();
-  renderGastos(); renderIngresos();
+  renderGastos();
+  renderIngresos();
 }
 
-// Poblar el dropdown "origen de fondos" con los ingresos existentes
-function actualizarOrigenFondos(){
-  const sel=document.getElementById('g-origen');
-  if(!sel) return;
-  const val=sel.value;
-  sel.innerHTML='<option value="">— No aplica / fondos propios —</option>'+
-    '<option value="empresa">💼 Fondos de la empresa / caja común</option>'+
-    INGRESOS.map(i=>`<option value="${i.id}">💰 ${escHtml(i.cliente||i.concepto)} · ${fmt$(i.monto_mxn)}</option>`).join('');
-  sel.value=val;
-}
 function origenLabel(g){
   if(g.origen_fondos==='empresa') return '💼 Empresa';
   const ing=INGRESOS.find(i=>i.id===g.origen_fondos);
@@ -653,108 +430,8 @@ function origenLabel(g){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  GASTOS
+//  GASTOS (solo lectura)
 // ═══════════════════════════════════════════════════════════════
-function openGasto(edit){
-  EDIT={tipo:'gasto',id:null};
-  document.getElementById('modal-gasto-title').textContent='💸 Nuevo gasto';
-  ['g-desc','g-monto','g-mxn','g-notas'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('g-moneda').value='MXN';
-  document.getElementById('g-cat').value='Infraestructura';
-  document.getElementById('g-socio').value=currentUser;
-  document.getElementById('g-metodo').value='Tarjeta';
-  document.getElementById('g-status').value='Pagado';
-  document.getElementById('g-origen').value='';
-  document.getElementById('g-proyecto').value='';
-  document.getElementById('g-recur').value='false';
-  document.getElementById('g-fecha').value=new Date().toISOString().split('T')[0];
-  if(edit){
-    EDIT.id=edit.id;
-    document.getElementById('modal-gasto-title').textContent='✏️ Editar gasto';
-    document.getElementById('g-desc').value=edit.descripcion||'';
-    document.getElementById('g-moneda').value=edit.moneda||'MXN';
-    document.getElementById('g-monto').value=edit.monto_original||'';
-    document.getElementById('g-cat').value=edit.categoria||'Otro';
-    document.getElementById('g-socio').value=edit.pagado_por||'fernando';
-    document.getElementById('g-metodo').value=edit.metodo_pago||'Tarjeta';
-    document.getElementById('g-status').value=edit.status||'Pagado';
-    document.getElementById('g-origen').value=edit.origen_fondos||'';
-    document.getElementById('g-proyecto').value=edit.proyecto_id||'';
-    document.getElementById('g-recur').value=String(edit.recurrente===true||edit.recurrente==='true');
-    document.getElementById('g-fecha').value=(edit.fecha||'').slice(0,10);
-    document.getElementById('g-notas').value=edit.notas||'';
-  }
-  calcGastoMXN();
-  openModal('modal-gasto');
-}
-function calcGastoMXN(){
-  const mon=document.getElementById('g-moneda').value;
-  const val=parseFloat(document.getElementById('g-monto').value)||0;
-  const mxn=aMXN(mon,val);
-  document.getElementById('g-mxn').value=fmt$(mxn);
-  const note=document.getElementById('g-tc-note');
-  note.textContent = mon==='MXN' ? '' : `Convertido con TC ${mon} = ${TC[mon]}`;
-}
-async function saveGasto(){
-  const desc=document.getElementById('g-desc').value.trim();
-  const monto=parseFloat(document.getElementById('g-monto').value);
-  if(!desc||!monto){ showToast('Descripción y monto son obligatorios','err'); return; }
-  const mon=document.getElementById('g-moneda').value;
-  const tc=mon==='MXN'?1:TC[mon];
-  const proyId=document.getElementById('g-proyecto').value;
-  const proy=PROYECTOS.find(p=>p.id==proyId);
-  const row={
-    descripcion:desc, moneda:mon, monto_original:monto, tipo_cambio:tc, monto_mxn:aMXN(mon,monto,tc),
-    categoria:document.getElementById('g-cat').value, pagado_por:document.getElementById('g-socio').value,
-    metodo_pago:document.getElementById('g-metodo').value, status:document.getElementById('g-status').value,
-    origen_fondos:document.getElementById('g-origen').value, proyecto_id:proyId, proyecto_nombre:proy?proy.nombre:'',
-    recurrente:document.getElementById('g-recur').value==='true', fecha:document.getElementById('g-fecha').value,
-    notas:document.getElementById('g-notas').value, user_registro:currentUser
-  };
-  if(EDIT.id){
-    await dbUpdate('finanzas_gastos',EDIT.id,row);
-    const i=GASTOS.findIndex(x=>x.id===EDIT.id); if(i>=0)GASTOS[i]={...GASTOS[i],...row};
-    showToast('✅ Gasto actualizado');
-  }else{
-    row.id=genId('G');
-    const saved=await dbInsert('finanzas_gastos',row);
-    GASTOS.unshift(saved||row);
-    showToast('✅ Gasto guardado');
-  }
-  closeModal('modal-gasto');
-  renderGastos();
-}
-async function deleteGasto(id){
-  if(!confirm('¿Eliminar este gasto?'))return;
-  await dbDelete('finanzas_gastos',id);
-  GASTOS=GASTOS.filter(g=>g.id!==id);
-  renderGastos();
-  showToast('Gasto eliminado');
-}
-function editGasto(id){ const g=GASTOS.find(x=>x.id===id); if(g)openGasto(g); }
-
-// Cargar recurrentes del mes: clona los gastos marcados recurrentes al mes actual
-async function cargarRecurrentes(){
-  const recur=GASTOS.filter(g=>g.recurrente===true||g.recurrente==='true');
-  if(!recur.length){ showToast('No hay gastos marcados como recurrentes','err'); return; }
-  // Evitar duplicar los que ya existan este mes con misma descripción
-  const yaEsteMes=new Set(GASTOS.filter(g=>esDelMes(g.fecha)).map(g=>g.descripcion.toLowerCase()));
-  const hoy=new Date().toISOString().split('T')[0];
-  let creados=0;
-  for(const g of recur){
-    if(yaEsteMes.has(g.descripcion.toLowerCase())) continue;
-    const tc=g.moneda==='MXN'?1:TC[g.moneda];
-    const row={ id:genId('G'), descripcion:g.descripcion, moneda:g.moneda, monto_original:g.monto_original,
-      tipo_cambio:tc, monto_mxn:aMXN(g.moneda,g.monto_original,tc), categoria:g.categoria, pagado_por:g.pagado_por,
-      metodo_pago:g.metodo_pago, status:'Pendiente', origen_fondos:'', proyecto_id:'', proyecto_nombre:'',
-      recurrente:true, fecha:hoy, notas:g.notas||'', user_registro:currentUser };
-    const saved=await dbInsert('finanzas_gastos',row);
-    GASTOS.unshift(saved||row); creados++;
-  }
-  renderGastos();
-  showToast(creados?`✅ ${creados} gastos recurrentes cargados (edítalos si cambió el monto)`:'Ya estaban cargados este mes');
-}
-
 function filtrarGastos(){
   const q=document.getElementById('g-search').value.toLowerCase();
   const serv=document.getElementById('g-fServicio').value.toLowerCase();
@@ -771,19 +448,14 @@ function filtrarGastos(){
 }
 function filterGastos(){ renderGastos(); }
 function limpiarFiltrosGastos(){
-  document.getElementById('g-search').value='';
-  document.getElementById('g-fServicio').value='';
-  document.getElementById('g-fMes').value='';
-  document.getElementById('g-fCat').value='';
-  document.getElementById('g-fSocio').value='';
-  document.getElementById('g-fStatus').value='';
+  ['g-search','g-fServicio','g-fMes','g-fCat','g-fSocio','g-fStatus'].forEach(id=>document.getElementById(id).value='');
   renderGastos();
   showToast('🧹 Filtros limpiados');
 }
 function renderGastos(){
   const lista=aplicarOrden(filtrarGastos(),'gastos');
   const tbody=document.getElementById('gastos-tbody');
-  if(!lista.length){ tbody.innerHTML='<tr><td colspan="9"><div class="empty-state"><span>💸</span>Sin gastos registrados</div></td></tr>'; }
+  if(!lista.length){ tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><span>💸</span>Sin gastos registrados</div></td></tr>'; }
   else{
     tbody.innerHTML=lista.map(g=>{
       const recur=(g.recurrente===true||g.recurrente==='true')?'<span class="recur-tag">🔁 mensual</span>':'';
@@ -796,10 +468,6 @@ function renderGastos(){
         <td style="font-size:.76rem;color:#4a5068">${origenLabel(g)}</td>
         <td style="font-size:.76rem;color:#4a5068">${escHtml(g.proyecto_nombre||'—')}</td>
         <td>${statusBadge(g.status)}</td>
-        <td style="white-space:nowrap">
-          <button class="btn btn-secondary btn-sm btn-icon" onclick="editGasto('${g.id}')">✏️</button>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteGasto('${g.id}')">✕</button>
-        </td>
       </tr>`;
     }).join('');
   }
@@ -810,7 +478,6 @@ function renderGastos(){
   renderUltimos6Gastos();
 }
 
-// Mini-tabla: gastos e ingresos de los últimos 6 meses
 function renderUltimos6Gastos(){
   const el=document.getElementById('g-ultimos6');
   if(!el) return;
@@ -831,7 +498,6 @@ function renderUltimos6Gastos(){
   </div>`;
 }
 
-// Selector de mes en la tarjeta de gastos
 function mesLabelLargo(k){
   const [y,m]=k.split('-');
   const M=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -857,84 +523,8 @@ function actualizarTotalMesGasto(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  INGRESOS
+//  INGRESOS (solo lectura)
 // ═══════════════════════════════════════════════════════════════
-function openIngreso(edit){
-  EDIT={tipo:'ingreso',id:null};
-  document.getElementById('modal-ingreso-title').textContent='💰 Nuevo ingreso';
-  ['i-concepto','i-cliente','i-monto','i-mxn','i-notas'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('i-proyecto').value='';
-  document.getElementById('i-moneda').value='MXN';
-  document.getElementById('i-metodo').value='Transferencia';
-  document.getElementById('i-status').value='Cobrado';
-  document.getElementById('i-fecha').value=new Date().toISOString().split('T')[0];
-  if(edit){
-    EDIT.id=edit.id;
-    document.getElementById('modal-ingreso-title').textContent='✏️ Editar ingreso';
-    document.getElementById('i-concepto').value=edit.concepto||'';
-    document.getElementById('i-proyecto').value=edit.proyecto_id||'';
-    document.getElementById('i-cliente').value=edit.cliente||'';
-    document.getElementById('i-moneda').value=edit.moneda||'MXN';
-    document.getElementById('i-monto').value=edit.monto_original||'';
-    document.getElementById('i-metodo').value=edit.metodo||'Transferencia';
-    document.getElementById('i-status').value=edit.status_cobro||'Cobrado';
-    document.getElementById('i-fecha').value=(edit.fecha||'').slice(0,10);
-    document.getElementById('i-notas').value=edit.notas||'';
-  }
-  calcIngresoMXN();
-  openModal('modal-ingreso');
-}
-function heredarCliente(){
-  const id=document.getElementById('i-proyecto').value;
-  const p=PROYECTOS.find(x=>x.id==id);
-  if(p&&p.empresa) document.getElementById('i-cliente').value=p.empresa;
-  else if(p&&p.nombre&&!document.getElementById('i-cliente').value) document.getElementById('i-cliente').value=p.nombre;
-}
-function calcIngresoMXN(){
-  const mon=document.getElementById('i-moneda').value;
-  const val=parseFloat(document.getElementById('i-monto').value)||0;
-  document.getElementById('i-mxn').value=fmt$(aMXN(mon,val));
-  const note=document.getElementById('i-tc-note');
-  note.textContent = mon==='MXN' ? '' : `Convertido con TC ${mon} = ${TC[mon]}`;
-}
-async function saveIngreso(){
-  const concepto=document.getElementById('i-concepto').value.trim();
-  const monto=parseFloat(document.getElementById('i-monto').value);
-  if(!concepto||!monto){ showToast('Concepto y monto son obligatorios','err'); return; }
-  const mon=document.getElementById('i-moneda').value;
-  const tc=mon==='MXN'?1:TC[mon];
-  const proyId=document.getElementById('i-proyecto').value;
-  const proy=PROYECTOS.find(p=>p.id==proyId);
-  const row={
-    concepto, moneda:mon, monto_original:monto, tipo_cambio:tc, monto_mxn:aMXN(mon,monto,tc),
-    proyecto_id:proyId, proyecto_nombre:proy?proy.nombre:'', cliente:document.getElementById('i-cliente').value,
-    metodo:document.getElementById('i-metodo').value, status_cobro:document.getElementById('i-status').value,
-    fecha:document.getElementById('i-fecha').value, notas:document.getElementById('i-notas').value, user_registro:currentUser
-  };
-  if(EDIT.id){
-    await dbUpdate('finanzas_ingresos',EDIT.id,row);
-    const i=INGRESOS.findIndex(x=>x.id===EDIT.id); if(i>=0)INGRESOS[i]={...INGRESOS[i],...row};
-    showToast('✅ Ingreso actualizado');
-  }else{
-    row.id=genId('I');
-    const saved=await dbInsert('finanzas_ingresos',row);
-    INGRESOS.unshift(saved||row);
-    showToast('✅ Ingreso guardado');
-  }
-  actualizarOrigenFondos();
-  closeModal('modal-ingreso');
-  renderIngresos();
-}
-async function deleteIngreso(id){
-  if(!confirm('¿Eliminar este ingreso?'))return;
-  await dbDelete('finanzas_ingresos',id);
-  INGRESOS=INGRESOS.filter(i=>i.id!==id);
-  actualizarOrigenFondos();
-  renderIngresos();
-  showToast('Ingreso eliminado');
-}
-function editIngreso(id){ const i=INGRESOS.find(x=>x.id===id); if(i)openIngreso(i); }
-
 function filtrarIngresos(){
   const q=document.getElementById('i-search').value.toLowerCase();
   const mes=document.getElementById('i-fMes').value;
@@ -948,17 +538,14 @@ function filtrarIngresos(){
 }
 function filterIngresos(){ renderIngresos(); }
 function limpiarFiltrosIngresos(){
-  document.getElementById('i-search').value='';
-  document.getElementById('i-fMes').value='';
-  document.getElementById('i-fProyecto').value='';
-  document.getElementById('i-fStatus').value='';
+  ['i-search','i-fMes','i-fProyecto','i-fStatus'].forEach(id=>document.getElementById(id).value='');
   renderIngresos();
   showToast('🧹 Filtros limpiados');
 }
 function renderIngresos(){
   const lista=aplicarOrden(filtrarIngresos(),'ingresos');
   const tbody=document.getElementById('ingresos-tbody');
-  if(!lista.length){ tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><span>💰</span>Sin ingresos registrados</div></td></tr>'; }
+  if(!lista.length){ tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><span>💰</span>Sin ingresos registrados</div></td></tr>'; }
   else{
     tbody.innerHTML=lista.map(i=>`<tr>
       <td>${fmtDate(i.fecha)}</td>
@@ -968,10 +555,6 @@ function renderIngresos(){
       <td>${montoCell(i.moneda,i.monto_original,i.monto_mxn)}</td>
       <td style="font-size:.78rem">${escHtml(i.metodo||'-')}</td>
       <td>${statusBadge(i.status_cobro)}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-secondary btn-sm btn-icon" onclick="editIngreso('${i.id}')">✏️</button>
-        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteIngreso('${i.id}')">✕</button>
-      </td>
     </tr>`).join('');
   }
   pintarIndicadores('ingresos');
@@ -1022,12 +605,12 @@ function pintarIndicadores(tabla){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  RESUMEN + GRÁFICAS (estilo dashboard de gastos original)
+//  RESUMEN + GRÁFICAS
 // ═══════════════════════════════════════════════════════════════
 const PALETA=['#ea5c0a','#4285f4','#d97706','#10b981','#8b5cf6','#ec4899','#06b6d4','#6b7280','#2563eb','#059669'];
 let CHARTS={};
 function destroyCharts(){ Object.values(CHARTS).forEach(c=>{ if(c) c.destroy(); }); CHARTS={}; }
-function mesKey(f){ const d=new Date(f+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function mesKey(f){ const d=new Date(String(f).slice(0,10)+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 function mesLabel(k){ const [y,m]=k.split('-'); const M=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; return `${M[parseInt(m)]} ${y.slice(2)}`; }
 const FONT={family:'Manrope'};
 
@@ -1073,7 +656,6 @@ function renderResumen(){
   document.getElementById('r-cobrado').textContent=fmt$(cobrado);
   document.getElementById('r-porcobrar').textContent=fmt$(porCobrar);
 
-  // Balance TOTAL — todos los meses
   const iTotal=INGRESOS.reduce((s,i)=>s+parseFloat(i.monto_mxn||0),0);
   const gTotal=GASTOS.reduce((s,g)=>s+parseFloat(g.monto_mxn||0),0);
   const balanceTotal=iTotal-gTotal;
@@ -1090,17 +672,17 @@ function renderResumen(){
   const serv=Object.entries(porServ).sort((a,b)=>b[1]-a[1]).slice(0,8);
   CHARTS.serv=chartDona('chartServ', serv.map(e=>e[0]), serv.map(e=>e[1]), serv.map((_,i)=>PALETA[i%PALETA.length]));
 
-  // 🗂️ Gasto por categoría (acumulado)
+  // 🗂️ Gasto por categoría
   const porCat={};
   GASTOS.forEach(g=>{ porCat[g.categoria]=(porCat[g.categoria]||0)+parseFloat(g.monto_mxn||0); });
   const cat=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
   CHARTS.cat=chartDona('chartCat', cat.map(e=>e[0]), cat.map(e=>e[1]), cat.map(e=>CAT_COLOR[e[0]]||'#8a90a0'));
 
-  // 👥 Cuánto ha puesto cada socio (solo fondos PROPIOS; los de empresa/ingreso van aparte)
+  // 👥 Cuánto ha puesto cada socio
   const porSoc={}; let fondosEmpresa=0;
   GASTOS.forEach(g=>{
     const m=parseFloat(g.monto_mxn||0);
-    if(g.origen_fondos){ fondosEmpresa+=m; }              // pagado con dinero externo → no se adjudica
+    if(g.origen_fondos){ fondosEmpresa+=m; }
     else { porSoc[g.pagado_por]=(porSoc[g.pagado_por]||0)+m; }
   });
   const socUids=Object.keys(USERS);
@@ -1127,13 +709,13 @@ function renderResumen(){
         scales:{ x:{ stacked:true, ticks:{ font:FONT } }, y:{ stacked:true, ticks:{ font:FONT } } } } });
   }
 
-  // 📈 Evolución mensual del gasto (línea)
+  // 📈 Evolución mensual del gasto
   const porMes={};
   GASTOS.forEach(g=>{ const k=mesKey(g.fecha); porMes[k]=(porMes[k]||0)+parseFloat(g.monto_mxn||0); });
   const mesesEvol=Object.keys(porMes).sort();
   CHARTS.linea=chartLineaEvol('chartLinea', mesesEvol.map(mesLabel), mesesEvol.map(k=>porMes[k]));
 
-  // 💼 Ingresos por cliente/proyecto (barras texto)
+  // 💼 Ingresos por cliente/proyecto
   const porCli={};
   INGRESOS.forEach(i=>{ const k=i.cliente||i.proyecto_nombre||i.concepto||'Sin cliente'; porCli[k]=(porCli[k]||0)+parseFloat(i.monto_mxn||0); });
   const clis=Object.entries(porCli).sort((a,b)=>b[1]-a[1]).slice(0,8);
