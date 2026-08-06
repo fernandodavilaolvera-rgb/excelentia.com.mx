@@ -1885,8 +1885,27 @@ async function cargarDirectorio(){
   EN_ADEUDO = DATA.filter(d=>d.dias>0 && (d.sit==='Activo' || d.sit==='Baja Temporal'));
   // v59 — candado de becados: quedan fuera de cualquier lista de envio (no de las graficas).
   EN_ADEUDO_AVISOS = EN_ADEUDO.filter(d=>!esBecado(d));
-  // Cargo domiciliado rechazado — INCLUYE Baja Temporal (para que aparezca la membresía 23)
-  CARGO_FALLIDO = DATA.filter(d=>d.fl===1 && (d.sit==='Activo' || d.sit==='Baja Temporal'));
+  // prod — Cargo Fallido POR MEMBRESÍA, no por persona (petición de Fernando, 6-ago).
+  // Antes esto listaba PERSONAS: 101 renglones para 32 membresías, porque el campo
+  // 'fallo' vive en cada integrante y un cargo rechazado marca a toda la familia.
+  // El cargo es UNO por membresía y el aviso también, así que la pastilla y la tabla
+  // tienen que hablar el mismo idioma que el módulo de Avisos, que siempre agrupó.
+  // Mismo criterio que COB_MEMB (v63): la membresía entra si ALGUIEN de su núcleo
+  // trae el cargo rechazado, y se pinta el renglón de la cabeza.
+  // INCLUYE Baja Temporal (para que aparezca la membresía 23).
+  const CF_SET = new Set(
+    DATA.filter(d => d.fl === 1 && (d.sit === 'Activo' || d.sit === 'Baja Temporal'))
+        .map(d => String(d.m))
+  );
+  const CF_CUENTA = {};
+  DATA.forEach(d => {
+    if(d.fl === 1 && (d.sit === 'Activo' || d.sit === 'Baja Temporal')){
+      const k = String(d.m);
+      CF_CUENTA[k] = (CF_CUENTA[k] || 0) + 1;
+    }
+  });
+  CARGO_FALLIDO = DATA.filter(d => d.es_cabeza && CF_SET.has(String(d.m)))
+                      .map(d => Object.assign({}, d, { _cfN: CF_CUENTA[String(d.m)] || 0 }));
   // Índice de dependientes por membresía + set de anuales con dependiente en adeudo
   construirIndiceDependientes();
   construirIndiceMembresias();
