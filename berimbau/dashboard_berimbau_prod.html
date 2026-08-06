@@ -3629,6 +3629,37 @@ function histAgrupar(filas){
   return Array.from(mapa.values());
 }
 
+// prod (6-ago) — El Historial pasa de UNA columna "Canal" a TRES: Correo, WhatsApp
+// y Ambos. Antes la etiqueta "Ambos" tapaba los otros dos canales y el Club no
+// encontraba los envíos de WhatsApp aunque sí hubieran salido.
+// Lectura de cada celda:
+//   ● verde  = se envió por ese canal y salió bien
+//   ● rojo   = se intentó por ese canal y falló (el detalle sale al pasar el cursor)
+//   —        = no se intentó por ese canal
+// La columna Ambos se prende solo cuando los DOS canales salieron bien.
+function histPunto(g, canal){
+  const envios = (canal === 'ambos')
+    ? g.envios
+    : g.envios.filter(e => e.canal === canal);
+
+  if(canal === 'ambos'){
+    const cor = g.envios.filter(e => e.canal === 'correo');
+    const wa  = g.envios.filter(e => e.canal === 'whatsapp');
+    if(!cor.length || !wa.length) return '<span style="color:#c3c8d4">—</span>';
+    const ok = cor.some(e=>e.ok) && wa.some(e=>e.ok);
+    return ok
+      ? '<span style="color:#15803d;font-size:1rem" title="Correo y WhatsApp entregados">●</span>'
+      : '<span style="color:#c3c8d4">—</span>';
+  }
+
+  if(!envios.length) return '<span style="color:#c3c8d4">—</span>';
+  const ok = envios.some(e => e.ok);
+  const detalle = envios.filter(e=>!e.ok).map(e=>e.detalle||'sin detalle').join(' · ');
+  return ok
+    ? '<span style="color:#15803d;font-size:1rem" title="Enviado">●</span>'
+    : '<span style="color:#b91c1c;font-size:1rem" title="' + esc(detalle) + '">●</span>';
+}
+
 function histCanalDe(g){
   const c = Object.keys(g.canales);
   if(c.length > 1) return CANALES_HIST.ambos;
@@ -3667,7 +3698,9 @@ function renderHistorial(){
         <td style="padding:8px 10px;white-space:nowrap"><span style="color:${g.mod.color};font-weight:700" title="${esc(g.mod.label)}">${g.mod.icon} ${g.mod.corto||g.mod.label}</span></td>
         <td style="padding:8px 10px"><strong style="display:block;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(g.nombre||contacto||'—')}">${esc(g.nombre||contacto||'—')}</strong><span style="display:block;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.68rem;color:var(--gray-text)" title="${esc(contacto)}">${esc(contacto)}</span></td>
         <td style="padding:8px 10px;white-space:nowrap">${g.membresia?'#'+esc(g.membresia):'—'}</td>
-        <td style="padding:8px 10px;white-space:nowrap"><span style="background:${can.bg};color:${can.color};border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">${can.icon} ${can.label}</span></td>
+        <td style="padding:8px 10px;text-align:center">${histPunto(g,'correo')}</td>
+        <td style="padding:8px 10px;text-align:center">${histPunto(g,'whatsapp')}</td>
+        <td style="padding:8px 10px;text-align:center">${histPunto(g,'ambos')}</td>
         <td style="padding:8px 10px;white-space:nowrap">${esc(g.hora)}</td>
         <td style="padding:8px 10px;white-space:nowrap"><span title="${esc(est.title)}" style="background:${est.bg};color:${est.color};border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">${est.texto}</span></td>
       </tr>`;
@@ -3681,7 +3714,7 @@ function renderHistorial(){
       <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-top:6px;min-width:640px">
         <thead><tr style="background:#f0f4ff">
-          <th style="${TH}">Módulo</th><th style="${TH}">Socio</th><th style="${TH}">Membresía</th><th style="${TH}">Canal</th><th style="${TH}">Hora</th><th style="${TH}">Estado</th>
+          <th style="${TH}">Módulo</th><th style="${TH}">Socio</th><th style="${TH}">Membresía</th><th style="${TH};text-align:center">📧 Correo</th><th style="${TH};text-align:center">💬 WhatsApp</th><th style="${TH};text-align:center">Ambos</th><th style="${TH}">Hora</th><th style="${TH}">Estado</th>
         </tr></thead><tbody>${filas}</tbody></table>
       </div>
     </details>`;
@@ -3691,17 +3724,43 @@ function exportarHistorial(){
   const lista = histFiltrado();
   if(!lista.length){ showToast('⚠️ No hay envíos en ese rango para exportar'); return; }
   const desde=document.getElementById('hist-desde')?.value||'', hasta=document.getElementById('hist-hasta')?.value||'';
-  // El Excel se exporta SIN agrupar: una fila por envío real, que es lo que sirve
-  // para auditar. La etiqueta "Ambos" solo existe en pantalla.
-  const enc=['Fecha','Canal','Módulo','Socio','Correo','Teléfono','Membresía','Estado','Detalle','Asunto','Plantilla'];
-  const filas=lista.map(h=>{
-    const mod=moduloDeFila(h);
-    const canal = (h.canal==='whatsapp') ? 'WhatsApp' : 'Correo';
-    return [histFecha(h)||'', canal, mod.label||'', h.nombre||h.Nombre||'',
-            h.correo||h.Correo||'', h.telefono||'', h.membresia||h.Membresia||'',
-            h.estado||h.Estado||'enviado', h.estado_detalle||'', h.asunto||h.Asunto||'', h.plantilla||''];
+  // prod (6-ago) — El Excel ahora sale AGRUPADO, igual que la pantalla: una fila por
+  // socio, módulo y día, con las tres columnas de canal por separado. Antes salía una
+  // fila por envío, así que un socio que recibió correo y WhatsApp aparecía dos veces
+  // y no se podía contar cuántos socios se contactaron sin depurar a mano.
+  // Cada columna dice 'Sí' (salió bien), 'Error' (se intentó y falló) o queda vacía
+  // (no se intentó por ese canal), para que se pueda filtrar y sumar en Excel.
+  const grupos = histAgrupar(lista);
+  const marca = (g, canal) => {
+    if(canal === 'ambos'){
+      const cor = g.envios.filter(e=>e.canal==='correo');
+      const wa  = g.envios.filter(e=>e.canal==='whatsapp');
+      if(!cor.length || !wa.length) return '';
+      return (cor.some(e=>e.ok) && wa.some(e=>e.ok)) ? 'Sí' : '';
+    }
+    const env = g.envios.filter(e=>e.canal===canal);
+    if(!env.length) return '';
+    return env.some(e=>e.ok) ? 'Sí' : 'Error';
+  };
+  const enc=['Fecha','Hora','Módulo','Socio','Membresía','Dirección de correo','Teléfono',
+             'Correo','WhatsApp','Ambos','Estado','Detalle'];
+  const filas = grupos.map(g=>{
+    const est = histEstadoDe(g);
+    return [g.dia||'', g.hora||'', (g.mod && g.mod.label)||'', g.nombre||'', g.membresia||'',
+            g.correo||'', g.telefono||'',
+            marca(g,'correo'), marca(g,'whatsapp'), marca(g,'ambos'),
+            est.texto||'', est.title||''];
   });
-  const cel=v=>`<td>${String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</td>`;
+  // Las tres columnas de canal se pintan de color para que se lean de un vistazo,
+  // igual que el punto verde de la pantalla.
+  const cel=(v,i)=>{
+    const s = String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    if(i>=7 && i<=9){
+      const color = (s==='Sí') ? '#15803d' : (s==='Error' ? '#b91c1c' : '#000000');
+      return `<td style="color:${color};font-weight:bold;text-align:center">${s}</td>`;
+    }
+    return `<td>${s}</td>`;
+  };
   const html=`<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body>
     <table border="1"><thead><tr>${enc.map(e=>`<th>${e}</th>`).join('')}</tr></thead>
     <tbody>${filas.map(f=>`<tr>${f.map(cel).join('')}</tr>`).join('')}</tbody></table></body></html>`;
@@ -3711,7 +3770,7 @@ function exportarHistorial(){
   a.download=`historial_envios_berimbau_${desde||'inicio'}_a_${hasta||'hoy'}.xls`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  showToast(`✅ ${lista.length} envíos exportados`);
+  showToast(`✅ ${grupos.length} socios exportados (${lista.length} envíos)`);
 }
 // ===== GRÁFICAS =====
 let graficasIniciadas = false;
