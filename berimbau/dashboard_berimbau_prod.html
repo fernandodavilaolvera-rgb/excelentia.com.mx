@@ -1492,6 +1492,31 @@ Por favor comunícate con nosotros a la brevedad para regularizar tu situación 
             </div>
           </div>
 
+          <!-- 7-ago-2026 (s37) SELECTOR DE CANAL. Nace de un caso real: en el envio del
+               6-ago, 8 membresias recibieron solo correo porque no tenian celular
+               capturado. El Club capturo los numeros y necesitaba reenviar SOLO el
+               WhatsApp, sin repetirles el correo el mismo dia. -->
+          <div id="cf-canal-box" style="max-width:720px;margin:0 auto 12px;border-radius:10px;padding:12px 14px;background:#f5f6f8;border:1px solid #dde1e9">
+            <div style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:800;color:#1a3a6b;margin-bottom:8px">
+              📨 ¿Por dónde se manda?
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
+              <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
+                <input type="radio" name="cf-canal" value="ambos" checked onchange="cfSetCanal('ambos')" style="accent-color:#1a3a6b;width:15px;height:15px">
+                <strong>Ambos</strong> <span style="color:#8a90a0;font-size:.68rem">(los que tenga capturados)</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
+                <input type="radio" name="cf-canal" value="whatsapp" onchange="cfSetCanal('whatsapp')" style="accent-color:#1a3a6b;width:15px;height:15px">
+                📱 <strong>Solo WhatsApp</strong>
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
+                <input type="radio" name="cf-canal" value="correo" onchange="cfSetCanal('correo')" style="accent-color:#1a3a6b;width:15px;height:15px">
+                ✉️ <strong>Solo correo</strong>
+              </label>
+            </div>
+            <div id="cf-canal-aviso" style="display:none;margin-top:10px;padding:8px 10px;border-radius:8px;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;font-size:.74rem;color:#1a3a6b"></div>
+          </div>
+
           <div style="max-width:720px;margin:0 auto">
             <button class="btn-av-probar" onclick="cargarListaCargoFallido()" id="cf-btn-cargar">🔄 Cargar lista</button>
           </div>
@@ -4792,6 +4817,39 @@ async function cargarModulos(){
 // ============================================================================
 let CF_LISTA = [];
 let CF_MODO_PRUEBA = true;
+// 7-ago-2026 (s37) - Canal elegido: 'ambos' | 'whatsapp' | 'correo'.
+// Viaja en el POST al webhook. Si vale 'ambos' el motor se porta como siempre.
+let CF_CANAL = 'ambos';
+
+// Un socio es alcanzable si tiene capturado el dato del canal elegido. Con
+// 'Solo WhatsApp' alguien que solo tiene correo queda fuera, aunque SI tenga
+// un canal: por eso no basta con preguntar si tiene correo o whats.
+function cfTieneCanal(x){
+  if(CF_CANAL === 'whatsapp') return !!(x && x.whats);
+  if(CF_CANAL === 'correo')   return !!(x && x.correo);
+  return !!(x && (x.correo || x.whats));
+}
+
+function cfSetCanal(c){
+  CF_CANAL = (c === 'correo' || c === 'whatsapp') ? c : 'ambos';
+  const av = document.getElementById('cf-canal-aviso');
+  if(av){
+    if(CF_CANAL === 'ambos'){
+      av.style.display = 'none';
+      av.innerHTML = '';
+    } else {
+      const falta = CF_LISTA.filter(function(x){ return !cfTieneCanal(x); }).length;
+      av.style.display = 'block';
+      av.innerHTML = (CF_CANAL === 'whatsapp'
+          ? 'Se enviar\u00e1 <strong>solo WhatsApp</strong>. Nadie recibir\u00e1 correo, aunque lo tenga capturado.'
+          : 'Se enviar\u00e1 <strong>solo correo</strong>. Nadie recibir\u00e1 WhatsApp, aunque lo tenga capturado.')
+        + (falta ? ' <strong>' + falta + '</strong> de la lista no tiene ese dato y queda bloqueado.' : '');
+    }
+  }
+  // Se vuelve a pintar para bloquear y destildar a quien ya no es alcanzable.
+  // NO se recarga la lista: los datos son los mismos, solo cambia a quien se le manda.
+  cfRender();
+}
 
 function cfSetModo(esPrueba){
   CF_MODO_PRUEBA = !!esPrueba;
@@ -4843,11 +4901,17 @@ function cfRender(){
   cont.innerHTML = CF_LISTA.map(function(x,i){
     const omitir  = String(x.recomendacion||'') === 'omitir';
     const avisado = x.ya_avisado === true;
+    // s37 - Solo se listan los canales por los que DE VERDAD va a salir el aviso,
+    // segun el selector. Asi 'sinCanal' queda bien solo: con 'Solo WhatsApp',
+    // quien no tiene celular capturado se bloquea aunque tenga correo.
     const canales = [];
-    if(x.correo) canales.push('✉️ Correo');
-    if(x.whats)  canales.push('📱 WhatsApp');
+    if(x.correo && CF_CANAL !== 'whatsapp') canales.push('✉️ Correo');
+    if(x.whats  && CF_CANAL !== 'correo')   canales.push('📱 WhatsApp');
     const sinCanal = canales.length === 0;
-    const chLbl = sinCanal ? '<span style="color:#c0392b;font-weight:700">Sin canal capturado</span>' : canales.join(' · ');
+    const faltaLbl = (CF_CANAL === 'whatsapp') ? 'Sin WhatsApp capturado'
+                   : (CF_CANAL === 'correo')   ? 'Sin correo capturado'
+                   : 'Sin canal capturado';
+    const chLbl = sinCanal ? '<span style="color:#c0392b;font-weight:700">' + faltaLbl + '</span>' : canales.join(' · ');
     const dis = sinCanal ? ' disabled' : '';
     const chk = (!omitir && !sinCanal && !avisado) ? ' checked' : '';
     return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#fff;border-top:' + (i?'1px solid #eef1f5':'none') + '">'
@@ -4968,6 +5032,13 @@ function confirmarEnvioCargoFallido(){
           ? 'Le va a llegar el aviso de cargo rechazado a estas <strong>' + sel.length + '</strong> membresías reales.'
           : 'Se enviará a los socios de prueba. Ningún socio del Club recibirá nada.')
     + '</p>'
+    // s37 - El canal elegido se repite aqui a proposito: es la ultima pantalla
+    // antes de que salga el mensaje y el selector queda arriba, fuera de vista.
+    + (CF_CANAL !== 'ambos'
+        ? '<div style="text-align:center;margin:-4px 0 12px;font-size:.76rem;font-weight:800;color:#1a3a6b;background:#f0f6ff;border:1px solid #c8d9f0;border-radius:8px;padding:7px 10px">'
+          + (CF_CANAL === 'whatsapp' ? '\ud83d\udcf1 Solo por WhatsApp \u00b7 nadie recibir\u00e1 correo' : '\u2709\ufe0f Solo por correo \u00b7 nadie recibir\u00e1 WhatsApp')
+          + '</div>'
+        : '')
     + (repetidos.length
         ? '<div style="border:1px solid #e8d9a0;background:#fdf6e3;border-radius:8px;padding:9px 11px;margin-bottom:12px">'
           + '<div style="font-size:.76rem;font-weight:800;color:#7a5b00;margin-bottom:5px">\ud83d\udce8 ' + repetidos.length + (repetidos.length===1 ? ' de ellas ya hab\u00eda recibido este aviso:' : ' de ellas ya hab\u00edan recibido este aviso:') + '</div>'
@@ -5042,7 +5113,7 @@ async function cfEnviarSeleccionados(){
     try{
       const r = await fetch(URL_CARGO_FALLIDO, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ membresia: String(x.membresia), modo_prueba: CF_MODO_PRUEBA })
+        body: JSON.stringify({ membresia: String(x.membresia), modo_prueba: CF_MODO_PRUEBA, canal: CF_CANAL })
       });
       const j = await r.json().catch(function(){ return {}; });
       salida.push({ membresia:x.membresia, nombre:x.nombre,
@@ -5246,9 +5317,26 @@ function initModulesV10(){
   }
 
   // --- Próximos a 26 años ---
+  // 7-ago-2026 (s37) — LO REPORTO EL CLUB: "el aviso ahorita agarra parejo".
+  // Y tenia razon: esta lista recorria TODO el padron y mostraba a cualquiera
+  // con 25 anios, sin mirar que tipo de socio era. En los 90 dias siguientes
+  // salian 3 personas y solo 1 era correcta: una Conyuge (8900) y una Individual
+  // Junior (8226) aparecian igual, y a esas cumplir 26 no les cambia nada porque
+  // NO son dependientes cubiertos.
+  // 🔑 El motor (cron Alerta 26) SIEMPRE filtro bien. El bug era solo de pantalla.
+  //    Aqui se replica su criterio exacto para que la lista y el envio coincidan.
+  // 📌 Se excluye a la cabeza (es_cabeza): quien tiene la cuota base no deja de
+  //    estar cubierto al cumplir 26, porque no depende de nadie. Lo pidio el Club.
+  // ⚠️ NO se usa esDependienteCuota(): esa lista incluye Agregado e Individual
+  //    Junior, que aqui NO deben entrar. El cron solo toma estos cuatro tipos.
+  const TU_26 = ['Juvenil','Infantil','Menor','Junior'];
   const proximos26 = [];
   TODOS.forEach(d=>{
     if(!d.fnac) return;
+    if(TU_26.indexOf(String(d.tu||'')) < 0) return;              // solo dependientes cubiertos
+    if(d.es_cabeza) return;                                       // el de la cuota base, fuera
+    if(!(d.sit === 'Activo' || d.sit === 'Baja Temporal')) return;
+    if(esBecado(d)) return;
     const fn = new Date(d.fnac);
     const edad = hoy.getFullYear()-fn.getFullYear() - (hoy < new Date(hoy.getFullYear(), fn.getMonth(), fn.getDate()) ? 1 : 0);
     if(edad >= 25 && edad < 26){
