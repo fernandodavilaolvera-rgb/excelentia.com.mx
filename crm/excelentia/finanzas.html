@@ -924,6 +924,7 @@ async function saveIngreso(){
   actualizarOrigenFondos();
   closeModal('modal-ingreso');
   renderIngresos();
+  renderUltimos6Gastos();   // la mini-tabla de 6 meses también muestra ingresos
 }
 async function deleteIngreso(id){
   if(!confirm('¿Eliminar este ingreso?'))return;
@@ -931,6 +932,7 @@ async function deleteIngreso(id){
   INGRESOS=INGRESOS.filter(i=>i.id!==id);
   actualizarOrigenFondos();
   renderIngresos();
+  renderUltimos6Gastos();
   showToast('Ingreso eliminado');
 }
 function editIngreso(id){ const i=INGRESOS.find(x=>x.id===id); if(i)openIngreso(i); }
