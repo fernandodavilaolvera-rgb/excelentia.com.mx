@@ -1707,6 +1707,66 @@ Si deseas que continúe como socio activo, te invitamos a contactarnos para gest
           <div id="lista-26" style="font-size:.77rem;color:var(--gray-text)">Cargando...</div>
         </div>
 
+        <!-- ===== s38 (7-ago-2026) · ENVIO MANUAL DEL AVISO DE 26 ANOS =====
+             Lo destapo el Club: este modulo solo tenia "Probar" (que va al equipo
+             de prueba) y "Guardar configuracion". La lista de arriba se veia pero
+             no se le podia disparar nada, y el unico envio real lo hacia el cron,
+             que esta pausado. Ya nos pego dos veces: Manuel Jimenez (1131) y
+             Karla Garcia (8226), los dos fuera de la ventana de 30 dias.
+             Mismo patron que Cargo Fallido: interruptor Prueba/Real, casillas,
+             confirmacion, y en real hay que teclear ENVIAR. -->
+        <div class="av-sub-section" id="m26-envio-section">
+          <div class="av-sub-title">📤 Enviar el aviso a un dependiente</div>
+
+          <div class="av-info-box" style="max-width:720px;margin:0 auto 12px">
+            Sirve para los casos que <strong>ya se pasaron de los 30 días</strong> y que el aviso
+            automático nunca les va a alcanzar. El mensaje lo arma el sistema con la
+            <strong>plantilla aprobada por Meta</strong> (masculina o femenina según el titular) y
+            manda copia a Cobranza. Aquí solo eliges <strong>a quién</strong>.
+            <br><strong>El aviso siempre le llega al titular de la membresía</strong>, no al dependiente.
+          </div>
+
+          <!-- INTERRUPTOR PRUEBA / REAL -->
+          <div id="m26-modo-box" style="max-width:720px;margin:0 auto 12px;border-radius:10px;padding:12px 14px;background:#f0faf0;border:1px solid #bfe3bf">
+            <div style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:800;color:#1a5c18;margin-bottom:8px">
+              🔒 ¿A quién le va a llegar?
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
+              <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
+                <input type="radio" name="m26-modo" value="prueba" checked onchange="m26SetModo(true)" style="accent-color:#3AAA35;width:15px;height:15px">
+                🧪 <strong>Prueba</strong> <span style="color:#8a90a0;font-size:.68rem">(socios de mentiras)</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
+                <input type="radio" name="m26-modo" value="real" onchange="m26SetModo(false)" style="accent-color:#c0392b;width:15px;height:15px">
+                🔴 <strong>Envío real</strong> <span style="color:#8a90a0;font-size:.68rem">(socios del Club)</span>
+              </label>
+            </div>
+            <div id="m26-modo-aviso" style="display:none;margin-top:10px;padding:8px 10px;border-radius:8px;background:#fdeaea;border:1px solid #f5b7b1;font-size:.74rem;color:#922b21;font-weight:700">
+              ⚠️ Modo real activo. El aviso llega al titular de una membresía del Club.
+            </div>
+          </div>
+
+          <div style="max-width:720px;margin:0 auto">
+            <button class="btn-av-probar" onclick="cargarLista26()" id="m26-btn-cargar">🔄 Cargar lista</button>
+          </div>
+
+          <div id="m26-lista-wrap" style="display:none;max-width:720px;margin:14px auto 0">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:10px 12px;border:1px solid #dde1e9;border-bottom:none;border-radius:10px 10px 0 0;background:#dce8f7">
+              <label style="display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:700;color:#1a2035;cursor:pointer">
+                <input type="checkbox" id="m26-chk-todos" onchange="m26ToggleTodos(this)" style="accent-color:#3AAA35;width:16px;height:16px">
+                Seleccionar todos
+              </label>
+              <span id="m26-contador" style="font-size:.74rem;font-weight:700;color:#1a3a6b">0 de 0 seleccionados</span>
+            </div>
+            <div id="m26-lista-tabla" style="border:1px solid #dde1e9;border-radius:0 0 10px 10px;overflow:hidden"></div>
+            <div style="margin-top:12px">
+              <button class="btn-av-probar" id="m26-btn-enviar" onclick="confirmarEnvio26()" disabled style="opacity:.5;cursor:not-allowed">📤 Enviar aviso a los seleccionados (0)</button>
+            </div>
+          </div>
+
+          <div id="m26-resultado" style="display:none;max-width:720px;margin:14px auto 0"></div>
+        </div>
+
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:4px">
           <div class="toggle-wrap">
             <label class="toggle-switch"><input type="checkbox" id="toggle-26" onchange="toggleModuleStatus('m26',this)"><span class="toggle-slider"></span></label>
@@ -2882,6 +2942,12 @@ const URL_WA_ENVIAR      = 'https://n8n.excelentia.com.mx/webhook/berimbau-wa-en
 // La API key de YCloud vive del lado del servidor en n8n, ya NO en el navegador.
 const URL_CARGO_FALLIDO  = 'https://n8n.excelentia.com.mx/webhook/berimbau-cargo-fallido';
 const URL_CF_LISTA       = 'https://n8n.excelentia.com.mx/webhook/berimbau-cargo-fallido-lista';
+// s38 (7-ago-2026) - Envio MANUAL del aviso de 26 anios. Segundo trigger del
+// workflow 'Berimbau - Alerta 26 Anios' (4fpgkGBqjhwq9xwe). Recibe UNA membresia
+// + el id del DEPENDIENTE + modo_prueba, y reutiliza el mismo motor del cron:
+// mismo texto, misma eleccion de plantilla masculina/femenina y misma copia a
+// Cobranza. El Dashboard NO arma el mensaje.
+const URL_ALERTA26_ENVIAR = 'https://n8n.excelentia.com.mx/webhook/berimbau-alerta26-enviar';
 const URL_PROG_LISTAR    = 'https://n8n.excelentia.com.mx/webhook/berimbau-programaciones-listar';
 const URL_PROG_CANCELAR  = 'https://n8n.excelentia.com.mx/webhook/berimbau-programaciones-cancelar';
 
@@ -5153,6 +5219,288 @@ function cfPintarResultado(salida){
   showToast(okN + ' de ' + salida.length + ' enviados');
 }
 
+// ============================================================================
+// s38 (7-ago-2026) · ENVIO MANUAL DEL AVISO DE 26 ANOS
+// ----------------------------------------------------------------------------
+// Por que existe: el modulo solo tenia "Probar" (equipo de prueba) y "Guardar
+// configuracion". La lista de proximos a cumplir se veia pero NO se le podia
+// disparar nada, y el unico envio real lo hace el cron, que esta pausado. Lo
+// destapo el Club al pedir mandar a mano el aviso de Karla (8226) y no encontrar
+// el boton. Ya habia pegado dos veces: Karla y Manuel Jimenez (1131).
+//
+// 🔑 ARQUITECTURA, y esto es lo que hay que respetar si se toca:
+//   El Dashboard manda UNICAMENTE { membresia, id, modo_prueba } al webhook
+//   'berimbau-alerta26-enviar'. El texto del aviso, la eleccion de plantilla
+//   masculina o femenina, quien es el titular y la copia a Cobranza los resuelve
+//   el motor contra la base. El navegador NO decide nada, igual que en Cargo
+//   Fallido. Por eso el aviso manual y el automatico siempre diran lo mismo.
+//
+// 🔑 EL 'id' ES EL DEL DEPENDIENTE, no el del titular. El motor sube solo a la
+//   cabeza de la membresia.
+//
+// ⚠️ EN MODO PRUEBA LA LISTA CAMBIA DE FUENTE, A PROPOSITO. Esta pantalla se
+//   alimenta de 'socios' (reales) y el webhook en prueba lee 'socios_test'. Si
+//   se mostrara la lista real en modo prueba, la pantalla ofreceria un envio que
+//   el motor iba a rechazar — el mismo error del caso 6028. Por eso en prueba se
+//   muestra la familia de prueba y nada mas.
+// ============================================================================
+let M26_LISTA = [];
+let M26_MODO_PRUEBA = true;
+
+// La familia de prueba (990005). Correo y WhatsApp caen los dos en Fernando, y
+// en modo prueba la copia de Cobranza tambien, asi que es imposible tocar a un
+// socio del Club. Verificado de punta a punta el 7-ago-2026.
+const M26_PRUEBA = [{
+  membresia: 990005, id: 2,
+  dependiente: 'Hijo (Prueba) Davila Test',
+  tipo_usr: 'Juvenil',
+  titular: 'Fernando Titular (Prueba) Davila Test',
+  correo: 'fernando.davila.olvera@gmail.com',
+  whats:  '5512154800',
+  cumple26: new Date(2038, 3, 10),
+  diasFalta: null,
+  esPrueba: true
+}];
+
+function m26SetModo(esPrueba){
+  M26_MODO_PRUEBA = !!esPrueba;
+  const aviso = document.getElementById('m26-modo-aviso');
+  if(aviso) aviso.style.display = esPrueba ? 'none' : 'block';
+  const box = document.getElementById('m26-modo-box');
+  if(box){
+    box.style.background  = esPrueba ? '#f0faf0' : '#fdf2f2';
+    box.style.borderColor = esPrueba ? '#bfe3bf' : '#f5b7b1';
+  }
+  // La lista cambia de fuente segun el modo: hay que volver a pedirla a proposito.
+  M26_LISTA = [];
+  const wrap = document.getElementById('m26-lista-wrap');
+  if(wrap) wrap.style.display = 'none';
+  const res = document.getElementById('m26-resultado');
+  if(res) res.style.display = 'none';
+}
+
+function cargarLista26(){
+  const btn  = document.getElementById('m26-btn-cargar');
+  const wrap = document.getElementById('m26-lista-wrap');
+  const res  = document.getElementById('m26-resultado');
+  if(res) res.style.display = 'none';
+  M26_LISTA = M26_MODO_PRUEBA ? M26_PRUEBA.slice() : (window.PROXIMOS_26 || []).slice();
+  m26Render();
+  if(wrap) wrap.style.display = 'block';
+  showToast('🔔 ' + M26_LISTA.length + (M26_LISTA.length===1 ? ' dependiente en la lista' : ' dependientes en la lista'));
+  if(btn) btn.textContent = '🔄 Cargar lista';
+}
+
+// Se llama sola cuando el Dashboard recalcula la lista de proximos a 26 (por
+// ejemplo despues de un sync), para que lo que esta en pantalla no se quede viejo.
+function m26Refrescar(){
+  if(M26_MODO_PRUEBA) return;
+  const wrap = document.getElementById('m26-lista-wrap');
+  if(!wrap || wrap.style.display === 'none') return;
+  M26_LISTA = (window.PROXIMOS_26 || []).slice();
+  m26Render();
+}
+
+function m26Fecha26(d){
+  if(!(d instanceof Date)) return '';
+  const MES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return d.getDate() + ' de ' + MES[d.getMonth()] + ' de ' + d.getFullYear();
+}
+
+function m26Render(){
+  const cont = document.getElementById('m26-lista-tabla');
+  if(!cont) return;
+  if(!M26_LISTA.length){
+    cont.innerHTML = '<div style="padding:18px 14px;text-align:center;font-size:.8rem;color:#8a90a0;background:#fff">'
+                   + 'No hay dependientes próximos a cumplir 26 años.</div>';
+    m26ActualizarContador();
+    return;
+  }
+  cont.innerHTML = M26_LISTA.map(function(x,i){
+    // ⚠️ SIN CORREO DEL TITULAR NO SALE NADA, NI SIQUIERA EL WHATSAPP. No es un
+    // capricho de esta pantalla: el nodo 'Calcular Proximos 26' del motor descarta
+    // al que no trae correo del titular, y ese nodo lo comparten el cron y el
+    // envio manual. Se bloquea aqui para no ofrecer un envio que el motor rechaza.
+    const sinCorreo = !x.correo;
+    const canales = [];
+    if(x.correo) canales.push('✉️ Correo');
+    if(x.whats)  canales.push('📱 WhatsApp');
+    const chLbl = sinCorreo
+      ? '<span style="color:#c0392b;font-weight:700">El titular no tiene correo capturado</span>'
+      : canales.join(' · ');
+    const dis = sinCorreo ? ' disabled' : '';
+    const chk = sinCorreo ? '' : ' checked';
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#fff;border-top:' + (i?'1px solid #eef1f5':'none') + '">'
+      + '<input type="checkbox" class="m26-chk" data-i="' + i + '" onchange="m26ActualizarContador()"' + chk + dis
+      + ' style="accent-color:#3AAA35;width:16px;height:16px;margin-top:2px;flex-shrink:0' + (sinCorreo?';opacity:.4':'') + '">'
+      + '<div style="min-width:0;flex:1">'
+        + '<div style="font-size:.8rem;font-weight:700;color:#1a2035;line-height:1.3">'
+          + '<span style="color:#1a3a6b">#' + x.membresia + '</span> · ' + (x.dependiente || '(sin nombre)')
+          + (x.tipo_usr ? ' <span style="color:#8a90a0;font-weight:600;font-size:.72rem">(' + x.tipo_usr + ')</span>' : '')
+        + '</div>'
+        + '<div style="font-size:.72rem;color:#4a5068;margin-top:2px">Cumple 26 el ' + m26Fecha26(x.cumple26)
+          + (x.diasFalta != null ? ' · faltan ' + x.diasFalta + ' días' : '') + '</div>'
+        // El titular se pinta SIEMPRE, aunque el aviso siempre le toque a el:
+        // el renglon dice el nombre del dependiente y Nancy tiene que ver a que
+        // buzon va a caer el mensaje antes de picar el boton.
+        + '<div style="font-size:.7rem;color:#1a3a6b;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:6px;padding:4px 7px;margin-top:5px">'
+          + '↪️ El aviso le llega al titular <strong>' + (x.titular || '—') + '</strong> · ' + chLbl + '</div>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+  m26ActualizarContador();
+}
+
+function m26Seleccionados(){
+  return Array.from(document.querySelectorAll('.m26-chk:checked'))
+              .map(function(c){ return M26_LISTA[Number(c.dataset.i)]; })
+              .filter(Boolean);
+}
+
+function m26ToggleTodos(master){
+  document.querySelectorAll('.m26-chk').forEach(function(c){ if(!c.disabled) c.checked = master.checked; });
+  m26ActualizarContador();
+}
+
+function m26ActualizarContador(){
+  const sel   = m26Seleccionados().length;
+  const total = M26_LISTA.length;
+  const el = document.getElementById('m26-contador');
+  if(el) el.textContent = sel + ' de ' + total + ' seleccionados';
+  const btn = document.getElementById('m26-btn-enviar');
+  if(btn){
+    btn.textContent = '📤 Enviar aviso a los seleccionados (' + sel + ')';
+    btn.disabled = (sel === 0);
+    btn.style.opacity = sel ? '1' : '.5';
+    btn.style.cursor  = sel ? 'pointer' : 'not-allowed';
+  }
+}
+
+// ---- Confirmacion. En modo real obliga a teclear ENVIAR (Fernando, s31). ----
+function confirmarEnvio26(){
+  const sel = m26Seleccionados();
+  if(!sel.length){ showToast('⚠️ No hay nadie seleccionado'); return; }
+  const real = !M26_MODO_PRUEBA;
+
+  const filas = sel.map(function(x){
+    const c = [];
+    if(x.correo) c.push('✉️');
+    if(x.whats)  c.push('📱');
+    return '<div style="padding:6px 0;border-bottom:1px solid #eef1f5;font-size:.75rem">'
+         + '<div style="display:flex;justify-content:space-between;gap:10px">'
+           + '<span style="color:#1a2035;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">#'
+           + x.membresia + ' · ' + (x.dependiente||'') + '</span>'
+           + '<span style="color:#4a5068;flex-shrink:0">' + (c.join(' ')||'—') + '</span>'
+         + '</div>'
+         + '<div style="color:#1a3a6b;font-size:.71rem;margin-top:1px">↪️ le llega a ' + (x.titular||'') + '</div>'
+         + '</div>';
+  }).join('');
+
+  const ov = document.createElement('div');
+  ov.className = 'modal-overlay';
+  ov.id = 'm26-modal';
+  ov.innerHTML =
+    '<div class="modal-box" style="max-width:520px;text-align:left">'
+    + '<h3 style="text-align:center">' + (real ? '🔴 Envío REAL a socios del Club' : '🧪 Envío de prueba') + '</h3>'
+    + '<p style="text-align:center;margin-bottom:12px">'
+      + (real
+          ? 'Le va a llegar el aviso de 26 años al titular de estas <strong>' + sel.length + '</strong> membresías reales.'
+          : 'Se enviará a la familia de prueba. Ningún socio del Club recibirá nada.')
+    + '</p>'
+    + '<div style="max-height:240px;overflow-y:auto;border:1px solid #dde1e9;border-radius:8px;padding:6px 10px;margin-bottom:14px;background:#f5f6f8">'
+      + filas + '</div>'
+    + (real
+        ? '<div style="margin-bottom:14px">'
+          + '<div style="font-size:.74rem;color:#922b21;font-weight:700;margin-bottom:6px">Para confirmar, escribe <strong>ENVIAR</strong>:</div>'
+          + '<input id="m26-confirm-input" type="text" autocomplete="off" oninput="m26ValidarPalabra()" '
+          + 'style="width:100%;padding:9px 11px;border:1px solid #f5b7b1;border-radius:8px;font-size:.85rem;font-family:inherit;letter-spacing:1px">'
+          + '</div>'
+        : '')
+    + '<div class="modal-btns">'
+      + '<button class="modal-btn-cancel" onclick="m26CerrarModal()">Cancelar</button>'
+      + '<button class="modal-btn-del" id="m26-confirm-btn" onclick="m26EnviarSeleccionados()"'
+      + (real ? ' disabled style="opacity:.45;cursor:not-allowed"' : '')
+      + '>' + (real ? '🔴 Enviar de verdad' : '🧪 Enviar prueba') + '</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(ov);
+}
+
+function m26ValidarPalabra(){
+  const inp = document.getElementById('m26-confirm-input');
+  const btn = document.getElementById('m26-confirm-btn');
+  if(!inp || !btn) return;
+  const ok = inp.value.trim().toUpperCase() === 'ENVIAR';
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '.45';
+  btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+}
+
+function m26CerrarModal(){
+  const m = document.getElementById('m26-modal');
+  if(m) m.remove();
+}
+
+// ---- El envio. Una llamada por dependiente, en fila y esperando cada una. ----
+async function m26EnviarSeleccionados(){
+  const sel = m26Seleccionados();
+  m26CerrarModal();
+  if(!sel.length) return;
+
+  const btn = document.getElementById('m26-btn-enviar');
+  if(btn){ btn.disabled = true; btn.style.opacity='.5'; btn.textContent = '⏳ Enviando 0/' + sel.length + '...'; }
+
+  const salida = [];
+  for(let i=0; i<sel.length; i++){
+    const x = sel[i];
+    if(btn) btn.textContent = '⏳ Enviando ' + (i+1) + '/' + sel.length + '...';
+    try{
+      const r = await fetch(URL_ALERTA26_ENVIAR, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ membresia: x.membresia, id: x.id, modo_prueba: M26_MODO_PRUEBA })
+      });
+      const j = await r.json().catch(function(){ return {}; });
+      salida.push({ membresia:x.membresia, dependiente:x.dependiente, titular:(j.titular || x.titular),
+                    ok: j.ok === true,
+                    correo: !!(j.canales && j.canales.correo),
+                    wa:     !!(j.canales && j.canales.whatsapp),
+                    msg: j.mensaje || (r.ok ? 'Sin respuesta del servidor' : 'Error HTTP ' + r.status) });
+    }catch(e){
+      salida.push({ membresia:x.membresia, dependiente:x.dependiente, titular:x.titular,
+                    ok:false, correo:false, wa:false, msg:'No se pudo contactar al servidor' });
+    }
+  }
+  m26PintarResultado(salida);
+  m26ActualizarContador();
+}
+
+function m26PintarResultado(salida){
+  const cont = document.getElementById('m26-resultado');
+  if(!cont) return;
+  const okN = salida.filter(function(x){ return x.ok; }).length;
+  cont.style.display = 'block';
+  cont.innerHTML =
+    '<div style="border:1px solid #dde1e9;border-radius:10px;overflow:hidden">'
+    + '<div style="padding:10px 12px;background:#dce8f7;font-size:.78rem;font-weight:800;color:#1a3a6b">'
+      + (M26_MODO_PRUEBA ? '🧪 Prueba · ' : '🔴 Envío real · ')
+      + okN + ' de ' + salida.length + ' enviados</div>'
+    + salida.map(function(x,i){
+        const ch = [];
+        if(x.correo) ch.push('✉️ correo');
+        if(x.wa)     ch.push('📱 WhatsApp');
+        return '<div style="padding:9px 12px;background:#fff;border-top:' + (i?'1px solid #eef1f5':'none') + ';font-size:.75rem">'
+          + '<div style="font-weight:700;color:#1a2035">' + (x.ok?'✅':'⛔') + ' #' + x.membresia + ' · ' + (x.dependiente||'') + '</div>'
+          + '<div style="color:#4a5068;margin-top:2px">'
+            + (x.ok ? '↪️ ' + (x.titular||'') + ' · ' + (ch.length ? ch.join(' · ') : (x.msg||'')) : (x.msg||''))
+          + '</div>'
+          + '</div>';
+      }).join('')
+    + '<div style="padding:8px 12px;background:#eef4fc;border-top:1px solid #dde1e9;font-size:.71rem;color:#1a3a6b">'
+      + 'La confirmación de entrega se ve en el <strong>Historial</strong>, módulo “Alerta 26 años”.</div>'
+    + '</div>';
+  showToast(okN + ' de ' + salida.length + ' enviados');
+}
+
 // Cargo fallido — PRUEBA a mí + equipo (Nancy, Carlos, Gustavo). Recorre TEST_TEAM y llama al webhook por persona.
 async function enviarCargoFallido(){
   const btn = document.querySelector('button[onclick="enviarCargoFallido()"]');
@@ -5346,6 +5694,29 @@ function initModulesV10(){
     }
   });
   proximos26.sort((a,b)=>a.diasFalta-b.diasFalta);
+
+  // s38 - Se guarda para que el modulo de envio manual trabaje EXACTAMENTE con la
+  // misma lista que se ve en pantalla, y no con un segundo criterio paralelo.
+  // A cada uno se le pega su CABEZA (el es_cabeza de v_socios), que es quien
+  // recibe el aviso. Verificado contra la base el 7-ago-2026: el es_cabeza de
+  // v_socios coincide con la cabeza que elige el motor en las 1,102 membresias,
+  // cero discrepancias. O sea que la pantalla y el envio senalan a la misma persona.
+  window.PROXIMOS_26 = proximos26.map(function(d){
+    const cab = TODOS.find(function(x){ return x.m === d.m && x.es_cabeza; }) || {};
+    const cor = String(cab.cor || '').split(/[,;]/)[0].trim();
+    return {
+      membresia: d.m,
+      id: d.id,
+      dependiente: toTitleCase(d.n || ''),
+      tipo_usr: d.tu || '',
+      cumple26: d.cumple26,
+      diasFalta: d.diasFalta,
+      titular: toTitleCase(cab.n || d.tit || ''),
+      correo: cor,
+      whats: primerTel(cab.wa)
+    };
+  });
+  if(typeof m26Refrescar === 'function') m26Refrescar();
 
   const el26Count = document.getElementById('mod-26-count');
   if(el26Count) el26Count.textContent = proximos26.length ? proximos26.length+' dependientes' : 'ninguno en 90 días';
