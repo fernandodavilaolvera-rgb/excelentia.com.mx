@@ -1661,7 +1661,13 @@ En nombre de todo el equipo de Club Berimbau, queremos desearte un día lleno de
       <div class="av-module-body" id="mod-26-body">
 
         <div class="av-channel-row">
-          <button class="av-channel-btn email active" id="btn-26-email" onclick="toggleChannel('m26','email')">✉️ Correo</button>
+          <!-- 8-ago-2026 (s38) BUG CORREGIDO. El id decia "btn-26-email" pero toda la
+               maquinaria arma el id como btn-<modulo>-<canal>, y el modulo aqui se llama
+               "m26" (el gemelo de WhatsApp SI estaba bien: btn-m26-wa). Consecuencias que
+               tenia: toggleChannel no encontraba el boton y no lo apagaba, y probarAviso
+               caia en su respaldo "si no hay boton, manda ambos", asi que el correo de
+               prueba salia SIEMPRE aunque el boton se viera apagado. -->
+          <button class="av-channel-btn email active" id="btn-m26-email" onclick="toggleChannel('m26','email')">✉️ Correo</button>
           <button class="av-channel-btn wa active" id="btn-m26-wa" onclick="toggleChannel('m26','wa')">
             📱 WhatsApp
           </button>
@@ -5042,8 +5048,23 @@ function cfSeleccionados(){
 }
 
 function cfToggleTodos(master){
-  document.querySelectorAll('.cf-chk').forEach(function(c){ if(!c.disabled) c.checked = master.checked; });
+  // Se lee ANTES de repintar: cfActualizarContador vuelve a calcular el estado
+  // del master y si no se guarda aqui, el click se pierde.
+  const marcar = master.checked;
+  document.querySelectorAll('.cf-chk').forEach(function(c){ if(!c.disabled) c.checked = marcar; });
   cfActualizarContador();
+}
+
+// s38 - Pone la casilla maestra en palomita / rayita / vacio segun cuantos
+// seleccionables esten marcados. 'indeterminate' es la rayita del navegador.
+function cfSincronizarMaster(){
+  const master = document.getElementById('cf-chk-todos');
+  if(!master) return;
+  const habilitados = Array.from(document.querySelectorAll('.cf-chk')).filter(function(c){ return !c.disabled; });
+  const marcados    = habilitados.filter(function(c){ return c.checked; }).length;
+  master.disabled      = habilitados.length === 0;
+  master.checked       = habilitados.length > 0 && marcados === habilitados.length;
+  master.indeterminate = marcados > 0 && marcados < habilitados.length;
 }
 
 function cfActualizarContador(){
@@ -5051,6 +5072,14 @@ function cfActualizarContador(){
   const total = CF_LISTA.length;
   const el = document.getElementById('cf-contador');
   if(el) el.textContent = sel + ' de ' + total + ' seleccionados';
+  // 8-ago-2026 (s38) - "Seleccionar todos" en TRES estados. Antes se quedaba
+  // destildado aunque hubiera renglones marcados, y eso hacia dudar de si la
+  // seleccion habia quedado o no justo antes de mandar. Ahora: palomita si estan
+  // todos los seleccionables, rayita si van algunos, vacio si ninguno.
+  // 🔑 Se cuentan solo los que NO estan disabled: los bloqueados por falta de
+  // canal nunca se van a poder tildar, asi que si contaran, la palomita completa
+  // seria imposible de alcanzar y la casilla se veria rota.
+  cfSincronizarMaster();
   const btn = document.getElementById('cf-btn-enviar');
   if(btn){
     btn.textContent = '📤 Enviar aviso a los seleccionados (' + sel + ')';
@@ -5358,8 +5387,19 @@ function m26Seleccionados(){
 }
 
 function m26ToggleTodos(master){
-  document.querySelectorAll('.m26-chk').forEach(function(c){ if(!c.disabled) c.checked = master.checked; });
+  const marcar = master.checked;
+  document.querySelectorAll('.m26-chk').forEach(function(c){ if(!c.disabled) c.checked = marcar; });
   m26ActualizarContador();
+}
+
+function m26SincronizarMaster(){
+  const master = document.getElementById('m26-chk-todos');
+  if(!master) return;
+  const habilitados = Array.from(document.querySelectorAll('.m26-chk')).filter(function(c){ return !c.disabled; });
+  const marcados    = habilitados.filter(function(c){ return c.checked; }).length;
+  master.disabled      = habilitados.length === 0;
+  master.checked       = habilitados.length > 0 && marcados === habilitados.length;
+  master.indeterminate = marcados > 0 && marcados < habilitados.length;
 }
 
 function m26ActualizarContador(){
@@ -5367,6 +5407,9 @@ function m26ActualizarContador(){
   const total = M26_LISTA.length;
   const el = document.getElementById('m26-contador');
   if(el) el.textContent = sel + ' de ' + total + ' seleccionados';
+  // s38 - Mismo comportamiento de tres estados que Cargo Fallido. Aqui los
+  // bloqueados son los titulares sin correo capturado.
+  m26SincronizarMaster();
   const btn = document.getElementById('m26-btn-enviar');
   if(btn){
     btn.textContent = '📤 Enviar aviso a los seleccionados (' + sel + ')';
