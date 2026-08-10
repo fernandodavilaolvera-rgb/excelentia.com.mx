@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escriba · Simulación de captura de asunto</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8;
+  --card:#ffffff;
+  --border:#dde1e9;
+  --header:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);
+  --accent:#4a9fd4;
+  --deep:#1a3a6b;
+  --hover:#e8f0fb;
+  --cardhead:#dce8f7;
+  --alert-bg:#f0f6ff;
+  --alert-bd:#c8d9f0;
+  --note-bg:#eef4fc;
+  --txt:#1a2035;
+  --txt2:#4a5068;
+  --txt3:#8a90a0;
+  --warn-bg:#fff8ec;
+  --warn-bd:#f0d9ae;
+  --warn-txt:#8a5a12;
+  --ok-bg:#eef8f0;
+  --ok-bd:#bfe2c8;
+  --ok-txt:#256c3a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Manrope',sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  font-size:17px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== HEADER ===== */
+header{
+  background:var(--header);
+  border-bottom:4px solid var(--accent);
+  padding:1.4rem 1.5rem;
+}
+.header-inner{
+  max-width:900px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;
+}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+.logo-box{
+  background:#fff;border-radius:10px;padding:.4rem .75rem;
+  display:flex;align-items:center;justify-content:center;
+  min-width:80px;min-height:52px;flex-shrink:0;
+}
+.logo-box img{height:48px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+.header-tag{
+  font-size:12px;font-weight:700;color:#fff;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.28);
+  padding:.35rem .7rem;border-radius:20px;letter-spacing:.4px;text-transform:uppercase;
+}
+
+/* ===== LAYOUT ===== */
+.wrap{max-width:900px;margin:0 auto;padding:1.8rem 1.5rem 4rem}
+.titulo-zona{margin-bottom:1.4rem}
+.titulo-zona h1{font-size:26px;font-weight:800;letter-spacing:-.4px;margin-bottom:.3rem}
+.titulo-zona .sub{font-size:16px;color:var(--txt2);max-width:720px}
+.pill-demo{
+  display:inline-block;margin-top:.7rem;font-size:12.5px;font-weight:700;
+  background:var(--alert-bg);border:1px solid var(--alert-bd);color:var(--deep);
+  padding:.3rem .75rem;border-radius:20px;
+}
+
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  margin-bottom:1.2rem;overflow:hidden;
+}
+.card-head{
+  background:var(--cardhead);padding:.85rem 1.2rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;
+}
+.card-head h2{font-size:17px;font-weight:800;color:var(--deep);letter-spacing:-.2px}
+.card-head .paso{font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.6px}
+.card-body{padding:1.3rem 1.2rem}
+
+/* ===== DROPZONE ===== */
+.dropzone{
+  max-width:720px;margin:0 auto;
+  border:2px dashed var(--alert-bd);border-radius:12px;background:var(--alert-bg);
+  padding:2rem 1.2rem;text-align:center;cursor:pointer;transition:.18s;
+}
+.dropzone:hover,.dropzone.drag{background:var(--hover);border-color:var(--accent)}
+.dz-ico{font-size:30px;line-height:1;margin-bottom:.5rem}
+.dz-t{font-weight:800;font-size:17px;color:var(--deep)}
+.dz-s{font-size:14px;color:var(--txt2);margin-top:.25rem}
+#fileInput{display:none}
+
+.file-chip{
+  max-width:720px;margin:1rem auto 0;
+  display:none;align-items:center;gap:.7rem;
+  background:var(--note-bg);border-left:4px solid var(--deep);
+  border:1px solid var(--alert-bd);border-left:4px solid var(--deep);
+  border-radius:10px;padding:.75rem 1rem;
+}
+.file-chip.on{display:flex}
+.file-chip .nom{font-weight:700;font-size:15px;word-break:break-all;flex:1}
+.file-chip .peso{font-size:13px;color:var(--txt3);white-space:nowrap}
+.file-chip button{
+  background:none;border:none;color:var(--txt3);font-size:20px;cursor:pointer;line-height:1;padding:0 .2rem;
+}
+.file-chip button:hover{color:#8f1d1d}
+
+.acciones{max-width:720px;margin:1.2rem auto 0;display:flex;gap:.7rem;flex-wrap:wrap}
+.btn{
+  font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;
+  border-radius:10px;padding:.75rem 1.4rem;cursor:pointer;border:1px solid transparent;transition:.15s;
+}
+.btn-primario{background:var(--deep);color:#fff}
+.btn-primario:hover{background:#1e5096}
+.btn-primario:disabled{background:#c3c8d4;cursor:not-allowed}
+.btn-sec{background:#fff;color:var(--deep);border-color:var(--border)}
+.btn-sec:hover{background:var(--hover);border-color:var(--accent)}
+.btn-ok{background:#256c3a;color:#fff}
+.btn-ok:hover{background:#1d5a30}
+.btn-ok:disabled{background:#c3c8d4;cursor:not-allowed}
+
+/* ===== ESTADO ===== */
+.estado{
+  max-width:720px;margin:1.1rem auto 0;display:none;
+  background:var(--alert-bg);border:1px solid var(--alert-bd);border-left:4px solid var(--accent);
+  border-radius:10px;padding:.85rem 1rem;font-size:15px;color:var(--txt2);
+}
+.estado.on{display:block}
+.estado.err{background:#fdf1f1;border-color:#eccaca;border-left-color:#8f1d1d;color:#7a2020}
+.spin{
+  display:inline-block;width:14px;height:14px;border:2px solid var(--alert-bd);
+  border-top-color:var(--deep);border-radius:50%;animation:sp .8s linear infinite;
+  vertical-align:-2px;margin-right:.5rem;
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ===== FORM ===== */
+#zonaForm{display:none}
+#zonaForm.on{display:block}
+.leyenda{
+  max-width:720px;margin:0 auto 1.2rem;display:flex;gap:1.2rem;flex-wrap:wrap;
+  font-size:13px;color:var(--txt2);
+}
+.leyenda span{display:flex;align-items:center;gap:.4rem}
+.sw{width:13px;height:13px;border-radius:3px;display:inline-block;border:1px solid}
+.sw-ia{background:var(--alert-bg);border-color:var(--accent)}
+.sw-hum{background:var(--ok-bg);border-color:var(--ok-bd)}
+.sw-no{background:var(--warn-bg);border-color:var(--warn-bd)}
+
+.campo{max-width:720px;margin:0 auto 1.15rem}
+.campo label{
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;
+  font-size:14px;font-weight:700;color:var(--txt2);margin-bottom:.35rem;
+}
+.chip{
+  font-size:11px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;
+  padding:.2rem .55rem;border-radius:20px;border:1px solid;
+}
+.chip-ia{background:var(--alert-bg);border-color:var(--alert-bd);color:var(--deep)}
+.chip-hum{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-txt)}
+.chip-no{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-txt)}
+.campo input,.campo textarea{
+  width:100%;font-family:'Manrope',sans-serif;font-size:16px;color:var(--txt);
+  background:#fff;border:1px solid var(--border);border-radius:10px;padding:.7rem .85rem;
+  transition:.15s;
+}
+.campo textarea{resize:vertical;min-height:92px;line-height:1.5}
+.campo input:focus,.campo textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(74,159,212,.16)}
+.campo.ia input,.campo.ia textarea{background:var(--alert-bg);border-color:var(--accent)}
+.campo.hum input,.campo.hum textarea{background:var(--ok-bg);border-color:var(--ok-bd)}
+.campo.vacio input,.campo.vacio textarea{background:var(--warn-bg);border-color:var(--warn-bd)}
+.nota-campo{font-size:12.5px;color:var(--txt3);margin-top:.3rem}
+.nota-campo.alerta{color:var(--warn-txt);font-weight:600}
+
+.resumen{
+  max-width:720px;margin:0 auto 1.3rem;
+  background:var(--note-bg);border:1px solid var(--alert-bd);border-left:4px solid var(--deep);
+  border-radius:10px;padding:.9rem 1.1rem;font-size:14px;color:var(--txt2);
+}
+.resumen b{color:var(--txt)}
+
+.exito{
+  max-width:720px;margin:1.1rem auto 0;display:none;
+  background:var(--ok-bg);border:1px solid var(--ok-bd);border-left:4px solid var(--ok-txt);
+  border-radius:10px;padding:.9rem 1.1rem;font-size:15px;color:var(--ok-txt);font-weight:600;
+}
+.exito.on{display:block}
+
+.pie{
+  max-width:720px;margin:1.6rem auto 0;text-align:center;
+  font-size:13px;color:var(--txt3);line-height:1.6;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width:600px){
+  body{font-size:16px}
+  header{padding:1.1rem 1rem}
+  .header-inner{flex-direction:column;align-items:flex-start;gap:.8rem}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .logo-slogan{font-size:11px}
+  .wrap{padding:1.3rem 1rem 3rem}
+  .titulo-zona h1{font-size:21px}
+  .card-body{padding:1.1rem .9rem}
+  .dropzone{padding:1.5rem .9rem}
+  .acciones{flex-direction:column}
+  .btn{width:100%}
+  .leyenda{gap:.5rem;flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <span class="header-tag">Escriba · Demostración conceptual</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="titulo-zona">
+    <h1>Simulación de captura de asunto</h1>
+    <p class="sub">Escriba lee el documento antes de que se cargue al repositorio y propone los datos del formulario. Cada campo queda marcado como sugerido hasta que una persona lo valida.</p>
+    <span class="pill-demo">Demostración conceptual — no es producto terminado</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Documento a capturar</h2>
+      <span class="paso">Paso 1</span>
+    </div>
+    <div class="card-body">
+      <div class="dropzone" id="dz">
+        <div class="dz-ico">📄</div>
+        <div class="dz-t">Arrastra el oficio aquí o haz clic para seleccionarlo</div>
+        <div class="dz-s">PDF, JPG o PNG · el archivo se almacena siempre completo</div>
+      </div>
+      <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png">
+
+      <div class="file-chip" id="chip">
+        <span class="nom" id="chipNom"></span>
+        <span class="peso" id="chipPeso"></span>
+        <button id="chipQuitar" title="Quitar">&times;</button>
+      </div>
+
+      <div class="acciones">
+        <button class="btn btn-primario" id="btnAnalizar" disabled>Analizar documento</button>
+        <button class="btn btn-sec" id="btnLimpiar">Empezar de nuevo</button>
+      </div>
+
+      <div class="estado" id="estado"></div>
+    </div>
+  </div>
+
+  <div class="card" id="zonaForm">
+    <div class="card-head">
+      <h2>Datos del asunto</h2>
+      <span class="paso">Paso 2 · revisión humana</span>
+    </div>
+    <div class="card-body">
+
+      <div class="resumen" id="resumen"></div>
+
+      <div class="leyenda">
+        <span><i class="sw sw-ia"></i> Sugerido por Escriba</span>
+        <span><i class="sw sw-hum"></i> Validado por una persona</span>
+        <span><i class="sw sw-no"></i> Sin dato — requiere captura manual</span>
+      </div>
+
+      <div class="campo" data-campo="numero_oficio">
+        <label>Número de oficio <span class="chip"></span></label>
+        <input type="text" placeholder="Sin dato — captúralo manualmente">
+        <div class="nota-campo"></div>
+      </div>
+
+      <div class="campo" data-campo="fecha_documento">
+        <label>Fecha del documento <span class="chip"></span></label>
+        <input type="text" placeholder="Sin dato — captúralo manualmente">
+        <div class="nota-campo"></div>
+      </div>
+
+      <div class="campo" data-campo="firmante">
+        <label>Firmante <span class="chip"></span></label>
+        <input type="text" placeholder="Sin dato — captúralo manualmente">
+        <div class="nota-campo"></div>
+      </div>
+
+      <div class="campo" data-campo="dependencia_emisora">
+        <label>Dependencia emisora <span class="chip"></span></label>
+        <input type="text" placeholder="Sin dato — captúralo manualmente">
+        <div class="nota-campo"></div>
+      </div>
+
+      <div class="campo" data-campo="sintesis_asunto">
+        <label>Síntesis del asunto <span class="chip"></span></label>
+        <textarea placeholder="Sin dato — captúralo manualmente"></textarea>
+        <div class="nota-campo"></div>
+      </div>
+
+      <div class="acciones">
+        <button class="btn btn-ok" id="btnConfirmar">Confirmar y registrar asunto</button>
+      </div>
+
+      <div class="exito" id="exito"></div>
+
+      <div class="pie">
+        Escriba propone, nunca guarda. Ningún campo se registra sin validación humana y cada confirmación queda con trazabilidad de quién la hizo.
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK_ANALIZAR  = "https://n8n.excelentia.com.mx/webhook/escriba-analizar";
+const WEBHOOK_CONFIRMAR = "https://n8n.excelentia.com.mx/webhook/escriba-confirmar";
+const UMBRAL_CONFIANZA = 0.5;
+
+const CAMPOS = ["numero_oficio","fecha_documento","firmante","dependencia_emisora","sintesis_asunto"];
+
+const dz = document.getElementById('dz');
+const fileInput = document.getElementById('fileInput');
+const chip = document.getElementById('chip');
+const chipNom = document.getElementById('chipNom');
+const chipPeso = document.getElementById('chipPeso');
+const chipQuitar = document.getElementById('chipQuitar');
+const btnAnalizar = document.getElementById('btnAnalizar');
+const btnLimpiar = document.getElementById('btnLimpiar');
+const btnConfirmar = document.getElementById('btnConfirmar');
+const estado = document.getElementById('estado');
+const zonaForm = document.getElementById('zonaForm');
+const resumen = document.getElementById('resumen');
+const exito = document.getElementById('exito');
+
+let archivo = null;
+let corridaId = null;
+let propuesta = {};
+let t0 = 0;
+
+function pesoLegible(b){
+  if(b < 1024) return b + " B";
+  if(b < 1048576) return (b/1024).toFixed(1) + " KB";
+  return (b/1048576).toFixed(1) + " MB";
+}
+
+function setEstado(txt, tipo){
+  estado.className = "estado on" + (tipo === "err" ? " err" : "");
+  estado.innerHTML = txt;
+}
+function ocultarEstado(){ estado.className = "estado"; }
+
+function elegirArchivo(f){
+  if(!f) return;
+  archivo = f;
+  chipNom.textContent = f.name;
+  chipPeso.textContent = pesoLegible(f.size);
+  chip.classList.add('on');
+  btnAnalizar.disabled = false;
+  ocultarEstado();
+}
+
+dz.addEventListener('click', () => fileInput.click());
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag');
+  elegirArchivo(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => elegirArchivo(e.target.files[0]));
+
+chipQuitar.addEventListener('click', reiniciar);
+btnLimpiar.addEventListener('click', reiniciar);
+
+function reiniciar(){
+  archivo = null; corridaId = null; propuesta = {};
+  fileInput.value = "";
+  chip.classList.remove('on');
+  btnAnalizar.disabled = true;
+  btnConfirmar.disabled = false;
+  btnConfirmar.textContent = "Confirmar y registrar asunto";
+  zonaForm.classList.remove('on');
+  exito.classList.remove('on');
+  ocultarEstado();
+  CAMPOS.forEach(c => {
+    const box = document.querySelector('[data-campo="'+c+'"]');
+    box.className = "campo";
+    box.querySelector('input,textarea').value = "";
+    box.querySelector('.chip').className = "chip";
+    box.querySelector('.chip').textContent = "";
+    box.querySelector('.nota-campo').className = "nota-campo";
+    box.querySelector('.nota-campo').textContent = "";
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+btnAnalizar.addEventListener('click', async () => {
+  if(!archivo) return;
+  btnAnalizar.disabled = true;
+  exito.classList.remove('on');
+  setEstado('<span class="spin"></span> Escriba está leyendo el documento…');
+  t0 = Date.now();
+
+  const fd = new FormData();
+  fd.append("archivo", archivo, archivo.name);
+  fd.append("nombre_archivo", archivo.name);
+  fd.append("peso_bytes", archivo.size);
+
+  try{
+    const r = await fetch(WEBHOOK_ANALIZAR, { method:"POST", body: fd });
+    if(!r.ok) throw new Error("El servicio respondió " + r.status);
+    const data = await r.json();
+    pintar(data);
+  }catch(err){
+    setEstado("No fue posible analizar el documento: " + err.message +
+      ". El formulario sigue disponible para captura manual; Escriba nunca bloquea la operación.", "err");
+    zonaForm.classList.add('on');
+    resumen.innerHTML = "<b>Sin propuesta de Escriba.</b> El servicio de IA no respondió; los cinco campos quedan en blanco para captura manual.";
+    CAMPOS.forEach(c => marcarVacio(c, "El servicio no respondió"));
+    btnAnalizar.disabled = false;
+  }
+});
+
+function marcarVacio(campo, motivo){
+  const box = document.querySelector('[data-campo="'+campo+'"]');
+  box.className = "campo vacio";
+  box.querySelector('input,textarea').value = "";
+  const ch = box.querySelector('.chip');
+  ch.className = "chip chip-no"; ch.textContent = "Sin dato";
+  const nt = box.querySelector('.nota-campo');
+  nt.className = "nota-campo alerta";
+  nt.textContent = motivo || "Escriba no pudo determinarlo con seguridad — se deja vacío en lugar de suponer.";
+}
+
+function pintar(data){
+  const seg = ((Date.now()-t0)/1000).toFixed(1);
+  ocultarEstado();
+  zonaForm.classList.add('on');
+  corridaId = data.corrida_id || null;
+  propuesta = {};
+
+  let lista = [];
+  if(Array.isArray(data.campos)){
+    lista = data.campos;
+  }else if(data.campos && typeof data.campos === 'object'){
+    lista = Object.keys(data.campos).map(k => {
+      const v = data.campos[k];
+      return (v && typeof v === 'object') ? {campo:k, valor:v.valor, confianza:v.confianza} : {campo:k, valor:v, confianza:null};
+    });
+  }
+
+  let sugeridos = 0, vacios = 0;
+
+  CAMPOS.forEach(c => {
+    const box = document.querySelector('[data-campo="'+c+'"]');
+    const inp = box.querySelector('input,textarea');
+    const ch = box.querySelector('.chip');
+    const nt = box.querySelector('.nota-campo');
+    const it = lista.find(x => x.campo === c);
+    const val = it && it.valor !== null && it.valor !== undefined ? String(it.valor).trim() : "";
+    const conf = it && typeof it.confianza === 'number' ? it.confianza : null;
+
+    propuesta[c] = { valor: val, confianza: conf };
+
+    if(!val || (conf !== null && conf < UMBRAL_CONFIANZA)){
+      marcarVacio(c, it && it.motivo ? it.motivo : null);
+      vacios++;
+      return;
+    }
+    box.className = "campo ia";
+    inp.value = val;
+    ch.className = "chip chip-ia"; ch.textContent = "Sugerido por IA";
+    nt.className = "nota-campo";
+    nt.textContent = conf !== null ? "Confianza " + Math.round(conf*100) + "% · edítalo si no coincide con el documento" : "Edítalo si no coincide con el documento";
+    sugeridos++;
+  });
+
+  const pags = data.paginas ? data.paginas + (data.paginas === 1 ? " página" : " páginas") : "extensión no reportada";
+  resumen.innerHTML = "<b>" + (data.documento || (archivo ? archivo.name : "Documento")) + "</b> · " + pags +
+    " · leído en " + seg + " s.<br>Escriba propone <b>" + sugeridos + " de " + CAMPOS.length + "</b> campos" +
+    (vacios ? " y deja <b>" + vacios + "</b> sin dato porque no los pudo determinar con seguridad." : ".") +
+    " Nada se registra hasta que confirmes.";
+
+  document.querySelectorAll('.campo input,.campo textarea').forEach(el => {
+    el.addEventListener('input', () => {
+      const box = el.closest('.campo');
+      const ch = box.querySelector('.chip');
+      const nt = box.querySelector('.nota-campo');
+      box.className = "campo hum";
+      ch.className = "chip chip-hum"; ch.textContent = "Validado por persona";
+      nt.className = "nota-campo"; nt.textContent = "Corregido manualmente.";
+    });
+  });
+
+  btnAnalizar.disabled = false;
+  zonaForm.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+btnConfirmar.addEventListener('click', async () => {
+  const final = {}, correcciones = [];
+  CAMPOS.forEach(c => {
+    const box = document.querySelector('[data-campo="'+c+'"]');
+    const v = box.querySelector('input,textarea').value.trim();
+    final[c] = v;
+    const orig = propuesta[c] ? propuesta[c].valor : "";
+    if(v !== orig) correcciones.push({campo:c, propuesto:orig, corregido:v});
+  });
+
+  btnConfirmar.disabled = true;
+  btnConfirmar.textContent = "Registrando…";
+
+  const cuerpo = {
+    corrida_id: corridaId,
+    documento: archivo ? archivo.name : null,
+    propuesta_ia: propuesta,
+    valores_finales: final,
+    correcciones: correcciones,
+    campos_corregidos: correcciones.length,
+    confirmado_en: new Date().toISOString()
+  };
+
+  try{
+    await fetch(WEBHOOK_CONFIRMAR, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(cuerpo)
+    });
+  }catch(e){ /* el demo no se detiene si no se pudo registrar la traza */ }
+
+  exito.className = "exito on";
+  exito.textContent = correcciones.length
+    ? "Asunto registrado. Se corrigieron " + correcciones.length + " de " + CAMPOS.length + " campos; esa corrección queda guardada y alimenta el reporte de exactitud."
+    : "Asunto registrado sin correcciones. Los " + CAMPOS.length + " campos propuestos por Escriba fueron validados tal cual.";
+  btnConfirmar.textContent = "Asunto registrado";
+  exito.scrollIntoView({behavior:'smooth',block:'center'});
+});
+</script>
+</body>
+</html>
