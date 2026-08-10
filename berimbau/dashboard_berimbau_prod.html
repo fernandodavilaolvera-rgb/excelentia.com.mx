@@ -1379,8 +1379,25 @@ Recuerda que aún es posible obtener beneficios por tu pago anual.
           </button>
         </div>
 
+        <!-- s39 (9-ago-2026) - Este recuadro decia "Dato pendiente del club: se necesita
+             saber que dia del mes el banco realiza el cargo". Llevaba semanas siendo falso:
+             el dato es el dia 26 y asi esta configurado el cron desde julio. -->
         <div class="av-info-box">
-          <strong>⚠️ Dato pendiente del club:</strong> Para activar este módulo se necesita saber qué día del mes el banco realiza el cargo. Una vez confirmado por Nancy / Tesorería, el sistema enviará el aviso automáticamente 7 días antes.
+          <strong>¿Cómo funciona?</strong> El aviso sale el <strong>día 26 de cada mes a las 10:00</strong>,
+          porque el cargo del banco cae los primeros días del mes siguiente. El sistema despierta solo
+          ese día, pero <strong>únicamente manda si el interruptor de abajo está activado</strong>.
+          Después de enviarse, el interruptor <strong>se apaga solo</strong>: cada mes hay que prenderlo
+          a propósito. Quien ya trae días de adeudo queda fuera, porque a esa persona le toca el aviso
+          de cobranza y no este.
+        </div>
+
+        <!-- ===== s39 (9-ago-2026) · INTERRUPTOR DE ENCENDIDO ===== -->
+        <div class="av-sub-section" id="domi-switch-section">
+          <div class="av-sub-title">🔌 ¿Va a salir el aviso este mes?</div>
+          <div id="domi-switch-box"
+               style="max-width:720px;margin:0 auto;border:1px solid #dde1e9;border-radius:10px;padding:13px 15px;background:#f5f6f8">
+            <div style="font-size:.76rem;color:#8a90a0">Consultando…</div>
+          </div>
         </div>
 
         <div class="av-sub-section">
@@ -2979,6 +2996,7 @@ function initAvisos(){
   cargarAvisos();
   cargarBiblioteca();
   cargarProgramaciones();
+  cargarSwitchDomiciliados();   // s39 - lee de la base si el aviso del 26 va prendido
   showAviso('general');
   actualizarDotsSidebar();
 }
@@ -5633,6 +5651,14 @@ function initModulesV10(){
   const domiTodas    = Object.keys(domiCabezas).map(k => domiCabezas[k]);
   const domiAvisadas = domiTodas.filter(d => !(Number(d.dias) > 0));
   const domiEnAdeudo = domiTodas.length - domiAvisadas.length;
+  // s39 - Se expone para que el interruptor diga a cuantas membresias les va a
+  // llegar. Es el MISMO calculo que ya alimenta el contador del modulo, que a su
+  // vez replica el criterio del cron. No se escribe a mano en ningun lado: si el
+  // padron cambia, el numero del interruptor cambia con el. Un contador que miente
+  // ya nos paso (los 957 que en realidad eran 314), y aqui mentir significaria
+  // autorizar un envio a ciegas.
+  window.DOMI_COUNT = domiAvisadas.length;
+  if(typeof renderSwitchDomiciliados === 'function') renderSwitchDomiciliados();
   const elDomiCount = document.getElementById('mod-domiprev-count');
   if(elDomiCount) elDomiCount.textContent =
       domiAvisadas.length + ' membresías reciben el aviso'
@@ -5804,6 +5830,160 @@ function initModulesV10(){
   }
 }
 
+
+// ============================================================================
+// s39 (9-ago-2026) · INTERRUPTOR DEL AVISO DE DOMICILIADOS
+// ----------------------------------------------------------------------------
+// Antes este aviso se prendia y apagaba publicando o despublicando el workflow
+// DZtcou0Kw7wYIKMy en n8n. Eso tenia dos problemas: era un interruptor INVISIBLE
+// (nadie en el Club podia saber si el aviso del 26 iba a salir) y solo lo podia
+// mover Fernando. Ahora el cron vive SIEMPRE publicado y despierta solo el dia
+// 26; lo que decide si manda es la clave berimbau.config.domiciliados_activo,
+// que es la que escribe este interruptor.
+//
+// 🔑 SE APAGA SOLO DESPUES DE DISPARAR. El ultimo nodo del cron pone la clave en
+//    false. Asi cada mes alguien tiene que prenderlo a proposito, en vez de que
+//    se quede encendido por inercia y vuelva a salir sin que nadie lo confirme.
+//
+// 🔑 PRENDER PIDE TECLEAR "ENVIAR". APAGAR NO PIDE NADA, a proposito: apagar
+//    nunca necesita permiso. Equivocarse hacia apagado cuesta un mes sin aviso;
+//    hacia el otro lado cuesta ~300 correos que nadie autorizo.
+//
+// 🔑 SI NO SE PUEDE LEER EL ESTADO, SE PINTA APAGADO. Nunca al reves: mas vale
+//    que el Club crea que esta apagado y lo prenda, a que lo crea prendido.
+// ============================================================================
+let DOMI_ACTIVO = false;
+
+async function cargarSwitchDomiciliados(){
+  try{
+    const r = await fetch(URL_CONFIG_GUARDAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ leer: true })
+    });
+    const j = await r.json();
+    DOMI_ACTIVO = (j && j.domiciliados_activo === true);
+  }catch(e){
+    DOMI_ACTIVO = false;   // falla hacia apagado
+  }
+  renderSwitchDomiciliados();
+}
+
+function domiCuantos(){
+  const n = Number(window.DOMI_COUNT);
+  return isFinite(n) ? n : null;
+}
+
+function renderSwitchDomiciliados(){
+  const box = document.getElementById('domi-switch-box');
+  if(!box) return;
+  const n = domiCuantos();
+  const cuantos = (n === null)
+      ? 'las membresías domiciliadas'
+      : (n + (n === 1 ? ' membresía' : ' membresías'));
+
+  box.style.background  = DOMI_ACTIVO ? '#fdf2f2' : '#f5f6f8';
+  box.style.borderColor = DOMI_ACTIVO ? '#f5b7b1' : '#dde1e9';
+
+  box.innerHTML =
+    '<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">'
+    + '<div style="flex:1;min-width:210px">'
+      + '<div style="font-family:\'Montserrat\',sans-serif;font-size:.8rem;font-weight:800;color:'
+        + (DOMI_ACTIVO ? '#922b21' : '#4a5068') + '">'
+        + (DOMI_ACTIVO ? '🔴 Activado' : '⚫ Apagado') + '</div>'
+      + '<div style="font-size:.74rem;color:#4a5068;margin-top:4px;line-height:1.55">'
+        + (DOMI_ACTIVO
+            ? 'El <strong>26 de este mes a las 10:00</strong> saldrá el aviso a <strong>'
+              + cuantos + '</strong>. Al terminar de enviarse, este interruptor se apaga solo.'
+            : 'El aviso <strong>no va a salir</strong> el día 26. El sistema despierta ese día, '
+              + 've el interruptor apagado y termina sin mandar nada.')
+      + '</div>'
+    + '</div>'
+    + '<button onclick="domiPedirCambio(' + (DOMI_ACTIVO ? 'false' : 'true') + ')" '
+      + 'style="flex-shrink:0;padding:9px 18px;border-radius:20px;cursor:pointer;'
+      + 'font-family:\'Montserrat\',sans-serif;font-size:.75rem;font-weight:800;'
+      + (DOMI_ACTIVO
+          ? 'background:#f5f6f8;color:#4a5068;border:1px solid #dde1e9">⏸ Apagar el aviso'
+          : 'background:#c0392b;color:#fff;border:none">🔴 Activar el aviso del 26')
+    + '</button>'
+    + '</div>';
+}
+
+// Apagar es directo. Prender abre la confirmacion con la palabra ENVIAR.
+function domiPedirCambio(prender){
+  if(!prender){ domiGuardar(false); return; }
+
+  const n = domiCuantos();
+  const cuantos = (n === null) ? 'las membresías domiciliadas'
+                               : (n + (n === 1 ? ' membresía' : ' membresías'));
+  const ov = document.createElement('div');
+  ov.className = 'modal-overlay';
+  ov.id = 'domi-modal';
+  ov.innerHTML =
+    '<div class="modal-box" style="max-width:500px;text-align:left">'
+    + '<h3 style="text-align:center">🔴 Activar el aviso de domiciliados</h3>'
+    + '<p style="text-align:center;margin-bottom:14px">El <strong>26 de este mes a las 10:00</strong> '
+      + 'les va a llegar el aviso del cargo automático a <strong>' + cuantos + '</strong> del Club.</p>'
+    + '<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;'
+      + 'border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:.74rem;color:#1a3a6b;line-height:1.55">'
+      + 'El número se consulta en el momento y puede cambiar de aquí al día 26. '
+      + 'Quien entre en adeudo antes de esa fecha queda fuera solo, porque a esa persona '
+      + 'le toca el aviso de cobranza.<br>'
+      + 'Después de enviarse, el interruptor <strong>se apaga solo</strong>.'
+      + '</div>'
+    + '<div style="margin-bottom:14px">'
+      + '<div style="font-size:.74rem;color:#922b21;font-weight:700;margin-bottom:6px">'
+        + 'Para confirmar, escribe <strong>ENVIAR</strong>:</div>'
+      + '<input id="domi-confirm-input" type="text" autocomplete="off" oninput="domiValidarPalabra()" '
+        + 'style="width:100%;padding:9px 11px;border:1px solid #f5b7b1;border-radius:8px;'
+        + 'font-size:.85rem;font-family:inherit;letter-spacing:1px">'
+      + '</div>'
+    + '<div class="modal-btns">'
+      + '<button class="modal-btn-cancel" onclick="domiCerrarModal()">Cancelar</button>'
+      + '<button class="modal-btn-del" id="domi-confirm-btn" onclick="domiGuardar(true)" '
+        + 'disabled style="opacity:.45;cursor:not-allowed">🔴 Activar</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(ov);
+}
+
+function domiValidarPalabra(){
+  const inp = document.getElementById('domi-confirm-input');
+  const btn = document.getElementById('domi-confirm-btn');
+  if(!inp || !btn) return;
+  const ok = inp.value.trim().toUpperCase() === 'ENVIAR';
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '.45';
+  btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+}
+
+function domiCerrarModal(){
+  const m = document.getElementById('domi-modal');
+  if(m) m.remove();
+}
+
+async function domiGuardar(valor){
+  domiCerrarModal();
+  const box = document.getElementById('domi-switch-box');
+  if(box) box.innerHTML = '<div style="font-size:.76rem;color:#8a90a0">⏳ Guardando…</div>';
+  try{
+    const r = await fetch(URL_CONFIG_GUARDAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ clave:'domiciliados_activo', valor: !!valor })
+    });
+    const j = await r.json();
+    // 🔑 Se pinta lo que la BASE devolvio, no lo que se pidio guardar. El 9-ago-2026
+    // pasamos por esto: el webhook respondia 'success' sin haber escrito nada y la
+    // pantalla se veia perfecta. Si el guardado falla, el interruptor no miente.
+    DOMI_ACTIVO = (j && j.domiciliados_activo === true);
+    renderSwitchDomiciliados();
+    showToast(DOMI_ACTIVO
+      ? '🔴 Aviso ACTIVADO — saldrá el día 26 a las 10:00'
+      : '⏸ Aviso apagado — no saldrá el día 26');
+  }catch(e){
+    showToast('⚠️ No se pudo guardar — verifica n8n');
+    cargarSwitchDomiciliados();   // vuelve a leer el estado real
+  }
+}
 
 // ===== SIDEBAR DE AVISOS (v50) =====
 const AV_DOT_MAP = {
