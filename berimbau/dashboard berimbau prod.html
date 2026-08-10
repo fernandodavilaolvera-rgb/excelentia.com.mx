@@ -6173,6 +6173,23 @@ function calcNotificaciones(){
   // const famMulti = t => /Anual|Semestral|Trimestral|Mantenimiento/i.test(String(t||''));
   // const desalin = reales.filter(d=>d.dias>0 && famMulti(d.pb)!==famMulti(d.cup));
 
+  // 10-ago-2026 — BONIFICABLES EN NOTIFICACIONES.
+  // Los casos ya se senalaban en la barra de Cobranza y con el chip del Directorio,
+  // pero esos dos lugares solo se ven si alguien entra a esa pantalla. Aqui aparecen
+  // con badge en la pestana, que es donde Cobranza busca "que esta pendiente".
+  // Reusa listaBonificables() a proposito: el criterio vive en UN solo lugar.
+  // 🔑 El Dashboard SIGUE SIN DESCONTAR el adeudo, solo lo senala: la correccion
+  // se hace en el Sistema del Club, que es quien genera el cargo.
+  const bonif = listaBonificables().filter(d=>d.m<990000);
+  if(bonif.length){
+    const membsBonif = Array.from(new Set(bonif.map(x=>x.m)));
+    out.push({tipo:'warn', ico:'⚠️',
+      tit:bonif.length+' dependiente'+(bonif.length>1?'s':'')+' con bonificación pendiente en el Sistema',
+      txt:'Están en baja temporal vigente y les corresponde bonificación al 100%, pero el Sistema les sigue generando cuota. Son '+membsBonif.length+' membresía'+(membsBonif.length>1?'s':'')+'; la corrección se hace en el Sistema, el Dashboard solo lo señala.',
+      items:bonif.map(d=>({m:d.m,id:d.id,n:d.n,
+        extra:(d.tu||'')+' · '+d.dias+' '+(d.dias===1?'día':'días')+' · baja hasta '+fmtFnac(d.ffin_baja)}))});
+  }
+
   const becados = reales.filter(d=>d.tm==='Sistemas' && d.es_cabeza);
   if(becados.length) out.push({tipo:'info', ico:'🎓',
     tit:becados.length+' membresías de becados fuera de avisos',
