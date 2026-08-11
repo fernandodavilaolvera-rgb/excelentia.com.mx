@@ -30,9 +30,9 @@ header{background:linear-gradient(120deg,#7ED957 0%,#12A150 65%,#0B8A45 100%);pa
 .brand .cart{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 46px}
 .brand h1{margin:0;font-size:27px;font-weight:600;color:#fff;letter-spacing:.3px;line-height:1.05}
 .brand small{display:block;font-family:'Nunito';font-size:12px;font-weight:700;color:rgba(255,255,255,.82);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
-.syncbadge{margin-left:auto;display:none;align-items:center;gap:6px;background:rgba(255,255,255,.2);border-radius:999px;padding:6px 12px;font-size:11.5px;font-weight:800;color:#fff;cursor:pointer}
-.syncbadge.on{display:flex}
-.syncbadge .led{width:8px;height:8px;border-radius:50%;background:#D6F5A0}
+.syncbadge{margin-left:auto;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border-radius:999px;padding:6px 12px;font-size:11.5px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;border:none}
+.syncbadge .led{width:8px;height:8px;border-radius:50%;background:#D6F5A0;flex:0 0 8px}
+.syncbadge.busy .led{background:#FFE08A}
 .syncbadge.off .led{background:#FFD1D1}
 
 .lists-bar{display:flex;gap:8px;overflow-x:auto;padding:14px 14px 2px;max-width:var(--maxw);margin:0 auto;scrollbar-width:none}
@@ -120,6 +120,7 @@ header{background:linear-gradient(120deg,#7ED957 0%,#12A150 65%,#0B8A45 100%);pa
 .sec-item button{width:36px;height:36px;border:1.5px solid var(--bd);background:#FFFBF5;border-radius:11px;font-size:14px;color:var(--tx2);cursor:pointer;font-family:inherit;font-weight:800}
 .tip{background:#EAF7EE;border:1.5px solid #C7E7D2;border-left:5px solid var(--g2);border-radius:14px;padding:12px 14px;font-size:13.5px;font-weight:600;color:#2C5E3F;margin-bottom:14px;line-height:1.5}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:19px;font-weight:800;letter-spacing:2px;text-align:center;background:#FFF6EC;border:2px dashed var(--g2);border-radius:14px;padding:14px;color:var(--g2);margin-bottom:12px}
+.code.link{font-size:12.5px;letter-spacing:0;word-break:break-all;line-height:1.5;text-align:left;font-weight:700}
 .switch-row{display:flex;align-items:center;gap:12px;padding:13px;border:1.5px solid var(--bd);border-radius:14px;margin-bottom:10px}
 .switch-row .nm{flex:1;font-size:14.5px;font-weight:800;color:var(--tx)}
 .switch-row small{display:block;font-size:12.5px;font-weight:600;color:var(--tx3);margin-top:2px}
@@ -162,7 +163,7 @@ header{background:linear-gradient(120deg,#7ED957 0%,#12A150 65%,#0B8A45 100%);pa
     <div class="brand">
       <span class="cart">🛒</span>
       <h1 class="disp">Ferrock List<small>Lista del súper</small></h1>
-      <button class="syncbadge" id="syncBadge"><span class="led"></span><span id="syncTxt">En familia</span></button>
+      <button class="syncbadge" id="syncBadge"><span class="led"></span><span id="syncTxt">En la nube</span></button>
     </div>
   </div>
 </header>
@@ -203,7 +204,8 @@ header{background:linear-gradient(120deg,#7ED957 0%,#12A150 65%,#0B8A45 100%);pa
 <script>
 /* =========================================================
    FERROCK LIST — lista del súper ordenada por colores
-   Sincronización familiar sobre Supabase (esquema ferrock)
+   Sincroniza siempre contra Supabase (esquema ferrock)
+   El espacio va en la URL: ?l=<espacio>
    ========================================================= */
 
 const SB={
@@ -241,13 +243,32 @@ mascotas:'croquetas,arena para gato,alimento para gato,premios para perro'
 };
 
 /* ---------- ALMACENAMIENTO LOCAL ---------- */
-const KEY='ferrock_list_v3', OLD2='ferrock_list_v2', OLD1='lista_super_v1', mem={};
+const OLD3='ferrock_list_v3', OLD2='ferrock_list_v2', OLD1='lista_super_v1';
+const ESP_KEY='ferrock_espacio', mem={};
+let ESP=null;
+const keyFor=e=>'ferrock_list_v4_'+e;
+const KEY=()=>keyFor(ESP);
 const DB={
   async get(k){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){}}
     try{return localStorage.getItem(k)}catch(e){return mem[k]||null} },
   async set(k,v){ if(window.storage){try{await window.storage.set(k,v);return}catch(e){}}
     try{localStorage.setItem(k,v)}catch(e){mem[k]=v} }
 };
+
+/* ---------- ESPACIO (identificador que va en la URL) ---------- */
+const ABC='abcdefghijkmnopqrstuvwxyz23456789';
+function newEsp(){ let s='fl'; for(let i=0;i<10;i++) s+=ABC[Math.floor(Math.random()*ABC.length)]; return s; }
+function cleanEsp(x){ return String(x||'').trim().toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,40); }
+function urlEsp(){ try{ return cleanEsp(new URLSearchParams(location.search).get('l')||'') }catch(e){ return '' } }
+function putUrl(e){
+  try{ const u=new URL(location.href); u.searchParams.set('l',e); history.replaceState(null,'',u.pathname+u.search+u.hash); }catch(x){}
+}
+function linkFor(e){
+  const base=(location.origin&&location.origin!=='null')
+    ? location.origin+location.pathname
+    : location.href.split('?')[0].split('#')[0];
+  return base+'?l='+e;
+}
 
 let S=null, editing=null, wakeLock=null, pushT=null, pollT=null, syncing=false;
 const uid=()=>Math.random().toString(36).slice(2,10);
@@ -259,38 +280,70 @@ const LIVE=()=>S.lists.filter(l=>!l.del);
 const IT=l=>(l&&l.items?l.items.filter(i=>!i.del):[]);
 const C=k=>S.cats[k]||S.cats.otros||{n:'Otros',c:'#8A90A0'};
 
-function save(local){ DB.set(KEY,JSON.stringify(S)); if(!local) queuePush(); }
+function save(local){ DB.set(KEY(),JSON.stringify(S)); if(!local) queuePush(); }
 
 function freshState(){
   const dict={}; for(const k in SEED) SEED[k].split(',').forEach(w=>dict[w.trim()]=k);
-  return {lists:[{id:uid(),name:'Súper',items:[],mt:now()}],active:null,
+  return {lists:[{id:uid(),name:'Súper',items:[],mt:now(),seed:true}],active:null,
     cats:JSON.parse(JSON.stringify(BASE_CATS)),route:BASE_ROUTE.slice(),catsMt:now(),
-    dict,keepAwake:false,sync:{codigo:'',rev:0,ok:null}};
+    dict,keepAwake:false,sync:{rev:0,ok:null}};
 }
 
 (async function init(){
-  let raw=await DB.get(KEY);
-  if(!raw){ const prev=await DB.get(OLD2)||await DB.get(OLD1);
-    if(prev){ try{ const o=JSON.parse(prev); S=freshState();
-      if(o.lists) S.lists=o.lists.map(l=>({id:l.id||uid(),name:l.name,mt:now(),
-        items:(l.items||[]).map(i=>({...i,mt:now()}))}));
-      if(o.cats) S.cats=Object.assign(S.cats,o.cats);
-      if(o.route) S.route=o.route.filter(k=>S.cats[k]);
-      S.dict=Object.assign(S.dict,o.dict||{});
-    }catch(e){} } }
-  if(!S){ try{S=raw?JSON.parse(raw):freshState()}catch(e){S=freshState()} }
+  /* 1. ¿Qué espacio abrimos? URL > guardado en este aparato > uno nuevo */
+  const fromUrl=urlEsp();
+  let mio=cleanEsp(await DB.get(ESP_KEY));
+  if(fromUrl){ ESP=fromUrl; if(!mio){ await DB.set(ESP_KEY,ESP); mio=ESP; } }
+  else if(mio){ ESP=mio; }
+
+  /* 2. Datos locales de ese espacio */
+  let raw = ESP ? await DB.get(KEY()) : null;
+
+  /* 3. Migración de lo que ya existía (solo hacia mi propio espacio) */
+  let viejo=null;
+  if(!raw && !fromUrl){
+    const prev = await DB.get(OLD3) || await DB.get(OLD2) || await DB.get(OLD1);
+    if(prev){ try{ viejo=JSON.parse(prev) }catch(e){} }
+  }
+  if(!ESP){
+    /* primer uso: si el respaldo viejo traía código de familia, se conserva
+       como espacio para no perder lo que ya estaba en la nube */
+    const anterior = viejo && viejo.sync ? cleanEsp(viejo.sync.codigo) : '';
+    ESP = (anterior && anterior.length>=4) ? anterior : newEsp();
+    await DB.set(ESP_KEY,ESP);
+  }
+  putUrl(ESP); installManifest();
+
+  /* 4. Estado */
+  if(raw){ try{S=JSON.parse(raw)}catch(e){S=null} }
+  if(!S && viejo){
+    try{
+      S=freshState(); delete S.lists;
+      if(viejo.lists) S.lists=viejo.lists.map(l=>({id:l.id||uid(),name:l.name,mt:l.mt||now(),del:l.del,
+        items:(l.items||[]).map(i=>({...i,mt:i.mt||now()}))}));
+      if(viejo.cats) S.cats=Object.assign(S.cats,viejo.cats);
+      if(viejo.route) S.route=viejo.route.filter(k=>S.cats[k]);
+      if(viejo.catsMt) S.catsMt=viejo.catsMt;
+      S.dict=Object.assign(S.dict,viejo.dict||{});
+      S.keepAwake=!!viejo.keepAwake;
+      S.active=viejo.active||null;
+      S.sync={rev:0,ok:null,dirty:true};
+    }catch(e){ S=null }
+  }
+  if(!S) S=freshState();
   if(!S.cats) S.cats=JSON.parse(JSON.stringify(BASE_CATS));
   if(!S.route||!S.route.length) S.route=Object.keys(S.cats);
   Object.keys(S.cats).forEach(k=>{if(!S.route.includes(k))S.route.push(k)});
   S.route=S.route.filter(k=>S.cats[k]);
   if(!S.catsMt) S.catsMt=now();
-  if(!S.sync) S.sync={codigo:'',rev:0,ok:null};
-  if(!S.lists||!LIVE().length) S.lists=[{id:uid(),name:'Súper',items:[],mt:now()}];
+  if(!S.sync) S.sync={rev:0,ok:null};
+  delete S.sync.codigo;
+  if(!S.lists||!LIVE().length) S.lists=[{id:uid(),name:'Súper',items:[],mt:now(),seed:true}];
   S.lists.forEach(l=>{l.items=l.items||[];l.mt=l.mt||now();l.items.forEach(i=>i.mt=i.mt||now())});
   if(!S.active||!LIVE().some(l=>l.id===S.active)) S.active=LIVE()[0].id;
-  purge(); render(); paintBadge();
+  purge(); save(1); render(); paintBadge();
   if(S.keepAwake) askWakeLock();
-  if(S.sync.codigo){ syncNow(); startPoll(); }
+  syncNow(); startPoll();
 })();
 
 /* borra los fantasmas viejos (más de 30 días marcados como eliminados) */
@@ -331,16 +384,20 @@ function mergeRemote(R){
   Object.keys(S.cats).forEach(k=>{if(!merged.includes(k))merged.push(k)});
   S.route=merged; S.catsMt=Math.max(S.catsMt||0,R.catsMt||0);
   S.dict=Object.assign({},R.dict||{},S.dict);
-  if(!LIVE().length) S.lists.push({id:uid(),name:'Súper',items:[],mt:now()});
+  if((R.lists||[]).length){
+    const rid={}; R.lists.forEach(r=>rid[r.id]=1);
+    S.lists=S.lists.filter(l=>!(l.seed&&!IT(l).length&&!rid[l.id]));
+  }
+  if(!LIVE().length) S.lists.push({id:uid(),name:'Súper',items:[],mt:now(),seed:true});
   if(!LIVE().some(l=>l.id===S.active)) S.active=LIVE()[0].id;
   return before!==JSON.stringify([S.lists,S.cats,S.route]);
 }
 
 async function syncNow(force){
-  if(!S.sync.codigo||syncing) return;
-  syncing=true;
+  if(!S||!ESP||syncing) return;
+  syncing=true; paintBadge();
   try{
-    const res=await rpc('ferrock_pull',{p_codigo:S.sync.codigo,p_rev:S.sync.rev||0});
+    const res=await rpc('ferrock_pull',{p_codigo:ESP,p_rev:S.sync.rev||0});
     const row=Array.isArray(res)?res[0]:res;
     let changed=false;
     if(row){
@@ -348,32 +405,34 @@ async function syncNow(force){
       else S.sync.rev=row.rev;
     }
     if(!row||changed||force||S.sync.dirty){
-      const rev=await rpc('ferrock_push',{p_codigo:S.sync.codigo,p_payload:payload()});
+      const rev=await rpc('ferrock_push',{p_codigo:ESP,p_payload:payload()});
       S.sync.rev=(typeof rev==='number')?rev:S.sync.rev;
       S.sync.dirty=false;
     }
     S.sync.ok=true; S.sync.last=now();
-    DB.set(KEY,JSON.stringify(S));
+    DB.set(KEY(),JSON.stringify(S));
     if(changed) render();
   }catch(e){ S.sync.ok=false; }
   syncing=false; paintBadge();
 }
 function queuePush(){
-  if(!S.sync.codigo) return;
+  if(!ESP) return;
   S.sync.dirty=true; paintBadge();
   clearTimeout(pushT); pushT=setTimeout(()=>syncNow(true),1200);
 }
 function startPoll(){ clearInterval(pollT); pollT=setInterval(()=>{ if(document.visibilityState==='visible') syncNow(); },7000); }
 function paintBadge(){
   const b=document.getElementById('syncBadge'), t=document.getElementById('syncTxt');
-  if(!S||!S.sync.codigo){ b.classList.remove('on'); return; }
-  b.classList.add('on');
-  b.classList.toggle('off',S.sync.ok===false);
-  t.textContent=S.sync.ok===false?'Sin conexión':(S.sync.dirty?'Guardando…':'En familia');
+  if(!b||!S) return;
+  const off = S.sync.ok===false;
+  const busy = !off && (S.sync.dirty||syncing);
+  b.classList.toggle('off',off);
+  b.classList.toggle('busy',busy);
+  t.textContent = off ? 'Sin conexión' : (busy ? 'Guardando…' : 'En la nube');
 }
 document.getElementById('syncBadge').onclick=()=>{ syncNow(true); toast('Buscando cambios…') };
 document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'){ if(S&&S.sync.codigo) syncNow(); if(S&&S.keepAwake) askWakeLock(); }
+  if(document.visibilityState==='visible'){ syncNow(); if(S&&S.keepAwake) askWakeLock(); }
 });
 
 /* =============== RENDER =============== */
@@ -650,16 +709,17 @@ document.getElementById('dkShare').onclick=()=>{
 
 /* =============== AJUSTES + SINCRONIZACIÓN =============== */
 document.getElementById('dkSet').onclick=()=>{
-  const nd=Object.keys(S.dict).length, ns=S.route.length, sy=S.sync.codigo;
-  openModal(`<h2>Ajustes</h2><p class="sub">Tus listas viven en este dispositivo; si sincronizas, también en la nube para tu familia.</p>
-    <div class="switch-row"><span class="nm">Compartir con mi familia<small>${sy?'Código: '+esc(sy):'Todos ven y editan las mismas listas'}</small></span>
-      <button class="sw ${sy?'on':''}" id="swSync"></button></div>
-    <div class="switch-row"><span class="nm">Pantalla siempre encendida<small>Para que no se apague mientras compras</small></span>
+  const nd=Object.keys(S.dict).length, ns=S.route.length;
+  openModal(`<h2>Ajustes</h2><p class="sub">Tus listas se guardan solas en la nube; quien abra tu enlace ve y edita lo mismo que tú.</p>
+    <div class="m-actions"><button class="b-primary" id="stLink">🔗 Mi enlace</button></div>
+    <div class="m-actions"><button class="b-orange" id="stNew">＋ Crear un espacio para alguien más</button></div>
+    <div class="switch-row" style="margin-top:12px"><span class="nm">Pantalla siempre encendida<small>Para que no se apague mientras compras</small></span>
       <button class="sw ${S.keepAwake?'on':''}" id="swWake"></button></div>
     <div class="tip">Reconozco <b>${nd}</b> productos con su color, repartidos en <b>${ns}</b> secciones.</div>
     <div class="m-actions"><button class="b-ghost" id="stExp">Respaldar</button><button class="b-ghost" id="stImp">Restaurar</button></div>
     <div class="m-actions"><button class="b-ghost" onclick="closeModal()">Cerrar</button></div>`);
-  document.getElementById('swSync').onclick=()=>{ if(sy) modalSyncOff(); else modalSyncOn(); };
+  document.getElementById('stLink').onclick=modalMiEnlace;
+  document.getElementById('stNew').onclick=modalNuevoEspacio;
   document.getElementById('swWake').onclick=async e=>{
     S.keepAwake=!S.keepAwake; e.target.classList.toggle('on',S.keepAwake);
     if(S.keepAwake) askWakeLock(); else if(wakeLock){try{await wakeLock.release()}catch(x){}wakeLock=null}
@@ -678,43 +738,44 @@ document.getElementById('dkSet').onclick=()=>{
       <div class="m-actions"><button class="b-ghost" onclick="closeModal()">Cancelar</button><button class="b-primary" id="rsGo">Restaurar</button></div>`);
     document.getElementById('rsGo').onclick=()=>{
       try{const o=JSON.parse(document.getElementById('rsT').value); if(!o.lists) throw 0;
+        const rev=S.sync.rev||0;
         S=o; if(!S.cats)S.cats=JSON.parse(JSON.stringify(BASE_CATS)); if(!S.route)S.route=Object.keys(S.cats);
-        if(!S.sync)S.sync={codigo:'',rev:0,ok:null};
-        save(1);render();closeModal();toast('Todo restaurado');
+        S.sync={rev:rev,ok:null,dirty:true};
+        if(!S.active||!LIVE().some(l=>l.id===S.active)) S.active=LIVE()[0].id;
+        save();render();closeModal();toast('Todo restaurado');
       }catch(e){toast('Ese respaldo no se puede leer')}
     };
   };
 };
 
-function modalSyncOn(){
-  const sug=('familia-'+Math.random().toString(36).slice(2,7)).toLowerCase();
-  openModal(`<h2>Compartir con mi familia</h2>
-    <p class="sub">Todos escriben el mismo código en su teléfono y ven la misma lista. Elige uno que nadie adivine; es la llave de tus listas.</p>
-    <div class="code" id="syCode">${sug}</div>
-    <input id="syIn" placeholder="O escribe el suyo (mínimo 6 letras)" value="${sug}" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <div class="tip">Si alguien de la familia ya lo activó, escribe <b>su mismo código</b>; las listas se juntan solas.</div>
-    <div class="m-actions"><button class="b-ghost" onclick="closeModal()">Cancelar</button>
-    <button class="b-primary" id="syOk">Activar</button></div>`);
-  document.getElementById('syIn').oninput=e=>{document.getElementById('syCode').textContent=e.target.value.trim().toLowerCase()||'—'};
-  document.getElementById('syOk').onclick=async()=>{
-    const cod=document.getElementById('syIn').value.trim().toLowerCase().replace(/\s+/g,'');
-    if(cod.length<6) return toast('El código necesita al menos 6 letras');
-    S.sync={codigo:cod,rev:0,ok:null,dirty:true};
-    save(1); closeModal(); toast('Conectando…');
-    await syncNow(true); startPoll(); render();
-    toast(S.sync.ok?'Listo, ya están sincronizados':'No se pudo conectar; se reintenta solo');
-  };
+function shareBox(titulo,sub,url,extra,wa){
+  openModal(`<h2>${titulo}</h2>
+    <p class="sub">${sub}</p>
+    <div class="code link" id="lkTxt">${esc(url)}</div>
+    ${extra||''}
+    <div class="m-actions"><button class="b-ghost" id="lkCopy">Copiar</button>
+    <button class="b-primary" id="lkWa">WhatsApp</button></div>
+    <div class="m-actions"><button class="b-ghost" id="lkBack">Volver</button></div>`);
+  document.getElementById('lkCopy').onclick=()=>{copy(url);toast('Enlace copiado')};
+  document.getElementById('lkWa').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(wa||url),'_blank');
+  document.getElementById('lkBack').onclick=()=>document.getElementById('dkSet').onclick();
 }
-function modalSyncOff(){
-  openModal(`<h2>Dejar de compartir</h2>
-    <p class="sub">Tus listas se quedan completas en este teléfono; ya no se envían ni reciben cambios. Puedes reconectar cuando quieras con el mismo código.</p>
-    <div class="m-actions"><button class="b-ghost" id="soNo">Cancelar</button>
-    <button class="b-danger" id="soSi">Dejar de compartir</button></div>`);
-  document.getElementById('soNo').onclick=()=>document.getElementById('dkSet').onclick();
-  document.getElementById('soSi').onclick=()=>{
-    S.sync={codigo:'',rev:0,ok:null}; clearInterval(pollT);
-    save(1); closeModal(); render(); toast('Ya no se comparte');
-  };
+
+function modalMiEnlace(){
+  shareBox('Mi enlace',
+    'Este es el enlace de tus listas. Quien lo abra ve y edita exactamente lo mismo que tú, al momento. Mándalo solo a quien quieras que entre.',
+    linkFor(ESP),
+    '<div class="tip">Guárdalo en tu teléfono; si algún día cambias de aparato, con este enlace recuperas todo.</div>',
+    'Te paso nuestra lista del súper 🛒 ábrela aquí y los dos vemos lo mismo: '+linkFor(ESP));
+}
+
+function modalNuevoEspacio(){
+  const otro=newEsp();
+  shareBox('Un espacio para alguien más',
+    'Aquí tienes un enlace nuevo y vacío, aparte del tuyo. El tuyo no se toca y esa persona no ve tus listas.',
+    linkFor(otro),
+    '<div class="tip">Sirve para la casa de tus papás, la oficina o cualquier lista que no quieras mezclar con la tuya.</div>',
+    'Te comparto tu lista del súper 🛒 ábrela desde aquí: '+linkFor(otro));
 }
 
 /* =============== LISTAS =============== */
@@ -768,13 +829,13 @@ document.getElementById('ov').onclick=e=>{if(e.target.id==='ov')closeModal()};
 let tT; function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('on'),1900)}
 async function askWakeLock(){try{if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}
 
-(function(){
+function installManifest(){
   const icon='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" rx="110" fill="#12A150"/><circle cx="196" cy="392" r="34" fill="#fff"/><circle cx="330" cy="392" r="34" fill="#fff"/><path d="M96 120h60l52 214h176l46-142H188" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-  const m={name:'Ferrock List',short_name:'Ferrock List',start_url:'.',display:'standalone',background_color:'#FFF6EC',theme_color:'#12A150',icons:[{src:icon,sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
+  const m={name:'Ferrock List',short_name:'Ferrock List',start_url:location.pathname+location.search,display:'standalone',background_color:'#FFF6EC',theme_color:'#12A150',icons:[{src:icon,sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
   try{const l=document.createElement('link');l.rel='manifest';
     l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}
   const al=document.createElement('link'); al.rel='apple-touch-icon'; al.href=icon; document.head.appendChild(al);
-})();
+}
 </script>
 </body>
 </html>
