@@ -1272,27 +1272,33 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
         </div>
 
         <div class="av-info-box">
-          <strong>¿Cómo funciona?</strong> Todas las membresías con pago anual terminan el <strong>31 de diciembre</strong>, así que no hay vencimientos individuales: es una <strong>campaña de temporada</strong> con cuatro disparos fijos de calendario iguales para todos — <strong>1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero</strong>.<br><br>La campaña es de <strong>renovación</strong>: se envía únicamente a quienes ya tienen un pago anual vigente, y solo a la <strong>cuota base</strong> (Titular, Cónyuge, Individual e Individual Menor). Los dependientes y los becados quedan fuera. Puedes activar o desactivar cada disparo por separado.
+          <strong>¿Cómo funciona?</strong> Todas las membresías con pago anual terminan el <strong>31 de diciembre</strong>, así que no hay vencimientos individuales: es una <strong>campaña de temporada</strong> con cuatro disparos fijos de calendario iguales para todos — <strong>1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero</strong>.<br><br>La campaña es de <strong>renovación</strong>: se envía únicamente a quienes ya tienen un pago anual vigente, y solo a la <strong>cuota base</strong> (Titular, Cónyuge, Individual e Individual Menor). Los dependientes y los becados quedan fuera.<br><br>Los cuatro disparos son <strong>una sola campaña</strong>: el interruptor de arriba los prende y los apaga juntos, no se activan por separado.
         </div>
 
         <!-- Cadena de envíos -->
         <div class="av-sub-section">
           <div class="av-sub-title">📬 Calendario de disparos</div>
+          <!-- 11-ago-2026 (s44) — LAS CASILLAS ERAN UN CONTROL QUE NO CONTROLABA NADA.
+               Las cuatro fechas viven escritas en el SQL del cron y este se prende o se apaga
+               completo desde el interruptor de arriba. Las casillas se guardaban en
+               saveModule('anual') pero el cron NUNCA las leyo, o sea que destildar una hacia
+               creer que ese disparo no saldria, y si salia. Mismo caso que el selector de
+               "¿Cuando enviar?" de Cumpleanos (s42).
+               Los inputs se dejan OCULTOS y en checked, no se borran: saveModule('anual') los
+               lee y quitarlos romperia el guardado del modulo. -->
           <div class="av-cadena-row">
-            <label class="av-cadena-chip active">
-              <input type="checkbox" id="anual-f-oct" checked> 1 de octubre
-            </label>
-            <label class="av-cadena-chip active">
-              <input type="checkbox" id="anual-f-nov" checked> 1 de noviembre
-            </label>
-            <label class="av-cadena-chip active">
-              <input type="checkbox" id="anual-f-dic" checked> 1 de diciembre
-            </label>
-            <label class="av-cadena-chip active">
-              <input type="checkbox" id="anual-f-ene" checked> 1 de enero
-            </label>
+            <span class="av-cadena-chip active">1 de octubre</span>
+            <span class="av-cadena-chip active">1 de noviembre</span>
+            <span class="av-cadena-chip active">1 de diciembre</span>
+            <span class="av-cadena-chip active">1 de enero</span>
           </div>
-          <div style="font-size:.71rem;color:var(--gray-text);margin-top:6px">Tres plantillas para cuatro fechas: diciembre y enero comparten la plantilla de cierre</div>
+          <div style="display:none">
+            <input type="checkbox" id="anual-f-oct" checked>
+            <input type="checkbox" id="anual-f-nov" checked>
+            <input type="checkbox" id="anual-f-dic" checked>
+            <input type="checkbox" id="anual-f-ene" checked>
+          </div>
+          <div style="font-size:.71rem;color:var(--gray-text);margin-top:6px">Las cuatro fechas son fijas y no se editan desde aquí. Tres plantillas para cuatro fechas: diciembre y enero comparten la plantilla de cierre</div>
         </div>
 
         <!-- Plantillas -->
