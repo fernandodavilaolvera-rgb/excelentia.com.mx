@@ -1332,6 +1332,25 @@ Recuerda que aún es posible obtener beneficios por tu pago anual.
           <div style="font-size:.71rem;color:var(--gray-text);margin-top:6px">La misma plantilla se envía en las dos fechas de cierre</div>
         </div>
 
+        <!-- ===== s42 (11-ago-2026) - INTERRUPTOR DE ENCENDIDO =====
+             Sustituye al toggle PAUSADO/ACTIVO, que no estaba conectado a nada: escribia
+             un registro de configuracion que el cron nunca leia. Este escribe
+             berimbau.config.anual_activo, la misma clave que consulta el SQL del cron. -->
+        <div class="av-sub-section" id="anual-switch-section">
+          <div class="av-sub-title">🔌 ¿Está activa la campaña?</div>
+          <div id="anual-switch-box"
+               style="max-width:720px;margin:0 auto;border:1px solid #dde1e9;border-radius:10px;padding:13px 15px;background:#f5f6f8">
+            <div style="font-size:.76rem;color:#8a90a0">Consultando…</div>
+          </div>
+          <div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;padding:9px 12px;margin:10px auto 0;max-width:720px;font-size:.72rem;color:#4a5068;line-height:1.55">
+            <strong style="color:#1a2035">Un solo interruptor para las cuatro fechas.</strong> Esto es
+            una campaña de temporada, no cuatro avisos sueltos: se activa una vez y cubre el 1 de octubre,
+            el 1 de noviembre, el 1 de diciembre y el 1 de enero.<br>
+            <strong style="color:#1a2035">No se apaga solo.</strong> Si se apagara después del primer
+            disparo, el del mes siguiente no saldría y nadie se enteraría hasta que un socio lo reclamara.
+          </div>
+        </div>
+
         <div class="av-sub-section">
           <div class="av-sub-title">🧪 ¿Qué disparo quieres probar?</div>
           <select class="av-input" id="anual-test-disparo" style="max-width:340px">
@@ -1343,8 +1362,13 @@ Recuerda que aún es posible obtener beneficios por tu pago anual.
         </div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:4px">
-          <div class="toggle-wrap">
-            <label class="toggle-switch"><input type="checkbox" id="toggle-anual" onchange="toggleModuleStatus('anual',this)"><span class="toggle-slider"></span></label>
+          <!-- s42 - El toggle visible se retiro: el encendido real vive arriba, en el
+               interruptor conectado a berimbau.config. El input se conserva OCULTO porque
+               actualizarDotsSidebar() y saveModule('anual') lo leen; borrarlo dejaria el
+               puntito del sidebar apagado para siempre. Sin onchange: lo sincroniza
+               renderSwitchAnual() con lo que dice la base. -->
+          <div class="toggle-wrap" style="display:none">
+            <input type="checkbox" id="toggle-anual">
             <span class="toggle-label" id="toggle-anual-label" style="color:#ccc">PAUSADO</span>
           </div>
           <div style="background:#f0faf0;border:1px solid #bfe3bf;border-radius:10px;padding:10px 12px;margin:0 0 12px;max-width:720px"><div style="font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:800;color:#1a5c18;margin-bottom:6px">🔒 ¿A quién enviar la prueba? <span style="font-weight:600;color:#4a5068">(marca 1 o varios)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px 16px"><label style="display:flex;align-items:center;gap:6px;font-size:.76rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-mod" data-mod="anual" value="990001" checked style="accent-color:#3AAA35;width:15px;height:15px"> Nancy</label><label style="display:flex;align-items:center;gap:6px;font-size:.76rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-mod" data-mod="anual" value="990002" checked style="accent-color:#3AAA35;width:15px;height:15px"> Carlos</label><label style="display:flex;align-items:center;gap:6px;font-size:.76rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-mod" data-mod="anual" value="990003" checked style="accent-color:#3AAA35;width:15px;height:15px"> Gustavo</label><label style="display:flex;align-items:center;gap:6px;font-size:.76rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-mod" data-mod="anual" value="990004" checked style="accent-color:#3AAA35;width:15px;height:15px"> Fernando</label></div></div>
@@ -1588,7 +1612,7 @@ Por favor comunícate con nosotros a la brevedad para regularizar tu situación 
         <div class="av-module-icon">🎂</div>
         <div class="av-module-info">
           <div class="av-module-title">Cumpleaños</div>
-          <div class="av-module-sub">Felicitación automática el día del cumpleaños (configurable: día anterior o día exacto) · <span id="mod-cumple-count" style="font-weight:700;color:var(--s1-color)">calculando...</span> próximos en 30 días</div>
+          <div class="av-module-sub">Felicitación automática el día exacto del cumpleaños · <span id="mod-cumple-count" style="font-weight:700;color:var(--s1-color)">calculando...</span> próximos en 30 días</div>
         </div>
         <div class="av-module-badges">
           <span class="av-module-status av-status-off" id="mod-cumple-status">⏸ Pausado</span>
@@ -1604,18 +1628,24 @@ Por favor comunícate con nosotros a la brevedad para regularizar tu situación 
           </button>
         </div>
 
+        <!-- s42 (11-ago-2026) - SE OCULTO el selector "¿Cuando enviar?" (El dia anterior /
+             El dia exacto / Ambos dias). NO estaba conectado a nada: el cron solo sabe
+             felicitar el DIA EXACTO y esa regla vive escrita en su SQL, asi que elegir
+             cualquier otra opcion no cambiaba nada. Ademas venia marcado "El dia anterior",
+             que es justo lo que NO hace.
+             Los radios se conservan ocultos porque saveModule('cumple') y el cargador de
+             configuracion los leen; borrarlos romperia el guardado. Queda marcado
+             "exacto", que es la verdad. -->
         <div class="av-sub-section">
-          <div class="av-sub-title">⚙️ ¿Cuándo enviar?</div>
-          <div class="av-cadena-row">
-            <label class="av-cadena-chip active">
-              <input type="radio" name="cumple-when" id="cumple-dia-antes" value="antes" checked> El día anterior
-            </label>
-            <label class="av-cadena-chip">
-              <input type="radio" name="cumple-when" id="cumple-dia-exacto" value="exacto"> El día exacto
-            </label>
-            <label class="av-cadena-chip">
-              <input type="radio" name="cumple-when" id="cumple-ambos" value="ambos"> Ambos días
-            </label>
+          <div class="av-sub-title">⚙️ ¿Cuándo se envía?</div>
+          <div style="font-size:.76rem;color:#4a5068;line-height:1.55;max-width:720px">
+            <strong style="color:#1a2035">El día exacto del cumpleaños</strong>, a las 8:00 de la mañana.
+            Es una regla fija del sistema y no se cambia desde aquí.
+          </div>
+          <div style="display:none">
+            <input type="radio" name="cumple-when" id="cumple-dia-antes" value="antes">
+            <input type="radio" name="cumple-when" id="cumple-dia-exacto" value="exacto" checked>
+            <input type="radio" name="cumple-when" id="cumple-ambos" value="ambos">
           </div>
         </div>
 
@@ -1647,9 +1677,36 @@ En nombre de todo el equipo de Club Berimbau, queremos desearte un día lleno de
           </details>
         </div>
 
+        <!-- ===== s42 (11-ago-2026) - INTERRUPTOR DE ENCENDIDO =====
+             Antes este modulo tenia un toggle PAUSADO/ACTIVO que NO estaba conectado a
+             nada: escribia un registro de configuracion que el cron nunca leia. Mentia en
+             las dos direcciones - puesto en ACTIVO no prendia el aviso, y puesto en
+             PAUSADO no lo detenia. Se sustituyo por este interruptor, que escribe
+             berimbau.config.cumpleanos_activo, la misma clave que consulta el SQL del cron. -->
+        <div class="av-sub-section" id="cumple-switch-section">
+          <div class="av-sub-title">🔌 ¿Está activo este aviso?</div>
+          <div id="cumple-switch-box"
+               style="max-width:720px;margin:0 auto;border:1px solid #dde1e9;border-radius:10px;padding:13px 15px;background:#f5f6f8">
+            <div style="font-size:.76rem;color:#8a90a0">Consultando…</div>
+          </div>
+          <div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;padding:9px 12px;margin:10px auto 0;max-width:720px;font-size:.72rem;color:#4a5068;line-height:1.55">
+            <strong style="color:#1a2035">Este interruptor no se apaga solo.</strong> A diferencia del
+            aviso de domiciliados, que se autoriza mes con mes, este queda encendido hasta que alguien
+            lo apague aquí: mientras esté activado felicita todos los días a quien cumpla años.<br>
+            <strong style="color:#1a2035">Se envía únicamente por correo.</strong> La felicitación por
+            WhatsApp está clasificada como mensaje promocional y WhatsApp no la entrega, así que aunque
+            el aviso esté activo el socio solo recibe el correo.
+          </div>
+        </div>
+
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:4px">
-          <div class="toggle-wrap">
-            <label class="toggle-switch"><input type="checkbox" id="toggle-cumple" onchange="toggleModuleStatus('cumple',this)"><span class="toggle-slider"></span></label>
+          <!-- s42 - El toggle visible se retiro: el encendido real vive arriba, en el
+               interruptor conectado a berimbau.config. El input se conserva OCULTO porque
+               actualizarDotsSidebar() y saveModule('cumple') lo leen; borrarlo dejaria el
+               puntito del sidebar apagado para siempre. Ya no tiene onchange: nadie lo
+               mueve a mano, lo sincroniza renderSwitchCumple() con lo que dice la base. -->
+          <div class="toggle-wrap" style="display:none">
+            <input type="checkbox" id="toggle-cumple">
             <span class="toggle-label" id="toggle-cumple-label" style="color:#ccc">PAUSADO</span>
           </div>
           <div style="background:#f0faf0;border:1px solid #bfe3bf;border-radius:10px;padding:10px 12px;margin:0 0 12px;max-width:720px"><div style="font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:800;color:#1a5c18;margin-bottom:6px">🔒 ¿A quién enviar la prueba? <span style="font-weight:600;color:#4a5068">(marca 1 o varios)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px 16px"><label style="display:flex;align-items:center;gap:6px;font-size:.76rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-mod" data-mod="cumple" value="990001" checked style="accent-color:#3AAA35;width:15px;height:15px"> Nancy</label><label style="display:flex;align-items:center;gap:6px;font-size:.76rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-mod" data-mod="cumple" value="990002" checked style="accent-color:#3AAA35;width:15px;height:15px"> Carlos</label><label style="display:flex;align-items:center;gap:6px;font-size:.76rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-mod" data-mod="cumple" value="990003" checked style="accent-color:#3AAA35;width:15px;height:15px"> Gustavo</label><label style="display:flex;align-items:center;gap:6px;font-size:.76rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-mod" data-mod="cumple" value="990004" checked style="accent-color:#3AAA35;width:15px;height:15px"> Fernando</label></div></div>
@@ -2996,6 +3053,8 @@ function initAvisos(){
   cargarBiblioteca();
   cargarProgramaciones();
   cargarSwitchDomiciliados();   // s39 - lee de la base si el aviso del 26 va prendido
+  cargarSwitchCumple();         // s42 - lee de la base si las felicitaciones van prendidas
+  cargarSwitchAnual();          // s42 - lee de la base si la campana anual va prendida
   showAviso('general');
   actualizarDotsSidebar();
 }
@@ -5985,6 +6044,303 @@ async function domiGuardar(valor){
   }catch(e){
     showToast('⚠️ No se pudo guardar — verifica n8n');
     cargarSwitchDomiciliados();   // vuelve a leer el estado real
+  }
+}
+
+// ============================================================================
+// s42 (11-ago-2026) · INTERRUPTOR DEL AVISO DE CUMPLEAÑOS
+//
+// Mismo patron que el de Domiciliados (s39), con DOS diferencias a proposito:
+//
+// 🔑 NO HAY AUTOAPAGADO. Domiciliados es un permiso de una sola vez: se prende,
+//    sale el 26 y se apaga solo. Este cron es DIARIO, asi que un autoapagado lo
+//    mataria el primer dia. Es un interruptor de ESTADO: queda encendido hasta
+//    que alguien lo apague.
+//
+// 🔑 PRENDER PIDE TECLEAR "ACTIVAR". APAGAR NO PIDE NADA: apagar nunca necesita
+//    permiso.
+//
+// 🔑 SI NO SE PUEDE LEER EL ESTADO, SE PINTA APAGADO. Nunca al reves.
+//
+// 🔑 SE PINTA LO QUE LA BASE DEVOLVIO, no lo que se pidio guardar (leccion del
+//    9-ago-2026: el webhook respondia 'success' sin haber escrito nada).
+// ============================================================================
+let CUMPLE_ACTIVO = false;
+
+async function cargarSwitchCumple(){
+  try{
+    const r = await fetch(URL_CONFIG_GUARDAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ leer: true })
+    });
+    const j = await r.json();
+    CUMPLE_ACTIVO = (j && j.cumpleanos_activo === true);
+  }catch(e){
+    CUMPLE_ACTIVO = false;   // falla hacia apagado
+  }
+  renderSwitchCumple();
+}
+
+function renderSwitchCumple(){
+  // Espejo del estado real en el toggle oculto, el rotulo del modulo y el
+  // puntito del sidebar, para que ninguna parte de la pantalla diga otra cosa.
+  const chk = document.getElementById('toggle-cumple');
+  if(chk) chk.checked = CUMPLE_ACTIVO;
+  const st = document.getElementById('mod-cumple-status');
+  if(st){
+    st.textContent = CUMPLE_ACTIVO ? '✅ Activo' : '⏸ Pausado';
+    st.className   = CUMPLE_ACTIVO ? 'av-module-status av-status-on' : 'av-module-status av-status-off';
+  }
+  const lbl = document.getElementById('toggle-cumple-label');
+  if(lbl){
+    lbl.textContent = CUMPLE_ACTIVO ? 'ACTIVO' : 'PAUSADO';
+    lbl.style.color = CUMPLE_ACTIVO ? 'var(--verde)' : '#ccc';
+  }
+  if(typeof actualizarDotsSidebar === 'function') actualizarDotsSidebar();
+
+  const box = document.getElementById('cumple-switch-box');
+  if(!box) return;
+
+  box.style.background  = CUMPLE_ACTIVO ? '#f0faf0' : '#f5f6f8';
+  box.style.borderColor = CUMPLE_ACTIVO ? '#bfe3bf' : '#dde1e9';
+
+  box.innerHTML =
+    '<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">'
+    + '<div style="flex:1;min-width:210px">'
+      + '<div style="font-family:\'Montserrat\',sans-serif;font-size:.8rem;font-weight:800;color:'
+        + (CUMPLE_ACTIVO ? '#1a5c18' : '#4a5068') + '">'
+        + (CUMPLE_ACTIVO ? '🟢 Activado' : '⚫ Apagado') + '</div>'
+      + '<div style="font-size:.74rem;color:#4a5068;margin-top:4px;line-height:1.55">'
+        + (CUMPLE_ACTIVO
+            ? 'Todos los días a las <strong>8:00 de la mañana</strong> se manda la felicitación '
+              + 'por correo a los socios que cumplan años ese día. Sigue haciéndolo hasta que se apague aquí.'
+            : 'La felicitación <strong>no se está enviando</strong>. El sistema despierta cada mañana, '
+              + 've el interruptor apagado y termina sin mandar nada.')
+      + '</div>'
+    + '</div>'
+    + '<button onclick="cumplePedirCambio(' + (CUMPLE_ACTIVO ? 'false' : 'true') + ')" '
+      + 'style="flex-shrink:0;padding:9px 18px;border-radius:20px;cursor:pointer;'
+      + 'font-family:\'Montserrat\',sans-serif;font-size:.75rem;font-weight:800;'
+      + (CUMPLE_ACTIVO
+          ? 'background:#f5f6f8;color:#4a5068;border:1px solid #dde1e9">⏸ Apagar las felicitaciones'
+          : 'background:#3AAA35;color:#fff;border:none">🟢 Activar las felicitaciones')
+    + '</button>'
+    + '</div>';
+}
+
+// Apagar es directo. Prender abre la confirmacion con la palabra ACTIVAR.
+function cumplePedirCambio(prender){
+  if(!prender){ cumpleGuardar(false); return; }
+
+  const ov = document.createElement('div');
+  ov.className = 'modal-overlay';
+  ov.id = 'cumple-modal';
+  ov.innerHTML =
+    '<div class="modal-box" style="max-width:500px;text-align:left">'
+    + '<h3 style="text-align:center">🟢 Activar las felicitaciones de cumpleaños</h3>'
+    + '<p style="text-align:center;margin-bottom:14px">A partir de mañana, <strong>todos los días '
+      + 'a las 8:00</strong> se enviará la felicitación por correo a los socios que cumplan años ese día.</p>'
+    + '<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;'
+      + 'border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:.74rem;color:#1a3a6b;line-height:1.55">'
+      + 'Este interruptor <strong>no se apaga solo</strong>: queda encendido hasta que alguien lo apague aquí.<br>'
+      + 'El aviso sale <strong>solo por correo</strong>. La felicitación por WhatsApp está clasificada '
+      + 'como mensaje promocional y WhatsApp no la entrega.'
+      + '</div>'
+    + '<div style="margin-bottom:14px">'
+      + '<div style="font-size:.74rem;color:#1a5c18;font-weight:700;margin-bottom:6px">'
+        + 'Para confirmar, escribe <strong>ACTIVAR</strong>:</div>'
+      + '<input id="cumple-confirm-input" type="text" autocomplete="off" oninput="cumpleValidarPalabra()" '
+        + 'style="width:100%;padding:9px 11px;border:1px solid #bfe3bf;border-radius:8px;'
+        + 'font-size:.85rem;font-family:inherit;letter-spacing:1px">'
+      + '</div>'
+    + '<div class="modal-btns">'
+      + '<button class="modal-btn-cancel" onclick="cumpleCerrarModal()">Cancelar</button>'
+      + '<button class="modal-btn-del" id="cumple-confirm-btn" onclick="cumpleGuardar(true)" '
+        + 'disabled style="opacity:.45;cursor:not-allowed">🟢 Activar</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(ov);
+}
+
+function cumpleValidarPalabra(){
+  const inp = document.getElementById('cumple-confirm-input');
+  const btn = document.getElementById('cumple-confirm-btn');
+  if(!inp || !btn) return;
+  const ok = inp.value.trim().toUpperCase() === 'ACTIVAR';
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '.45';
+  btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+}
+
+function cumpleCerrarModal(){
+  const m = document.getElementById('cumple-modal');
+  if(m) m.remove();
+}
+
+async function cumpleGuardar(valor){
+  cumpleCerrarModal();
+  const box = document.getElementById('cumple-switch-box');
+  if(box) box.innerHTML = '<div style="font-size:.76rem;color:#8a90a0">⏳ Guardando…</div>';
+  try{
+    const r = await fetch(URL_CONFIG_GUARDAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ clave:'cumpleanos_activo', valor: !!valor })
+    });
+    const j = await r.json();
+    CUMPLE_ACTIVO = (j && j.cumpleanos_activo === true);
+    renderSwitchCumple();
+    showToast(CUMPLE_ACTIVO
+      ? '🟢 Felicitaciones ACTIVADAS — cada día a las 8:00, solo por correo'
+      : '⏸ Felicitaciones apagadas — no se envía nada');
+  }catch(e){
+    showToast('⚠️ No se pudo guardar — verifica n8n');
+    cargarSwitchCumple();   // vuelve a leer el estado real
+  }
+}
+
+// ============================================================================
+// s42 (11-ago-2026) · INTERRUPTOR DE LA CAMPAÑA ANUAL
+//
+// 🔑 UNA SOLA CLAVE PARA LOS CUATRO DISPAROS (1-oct, 1-nov, 1-dic, 1-ene). Es una
+//    campaña de temporada, no cuatro avisos sueltos: cuatro interruptores serian
+//    cuatro cosas que alguien tiene que acordarse de prender.
+//
+// 🔑 NO HAY AUTOAPAGADO. Si se apagara tras el 1-oct, el disparo del 1-nov no
+//    saldria y nadie se enteraria hasta diciembre.
+//
+// 🔑 PRENDER PIDE TECLEAR "ACTIVAR"; APAGAR NO PIDE NADA.
+// 🔑 SI NO SE PUEDE LEER EL ESTADO, SE PINTA APAGADO. Nunca al reves.
+// 🔑 SE PINTA LO QUE LA BASE DEVOLVIO, no lo que se pidio guardar.
+// ============================================================================
+let ANUAL_ACTIVO = false;
+
+async function cargarSwitchAnual(){
+  try{
+    const r = await fetch(URL_CONFIG_GUARDAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ leer: true })
+    });
+    const j = await r.json();
+    ANUAL_ACTIVO = (j && j.anual_activo === true);
+  }catch(e){
+    ANUAL_ACTIVO = false;   // falla hacia apagado
+  }
+  renderSwitchAnual();
+}
+
+function renderSwitchAnual(){
+  const chk = document.getElementById('toggle-anual');
+  if(chk) chk.checked = ANUAL_ACTIVO;
+  const st = document.getElementById('mod-anual-status');
+  if(st){
+    st.textContent = ANUAL_ACTIVO ? '✅ Activo' : '⏸ Pausado';
+    st.className   = ANUAL_ACTIVO ? 'av-module-status av-status-on' : 'av-module-status av-status-off';
+  }
+  const lbl = document.getElementById('toggle-anual-label');
+  if(lbl){
+    lbl.textContent = ANUAL_ACTIVO ? 'ACTIVO' : 'PAUSADO';
+    lbl.style.color = ANUAL_ACTIVO ? 'var(--verde)' : '#ccc';
+  }
+  if(typeof actualizarDotsSidebar === 'function') actualizarDotsSidebar();
+
+  const box = document.getElementById('anual-switch-box');
+  if(!box) return;
+
+  box.style.background  = ANUAL_ACTIVO ? '#f0faf0' : '#f5f6f8';
+  box.style.borderColor = ANUAL_ACTIVO ? '#bfe3bf' : '#dde1e9';
+
+  box.innerHTML =
+    '<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">'
+    + '<div style="flex:1;min-width:210px">'
+      + '<div style="font-family:\'Montserrat\',sans-serif;font-size:.8rem;font-weight:800;color:'
+        + (ANUAL_ACTIVO ? '#1a5c18' : '#4a5068') + '">'
+        + (ANUAL_ACTIVO ? '🟢 Activada' : '⚫ Apagada') + '</div>'
+      + '<div style="font-size:.74rem;color:#4a5068;margin-top:4px;line-height:1.55">'
+        + (ANUAL_ACTIVO
+            ? 'Los avisos de renovación <strong>van a salir</strong> en sus cuatro fechas: '
+              + '1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero, a las 8:00 de la mañana.'
+            : 'Los avisos de renovación <strong>no van a salir</strong> en ninguna de sus cuatro fechas. '
+              + 'El sistema despierta esos días, ve el interruptor apagado y termina sin mandar nada.')
+      + '</div>'
+    + '</div>'
+    + '<button onclick="anualPedirCambio(' + (ANUAL_ACTIVO ? 'false' : 'true') + ')" '
+      + 'style="flex-shrink:0;padding:9px 18px;border-radius:20px;cursor:pointer;'
+      + 'font-family:\'Montserrat\',sans-serif;font-size:.75rem;font-weight:800;'
+      + (ANUAL_ACTIVO
+          ? 'background:#f5f6f8;color:#4a5068;border:1px solid #dde1e9">⏸ Apagar la campaña'
+          : 'background:#3AAA35;color:#fff;border:none">🟢 Activar la campaña')
+    + '</button>'
+    + '</div>';
+}
+
+function anualPedirCambio(prender){
+  if(!prender){ anualGuardar(false); return; }
+
+  const ov = document.createElement('div');
+  ov.className = 'modal-overlay';
+  ov.id = 'anual-modal';
+  ov.innerHTML =
+    '<div class="modal-box" style="max-width:500px;text-align:left">'
+    + '<h3 style="text-align:center">🟢 Activar la campaña de renovación anual</h3>'
+    + '<p style="text-align:center;margin-bottom:14px">Quedan autorizados los <strong>cuatro avisos '
+      + 'de la temporada</strong>: 1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero, '
+      + 'a las 8:00 de la mañana.</p>'
+    + '<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;'
+      + 'border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:.74rem;color:#1a3a6b;line-height:1.55">'
+      + 'El de octubre es el envío más grande del año: <strong>alrededor de 460 correos</strong> '
+      + 'de una sola vez. El número se calcula ese día y puede cambiar.<br>'
+      + 'Este interruptor <strong>no se apaga solo</strong>: cubre la temporada completa hasta que '
+      + 'alguien lo apague aquí.'
+      + '</div>'
+    + '<div style="margin-bottom:14px">'
+      + '<div style="font-size:.74rem;color:#1a5c18;font-weight:700;margin-bottom:6px">'
+        + 'Para confirmar, escribe <strong>ACTIVAR</strong>:</div>'
+      + '<input id="anual-confirm-input" type="text" autocomplete="off" oninput="anualValidarPalabra()" '
+        + 'style="width:100%;padding:9px 11px;border:1px solid #bfe3bf;border-radius:8px;'
+        + 'font-size:.85rem;font-family:inherit;letter-spacing:1px">'
+      + '</div>'
+    + '<div class="modal-btns">'
+      + '<button class="modal-btn-cancel" onclick="anualCerrarModal()">Cancelar</button>'
+      + '<button class="modal-btn-del" id="anual-confirm-btn" onclick="anualGuardar(true)" '
+        + 'disabled style="opacity:.45;cursor:not-allowed">🟢 Activar</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(ov);
+}
+
+function anualValidarPalabra(){
+  const inp = document.getElementById('anual-confirm-input');
+  const btn = document.getElementById('anual-confirm-btn');
+  if(!inp || !btn) return;
+  const ok = inp.value.trim().toUpperCase() === 'ACTIVAR';
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '.45';
+  btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+}
+
+function anualCerrarModal(){
+  const m = document.getElementById('anual-modal');
+  if(m) m.remove();
+}
+
+async function anualGuardar(valor){
+  anualCerrarModal();
+  const box = document.getElementById('anual-switch-box');
+  if(box) box.innerHTML = '<div style="font-size:.76rem;color:#8a90a0">⏳ Guardando…</div>';
+  try{
+    const r = await fetch(URL_CONFIG_GUARDAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ clave:'anual_activo', valor: !!valor })
+    });
+    const j = await r.json();
+    ANUAL_ACTIVO = (j && j.anual_activo === true);
+    renderSwitchAnual();
+    showToast(ANUAL_ACTIVO
+      ? '🟢 Campaña ACTIVADA — saldrá en sus cuatro fechas'
+      : '⏸ Campaña apagada — no saldrá ningún aviso de renovación');
+  }catch(e){
+    showToast('⚠️ No se pudo guardar — verifica n8n');
+    cargarSwitchAnual();   // vuelve a leer el estado real
   }
 }
 
