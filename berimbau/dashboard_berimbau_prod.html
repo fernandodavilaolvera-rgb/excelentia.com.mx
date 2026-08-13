@@ -2400,6 +2400,10 @@ function dirTogglePill(which,btn){
 //  - Dependientes: Agregado, Juvenil, Infantil, Menor, Junior e Individual Junior
 //    (este ultimo siempre va dentro de una membresia) -> bonificacion al 100%
 //    mientras dure una baja temporal vigente.
+// 13-ago-2026 (s47) — MATIZ IMPORTANTE QUE DIO EL CLUB: esa bonificacion NO es
+// automatica, se aplica solo si el socio PAGA su baja temporal. Mientras no la pague,
+// el cargo sale completo y es correcto. Ese pago no llega al Dashboard, asi que estos
+// casos se senalan como POR REVISAR, nunca como error del Sistema.
 // El Dashboard NO descuenta el adeudo: solo lo SENALA para que Cobranza lo
 // revise caso por caso y la correccion se haga en el Sistema. Asi no hay
 // inconsistencias entre el Dashboard y el Sistema.
@@ -2431,9 +2435,15 @@ function esBonificable(d){
   return org>=ini;   // el adeudo nacio DENTRO de la baja
 }
 function listaBonificables(){ return (TODOS||[]).filter(esBonificable); }
+// 13-ago-2026 (s47) — TEXTO CORREGIDO. El Club aclaró que la bonificación de la baja
+// temporal NO es automática: se aplica solo si el socio paga su baja; mientras no la
+// pague, el cargo sale completo y es correcto. Antes esta pantalla afirmaba que "les
+// corresponde bonificación al 100%", que es un dato que el Dashboard no puede saber.
+// La detección se queda igual (el criterio es bueno); lo que cambia es que ahora se
+// señala como caso POR REVISAR, no como error del Sistema.
 function chipBonificable(d){
   if(!esBonificable(d)) return '';
-  return '<span class="chip-bonif" title="Dependiente con baja temporal vigente. Corresponde bonificacion al 100% — pendiente de aplicar en el Sistema.">&#9888; Bonificable</span>';
+  return '<span class="chip-bonif" title="Dependiente con baja temporal vigente y adeudo que cae dentro de la baja. Si pagó su baja temporal le corresponde bonificación; si no, el cargo es correcto. Revisar en el Sistema.">&#9888; Revisar baja</span>';
 }
 function chipBecado(d){
   if(!esBecado(d)) return '';
@@ -2453,8 +2463,8 @@ function renderBonifBar(){
   box.style.display='block';
   box.innerHTML='<div class="bonif-head" onclick="toggleBonifBar()">'
     +'<span class="bonif-ico">&#9888;</span>'
-    +'<div><div class="bonif-tit">'+arr.length+' caso'+(arr.length>1?'s':'')+' bonificable'+(arr.length>1?'s':'')+' pendiente'+(arr.length>1?'s':'')+' en el Sistema</div>'
-    +'<div class="bonif-sub">Dependientes con baja temporal vigente a quienes el Sistema les sigue generando cuota. Corresponde bonificacion al 100% · '+membs.length+' membresia'+(membs.length>1?'s':'')+'.</div></div>'
+    +'<div><div class="bonif-tit">'+arr.length+' caso'+(arr.length>1?'s':'')+' de baja temporal por revisar</div>'
+    +'<div class="bonif-sub">Dependientes con baja temporal vigente cuyo adeudo cae dentro de la baja. Si pagaron su baja les corresponde bonificación; si no, el cargo es correcto. Se revisa en el Sistema · '+membs.length+' membresía'+(membs.length>1?'s':'')+'.</div></div>'
     +'<span class="bonif-chev" id="bonif-chev">&#9654;</span></div>'
     +'<div class="bonif-body" id="bonif-body">'+filas+'</div>';
 }
@@ -2566,7 +2576,7 @@ function dependientesDetalleHTML(d){
       : '';
     const _full = (TODOS||[]).find(z=>z.m===d.m && z.id===x.id);
     const bon = _full && esBonificable(_full)
-      ? `<span class="pill" style="background:#fff4e6;color:#b35309;border:1px solid #ffd8a8;font-weight:700" title="Corresponde bonificación al 100% — pendiente de aplicar en el Sistema">⚠️ Bonificable</span>` : '';
+      ? `<span class="pill" style="background:#fff4e6;color:#b35309;border:1px solid #ffd8a8;font-weight:700" title="Su adeudo cae dentro de la baja temporal. Si pagó su baja le corresponde bonificación; si no, el cargo es correcto. Revisar en el Sistema.">⚠️ Revisar baja</span>` : '';
     return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #eef0f4">
       <span style="font-size:.8rem"><span class="dep-link" title="Ver ficha completa de ${esc(x.n)}" onclick="abrirDetalleSocio(${d.m},${x.id})">${esc(x.n)}</span> <span style="color:#8a90a0;font-size:.72rem">· ${esc(x.tu||'')}</span></span>
       <span style="display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">${bon}${bt}${badge}</span></div>`;
@@ -2653,7 +2663,7 @@ function abrirDetalleSocio(m,id){
       <div class="det-row"><span class="det-label">Visitas ${RANGO_CORTO}</span><span class="det-value">${d.ac}</span></div>
       <div class="det-row"><span class="det-label">Fecha límite de pago</span><span class="det-value">${fmtFnac(d.flim)}</span></div>
       <div class="det-row"><span class="det-label">Días de atraso</span><span class="det-value">${d.sit==='Inactivo'?'<span style="color:#8a90a0;font-weight:700">⚪ Inactivo — no genera cobro</span>':(d.dias>0?`<strong style="color:#c0392b">${d.dias} ${d.dias===1?'día':'días'}</strong>`:'<span style="color:#1a8a6e;font-weight:700">Al corriente</span>')}</span></div>
-      ${esBonificable(d)?`<div class="det-row full" style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:8px;padding:8px 10px;margin:4px 0"><span class="det-label" style="color:#9a3412">⚠️ Bonificable</span><span class="det-value" style="color:#b35309">Dependiente con baja temporal vigente. Corresponde bonificación al 100% — pendiente de aplicar en el Sistema.</span></div>`:''}
+      ${esBonificable(d)?`<div class="det-row full" style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:8px;padding:8px 10px;margin:4px 0"><span class="det-label" style="color:#9a3412">⚠️ Revisar baja</span><span class="det-value" style="color:#b35309">Dependiente con baja temporal vigente y adeudo que cae dentro de la baja. Si pagó su baja temporal le corresponde bonificación; si no la pagó, el cargo es correcto. Se revisa en el Sistema.</span></div>`:''}
       ${esBecado(d)?`<div class="det-row full" style="background:#eef4fc;border:1px solid #c8d9f0;border-radius:8px;padding:8px 10px;margin:4px 0"><span class="det-label" style="color:#1a3a6b">🎓 Becado</span><span class="det-value" style="color:#1a3a6b">Por indicación del Club no recibe avisos automáticos; cada caso se maneja de forma particular.</span></div>`:''}
       <div class="det-row full"><span class="det-label">Teléfono</span><span class="det-value">${esc(d.tel||'—')}</span></div>
       <div class="det-row full"><span class="det-label">Correo</span><span class="det-value">${esc(d.cor||'—')}</span></div>
@@ -4178,7 +4188,12 @@ function drawBarsEdades(canvasId, data, legendId){
 }
 function renderPieEdades(){
   // v56 — solo socios Activos, contando personas (no membresias)
-  const activos=TODOS.filter(d=>d.sit==='Activo');
+  // 13-ago-2026 (s47) — se agrega el filtro m<990000. Esta grafica estaba sumando
+  // a los 7 usuarios internos de prueba (990001-990006), asi que el total decia 2687
+  // cuando los activos reales son 2680. Lo cazo el Club al comparar contra las tres
+  // graficas del perfil del padron, que si los excluian. Mismo criterio en todos lados:
+  // toda cifra que se le muestre al Club filtra las membresias de servicio.
+  const activos=TODOS.filter(d=>d.sit==='Activo' && Number(d.m)<990000);
   const data=RANGOS_EDAD.map(g=>({
     label:g.lbl, color:g.color,
     val:activos.filter(d=>{ const e=(d.ed!=null?d.ed:d.edad); return e!=null && e>=g.min && e<=g.max; }).length
@@ -7006,12 +7021,15 @@ function calcNotificaciones(){
   // Reusa listaBonificables() a proposito: el criterio vive en UN solo lugar.
   // 🔑 El Dashboard SIGUE SIN DESCONTAR el adeudo, solo lo senala: la correccion
   // se hace en el Sistema del Club, que es quien genera el cargo.
+  // 13-ago-2026 (s47) — TEXTO CORREGIDO: la bonificación depende de que el socio pague
+  // su baja temporal (aclaración del Club). El Dashboard no ve ese pago, así que este
+  // grupo pasa de "esto está mal en el Sistema" a "esto hay que revisarlo".
   const bonif = listaBonificables().filter(d=>d.m<990000);
   if(bonif.length){
     const membsBonif = Array.from(new Set(bonif.map(x=>x.m)));
     out.push({tipo:'warn', ico:'⚠️',
-      tit:bonif.length+' dependiente'+(bonif.length>1?'s':'')+' con bonificación pendiente en el Sistema',
-      txt:'Están en baja temporal vigente y les corresponde bonificación al 100%, pero el Sistema les sigue generando cuota. Son '+membsBonif.length+' membresía'+(membsBonif.length>1?'s':'')+'; la corrección se hace en el Sistema, el Dashboard solo lo señala.',
+      tit:bonif.length+' dependiente'+(bonif.length>1?'s':'')+' en baja temporal por revisar',
+      txt:'Están en baja temporal vigente y su adeudo cae dentro del periodo de baja. Si pagaron su baja temporal les corresponde bonificación y el cargo habría que corregirlo; si no la pagaron, el cargo es correcto y sí deben. Son '+membsBonif.length+' membresía'+(membsBonif.length>1?'s':'')+'; el dato del pago de la baja no llega al Dashboard, se revisa en el Sistema.',
       items:bonif.map(d=>({m:d.m,id:d.id,n:d.n,
         extra:(d.tu||'')+' · '+d.dias+' '+(d.dias===1?'día':'días')+' · baja hasta '+fmtFnac(d.ffin_baja)}))});
   }
