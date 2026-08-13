@@ -274,6 +274,13 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
 /* ===== GRÁFICAS ===== */
 .graf-grid-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
 .graf-grid-bot{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.graf-grid-perfil{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;margin-bottom:20px}
+.graf-grid-perfil .graf-card{min-width:0;overflow:hidden}
+.graf-grid-perfil .graf-canvas-wrap{width:100%;display:block}
+.graf-grid-perfil canvas{display:block;width:100%;max-width:100%}
+.graf-perfil-head{max-width:720px;margin:0 auto 14px;text-align:center}
+.graf-perfil-head h3{font-family:'Montserrat',sans-serif;font-size:.95rem;font-weight:800;color:#1a2035;margin:0 0 4px}
+.graf-perfil-head p{font-size:.75rem;color:#8a90a0;margin:0;line-height:1.4}
 .graf-card{background:var(--blanco);border:1px solid var(--gray-mid);border-radius:12px;padding:18px;display:flex;flex-direction:column}
 .graf-card-title{font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:700;color:var(--negro);margin-bottom:4px;display:flex;align-items:center;gap:8px}
 .graf-card-sub{font-size:.68rem;color:var(--gray-text);margin-bottom:14px}
@@ -312,6 +319,7 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 @media(max-width:640px){
   .graf-grid-top{grid-template-columns:1fr}
   .graf-grid-bot{grid-template-columns:1fr}
+  .graf-grid-perfil{grid-template-columns:1fr}
   .graf-kpi-row{grid-template-columns:repeat(2,1fr)}
 }
 
@@ -853,6 +861,36 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
         <div class="graf-canvas-wrap" style="min-height:220px">
           <canvas id="chart-edades" width="400" height="220"></canvas>
         </div>
+      </div>
+
+    </div>
+
+    <!-- ===== PERFIL DEL PADRÓN (3 gráficas) ===== -->
+    <div class="graf-perfil-head">
+      <h3>👥 Perfil del padrón</h3>
+      <p>Composición de toda la comunidad — no solo los socios en adeudo. Se cuentan personas, no membresías.</p>
+    </div>
+    <div class="graf-grid-perfil">
+
+      <div class="graf-card">
+        <div class="graf-card-title">🧍 Socios por tipo de usuario</div>
+        <div class="graf-card-sub">Titulares, cónyuges, dependientes y demás categorías</div>
+        <div class="graf-canvas-wrap"><canvas id="chart-tipo-usuario"></canvas></div>
+        <div class="graf-legend" id="legend-tipo-usuario"></div>
+      </div>
+
+      <div class="graf-card">
+        <div class="graf-card-title">📅 Socios por antigüedad</div>
+        <div class="graf-card-sub">Años cumplidos en el Club según el sistema</div>
+        <div class="graf-canvas-wrap"><canvas id="chart-antiguedad"></canvas></div>
+        <div class="graf-legend" id="legend-antiguedad"></div>
+      </div>
+
+      <div class="graf-card">
+        <div class="graf-card-title">💳 Socios por concepto de último pago</div>
+        <div class="graf-card-sub">Cómo paga hoy cada socio — mensual, anual, domiciliado…</div>
+        <div class="graf-canvas-wrap"><canvas id="chart-concepto-pago"></canvas></div>
+        <div class="graf-legend" id="legend-concepto-pago"></div>
       </div>
 
     </div>
@@ -4147,8 +4185,137 @@ function renderPieEdades(){
   }));
   drawBarsEdades('chart-pie-edades', data, 'legend-pie-edades');
 }
+/* ===== PERFIL DEL PADRÓN — 3 gráficas (tipo de usuario, antigüedad, concepto de pago) =====
+   Los tres cortes se cuentan sobre lo que venga en los datos, sin listas fijas: si mañana
+   el Club da de alta un tipo de socio o un concepto de pago nuevo, aparece solo. */
+
+// Paleta rotativa para categorías dinámicas
+const PALETA_PERFIL = ['#1a3a6b','#3AAA35','#4a9fd4','#EF4B1F','#1a8a6e','#9b5de5',
+                       '#c8a84b','#f97316','#8ecae6','#4a5068','#991b1b','#7a8194'];
+
+// Socios reales del directorio: fuera las membresías de servicio del equipo de prueba
+function sociosPadron(){ return TODOS.filter(d => Number(d.m) < 990000); }
+
+// Barras horizontales genéricas. El canvas se mide contra el ancho real de su tarjeta,
+// así que la gráfica nunca se sale de la pantalla ni en escritorio ni en celular.
+function drawBarsPerfil(canvasId, data, legendId, padLBase){
+  const canvas=document.getElementById(canvasId); if(!canvas) return;
+  const wrap=canvas.parentElement;
+  const dispW=Math.max(260, Math.floor((wrap&&wrap.clientWidth)||canvas.clientWidth||420));
+  const filas=data.length||1;
+  const dispH=Math.max(150, filas*28+12);
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(dispW*dpr);
+  canvas.height=Math.round(dispH*dpr);
+  canvas.style.height=dispH+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=dispW, H=dispH;
+  ctx.clearRect(0,0,W,H);
+  const total=data.reduce((a,d)=>a+d.val,0);
+  if(!total){ ctx.fillStyle='#8a90a0'; ctx.font='12px sans-serif'; ctx.textAlign='center';
+              ctx.fillText('Sin datos',W/2,H/2); return; }
+  const max=Math.max.apply(null,data.map(d=>d.val))||1;
+  // La columna de etiquetas nunca se come más del 42% del ancho disponible
+  const padL=Math.min(padLBase||150, Math.round(W*0.42));
+  const padR=Math.min(66, Math.round(W*0.18)), padT=6, padB=6;
+  const bw=Math.max(20, W-padL-padR), step=(H-padT-padB)/filas, bh=Math.min(step-7,22);
+  ctx.textBaseline='middle';
+  data.forEach((d,i)=>{
+    const y=padT+step*i+step/2;
+    ctx.font='11px sans-serif'; ctx.fillStyle='#4a5068'; ctx.textAlign='right';
+    let lbl=d.label;
+    while(ctx.measureText(lbl).width > padL-10 && lbl.length>4) lbl=lbl.slice(0,-2)+'…';
+    ctx.fillText(lbl, padL-8, y);
+    const w=Math.max(2,(d.val/max)*bw);
+    ctx.fillStyle='#eef0f4'; ctx.fillRect(padL,y-bh/2,bw,bh);
+    ctx.fillStyle=d.color;  ctx.fillRect(padL,y-bh/2,w,bh);
+    const txt=d.val+'  ('+Math.round(d.val/total*100)+'%)';
+    ctx.font='bold 11px sans-serif'; ctx.fillStyle='#1a2035';
+    // Si la etiqueta del valor no cabe fuera de la barra, se pinta dentro en blanco
+    if(padL+w+7+ctx.measureText(txt).width <= W-2){
+      ctx.textAlign='left'; ctx.fillText(txt, padL+w+7, y);
+    } else {
+      ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.fillText(txt, padL+w-6, y);
+    }
+  });
+  const leg=document.getElementById(legendId);
+  if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">Total de socios: '+
+                        '<strong style="color:#1a2035;margin-left:4px">'+total+'</strong></div>';
+}
+
+// Agrupa por un campo y ordena de mayor a menor; los vacíos caen en la etiqueta que se indique
+function agruparPorCampo(lista, campo, etiquetaVacio){
+  const mapa={};
+  lista.forEach(d=>{
+    let v=(d[campo]==null?'':String(d[campo])).trim();
+    if(!v) v=etiquetaVacio;
+    mapa[v]=(mapa[v]||0)+1;
+  });
+  return Object.keys(mapa)
+    .map(k=>({label:k, val:mapa[k]}))
+    .sort((a,b)=>b.val-a.val)
+    .map((d,i)=>({...d, color:PALETA_PERFIL[i%PALETA_PERFIL.length]}));
+}
+
+function renderTipoUsuario(){
+  drawBarsPerfil('chart-tipo-usuario',
+    agruparPorCampo(sociosPadron(),'tu','Sin tipo'),
+    'legend-tipo-usuario', 160);
+}
+
+// Rangos del Club, más el tramo de menos de un año que su catálogo no contempla
+const RANGOS_ANTIGUEDAD=[
+  {lbl:'Menos de 1 año', min:0,  max:0.99, color:'#8ecae6'},
+  {lbl:'01 a 02 años',   min:1,  max:2,    color:'#4a9fd4'},
+  {lbl:'03 a 04 años',   min:3,  max:4,    color:'#1a8a6e'},
+  {lbl:'05 a 09 años',   min:5,  max:9,    color:'#3AAA35'},
+  {lbl:'10 a 14 años',   min:10, max:14,   color:'#c8a84b'},
+  {lbl:'15 a 19 años',   min:15, max:19,   color:'#EF4B1F'},
+  {lbl:'20 a 24 años',   min:20, max:24,   color:'#f97316'},
+  {lbl:'25 a 29 años',   min:25, max:29,   color:'#9b5de5'},
+  {lbl:'30 a 34 años',   min:30, max:34,   color:'#1a3a6b'},
+  {lbl:'35 a 39 años',   min:35, max:39,   color:'#4a5068'},
+  {lbl:'40 años o más',  min:40, max:999,  color:'#991b1b'}
+];
+
+function renderAntiguedad(){
+  const lista=sociosPadron();
+  const conDato=lista.filter(d=>d.perm!=null && d.perm!=='');
+  const data=RANGOS_ANTIGUEDAD.map(g=>({
+    label:g.lbl, color:g.color,
+    val:conDato.filter(d=>{ const p=Number(d.perm); return !isNaN(p) && p>=g.min && p<=g.max; }).length
+  }));
+  drawBarsPerfil('chart-antiguedad', data, 'legend-antiguedad', 130);
+  // Si la vista todavía no manda el campo, se avisa en vez de pintar una gráfica vacía y creíble
+  const leg=document.getElementById('legend-antiguedad');
+  if(leg && !conDato.length) leg.innerHTML='<div class="graf-legend-item" style="color:#EF4B1F">'+
+    'El directorio no está mandando los años de permanencia.</div>';
+}
+
+function renderConceptoPago(){
+  drawBarsPerfil('chart-concepto-pago',
+    agruparPorCampo(sociosPadron(),'cup','Sin concepto de pago'),
+    'legend-concepto-pago', 175);
+}
+
+// Al girar el celular o cambiar el tamaño de la ventana, las tres se vuelven a medir
+let perfilResizeT=null;
+window.addEventListener('resize', function(){
+  clearTimeout(perfilResizeT);
+  perfilResizeT=setTimeout(function(){
+    if(!graficasIniciadas) return;
+    const panel=document.getElementById('panel-graficas');
+    if(!panel || !panel.classList.contains('active')) return;
+    renderTipoUsuario(); renderAntiguedad(); renderConceptoPago();
+  }, 180);
+});
+
 function renderGraficas(){
   renderPieEdades();
+  renderTipoUsuario();
+  renderAntiguedad();
+  renderConceptoPago();
   const total = EN_ADEUDO.length;
   const s1 = EN_ADEUDO.filter(d=>d.sg==='s1');
   const s2 = EN_ADEUDO.filter(d=>d.sg==='s2');
