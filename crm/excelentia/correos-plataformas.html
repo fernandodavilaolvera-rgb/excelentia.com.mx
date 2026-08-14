@@ -339,14 +339,15 @@ function parseDetalle(dia){
     const puntos = (Array.isArray(p.puntos) ? p.puntos : []).map(function(pt){
       if(typeof pt === 'string'){
         _fallbackSeq++;
-        return { id: 'X-'+dia.id+'-'+_fallbackSeq, txt: pt, nivel:'verde', leido:false };
+        return { id: 'X-'+dia.id+'-'+_fallbackSeq, txt: pt, nivel:'verde', leido:false, fecha:'' };
       }
       _fallbackSeq++;
       return {
         id: pt.id || ('X-'+dia.id+'-'+_fallbackSeq),
         txt: pt.txt || pt.texto || '',
         nivel: nivelOk(pt.nivel),
-        leido: pt.leido === true
+        leido: pt.leido === true,
+        fecha: pt.fecha || ''
       };
     }).filter(function(pt){ return pt.txt; });
     puntos.sort(function(a,b){ return (ORDEN[a.nivel]||2) - (ORDEN[b.nivel]||2); });
@@ -360,7 +361,8 @@ function parseDetalle(dia){
       nivel: nivelOk(a.nivel),
       plataforma: a.plataforma || '',
       accion: a.accion || '',
-      leido: a.leido === true
+      leido: a.leido === true,
+      fecha: a.fecha || ''
     };
   }).filter(function(a){ return a.accion; });
   acciones.sort(function(a,b){ return (ORDEN[a.nivel]||2) - (ORDEN[b.nivel]||2); });
