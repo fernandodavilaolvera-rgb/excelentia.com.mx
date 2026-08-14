@@ -257,14 +257,14 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 </div>
 
 <script>
-const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxW6GMQ7nE4MQpsBmrgfutPlto-2YnUjIjgq-MMKc3cTu83pgnq2bMRSSi-q9i4_NmZhA/exec';
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbz39wtuqpRwY8XsBY7-vzIM7a6vx5m1AXrKomKimwPPBwj2UG3mClU-pPSYBtQNYqEDyg/exec';
 const INTERVALO_MS=5000,CIRC=352;
 
 const PERFILES=[
-  {nombre:'🧀 PUFF MODE',         color:'var(--c0)', frase:'Apenas estás entrando, pero todavía te falta agarrar la onda.'},
-  {nombre:'🌀 GETTING RETORCIDO', color:'var(--c1)', frase:'Ya cachas varias señales y empiezas a dominar el código.'},
-  {nombre:"🔥 FLAMIN' AURA",      color:'var(--c2)', frase:'Traes cultura, actitud y suficiente fuego para hacerte notar.'},
-  {nombre:'🦊 CHESTER APPROVED',  color:'var(--c3)', frase:'Estás peligrosamente cool. Chester no necesita saber nada más.'},
+  {nombre:'🧀 PUFF MODE',         key:'PUFF MODE',         color:'var(--c0)', frase:'Apenas estás entrando, pero todavía te falta agarrar la onda.'},
+  {nombre:'🌀 GETTING RETORCIDO', key:'GETTING RETORCIDO',  color:'var(--c1)', frase:'Ya cachas varias señales y empiezas a dominar el código.'},
+  {nombre:"🔥 FLAMIN' AURA",      key:"FLAMIN' AURA",       color:'var(--c2)', frase:'Traes cultura, actitud y suficiente fuego para hacerte notar.'},
+  {nombre:'🦊 CHESTER APPROVED',  key:'CHESTER APPROVED',   color:'var(--c3)', frase:'Estás peligrosamente cool. Chester no necesita saber nada más.'},
 ];
 
 function actualizarSenal(counts, total){
@@ -361,7 +361,7 @@ function actualizarUI(data){
 
 async function fetchDatos(){
   try{
-    const res=await fetch(`${APPS_SCRIPT_URL}?accion=leer_radar`,{cache:'no-store'});
+    const res=await fetch(`${APPS_SCRIPT_URL}?accion=leer_coolture`,{cache:'no-store'});
     actualizarUI(await res.json());
     document.getElementById('update-txt').textContent='';
   }catch(e){
