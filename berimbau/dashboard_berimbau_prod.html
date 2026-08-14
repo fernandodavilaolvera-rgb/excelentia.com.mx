@@ -536,6 +536,7 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
   .av-side-item{width:auto;white-space:nowrap;margin-bottom:3px}
 }
 .chip-bonif{display:inline-block;background:#fff4e6;color:#b35309;border:1px solid #ffd8a8;border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:800;margin-left:5px;white-space:nowrap;cursor:help}
+.chip-memb-baja{display:inline-block;background:#eef4fc;color:#1a3a6b;border:1px solid #c8d9f0;border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:800;margin-left:5px;white-space:nowrap;cursor:help}
 .chip-becado{display:inline-block;background:#eef4fc;color:#1a3a6b;border:1px solid #c8d9f0;border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:800;margin-left:5px;white-space:nowrap;cursor:help}
 #cob-bonif-bar{display:none;max-width:1100px;margin:0 auto 12px;background:#fff4e6;border:1px solid #ffd8a8;border-left:4px solid #EF4B1F;border-radius:10px;overflow:hidden}
 .bonif-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer}
@@ -865,19 +866,44 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 
     </div>
 
-    <!-- ===== PERFIL DEL PADRÓN (3 gráficas) ===== -->
+    <!-- ===== PERFIL DEL PADRÓN — 5 gráficas en dos bloques =====
+         14-ago-2026 (s48): el Club pidió ver antigüedad y concepto de pago POR MEMBRESÍA.
+         Se AGREGARON las dos, no se sustituyeron las de socio: los dos cortes contestan
+         preguntas distintas y las tres originales ya se le habían mostrado al Club. -->
     <div class="graf-perfil-head">
       <h3>👥 Perfil del padrón</h3>
-      <p>Composición de toda la comunidad — no solo los socios en adeudo. Se cuentan personas, no membresías.</p>
+      <p>Composición de toda la comunidad — no solo los socios en adeudo. Arriba, tipo de usuario y los dos cortes por membresía; abajo, esos mismos dos cortes contados persona por persona.</p>
     </div>
     <div class="graf-grid-perfil">
 
       <div class="graf-card">
         <div class="graf-card-title">🧍 Socios por tipo de usuario</div>
-        <div class="graf-card-sub">Titulares, cónyuges, dependientes y demás categorías</div>
+        <div class="graf-card-sub">Titulares, cónyuges, dependientes y demás categorías · se cuentan personas</div>
         <div class="graf-canvas-wrap"><canvas id="chart-tipo-usuario"></canvas></div>
         <div class="graf-legend" id="legend-tipo-usuario"></div>
       </div>
+
+      <div class="graf-card">
+        <div class="graf-card-title">🏠 Membresías por antigüedad</div>
+        <div class="graf-card-sub">Una sola cuenta por membresía, tomando la antigüedad de su cuota base</div>
+        <div class="graf-canvas-wrap"><canvas id="chart-antiguedad-memb"></canvas></div>
+        <div class="graf-legend" id="legend-antiguedad-memb"></div>
+      </div>
+
+      <div class="graf-card">
+        <div class="graf-card-title">🏠 Membresías por concepto de último pago</div>
+        <div class="graf-card-sub">Cómo paga cada membresía · quien no ha hecho su primer pago sale sin concepto</div>
+        <div class="graf-canvas-wrap"><canvas id="chart-concepto-memb"></canvas></div>
+        <div class="graf-legend" id="legend-concepto-memb"></div>
+      </div>
+
+    </div>
+
+    <div class="graf-perfil-head">
+      <h3>🧍 Los mismos dos cortes, contados por socio</h3>
+      <p>Aquí cada persona suma uno, así que los dependientes también cuentan; por eso los números son más altos que los de arriba.</p>
+    </div>
+    <div class="graf-grid-perfil">
 
       <div class="graf-card">
         <div class="graf-card-title">📅 Socios por antigüedad</div>
@@ -2435,6 +2461,21 @@ function esBonificable(d){
   return org>=ini;   // el adeudo nacio DENTRO de la baja
 }
 function listaBonificables(){ return (TODOS||[]).filter(esBonificable); }
+// 14-ago-2026 (s48) — LO PIDIO EL CLUB (Carlos Medina, a peticion de Cobranza): en la
+// lista de casos por revisar no se distingue si la baja temporal es de UN dependiente
+// o de TODA la membresia, y son dos situaciones distintas para quien cobra.
+// No hace falta pedirle dato nuevo al Club: se calcula con el padron ya cargado.
+// 🔑 Se compara contra estadoBaja() y no contra el campo sit, para que respete las
+// bajas programadas y las vencidas igual que el resto del Dashboard.
+function membresiaTodaEnBaja(m){
+  const fam=(TODOS||[]).filter(x=>x.m===m);
+  if(!fam.length) return false;
+  return fam.every(x=>estadoBaja(x)==='vigente');
+}
+function etiquetaMembBaja(d){
+  if(!d || !membresiaTodaEnBaja(d.m)) return '';
+  return '<span class="chip-memb-baja" title="Todos los integrantes de esta membresia tienen baja temporal vigente, no solo este dependiente.">Membresia en baja temporal</span>';
+}
 // 13-ago-2026 (s47) — TEXTO CORREGIDO. El Club aclaró que la bonificación de la baja
 // temporal NO es automática: se aplica solo si el socio paga su baja; mientras no la
 // pague, el cargo sale completo y es correcto. Antes esta pantalla afirmaba que "les
@@ -2458,7 +2499,7 @@ function renderBonifBar(){
   const membs=Array.from(new Set(arr.map(x=>x.m)));
   const filas=arr.map(x=>'<div class="bonif-row"><span class="bonif-m">#'+x.m+'</span>'
     +'<span class="bonif-n dep-link" onclick="abrirDetalleSocio('+x.m+','+x.id+')">'+esc(toTitleCase(x.n||''))+'</span>'
-    +'<span class="bonif-t">'+esc(x.tu||'')+'</span>'
+    +'<span class="bonif-t">'+esc(x.tu||'')+etiquetaMembBaja(x)+'</span>'
     +'<span class="bonif-d">'+x.dias+' '+(x.dias===1?'dia':'dias')+'</span></div>').join('');
   box.style.display='block';
   box.innerHTML='<div class="bonif-head" onclick="toggleBonifBar()">'
@@ -4210,6 +4251,11 @@ const PALETA_PERFIL = ['#1a3a6b','#3AAA35','#4a9fd4','#EF4B1F','#1a8a6e','#9b5de
 
 // Socios reales del directorio: fuera las membresías de servicio del equipo de prueba
 function sociosPadron(){ return TODOS.filter(d => Number(d.m) < 990000); }
+// 14-ago-2026 (s48) — UNIVERSO POR MEMBRESIA. Se toma la CABEZA de cada membresia
+// (es_cabeza de v_socios), que es el mismo criterio con el que Cobranza cuenta y con
+// el que el motor de avisos elige a quien escribirle: asi ningun numero de una pantalla
+// contradice al de otra. Medido el 13-ago: 2,781 personas contra 1,105 membresias.
+function membresiasPadron(){ return sociosPadron().filter(d => d.es_cabeza); }
 
 // Barras horizontales genéricas. El canvas se mide contra el ancho real de su tarjeta,
 // así que la gráfica nunca se sale de la pantalla ni en escritorio ni en celular.
@@ -4294,24 +4340,35 @@ const RANGOS_ANTIGUEDAD=[
   {lbl:'40 años o más',  min:40, max:999,  color:'#991b1b'}
 ];
 
-function renderAntiguedad(){
-  const lista=sociosPadron();
+// 14-ago-2026 (s48) — se parametrizo la lista y los ids para que el corte por socio y
+// el corte por membresia usen EXACTAMENTE el mismo calculo. Duplicar la funcion habria
+// dejado dos rangos que en tres meses dirian cosas distintas.
+function renderAntiguedadEn(lista, canvasId, legendId){
   const conDato=lista.filter(d=>d.perm!=null && d.perm!=='');
   const data=RANGOS_ANTIGUEDAD.map(g=>({
     label:g.lbl, color:g.color,
     val:conDato.filter(d=>{ const p=Number(d.perm); return !isNaN(p) && p>=g.min && p<=g.max; }).length
   }));
-  drawBarsPerfil('chart-antiguedad', data, 'legend-antiguedad', 130);
+  drawBarsPerfil(canvasId, data, legendId, 130);
   // Si la vista todavía no manda el campo, se avisa en vez de pintar una gráfica vacía y creíble
-  const leg=document.getElementById('legend-antiguedad');
+  const leg=document.getElementById(legendId);
   if(leg && !conDato.length) leg.innerHTML='<div class="graf-legend-item" style="color:#EF4B1F">'+
     'El directorio no está mandando los años de permanencia.</div>';
 }
+
+function renderAntiguedad(){ renderAntiguedadEn(sociosPadron(),'chart-antiguedad','legend-antiguedad'); }
+function renderAntiguedadMemb(){ renderAntiguedadEn(membresiasPadron(),'chart-antiguedad-memb','legend-antiguedad-memb'); }
 
 function renderConceptoPago(){
   drawBarsPerfil('chart-concepto-pago',
     agruparPorCampo(sociosPadron(),'cup','Sin concepto de pago'),
     'legend-concepto-pago', 175);
+}
+
+function renderConceptoMemb(){
+  drawBarsPerfil('chart-concepto-memb',
+    agruparPorCampo(membresiasPadron(),'cup','Sin concepto de pago'),
+    'legend-concepto-memb', 175);
 }
 
 // Al girar el celular o cambiar el tamaño de la ventana, las tres se vuelven a medir
@@ -4322,13 +4379,15 @@ window.addEventListener('resize', function(){
     if(!graficasIniciadas) return;
     const panel=document.getElementById('panel-graficas');
     if(!panel || !panel.classList.contains('active')) return;
-    renderTipoUsuario(); renderAntiguedad(); renderConceptoPago();
+    renderTipoUsuario(); renderAntiguedadMemb(); renderConceptoMemb(); renderAntiguedad(); renderConceptoPago();
   }, 180);
 });
 
 function renderGraficas(){
   renderPieEdades();
   renderTipoUsuario();
+  renderAntiguedadMemb();
+  renderConceptoMemb();
   renderAntiguedad();
   renderConceptoPago();
   const total = EN_ADEUDO.length;
@@ -7031,7 +7090,7 @@ function calcNotificaciones(){
       tit:bonif.length+' dependiente'+(bonif.length>1?'s':'')+' en baja temporal por revisar',
       txt:'Están en baja temporal vigente y su adeudo cae dentro del periodo de baja. Si pagaron su baja temporal les corresponde bonificación y el cargo habría que corregirlo; si no la pagaron, el cargo es correcto y sí deben. Son '+membsBonif.length+' membresía'+(membsBonif.length>1?'s':'')+'; el dato del pago de la baja no llega al Dashboard, se revisa en el Sistema.',
       items:bonif.map(d=>({m:d.m,id:d.id,n:d.n,
-        extra:(d.tu||'')+' · '+d.dias+' '+(d.dias===1?'día':'días')+' · baja hasta '+fmtFnac(d.ffin_baja)}))});
+        extra:(d.tu||'')+(membresiaTodaEnBaja(d.m)?' · membresía completa en baja temporal':'')+' · '+d.dias+' '+(d.dias===1?'día':'días')+' · baja hasta '+fmtFnac(d.ffin_baja)}))});
   }
 
   const becados = reales.filter(d=>d.tm==='Sistemas' && d.es_cabeza);
