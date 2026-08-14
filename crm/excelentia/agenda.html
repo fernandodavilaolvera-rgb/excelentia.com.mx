@@ -60,6 +60,16 @@ a.btn{text-decoration:none}
 .ev-title{font-size:.78rem;font-weight:600;color:#1a2035;line-height:1.25;word-break:break-word}
 .ev-loc{font-size:.68rem;color:#8a90a0;margin-top:.15rem}
 .ev-guests{font-size:.66rem;color:#7c3aed;margin-top:.15rem;font-weight:600}
+.ev-meet{display:inline-flex;align-items:center;gap:.2rem;font-size:.66rem;font-weight:700;color:#fff;background:#059669;border-radius:20px;padding:.1rem .45rem;margin-top:.25rem;text-decoration:none}
+.ev-meet:hover{background:#047857}
+.meet-box{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #059669;border-radius:8px;padding:.55rem .7rem;margin-bottom:.85rem}
+.meet-info{min-width:0;flex:1}
+.meet-nom{font-size:.76rem;font-weight:800;color:#065f46}
+.meet-url{font-size:.7rem;color:#4a5068;word-break:break-all}
+.meet-btns{display:flex;gap:.35rem;flex-shrink:0}
+.meet-btn{font-family:'Manrope',sans-serif;font-size:.74rem;font-weight:700;padding:.3rem .6rem;border-radius:7px;border:1px solid #bbf7d0;background:#fff;color:#065f46;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem}
+.meet-btn:hover{background:#dcfce7}
+.meet-btn.solid{background:#059669;color:#fff;border-color:#059669}
 
 /* ESTADO CONECTAR / VACÍO */
 .connect-card{background:#fff;border:1px solid #dde1e9;border-radius:14px;padding:2.5rem 1.5rem;text-align:center;max-width:440px;margin:2rem auto}
@@ -158,6 +168,16 @@ textarea{resize:vertical;min-height:70px}
       <button class="modal-close" onclick="cerrarModal()">✕</button>
     </div>
     <div class="modal-body">
+      <div class="meet-box" id="meet-box" style="display:none">
+        <div class="meet-info">
+          <div class="meet-nom" id="meet-nom">📹 Videollamada</div>
+          <div class="meet-url" id="meet-url"></div>
+        </div>
+        <div class="meet-btns">
+          <button class="meet-btn" onclick="copiarReunion()">📋 Copiar</button>
+          <a class="meet-btn solid" id="meet-abrir" href="#" target="_blank" rel="noopener">Entrar ↗</a>
+        </div>
+      </div>
       <div class="form-grid">
         <div class="form-group full"><label>Título *</label><input type="text" id="e-titulo" placeholder="Ej: Call con cliente"></div>
         <div class="form-group full">
@@ -482,6 +502,39 @@ async function cargarEventos(force){
   }
 }
 
+// Busca la liga de videollamada donde sea que venga:
+// Meet nativo, conferenceData (Meet/Zoom/Teams), o pegada a mano en ubicacion o descripcion.
+function ligaReunion(ev){
+  if(ev.hangoutLink) return ev.hangoutLink;
+  const cd = ev.conferenceData || {};
+  const eps = Array.isArray(cd.entryPoints) ? cd.entryPoints : [];
+  const video = eps.find(function(p){ return p && p.entryPointType === 'video' && p.uri; });
+  if(video) return video.uri;
+  const otro = eps.find(function(p){ return p && p.uri && /^https?:/i.test(p.uri); });
+  if(otro) return otro.uri;
+  const suelta = buscarURL(ev.location) || buscarURL(ev.description);
+  return suelta || '';
+}
+
+// Saca la primera liga de videollamada que aparezca en un texto libre
+function buscarURL(txt){
+  if(!txt) return '';
+  const m = String(txt).match(/https?:\/\/[^\s<>"')]+/gi);
+  if(!m) return '';
+  const buenas = /meet\.google|zoom\.us|teams\.(live|microsoft)|whereby|webex|meet\.jit/i;
+  const fav = m.find(function(u){ return buenas.test(u); });
+  return fav || '';
+}
+
+function servicioReunion(url){
+  const u = (url||'').toLowerCase();
+  if(u.includes('meet.google')) return { ic:'📹', nom:'Google Meet' };
+  if(u.includes('zoom.us')) return { ic:'📹', nom:'Zoom' };
+  if(u.includes('teams.')) return { ic:'📹', nom:'Teams' };
+  if(u.includes('webex')) return { ic:'📹', nom:'Webex' };
+  return { ic:'📹', nom:'Videollamada' };
+}
+
 function normalizar(ev){
   if(!ev || ev.status === 'cancelled') return null;
   const start = ev.start || {};
@@ -492,6 +545,7 @@ function normalizar(ev){
     titulo: ev.summary || '(sin título)',
     descripcion: ev.description || '',
     ubicacion: ev.location || '',
+    reunion: ligaReunion(ev),
     allDay,
     inicio: start.dateTime || start.date,
     fin: end.dateTime || end.date,
@@ -538,6 +592,7 @@ function chipEvento(ev){
     <div class="ev-title">${esc(ev.titulo)}</div>
     ${ev.ubicacion?`<div class="ev-loc">📍 ${esc(ev.ubicacion.length>22?ev.ubicacion.slice(0,22)+'…':ev.ubicacion)}</div>`:''}
     ${nInv?`<div class="ev-guests">👥 ${nInv} invitado${nInv>1?'s':''}</div>`:''}
+    ${ev.reunion?`<a class="ev-meet" href="${escAttr(ev.reunion)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Entrar a la videollamada">${servicioReunion(ev.reunion).ic} Entrar</a>`:''}
   </div>`;
 }
 
@@ -560,6 +615,7 @@ function abrirNuevo(){
   document.getElementById('e-hini').value = '09:00';
   document.getElementById('e-hfin').value = '10:00';
   document.getElementById('e-ubic').value = TEAMS_URL;
+  pintarReunion('');
   document.getElementById('e-invitados').value = '';
   document.getElementById('e-desc').value = '';
   document.getElementById('e-allday').checked = false;
@@ -583,11 +639,44 @@ function abrirEditar(ev){
     document.getElementById('e-fecha-fin').value = '';
   }
   document.getElementById('e-ubic').value = ev.ubicacion || '';
+  pintarReunion(ev.reunion || '');
   document.getElementById('e-invitados').value = ev.invitados || '';
   document.getElementById('e-desc').value = ev.descripcion || '';
   toggleAllDay();
   document.getElementById('modal-evento').classList.add('open');
 }
+// Bloque verde con la liga de la videollamada del evento
+let reunionActual = '';
+function pintarReunion(url){
+  reunionActual = url || '';
+  const caja = document.getElementById('meet-box');
+  if(!caja) return;
+  if(!reunionActual){ caja.style.display = 'none'; return; }
+  const s = servicioReunion(reunionActual);
+  document.getElementById('meet-nom').textContent = s.ic + ' ' + s.nom;
+  document.getElementById('meet-url').textContent = reunionActual;
+  document.getElementById('meet-abrir').href = reunionActual;
+  caja.style.display = 'flex';
+}
+
+function copiarReunion(){
+  if(!reunionActual) return;
+  const ok = function(){ toast('Liga copiada'); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(reunionActual).then(ok).catch(function(){ copiarADedo(reunionActual, ok); });
+  } else {
+    copiarADedo(reunionActual, ok);
+  }
+}
+
+function copiarADedo(txt, ok){
+  const ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); ok(); }catch(e){ toast('No se pudo copiar','err'); }
+  document.body.removeChild(ta);
+}
+
 function toggleAllDay(){
   const allday = document.getElementById('e-allday').checked;
   document.querySelectorAll('.hora-field').forEach(el => el.style.display = allday ? 'none':'flex');
@@ -668,6 +757,7 @@ async function borrarEvento(){
 // HELPERS
 // ════════════════════════════════════════════
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function toast(msg, tipo='ok'){
   let t = document.getElementById('toast');
   if(!t){ t = document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
