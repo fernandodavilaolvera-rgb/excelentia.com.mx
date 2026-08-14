@@ -4235,10 +4235,17 @@ const RANGOS_EDAD=[
   {lbl:'Agregado (50-64)',   min:50, max:64,  color:'#9b5de5'},
   {lbl:'Ag. Mayor (65-100)', min:65, max:100, color:'#4a5068'}
 ];
-function drawBarsEdades(canvasId, data, legendId){
+function drawBarsEdades(canvasId, data, legendId, opts){
   // v57 — barras horizontales, una por rango de edad, con su valor y porcentaje
+  // 14-ago-2026 (s48) — se le monta el mismo drill down de las otras cinco: resaltado,
+  // globo al pasar el mouse y panel con exportacion al hacer clic.
   const canvas=document.getElementById(canvasId); if(!canvas) return;
+  if(opts!==undefined){ canvas._gdOpts=opts||{}; canvas._gdHi=-1; }
+  canvas._gdData=data; canvas._gdLegend=legendId; canvas._gdDraw='edades';
+  const _hi=(canvas._gdHi==null?-1:canvas._gdHi), _geo=[];
+  canvas._gdGeo=_geo;
   const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height;
+  canvas._gdW=W; canvas._gdH=H;
   ctx.clearRect(0,0,W,H);
   const total=data.reduce((a,d)=>a+d.val,0);
   if(!total){ ctx.fillStyle='#8a90a0'; ctx.font='12px sans-serif'; ctx.textAlign='center'; ctx.fillText('Sin datos',W/2,H/2); return; }
@@ -4251,13 +4258,18 @@ function drawBarsEdades(canvasId, data, legendId){
     ctx.font='11px sans-serif'; ctx.fillStyle='#4a5068'; ctx.textAlign='right';
     ctx.fillText(d.label, padL-8, y);
     const w=Math.max(2,(d.val/max)*bw);
-    ctx.fillStyle='#eef0f4'; ctx.fillRect(padL,y-bh/2,bw,bh);
+    ctx.fillStyle=(i===_hi?'#e2e6ee':'#eef0f4'); ctx.fillRect(padL,y-bh/2,bw,bh);
     ctx.fillStyle=d.color;  ctx.fillRect(padL,y-bh/2,w,bh);
+    if(i===_hi){ ctx.strokeStyle='#1a2035'; ctx.lineWidth=1.5;
+                 ctx.strokeRect(padL+0.75,y-bh/2+0.75,bw-1.5,bh-1.5); }
+    _geo.push({i:i, y0:padT+step*i, y1:padT+step*(i+1), x0:padL, x1:padL+bw});
     ctx.font='bold 11px sans-serif'; ctx.fillStyle='#1a2035'; ctx.textAlign='left';
     ctx.fillText(d.val+'  ('+Math.round(d.val/total*100)+'%)', padL+w+7, y);
   });
+  gdBind(canvas);
   const leg=document.getElementById(legendId);
-  if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">Total de socios activos: <strong style="color:#1a2035;margin-left:4px">'+total+'</strong></div>';
+  if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">Total de socios activos: <strong style="color:#1a2035;margin-left:4px">'+total+'</strong>'+
+                        '<span style="margin-left:8px;color:#4a9fd4;font-weight:700">· clic en una barra para ver el listado</span></div>';
 }
 function renderPieEdades(){
   // v56 — solo socios Activos, contando personas (no membresias)
@@ -4267,11 +4279,14 @@ function renderPieEdades(){
   // graficas del perfil del padron, que si los excluian. Mismo criterio en todos lados:
   // toda cifra que se le muestre al Club filtra las membresias de servicio.
   const activos=TODOS.filter(d=>d.sit==='Activo' && Number(d.m)<990000);
-  const data=RANGOS_EDAD.map(g=>({
-    label:g.lbl, color:g.color,
-    val:activos.filter(d=>{ const e=(d.ed!=null?d.ed:d.edad); return e!=null && e>=g.min && e<=g.max; }).length
-  }));
-  drawBarsEdades('chart-pie-edades', data, 'legend-pie-edades');
+  const data=RANGOS_EDAD.map(g=>{
+    const items=activos.filter(d=>{ const e=(d.ed!=null?d.ed:d.edad); return e!=null && e>=g.min && e<=g.max; });
+    return {label:g.lbl, color:g.color, val:items.length, items:items};
+  });
+  drawBarsEdades('chart-pie-edades', data, 'legend-pie-edades', {
+    titulo:'Socios activos por rango de edad', datoLabel:'Edad',
+    datoFn: d => { const e=(d.ed!=null?d.ed:d.edad); return e==null?'—':e+(Number(e)===1?' año':' años'); }
+  });
 }
 /* ===== PERFIL DEL PADRÓN — 3 gráficas (tipo de usuario, antigüedad, concepto de pago) =====
    Los tres cortes se cuentan sobre lo que venga en los datos, sin listas fijas: si mañana
@@ -4307,7 +4322,12 @@ function gdTipEl(){
 function gdBarEn(canvas, ev){
   const geo=canvas._gdGeo; if(!geo || !geo.length) return -1;
   const r=canvas.getBoundingClientRect();
-  const x=ev.clientX-r.left, y=ev.clientY-r.top;
+  // La geometria se guarda en el espacio en que se DIBUJO, que no siempre es el mismo
+  // en que se MUESTRA: la grafica de edades se pinta en 420x250 y el CSS la estira al
+  // ancho de su tarjeta. Sin esta conversion, el mouse apuntaria a la barra equivocada.
+  const sx=(canvas._gdW&&r.width)?canvas._gdW/r.width:1;
+  const sy=(canvas._gdH&&r.height)?canvas._gdH/r.height:1;
+  const x=(ev.clientX-r.left)*sx, y=(ev.clientY-r.top)*sy;
   for(let k=0;k<geo.length;k++){
     const g=geo[k];
     if(y>=g.y0 && y<=g.y1 && x>=0 && x<=g.x1+70) return g.i;
@@ -4317,7 +4337,8 @@ function gdBarEn(canvas, ev){
 function gdRepintar(canvas, hi){
   if(canvas._gdHi===hi) return;
   canvas._gdHi=hi;
-  drawBarsPerfil(canvas.id, canvas._gdData, canvas._gdLegend, canvas._gdPadL);
+  if(canvas._gdDraw==='edades') drawBarsEdades(canvas.id, canvas._gdData, canvas._gdLegend);
+  else drawBarsPerfil(canvas.id, canvas._gdData, canvas._gdLegend, canvas._gdPadL);
 }
 function gdBind(canvas){
   if(canvas._gdBound) return;            // los handlers se cuelgan una sola vez
@@ -4469,6 +4490,7 @@ function drawBarsPerfil(canvasId, data, legendId, padLBase, opts){
   canvas._gdData=data; canvas._gdLegend=legendId; canvas._gdPadL=padLBase;
   const _hi=(canvas._gdHi==null?-1:canvas._gdHi), _geo=[];
   canvas._gdGeo=_geo;   // se enlaza desde ya: si la grafica sale vacia, no queda geometria vieja viva
+  canvas._gdDraw='perfil';
   const wrap=canvas.parentElement;
   const dispW=Math.max(260, Math.floor((wrap&&wrap.clientWidth)||canvas.clientWidth||420));
   const filas=data.length||1;
