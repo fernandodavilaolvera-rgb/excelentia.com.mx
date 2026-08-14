@@ -275,6 +275,38 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
 .graf-grid-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
 .graf-grid-bot{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 .graf-grid-perfil{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;margin-bottom:20px}
+/* 14-ago-2026 (s48) — DRILL DOWN DE LAS GRAFICAS DEL PERFIL */
+.graf-grid-perfil canvas{cursor:default}
+#graf-tip{position:fixed;z-index:10050;pointer-events:none;display:none;max-width:260px;background:#1a2035;color:#fff;border-radius:8px;padding:8px 11px;font-family:'Manrope',sans-serif;font-size:.72rem;line-height:1.35;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#graf-tip .gt-lbl{font-weight:800;display:block;margin-bottom:2px}
+#graf-tip .gt-hint{display:block;margin-top:4px;color:#8ecae6;font-size:.66rem;font-weight:700}
+.gd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10040;display:flex;align-items:center;justify-content:center;padding:16px}
+.gd-box{background:#fff;border-radius:14px;width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.gd-head{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;color:#fff;padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.gd-head h4{font-family:'Manrope',sans-serif;font-size:.9rem;font-weight:800;margin:0 0 3px}
+.gd-head p{font-size:.7rem;margin:0;color:#c8d9f0}
+.gd-x{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:1rem;line-height:1;flex-shrink:0}
+.gd-x:hover{background:rgba(255,255,255,.28)}
+.gd-tools{padding:10px 18px;border-bottom:1px solid #dde1e9;display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#f5f6f8}
+.gd-search{flex:1;min-width:180px;padding:7px 11px;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.75rem;background:#fff}
+.gd-btn{padding:7px 14px;background:#3AAA35;color:#fff;border:none;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.gd-btn:hover{background:#2d8a28}
+.gd-body{overflow:auto;padding:0 18px 14px}
+.gd-table{width:100%;border-collapse:collapse;font-size:.73rem}
+.gd-table thead th{position:sticky;top:0;background:#dce8f7;color:#1a2035;font-weight:800;text-align:left;padding:8px 8px;white-space:nowrap;cursor:pointer;border-bottom:1px solid #c8d9f0;z-index:1}
+.gd-table thead th:hover{background:#c8d9f0}
+.gd-table td{padding:7px 8px;border-bottom:1px solid #eef0f4;color:#4a5068;vertical-align:top}
+.gd-table tbody tr:hover{background:#e8f0fb}
+.gd-m{font-weight:800;color:#1a3a6b;white-space:nowrap}
+.gd-n{color:#1a3a6b;font-weight:700;cursor:pointer;text-decoration:underline dotted}
+.gd-mut{color:#8a90a0}
+.gd-foot{padding:9px 18px;border-top:1px solid #dde1e9;background:#f5f6f8;font-size:.68rem;color:#8a90a0}
+@media (max-width:600px){
+  .gd-box{max-width:100%;max-height:92vh}
+  .gd-table{font-size:.68rem}
+  .gd-table td,.gd-table thead th{padding:6px 5px}
+}
+@media print{ #graf-tip,.gd-overlay{display:none !important} }
 .graf-grid-perfil .graf-card{min-width:0;overflow:hidden}
 .graf-grid-perfil .graf-canvas-wrap{width:100%;display:block}
 .graf-grid-perfil canvas{display:block;width:100%;max-width:100%}
@@ -4257,10 +4289,186 @@ function sociosPadron(){ return TODOS.filter(d => Number(d.m) < 990000); }
 // contradice al de otra. Medido el 13-ago: 2,781 personas contra 1,105 membresias.
 function membresiasPadron(){ return sociosPadron().filter(d => d.es_cabeza); }
 
+
+/* ===== DRILL DOWN DE LAS GRAFICAS DEL PERFIL — 14-ago-2026 (s48) =====
+   Lo pidio Fernando: poder ver QUIENES estan detras de una barra y llevarselos a Excel.
+   Al pasar el mouse se resalta la barra y sale un globo con el conteo y el porcentaje;
+   el listado NO va en el globo a proposito: el grupo mas grande trae ~196 membresias y un
+   listado colgado del cursor se cierra al primer movimiento, no se puede leer ni copiar.
+   El listado vive en un panel que se abre con clic, con buscador, orden y exportacion.
+   🔑 El panel NO recalcula nada: recibe los mismos registros que ya conto la grafica, asi
+   que jamas puede decir un numero distinto al de la barra. */
+
+function gdTipEl(){
+  let t=document.getElementById('graf-tip');
+  if(!t){ t=document.createElement('div'); t.id='graf-tip'; document.body.appendChild(t); }
+  return t;
+}
+function gdBarEn(canvas, ev){
+  const geo=canvas._gdGeo; if(!geo || !geo.length) return -1;
+  const r=canvas.getBoundingClientRect();
+  const x=ev.clientX-r.left, y=ev.clientY-r.top;
+  for(let k=0;k<geo.length;k++){
+    const g=geo[k];
+    if(y>=g.y0 && y<=g.y1 && x>=0 && x<=g.x1+70) return g.i;
+  }
+  return -1;
+}
+function gdRepintar(canvas, hi){
+  if(canvas._gdHi===hi) return;
+  canvas._gdHi=hi;
+  drawBarsPerfil(canvas.id, canvas._gdData, canvas._gdLegend, canvas._gdPadL);
+}
+function gdBind(canvas){
+  if(canvas._gdBound) return;            // los handlers se cuelgan una sola vez
+  canvas._gdBound=true;
+  canvas.addEventListener('mousemove', function(ev){
+    const i=gdBarEn(canvas,ev);
+    const d=(i>=0 && canvas._gdData)?canvas._gdData[i]:null;
+    canvas.style.cursor = d ? 'pointer' : 'default';
+    gdRepintar(canvas,i);
+    const t=gdTipEl();
+    if(!d){ t.style.display='none'; return; }
+    const tot=canvas._gdData.reduce((a,x)=>a+x.val,0)||1;
+    const uni=(canvas._gdOpts&&/Membres/i.test(canvas._gdOpts.titulo||''))?'membresía':'socio';
+    t.innerHTML='<span class="gt-lbl">'+esc(d.label)+'</span>'+
+      d.val+' '+uni+(d.val===1?'':'s')+' · '+Math.round(d.val/tot*100)+'% del total'+
+      '<span class="gt-hint">clic para ver el listado</span>';
+    t.style.display='block';
+    const w=t.offsetWidth, h=t.offsetHeight;
+    let L=ev.clientX+14, T=ev.clientY-h-10;
+    if(L+w>window.innerWidth-8) L=ev.clientX-w-14;
+    if(T<8) T=ev.clientY+16;
+    t.style.left=L+'px'; t.style.top=T+'px';
+  });
+  canvas.addEventListener('mouseleave', function(){
+    gdTipEl().style.display='none';
+    canvas.style.cursor='default';
+    gdRepintar(canvas,-1);
+  });
+  canvas.addEventListener('click', function(ev){
+    const i=gdBarEn(canvas,ev); if(i<0) return;
+    gdTipEl().style.display='none';
+    gdAbrir(canvas._gdData[i], canvas._gdOpts||{});
+  });
+}
+
+/* ---- Panel del listado ---- */
+let GD_STATE=null;
+function gdAbrir(grupo, opts){
+  if(!grupo || !grupo.items) return;
+  GD_STATE={items:grupo.items.slice(), label:grupo.label, opts:opts, q:'', ord:'n', dir:1};
+  let ov=document.getElementById('gd-overlay');
+  if(ov) ov.remove();
+  ov=document.createElement('div');
+  ov.id='gd-overlay'; ov.className='gd-overlay no-print';
+  ov.onclick=function(e){ if(e.target===ov) gdCerrar(); };
+  const unidad=/Membres/i.test(opts.titulo||'')?'membresías':'socios';
+  ov.innerHTML=
+    '<div class="gd-box">'
+    + '<div class="gd-head"><div>'
+    +   '<h4>'+esc(grupo.label)+'</h4>'
+    +   '<p>'+esc(opts.titulo||'')+' · '+grupo.items.length+' '+unidad+'</p>'
+    + '</div><button class="gd-x" onclick="gdCerrar()" title="Cerrar">&#10005;</button></div>'
+    + '<div class="gd-tools">'
+    +   '<input class="gd-search" id="gd-q" placeholder="Buscar por nombre, membresía o correo…" oninput="gdFiltrar(this.value)">'
+    +   '<button class="gd-btn" onclick="gdExportar()">&#8681; Exportar a Excel</button>'
+    + '</div>'
+    + '<div class="gd-body"><table class="gd-table"><thead><tr>'
+    +   '<th onclick="gdOrdenar(\'m\')">Membresía</th>'
+    +   '<th onclick="gdOrdenar(\'n\')">Nombre</th>'
+    +   '<th onclick="gdOrdenar(\'tu\')">Tipo</th>'
+    +   '<th onclick="gdOrdenar(\'dato\')">'+esc(opts.datoLabel||'Dato')+'</th>'
+    +   '<th>Correo</th><th>Teléfono</th>'
+    + '</tr></thead><tbody id="gd-tbody"></tbody></table></div>'
+    + '<div class="gd-foot" id="gd-foot"></div>'
+    + '</div>';
+  document.body.appendChild(ov);
+  gdPintar();
+  document.addEventListener('keydown', gdEsc);
+}
+function gdEsc(e){ if(e.key==='Escape') gdCerrar(); }
+function gdCerrar(){
+  const ov=document.getElementById('gd-overlay'); if(ov) ov.remove();
+  document.removeEventListener('keydown', gdEsc);
+  GD_STATE=null;
+}
+function gdDato(d){
+  const f=GD_STATE&&GD_STATE.opts&&GD_STATE.opts.datoFn;
+  try{ return f?String(f(d)||'—'):'—'; }catch(e){ return '—'; }
+}
+function gdFiltradas(){
+  if(!GD_STATE) return [];
+  const q=norm(GD_STATE.q||'');
+  let arr=GD_STATE.items.filter(d=>!q||norm(d.n).includes(q)||String(d.m).includes(q)||norm(d.cor).includes(q));
+  const k=GD_STATE.ord, dir=GD_STATE.dir;
+  arr.sort(function(a,b){
+    let va,vb;
+    if(k==='m'){ va=Number(a.m)||0; vb=Number(b.m)||0; }
+    else if(k==='dato'){ va=norm(gdDato(a)); vb=norm(gdDato(b)); }
+    else if(k==='tu'){ va=norm(a.tu); vb=norm(b.tu); }
+    else { va=norm(a.n); vb=norm(b.n); }
+    return va<vb?-dir:(va>vb?dir:0);
+  });
+  return arr;
+}
+function gdPintar(){
+  const tb=document.getElementById('gd-tbody'); if(!tb) return;
+  const arr=gdFiltradas();
+  tb.innerHTML = arr.length ? arr.map(function(d){
+    const cor=d.cor?esc(d.cor):'<span class="gd-mut">sin correo</span>';
+    const tel=d.tel?esc(d.tel):'<span class="gd-mut">sin teléfono</span>';
+    return '<tr>'
+      + '<td class="gd-m">#'+d.m+'</td>'
+      + '<td><span class="gd-n" onclick="gdCerrar();abrirDetalleSocio('+d.m+','+d.id+')">'+esc(toTitleCase(d.n||''))+'</span></td>'
+      + '<td>'+esc(d.tu||'—')+'</td>'
+      + '<td>'+esc(gdDato(d))+'</td>'
+      + '<td>'+cor+'</td>'
+      + '<td>'+tel+'</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="gd-mut" style="padding:16px;text-align:center">Nadie coincide con esa búsqueda.</td></tr>';
+  const f=document.getElementById('gd-foot');
+  if(f) f.innerHTML='Mostrando <strong>'+arr.length+'</strong> de '+GD_STATE.items.length
+    +' · clic en el nombre para abrir su detalle · clic en un encabezado para ordenar';
+}
+function gdFiltrar(v){ if(!GD_STATE) return; GD_STATE.q=v; gdPintar(); }
+function gdOrdenar(k){
+  if(!GD_STATE) return;
+  if(GD_STATE.ord===k) GD_STATE.dir=-GD_STATE.dir; else { GD_STATE.ord=k; GD_STATE.dir=1; }
+  gdPintar();
+}
+/* Exportacion. Va con BOM y punto y coma porque el Excel en español abre asi el CSV
+   en columnas; con coma mete todo en una sola celda. Incluye correo y telefono por
+   indicacion de Fernando: el archivo sale con datos de contacto, hay que tratarlo como tal. */
+function gdExportar(){
+  if(!GD_STATE) return;
+  const arr=gdFiltradas();
+  const esc2=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const cab=['Membresia','Nombre','Tipo de usuario',(GD_STATE.opts.datoLabel||'Dato'),'Situacion','Correo','Telefono'];
+  const filas=arr.map(d=>[d.m, toTitleCase(d.n||''), d.tu||'', gdDato(d), d.sit||'', d.cor||'', d.tel||''].map(esc2).join(';'));
+  const csv='\ufeff'+cab.map(esc2).join(';')+'\r\n'+filas.join('\r\n');
+  const slug=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                 .replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'').toLowerCase().slice(0,40);
+  const hoy=new Date(), f=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getDate()).padStart(2,'0');
+  const nom='berimbau_'+slug(GD_STATE.opts.titulo)+'_'+slug(GD_STATE.label)+'_'+f+'.csv';
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=nom;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+
 // Barras horizontales genéricas. El canvas se mide contra el ancho real de su tarjeta,
 // así que la gráfica nunca se sale de la pantalla ni en escritorio ni en celular.
-function drawBarsPerfil(canvasId, data, legendId, padLBase){
+function drawBarsPerfil(canvasId, data, legendId, padLBase, opts){
   const canvas=document.getElementById(canvasId); if(!canvas) return;
+  // 14-ago-2026 (s48) — se guarda todo lo necesario para repintar con una barra resaltada
+  // sin recalcular los grupos; el redibujo del hover ocurre muchas veces por segundo.
+  // Un repintado por hover llega SIN opts y conserva la barra resaltada; un render
+  // completo (carga o giro de pantalla) si trae opts y limpia el resaltado viejo.
+  if(opts!==undefined){ canvas._gdOpts=opts||{}; canvas._gdHi=-1; }
+  canvas._gdData=data; canvas._gdLegend=legendId; canvas._gdPadL=padLBase;
+  const _hi=(canvas._gdHi==null?-1:canvas._gdHi), _geo=[];
+  canvas._gdGeo=_geo;   // se enlaza desde ya: si la grafica sale vacia, no queda geometria vieja viva
   const wrap=canvas.parentElement;
   const dispW=Math.max(260, Math.floor((wrap&&wrap.clientWidth)||canvas.clientWidth||420));
   const filas=data.length||1;
@@ -4289,8 +4497,13 @@ function drawBarsPerfil(canvasId, data, legendId, padLBase){
     while(ctx.measureText(lbl).width > padL-10 && lbl.length>4) lbl=lbl.slice(0,-2)+'…';
     ctx.fillText(lbl, padL-8, y);
     const w=Math.max(2,(d.val/max)*bw);
-    ctx.fillStyle='#eef0f4'; ctx.fillRect(padL,y-bh/2,bw,bh);
+    ctx.fillStyle=(i===_hi?'#e2e6ee':'#eef0f4'); ctx.fillRect(padL,y-bh/2,bw,bh);
     ctx.fillStyle=d.color;  ctx.fillRect(padL,y-bh/2,w,bh);
+    if(i===_hi){ ctx.strokeStyle='#1a2035'; ctx.lineWidth=1.5;
+                 ctx.strokeRect(padL+0.75,y-bh/2+0.75,bw-1.5,bh-1.5); }
+    // Zona sensible: TODA la franja de la fila, no solo lo pintado, para que los grupos
+    // chicos tambien se puedan senalar sin tener que cazar dos pixeles con el mouse.
+    _geo.push({i:i, y0:padT+step*i, y1:padT+step*(i+1), x0:padL, x1:padL+bw});
     const txt=d.val+'  ('+Math.round(d.val/total*100)+'%)';
     ctx.font='bold 11px sans-serif'; ctx.fillStyle='#1a2035';
     // Si la etiqueta del valor no cabe fuera de la barra, se pinta dentro en blanco
@@ -4300,21 +4513,27 @@ function drawBarsPerfil(canvasId, data, legendId, padLBase){
       ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.fillText(txt, padL+w-6, y);
     }
   });
+  canvas._gdGeo=_geo;
+  gdBind(canvas);
   const leg=document.getElementById(legendId);
   if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">Total de socios: '+
-                        '<strong style="color:#1a2035;margin-left:4px">'+total+'</strong></div>';
+                        '<strong style="color:#1a2035;margin-left:4px">'+total+'</strong>'+
+                        '<span style="margin-left:8px;color:#4a9fd4;font-weight:700">· clic en una barra para ver el listado</span></div>';
 }
 
 // Agrupa por un campo y ordena de mayor a menor; los vacíos caen en la etiqueta que se indique
 function agruparPorCampo(lista, campo, etiquetaVacio){
+  // 14-ago-2026 (s48) — ademas del conteo se guardan los REGISTROS de cada grupo, que son
+  // los que alimentan el panel del clic. Se guarda la referencia al socio, no una copia,
+  // para que el panel abra el mismo detalle que el Directorio y no una version congelada.
   const mapa={};
   lista.forEach(d=>{
     let v=(d[campo]==null?'':String(d[campo])).trim();
     if(!v) v=etiquetaVacio;
-    mapa[v]=(mapa[v]||0)+1;
+    (mapa[v]=mapa[v]||[]).push(d);
   });
   return Object.keys(mapa)
-    .map(k=>({label:k, val:mapa[k]}))
+    .map(k=>({label:k, val:mapa[k].length, items:mapa[k]}))
     .sort((a,b)=>b.val-a.val)
     .map((d,i)=>({...d, color:PALETA_PERFIL[i%PALETA_PERFIL.length]}));
 }
@@ -4322,7 +4541,8 @@ function agruparPorCampo(lista, campo, etiquetaVacio){
 function renderTipoUsuario(){
   drawBarsPerfil('chart-tipo-usuario',
     agruparPorCampo(sociosPadron(),'tu','Sin tipo'),
-    'legend-tipo-usuario', 160);
+    'legend-tipo-usuario', 160,
+    {titulo:'Socios por tipo de usuario', datoLabel:'Tipo de usuario', datoFn:d=>d.tu||'—'});
 }
 
 // Rangos del Club, más el tramo de menos de un año que su catálogo no contempla
@@ -4343,32 +4563,37 @@ const RANGOS_ANTIGUEDAD=[
 // 14-ago-2026 (s48) — se parametrizo la lista y los ids para que el corte por socio y
 // el corte por membresia usen EXACTAMENTE el mismo calculo. Duplicar la funcion habria
 // dejado dos rangos que en tres meses dirian cosas distintas.
-function renderAntiguedadEn(lista, canvasId, legendId){
+function renderAntiguedadEn(lista, canvasId, legendId, titulo){
   const conDato=lista.filter(d=>d.perm!=null && d.perm!=='');
-  const data=RANGOS_ANTIGUEDAD.map(g=>({
-    label:g.lbl, color:g.color,
-    val:conDato.filter(d=>{ const p=Number(d.perm); return !isNaN(p) && p>=g.min && p<=g.max; }).length
-  }));
-  drawBarsPerfil(canvasId, data, legendId, 130);
+  const data=RANGOS_ANTIGUEDAD.map(g=>{
+    const items=conDato.filter(d=>{ const p=Number(d.perm); return !isNaN(p) && p>=g.min && p<=g.max; });
+    return {label:g.lbl, color:g.color, val:items.length, items:items};
+  });
+  drawBarsPerfil(canvasId, data, legendId, 130, {
+    titulo: titulo, datoLabel:'Antigüedad',
+    datoFn: d => (d.perm==null||d.perm===''?'—':d.perm+(Number(d.perm)===1?' año':' años'))
+  });
   // Si la vista todavía no manda el campo, se avisa en vez de pintar una gráfica vacía y creíble
   const leg=document.getElementById(legendId);
   if(leg && !conDato.length) leg.innerHTML='<div class="graf-legend-item" style="color:#EF4B1F">'+
     'El directorio no está mandando los años de permanencia.</div>';
 }
 
-function renderAntiguedad(){ renderAntiguedadEn(sociosPadron(),'chart-antiguedad','legend-antiguedad'); }
-function renderAntiguedadMemb(){ renderAntiguedadEn(membresiasPadron(),'chart-antiguedad-memb','legend-antiguedad-memb'); }
+function renderAntiguedad(){ renderAntiguedadEn(sociosPadron(),'chart-antiguedad','legend-antiguedad','Socios por antigüedad'); }
+function renderAntiguedadMemb(){ renderAntiguedadEn(membresiasPadron(),'chart-antiguedad-memb','legend-antiguedad-memb','Membresías por antigüedad'); }
 
 function renderConceptoPago(){
   drawBarsPerfil('chart-concepto-pago',
     agruparPorCampo(sociosPadron(),'cup','Sin concepto de pago'),
-    'legend-concepto-pago', 175);
+    'legend-concepto-pago', 175,
+    {titulo:'Socios por concepto de último pago', datoLabel:'Concepto de último pago', datoFn:d=>d.cup||'Sin concepto de pago'});
 }
 
 function renderConceptoMemb(){
   drawBarsPerfil('chart-concepto-memb',
     agruparPorCampo(membresiasPadron(),'cup','Sin concepto de pago'),
-    'legend-concepto-memb', 175);
+    'legend-concepto-memb', 175,
+    {titulo:'Membresías por concepto de último pago', datoLabel:'Concepto de último pago', datoFn:d=>d.cup||'Sin concepto de pago'});
 }
 
 // Al girar el celular o cambiar el tamaño de la ventana, las tres se vuelven a medir
