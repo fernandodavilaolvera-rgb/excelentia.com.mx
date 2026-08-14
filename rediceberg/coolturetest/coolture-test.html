@@ -417,10 +417,10 @@ function mezclar(a){ return [...a].sort(()=>Math.random()-.5); }
 async function cargarConfig() {
   // Perfiles Coolture Test — hardcodeados (rangos con huecos, múltiplos de 4)
   PERFILES = [
-    { min:0,  max:12, nombre:'🧀 PUFF MODE',         desc:'Apenas estás entrando, pero todavía te falta agarrar la onda.',        color:'#ffcc00' },
-    { min:16, max:24, nombre:'🌀 GETTING RETORCIDO',  desc:'Ya cachas varias señales y empiezas a dominar el código.',             color:'#cc66ff' },
-    { min:28, max:32, nombre:"🔥 FLAMIN' AURA",       desc:'Traes cultura, actitud y suficiente fuego para hacerte notar.',        color:'#ff6600' },
-    { min:36, max:40, nombre:'🦊 CHESTER APPROVED',   desc:'Estás peligrosamente cool. Chester no necesita saber nada más.',       color:'#aaff00' },
+    { min:0,  max:12, nombre:'🧀 PUFF MODE',         key:'PUFF MODE',        desc:'Apenas estás entrando, pero todavía te falta agarrar la onda.',        color:'#ffcc00' },
+    { min:16, max:24, nombre:'🌀 GETTING RETORCIDO',  key:'GETTING RETORCIDO', desc:'Ya cachas varias señales y empiezas a dominar el código.',             color:'#cc66ff' },
+    { min:28, max:32, nombre:"🔥 FLAMIN' AURA",       key:"FLAMIN' AURA",      desc:'Traes cultura, actitud y suficiente fuego para hacerte notar.',        color:'#ff6600' },
+    { min:36, max:40, nombre:'🦊 CHESTER APPROVED',   key:'CHESTER APPROVED',  desc:'Estás peligrosamente cool. Chester no necesita saber nada más.',       color:'#aaff00' },
   ];
   try {
     const res  = await fetch(`${APPS_SCRIPT_URL}?accion=config`);
@@ -510,7 +510,7 @@ function mostrarResultado(){
     arc.style.strokeDashoffset = 502-(pct*502);
   },150);
 
-  guardar(nombre, total, perfil.nombre);
+  guardar(nombre, total, perfil.key || perfil.nombre);
 }
 
 async function guardar(nombre,puntos,perfil){
