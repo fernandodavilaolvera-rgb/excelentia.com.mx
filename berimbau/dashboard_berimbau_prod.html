@@ -3886,6 +3886,13 @@ async function enviarManual(){
     await fetch(URL_AV_ENVIAR,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         asunto,cuerpo,
+        // 17-ago-2026 (s53) — MODULO EXPLICITO. Antes no se mandaba y el webhook lo
+        // deducia del asunto, asi que si alguien editaba el asunto en pantalla ese
+        // envio quedaba mal etiquetado en el Historial. Ademas el modulo es lo que
+        // habilita la COPIA DE AVISOS: la lista blanca del webhook es
+        // manual / cargo_fallido / anual, y sin modulo NO se agrega copia.
+        // Los tres botones de prueba se dejan SIN modulo a proposito.
+        modulo:'manual',
         remitente:document.getElementById('av-remitente')?.value,
         destinatarios:totalLista.map(d=>({membresia:d.m||d.membresia,nombre:d.n||d.nombre,correo:d.cor||d.correo,dias:d.dias!=null?d.dias:0,meses:d.dias!=null?d.dias:0}))
       })
@@ -3902,6 +3909,10 @@ async function enviarManual(){
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({
               segmento:segVal,
+              // 17-ago-2026 (s53) — MODULO EXPLICITO, igual que en el correo de arriba.
+              // Habilita la copia de avisos por WhatsApp (lista blanca manual /
+              // cargo_fallido / anual). En modo prueba el webhook nunca copia.
+              modulo:'manual',
               modo_prueba:MODO_PRUEBA,
               destinatarios:conTel.map(d=>({
                 whats:(d.wa||d.whats||''),
