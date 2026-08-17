@@ -340,6 +340,24 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 .dep-link{color:#1a3a6b;font-weight:700;cursor:pointer;text-decoration:underline dotted}
 .dep-link:hover{color:var(--verde)}
 .graf-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;justify-content:center}
+/* 16-ago-2026 — rango de edad personalizado bajo la grafica de edades */
+.edad-libre{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;
+  max-width:720px;margin:14px auto 2px;padding:10px 14px;background:#f0f6ff;
+  border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;
+  font-family:'Manrope',sans-serif;font-size:.8rem;color:#4a5068}
+.edad-libre label{font-weight:600;color:#4a5068}
+.edad-libre input{width:64px;padding:5px 8px;border:1px solid #dde1e9;border-radius:6px;
+  font-family:'Manrope',sans-serif;font-size:.8rem;color:#1a2035;text-align:center;background:#fff}
+.edad-libre input:focus{outline:none;border-color:#4a9fd4}
+.edad-libre button{background:#1a3a6b;color:#fff;border:none;border-radius:16px;padding:6px 16px;
+  font-family:'Manrope',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer}
+.edad-libre button:hover{background:#1e5096}
+.edad-libre-msg{font-size:.75rem;color:#1a3a6b;font-weight:700}
+@media (max-width:600px){
+  .edad-libre{gap:6px;padding:10px;font-size:.75rem}
+  .edad-libre input{width:56px}
+  .edad-libre-msg{width:100%;text-align:center}
+}
 .graf-legend-item{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--negro)}
 .graf-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .graf-top-list{display:flex;flex-direction:column;gap:6px;margin-top:4px;flex:1}
@@ -885,6 +903,23 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
           <canvas id="chart-pie-edades" width="420" height="250"></canvas>
         </div>
         <div class="graf-legend" id="legend-pie-edades"></div>
+        <!-- 16-ago-2026 — RANGO DE EDAD PERSONALIZADO.
+             Las barras de arriba son cortes fijos; esto sirve para preguntarle a la
+             grafica cualquier otro rango sin tocar codigo. No redibuja las barras a
+             proposito: abre el MISMO panel del drill down de la s48, que ya trae
+             buscador, orden, detalle del socio y exportacion a Excel, y que recibe los
+             registros ya contados en vez de recalcularlos. -->
+        <div class="edad-libre no-print">
+          <label for="edad-libre-min">Ver socios de</label>
+          <input type="number" id="edad-libre-min" min="0" max="120" step="1" value="26"
+                 inputmode="numeric" onkeydown="if(event.key==='Enter')edadesRangoLibre()">
+          <label for="edad-libre-max">a</label>
+          <input type="number" id="edad-libre-max" min="0" max="120" step="1" value="29"
+                 inputmode="numeric" onkeydown="if(event.key==='Enter')edadesRangoLibre()">
+          <label>años</label>
+          <button type="button" onclick="edadesRangoLibre()">Ver listado</button>
+          <span class="edad-libre-msg" id="edad-libre-msg"></span>
+        </div>
       </div>
 
       <!-- Distribución por edad (grupos) — OCULTA -->
@@ -4234,7 +4269,17 @@ const RANGOS_EDAD=[
   {lbl:'Infantil (6-11)',    min:6,  max:11,  color:'#3AAA35'},
   {lbl:'Juvenil (12-20)',    min:12, max:20,  color:'#1a8a6e'},
   {lbl:'Junior (21-25)',     min:21, max:25,  color:'#c8a84b'},
-  {lbl:'Adultos (26-49)',    min:26, max:49,  color:'#EF4B1F'},
+  // 16-ago-2026 — se parte el bloque de Adultos para abrir el corte de 26 a 29.
+  // 🔑 EL ROTULO NO DICE "Junior" A PROPOSITO. Medido ese dia: de las 60 personas de
+  // 26 a 29, solo 10 son de perfil Junior (3 Junior y 7 Individual Junior); las otras
+  // 50 son 22 Conyuges, 15 Individuales y 13 Titulares, o sea gente con su propia
+  // cuota base. Poner "Junior" en la barra seria afirmar algo falso del 83% de los que
+  // cuenta, que es el mismo molde de los cinco textos que hubo que corregir en la s47.
+  // La edad y el perfil no se tapan: los Junior de hoy van de 20 a 26 anios y los
+  // Individual Junior de 26 a 35. El corte por perfil ya vive en la grafica de tipo
+  // de usuario; esta es, y se llama, un corte de EDAD.
+  {lbl:'26 a 29 (auxiliar)',  min:26, max:29,  color:'#f97316'},
+  {lbl:'Adultos (30-49)',    min:30, max:49,  color:'#EF4B1F'},
   {lbl:'Agregado (50-64)',   min:50, max:64,  color:'#9b5de5'},
   {lbl:'Ag. Mayor (65-100)', min:65, max:100, color:'#4a5068'}
 ];
@@ -4287,6 +4332,32 @@ function renderPieEdades(){
     return {label:g.lbl, color:g.color, val:items.length, items:items};
   });
   drawBarsEdades('chart-pie-edades', data, 'legend-pie-edades', {
+    titulo:'Socios activos por rango de edad', datoLabel:'Edad',
+    datoFn: d => { const e=(d.ed!=null?d.ed:d.edad); return e==null?'—':e+(Number(e)===1?' año':' años'); }
+  });
+}
+// 16-ago-2026 — RANGO DE EDAD PERSONALIZADO.
+// Reusa EXACTAMENTE el mismo universo que pinta la grafica (activos reales, fuera las
+// membresias de servicio) y el mismo panel del drill down. No se copio el criterio: si
+// manana cambia lo que se considera activo, esta consulta se mueve con la grafica.
+function edadesRangoLibre(){
+  const msg=document.getElementById('edad-libre-msg');
+  const elMin=document.getElementById('edad-libre-min');
+  const elMax=document.getElementById('edad-libre-max');
+  if(!elMin||!elMax) return;
+  const decir=t=>{ if(msg) msg.textContent=t||''; };
+  let min=parseInt(elMin.value,10), max=parseInt(elMax.value,10);
+  if(isNaN(min)||isNaN(max)){ decir('Escribe las dos edades.'); return; }
+  if(min<0||max<0||min>120||max>120){ decir('Las edades van de 0 a 120.'); return; }
+  // Si vienen al reves se voltean en vez de devolver cero: escribir "de 29 a 26" es un
+  // dedazo, no una consulta vacia, y una lista vacia haria creer que no hay socios.
+  if(min>max){ const t=min; min=max; max=t; elMin.value=min; elMax.value=max; }
+  const activos=TODOS.filter(d=>d.sit==='Activo' && Number(d.m)<990000);
+  const items=activos.filter(d=>{ const e=(d.ed!=null?d.ed:d.edad); return e!=null && e>=min && e<=max; });
+  if(!items.length){ decir('No hay socios activos de '+min+' a '+max+' años.'); return; }
+  const pct=activos.length?Math.round(items.length/activos.length*100):0;
+  decir(items.length+' de '+activos.length+' ('+pct+'%)');
+  gdAbrir({label:'De '+min+' a '+max+' años', items:items}, {
     titulo:'Socios activos por rango de edad', datoLabel:'Edad',
     datoFn: d => { const e=(d.ed!=null?d.ed:d.edad); return e==null?'—':e+(Number(e)===1?' año':' años'); }
   });
