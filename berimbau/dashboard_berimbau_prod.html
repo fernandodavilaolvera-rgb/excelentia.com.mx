@@ -2105,6 +2105,7 @@ const URL_DIRECTORIO = 'https://n8n.excelentia.com.mx/webhook/berimbau-datos';
 const URL_SYNC_AHORA = 'https://n8n.excelentia.com.mx/webhook/berimbau-sync-socios';
 const URL_CONFIG_GUARDAR = 'https://n8n.excelentia.com.mx/webhook/berimbau-config-guardar';
 const URL_RESP_GUARDAR   = 'https://n8n.excelentia.com.mx/webhook/berimbau-responsable-guardar';
+const URL_RESP_CARGAR    = 'https://n8n.excelentia.com.mx/webhook/berimbau-responsable-cargar';
 const URL_EXPORTAR       = 'https://n8n.excelentia.com.mx/webhook/berimbau-export-socios';
 let ALERTA_ANUAL = [];
 let RESPONSABLES = {};   // v52: override manual del responsable de pago, por membresia
@@ -2180,6 +2181,7 @@ async function cargarDirectorio(){
     mostrarErrorCarga();
     return;
   }
+  await cargarCopiasAviso();
   TODOS = DATA;
   // v53 — Regla del Club (Sinely): la Baja Temporal SÍ genera adeudo, así que entra a cobranza.
   // Solo Inactivo queda fuera.
@@ -2725,7 +2727,8 @@ function abrirDetalleSocio(m,id){
       <div class="det-row"><span class="det-label">Situación</span><span class="det-value">${esc(d.sit)}</span></div>
       ${(d.fini_baja||d.ffin_baja) ? `<div class="det-row"><span class="det-label">Periodo de baja</span><span class="det-value">${fmtFnac(d.fini_baja)} a ${fmtFnac(d.ffin_baja)}</span></div>` : ''}
       ${bajaDetalleHTML(d)}
-      <div class="det-row full"><span class="det-label">Responsable de pago</span><span class="det-value">${respLabel(d.m)} <span class="resp-chip" onclick="document.getElementById('det-modal')?.remove();abrirResponsable(${d.m})">✏️ Cambiar</span></span></div>
+      <div class="det-row full"><span class="det-label">Responsable de pago</span><span class="det-value">${respLabel(d.m)} <span class="resp-chip" onclick="document.getElementById('det-modal')?.remove();abrirResponsable(${d.m})">✏️ Cambiar</span> <span class="resp-chip" title="Sumar a otro integrante mayor de edad para que los avisos le lleguen también a él" onclick="document.getElementById('det-modal')?.remove();abrirCopiaAviso(${d.m})">➕ Agregar</span></span></div>
+      <div class="det-row full"><span class="det-label">Copia de avisos</span><span class="det-value">${copiaLabel(d.m)}</span></div>
       <div class="det-row"><span class="det-label">Tipo de cuota</span><span class="det-value">${fmtCuotaTxt(d.tc)}</span></div>
       <div class="det-row"><span class="det-label">Cargo domiciliado</span><span class="det-value">${d.pb==='Mensual Domiciliado' ? (d.fl===1?'<span style="color:#c0392b;font-weight:700">❌ Rechazado por el banco</span>':'<span style="color:#1a8a6e;font-weight:700">✅ Sin rechazos</span>') : '<span style="color:#8a90a0">No aplica</span>'}</span></div>
       <div class="det-row"><span class="det-label">Periodo base</span><span class="det-value">${esc(d.pb)}</span></div>
@@ -7218,6 +7221,109 @@ function correoDeCobro(m){
   if(!r || !r.correo) return '';
   return String(r.correo).split(/[,;]/)[0].trim();
 }
+// ===================== s48: CONTACTO EXTRA DE AVISOS =====================
+// Lo pidio el Club (14-ago-2026): ademas del responsable, poder sumar a OTRO
+// integrante mayor de edad para que el aviso le llegue a los dos.
+// Limite acordado con Fernando: UNO por membresia.
+// 🔑 Se lee de 'berimbau-responsable-cargar' y no del Directorio: ese endpoint
+//    ya devuelve la fila completa de responsable_pago, asi que las columnas de
+//    la copia llegan solas y no hubo que tocar el Directorio, que es el
+//    workflow mas grande y el que le da de comer a TODO el Dashboard.
+// ⚠️ Si esta llamada falla, el Dashboard sigue funcionando sin las copias: es
+//    informacion adicional, no puede tumbar la carga del padron.
+async function cargarCopiasAviso(){
+  try{
+    const r = await fetch(URL_RESP_CARGAR);
+    if(!r.ok) return;
+    const j = await r.json();
+    const filas = (j && j.responsables) ? j.responsables : {};
+    Object.keys(filas).forEach(k=>{
+      RESPONSABLES[k] = Object.assign({}, RESPONSABLES[k]||{}, filas[k]);
+    });
+  }catch(e){ console.warn('cargarCopiasAviso', e); }
+}
+function getCopia(m){
+  const r = RESPONSABLES[String(m)];
+  if(!r || !r.copia_socio_id) return null;
+  return {socio_id:r.copia_socio_id, nombre:r.copia_nombre,
+          correo:r.copia_correo, whats:r.copia_whats};
+}
+function copiaLabel(m){
+  const c = getCopia(m);
+  if(!c) return '<span style="color:#8a90a0">Nadie más</span>';
+  const canal = [c.correo?'correo':'', c.whats?'WhatsApp':''].filter(Boolean).join(' y ');
+  return esc(toTitleCase(c.nombre||'—'))
+       + (canal?' <span style="color:#8a90a0">('+canal+')</span>':'');
+}
+// Mayores de edad de la membresia, sin el responsable actual (copiarse a uno mismo no existe).
+function candidatosCopia(m){
+  const resp = getResponsable(m);
+  return TODOS.filter(x => x.m===m
+      && Number(x.ed) >= 18
+      && !(resp && Number(resp.socio_id)===Number(x.id)));
+}
+function abrirCopiaAviso(m){
+  const cand = candidatosCopia(m);
+  const actual = getCopia(m);
+  document.getElementById('copia-modal')?.remove();
+  const ov=document.createElement('div');
+  ov.className='det-modal-overlay'; ov.id='copia-modal';
+  const opts = cand.map(x=>{
+    const sel = actual && Number(actual.socio_id)===Number(x.id) ? ' selected':'';
+    const cor = (x.cor||'').split(/[,;]/)[0].trim();
+    const wa  = primerTel(x.wa);
+    const canal = [cor?'✉ '+cor:'', wa?'📱 '+wa:''].filter(Boolean).join(' · ') || 'sin correo ni WhatsApp';
+    const sinDatos = (!cor && !wa);
+    return '<option value="'+x.id+'"'+sel+(sinDatos?' disabled':'')+'>'
+      + esc(toTitleCase(x.n))+' — '+esc(x.tu||'')+', '+x.ed+' años · '+esc(canal)+'</option>';
+  }).join('');
+  const cuerpo = cand.length
+    ? '<label style="font-size:.72rem;font-weight:700;color:var(--negro);display:block;margin-bottom:5px">Integrante que también recibirá los avisos</label>'
+      +'<select id="copia-sel" style="width:100%;height:36px;border:1px solid var(--gray-mid);border-radius:7px;padding:0 10px;font-size:.78rem;background:#fff">'+opts+'</select>'
+    : '<p style="font-size:.78rem;color:#b35309;margin:0">En esta membresía no hay otro integrante mayor de 18 años al que se le pueda copiar.</p>';
+  ov.innerHTML='<div class="det-modal-box" style="max-width:560px">'
+    +'<div class="det-modal-header"><h3>Copia de avisos · #'+m+'</h3>'
+    +'<button class="det-modal-close" onclick="document.getElementById(\'copia-modal\').remove()">✕</button></div>'
+    +'<div class="det-modal-body" style="display:block">'
+    +'<p style="font-size:.78rem;color:var(--gray-text);margin:0 0 12px">'
+    +'Los avisos de <strong>Cobranza, Cargo Fallido y vencimiento Anual</strong> le llegarán '
+    +'también a esta persona, por correo y por WhatsApp. Solo aparecen los integrantes '
+    +'<strong>mayores de 18 años</strong>; quien no tenga ningún dato de contacto sale en gris.</p>'
+    +'<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;padding:9px 11px;font-size:.72rem;color:#1a3a6b;margin:0 0 14px">'
+    +'⏳ Por ahora esto <strong>se guarda pero todavía no se envía doble</strong>: falta conectar los tres avisos. Se puede ir capturando desde hoy.</div>'
+    +cuerpo
+    +'<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">'
+    +(actual?'<button onclick="guardarCopiaAviso('+m+',true)" style="background:#fff;color:#c0392b;border:1px solid #f0c8c8;border-radius:20px;padding:8px 16px;font-size:.76rem;font-weight:700;cursor:pointer">Quitar copia</button>':'')
+    +(cand.length?'<button onclick="guardarCopiaAviso('+m+',false)" style="background:var(--verde);color:#fff;border:none;border-radius:20px;padding:8px 20px;font-size:.76rem;font-weight:700;cursor:pointer">Guardar</button>':'')
+    +'</div></div></div>';
+  ov.onclick=(e)=>{if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+async function guardarCopiaAviso(m, borrar){
+  let body = {membresia:m, accion: borrar?'borrar_copia':'guardar_copia'};
+  if(!borrar){
+    const sel = document.getElementById('copia-sel');
+    const id = Number(sel && sel.value);
+    const p = TODOS.find(x=>x.m===m && x.id===id);
+    if(!p){ showToast('No se encontró al integrante'); return; }
+    if(Number(p.ed) < 18){ showToast('⚠️ Solo se puede copiar a mayores de edad'); return; }
+    body.copia_socio_id=id; body.copia_nombre=p.n;
+    body.copia_correo=(p.cor||'').split(/[,;]/)[0].trim();
+    body.copia_whats=primerTel(p.wa);
+  }
+  try{
+    await fetch(URL_RESP_GUARDAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const k=String(m);
+    RESPONSABLES[k] = Object.assign({}, RESPONSABLES[k]||{}, borrar
+      ? {copia_socio_id:null, copia_nombre:null, copia_correo:null, copia_whats:null}
+      : {copia_socio_id:body.copia_socio_id, copia_nombre:body.copia_nombre,
+         copia_correo:body.copia_correo, copia_whats:body.copia_whats});
+    document.getElementById('copia-modal')?.remove();
+    showToast(borrar?'✅ Se quitó la copia':'✅ Copia de avisos guardada');
+    renderNotificaciones();
+  }catch(e){ showToast('⚠️ No se pudo guardar'); }
+}
+
 function abrirResponsable(m){
   const integrantes = TODOS.filter(x=>x.m===m);
   if(!integrantes.length) return;
