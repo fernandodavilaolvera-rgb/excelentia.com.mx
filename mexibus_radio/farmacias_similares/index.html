@@ -194,8 +194,6 @@
     <a class="btn rojo" id="btnLanding" href="#" onclick="return irLanding(event)">Ver ofertas de Farmacias Similares</a>
 
     <div class="datos">
-      <div class="fila"><span>Red</span><span id="redTxt">Mexibus Radio WiFi</span></div>
-      <div class="fila"><span>Andén</span><span id="andenTxt">—</span></div>
       <div class="fila"><span>Estado</span><span style="color:#2d9e5f">● Conectado</span></div>
       <div class="fila"><span>Sesión</span><span>4 horas</span></div>
     </div>
@@ -378,13 +376,17 @@ function contarClic(origen){
       correo : datos ? datos.correo : '',
       ssidName: RED.ssidName
     });
-    if(navigator.sendBeacon){
-      navigator.sendBeacon(WEBHOOK, new Blob([cuerpo], {type:'application/json'}));
-    }else{
-      fetch(WEBHOOK, {method:'POST', headers:{'Content-Type':'application/json'},
-                      body:cuerpo, keepalive:true}).catch(function(){});
-    }
-  }catch(e){}
+    /* Se manda por el MISMO camino que el registro, que ya está probado en
+       equipo real. El envío en segundo plano (sendBeacon) se perdía: sale
+       justo cuando el teléfono está cambiando de estado de red y se descarta
+       sin dejar rastro. keepalive lo mantiene vivo aunque la ventana se cierre. */
+    return fetch(WEBHOOK, {
+      method  : 'POST',
+      headers : {'Content-Type':'application/json'},
+      body    : cuerpo,
+      keepalive: true
+    }).catch(function(){});
+  }catch(e){ return null; }
 }
 
 /* ---------- 2 → 3 · LIBERAR EL INTERNET Y MANDAR A LA MARCA ----------
@@ -395,8 +397,6 @@ function contarClic(origen){
 function continuar(){
   contarClic('boton_continuar');
 
-  document.getElementById('andenTxt').textContent = RED.nasId || 'Andén Mexibús';
-  if(RED.ssidName) document.getElementById('redTxt').textContent = RED.ssidName;
   document.getElementById('btnLanding').setAttribute('href', LANDING);
   ver('p3');
 
@@ -415,8 +415,11 @@ function continuar(){
    y este botón la lleva igual.                                        */
 function irLanding(ev){
   ev.preventDefault();
-  contarClic('boton_respaldo');
-  window.location.href = LANDING;
+  var envio = contarClic('boton_respaldo');
+  var listo = false;
+  function salir(){ if(!listo){ listo = true; window.location.href = LANDING; } }
+  if(envio && envio.then){ envio.then(salir, salir); }
+  setTimeout(salir, 500);   /* no se hace esperar a nadie más de medio segundo */
   return false;
 }
 </script>
