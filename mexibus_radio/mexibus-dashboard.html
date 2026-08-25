@@ -39,11 +39,12 @@
     font-family:'Manrope',sans-serif; font-size:12px; font-weight:700; color:var(--txt2); cursor:pointer; transition:.2s}
   .chip.on{background:var(--rojo); border-color:var(--rojo); color:#fff}
 
-  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:.9rem; margin-top:1rem}
+  .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:.9rem; margin-top:1rem}
   .kpi{background:#fff; border:1px solid var(--linea); border-radius:13px; padding:1.1rem 1.15rem; position:relative; overflow:hidden}
   .kpi::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px}
   .kpi.k1::before{background:var(--rojo)} .kpi.k2::before{background:var(--azul)}
   .kpi.k3::before{background:var(--verde)} .kpi.k4::before{background:var(--naranja)}
+  .kpi.k5::before{background:#7B3F8C}
   .kpi .lab{font-size:10.5px; font-weight:800; color:var(--txt3); letter-spacing:.5px; text-transform:uppercase}
   .kpi .num{font-size:31px; font-weight:800; color:var(--txt); line-height:1.1; margin-top:.35rem; font-variant-numeric:tabular-nums}
   .kpi .var{font-size:11.5px; font-weight:700; color:#2c8a45; margin-top:.25rem}
@@ -98,6 +99,9 @@
 
   .pie{text-align:center; font-size:11px; color:#b0b3bd; margin-top:1.6rem; line-height:1.6}
 
+  @media (max-width:1150px){
+    .kpis{grid-template-columns:repeat(3,1fr)}
+  }
   @media (max-width:900px){
     .kpis{grid-template-columns:repeat(2,1fr)}
     .grid2{grid-template-columns:1fr}
@@ -124,6 +128,22 @@
     max-width:720px;margin:0 auto .9rem;
   }
   .aviso-priv b{color:#1a2035;}
+
+  /* ===== IMPRESIÓN / PDF ===== */
+  @media print{
+    @page{ size:Letter; margin:13mm }
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact }
+    body{ background:#fff }
+    .filtros, .vivo, .no-print{ display:none !important }
+    section, .card, main, div, .tabla-wrap{ break-inside:auto }
+    .kpi, .anden, .paso-e, .aviso-priv, img{ break-inside:avoid }
+    h1,h2,h3,h4, .card h3{ break-after:avoid }
+    p, li{ orphans:3; widows:3 }
+    thead{ display:table-header-group }
+    .kpis{ grid-template-columns:repeat(5,1fr) }
+    .grid2{ break-inside:auto }
+    a[href]:after{ content:none }
+  }
 </style>
 </head>
 <body>
@@ -172,6 +192,11 @@
       <div class="num" id="k4">—</div>
       <div class="var" id="v4">&nbsp;</div>
     </div>
+    <div class="kpi k5">
+      <div class="lab">Clics al sitio</div>
+      <div class="num" id="k5">—</div>
+      <div class="var" id="v5">&nbsp;</div>
+    </div>
   </div>
 
   <div class="grid2">
@@ -207,7 +232,7 @@
     <h3>Actividad por andén <span id="totalReg">—</span></h3>
     <div class="tabla-wrap">
       <table>
-        <thead><tr><th>Andén</th><th>Registros</th><th>Videos completos</th><th>Efectividad</th><th></th></tr></thead>
+        <thead><tr><th>Andén</th><th>Registros</th><th>Videos completos</th><th>Clics al sitio</th><th>Efectividad</th><th></th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -316,10 +341,11 @@ function cargar(){
 
 /* ---------- KPIs y embudo ---------- */
 function pintarKpis(dias, d){
-  var t = { dispositivos:0, registros:0, videos:0, autorizados:0 };
+  var t = { dispositivos:0, registros:0, videos:0, autorizados:0, clics:0 };
   dias.forEach(function(x){
     t.dispositivos += x.dispositivos; t.registros += x.registros;
     t.videos += x.videos; t.autorizados += x.autorizados;
+    t.clics += (x.clics || 0);
   });
 
   document.getElementById('k1').textContent = n(t.dispositivos);
@@ -329,6 +355,8 @@ function pintarKpis(dias, d){
   var tasa = t.dispositivos ? (t.videos / t.dispositivos * 100) : 0;
   document.getElementById('k4').innerHTML = tasa.toFixed(1) + '<span style="font-size:19px">%</span>';
 
+  document.getElementById('k5').textContent = n(t.clics);
+
   /* Comparación contra el día anterior, solo cuando el rango es "hoy" */
   if(RANGO === 'hoy'){
     var ayer = restaDias(hoyMX(), 1);
@@ -337,13 +365,14 @@ function pintarKpis(dias, d){
       comparar('v1', t.dispositivos, y && y.dispositivos);
       comparar('v2', t.registros,    y && y.registros);
       comparar('v3', t.videos,       y && y.videos);
+      comparar('v5', t.clics,        y && y.clics);
       var tasaAyer = (y && y.dispositivos) ? (y.videos / y.dispositivos * 100) : null;
       var e4 = document.getElementById('v4');
       e4.innerHTML = (tasaAyer === null) ? '&nbsp;'
         : (tasa - tasaAyer >= 0 ? '▲ ' : '▼ ') + Math.abs(tasa - tasaAyer).toFixed(1) + ' pts vs ayer';
     }).catch(function(){});
   } else {
-    ['v1','v2','v3','v4'].forEach(function(i){ document.getElementById(i).innerHTML = '&nbsp;'; });
+    ['v1','v2','v3','v4','v5'].forEach(function(i){ document.getElementById(i).innerHTML = '&nbsp;'; });
   }
 
   /* Embudo */
@@ -351,7 +380,8 @@ function pintarKpis(dias, d){
     ['Se conectaron', t.dispositivos, '#29ABE2'],
     ['Se registraron', t.registros,   '#E5449A'],
     ['Video completo', t.videos,      '#E8114B'],
-    ['Internet liberado', t.autorizados, '#8CC63F']
+    ['Internet liberado', t.autorizados, '#8CC63F'],
+    ['Entró al sitio de la marca', t.clics, '#7B3F8C']
   ];
   var base = t.dispositivos || 1;
   document.getElementById('embudo').innerHTML = t.dispositivos
@@ -366,8 +396,12 @@ function pintarKpis(dias, d){
   var nota = document.getElementById('notaEmbudo');
   if(t.dispositivos){
     var de10 = Math.round(t.videos / base * 10);
+    var notaClic = t.videos
+      ? ' De quienes lo vieron completo, <b style="color:#1a2035">' +
+        Math.round(t.clics / t.videos * 100) + '% entró al sitio de la marca</b>.'
+      : '';
     nota.innerHTML = 'De cada 10 personas que se conectan al WiFi, <b style="color:#1a2035">' +
-      de10 + ' ven el spot completo</b>. Ese es el número que se le reporta al patrocinador.';
+      de10 + ' ven el spot completo</b>. Ese es el número que se le reporta al patrocinador.' + notaClic;
   } else {
     nota.textContent = 'El número que se le reporta al patrocinador es el de videos completos.';
   }
@@ -408,12 +442,13 @@ function pintarHoras(filas){
 function pintarAndenes(filas){
   var acum = {};
   filas.forEach(function(f){
-    if(!acum[f.anden]) acum[f.anden] = { registros:0, videos:0 };
+    if(!acum[f.anden]) acum[f.anden] = { registros:0, videos:0, clics:0 };
     acum[f.anden].registros += f.registros;
     acum[f.anden].videos    += f.videos;
+    acum[f.anden].clics     += (f.clics || 0);
   });
   var lista = Object.keys(acum).map(function(k){
-    return { anden:k, registros:acum[k].registros, videos:acum[k].videos };
+    return { anden:k, registros:acum[k].registros, videos:acum[k].videos, clics:acum[k].clics };
   }).sort(function(a,b){ return b.videos - a.videos; });
 
   var cajaA = document.getElementById('andenes');
@@ -421,7 +456,7 @@ function pintarAndenes(filas){
 
   if(!lista.length){
     cajaA.innerHTML = '<div class="vacio"><b>Sin datos por andén</b>Aparecen en cuanto los equipos queden registrados en la bitácora.</div>';
-    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
     document.getElementById('totalReg').textContent = '—';
     return;
   }
@@ -441,6 +476,7 @@ function pintarAndenes(filas){
   tb.innerHTML = lista.map(function(a){
     var ef = a.registros ? Math.round(a.videos / a.registros * 100) : 0;
     return '<tr><td><b>' + a.anden + '</b></td><td>' + n(a.registros) + '</td><td>' + n(a.videos) + '</td>' +
+           '<td>' + n(a.clics) + '</td>' +
            '<td>' + ef + '%</td>' +
            '<td><span class="badge ' + (ef >= 75 ? 'ok' : 'mid') + '">' +
            (ef >= 75 ? 'Buena' : 'Revisar') + '</span></td></tr>';
