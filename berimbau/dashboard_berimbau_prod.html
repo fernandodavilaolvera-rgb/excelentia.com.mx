@@ -1524,7 +1524,7 @@ Recuerda que aún es posible obtener beneficios por tu pago anual.
         <div class="av-module-icon">🏦</div>
         <div class="av-module-info">
           <div class="av-module-title">Domiciliados — Aviso Previo</div>
-          <div class="av-module-sub">Se envía el día 26 de cada mes · el cargo cae los primeros días del mes siguiente · <span id="mod-domiprev-count" style="font-weight:700;color:var(--s1-color)">calculando...</span></div>
+          <div class="av-module-sub">Se envía el día 1 de cada mes · el cargo cae los primeros días de ese mismo mes · <span id="mod-domiprev-count" style="font-weight:700;color:var(--s1-color)">calculando...</span></div>
         </div>
         <div class="av-module-badges">
           <span class="av-module-status av-status-off" id="mod-domiprev-status">⏸ Pausado</span>
@@ -1542,10 +1542,11 @@ Recuerda que aún es posible obtener beneficios por tu pago anual.
 
         <!-- s39 (9-ago-2026) - Este recuadro decia "Dato pendiente del club: se necesita
              saber que dia del mes el banco realiza el cargo". Llevaba semanas siendo falso:
-             el dato es el dia 26 y asi esta configurado el cron desde julio. -->
+             el dato es el dia 1 desde el 26-ago-2026 (antes era el 26) y asi esta
+             configurado el cron. -->
         <div class="av-info-box">
-          <strong>¿Cómo funciona?</strong> El aviso sale el <strong>día 26 de cada mes a las 10:00</strong>,
-          porque el cargo del banco cae los primeros días del mes siguiente. El sistema despierta solo
+          <strong>¿Cómo funciona?</strong> El aviso sale el <strong>día 1 de cada mes a las 10:00</strong>,
+          porque el cargo del banco cae los primeros días de ese mismo mes. El sistema despierta solo
           ese día, pero <strong>únicamente manda si el interruptor de abajo está activado</strong>.
           Después de enviarse, el interruptor <strong>se apaga solo</strong>: cada mes hay que prenderlo
           a propósito. Quien ya trae días de adeudo queda fuera, porque a esa persona le toca el aviso
@@ -3252,7 +3253,7 @@ function initAvisos(){
   cargarAvisos();
   cargarBiblioteca();
   cargarProgramaciones();
-  cargarSwitchDomiciliados();   // s39 - lee de la base si el aviso del 26 va prendido
+  cargarSwitchDomiciliados();   // s39 - lee de la base si el aviso del dia 1 va prendido
   cargarSwitchCumple();         // s42 - lee de la base si las felicitaciones van prendidas
   cargarSwitchAnual();          // s42 - lee de la base si la campana anual va prendida
   cargarSwitch26();             // s43 - lee de la base si el aviso de 26 anios va prendido
@@ -5495,9 +5496,10 @@ function getModRecipients(tipo){
   return TEST_TEAM.filter(r=>checked.has(String(r.membresia)));
 }
 function _mesMX(){ return new Date().toLocaleDateString('es-MX',{month:'long'}); }
-// v64 — El aviso de domiciliados se manda el día 26 y el cargo cae los primeros
-// días del MES SIGUIENTE. El cron calcula mes+1; la prueba también, para que el
+// v64 / s58 — El aviso de domiciliados se manda el día 1 y el cargo cae los primeros
+// días de ESE MISMO mes. El cron ya no suma un mes; la prueba tampoco, para que el
 // texto que se revisa en la prueba sea el mismo que recibe el socio.
+// _mesSiguienteMX se conserva porque la usan otros modulos.
 function _mesSiguienteMX(){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()+1); return d.toLocaleDateString('es-MX',{month:'long'}); }
 function _fechaMasDias(n){ const d=new Date(); d.setDate(d.getDate()+n); return d.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}); }
 // v60 — Los pagos anuales cierran SIEMPRE el 31 de diciembre. En enero la campaña
@@ -5602,8 +5604,11 @@ function _varsInvalidas(txt, tipo){
 }
 
 async function probarAviso(tipo){
-  // El aviso de domiciliados habla del cargo del MES SIGUIENTE, igual que el cron.
-  const mes = (tipo==='domiprev') ? _mesSiguienteMX() : _mesMX();
+  // 26-ago-2026 (s58) — El aviso de domiciliados ya habla del cargo del MES EN CURSO,
+  // igual que el cron: sale el dia 1 y el banco cobra el dia 5 de ese mismo mes.
+  // Antes usaba _mesSiguienteMX(); si no se cambia, la prueba que revisa Cobranza
+  // diria un mes y el socio recibiria otro.
+  const mes = _mesMX();
   const cfg=_buildAviso(tipo, mes);
   if(!cfg) return;
   let recipients = getModRecipients(tipo);
@@ -6785,9 +6790,10 @@ function initModulesV10(){
 // ----------------------------------------------------------------------------
 // Antes este aviso se prendia y apagaba publicando o despublicando el workflow
 // DZtcou0Kw7wYIKMy en n8n. Eso tenia dos problemas: era un interruptor INVISIBLE
-// (nadie en el Club podia saber si el aviso del 26 iba a salir) y solo lo podia
+// (nadie en el Club podia saber si el aviso iba a salir) y solo lo podia
 // mover Fernando. Ahora el cron vive SIEMPRE publicado y despierta solo el dia
-// 26; lo que decide si manda es la clave berimbau.config.domiciliados_activo,
+// 1 (s58: era el 26 hasta el 26-ago-2026); lo que decide si manda es la clave
+// berimbau.config.domiciliados_activo,
 // que es la que escribe este interruptor.
 //
 // 🔑 SE APAGA SOLO DESPUES DE DISPARAR. El ultimo nodo del cron pone la clave en
@@ -6842,9 +6848,9 @@ function renderSwitchDomiciliados(){
         + (DOMI_ACTIVO ? '🔴 Activado' : '⚫ Apagado') + '</div>'
       + '<div style="font-size:.74rem;color:#4a5068;margin-top:4px;line-height:1.55">'
         + (DOMI_ACTIVO
-            ? 'El <strong>26 de este mes a las 10:00</strong> saldrá el aviso a <strong>'
+            ? 'El <strong>próximo día 1 a las 10:00</strong> saldrá el aviso a <strong>'
               + cuantos + '</strong>. Al terminar de enviarse, este interruptor se apaga solo.'
-            : 'El aviso <strong>no va a salir</strong> el día 26. El sistema despierta ese día, '
+            : 'El aviso <strong>no va a salir</strong> el día 1. El sistema despierta ese día, '
               + 've el interruptor apagado y termina sin mandar nada.')
       + '</div>'
     + '</div>'
@@ -6853,7 +6859,7 @@ function renderSwitchDomiciliados(){
       + 'font-family:\'Montserrat\',sans-serif;font-size:.75rem;font-weight:800;'
       + (DOMI_ACTIVO
           ? 'background:#f5f6f8;color:#4a5068;border:1px solid #dde1e9">⏸ Apagar el aviso'
-          : 'background:#c0392b;color:#fff;border:none">🔴 Activar el aviso del 26')
+          : 'background:#c0392b;color:#fff;border:none">🔴 Activar el aviso del día 1')
     + '</button>'
     + '</div>';
 }
@@ -6871,11 +6877,11 @@ function domiPedirCambio(prender){
   ov.innerHTML =
     '<div class="modal-box" style="max-width:500px;text-align:left">'
     + '<h3 style="text-align:center">🔴 Activar el aviso de domiciliados</h3>'
-    + '<p style="text-align:center;margin-bottom:14px">El <strong>26 de este mes a las 10:00</strong> '
+    + '<p style="text-align:center;margin-bottom:14px">El <strong>próximo día 1 a las 10:00</strong> '
       + 'les va a llegar el aviso del cargo automático a <strong>' + cuantos + '</strong> del Club.</p>'
     + '<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;'
       + 'border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:.74rem;color:#1a3a6b;line-height:1.55">'
-      + 'El número se consulta en el momento y puede cambiar de aquí al día 26. '
+      + 'El número se consulta en el momento y puede cambiar de aquí al día 1. '
       + 'Quien entre en adeudo antes de esa fecha queda fuera solo, porque a esa persona '
       + 'le toca el aviso de cobranza.<br>'
       + 'Después de enviarse, el interruptor <strong>se apaga solo</strong>.'
@@ -6901,7 +6907,7 @@ function domiValidarPalabra(){
   const btn = document.getElementById('domi-confirm-btn');
   if(!inp || !btn) return;
   // s40 (9-ago-2026): la palabra paso de ENVIAR a ACTIVAR. Este boton NO envia,
-  // AGENDA: el envio lo dispara el cron y ese cron solo despierta el dia 26.
+  // AGENDA: el envio lo dispara el cron y ese cron solo despierta el dia 1 (s58).
   // La palabra "ENVIAR" hacia creer que el mensaje salia en ese momento.
   const ok = inp.value.trim().toUpperCase() === 'ACTIVAR';
   btn.disabled = !ok;
@@ -6930,8 +6936,8 @@ async function domiGuardar(valor){
     DOMI_ACTIVO = (j && j.domiciliados_activo === true);
     renderSwitchDomiciliados();
     showToast(DOMI_ACTIVO
-      ? '🔴 Aviso ACTIVADO — saldrá el día 26 a las 10:00'
-      : '⏸ Aviso apagado — no saldrá el día 26');
+      ? '🔴 Aviso ACTIVADO — saldrá el día 1 a las 10:00'
+      : '⏸ Aviso apagado — no saldrá el día 1');
   }catch(e){
     showToast('⚠️ No se pudo guardar — verifica n8n');
     cargarSwitchDomiciliados();   // vuelve a leer el estado real
