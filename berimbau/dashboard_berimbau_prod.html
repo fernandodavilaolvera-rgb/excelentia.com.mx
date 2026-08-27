@@ -4247,23 +4247,21 @@ function exportarHistorial(){
   });
   // Las tres columnas de canal se pintan de color para que se lean de un vistazo,
   // igual que el punto verde de la pantalla.
-  const cel=(v,i)=>{
-    const s = String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  // 26-ago-2026 (s58) — Antes esto se bajaba como tabla HTML con extension .xls:
+  // abria, pero el Excel avisaba que el formato no coincidia con la extension y
+  // el archivo no era un libro de verdad. Ahora sale un XLSX real, con la fila
+  // de titulos congelada y filtros ya puestos.
+  const filasXls = filas.map(f=>f.map((v,i)=>{
     if(i>=7 && i<=9){
-      const color = (s==='Sí') ? '#15803d' : (s==='Error' ? '#b91c1c' : '#000000');
-      return `<td style="color:${color};font-weight:bold;text-align:center">${s}</td>`;
+      const s = String(v||'');
+      return { v: s, s: (s==='Sí' ? 2 : (s==='Error' ? 3 : 4)) };
     }
-    return `<td>${s}</td>`;
-  };
-  const html=`<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body>
-    <table border="1"><thead><tr>${enc.map(e=>`<th>${e}</th>`).join('')}</tr></thead>
-    <tbody>${filas.map(f=>`<tr>${f.map(cel).join('')}</tr>`).join('')}</tbody></table></body></html>`;
-  const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`historial_envios_berimbau_${desde||'inicio'}_a_${hasta||'hoy'}.xls`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
+    // La membresia como numero, para que ordene y filtre como numero.
+    if(i===4){ const n=Number(v); return (v!=='' && isFinite(n)) ? n : (v||''); }
+    return v==null ? '' : v;
+  }));
+  xlsxDescargar(`historial_envios_berimbau_${desde||'inicio'}_a_${hasta||'hoy'}`,
+                'Historial de envios', enc, filasXls);
   showToast(`✅ ${grupos.length} socios exportados (${lista.length} envíos)`);
 }
 // ===== GRÁFICAS =====
@@ -4542,25 +4540,194 @@ function gdOrdenar(k){
   if(GD_STATE.ord===k) GD_STATE.dir=-GD_STATE.dir; else { GD_STATE.ord=k; GD_STATE.dir=1; }
   gdPintar();
 }
-/* Exportacion. Va con BOM y punto y coma porque el Excel en español abre asi el CSV
-   en columnas; con coma mete todo en una sola celda. Incluye correo y telefono por
-   indicacion de Fernando: el archivo sale con datos de contacto, hay que tratarlo como tal. */
+/* ============================================================================
+   26-ago-2026 (s58) — ESCRITOR DE XLSX EN JAVASCRIPT PURO.
+   Antes el Dashboard bajaba dos cosas que NO eran Excel: el drill down de las
+   graficas salia en CSV con punto y coma (el Excel en espanol a veces lo abre
+   en columnas y a veces mete todo en la columna A, que fue justo lo reportado)
+   y el Historial salia como tabla HTML con extension .xls, que abre pero saca
+   la advertencia de "el formato no coincide con la extension".
+   Ahora los dos bajan un .xlsx de verdad.
+   Un .xlsx es un ZIP con archivos XML adentro, asi que aqui se arma el ZIP a
+   mano (sin comprimir, metodo 'stored') y se calcula su CRC32.
+   📌 A PROPOSITO SIN LIBRERIAS: el Dashboard no carga ningun script externo y
+      no se le va a meter uno ahora; si el CDN se cayera o la red del Club lo
+      bloqueara, el boton dejaria de funcionar sin avisar.
+   ========================================================================== */
+const XLSX_TABLA_CRC = (function(){
+  const t = new Uint32Array(256);
+  for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c = (c&1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1); t[n]=c>>>0; }
+  return t;
+})();
+function xlsxCrc32(u8){
+  let c = 0xFFFFFFFF;
+  for(let i=0;i<u8.length;i++) c = XLSX_TABLA_CRC[(c ^ u8[i]) & 0xFF] ^ (c>>>8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function xlsxZip(archivos){
+  const enc = new TextEncoder(), out = [], central = [];
+  let off = 0;
+  const u16 = (a,v)=>{ a.push(v & 0xFF, (v>>>8) & 0xFF); };
+  const u32 = (a,v)=>{ a.push(v & 0xFF, (v>>>8) & 0xFF, (v>>>16) & 0xFF, (v>>>24) & 0xFF); };
+  archivos.forEach(f=>{
+    const nombre = enc.encode(f.name);
+    const datos  = (f.data instanceof Uint8Array) ? f.data : enc.encode(f.data);
+    const crc    = xlsxCrc32(datos);
+    const lh = [];
+    u32(lh, 0x04034B50); u16(lh, 20); u16(lh, 0x0800); u16(lh, 0); u16(lh, 0); u16(lh, 0x0021);
+    u32(lh, crc); u32(lh, datos.length); u32(lh, datos.length); u16(lh, nombre.length); u16(lh, 0);
+    const cd = [];
+    u32(cd, 0x02014B50); u16(cd, 20); u16(cd, 20); u16(cd, 0x0800); u16(cd, 0); u16(cd, 0); u16(cd, 0x0021);
+    u32(cd, crc); u32(cd, datos.length); u32(cd, datos.length); u16(cd, nombre.length);
+    u16(cd, 0); u16(cd, 0); u16(cd, 0); u16(cd, 0); u32(cd, 0); u32(cd, off);
+    out.push(Uint8Array.from(lh), nombre, datos);
+    central.push(Uint8Array.from(cd), nombre);
+    off += lh.length + nombre.length + datos.length;
+  });
+  let cdLargo = 0; central.forEach(p=>cdLargo += p.length);
+  const fin = [];
+  u32(fin, 0x06054B50); u16(fin, 0); u16(fin, 0);
+  u16(fin, archivos.length); u16(fin, archivos.length);
+  u32(fin, cdLargo); u32(fin, off); u16(fin, 0);
+  const partes = out.concat(central, [Uint8Array.from(fin)]);
+  let total = 0; partes.forEach(p=>total += p.length);
+  const buf = new Uint8Array(total); let p = 0;
+  partes.forEach(x=>{ buf.set(x, p); p += x.length; });
+  return buf;
+}
+function xlsxEsc(v){
+  return String(v==null?'':v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    // El Sistema a veces trae caracteres de control que rompen el XML del Excel.
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
+}
+function xlsxCol(i){ let s=''; i++; while(i>0){ const r=(i-1)%26; s=String.fromCharCode(65+r)+s; i=Math.floor((i-1)/26); } return s; }
+/* Estilos: 0 normal · 1 encabezado · 2 verde negrita centrado · 3 rojo negrita
+   centrado · 4 centrado. Los tres ultimos son para las columnas de canal del
+   Historial, que en pantalla se leen de un vistazo por el color. */
+const XLSX_ESTILOS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
++'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
++'<fonts count="4">'
++'<font><sz val="11"/><name val="Calibri"/></font>'
++'<font><b/><sz val="11"/><color rgb="FF1A3A6B"/><name val="Calibri"/></font>'
++'<font><b/><sz val="11"/><color rgb="FF15803D"/><name val="Calibri"/></font>'
++'<font><b/><sz val="11"/><color rgb="FFB91C1C"/><name val="Calibri"/></font>'
++'</fonts>'
++'<fills count="3"><fill><patternFill patternType="none"/></fill>'
++'<fill><patternFill patternType="gray125"/></fill>'
++'<fill><patternFill patternType="solid"><fgColor rgb="FFDCE8F7"/><bgColor indexed="64"/></patternFill></fill></fills>'
++'<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>'
++'<border><left/><right/><top/><bottom style="thin"><color rgb="FFC8D9F0"/></bottom><diagonal/></border></borders>'
++'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
++'<cellXfs count="5">'
++'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
++'<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>'
++'<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center"/></xf>'
++'<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center"/></xf>'
++'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center"/></xf>'
++'</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+/* Arma y descarga el archivo.
+   cab   = arreglo de titulos
+   filas = arreglo de arreglos; cada celda puede ser un valor suelto o {v, s}
+           con el numero de estilo. Los numeros se escriben como numeros para
+           que en Excel se puedan sumar y ordenar sin convertir nada a mano. */
+function xlsxDescargar(nombreArchivo, nombreHoja, cab, filas){
+  const anchos = cab.map((c,i)=>{
+    let max = String(c||'').length;
+    for(let r=0;r<filas.length && r<400;r++){
+      const cl = filas[r][i]; const v = (cl && typeof cl==='object') ? cl.v : cl;
+      const l = String(v==null?'':v).length; if(l>max) max=l;
+    }
+    return Math.min(Math.max(max+2, 9), 46);
+  });
+  let xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    + '<sheetViews><sheetView workbookViewId="0">'
+    + '<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
+    + '<cols>' + anchos.map((a,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+a+'" customWidth="1"/>').join('') + '</cols>'
+    + '<sheetData><row r="1">'
+    + cab.map((c,i)=>'<c r="'+xlsxCol(i)+'1" s="1" t="inlineStr"><is><t xml:space="preserve">'+xlsxEsc(c)+'</t></is></c>').join('')
+    + '</row>';
+  filas.forEach((fila,r)=>{
+    const n = r+2;
+    xml += '<row r="'+n+'">';
+    for(let i=0;i<cab.length;i++){
+      const celda = fila[i];
+      const esObj = celda && typeof celda === 'object';
+      const v = esObj ? celda.v : celda;
+      const s = esObj ? (celda.s||0) : 0;
+      if(v==null || v==='') { if(s) xml += '<c r="'+xlsxCol(i)+n+'" s="'+s+'"/>'; continue; }
+      const ref = xlsxCol(i)+n;
+      if(typeof v === 'number' && isFinite(v)){
+        xml += '<c r="'+ref+'"'+(s?' s="'+s+'"':'')+'><v>'+v+'</v></c>';
+      } else {
+        xml += '<c r="'+ref+'"'+(s?' s="'+s+'"':'')+' t="inlineStr"><is><t xml:space="preserve">'+xlsxEsc(v)+'</t></is></c>';
+      }
+    }
+    xml += '</row>';
+  });
+  xml += '</sheetData><autoFilter ref="A1:'+xlsxCol(cab.length-1)+(filas.length+1)+'"/></worksheet>';
+  const hoja = String(nombreHoja||'Datos').replace(/[\\\/\?\*\[\]:]/g,' ').slice(0,31) || 'Datos';
+  const archivos = [
+    { name:'[Content_Types].xml', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+      +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+      +'<Default Extension="xml" ContentType="application/xml"/>'
+      +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+      +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+      +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+      +'</Types>' },
+    { name:'_rels/.rels', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+      +'</Relationships>' },
+    { name:'xl/workbook.xml', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+      +'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      +'<sheets><sheet name="'+xlsxEsc(hoja)+'" sheetId="1" r:id="rId1"/></sheets></workbook>' },
+    { name:'xl/_rels/workbook.xml.rels', data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+      +'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+      +'</Relationships>' },
+    { name:'xl/styles.xml', data: XLSX_ESTILOS },
+    { name:'xl/worksheets/sheet1.xml', data: xml }
+  ];
+  const blob = new Blob([xlsxZip(archivos)],
+    { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = String(nombreArchivo||'berimbau').replace(/\.(csv|xls|xlsx)$/i,'') + '.xlsx';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+
+/* Exportacion del drill down. 26-ago-2026 (s58): sale en XLSX de verdad.
+   Antes era un CSV con punto y coma y BOM, apostando a que el Excel en espanol
+   lo partiera en columnas; en la maquina del Club abrio todo en la columna A,
+   que es justo lo que se reporto. Con el XLSX ya no depende de la configuracion
+   regional de quien lo abre.
+   Incluye correo y telefono por indicacion de Fernando: el archivo sale con
+   datos de contacto, hay que tratarlo como tal.
+   📌 La membresia se manda como NUMERO para que ordene bien; lo demas es texto. */
 function gdExportar(){
   if(!GD_STATE) return;
   const arr=gdFiltradas();
-  const esc2=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
   const cab=['Membresia','Nombre','Tipo de usuario',(GD_STATE.opts.datoLabel||'Dato'),'Situacion','Correo','Telefono'];
-  const filas=arr.map(d=>[d.m, toTitleCase(d.n||''), d.tu||'', gdDato(d), d.sit||'', d.cor||'', d.tel||''].map(esc2).join(';'));
-  const csv='\ufeff'+cab.map(esc2).join(';')+'\r\n'+filas.join('\r\n');
+  const filas=arr.map(d=>{
+    const dato=gdDato(d);
+    const n=Number(dato);
+    return [ (isFinite(Number(d.m)) ? Number(d.m) : (d.m||'')),
+             toTitleCase(d.n||''), d.tu||'',
+             (dato!=='' && dato!=null && isFinite(n) && String(n)===String(dato).trim()) ? n : dato,
+             d.sit||'', d.cor||'', d.tel||'' ];
+  });
   const slug=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
                  .replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'').toLowerCase().slice(0,40);
   const hoy=new Date(), f=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getDate()).padStart(2,'0');
-  const nom='berimbau_'+slug(GD_STATE.opts.titulo)+'_'+slug(GD_STATE.label)+'_'+f+'.csv';
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download=nom;
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  const nom='berimbau_'+slug(GD_STATE.opts.titulo)+'_'+slug(GD_STATE.label)+'_'+f;
+  xlsxDescargar(nom, (GD_STATE.opts.titulo||'Socios'), cab, filas);
 }
 
 // Barras horizontales genéricas. El canvas se mide contra el ancho real de su tarjeta,
