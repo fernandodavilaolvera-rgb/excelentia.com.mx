@@ -178,7 +178,7 @@
       <video id="arte" playsinline muted autoplay preload="auto" src="https://n8n.excelentia.com.mx/webhook/mexibus-video"></video>
       <div class="barra"><i id="barra"></i></div>
     </div>
-    <div class="cuenta" id="cuenta">Tu internet se activa al terminar el anuncio</div>
+    <div class="cuenta" id="cuenta">Tu internet se activa en unos segundos</div>
     <div style="padding:.4rem 1.3rem 1.4rem">
       <button class="btn rojo" id="btnCont" disabled onclick="continuar()">Continuar</button>
       <div class="aviso-error" id="avisoError2"></div>
@@ -219,7 +219,7 @@
 /* ---------- LO ÚNICO QUE SE TOCA AL CAMBIAR DE CAMPAÑA ---------- */
 var WEBHOOK  = 'https://n8n.excelentia.com.mx/webhook/mexibus-registro';
 var LANDING  = 'https://bit.ly/Analgesia';
-var SEGUNDOS = 7;      /* espera mínima si el video no llegara a correr */
+var ESPERA   = 5;      /* segundos que la persona espera antes de poder continuar */
 var TOPE     = 20;     /* tope máximo de espera, pase lo que pase */
 var RESPIRO  = 1200;   /* milisegundos antes de redirigir: la liberación tarda un instante */
 /* --------------------------------------------------------------- */
@@ -284,9 +284,10 @@ function irAnuncio(){
 }
 
 /* ---------- 2 · EL ANUNCIO ----------
-   Manda el video: la barra sigue su avance real y al terminar se registra.
-   Si el video no carga o el navegador no lo deja arrancar solo, entra el
-   respaldo por tiempo para que nadie se quede atorado sin internet.      */
+   La espera son ESPERA segundos y el anuncio sigue corriendo detrás: quien
+   quiera se queda a verlo completo y quien no, continúa. La barra mide la
+   espera, no la duración del video, para que lo que se ve corresponda con
+   lo que de verdad falta para tener internet.                            */
 function correrAnuncio(){
   var barra  = document.getElementById('barra');
   var cuenta = document.getElementById('cuenta');
@@ -295,45 +296,43 @@ function correrAnuncio(){
 
   boton.disabled = true;
   barra.style.width = '0%';
-  cuenta.textContent = 'Tu internet se activa al terminar el anuncio';
+  cuenta.textContent = 'Tu internet se activa en ' + ESPERA + ' s';
 
-  var cerrado = false;
-  function cerrar(){
-    if(cerrado) return;
-    cerrado = true;
+  var liberado = false;
+  function liberar(){
+    if(liberado) return;
+    liberado = true;
     clearInterval(t);
     barra.style.width = '100%';
     cuenta.textContent = 'Activando tu conexión…';
     registrar();
   }
 
-  /* Respaldo por tiempo: nunca deja a nadie esperando más de lo debido */
-  var paso = 0, total = TOPE * 10;
+  /* El reloj de la espera. Corre pase lo que pase con el video, así que
+     nadie se queda sin internet aunque el anuncio no cargue.            */
+  var paso = 0, total = ESPERA * 10;
   clearInterval(t);
   t = setInterval(function(){
     paso++;
-    if(!video || !video.duration) barra.style.width = (paso / total * 100) + '%';
-    if(paso >= total) cerrar();
+    barra.style.width = Math.min(paso / total * 100, 100) + '%';
+    var resta = Math.ceil((total - paso) / 10);
+    if(resta > 0) cuenta.textContent = 'Tu internet se activa en ' + resta + ' s';
+    if(paso >= total) liberar();
   }, 100);
+
+  /* Tope duro, por si el reloj se detiene con la pantalla apagada */
+  setTimeout(liberar, TOPE * 1000);
 
   if(!video){ return; }
 
-  video.addEventListener('timeupdate', function(){
-    if(video.duration){
-      barra.style.width = (video.currentTime / video.duration * 100) + '%';
-      var resta = Math.ceil(video.duration - video.currentTime);
-      if(resta > 0) cuenta.textContent = 'Tu internet se activa en ' + resta + ' s';
-    }
-  });
-  video.addEventListener('ended', cerrar);
-  video.addEventListener('error', function(){ setTimeout(cerrar, SEGUNDOS * 1000); });
+  /* Si algún día el anuncio dura menos que la espera, libera al terminar */
+  video.addEventListener('ended', liberar);
 
   /* Algunos navegadores solo dejan arrancar el video tras un toque; ya hubo
-     uno al presionar el botón, así que aquí normalmente sí corre.          */
+     uno al presionar el botón, así que aquí normalmente sí corre. Si no
+     arranca, la espera sigue corriendo igual.                             */
   var intento = video.play();
-  if(intento && intento.catch){
-    intento.catch(function(){ setTimeout(cerrar, SEGUNDOS * 1000); });
-  }
+  if(intento && intento.catch){ intento.catch(function(){}); }
 }
 
 /* ---------- REGISTRAR ---------- */
@@ -425,6 +424,10 @@ function contarClic(origen){
    justo ahí en cuanto lo autoriza.                                      */
 function continuar(){
   contarClic('boton_continuar');
+
+  /* El anuncio pudo quedarse corriendo detrás: se detiene para no seguir
+     gastando datos de la SIM del andén una vez que la persona continuó. */
+  try{ var v = document.getElementById('arte'); if(v) v.pause(); }catch(e){}
 
   document.getElementById('btnLanding').setAttribute('href', LANDING);
   ver('p3');
