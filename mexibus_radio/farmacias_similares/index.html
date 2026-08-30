@@ -227,6 +227,12 @@ var RESPIRO  = 1200;   /* milisegundos antes de redirigir: la liberación tarda 
 var ANDEN_FIJO = '';   /* solo si el equipo no mandara la clave del andén */
 var t = null, datos = null, yaEnviado = false, LOGON = '';
 
+/* Se pone en true SOLO cuando el video termina de verdad (evento 'ended').
+   Antes se mandaba true escrito a mano y el dato nunca se midió: el registro
+   sale a los ESPERA segundos, con el anuncio todavía corriendo, así que en
+   ese momento la verdad es 'no lo vio'. El dato bueno viaja con el clic. */
+var vioCompleto = false;
+
 /* ---------- Parámetros que manda el equipo ---------- */
 function paramsRed(){
   var u = new URLSearchParams(window.location.search);
@@ -295,6 +301,7 @@ function correrAnuncio(){
   var video  = document.getElementById('arte');
 
   boton.disabled = true;
+  vioCompleto = false;
   barra.style.width = '0%';
   cuenta.textContent = 'Tu internet se activa en ' + ESPERA + ' s';
 
@@ -325,8 +332,12 @@ function correrAnuncio(){
 
   if(!video){ return; }
 
-  /* Si algún día el anuncio dura menos que la espera, libera al terminar */
-  video.addEventListener('ended', liberar);
+  /* Aquí se mide de verdad si la persona vio el anuncio completo. Además,
+     si algún día el anuncio dura menos que la espera, libera al terminar. */
+  video.addEventListener('ended', function(){
+    vioCompleto = true;
+    liberar();
+  });
 
   /* Algunos navegadores solo dejan arrancar el video tras un toque; ya hubo
      uno al presionar el botón, así que aquí normalmente sí corre. Si no
@@ -348,7 +359,7 @@ function registrar(){
       nombre       : datos.nombre,
       correo       : datos.correo,
       acepto       : true,
-      videoCompleto: true,
+      videoCompleto: vioCompleto,
       userAgent    : navigator.userAgent,
       clientMac    : RED.clientMac,
       nasId        : RED.nasId,
@@ -402,7 +413,8 @@ function contarClic(origen){
       origen : origen,
       nasId  : RED.nasId,
       correo : datos ? datos.correo : '',
-      ssidName: RED.ssidName
+      ssidName: RED.ssidName,
+      videoCompleto: vioCompleto
     });
     /* Se manda por el MISMO camino que el registro, que ya está probado en
        equipo real. El envío en segundo plano (sendBeacon) se perdía: sale
