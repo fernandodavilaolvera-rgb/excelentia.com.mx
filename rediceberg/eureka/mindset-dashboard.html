@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innovation Mindset — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Kodchasan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090a;--card:#0c110c;--border:#172017;
+  --green:#aaff00;--cyan:#00ffee;--yellow:#ffee00;--text:#ddeedd;
+  --font:'Kodchasan',sans-serif;
+  /* Base = borde de tarjeta · Claro = número, barra y glow */
+  --o1:#2e4fa0; --o1b:#7fa4f5;
+  --o2:#c3c018; --o2b:#c3c018;
+  --o3:#eb4c7b; --o3b:#eb4c7b;
+  --o4:#64330e; --o4b:#e0a862;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(170,255,0,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(170,255,0,.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(170,255,0,.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;padding:10px 18px 8px;}
+
+/* HEADER */
+.topbar{display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:10px;flex-shrink:0;}
+.logo-mindset{height:58px;width:auto;object-fit:contain;flex-shrink:0;}
+.vline{width:1px;height:44px;background:var(--border);flex-shrink:0;}
+.hcenter{flex:1;text-align:center;min-width:0;}
+.hcenter h1{font-size:22px;font-weight:700;color:var(--yellow);letter-spacing:1.5px;text-transform:uppercase;line-height:1.2;}
+.live-badge{display:flex;align-items:center;gap:8px;background:rgba(170,255,0,.08);border:1px solid rgba(170,255,0,.2);border-radius:20px;padding:8px 18px;flex-shrink:0;}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 1.4s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.live-txt{font-size:13px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;}
+.live-badge.sin-conexion{background:rgba(255,77,77,.1);border-color:rgba(255,77,77,.4);}
+.live-badge.sin-conexion .live-dot{background:#ff4d4d;box-shadow:0 0 6px #ff4d4d;animation:none;}
+.live-badge.sin-conexion .live-txt{color:#ff4d4d;}
+.total-badge{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:6px 16px;flex:0 0 96px;}
+.total-num{font-size:26px;font-weight:700;color:var(--green);line-height:1;}
+.total-lbl{font-size:11px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;font-weight:600;}
+
+/* GRID 2x2 */
+.main{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;min-height:0;}
+
+.col-card{border-radius:14px;overflow:hidden;border:2px solid var(--border);display:flex;flex-direction:column;position:relative;background:#000;transition:border-color .8s ease,box-shadow .8s ease;min-height:0;}
+.col-card.o1{border-color:rgba(46,79,160,.55);}
+.col-card.o2{border-color:rgba(195,192,24,.55);}
+.col-card.o3{border-color:rgba(235,76,123,.55);}
+.col-card.o4{border-color:rgba(100,51,14,.7);}
+
+.col-card.ganadora.o1{border-color:var(--o1b);box-shadow:0 0 40px rgba(127,164,245,.25);}
+.col-card.ganadora.o2{border-color:var(--o2b);box-shadow:0 0 40px rgba(195,192,24,.25);}
+.col-card.ganadora.o3{border-color:var(--o3b);box-shadow:0 0 40px rgba(235,76,123,.25);}
+.col-card.ganadora.o4{border-color:var(--o4b);box-shadow:0 0 40px rgba(224,168,98,.25);}
+
+/* Badge GANANDO */
+.badge-ganando{position:absolute;top:10px;right:12px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:5px 14px;border-radius:20px;z-index:10;opacity:0;transition:opacity .6s ease;white-space:nowrap;background:rgba(0,0,0,.75);}
+.ganadora .badge-ganando{opacity:1;}
+.o1 .badge-ganando{border:1px solid var(--o1b);color:var(--o1b);}
+.o2 .badge-ganando{border:1px solid var(--o2b);color:var(--o2b);}
+.o3 .badge-ganando{border:1px solid var(--o3b);color:var(--o3b);}
+.o4 .badge-ganando{border:1px solid var(--o4b);color:var(--o4b);}
+
+/* Banner completo, sin recortes ni nada encima */
+.col-img{flex:1;min-height:0;overflow:hidden;}
+.col-img img{width:100%;height:100%;object-fit:contain;display:block;}
+
+/* Franja de datos abajo */
+.col-data{flex-shrink:0;padding:6px 16px 8px;display:flex;align-items:center;gap:16px;background:rgba(0,0,0,.55);border-top:1px solid rgba(255,255,255,.07);}
+.col-num{font-size:19px;font-weight:700;line-height:1;flex-shrink:0;}
+.col-bar-wrap{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;}
+.col-bar-track{width:100%;height:9px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden;}
+.col-bar-fill{height:100%;border-radius:5px;width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.col-votos{font-size:12px;color:var(--yellow);letter-spacing:.5px;font-weight:600;}
+.col-pct{font-size:44px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;flex-shrink:0;}
+
+.o1 .col-num,.o1 .col-pct{color:var(--o1b);} .o1 .col-bar-fill{background:var(--o1b);box-shadow:0 0 10px rgba(127,164,245,.5);}
+.o2 .col-num,.o2 .col-pct{color:var(--o2b);} .o2 .col-bar-fill{background:var(--o2b);box-shadow:0 0 10px rgba(195,192,24,.5);}
+.o3 .col-num,.o3 .col-pct{color:var(--o3b);} .o3 .col-bar-fill{background:var(--o3b);box-shadow:0 0 10px rgba(235,76,123,.5);}
+.o4 .col-num,.o4 .col-pct{color:var(--o4b);} .o4 .col-bar-fill{background:var(--o4b);box-shadow:0 0 10px rgba(224,168,98,.5);}
+
+@keyframes pulso{0%,100%{opacity:1}50%{opacity:.75}}
+.ganadora .col-pct{animation:pulso 2.5s ease-in-out infinite;}
+
+/* FOOTER */
+.footer{margin-top:6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.footer-txt{font-size:11px;color:var(--cyan);letter-spacing:1px;opacity:.7;}
+.update-txt{font-size:11px;color:var(--yellow);letter-spacing:.5px;font-weight:600;}
+
+@media print{
+  @page{size:Letter landscape;margin:12mm;}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+  html,body{height:auto;overflow:visible;}
+  body::before,body::after{display:none;}
+  .wrap{height:auto;}
+  .main{break-inside:auto;}
+  .col-card{break-inside:avoid;}
+  .hcenter h1{break-after:avoid;}
+  a[href]:after{content:none;}
+  .no-print{display:none!important;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <img class="logo-mindset"
+      src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/innovation_mindset.jpeg"
+      alt="Innovation Mindset">
+    <div class="vline"></div>
+    <div class="hcenter">
+      <h1>¿Qué territorio tiene más potencial para transformar el negocio?</h1>
+    </div>
+    <div class="live-badge" id="live-badge">
+      <div class="live-dot"></div>
+      <span class="live-txt" id="live-txt">EN VIVO</span>
+    </div>
+    <div class="total-badge">
+      <div class="total-num" id="hdr-total">0</div>
+      <div class="total-lbl">Votos</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="col-card o1" id="card-1">
+      <div class="badge-ganando">★ GANANDO</div>
+      <div class="col-img"><img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/accesible_funcionality.jpeg" alt="Accesible Functionality"></div>
+      <div class="col-data">
+        <div class="col-num">01</div>
+        <div class="col-bar-wrap">
+          <div class="col-bar-track"><div class="col-bar-fill" id="bar-1"></div></div>
+          <div class="col-votos" id="vot-1">0 votos</div>
+        </div>
+        <div class="col-pct" id="pct-1">0%</div>
+      </div>
+    </div>
+
+    <div class="col-card o2" id="card-2">
+      <div class="badge-ganando">★ GANANDO</div>
+      <div class="col-img"><img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/elevated_Indulgence.jpeg" alt="Elevated Indulgence"></div>
+      <div class="col-data">
+        <div class="col-num">02</div>
+        <div class="col-bar-wrap">
+          <div class="col-bar-track"><div class="col-bar-fill" id="bar-2"></div></div>
+          <div class="col-votos" id="vot-2">0 votos</div>
+        </div>
+        <div class="col-pct" id="pct-2">0%</div>
+      </div>
+    </div>
+
+    <div class="col-card o3" id="card-3">
+      <div class="badge-ganando">★ GANANDO</div>
+      <div class="col-img"><img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/mexican_pride.jpeg" alt="Mexican Pride"></div>
+      <div class="col-data">
+        <div class="col-num">03</div>
+        <div class="col-bar-wrap">
+          <div class="col-bar-track"><div class="col-bar-fill" id="bar-3"></div></div>
+          <div class="col-votos" id="vot-3">0 votos</div>
+        </div>
+        <div class="col-pct" id="pct-3">0%</div>
+      </div>
+    </div>
+
+    <div class="col-card o4" id="card-4">
+      <div class="badge-ganando">★ GANANDO</div>
+      <div class="col-img"><img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/new_simplicity.jpeg" alt="New Simplicity"></div>
+      <div class="col-data">
+        <div class="col-num">04</div>
+        <div class="col-bar-wrap">
+          <div class="col-bar-track"><div class="col-bar-fill" id="bar-4"></div></div>
+          <div class="col-votos" id="vot-4">0 votos</div>
+        </div>
+        <div class="col-pct" id="pct-4">0%</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-txt">INNOVATION MINDSET · Dashboard en vivo</div>
+    <div class="update-txt" id="update-txt"></div>
+  </div>
+
+</div>
+
+<script>
+const APPS_URL  = 'https://script.google.com/macros/s/AKfycbwPjU6LtL8f39CPbZIZHqqrnTJGskiTelx-Rdw583Xjwlu156H8nc0R8Zf3b61hs9a7gg/exec';
+const INTERVALO = 5000;
+const KEYS = {1:'ACCESIBLE FUNCTIONALITY', 2:'ELEVATED INDULGENCE', 3:'MEXICAN PRIDE', 4:'NEW SIMPLICITY'};
+
+// Reloj independiente del polling
+function tickReloj(){
+  const n = new Date();
+  document.getElementById('update-txt').textContent =
+    'Actualizado ' + String(n.getHours()).padStart(2,'0') + ':' +
+    String(n.getMinutes()).padStart(2,'0') + ':' +
+    String(n.getSeconds()).padStart(2,'0');
+}
+setInterval(tickReloj, 1000);
+tickReloj();
+
+function actualizarUI(datos){
+  const c = {};
+  for(let i=1;i<=4;i++) c[i] = datos[KEYS[i]] || 0;
+  const total = c[1]+c[2]+c[3]+c[4];
+  document.getElementById('hdr-total').textContent = total;
+
+  const max = Math.max(c[1],c[2],c[3],c[4]);
+  const hayEmpate = [1,2,3,4].filter(i => c[i] === max).length > 1;
+
+  [1,2,3,4].forEach(i=>{
+    const pct = total > 0 ? Math.round(c[i]/total*100) : 0;
+    document.getElementById('pct-'+i).textContent = pct + '%';
+    document.getElementById('vot-'+i).textContent = c[i] + ' voto' + (c[i]!==1?'s':'');
+    setTimeout(()=>{ document.getElementById('bar-'+i).style.width = pct + '%'; }, 80);
+
+    const card = document.getElementById('card-'+i);
+    if(!hayEmpate && c[i] === max && total > 0) card.classList.add('ganadora');
+    else card.classList.remove('ganadora');
+  });
+}
+
+async function fetchDatos(){
+  const badge = document.getElementById('live-badge');
+  try{
+    const res  = await fetch(APPS_URL + '?accion=leer&t=' + Date.now(), {cache:'no-store'});
+    const json = await res.json();
+    actualizarUI(json);
+    badge.classList.remove('sin-conexion');
+    document.getElementById('live-txt').textContent = 'EN VIVO';
+  } catch(e){
+    badge.classList.add('sin-conexion');
+    document.getElementById('live-txt').textContent = 'SIN CONEXIÓN';
+  }
+}
+
+fetchDatos();
+setInterval(fetchDatos, INTERVALO);
+</script>
+</body>
+</html>

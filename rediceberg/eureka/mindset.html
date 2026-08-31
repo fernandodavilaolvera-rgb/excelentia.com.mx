@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Innovation Mindset</title>
+<link href="https://fonts.googleapis.com/css2?family=Kodchasan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#080c08;--card:#0d120d;--border:#1a221a;
+  --green:#aaff00;--cyan:#00ffee;--yellow:#ffee00;--text:#ddeedd;
+  /* Colores por territorio: base (borde) y claro (texto/barra) */
+  --o1:#2e4fa0; --o1b:#7fa4f5;
+  --o2:#c3c018; --o2b:#c3c018;
+  --o3:#eb4c7b; --o3b:#eb4c7b;
+  --o4:#64330e; --o4b:#e0a862;
+  --font:'Kodchasan',sans-serif;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(170,255,0,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(170,255,0,.015) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+.wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;
+  padding:0 0 40px;max-width:720px;margin:0 auto;width:100%;}
+
+/* HEADER */
+.topbar{padding:18px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:14px;border-bottom:1px solid var(--border);}
+.logo-mindset{width:100%;max-width:420px;height:auto;display:block;}
+.pregunta{font-size:17px;font-weight:700;color:var(--text);text-align:center;line-height:1.4;padding:0 6px;text-transform:uppercase;}
+.pregunta span{color:var(--yellow);}
+.sub-tag{font-size:11px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;opacity:.8;text-align:center;}
+.instruccion{font-size:14px;font-weight:600;color:var(--green);letter-spacing:1px;text-align:center;margin-top:-6px;}
+
+/* OPCIONES */
+.opciones{display:flex;flex-direction:column;gap:18px;padding:20px 16px 0;}
+.opcion{border-radius:16px;overflow:hidden;border:3px solid var(--border);position:relative;cursor:pointer;transition:transform .15s ease;background:#000;}
+.opcion:active{transform:scale(.98);}
+.opcion.o1{border-color:var(--o1);}
+.opcion.o2{border-color:var(--o2);}
+.opcion.o3{border-color:var(--o3);}
+.opcion.o4{border-color:var(--o4);}
+.opcion-img{width:100%;height:auto;display:block;}
+
+/* PANTALLAS DE ESTADO */
+.gracias-wrap,.ya-votaste{display:none;flex-direction:column;align-items:center;gap:20px;padding:36px 20px;}
+.gracias-icon{font-size:48px;}
+.gracias-titulo{font-size:21px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;text-align:center;}
+.gracias-sub{font-size:14px;color:var(--cyan);text-align:center;opacity:.85;letter-spacing:1px;}
+.ya-votaste-txt{font-size:18px;font-weight:700;color:var(--yellow);letter-spacing:2px;text-align:center;}
+
+/* RESULTADOS */
+.resultados{width:100%;display:flex;flex-direction:column;gap:12px;margin-top:4px;}
+.res-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:9px;}
+.res-header{display:flex;align-items:center;gap:10px;}
+.res-num{font-size:20px;font-weight:700;line-height:1;}
+.res-name{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;flex:1;line-height:1.2;}
+.res-pct{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;}
+.res-track{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.res-fill{height:100%;border-radius:4px;width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.res-votos{font-size:11px;opacity:.6;letter-spacing:.5px;}
+
+.res-card.o1 .res-num,.res-card.o1 .res-pct{color:var(--o1b);}
+.res-card.o1 .res-fill{background:var(--o1b);}
+.res-card.o2 .res-num,.res-card.o2 .res-pct{color:var(--o2b);}
+.res-card.o2 .res-fill{background:var(--o2b);}
+.res-card.o3 .res-num,.res-card.o3 .res-pct{color:var(--o3b);}
+.res-card.o3 .res-fill{background:var(--o3b);}
+.res-card.o4 .res-num,.res-card.o4 .res-pct{color:var(--o4b);}
+.res-card.o4 .res-fill{background:var(--o4b);}
+
+.total-live{text-align:center;font-size:12px;color:var(--cyan);letter-spacing:1.5px;opacity:.7;}
+.live-row{display:flex;align-items:center;gap:8px;justify-content:center;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.4s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.live-lbl{font-size:11px;color:var(--green);letter-spacing:2px;font-weight:700;text-transform:uppercase;}
+.live-row.sin-conexion .live-dot{background:#ff4d4d;animation:none;}
+.live-row.sin-conexion .live-lbl{color:#ff4d4d;}
+
+@media print{
+  @page{size:Letter;margin:13mm;}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+  body::before{display:none;}
+  .opciones,.wrap,section,div{break-inside:auto;}
+  .res-card,.opcion{break-inside:avoid;}
+  .pregunta,.gracias-titulo{break-after:avoid;}
+  p,li{orphans:3;widows:3;}
+  a[href]:after{content:none;}
+  .no-print{display:none!important;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <img class="logo-mindset"
+      src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/innovation_mindset.jpeg"
+      alt="Innovation Mindset">
+    <div class="pregunta">¿Qué territorio tiene <span>más potencial</span> para transformar el negocio?</div>
+    <div class="sub-tag">Votación en vivo · Un voto por persona</div>
+    <div class="instruccion">Elige uno de los territorios</div>
+  </div>
+
+  <!-- OPCIONES -->
+  <div class="opciones" id="seccion-opciones">
+    <div class="opcion o1" onclick="votar(1)">
+      <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/accesible_funcionality.jpeg" alt="Accesible Functionality">
+    </div>
+    <div class="opcion o2" onclick="votar(2)">
+      <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/elevated_Indulgence.jpeg" alt="Elevated Indulgence">
+    </div>
+    <div class="opcion o3" onclick="votar(3)">
+      <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/mexican_pride.jpeg" alt="Mexican Pride">
+    </div>
+    <div class="opcion o4" onclick="votar(4)">
+      <img class="opcion-img" src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/new_simplicity.jpeg" alt="New Simplicity">
+    </div>
+  </div>
+
+  <!-- GRACIAS -->
+  <div class="gracias-wrap" id="seccion-gracias">
+    <div class="gracias-icon">✦</div>
+    <div class="gracias-titulo">¡Voto registrado!</div>
+    <div class="gracias-sub">Así está votando el grupo en este momento</div>
+    <div class="live-row" id="live-gracias">
+      <div class="live-dot"></div><div class="live-lbl">En vivo</div>
+    </div>
+    <div class="resultados" id="resultados"></div>
+    <div class="total-live" id="total-live"></div>
+  </div>
+
+  <!-- YA VOTASTE -->
+  <div class="ya-votaste" id="seccion-ya-votaste">
+    <div class="gracias-icon">🔒</div>
+    <div class="ya-votaste-txt">Ya registraste tu voto</div>
+    <div class="gracias-sub">Aquí van los resultados en tiempo real</div>
+    <div class="live-row" id="live-ya">
+      <div class="live-dot"></div><div class="live-lbl">En vivo</div>
+    </div>
+    <div class="resultados" id="resultados-ya"></div>
+    <div class="total-live" id="total-live-ya"></div>
+  </div>
+
+</div>
+
+<script>
+const APPS_URL = 'https://script.google.com/macros/s/AKfycbwPjU6LtL8f39CPbZIZHqqrnTJGskiTelx-Rdw583Xjwlu156H8nc0R8Zf3b61hs9a7gg/exec';
+const LS_KEY   = 'mindset_voto_v1';
+
+const KEYS    = ['','ACCESIBLE FUNCTIONALITY','ELEVATED INDULGENCE','MEXICAN PRIDE','NEW SIMPLICITY'];
+const NOMBRES = ['','Accesible Functionality','Elevated Indulgence','Mexican Pride','New Simplicity'];
+const CLASES  = ['','o1','o2','o3','o4'];
+const NUMS    = ['','01','02','03','04'];
+
+// Reset para pruebas: ?reset=1
+if(new URLSearchParams(window.location.search).get('reset') === '1'){
+  localStorage.removeItem(LS_KEY);
+}
+
+if(localStorage.getItem(LS_KEY)) mostrarYaVotaste();
+
+function votar(opcion){
+  localStorage.setItem(LS_KEY, opcion);
+  fetch(APPS_URL + '?accion=voto&opcion=' + opcion, {mode:'no-cors'}).catch(()=>{});
+  mostrarGracias();
+}
+
+function mostrarGracias(){
+  document.getElementById('seccion-opciones').style.display = 'none';
+  document.getElementById('seccion-gracias').style.display  = 'flex';
+  arrancarPolling('resultados','total-live','live-gracias');
+}
+
+function mostrarYaVotaste(){
+  document.getElementById('seccion-opciones').style.display   = 'none';
+  document.getElementById('seccion-ya-votaste').style.display = 'flex';
+  arrancarPolling('resultados-ya','total-live-ya','live-ya');
+}
+
+function arrancarPolling(contId, totalId, liveId){
+  cargarResultados(contId, totalId, liveId);
+  setInterval(()=>cargarResultados(contId, totalId, liveId), 5000);
+}
+
+async function cargarResultados(contId, totalId, liveId){
+  const live = document.getElementById(liveId);
+  try{
+    const res  = await fetch(APPS_URL + '?accion=leer&t=' + Date.now(), {cache:'no-store'});
+    const json = await res.json();
+    const datos = {};
+    for(let i=1;i<=4;i++) datos[i] = json[KEYS[i]] || 0;
+    live.classList.remove('sin-conexion');
+    live.querySelector('.live-lbl').textContent = 'En vivo';
+    renderResultados(datos, contId, totalId);
+  }catch(e){
+    live.classList.add('sin-conexion');
+    live.querySelector('.live-lbl').textContent = 'Sin conexión';
+  }
+}
+
+function renderResultados(datos, contId, totalId){
+  const cont  = document.getElementById(contId);
+  const total = datos[1]+datos[2]+datos[3]+datos[4];
+  const orden = [1,2,3,4].sort((a,b)=>datos[b]-datos[a]);
+
+  cont.innerHTML = '';
+  orden.forEach(i=>{
+    const pct  = total > 0 ? Math.round(datos[i]/total*100) : 0;
+    const card = document.createElement('div');
+    card.className = 'res-card ' + CLASES[i];
+    card.innerHTML =
+      '<div class="res-header">' +
+        '<div class="res-num">'+NUMS[i]+'</div>' +
+        '<div class="res-name">'+NOMBRES[i]+'</div>' +
+        '<div class="res-pct">'+pct+'%</div>' +
+      '</div>' +
+      '<div class="res-track"><div class="res-fill" id="fill-'+contId+'-'+i+'"></div></div>' +
+      '<div class="res-votos">'+datos[i]+' voto'+(datos[i]!==1?'s':'')+'</div>';
+    cont.appendChild(card);
+    setTimeout(()=>{
+      const f = document.getElementById('fill-'+contId+'-'+i);
+      if(f) f.style.width = pct+'%';
+    }, 80);
+  });
+
+  document.getElementById(totalId).textContent = 'Total: ' + total + ' voto' + (total!==1?'s':'');
+}
+</script>
+</body>
+</html>
