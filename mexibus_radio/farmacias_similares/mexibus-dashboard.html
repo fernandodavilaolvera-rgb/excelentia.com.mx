@@ -40,6 +40,10 @@
   .chip{background:#fff; border:1px solid var(--linea); border-radius:20px; padding:.45rem .95rem;
     font-family:'Manrope',sans-serif; font-size:12px; font-weight:700; color:var(--txt2); cursor:pointer; transition:.2s}
   .chip.on{background:var(--rojo); border-color:var(--rojo); color:#fff}
+  .filtros-linea{margin-top:.55rem; align-items:center}
+  .filtro-tit{font-size:10.5px; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
+    color:var(--txt3); margin-right:.2rem}
+  .chip.lin.on{background:#1a3a6b; border-color:#1a3a6b}
   .rango-fechas{display:flex; align-items:center; gap:.4rem; margin-left:.35rem}
   .rango-fechas label{font-size:11.5px; font-weight:700; color:var(--txt3)}
   .rango-fechas input{font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:700; color:var(--txt2);
@@ -105,6 +109,30 @@
     .franja-sep{width:100%; height:1px; align-self:auto}
     .franja-dato b{font-size:36px}
   }
+
+  /* grupos por linea */
+  .grupo-linea{margin-bottom:1.1rem}
+  .grupo-linea:last-child{margin-bottom:0}
+  .grupo-tit{font-size:10.5px; font-weight:800; letter-spacing:.4px; text-transform:uppercase;
+    color:var(--txt3); margin-bottom:.6rem; padding-bottom:.3rem; border-bottom:1px solid var(--linea)}
+  .grupo-tit span{font-weight:700; color:#a8aebd; text-transform:none; letter-spacing:0}
+  .pil{display:inline-block; color:#fff; font-size:9.5px; font-weight:800;
+    padding:.15rem .45rem; border-radius:5px; white-space:nowrap}
+
+  /* comparativa de lineas */
+  .cmp{display:grid; grid-template-columns:1fr 1fr; gap:.9rem}
+  .cmp-col{border:1px solid var(--linea); border-radius:11px; padding:1rem 1.1rem}
+  .cmp-col h4{font-size:12px; font-weight:800; margin-bottom:.8rem; display:flex;
+    align-items:center; gap:.45rem}
+  .cmp-col h4 i{width:11px; height:11px; border-radius:3px; display:inline-block}
+  .cmp-fila{display:flex; justify-content:space-between; align-items:baseline;
+    padding:.4rem 0; border-bottom:1px solid #f0f1f5; font-size:12px; color:var(--txt2)}
+  .cmp-fila:last-child{border-bottom:none}
+  .cmp-fila b{font-size:15px; font-weight:800; color:var(--txt); font-variant-numeric:tabular-nums}
+  .cmp-alerta{background:#fff6e5; border:1px solid #f0dcb4; border-left:3px solid #F7941E;
+    border-radius:9px; padding:.8rem 1rem; margin-top:.9rem; font-size:11.5px;
+    color:#4a5068; line-height:1.55; max-width:720px}
+  @media (max-width:700px){ .cmp{grid-template-columns:1fr} }
 
   /* reparto por andén (dona) */
   .dona-wrap{display:flex; gap:1.6rem; align-items:center; flex-wrap:wrap}
@@ -182,9 +210,10 @@
     @page{ size:Letter; margin:13mm }
     *{ -webkit-print-color-adjust:exact; print-color-adjust:exact }
     body{ background:#fff }
-    .filtros, .vivo, .no-print{ display:none !important }
+    .vivo, .no-print{ display:none !important }
+    .filtros{ display:none !important }
     section, .card, main, div, .tabla-wrap{ break-inside:auto }
-    .kpi, .anden, .paso-e, .aviso-priv, .ley, .dona, .franja, img{ break-inside:avoid }
+    .kpi, .anden, .paso-e, .aviso-priv, .ley, .dona, .franja, .cmp-col, .cmp-alerta, img{ break-inside:avoid }
     h1,h2,h3,h4, .card h3{ break-after:avoid }
     p, li{ orphans:3; widows:3 }
     thead{ display:table-header-group }
@@ -231,6 +260,13 @@
       <input type="date" id="fHasta">
       <button class="chip aplica" onclick="aplicarFechas()">Aplicar</button>
     </div>
+  </div>
+
+  <div class="filtros filtros-linea">
+    <span class="filtro-tit">Línea</span>
+    <button class="chip lin on" data-linea="" onclick="cambiarLinea(this)">Ambas</button>
+    <button class="chip lin" data-linea="Línea 1" onclick="cambiarLinea(this)">Línea 1</button>
+    <button class="chip lin" data-linea="Línea 2" onclick="cambiarLinea(this)">Línea 2</button>
   </div>
 
   <div class="kpis">
@@ -304,10 +340,15 @@
     <h3>Actividad por andén <span id="totalReg">—</span></h3>
     <div class="tabla-wrap">
       <table>
-        <thead><tr><th>Andén</th><th>Registros</th><th>Videos completos</th><th>Clics al sitio</th><th>Efectividad</th><th></th></tr></thead>
+        <thead><tr><th>Andén</th><th>Línea</th><th>Registros</th><th>Videos completos</th><th>Clics al sitio</th><th>Efectividad</th><th></th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
+  </div>
+
+  <div class="card" style="margin-top:.9rem">
+    <h3>Línea 1 contra Línea 2 <span id="cmpPeriodo">Mes</span></h3>
+    <div class="body" id="cmpBox"><div class="vacio">Cargando…</div></div>
   </div>
 
   <div class="card" style="margin-top:.9rem">
@@ -346,7 +387,20 @@ var HEAD = { apikey: KEY, Authorization: 'Bearer ' + KEY };
 
 var RANGO = 'mes';
 var F_DESDE = '', F_HASTA = '';   /* filtro por fechas, cuando se usa */
+var LINEA = '';                   /* '' = ambas lineas */
+var CATALOGO = [];                /* andenes dados de alta, por linea */
 var COLORES = ['#E8114B','#E5449A','#7B3F8C','#29ABE2','#8CC63F','#FFC20E','#F7941E'];
+
+/* Cada linea tiene su familia de color: azules la 1, verdes la 2.
+   Asi se distinguen de un golpe de vista en la lista y en la dona. */
+var AZULES  = ['#1e5096','#29ABE2','#1a3a6b','#4a9fd4','#0d1b3e','#7fc4e8'];
+var VERDES  = ['#2c8a45','#8CC63F','#1f6b33','#a8d95f','#145226','#c6e88f'];
+function colorLinea(ln){ return ln === 'Línea 2' ? VERDES[0] : (ln === 'Línea 1' ? AZULES[0] : '#8a90a0'); }
+function tonoLinea(ln, i){
+  if(ln === 'Línea 2') return VERDES[i % VERDES.length];
+  if(ln === 'Línea 1') return AZULES[i % AZULES.length];
+  return '#8a90a0';
+}
 
 /* ---------- Utilidades ---------- */
 function n(v){ return (v || 0).toLocaleString('es-MX'); }
@@ -399,9 +453,16 @@ function aplicarFechas(){
   cargar();
 }
 
+function cambiarLinea(btn){
+  document.querySelectorAll('.chip.lin').forEach(function(c){ c.classList.remove('on'); });
+  btn.classList.add('on');
+  LINEA = btn.dataset.linea;
+  cargar();
+}
+
 function pintarPeriodo(){
   var txt = rotulo();
-  ['embudoPeriodo','andenPeriodo','donaPeriodo'].forEach(function(id){
+  ['embudoPeriodo','andenPeriodo','donaPeriodo','cmpPeriodo'].forEach(function(id){
     var e = document.getElementById(id);
     if(e) e.textContent = txt;
   });
@@ -461,19 +522,27 @@ function cargar(){
   var f = 'fecha=gte.' + d;
   if(RANGO === 'fechas' && F_HASTA) f += '&fecha=lte.' + F_HASTA;
 
+  /* El filtro de linea se aplica en la consulta; cuando esta en "Ambas"
+     no se manda nada y las vistas devuelven las dos. */
+  var fl = f + (LINEA ? '&linea=eq.' + encodeURIComponent(LINEA) : '');
+
   Promise.all([
-    traer('mexibus_v_dia',   f + '&order=fecha.desc'),
-    traer('mexibus_v_hora',  f + '&order=hora.asc'),
-    traer('mexibus_v_anden', f),
-    traer('mexibus_v_total', 'select=*'),
-    traer('mexibus_config',  'select=*')
+    traer('mexibus_v_dia_linea',  fl + '&order=fecha.desc'),
+    traer('mexibus_v_hora_linea', fl + '&order=hora.asc'),
+    traer('mexibus_v_anden',      fl),
+    traer('mexibus_v_total',      'select=*'),
+    traer('mexibus_config',       'select=*'),
+    traer('mexibus_andenes',      'select=nombre,linea'),
+    traer('mexibus_v_anden',      f)   /* sin filtro: la comparacion siempre ve las dos */
   ])
   .then(function(r){
     conexion(true);
+    CATALOGO = r[5] || [];
     pintarKpis(r[0], d);
     pintarHoras(r[1]);
     pintarAndenes(r[2]);
     pintarCampana(r[4] || []);
+    pintarLineas(r[6] || []);
   })
   .catch(function(){ conexion(false); });
 }
@@ -593,30 +662,44 @@ function pintarHoras(filas){
 function pintarAndenes(filas){
   var acum = {};
   filas.forEach(function(f){
-    if(!acum[f.anden]) acum[f.anden] = { registros:0, videos:0, clics:0 };
+    if(!acum[f.anden]) acum[f.anden] = { registros:0, videos:0, clics:0, linea:f.linea || 'Sin identificar' };
     acum[f.anden].registros += f.registros;
     acum[f.anden].videos    += f.videos;
     acum[f.anden].clics     += (f.clics || 0);
   });
   var lista = Object.keys(acum).map(function(k){
-    return { anden:k, registros:acum[k].registros, videos:acum[k].videos, clics:acum[k].clics };
-  }).sort(function(a,b){ return b.videos - a.videos; });
+    return { anden:k, registros:acum[k].registros, videos:acum[k].videos,
+             clics:acum[k].clics, linea:acum[k].linea };
+  }).sort(function(a,b){ return b.registros - a.registros; });
 
   var cajaA = document.getElementById('andenes');
   var tb    = document.getElementById('tbody');
 
   if(!lista.length){
     cajaA.innerHTML = '<div class="vacio"><b>Sin datos por andén</b>Aparecen en cuanto los equipos queden registrados en la bitácora.</div>';
-    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
     document.getElementById('totalReg').textContent = '—';
     return;
   }
 
-  var maxA = lista[0].videos || 1;
-  cajaA.innerHTML = lista.map(function(a, i){
-    return '<div class="anden"><div class="anden-top"><b>' + a.anden + '</b><span>' + n(a.videos) + '</span></div>' +
-           '<div class="anden-bar"><i style="width:0;background:' + COLORES[i % COLORES.length] +
-           '" data-w="' + (a.videos / maxA * 100) + '"></i></div></div>';
+  /* Los andenes se agrupan bajo su linea y se colorean segun a cual
+     pertenecen: azules la 1, verdes la 2. */
+  var maxA = lista[0].registros || 1;
+  var porLinea = {};
+  lista.forEach(function(a){
+    if(!porLinea[a.linea]) porLinea[a.linea] = [];
+    porLinea[a.linea].push(a);
+  });
+
+  cajaA.innerHTML = Object.keys(porLinea).sort().map(function(ln){
+    return '<div class="grupo-linea"><div class="grupo-tit">' + ln +
+           ' <span>' + porLinea[ln].length + ' andenes</span></div>' +
+      porLinea[ln].map(function(a){
+        return '<div class="anden"><div class="anden-top"><b>' + a.anden + '</b><span>' +
+               n(a.registros) + '</span></div>' +
+               '<div class="anden-bar"><i style="width:0;background:' + colorLinea(a.linea) +
+               '" data-w="' + (a.registros / maxA * 100) + '"></i></div></div>';
+      }).join('') + '</div>';
   }).join('');
   setTimeout(function(){
     document.querySelectorAll('.anden-bar i').forEach(function(b, i){
@@ -626,7 +709,9 @@ function pintarAndenes(filas){
 
   tb.innerHTML = lista.map(function(a){
     var ef = a.registros ? Math.round(a.videos / a.registros * 100) : 0;
-    return '<tr><td><b>' + a.anden + '</b></td><td>' + n(a.registros) + '</td><td>' + n(a.videos) + '</td>' +
+    return '<tr><td><b>' + a.anden + '</b></td>' +
+           '<td><span class="pil" style="background:' + colorLinea(a.linea) + '">' + a.linea + '</span></td>' +
+           '<td>' + n(a.registros) + '</td><td>' + n(a.videos) + '</td>' +
            '<td>' + n(a.clics) + '</td>' +
            '<td>' + ef + '%</td>' +
            '<td><span class="badge ' + (ef >= 75 ? 'ok' : 'mid') + '">' +
@@ -634,6 +719,65 @@ function pintarAndenes(filas){
   }).join('');
   document.getElementById('totalReg').textContent = lista.length + ' andenes con actividad';
   pintarDona(lista);
+}
+
+/* ---------- Línea 1 contra Línea 2 ----------
+   Siempre mira las dos lineas, aunque arriba se este filtrando una sola:
+   la gracia de esta tarjeta es comparar. */
+function pintarLineas(filas){
+  var caja = document.getElementById('cmpBox');
+  if(!caja) return;
+
+  var t = {};
+  ['Línea 1','Línea 2'].forEach(function(ln){
+    t[ln] = { registros:0, videos:0, clics:0, andenes:{} };
+  });
+
+  filas.forEach(function(f){
+    var ln = f.linea;
+    if(!t[ln]) return;                    /* 'Sin identificar' no entra */
+    t[ln].registros += f.registros;
+    t[ln].videos    += f.videos;
+    t[ln].clics     += (f.clics || 0);
+    t[ln].andenes[f.anden] = true;
+  });
+
+  /* Cuantos andenes tiene dada de alta cada linea */
+  var catalogo = {};
+  CATALOGO.forEach(function(a){ catalogo[a.linea] = (catalogo[a.linea] || 0) + 1; });
+
+  var total = t['Línea 1'].registros + t['Línea 2'].registros;
+
+  caja.innerHTML = '<div class="cmp">' + ['Línea 1','Línea 2'].map(function(ln){
+    var d      = t[ln];
+    var activos = Object.keys(d.andenes).length;
+    var deAlta  = catalogo[ln] || 0;
+    var pctClic = d.registros ? Math.round(d.clics / d.registros * 100) : 0;
+    var aporte  = total ? Math.round(d.registros / total * 100) : 0;
+
+    return '<div class="cmp-col">' +
+      '<h4><i style="background:' + colorLinea(ln) + '"></i>' + ln + '</h4>' +
+      '<div class="cmp-fila"><span>Conexiones</span><b>' + n(d.registros) + '</b></div>' +
+      '<div class="cmp-fila"><span>Andenes activos</span><b>' + activos + ' de ' + deAlta + '</b></div>' +
+      '<div class="cmp-fila"><span>Entran al sitio</span><b>' + pctClic + '%</b></div>' +
+      '<div class="cmp-fila"><span>Del total de conexiones</span><b>' + aporte + '%</b></div>' +
+      '</div>';
+  }).join('') + '</div>' + avisoCobertura(t, catalogo);
+}
+
+/* Aviso cuando hay andenes dados de alta que no reportan nada en el periodo */
+function avisoCobertura(t, catalogo){
+  var mudos = [];
+  ['Línea 1','Línea 2'].forEach(function(ln){
+    var activos = Object.keys(t[ln].andenes).length;
+    var deAlta  = catalogo[ln] || 0;
+    if(deAlta && activos < deAlta) mudos.push((deAlta - activos) + ' de ' + ln);
+  });
+  if(!mudos.length) return '';
+  return '<div class="cmp-alerta"><b>Andenes sin reportar en este periodo:</b> ' +
+         mudos.join(' y ') + '. Están dados de alta pero no ha entrado ' +
+         'ni una conexión desde ellos; puede ser que el equipo esté apagado, ' +
+         'sin señal o que todavía no le hayan cargado la liga.</div>';
 }
 
 /* ---------- Reparto de conexiones por andén (dona) ---------- */
@@ -658,7 +802,7 @@ function pintarDona(lista){
   orden.forEach(function(a, i){
     var pct = a.registros / total * 100;
     arcos += '<circle cx="21" cy="21" r="' + R + '" fill="none" stroke="' +
-             COLORES[i % COLORES.length] + '" stroke-width="7" ' +
+             tonoLinea(a.linea, i) + '" stroke-width="7" ' +
              'stroke-dasharray="0 100" stroke-dashoffset="' + (-giro) + '" ' +
              'data-dash="' + pct.toFixed(2) + ' ' + (100 - pct).toFixed(2) + '">' +
              '<title>' + a.anden + ': ' + n(a.registros) + ' conexiones (' + Math.round(pct) + '%)</title></circle>';
@@ -679,7 +823,7 @@ function pintarDona(lista){
 
   ley.innerHTML = orden.map(function(a, i){
     var pct = Math.round(a.registros / total * 100);
-    return '<div class="ley"><i style="background:' + COLORES[i % COLORES.length] + '"></i>' +
+    return '<div class="ley"><i style="background:' + tonoLinea(a.linea, i) + '"></i>' +
            '<b title="' + a.anden + '">' + a.anden + '</b>' +
            '<span>' + n(a.registros) + ' · ' + pct + '%</span></div>';
   }).join('');
