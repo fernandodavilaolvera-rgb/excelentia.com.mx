@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mexican Pride — Ventana al Mundo</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color: #FF2D9B;
+    --color-dark: #d4007e;
+    --color-light: #ffe0f3;
+    --color-mid: #ff70bf;
+    --black: #0a0a0f;
+    --gray-bg: #f5f5f7;
+    --gray-light: #e5e7eb;
+    --text-dark: #111827;
+    --text-mid: #374151;
+    --text-soft: #6B7280;
+    --white: #ffffff;
+    --header-h: 64px;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(255,45,155,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: 'Manrope', sans-serif;
+    background-color: #f5f5f7;
+    background-image: url('https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/fondoventanas.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top center;
+    background-attachment: fixed;
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--black);
+    height: var(--header-h);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 2px solid var(--color);
+  }
+  .header-logo-text {
+    display: flex; flex-direction: column; gap: 2px;
+    line-height: 1;
+  }
+  .header-logo-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 900; font-size: 17px;
+    color: var(--white); letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .header-logo-sub {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600; font-size: 7px;
+    color: #00e5ff; letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+  .header-back {
+    display: none;
+    align-items: center; gap: 6px;
+    background: none; border: none;
+    color: var(--white); font-family: 'Manrope', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 6px 0;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .header-back svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .header-back.visible { display: flex; }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    padding-top: var(--header-h);
+    min-height: 100vh;
+  }
+  .screen.active { display: block; }
+
+  /* ════════════════════════════════
+     SCREEN 2 — TERRITORIO
+  ════════════════════════════════ */
+
+  /* Hero image — tarjeta flotante con esquinas curvas */
+  .hero-img-wrap {
+    padding: 16px 16px 8px;
+  }
+  .hero-img-wrap img {
+    width: 100%;
+    height: auto;
+    max-height: 220px;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+
+  @media (max-width: 600px) {
+    .hero-img-wrap img { max-height: 180px; }
+  }
+  @media (min-width: 601px) {
+    .hero-img-wrap { max-width: 700px; margin: 0 auto; }
+  }
+
+  /* Category section */
+  .cat-section { margin-bottom: 4px; }
+  .cat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 10px;
+  }
+  .cat-title-wrap { display: flex; align-items: center; gap: 10px; }
+  .cat-icon-circle {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .cat-name {
+    font-weight: 900; font-size: 15px;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--color);
+  }
+  .cat-ver {
+    font-size: 12px; font-weight: 700;
+    color: var(--color); text-decoration: none;
+    display: flex; align-items: center; gap: 3px;
+    white-space: nowrap;
+  }
+  .cat-ver svg { width: 14px; height: 14px; }
+
+  /* Carousel */
+  .carousel-wrap { padding: 0 16px; }
+  .carousel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+    padding-right: 24px;
+  }
+  .carousel::-webkit-scrollbar { display: none; }
+
+  .product-card {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 148px;
+    height: 262px;
+    background: var(--white);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    transition: transform 0.15s;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-card:active { transform: scale(0.97); }
+
+  .pc-img-wrap {
+    width: 100%; height: 138px;
+    flex-shrink: 0;
+    background: #fafafa;
+    position: relative; overflow: hidden;
+  }
+  .pc-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    padding: 10px;
+    transition: opacity 0.3s;
+  }
+  .pc-body {
+    padding: 10px 10px 12px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .pc-brand {
+    font-weight: 900; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--color);
+    margin-bottom: 2px;
+    flex-shrink: 0;
+  }
+  .pc-name {
+    font-size: 11px; color: var(--text-mid);
+    line-height: 1.3; font-weight: 500;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+  .pc-claim {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 36px;
+    width: 100%;
+    font-size: 9px; font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 20px;
+    background: var(--color);
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    line-height: 1.2;
+  }
+
+  /* Carousel dots */
+  .carousel-dots {
+    display: flex; justify-content: center; gap: 5px;
+    padding: 8px 0 14px;
+  }
+  .cdot {
+    width: 6px; height: 4px;
+    border-radius: 3px;
+    background: var(--gray-light);
+    transition: all 0.2s;
+  }
+  .cdot.active { width: 18px; background: var(--color); }
+
+  /* Separador sección */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-light), transparent);
+    margin: 4px 16px 0;
+  }
+
+  /* Padding bottom para scroll */
+  .screen-territorio-inner { padding-bottom: 40px; }
+
+  @media (min-width: 601px) {
+    .screen-territorio-inner { max-width: 700px; margin: 0 auto; }
+    .cat-section { max-width: 700px; }
+  }
+
+  /* ════════════════════════════════
+     SCREEN 3 — PRODUCTO
+  ════════════════════════════════ */
+  #screen-producto { background: var(--gray-bg); }
+
+  .producto-img-section {
+    background: var(--white);
+    padding: 24px 20px 20px;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 240px;
+    position: relative;
+  }
+  .producto-img-section img {
+    max-width: 220px; max-height: 220px;
+    width: 100%; object-fit: contain;
+    border-radius: 12px;
+  }
+  .prod-tab-badge {
+    position: absolute; top: 16px; left: 16px;
+    background: var(--color);
+    color: white;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 4px 10px; border-radius: 20px;
+  }
+
+  .producto-body { padding: 16px 16px 80px; }
+
+  .prod-brand {
+    font-weight: 900; font-size: 28px;
+    text-transform: uppercase;
+    color: var(--color);
+    line-height: 1; margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+  .prod-name {
+    font-size: 16px; color: var(--text-mid);
+    font-weight: 500; line-height: 1.3;
+    margin-bottom: 20px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .info-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .info-card.full { grid-column: 1 / -1; }
+  .info-label {
+    font-size: 9px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--color);
+    margin-bottom: 5px;
+  }
+  .info-value {
+    font-size: 13px; color: var(--text-dark);
+    font-weight: 500; line-height: 1.4;
+  }
+  .info-value.highlight {
+    font-size: 15px; font-weight: 800;
+    color: var(--color);
+  }
+
+  .racional-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--color);
+  }
+  .racional-label {
+    font-size: 9px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--color);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .racional-text {
+    font-size: 13px; color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  .oportunidad-card {
+    background: linear-gradient(135deg, #fff0f9 0%, #ffe4f4 100%);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--color-light);
+  }
+  .oportunidad-label {
+    font-size: 9px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--color-dark);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .oportunidad-text {
+    font-size: 12px; color: #7d1a50;
+    line-height: 1.6;
+  }
+
+  /* ── ANIMACIONES ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .screen.active .hero-img-wrap { animation: fadeUp 0.35s ease both; }
+  .screen.active .cat-section { animation: fadeUp 0.35s ease both; }
+  .screen.active .cat-section:nth-child(2) { animation-delay: 0.08s; }
+  .screen.active .producto-img-section { animation: fadeUp 0.3s ease both; }
+  .screen.active .producto-body { animation: fadeUp 0.3s ease 0.08s both; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .prod-brand { font-size: 24px; }
+    .info-grid { gap: 6px; }
+    .info-card { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-logo-text">
+    <div class="header-logo-title">VENTANA <span style="font-weight:400;">AL</span> MUNDO</div>
+    <div class="header-logo-sub">El sistema vivo que convierte señales en inteligencia accionable</div>
+  </div>
+  <button class="header-back" id="btnBack" onclick="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    <span id="backLabel">Territorio</span>
+  </button>
+</header>
+
+<!-- ══════════════════════════════════
+     SCREEN 2: TERRITORIO
+══════════════════════════════════ -->
+<div id="screen-territorio" class="screen active">
+  <div class="screen-territorio-inner">
+
+    <!-- Hero image -->
+    <div class="hero-img-wrap">
+      <img
+        src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/mexican_pride.jpeg"
+        alt="Mexican Pride"
+        onerror="this.style.opacity='0.4'">
+    </div>
+
+    <!-- Sección F&B -->
+    <div class="cat-section" id="section-fb">
+      <div class="cat-header">
+        <div class="cat-title-wrap">
+          <div class="cat-icon-circle">🌮</div>
+          <span class="cat-name">Alimentos y Bebidas</span>
+        </div>
+        <a class="cat-ver" onclick="verTodos('fb')" style="cursor:pointer;">
+          Ver todos
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      </div>
+      <div class="carousel-wrap">
+        <div class="carousel" id="carousel-fb"></div>
+      </div>
+      <div class="carousel-dots" id="dots-fb"></div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- Sección Otras Industrias -->
+    <div class="cat-section" id="section-other">
+      <div class="cat-header">
+        <div class="cat-title-wrap">
+          <div class="cat-icon-circle">✨</div>
+          <span class="cat-name">Otras Industrias</span>
+        </div>
+        <a class="cat-ver" onclick="verTodos('other')" style="cursor:pointer;">
+          Ver todos
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      </div>
+      <div class="carousel-wrap">
+        <div class="carousel" id="carousel-other"></div>
+      </div>
+      <div class="carousel-dots" id="dots-other"></div>
+    </div>
+
+    <!-- Logo centrado al final -->
+    <div style="padding: 24px 16px 40px; display:flex; justify-content:center;">
+      <img
+        src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/logo1ventanacompleto.png"
+        alt="Ventana al Mundo"
+        style="width:100%; max-width:calc(100% - 32px); height:auto; display:block; object-fit:contain;"
+        onerror="this.style.display='none'">
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 3: PRODUCTO
+══════════════════════════════════ -->
+<div id="screen-producto" class="screen">
+  <div class="producto-img-section" id="prod-img-section">
+    <div class="prod-tab-badge" id="prod-tab-badge">F&B</div>
+    <img id="prod-img" src="" alt="">
+  </div>
+  <div class="producto-body" id="prod-body"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 4: VER TODOS
+══════════════════════════════════ -->
+<div id="screen-todos" class="screen">
+  <div style="padding: 20px 16px 80px;">
+    <h2 id="todos-title" style="font-weight:900; font-size:20px; text-transform:uppercase; color: var(--color); letter-spacing:1px; margin-bottom:16px;"></h2>
+    <div id="todos-grid" style="display:grid; grid-template-columns: repeat(2,1fr); gap:10px; align-items:start;"></div>
+  </div>
+</div>
+
+<script>
+// ── IMAGEN URL ──
+function imgUrl(filename) {
+  const base = 'https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/';
+  return base + filename.split('').map(c => {
+    if (/[a-zA-Z0-9_.\-]/.test(c)) return c;
+    return encodeURIComponent(c);
+  }).join('');
+}
+
+// ══════════════════════════════════
+//  DATOS — MEXICAN GATEKEEPING
+// ══════════════════════════════════
+const PRODUCTS = [
+  // F&B
+  {id:1,  file:"01_Indio_Agave.avif",                                         brand:"Indio",           name:"Indio Agave",                          cat:"Bebidas alcohólicas",       tab:"fb",  ingredient:"Agave",                    benefit:"Identidad mexicana premium",                claim:"Edición limitada",              racional:"Usa el agave como guiño aspiracional de origen mexicano dentro de una cerveza contemporánea."},
+  {id:2,  file:"02_Un_Sabor_Autentico_Instant_Ramen_Noodle_POZOLE.jpg",       brand:"Un Sabor Auténtico", name:"Instant Ramen Noodle POZOLE",        cat:"Instant ramen",             tab:"fb",  ingredient:"Sabor pozole",             benefit:"Conveniencia cultural",                     claim:"Un Sabor Auténtico",            racional:"Lleva un platillo tradicional mexicano a un formato global, rápido y cotidiano."},
+  {id:3,  file:"03_BelAra_NaturaBef_Totopos_de_Chapulin_con_Mole.jpg",        brand:"BelAra",          name:"Totopos de Chapulín con Mole",          cat:"Snacks tradicionales",      tab:"fb",  ingredient:"Chapulín con mole",        benefit:"Tradición en formato snack",               claim:"Chapulín con mole",             racional:"Convierte el chapulín con mole en una botana moderna sin perder su raíz gastronómica mexicana."},
+  {id:4,  file:"04_Chilpines_Chapulin_Deshidratado.jpg",                      brand:"Chilpines",       name:"Chapulín Deshidratado",                 cat:"Snacks tradicionales",      tab:"fb",  ingredient:"Chapulín deshidratado",    benefit:"Proteína tradicional",                     claim:"Chapulín deshidratado",         racional:"Preserva el consumo regional de insectos comestibles en un formato práctico y listo para comer."},
+  {id:5,  file:"05_ROBS_Chips_Limon_Chiltepin.avif",                          brand:"ROBS",            name:"Chips Limón Chiltepín",                 cat:"Snacks picantes",           tab:"fb",  ingredient:"Chiltepín",                benefit:"Sabor regional auténtico",                 claim:"Limón Chiltepín",               racional:"Integra ingredientes y sabores profundamente asociados a la cocina regional mexicana en un formato contemporáneo."},
+  {id:6,  file:"06_Cafe_Mis_Raices_VeHav_Chiapas.avif",                       brand:"Café Mis Raíces", name:"VeHav Chiapas",                         cat:"Café",                      tab:"fb",  ingredient:"Café chiapaneco",          benefit:"Origen premium",                           claim:"100% mexicano",                 racional:"Eleva el origen chiapaneco como señal de autenticidad, orgullo regional y pertenencia cultural."},
+  {id:7,  file:"07_Jarritos_Sabor_Tutti_Frutti.png",                          brand:"Jarritos",        name:"Sabor Tutti Frutti",                    cat:"Bebidas",                   tab:"fb",  ingredient:"Sabor tutti frutti",       benefit:"Nostalgia cultural",                       claim:"Sabor Tutti Frutti",            racional:"Activa nostalgia cultural a través de una marca mexicana icónica y sabores frutales populares."},
+  {id:8,  file:"08_Tepache_Mango_Chili.png",                                  brand:"Tepache",         name:"Mango Chili",                           cat:"Bebidas fermentadas",       tab:"fb",  ingredient:"Tepache y mango chili",    benefit:"Fermentación tradicional",                 claim:"Fermented beverage",            racional:"Moderniza el tepache en una bebida enlatada con sabor frutal y picante de inspiración mexicana."},
+  {id:9,  file:"09_Tepache_Spiced_Pineapple.png",                             brand:"Tepache",         name:"Spiced Pineapple",                      cat:"Bebidas fermentadas",       tab:"fb",  ingredient:"Tepache y piña especiada", benefit:"Fermentación natural",                     claim:"Spiced pineapple",              racional:"Recupera el tepache tradicional con piña especiada en un formato moderno y accesible."},
+  {id:10, file:"10_Topo_Chico_Cantarito.avif",                                brand:"Topo Chico",      name:"Cantarito",                             cat:"RTD bebidas alcohólicas",   tab:"fb",  ingredient:"Sabores de cantarito",     benefit:"Conveniencia cultural",                    claim:"Drinks Mexicanos",              racional:"Reinterpreta cocteles icónicos mexicanos en formatos RTD contemporáneos."},
+  {id:11, file:"11_Topo_Chico_Paloma.avif",                                   brand:"Topo Chico",      name:"Paloma",                                cat:"RTD bebidas alcohólicas",   tab:"fb",  ingredient:"Toronja / paloma",         benefit:"Coctelería práctica",                      claim:"Drinks Mexicanos",              racional:"Traduce la paloma mexicana a un hard seltzer listo para beber y socialmente actual."},
+  {id:12, file:"12_Topo_Chico_Margarita.avif",                                brand:"Topo Chico",      name:"Margarita",                             cat:"RTD bebidas alcohólicas",   tab:"fb",  ingredient:"Sabor margarita",          benefit:"Conveniencia cultural",                    claim:"Drinks Mexicanos",              racional:"Lleva la margarita a un formato portable, conectando rituales de cantina con consumo moderno."},
+  {id:13, file:"13_Mazapan_De_la_Rosa.webp",                                  brand:"De La Rosa",      name:"Mazapán",                               cat:"Confitería tradicional",    tab:"fb",  ingredient:"Cacahuate",                benefit:"Nostalgia cultural",                       claim:"Desde 1950",                    racional:"Mantiene viva una golosina mexicana reconocible como símbolo de nostalgia y tradición."},
+  {id:14, file:"14_Chocolate_Abuelita.jpg",                                   brand:"Abuelita",        name:"Chocolate Abuelita",                    cat:"Bebidas calientes",         tab:"fb",  ingredient:"Cacao y canela",           benefit:"Comfort emocional",                        claim:"Original",                      racional:"Preserva el ritual familiar del chocolate de mesa mexicano en un formato de alta recordación."},
+  {id:15, file:"15_Tajin_Clasico_Escarchador.webp",                           brand:"Tajín",           name:"Clásico Escarchador",                   cat:"Condimentos",               tab:"fb",  ingredient:"Chile y limón",            benefit:"Realce de sabor",                          claim:"Clásico",                       racional:"Convierte la mezcla chile-limón en un código de sabor mexicano reconocido globalmente."},
+  {id:16, file:"16_Zaks_Galleta_Rellena_de_Mazapan.avif",                    brand:"Zak's",           name:"Galleta Rellena de Mazapán",            cat:"Snacks dulces",             tab:"fb",  ingredient:"Mazapán",                  benefit:"Nostalgia dulce",                          claim:"Galleta rellena de mazapán",    racional:"Reinterpreta el mazapán mexicano dentro de una galleta rellena indulgente y familiar."},
+  {id:17, file:"17_Jumex_Aguas_Frescas_Strawberry.webp",                      brand:"Jumex",           name:"Aguas Frescas Strawberry",              cat:"Bebidas",                   tab:"fb",  ingredient:"Fresa",                    benefit:"Hidratación con nostalgia",                claim:"Aguas Frescas",                 racional:"Actualiza las aguas frescas mexicanas en lata con un sabor frutal accesible y cotidiano."},
+  {id:18, file:"18_Jumex_Aguas_Frescas_Mango.webp",                           brand:"Jumex",           name:"Aguas Frescas Mango",                   cat:"Bebidas",                   tab:"fb",  ingredient:"Mango",                    benefit:"Conveniencia cultural",                    claim:"Aguas Frescas",                 racional:"Lleva el sabor de agua fresca de mango a un formato moderno y portátil."},
+  {id:19, file:"19_HEB_Dulce_de_Leche_Corn_Flakes.jpg",                       brand:"HEB",             name:"Dulce de Leche Corn Flakes",            cat:"Cereal",                    tab:"fb",  ingredient:"Dulce de leche",           benefit:"Comfort matutino",                         claim:"Naturally flavored",            racional:"Integra dulce de leche en un cereal cotidiano, conectando desayuno con indulgencia latinoamericana."},
+  {id:20, file:"20_Juanitas_Amaranto_Alegrias_de_Amaranto.png",               brand:"Juanitas Amaranto", name:"Alegrías de Amaranto",               cat:"Confitería tradicional",    tab:"fb",  ingredient:"Amaranto",                 benefit:"Energía tradicional",                      claim:"Alegrías de amaranto",          racional:"Preserva la alegría de amaranto como snack mexicano de origen ancestral y familiar."},
+  // Otras Industrias
+  {id:79, file:"79_Yuya_Labial_Mate_La_Sirena.png",                           brand:"Yuya",            name:'Labial Mate "La Sirena"',               cat:"Beauty",                    tab:"other", ingredient:"Labial líquido mate",    benefit:"Beauty con estética mexicana coleccionable", claim:"",                            racional:"Resignifica imaginarios mexicanos y fantásticos como objeto beauty coleccionable y culturalmente aspiracional.", oportunidad:"Ediciones limitadas de bebidas o snacks inspiradas en leyendas, personajes y sabores regionales."},
+  {id:80, file:"80_Yuya_Labial_Mate_Mi_amor.png",                             brand:"Yuya",            name:'Labial Mate "Mi amor"',                 cat:"Beauty",                    tab:"other", ingredient:"Labial mate",           benefit:"Naming emocional como driver de pertenencia", claim:"",                            racional:"Convierte expresiones afectivas mexicanas en códigos de color, nombre y deseo.", oportunidad:"Sabores con nombres coloquiales mexicanos que generen cariño, memoria y conversación."},
+  {id:81, file:"81_Yuya_Labial_Mate_Quedate.png",                             brand:"Yuya",            name:'Labial Mate "Quédate"',                 cat:"Beauty",                    tab:"other", ingredient:"Labial mate",           benefit:"Productos nombrados con frases culturales", claim:"",                            racional:"Usa lenguaje íntimo y cotidiano para transformar un labial en pieza de identidad personal.", oportunidad:"Claims y sabores que suenen a conversación real: antojo, cariño, ritual y pertenencia."},
+  {id:82, file:"82_Yuya_Labial_Velvet_Te_quiero.png",                         brand:"Yuya",            name:'Labial Velvet "Te quiero"',             cat:"Beauty",                    tab:"other", ingredient:"Labial velvet",         benefit:"Beauty sensorial + lenguaje afectivo", claim:"",                            racional:"Lleva el lenguaje afectivo mexicano a un acabado beauty sensorial y suave.", oportunidad:"Texturas indulgentes con claims emocionales: cremoso, apapacho, cariño, ritual."},
+  {id:83, file:"83_Yuya_Labial_Mate_Chiquita.png",                            brand:"Yuya",            name:'Labial Mate "Chiquita"',                cat:"Beauty",                    tab:"other", ingredient:"Labial mate",           benefit:"Lenguaje mexicano como equity de marca", claim:"",                           racional:"Reinterpreta diminutivos y expresiones mexicanas como parte de un sistema beauty aspiracional.", oportunidad:"Snacks y bebidas con nombres coloquiales que generen identificación instantánea."},
+  {id:84, file:"84_Maybelline_Super_Stay_Matte_Ink_Frida_Kahlo.jpg",          brand:"Maybelline",      name:"Super Stay Matte Ink Frida Kahlo",      cat:"Beauty",                    tab:"other", ingredient:"Labial larga duración", benefit:"Íconos culturales convertidos en drops de consumo", claim:"",                     racional:"Asocia una marca global con un ícono cultural mexicano para elevar el maquillaje a statement identitario.", oportunidad:"Colabs F&B con artistas, artesanos o símbolos mexicanos reinterpretados para nuevas generaciones."},
+  {id:85, file:"85_Perfume_Frida_Kahlo.webp",                                 brand:"Frida Kahlo",     name:"Perfume Frida Kahlo",                   cat:"Fragancias",                tab:"other", ingredient:"Fragancia Frida Kahlo", benefit:"Heritage convertido en experiencia sensorial", claim:"",                         racional:"Transforma el legado artístico de Frida en una experiencia olfativa aspiracional.", oportunidad:"Bebidas y postres aromáticos inspirados en flores, mercados, jardines y casas icónicas mexicanas."},
+  {id:86, file:"86_Rubor_Nopal_Milta.png",                                    brand:"Milta",           name:"Rubor Nopal",                           cat:"Beauty",                    tab:"other", ingredient:"Nopal",                 benefit:"Botánicos mexicanos en beauty premium", claim:"",                            racional:"Eleva el nopal como ingrediente/ícono mexicano dentro de maquillaje natural y local.", oportunidad:"Ingredientes como nopal, tuna, cacao, maíz o agave en lanzamientos BFY o sensoriales."},
+  {id:87, file:"87_Shampoo_Huichol.jpg",                                      brand:"Huichol",         name:"Shampoo Huichol",                       cat:"Hair Care",                 tab:"other", ingredient:"Arte huichol",          benefit:"Packaging con códigos artesanales mexicanos", claim:"",                         racional:"Integra estética wixárika/huichol en cuidado personal para comunicar herencia visual mexicana.", oportunidad:"Empaques F&B con patrones regionales y narrativas de origen bien curadas."},
+  {id:88, file:"88_Juego_de_Mesa_Al_Chile.webp",                              brand:"Al Chile",        name:'Juego de Mesa "Al Chile"',              cat:"Juegos / Entretenimiento",  tab:"other", ingredient:"Lenguaje popular mexicano", benefit:"Lenguaje popular como plataforma de interacción", claim:"",                 racional:"Convierte una expresión mexicana en dinámica social, humor y conversación.", oportunidad:"Promociones o empaques con retos, preguntas y dinámicas inspiradas en humor mexicano."},
+  {id:89, file:"89_Jersey_Charly_Chapulin_Colorado.webp",                     brand:"Charly",          name:"Jersey Chapulín Colorado",              cat:"Fashion / Sportswear",      tab:"other", ingredient:"Nostalgia televisiva",  benefit:"Nostalgia pop en productos wearable", claim:"",                            racional:"Fusiona cultura pop mexicana con sportswear para convertir nostalgia en pertenencia visible.", oportunidad:"Ediciones F&B con personajes o universos mexicanos reinterpretados desde cultura pop."},
+  {id:90, file:"90_Playera_Lucha_Libre.jpg",                                  brand:"Lucha Libre",     name:"Playera Lucha Libre",                   cat:"Fashion",                   tab:"other", ingredient:"Gráfica lucha libre",   benefit:"Lucha libre como estética urbana", claim:"",                            racional:"Lleva la lucha libre de espectáculo cultural a código de moda urbana.", oportunidad:"Botanas y bebidas con diseño de máscaras, duelos de sabor y ritual de arena."},
+  {id:91, file:"91_Playera_Chusma.webp",                                      brand:"Chusma",          name:"Playera Chusma",                        cat:"Fashion",                   tab:"other", ingredient:"Nostalgia televisiva",  benefit:"Merch nostálgico como identidad social", claim:"",                         racional:"Reivindica la nostalgia de la televisión mexicana como statement de moda y humor.", oportunidad:"Snacks coleccionables que rescaten frases, personajes y momentos de cultura popular."},
+  {id:92, file:"92_Gorra_Mexico_Aguila.png",                                  brand:"México",          name:"Gorra México Águila",                   cat:"Fashion / Accessories",     tab:"other", ingredient:"Símbolos nacionales",   benefit:"Patriotismo cotidiano en accesorios", claim:"",                           racional:"Convierte símbolos patrios en accesorio streetwear de orgullo cotidiano.", oportunidad:"Lanzamientos para celebraciones mexicanas con diseño coleccionable y uso social."},
+  {id:93, file:"93_Tenis_Panam_Mistico.png",                                  brand:"Panam",           name:"Tenis Panam Místico",                   cat:"Footwear",                  tab:"other", ingredient:"Lucha libre / Heritage", benefit:"Heritage local + fandom deportivo/cultural", claim:"",                     racional:"Une una marca mexicana clásica con referencias de lucha libre para actualizar su relevancia cultural.", oportunidad:"Colaboraciones F&B con fandoms mexicanos: fútbol, lucha, música regional y cultura popular."}
+];
+
+// ── ESTADO ──
+let currentScreen = 'territorio';
+let currentProduct = null;
+let navHistory = [];
+
+// ── RENDER CARRUSELES ──
+function buildCarousel(tab, containerId, dotsId) {
+  const products = PRODUCTS.filter(p => p.tab === tab);
+  const carousel = document.getElementById(containerId);
+  const dotsWrap = document.getElementById(dotsId);
+
+  carousel.innerHTML = products.map(p => `
+    <div class="product-card" onclick="openProducto(${p.id})">
+      <div class="pc-img-wrap">
+        <img src="${imgUrl(p.file)}" alt="${p.brand}" loading="lazy"
+          onerror="this.style.opacity='0.25'; this.style.padding='30px';">
+      </div>
+      <div class="pc-body">
+        <div class="pc-brand">${p.brand}</div>
+        <div class="pc-name">${p.name}</div>
+        ${p.claim ? `<span class="pc-claim">${p.claim}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  dotsWrap.innerHTML = products.map((_, i) =>
+    `<div class="cdot ${i === 0 ? 'active' : ''}" id="dot-${tab}-${i}"></div>`
+  ).join('');
+
+  // Actualizar dots al hacer scroll
+  carousel.addEventListener('scroll', () => {
+    const cardW = 148 + 10;
+    const idx = Math.round(carousel.scrollLeft / cardW);
+    dotsWrap.querySelectorAll('.cdot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  }, { passive: true });
+}
+
+// ── VER TODOS ──
+function verTodos(tab) {
+  const products = PRODUCTS.filter(p => p.tab === tab);
+  const label = tab === 'fb' ? 'Alimentos y Bebidas' : 'Otras Industrias';
+  navHistory.push('territorio');
+  document.getElementById('btnBack').classList.add('visible');
+  document.getElementById('backLabel').textContent = 'Territorio';
+  document.getElementById('todos-title').textContent = label;
+  const grid = document.getElementById('todos-grid');
+  grid.innerHTML = products.map(p => `
+    <div class="product-card" onclick="openProducto(${p.id})" style="width:100%;">
+      <div class="pc-img-wrap">
+        <img src="${imgUrl(p.file)}" alt="${p.brand}" loading="lazy"
+          onerror="this.style.opacity='0.25'; this.style.padding='30px';">
+      </div>
+      <div class="pc-body">
+        <div class="pc-brand">${p.brand}</div>
+        <div class="pc-name">${p.name}</div>
+        ${p.claim ? `<span class="pc-claim">${p.claim}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+  showScreen('todos');
+}
+
+// ── ABRIR PRODUCTO ──
+function openProducto(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  currentProduct = p;
+  const prev = currentScreen;
+  navHistory.push(prev);
+
+  document.getElementById('btnBack').classList.add('visible');
+  document.getElementById('backLabel').textContent = 'Territorio';
+  document.getElementById('prod-tab-badge').textContent = p.tab === 'fb' ? '🇲🇽 Alimentos y Bebidas' : '✨ Otras Industrias';
+  document.getElementById('prod-img').src = imgUrl(p.file);
+  document.getElementById('prod-img').alt = p.brand + ' ' + p.name;
+
+  let html = `
+    <div class="prod-brand">${p.brand}</div>
+    <div class="prod-name">${p.name}</div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-label">Categoría</div>
+        <div class="info-value">${p.cat}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Ingrediente / Base</div>
+        <div class="info-value">${p.ingredient || '—'}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Beneficio Funcional</div>
+        <div class="info-value">${p.benefit || '—'}</div>
+      </div>
+      ${p.claim ? `
+      <div class="info-card">
+        <div class="info-label">Claim Principal</div>
+        <div class="info-value highlight">${p.claim}</div>
+      </div>` : ''}
+    </div>
+    <div class="racional-card">
+      <div class="racional-label">⭐ ¿Por qué está en Mexican Pride?</div>
+      <div class="racional-text">${p.racional}</div>
+    </div>
+  `;
+
+  if (p.oportunidad) {
+    html += `
+      <div class="oportunidad-card">
+        <div class="oportunidad-label">💡 Oportunidad en Food & Beverage</div>
+        <div class="oportunidad-text">${p.oportunidad}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById('prod-body').innerHTML = html;
+  showScreen('producto');
+}
+
+// ── NAVEGACIÓN ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  currentScreen = id;
+  window.scrollTo(0, 0);
+}
+
+function goBack() {
+  const prev = navHistory.pop();
+  if (!prev || prev === 'territorio') {
+    document.getElementById('btnBack').classList.remove('visible');
+    showScreen('territorio');
+  } else {
+    showScreen(prev);
+    if (navHistory.length === 0) {
+      document.getElementById('btnBack').classList.remove('visible');
+    }
+  }
+}
+
+// Swipe iOS-style
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (dx > 80 && navHistory.length > 0) goBack();
+}, { passive: true });
+
+// ── INIT ──
+buildCarousel('fb', 'carousel-fb', 'dots-fb');
+buildCarousel('other', 'carousel-other', 'dots-other');
+</script>
+</body>
+</html>

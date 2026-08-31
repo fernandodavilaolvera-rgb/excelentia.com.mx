@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Accesible Functionality — Ventana al Mundo</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color: #CBE5EC;
+    --color-dark: #9BCAD4;
+    --color-light: #edf6f9;
+    --color-mid: #b5dce6;
+    --black: #0a0a0f;
+    --gray-bg: #f5f5f7;
+    --gray-light: #e5e7eb;
+    --text-dark: #111827;
+    --text-mid: #374151;
+    --text-soft: #6B7280;
+    --white: #ffffff;
+    --header-h: 64px;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(203,229,236,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: 'Manrope', sans-serif;
+    background-color: #f5f5f7;
+    background-image: url('https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/fondoventanas.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top center;
+    background-attachment: fixed;
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--black);
+    height: var(--header-h);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 2px solid var(--color);
+  }
+  .header-logo-text {
+    display: flex; flex-direction: column; gap: 2px;
+    line-height: 1;
+  }
+  .header-logo-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 900; font-size: 17px;
+    color: var(--white); letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .header-logo-sub {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600; font-size: 7px;
+    color: #00e5ff; letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+  .header-back {
+    display: none;
+    align-items: center; gap: 6px;
+    background: none; border: none;
+    color: var(--white); font-family: 'Manrope', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 6px 0;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .header-back svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .header-back.visible { display: flex; }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    padding-top: var(--header-h);
+    min-height: 100vh;
+  }
+  .screen.active { display: block; }
+
+  /* ════════════════════════════════
+     SCREEN 2 — TERRITORIO
+  ════════════════════════════════ */
+
+  /* Hero image — tarjeta flotante con esquinas curvas */
+  .hero-img-wrap {
+    padding: 16px 16px 8px;
+  }
+  .hero-img-wrap img {
+    width: 100%;
+    height: auto;
+    max-height: 220px;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(203,229,236,0.18);
+  }
+
+  @media (max-width: 600px) {
+    .hero-img-wrap img { max-height: 180px; }
+  }
+  @media (min-width: 601px) {
+    .hero-img-wrap { max-width: 700px; margin: 0 auto; }
+  }
+
+  /* Category section */
+  .cat-section { margin-bottom: 4px; }
+  .cat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 16px 10px;
+  }
+  .cat-title-wrap { display: flex; align-items: center; gap: 10px; }
+  .cat-icon-circle {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .cat-name {
+    font-weight: 900; font-size: 15px;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: #1a4a5a;
+  }
+  .cat-ver {
+    font-size: 12px; font-weight: 700;
+    color: #1a4a5a; text-decoration: none;
+    display: flex; align-items: center; gap: 3px;
+    white-space: nowrap;
+  }
+  .cat-ver svg { width: 14px; height: 14px; }
+
+  /* Carousel */
+  .carousel-wrap { padding: 0 16px; }
+  .carousel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+    padding-right: 24px;
+  }
+  .carousel::-webkit-scrollbar { display: none; }
+
+  .product-card {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 148px;
+    height: 262px;
+    background: var(--white);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    transition: transform 0.15s;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-card:active { transform: scale(0.97); }
+
+  .pc-img-wrap {
+    width: 100%; height: 138px;
+    flex-shrink: 0;
+    background: #fafafa;
+    position: relative; overflow: hidden;
+  }
+  .pc-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    padding: 10px;
+    transition: opacity 0.3s;
+  }
+  .pc-body {
+    padding: 10px 10px 12px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .pc-brand {
+    font-weight: 900; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: #1a4a5a;
+    margin-bottom: 2px;
+    flex-shrink: 0;
+  }
+  .pc-name {
+    font-size: 11px; color: var(--text-mid);
+    line-height: 1.3; font-weight: 500;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+  .pc-claim {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 36px;
+    width: 100%;
+    font-size: 9px; font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 20px;
+    background: var(--color);
+    color: #1a4a5a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    line-height: 1.2;
+  }
+
+  /* Carousel dots */
+  .carousel-dots {
+    display: flex; justify-content: center; gap: 5px;
+    padding: 8px 0 14px;
+  }
+  .cdot {
+    width: 6px; height: 4px;
+    border-radius: 3px;
+    background: var(--gray-light);
+    transition: all 0.2s;
+  }
+  .cdot.active { width: 18px; background: var(--color); }
+
+  /* Separador sección */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-light), transparent);
+    margin: 4px 16px 0;
+  }
+
+  /* Padding bottom para scroll */
+  .screen-territorio-inner { padding-bottom: 40px; }
+
+  @media (min-width: 601px) {
+    .screen-territorio-inner { max-width: 700px; margin: 0 auto; }
+    .cat-section { max-width: 700px; }
+  }
+
+  /* ════════════════════════════════
+     SCREEN 3 — PRODUCTO
+  ════════════════════════════════ */
+  #screen-producto { background: var(--gray-bg); }
+
+  .producto-img-section {
+    background: var(--white);
+    padding: 24px 20px 20px;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 240px;
+    position: relative;
+  }
+  .producto-img-section img {
+    max-width: 220px; max-height: 220px;
+    width: 100%; object-fit: contain;
+    border-radius: 12px;
+  }
+  .prod-tab-badge {
+    position: absolute; top: 16px; left: 16px;
+    background: var(--color);
+    color: #1a4a5a;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 4px 10px; border-radius: 20px;
+  }
+
+  .producto-body { padding: 16px 16px 80px; }
+
+  .prod-brand {
+    font-weight: 900; font-size: 28px;
+    text-transform: uppercase;
+    color: #1a4a5a;
+    line-height: 1; margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+  .prod-name {
+    font-size: 16px; color: var(--text-mid);
+    font-weight: 500; line-height: 1.3;
+    margin-bottom: 20px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .info-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .info-card.full { grid-column: 1 / -1; }
+  .info-label {
+    font-size: 9px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: #1a4a5a;
+    margin-bottom: 5px;
+  }
+  .info-value {
+    font-size: 13px; color: var(--text-dark);
+    font-weight: 500; line-height: 1.4;
+  }
+  .info-value.highlight {
+    font-size: 15px; font-weight: 800;
+    color: #1a4a5a;
+  }
+
+  .racional-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--color);
+  }
+  .racional-label {
+    font-size: 9px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: #1a4a5a;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .racional-text {
+    font-size: 13px; color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  .oportunidad-card {
+    background: linear-gradient(135deg, #f4fafc 0%, #edf6f9 100%);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--color-light);
+  }
+  .oportunidad-label {
+    font-size: 9px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--color-dark);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .oportunidad-text {
+    font-size: 12px; color: #1a5f75;
+    line-height: 1.6;
+  }
+
+  /* ── ANIMACIONES ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .screen.active .hero-img-wrap { animation: fadeUp 0.35s ease both; }
+  .screen.active .cat-section { animation: fadeUp 0.35s ease both; }
+  .screen.active .cat-section:nth-child(2) { animation-delay: 0.08s; }
+  .screen.active .producto-img-section { animation: fadeUp 0.3s ease both; }
+  .screen.active .producto-body { animation: fadeUp 0.3s ease 0.08s both; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .prod-brand { font-size: 24px; }
+    .info-grid { gap: 6px; }
+    .info-card { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-logo-text">
+    <div class="header-logo-title">VENTANA <span style="font-weight:400;">AL</span> MUNDO</div>
+    <div class="header-logo-sub">El sistema vivo que convierte señales en inteligencia accionable</div>
+  </div>
+  <button class="header-back" id="btnBack" onclick="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    <span id="backLabel">Territorio</span>
+  </button>
+</header>
+
+<!-- ══════════════════════════════════
+     SCREEN 2: TERRITORIO
+══════════════════════════════════ -->
+<div id="screen-territorio" class="screen active">
+  <div class="screen-territorio-inner">
+
+    <!-- Hero image -->
+    <div class="hero-img-wrap">
+      <img
+        src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/accesible_funcionality.jpeg"
+        alt="Accesible Functionality"
+        onerror="this.style.opacity='0.4'">
+    </div>
+
+    <!-- Sección F&B -->
+    <div class="cat-section" id="section-fb">
+      <div class="cat-header">
+        <div class="cat-title-wrap">
+          <div class="cat-icon-circle">🌮</div>
+          <span class="cat-name">Alimentos y Bebidas</span>
+        </div>
+        <a class="cat-ver" onclick="verTodos('fb')" style="cursor:pointer;">
+          Ver todos
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      </div>
+      <div class="carousel-wrap">
+        <div class="carousel" id="carousel-fb"></div>
+      </div>
+      <div class="carousel-dots" id="dots-fb"></div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- Sección Otras Industrias -->
+    <div class="cat-section" id="section-other">
+      <div class="cat-header">
+        <div class="cat-title-wrap">
+          <div class="cat-icon-circle">✨</div>
+          <span class="cat-name">Otras Industrias</span>
+        </div>
+        <a class="cat-ver" onclick="verTodos('other')" style="cursor:pointer;">
+          Ver todos
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      </div>
+      <div class="carousel-wrap">
+        <div class="carousel" id="carousel-other"></div>
+      </div>
+      <div class="carousel-dots" id="dots-other"></div>
+    </div>
+
+    <!-- Logo centrado al final -->
+    <div style="padding: 24px 16px 40px; display:flex; justify-content:center;">
+      <img
+        src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/logo1ventanacompleto.png"
+        alt="Ventana al Mundo"
+        style="width:100%; max-width:calc(100% - 32px); height:auto; display:block; object-fit:contain;"
+        onerror="this.style.display='none'">
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 3: PRODUCTO
+══════════════════════════════════ -->
+<div id="screen-producto" class="screen">
+  <div class="producto-img-section" id="prod-img-section">
+    <div class="prod-tab-badge" id="prod-tab-badge">F&B</div>
+    <img id="prod-img" src="" alt="">
+  </div>
+  <div class="producto-body" id="prod-body"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 4: VER TODOS
+══════════════════════════════════ -->
+<div id="screen-todos" class="screen">
+  <div style="padding: 20px 16px 80px;">
+    <h2 id="todos-title" style="font-weight:900; font-size:20px; text-transform:uppercase; color: #1a4a5a; letter-spacing:1px; margin-bottom:16px;"></h2>
+    <div id="todos-grid" style="display:grid; grid-template-columns: repeat(2,1fr); gap:10px; align-items:start;"></div>
+  </div>
+</div>
+
+<script>
+// ── IMAGEN URL ──
+function imgUrl(filename) {
+  const base = 'https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/ventana1/';
+  return base + filename.split('').map(c => {
+    if (/[a-zA-Z0-9_.\-]/.test(c)) return c;
+    return encodeURIComponent(c);
+  }).join('');
+}
+
+// ══════════════════════════════════
+//  DATOS — HACKING BODY
+// ══════════════════════════════════
+const PRODUCTS = [
+  // F&B
+  {id:59,  file:"59_QUEST_Bake_Shop_Frosted_Cookies_Chocolate_Cake.jpg",      brand:"QUEST",            name:"Bake Shop Frosted Cookies Chocolate Cake", cat:"Protein snacks",         tab:"fb",    ingredient:"Proteina",                        benefit:"Control de macros",                       claim:"5g protein / 1g sugar",    racional:"Transforma indulgencia de galleta pastelera en snack funcional con proteina y bajo azucar."},
+  {id:60,  file:"60_Back_To_Nature_Chocolate_Chunk.avif",                     brand:"Back To Nature",   name:"Chocolate Chunk",                          cat:"Snacks dulces",          tab:"fb",    ingredient:"Chocolate chunk",                 benefit:"Indulgencia mas limpia",                  claim:"Non-GMO",                  racional:"Reformula una galleta clasica con una lectura mas natural y menos artificial."},
+  {id:61,  file:"61_BelVita_Energy_Snack_Bites.png",                          brand:"BelVita",           name:"Energy Snack Bites",                       cat:"Functional snacks",      tab:"fb",    ingredient:"Avena y semillas",                benefit:"Energia sostenida",                       claim:"Energy Snack Bites",       racional:"Integra energia sostenida en un formato snack portable de avena y semillas."},
+  {id:62,  file:"62_Dose_for_immunity.jpg",                                   brand:"Dose",              name:"Dose for immunity",                        cat:"Bebidas funcionales",    tab:"fb",    ingredient:"Jengibre y citricos",             benefit:"Soporte inmune",                          claim:"For immunity",             racional:"Convierte el shot diario en soporte inmunologico practico y de alta conveniencia."},
+  {id:63,  file:"63_Dose_for_your_liver.png",                                 brand:"Dose",              name:"Dose for your liver",                      cat:"Bebidas funcionales",    tab:"fb",    ingredient:"Botanicos para higado",           benefit:"Soporte hepatico",                        claim:"For your liver",           racional:"Dirige la funcionalidad hacia el cuidado del higado en una bebida lista para tomar."},
+  {id:64,  file:"64_Dose_for_cholesterol.webp",                               brand:"Dose",              name:"Dose for cholesterol",                     cat:"Bebidas funcionales",    tab:"fb",    ingredient:"Esteroles vegetales",             benefit:"Soporte cardiovascular",                  claim:"For cholesterol",          racional:"Enfoca el consumo diario en control de colesterol con una promesa funcional clara."},
+  {id:65,  file:"65_OLLY_Undeniable_Beauty_Healthy_Hair_Skin_and_Nails.jpg",  brand:"OLLY",              name:"Undeniable Beauty Healthy Hair, Skin & Nails", cat:"Suplementos beauty", tab:"fb",    ingredient:"Biotina, keratina y vitaminas",   benefit:"Belleza desde adentro",                   claim:"Healthy Hair, Skin & Nails", racional:"Traduce la belleza en nutricion funcional diaria desde gomitas faciles de consumir."},
+  {id:66,  file:"66_LesserEvil_Popcorn_Himalayan_Pink_Salt.png",              brand:"LesserEvil",        name:"Popcorn Himalayan Pink Salt",              cat:"Better-for-you snacks",  tab:"fb",    ingredient:"Sal rosa del Himalaya",           benefit:"Snack ligero",                            claim:"40 calories per cup",      racional:"Ofrece popcorn limpio y ligero con ingredientes simples para snackeo mas balanceado."},
+  {id:67,  file:"67_Natures_Bakery_Oatmeal_Crumble_Strawberry.jpg",           brand:"Nature's Bakery",   name:"Oatmeal Crumble Strawberry",               cat:"Snacks dulces funcionales", tab:"fb", ingredient:"Avena integral y fresa",          benefit:"Energia portable",                        claim:"14g whole grains",         racional:"Combina avena y fruta en una barra tipo crumble con porcion controlada y energia practica."},
+  {id:68,  file:"68_David_Peanut_Butter_Chocolate_Chunk_Flavored_Bar.png",    brand:"David",             name:"Peanut Butter Chocolate Chunk Bar",        cat:"Protein bars",           tab:"fb",    ingredient:"Proteina y peanut butter",        benefit:"Saciedad muscular",                       claim:"28g protein / 0g sugar",   racional:"Optimiza el snack dulce con alta proteina y bajo azucar en formato barra."},
+  {id:69,  file:"69_David_Fudge_Brownie_Flavored_Bar.png",                    brand:"David",             name:"Fudge Brownie Bar",                        cat:"Protein bars",           tab:"fb",    ingredient:"Proteina y cocoa",               benefit:"Saciedad funcional",                      claim:"28g protein / 0g sugar",   racional:"Convierte el sabor brownie en una barra de alto desempeno con control de azucar."},
+  {id:70,  file:"70_David_Cinnamon_Roll_Flavored_Bar.webp",                   brand:"David",             name:"Cinnamon Roll Bar",                        cat:"Protein bars",           tab:"fb",    ingredient:"Proteina y canela",               benefit:"Energia y saciedad",                      claim:"28g protein / 0g sugar",   racional:"Lleva un sabor indulgente de cinnamon roll a una barra enfocada en macros."},
+  {id:71,  file:"71_Chobani_Zero_Sugar_Greek_Yogurt_Strawberry_Cheesecake.png", brand:"Chobani",         name:"Zero Sugar Greek Yogurt Strawberry Cheesecake", cat:"Yogurt funcional",  tab:"fb",    ingredient:"Yogurt griego y fresa",           benefit:"Control de azucar",                       claim:"Zero Sugar",               racional:"Equilibra sabor postre con cero azucar para consumidores que buscan control sin sacrificar antojo."},
+  {id:72,  file:"72_Lenny_and_Larrys_The_Complete_Chocolate_Chip.png",        brand:"Lenny & Larry's",  name:"The Complete Chocolate Chip",              cat:"Functional cookies",     tab:"fb",    ingredient:"Proteina vegetal",               benefit:"Saciedad funcional",                      claim:"16g protein",              racional:"Replantea la cookie como snack de nutricion plant-based con proteina y fibra."},
+  {id:73,  file:"73_Organic_Marys_Gone_Crackers_SuperSeed_Seaweed_and_Black_Sesame.jpg", brand:"Mary's Gone Crackers", name:"SuperSeed Seaweed & Black Sesame", cat:"Better-for-you crackers", tab:"fb", ingredient:"Semillas organicas",           benefit:"Grasas buenas y fibra",                   claim:"SuperSeed",                racional:"Usa semillas como base para entregar crunch funcional con perfil mas nutritivo."},
+  {id:74,  file:"74_OIKOS_Fusion_Muscle_plusDigestive_Health_Support_Strawberry.png", brand:"OIKOS",     name:"Fusion Muscle +Digestive Health Strawberry", cat:"Bebidas funcionales", tab:"fb",    ingredient:"Proteina y probioticos",          benefit:"Musculo y digestion",                     claim:"Muscle + Digestive Health", racional:"Integra proteina con beneficios digestivos y musculares en un formato bebible de alto rendimiento."},
+  {id:75,  file:"75_OIKOS_PRO_23g_Protein_Mango_Pineapple.png",               brand:"OIKOS",             name:"PRO 23g Protein Mango Pineapple",          cat:"Bebidas funcionales",    tab:"fb",    ingredient:"23g proteina",                    benefit:"Recuperacion muscular",                   claim:"23g Protein",              racional:"Optimiza recuperacion y proteina diaria en formato portable."},
+  {id:76,  file:"76_Yogi_Honey_Lavender_Stress_Relief.jpg",                   brand:"Yogi",              name:"Honey Lavender Stress Relief",             cat:"Functional tea",         tab:"fb",    ingredient:"Lavanda y miel",                 benefit:"Relajacion",                              claim:"Stress Relief",            racional:"Promueve relajacion y balance mental mediante ingredientes botanicos."},
+  {id:77,  file:"77_Simple_Truth_Protein_Puffs_Nacho_Cheese.png",             brand:"Simple Truth",      name:"Protein Puffs Nacho Cheese",               cat:"Protein snacks",         tab:"fb",    ingredient:"Proteina",                        benefit:"Snack alto en proteina",                  claim:"21g protein",              racional:"Convierte un puff snack en vehiculo de proteina con sabor familiar a queso nacho."},
+  {id:78,  file:"78_Crisp_Power_Protein_Pretzels_Flamin_Crunch.webp",         brand:"Crisp Power",       name:"Protein Pretzels Flamin' Crunch",          cat:"Protein snacks",         tab:"fb",    ingredient:"Proteina",                        benefit:"Saciedad y crunch",                       claim:"26g protein",              racional:"Hackea un pretzel picante con proteina para convertir una botana intensa en snack funcional."},
+  // Otras Industrias
+  {id:117, file:"117_Smart_Eye_Massager.webp",                                 brand:"Smart Eye",         name:"Smart Eye Massager",                       cat:"Wellness Tech",          tab:"other", ingredient:"Masajeador ocular",               benefit:"Tech recovery for daily fatigue",          claim:"",                         racional:"Optimiza descanso visual y relajacion con tecnologia de masaje portable.", oportunidad:"Bebidas funcionales para screen fatigue, enfoque, descanso visual o recuperacion mental."},
+  {id:118, file:"118_Smart_Health_Ring.webp",                                  brand:"Smart Ring",        name:"Smart Health Ring",                        cat:"Wearable Technology",    tab:"other", ingredient:"Anillo inteligente",              benefit:"Wellness tracking invisible y continuo",   claim:"",                         racional:"Convierte metricas corporales en informacion continua para mejorar habitos diarios.", oportunidad:"F&B personalizado segun sueno, energia, hidratacion o recuperacion diaria."},
+  {id:119, file:"119_WHOOP_Fitness_Band.webp",                                 brand:"WHOOP",             name:"Fitness Band",                             cat:"Wearable Technology",    tab:"other", ingredient:"Banda wearable",                  benefit:"Performance data for everyday consumers",  claim:"",                         racional:"Transforma recuperacion, sueno y esfuerzo fisico en data accionable para optimizar rendimiento.", oportunidad:"Productos F&B con claims medibles: recovery, readiness, endurance, hydration score."},
+  {id:120, file:"120_Electric_Neck_Beauty_Instrument.avif",                    brand:"Beauty Neck",       name:"Electric Neck Beauty Instrument",          cat:"Beauty Tech",            tab:"other", ingredient:"Dispositivo electrico",           benefit:"At-home beauty devices",                  claim:"",                         racional:"Lleva la estetica facial/cuello al terreno del dispositivo de mejora corporal en casa.", oportunidad:"Bebidas beauty-from-within que acompanen rutinas de colageno, piel y cuidado visible."},
+  {id:121, file:"121_Aroma_Diffuser_Humidifier.avif",                          brand:"Aroma Diffuser",    name:"Aroma Diffuser Humidifier",                cat:"Home Wellness Tech",     tab:"other", ingredient:"Difusor aromatico",               benefit:"Home environment as wellness interface",   claim:"",                         racional:"Optimiza ambiente, respiracion y estado de animo mediante aroma y humidificacion.", oportunidad:"Bebidas o snacks asociados a estados de animo: calm, focus, sleep, reset."},
+  {id:122, file:"122_Vital_Proteins_Collagen_Peptides.jpg",                    brand:"Vital Proteins",    name:"Collagen Peptides",                        cat:"Supplements",            tab:"other", ingredient:"Colageno en polvo",               benefit:"Daily functional powders",                claim:"",                         racional:"Integra colageno como herramienta diaria para belleza, articulaciones y bienestar fisico.", oportunidad:"Bebidas listas con colageno, proteina y beneficios beauty/wellness explicitos."},
+  {id:123, file:"123_Sports_Compression_Socks.png",                            brand:"Sports",            name:"Compression Socks",                        cat:"Performance Apparel",    tab:"other", ingredient:"Calcetas compresion",             benefit:"Performance apparel beyond aesthetics",   claim:"",                         racional:"Convierte la ropa en herramienta de circulacion, recuperacion y soporte activo.", oportunidad:"Snacks/bebidas para circulacion, recuperacion muscular o soporte post-actividad."},
+  {id:124, file:"124_Chesapeake_Bay_Mind_and_Body_Candle_EscapeplusDiscover.jpg", brand:"Chesapeake Bay", name:"Mind & Body Candle Escape+Discover",       cat:"Home Wellness",          tab:"other", ingredient:"Vela aromatica",                  benefit:"Mood-based home wellness",                claim:"",                         racional:"Usa aroma como herramienta de regulacion emocional y ritual mental.", oportunidad:"F&B para estados emocionales: calm, focus, unwind, comfort, sleep ritual."},
+  {id:125, file:"125_Libro_Habitos_Atomicos.jpg",                              brand:"James Clear",       name:"Libro Habitos Atomicos",                   cat:"Books / Self-Optimization", tab:"other", ingredient:"Habitos",                      benefit:"Habit design as consumer framework",       claim:"",                         racional:"Enmarca la mejora personal como sistema de pequenos cambios acumulativos.", oportunidad:"Productos F&B pensados como rituales diarios: morning habit, night reset, focus break."},
+  {id:126, file:"126_LetPot_Smart_Hydroponic_Garden.jpg",                      brand:"LetPot",            name:"Smart Hydroponic Garden",                  cat:"Home Tech / Food Growing", tab:"other", ingredient:"Jardin hidroponico",            benefit:"Home-grown wellness food systems",         claim:"",                         racional:"Permite cultivar ingredientes frescos en casa como forma de controlar nutricion y origen.", oportunidad:"Kits F&B de cultivo, ingredientes vivos, microgreens o experiencias de frescura hiperlocal."},
+  {id:127, file:"127_Lavender_Vanilla_Sleep_Spray.webp",                       brand:"Puretive",          name:"Lavender Vanilla Sleep Spray",             cat:"Sleep Care",             tab:"other", ingredient:"Lavanda y vainilla",              benefit:"Sleep optimization rituals",              claim:"",                         racional:"Convierte el sueno en un ritual sensorial optimizado con aromas calmantes.", oportunidad:"Bebidas nocturnas con lavanda, vainilla, magnesio o claims de relajacion/restauracion."},
+  {id:128, file:"128_Epielle_Hydrating_Gel_Sheet_Mask.webp",                   brand:"Epielle",           name:"Hydrating Gel Sheet Mask",                 cat:"Skincare",               tab:"other", ingredient:"Mascarilla gel",                  benefit:"Instant reset skincare formats",           claim:"",                         racional:"Entrega hidratacion rapida en formato mascara para reset visible de la piel.", oportunidad:"Bebidas beauty hydration con electrolitos, colageno o claims de glow inmediato."},
+  {id:129, file:"129_CVS_Urinary_Tract_Infection_Test_Strips.png",             brand:"CVS Health",        name:"Urinary Tract Infection Test Strips",      cat:"Health Diagnostics",     tab:"other", ingredient:"Tiras diagnostico",               benefit:"At-home testing and proactive health",     claim:"",                         racional:"Lleva el diagnostico basico al hogar para dar control y rapidez al usuario.", oportunidad:"F&B preventivo con beneficios urinarios, hidratacion, cranberry, microbiota o claims de cuidado diario."}
+];
+
+// ── ESTADO ──
+let currentScreen = 'territorio';
+let currentProduct = null;
+let navHistory = [];
+
+// ── RENDER CARRUSELES ──
+function buildCarousel(tab, containerId, dotsId) {
+  const products = PRODUCTS.filter(p => p.tab === tab);
+  const carousel = document.getElementById(containerId);
+  const dotsWrap = document.getElementById(dotsId);
+
+  carousel.innerHTML = products.map(p => `
+    <div class="product-card" onclick="openProducto(${p.id})">
+      <div class="pc-img-wrap">
+        <img src="${imgUrl(p.file)}" alt="${p.brand}" loading="lazy"
+          onerror="this.style.opacity='0.25'; this.style.padding='30px';">
+      </div>
+      <div class="pc-body">
+        <div class="pc-brand">${p.brand}</div>
+        <div class="pc-name">${p.name}</div>
+        ${p.claim ? `<span class="pc-claim">${p.claim}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  dotsWrap.innerHTML = products.map((_, i) =>
+    `<div class="cdot ${i === 0 ? 'active' : ''}" id="dot-${tab}-${i}"></div>`
+  ).join('');
+
+  // Actualizar dots al hacer scroll
+  carousel.addEventListener('scroll', () => {
+    const cardW = 148 + 10;
+    const idx = Math.round(carousel.scrollLeft / cardW);
+    dotsWrap.querySelectorAll('.cdot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  }, { passive: true });
+}
+
+// ── VER TODOS ──
+function verTodos(tab) {
+  const products = PRODUCTS.filter(p => p.tab === tab);
+  const label = tab === 'fb' ? 'Alimentos y Bebidas' : 'Otras Industrias';
+  navHistory.push('territorio');
+  document.getElementById('btnBack').classList.add('visible');
+  document.getElementById('backLabel').textContent = 'Territorio';
+  document.getElementById('todos-title').textContent = label;
+  const grid = document.getElementById('todos-grid');
+  grid.innerHTML = products.map(p => `
+    <div class="product-card" onclick="openProducto(${p.id})" style="width:100%;">
+      <div class="pc-img-wrap">
+        <img src="${imgUrl(p.file)}" alt="${p.brand}" loading="lazy"
+          onerror="this.style.opacity='0.25'; this.style.padding='30px';">
+      </div>
+      <div class="pc-body">
+        <div class="pc-brand">${p.brand}</div>
+        <div class="pc-name">${p.name}</div>
+        ${p.claim ? `<span class="pc-claim">${p.claim}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+  showScreen('todos');
+}
+
+// ── ABRIR PRODUCTO ──
+function openProducto(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  currentProduct = p;
+  const prev = currentScreen;
+  navHistory.push(prev);
+
+  document.getElementById('btnBack').classList.add('visible');
+  document.getElementById('backLabel').textContent = 'Territorio';
+  document.getElementById('prod-tab-badge').textContent = p.tab === 'fb' ? '♿ Alimentos y Bebidas' : '✨ Otras Industrias';
+  document.getElementById('prod-img').src = imgUrl(p.file);
+  document.getElementById('prod-img').alt = p.brand + ' ' + p.name;
+
+  let html = `
+    <div class="prod-brand">${p.brand}</div>
+    <div class="prod-name">${p.name}</div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-label">Categoría</div>
+        <div class="info-value">${p.cat}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Ingrediente / Base</div>
+        <div class="info-value">${p.ingredient || '—'}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Beneficio Funcional</div>
+        <div class="info-value">${p.benefit || '—'}</div>
+      </div>
+      ${p.claim ? `
+      <div class="info-card">
+        <div class="info-label">Claim Principal</div>
+        <div class="info-value highlight">${p.claim}</div>
+      </div>` : ''}
+    </div>
+    <div class="racional-card">
+      <div class="racional-label">⭐ ¿Por qué está en Accesible Functionality?</div>
+      <div class="racional-text">${p.racional}</div>
+    </div>
+  `;
+
+  if (p.oportunidad) {
+    html += `
+      <div class="oportunidad-card">
+        <div class="oportunidad-label">💡 Oportunidad en Food & Beverage</div>
+        <div class="oportunidad-text">${p.oportunidad}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById('prod-body').innerHTML = html;
+  showScreen('producto');
+}
+
+// ── NAVEGACIÓN ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  currentScreen = id;
+  window.scrollTo(0, 0);
+}
+
+function goBack() {
+  const prev = navHistory.pop();
+  if (!prev || prev === 'territorio') {
+    document.getElementById('btnBack').classList.remove('visible');
+    showScreen('territorio');
+  } else {
+    showScreen(prev);
+    if (navHistory.length === 0) {
+      document.getElementById('btnBack').classList.remove('visible');
+    }
+  }
+}
+
+// Swipe iOS-style
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (dx > 80 && navHistory.length > 0) goBack();
+}, { passive: true });
+
+// ── INIT ──
+buildCarousel('fb', 'carousel-fb', 'dots-fb');
+buildCarousel('other', 'carousel-other', 'dots-other');
+</script>
+</body>
+</html>
