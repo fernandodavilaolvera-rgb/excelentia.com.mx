@@ -38,19 +38,29 @@
   .chip{background:#fff; border:1px solid var(--linea); border-radius:20px; padding:.45rem .95rem;
     font-family:'Manrope',sans-serif; font-size:12px; font-weight:700; color:var(--txt2); cursor:pointer; transition:.2s}
   .chip.on{background:var(--rojo); border-color:var(--rojo); color:#fff}
+  .rango-fechas{display:flex; align-items:center; gap:.4rem; margin-left:.35rem}
+  .rango-fechas label{font-size:11.5px; font-weight:700; color:var(--txt3)}
+  .rango-fechas input{font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:700; color:var(--txt2);
+    background:#fff; border:1px solid var(--linea); border-radius:8px; padding:.35rem .5rem}
+  .chip.aplica{background:#1a3a6b; border-color:#1a3a6b; color:#fff}
+  @media (max-width:700px){
+    .rango-fechas{margin-left:0; width:100%; flex-wrap:wrap}
+    .rango-fechas input{flex:1; min-width:120px}
+  }
 
-  .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:.9rem; margin-top:1rem}
-  .kpi{background:#fff; border:1px solid var(--linea); border-radius:13px; padding:1.1rem 1.15rem; position:relative; overflow:hidden}
+  .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:.65rem; margin-top:1rem}
+  .kpi{background:#fff; border:1px solid var(--linea); border-radius:13px; padding:.85rem .9rem; position:relative; overflow:hidden; min-width:0}
   .kpi::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px}
   .kpi.k1::before{background:var(--rojo)} .kpi.k2::before{background:var(--azul)}
   .kpi.k3::before{background:var(--verde)} .kpi.k4::before{background:var(--naranja)}
   .kpi.k5::before{background:#7B3F8C}
-  .kpi .lab{font-size:10.5px; font-weight:800; color:var(--txt3); letter-spacing:.5px; text-transform:uppercase}
-  .kpi .num{font-size:31px; font-weight:800; color:var(--txt); line-height:1.1; margin-top:.35rem; font-variant-numeric:tabular-nums}
-  .kpi .var{font-size:11.5px; font-weight:700; color:#2c8a45; margin-top:.25rem}
+  .kpi .lab{font-size:9.5px; font-weight:800; color:var(--txt3); letter-spacing:.3px; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .kpi .num{font-size:26px; font-weight:800; color:var(--txt); line-height:1.1; margin-top:.3rem; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .kpi .var{font-size:10.5px; font-weight:700; color:#2c8a45; margin-top:.2rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .kpi .var.baja{color:var(--rojo)}
 
-  .grid2{display:grid; grid-template-columns:1.5fr 1fr; gap:.9rem; margin-top:.9rem}
+  .grid2{display:grid; grid-template-columns:1.5fr 1fr; gap:.9rem; margin-top:.9rem; align-items:start}
+  .col-izq{display:flex; flex-direction:column; gap:.9rem}
   .card{background:#fff; border:1px solid var(--linea); border-radius:13px; overflow:hidden}
   .card h3{font-size:13px; font-weight:800; color:var(--txt); padding:.95rem 1.15rem;
     background:#dce8f7; border-bottom:1px solid var(--linea); display:flex; justify-content:space-between; align-items:center}
@@ -76,6 +86,39 @@
   .anden-bar{height:8px; background:#eef0f5; border-radius:5px; overflow:hidden}
   .anden-bar i{display:block; height:100%; border-radius:5px; transition:width .8s cubic-bezier(.2,.8,.3,1)}
 
+
+  /* franja de los dos datos fuertes */
+  .franja{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);
+    border-radius:13px; padding:1.15rem 1.4rem; margin-top:.9rem; color:#fff}
+  .franja-lab{font-size:11px; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
+    color:#9fc4ea; margin-bottom:.75rem}
+  .franja-nums{display:flex; align-items:center; gap:1.6rem}
+  .franja-dato{flex:1; display:flex; align-items:baseline; gap:.7rem}
+  .franja-dato b{font-size:44px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; color:#fff}
+  .franja-dato b i{font-style:normal; font-size:24px; font-weight:800; margin-left:1px}
+  .franja-dato span{font-size:12.5px; font-weight:600; color:#dce8f7; line-height:1.4; max-width:260px}
+  .franja-sep{width:1px; align-self:stretch; background:rgba(255,255,255,.22)}
+  @media (max-width:700px){
+    .franja-nums{flex-direction:column; align-items:flex-start; gap:1.1rem}
+    .franja-sep{width:100%; height:1px; align-self:auto}
+    .franja-dato b{font-size:36px}
+  }
+
+  /* reparto por andén (dona) */
+  .dona-wrap{display:flex; gap:1.6rem; align-items:center; flex-wrap:wrap}
+  .dona{width:210px; height:210px; flex-shrink:0; position:relative}
+  .dona svg{transform:rotate(-90deg)}
+  .dona-centro{position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center}
+  .dona-centro b{font-size:27px; font-weight:800; color:var(--txt); font-variant-numeric:tabular-nums}
+  .dona-centro span{font-size:10.5px; font-weight:700; color:var(--txt3)}
+  .leyenda{flex:1; min-width:260px; display:grid; grid-template-columns:repeat(2,1fr); gap:.5rem .9rem}
+  .ley{display:flex; align-items:center; gap:.5rem; font-size:11.5px}
+  .ley i{width:10px; height:10px; border-radius:3px; flex-shrink:0}
+  .ley b{color:var(--txt); font-weight:700; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .ley span{font-weight:800; color:var(--txt2); font-variant-numeric:tabular-nums}
+  @media (max-width:700px){ .leyenda{grid-template-columns:1fr} }
+
   /* embudo */
   .nota-embudo{font-size:11.5px;color:#8a90a0;margin-top:1.1rem;line-height:1.55;max-width:720px}
   .embudo{display:flex; flex-direction:column; gap:.7rem}
@@ -100,12 +143,14 @@
 
   .pie{text-align:center; font-size:11px; color:#b0b3bd; margin-top:1.6rem; line-height:1.6}
 
-  @media (max-width:1150px){
+  @media (max-width:820px){
     .kpis{grid-template-columns:repeat(3,1fr)}
   }
   @media (max-width:900px){
-    .kpis{grid-template-columns:repeat(2,1fr)}
     .grid2{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
   }
   @media (max-width:600px){
     header{padding:.9rem 1rem}
@@ -137,7 +182,7 @@
     body{ background:#fff }
     .filtros, .vivo, .no-print{ display:none !important }
     section, .card, main, div, .tabla-wrap{ break-inside:auto }
-    .kpi, .anden, .paso-e, .aviso-priv, img{ break-inside:avoid }
+    .kpi, .anden, .paso-e, .aviso-priv, .ley, .dona, .franja, img{ break-inside:avoid }
     h1,h2,h3,h4, .card h3{ break-after:avoid }
     p, li{ orphans:3; widows:3 }
     thead{ display:table-header-group }
@@ -166,10 +211,18 @@
 <div class="cont">
 
   <div class="filtros">
-    <button class="chip on" data-rango="hoy" onclick="cambiarRango(this)">Hoy</button>
+    <button class="chip" data-rango="hoy" onclick="cambiarRango(this)">Hoy</button>
     <button class="chip" data-rango="7" onclick="cambiarRango(this)">7 días</button>
-    <button class="chip" data-rango="mes" onclick="cambiarRango(this)">Mes</button>
-    <button class="chip" data-rango="todo" onclick="cambiarRango(this)">Campaña completa</button>
+    <button class="chip on" data-rango="mes" onclick="cambiarRango(this)">Mes</button>
+    <button class="chip" data-rango="todo" onclick="cambiarRango(this)">Todo (desde el inicio)</button>
+
+    <div class="rango-fechas">
+      <label>Del</label>
+      <input type="date" id="fDesde">
+      <label>al</label>
+      <input type="date" id="fHasta">
+      <button class="chip aplica" onclick="aplicarFechas()">Aplicar</button>
+    </div>
   </div>
 
   <div class="kpis">
@@ -200,24 +253,42 @@
     </div>
   </div>
 
-  <div class="grid2">
-    <div class="card">
-      <h3>Impactos por hora del día <span>Videos completos</span></h3>
-      <div class="body"><div class="horas" id="horas"></div></div>
-    </div>
-    <div class="card">
-      <h3>Por andén <span id="andenPeriodo">Hoy</span></h3>
-      <div class="body" id="andenes"></div>
+  <div class="franja" id="franja">
+    <div class="franja-lab">Del 100% de las conexiones al WiFi</div>
+    <div class="franja-nums">
+      <div class="franja-dato">
+        <b id="hVideo">—</b>
+        <span>ven completo el video promocional de Farmacias Similares</span>
+      </div>
+      <div class="franja-sep"></div>
+      <div class="franja-dato">
+        <b id="hClic">—</b>
+        <span>entran al sitio de Farmacias Similares</span>
+      </div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:.9rem">
-    <h3>Embudo de conversión <span id="embudoPeriodo">Hoy</span></h3>
-    <div class="body">
-      <div class="embudo" id="embudo"></div>
-      <p class="nota-embudo">
-        <span id="notaEmbudo">El número que se le reporta al patrocinador es el de videos completos.</span>
-      </p>
+  <!-- La columna izquierda apila las horas y el embudo: la lista de andenes
+       de la derecha es alta y antes dejaba un hueco blanco a su costado. -->
+  <div class="grid2">
+    <div class="col-izq">
+      <div class="card">
+        <h3>Conexiones por hora del día <span>Cuándo se usa el WiFi</span></h3>
+        <div class="body"><div class="horas" id="horas"></div></div>
+      </div>
+      <div class="card">
+        <h3>Embudo de conversión <span id="embudoPeriodo">Mes</span></h3>
+        <div class="body">
+          <div class="embudo" id="embudo"></div>
+          <p class="nota-embudo">
+            <span id="notaEmbudo">El número que se le reporta al patrocinador es el de videos completos.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="align-self:start">
+      <h3>Por andén <span id="andenPeriodo">Mes</span></h3>
+      <div class="body" id="andenes"></div>
     </div>
   </div>
 
@@ -230,6 +301,17 @@
       </table>
     </div>
   </div>
+
+  <div class="card" style="margin-top:.9rem">
+    <h3>Reparto de conexiones por andén <span id="donaPeriodo">Mes</span></h3>
+    <div class="body">
+      <div class="dona-wrap">
+        <div class="dona" id="dona"></div>
+        <div class="leyenda" id="leyenda"></div>
+      </div>
+    </div>
+  </div>
+
 
   <div class="aviso-priv">
     <b>Sobre los datos personales.</b> Este tablero muestra únicamente totales.
@@ -254,7 +336,8 @@ var SB  = 'https://rcotlydvsubvdapubnkx.supabase.co/rest/v1/';
 var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjb3RseWR2c3VidmRhcHVibmt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDc5MzYsImV4cCI6MjA5OTEyMzkzNn0.gZyklBXbSI6B_5Iz62faMf31ZlmpGmCD7v0tMICK_9Y';
 var HEAD = { apikey: KEY, Authorization: 'Bearer ' + KEY };
 
-var RANGO = 'hoy';
+var RANGO = 'mes';
+var F_DESDE = '', F_HASTA = '';   /* filtro por fechas, cuando se usa */
 var COLORES = ['#E8114B','#E5449A','#7B3F8C','#29ABE2','#8CC63F','#FFC20E','#F7941E'];
 
 /* ---------- Utilidades ---------- */
@@ -271,10 +354,49 @@ function restaDias(fecha, d){
 }
 function desde(){
   var h = hoyMX();
+  if(RANGO === 'fechas') return F_DESDE || '2000-01-01';
   if(RANGO === 'hoy') return h;
   if(RANGO === '7')   return restaDias(h, 6);
   if(RANGO === 'mes') return h.slice(0,8) + '01';
   return '2000-01-01';
+}
+
+/* Texto con el que se rotulan las tarjetas según el periodo elegido */
+function rotulo(){
+  if(RANGO === 'fechas'){
+    return 'Del ' + diaCorto(F_DESDE) + ' al ' + diaCorto(F_HASTA);
+  }
+  var b = document.querySelector('.chip.on');
+  return b ? b.textContent.trim() : '';
+}
+
+function diaCorto(f){
+  if(!f) return '';
+  var M = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var p = f.split('-');
+  return parseInt(p[2], 10) + ' ' + M[parseInt(p[1], 10) - 1];
+}
+
+/* Filtro por fechas: manda sobre los botones de periodo */
+function aplicarFechas(){
+  var d = document.getElementById('fDesde').value;
+  var h = document.getElementById('fHasta').value;
+  if(!d || !h){ alert('Elige las dos fechas: desde cuándo y hasta cuándo.'); return; }
+  if(d > h){ var t = d; d = h; h = t; }   /* si vienen al revés, se acomodan solas */
+  F_DESDE = d; F_HASTA = h; RANGO = 'fechas';
+  document.querySelectorAll('.chip[data-rango]').forEach(function(c){ c.classList.remove('on'); });
+  document.getElementById('fDesde').value = d;
+  document.getElementById('fHasta').value = h;
+  pintarPeriodo();
+  cargar();
+}
+
+function pintarPeriodo(){
+  var txt = rotulo();
+  ['embudoPeriodo','andenPeriodo','donaPeriodo'].forEach(function(id){
+    var e = document.getElementById(id);
+    if(e) e.textContent = txt;
+  });
 }
 function etiquetaHora(h){
   if(h === 0) return '12a';
@@ -302,17 +424,26 @@ function reloj(){
 }
 reloj(); setInterval(reloj, 1000);
 
+/* No se pueden pedir fechas futuras */
+(function(){
+  var h = hoyMX();
+  ['fDesde','fHasta'].forEach(function(id){
+    var e = document.getElementById(id);
+    if(e) e.max = h;
+  });
+})();
+
 /* ---------- Cambio de rango ---------- */
 function cambiarRango(btn){
   document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
   btn.classList.add('on');
   RANGO = btn.dataset.rango;
+  F_DESDE = ''; F_HASTA = '';
+  document.getElementById('fDesde').value = '';
+  document.getElementById('fHasta').value = '';
   /* El rótulo de las tarjetas sigue al periodo elegido; antes decía
-     "Hoy" siempre, aunque se estuviera viendo la campaña completa. */
-  ['embudoPeriodo','andenPeriodo'].forEach(function(id){
-    var e = document.getElementById(id);
-    if(e) e.textContent = btn.textContent.trim();
-  });
+     "Hoy" siempre, aunque se estuviera viendo todo el histórico. */
+  pintarPeriodo();
   cargar();
 }
 
@@ -320,6 +451,7 @@ function cambiarRango(btn){
 function cargar(){
   var d = desde();
   var f = 'fecha=gte.' + d;
+  if(RANGO === 'fechas' && F_HASTA) f += '&fecha=lte.' + F_HASTA;
 
   Promise.all([
     traer('mexibus_v_dia',   f + '&order=fecha.desc'),
@@ -396,6 +528,12 @@ function pintarKpis(dias, d){
       }).join('')
     : '<div class="vacio"><b>Todavía no hay datos</b>El embudo aparece con el primer registro.</div>';
 
+  /* Franja de arriba: los dos datos que de verdad importan, sobre la
+     misma base de conexiones. */
+  var fV = document.getElementById('hVideo'), fC = document.getElementById('hClic');
+  if(fV) fV.innerHTML = t.registros ? Math.round(t.videos / t.registros * 100) + '<i>%</i>' : '—';
+  if(fC) fC.innerHTML = t.registros ? Math.round(t.clics  / t.registros * 100) + '<i>%</i>' : '—';
+
   var nota = document.getElementById('notaEmbudo');
   if(t.registros){
     var deVideo = Math.round(t.videos / base * 100);
@@ -422,7 +560,7 @@ function comparar(id, hoy, ayer){
 /* ---------- Barras por hora ---------- */
 function pintarHoras(filas){
   var acum = {};
-  filas.forEach(function(f){ acum[f.hora] = (acum[f.hora] || 0) + f.videos; });
+  filas.forEach(function(f){ acum[f.hora] = (acum[f.hora] || 0) + f.registros; });
   var horas = Object.keys(acum).map(Number).sort(function(a,b){ return a - b; });
 
   if(!horas.length){
@@ -487,6 +625,56 @@ function pintarAndenes(filas){
            (ef >= 75 ? 'Buena' : 'Revisar') + '</span></td></tr>';
   }).join('');
   document.getElementById('totalReg').textContent = lista.length + ' andenes con actividad';
+  pintarDona(lista);
+}
+
+/* ---------- Reparto de conexiones por andén (dona) ---------- */
+function pintarDona(lista){
+  var caja = document.getElementById('dona');
+  var ley  = document.getElementById('leyenda');
+  if(!caja || !ley) return;
+
+  var orden = lista.slice().sort(function(a,b){ return b.registros - a.registros; });
+  var total = orden.reduce(function(a,b){ return a + b.registros; }, 0);
+
+  if(!total){
+    caja.innerHTML = '';
+    ley.innerHTML  = '<div class="vacio" style="width:100%"><b>Sin conexiones todavía</b>' +
+                     'El reparto aparece en cuanto los andenes empiecen a registrar.</div>';
+    return;
+  }
+
+  /* Círculo de perímetro 100: cada rebanada se dibuja con el trazo,
+     así el ancho de cada segmento es directamente su porcentaje. */
+  var R = 15.9155, giro = 0, arcos = '';
+  orden.forEach(function(a, i){
+    var pct = a.registros / total * 100;
+    arcos += '<circle cx="21" cy="21" r="' + R + '" fill="none" stroke="' +
+             COLORES[i % COLORES.length] + '" stroke-width="7" ' +
+             'stroke-dasharray="0 100" stroke-dashoffset="' + (-giro) + '" ' +
+             'data-dash="' + pct.toFixed(2) + ' ' + (100 - pct).toFixed(2) + '">' +
+             '<title>' + a.anden + ': ' + n(a.registros) + ' conexiones (' + Math.round(pct) + '%)</title></circle>';
+    giro += pct;
+  });
+
+  caja.innerHTML = '<svg viewBox="0 0 42 42" width="210" height="210">' + arcos + '</svg>' +
+    '<div class="dona-centro"><b>' + n(total) + '</b><span>conexiones</span></div>';
+
+  setTimeout(function(){
+    caja.querySelectorAll('circle').forEach(function(c, i){
+      setTimeout(function(){
+        c.style.transition = 'stroke-dasharray .7s ease';
+        c.setAttribute('stroke-dasharray', c.dataset.dash);
+      }, i * 70);
+    });
+  }, 150);
+
+  ley.innerHTML = orden.map(function(a, i){
+    var pct = Math.round(a.registros / total * 100);
+    return '<div class="ley"><i style="background:' + COLORES[i % COLORES.length] + '"></i>' +
+           '<b title="' + a.anden + '">' + a.anden + '</b>' +
+           '<span>' + n(a.registros) + ' · ' + pct + '%</span></div>';
+  }).join('');
 }
 
 /* ---------- Nombre de la campaña ---------- */
