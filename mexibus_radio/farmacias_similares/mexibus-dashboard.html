@@ -54,11 +54,10 @@
     .rango-fechas input{flex:1; min-width:120px}
   }
 
-  .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:.65rem; margin-top:1rem}
+  .kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:.65rem; margin-top:1rem}
   .kpi{background:#fff; border:1px solid var(--linea); border-radius:13px; padding:.85rem .9rem; position:relative; overflow:hidden; min-width:0}
   .kpi::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px}
   .kpi.k1::before{background:var(--rojo)} .kpi.k2::before{background:var(--azul)}
-  .kpi.k3::before{background:var(--verde)} .kpi.k4::before{background:var(--naranja)}
   .kpi.k5::before{background:#7B3F8C}
   .kpi .lab{font-size:9.5px; font-weight:800; color:var(--txt3); letter-spacing:.3px; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .kpi .num{font-size:26px; font-weight:800; color:var(--txt); line-height:1.1; margin-top:.3rem; font-variant-numeric:tabular-nums; white-space:nowrap}
@@ -306,16 +305,6 @@
       <div class="num" id="k2">—</div>
       <div class="var" id="v2">&nbsp;</div>
     </div>
-    <div class="kpi k3">
-      <div class="lab">Videos completos</div>
-      <div class="num" id="k3">—</div>
-      <div class="var" id="v3">&nbsp;</div>
-    </div>
-    <div class="kpi k4">
-      <div class="lab">Tasa de impacto</div>
-      <div class="num" id="k4">—</div>
-      <div class="var" id="v4">&nbsp;</div>
-    </div>
     <div class="kpi k5">
       <div class="lab">Clics al sitio</div>
       <div class="num" id="k5">—</div>
@@ -361,7 +350,7 @@
     <h3>Actividad por andén <span id="totalReg">—</span></h3>
     <div class="tabla-wrap">
       <table>
-        <thead><tr><th>Andén</th><th>Línea</th><th>Registros</th><th>Videos completos</th><th>Clics al sitio</th><th>Efectividad</th><th></th></tr></thead>
+        <thead><tr><th>Andén</th><th>Línea</th><th>Conexiones</th><th>Clics al sitio</th><th>Entran al sitio</th><th></th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -582,10 +571,7 @@ function pintarKpis(dias, d){
 
   document.getElementById('k1').textContent = n(t.dispositivos);
   document.getElementById('k2').textContent = n(t.registros);
-  document.getElementById('k3').textContent = n(t.videos);
 
-  var tasa = t.registros ? (t.videos / t.registros * 100) : 0;
-  document.getElementById('k4').innerHTML = tasa.toFixed(1) + '<span style="font-size:19px">%</span>';
 
   document.getElementById('k5').textContent = n(t.clics);
 
@@ -596,15 +582,10 @@ function pintarKpis(dias, d){
       var y = a[0];
       comparar('v1', t.dispositivos, y && y.dispositivos);
       comparar('v2', t.registros,    y && y.registros);
-      comparar('v3', t.videos,       y && y.videos);
       comparar('v5', t.clics,        y && y.clics);
-      var tasaAyer = (y && y.registros) ? (y.videos / y.registros * 100) : null;
-      var e4 = document.getElementById('v4');
-      e4.innerHTML = (tasaAyer === null) ? '&nbsp;'
-        : (tasa - tasaAyer >= 0 ? '▲ ' : '▼ ') + Math.abs(tasa - tasaAyer).toFixed(1) + ' pts vs ayer';
     }).catch(function(){});
   } else {
-    ['v1','v2','v3','v4','v5'].forEach(function(i){ document.getElementById(i).innerHTML = '&nbsp;'; });
+    ['v1','v2','v5'].forEach(function(i){ document.getElementById(i).innerHTML = '&nbsp;'; });
   }
 
   /* Embudo.
@@ -697,7 +678,7 @@ function pintarAndenes(filas){
 
   if(!lista.length){
     cajaA.innerHTML = '<div class="vacio"><b>Sin datos por andén</b>Aparecen en cuanto los equipos queden registrados en la bitácora.</div>';
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
     document.getElementById('totalReg').textContent = '—';
     pintarBarras([]);
     return;
@@ -729,10 +710,12 @@ function pintarAndenes(filas){
   }, 300);
 
   tb.innerHTML = lista.map(function(a){
-    var ef = a.registros ? Math.round(a.videos / a.registros * 100) : 0;
+    /* La efectividad del anden ahora se mide con las entradas al sitio,
+       que es el numero que se le reporta al patrocinador. */
+    var ef = a.registros ? Math.round(a.clics / a.registros * 100) : 0;
     return '<tr><td><b>' + a.anden + '</b></td>' +
            '<td><span class="pil" style="background:' + colorLinea(a.linea) + '">' + a.linea + '</span></td>' +
-           '<td>' + n(a.registros) + '</td><td>' + n(a.videos) + '</td>' +
+           '<td>' + n(a.registros) + '</td>' +
            '<td>' + n(a.clics) + '</td>' +
            '<td>' + ef + '%</td>' +
            '<td><span class="badge ' + (ef >= 75 ? 'ok' : 'mid') + '">' +
