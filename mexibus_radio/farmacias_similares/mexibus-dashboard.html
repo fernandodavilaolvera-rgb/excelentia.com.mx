@@ -100,9 +100,9 @@
     color:#9fc4ea; margin-bottom:.75rem}
   .franja-nums{display:flex; align-items:center; gap:1.6rem}
   .franja-dato{flex:1; display:flex; align-items:baseline; gap:.7rem}
-  .franja-dato b{font-size:44px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; color:#fff}
+  .franja-dato b{font-size:52px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; color:#fff}
   .franja-dato b i{font-style:normal; font-size:24px; font-weight:800; margin-left:1px}
-  .franja-dato span{font-size:12.5px; font-weight:600; color:#dce8f7; line-height:1.4; max-width:260px}
+  .franja-dato span{font-size:14px; font-weight:600; color:#dce8f7; line-height:1.4; max-width:340px}
   .franja-sep{width:1px; align-self:stretch; background:rgba(255,255,255,.22)}
   @media (max-width:700px){
     .franja-nums{flex-direction:column; align-items:flex-start; gap:1.1rem}
@@ -327,11 +327,6 @@
     <div class="franja-lab">Del 100% de las conexiones al WiFi</div>
     <div class="franja-nums">
       <div class="franja-dato">
-        <b id="hVideo">—</b>
-        <span>ven completo el video promocional de Farmacias Similares</span>
-      </div>
-      <div class="franja-sep"></div>
-      <div class="franja-dato">
         <b id="hClic">—</b>
         <span>entran al sitio de Farmacias Similares</span>
       </div>
@@ -351,7 +346,7 @@
         <div class="body">
           <div class="embudo" id="embudo"></div>
           <p class="nota-embudo">
-            <span id="notaEmbudo">El número que se le reporta al patrocinador es el de videos completos.</span>
+            <span id="notaEmbudo">El número que se le reporta al patrocinador es el de entradas al sitio.</span>
           </p>
         </div>
       </div>
@@ -622,7 +617,6 @@ function pintarKpis(dias, d){
   var pasos = [
     ['Se conectaron al WiFi', t.registros,   '#29ABE2'],
     ['Internet liberado', t.autorizados,     '#8CC63F'],
-    ['Vieron el video completo', t.videos,   '#E8114B'],
     ['Entraron al sitio de Farmacias Similares', t.clics, '#7B3F8C']
   ];
   document.getElementById('embudo').innerHTML = t.registros
@@ -636,23 +630,20 @@ function pintarKpis(dias, d){
 
   /* Franja de arriba: los dos datos que de verdad importan, sobre la
      misma base de conexiones. */
-  var fV = document.getElementById('hVideo'), fC = document.getElementById('hClic');
-  if(fV) fV.innerHTML = t.registros ? Math.round(t.videos / t.registros * 100) + '<i>%</i>' : '—';
-  if(fC) fC.innerHTML = t.registros ? Math.round(t.clics  / t.registros * 100) + '<i>%</i>' : '—';
+  var fC = document.getElementById('hClic');
+  if(fC) fC.innerHTML = t.registros ? Math.round(t.clics / t.registros * 100) + '<i>%</i>' : '—';
 
   var nota = document.getElementById('notaEmbudo');
   if(t.registros){
-    var deVideo = Math.round(t.videos / base * 100);
-    var deClic  = Math.round(t.clics  / base * 100);
+    var deClic = Math.round(t.clics / base * 100);
     nota.innerHTML =
       'Son <b style="color:#1a2035">' + n(t.registros) + ' conexiones</b> hechas desde <b style="color:#1a2035">' +
       n(t.dispositivos) + ' celulares distintos</b>; una misma persona puede conectarse varios días, ' +
       'por eso los porcentajes se calculan sobre las conexiones y no sobre los celulares. ' +
-      'De cada 100 conexiones, <b style="color:#1a2035">' + deVideo + ' ven el video promocional completo</b> y <b style="color:#1a2035">' +
-      deClic + ' entran al sitio de Farmacias Similares</b>. Son dos grupos distintos: se puede entrar al sitio ' +
-      'sin haber visto el video hasta el final.';
+      'De cada 100 conexiones, <b style="color:#1a2035">' + deClic +
+      ' entran al sitio de Farmacias Similares</b>.';
   } else {
-    nota.textContent = 'El número que se le reporta al patrocinador es el de videos completos.';
+    nota.textContent = 'El número que se le reporta al patrocinador es el de entradas al sitio.';
   }
 }
 
