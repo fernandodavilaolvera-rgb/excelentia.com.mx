@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innovation Mindset Test — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Kodchasan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090a;--card:#0c110c;--border:#172017;
+  --green:#aaff00;--cyan:#00ffee;--yellow:#ffee00;--text:#ddeedd;
+  --font:'Kodchasan',sans-serif;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(170,255,0,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(170,255,0,.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(170,255,0,.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;padding:12px 20px 10px;}
+
+/* HEADER */
+.topbar{display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px;flex-shrink:0;}
+.logo-mindset{height:62px;width:auto;object-fit:contain;flex-shrink:0;}
+.vline{width:1px;height:42px;background:var(--border);flex-shrink:0;}
+.hcenter{flex:1;text-align:center;min-width:0;}
+.hcenter h1{font-size:23px;font-weight:700;color:var(--yellow);letter-spacing:2px;text-transform:uppercase;line-height:1.2;}
+.hcenter p{font-size:12px;color:var(--cyan);margin-top:3px;letter-spacing:1px;opacity:.85;}
+.live-badge{display:flex;align-items:center;gap:8px;background:rgba(170,255,0,.08);border:1px solid rgba(170,255,0,.2);border-radius:20px;padding:8px 18px;flex-shrink:0;}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 1.4s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.live-txt{font-size:13px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;}
+.live-badge.sin-conexion{background:rgba(255,77,77,.1);border-color:rgba(255,77,77,.4);}
+.live-badge.sin-conexion .live-dot{background:#ff4d4d;box-shadow:0 0 6px #ff4d4d;animation:none;}
+.live-badge.sin-conexion .live-txt{color:#ff4d4d;}
+.total-badge{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:6px 18px;flex:0 0 108px;}
+.total-num{font-size:30px;font-weight:700;color:var(--green);line-height:1;}
+.total-lbl{font-size:11px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;font-weight:600;}
+
+/* MAIN */
+.main{flex:1;display:grid;grid-template-columns:1.35fr 1fr;gap:14px;min-height:0;}
+.cards{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;min-height:0;}
+
+.pcard{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:16px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:0;transition:border-color .8s ease,box-shadow .8s ease;}
+.pcard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.pcard-nombre{font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;line-height:1.2;}
+.pcard-rango{font-size:11px;color:var(--cyan);opacity:.7;letter-spacing:1px;margin-top:4px;white-space:nowrap;}
+.pcard-pct{font-size:44px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;flex-shrink:0;}
+.pcard-bar-track{width:100%;height:9px;background:rgba(255,255,255,.09);border-radius:5px;overflow:hidden;margin-top:10px;}
+.pcard-bar-fill{height:100%;border-radius:5px;width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.pcard-votos{font-size:12px;color:var(--yellow);font-weight:600;letter-spacing:.5px;margin-top:6px;}
+
+/* SEÑAL DETECTADA */
+.senal{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;min-height:0;transition:border-color .8s ease,box-shadow .8s ease;}
+.senal-lbl{font-size:12px;color:var(--cyan);letter-spacing:4px;text-transform:uppercase;font-weight:600;}
+.senal-nombre{font-size:38px;font-weight:700;letter-spacing:2px;text-transform:uppercase;line-height:1.15;}
+.senal-desc{font-size:14px;line-height:1.55;opacity:.85;max-width:440px;}
+.senal-pulso{width:14px;height:14px;border-radius:50%;animation:pulso 2s ease-in-out infinite;}
+@keyframes pulso{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.35)}}
+
+/* FOOTER */
+.footer{margin-top:8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.footer-txt{font-size:11px;color:var(--cyan);letter-spacing:1px;opacity:.7;}
+.update-txt{font-size:11px;color:var(--yellow);letter-spacing:.5px;font-weight:600;}
+
+@media print{
+  @page{size:Letter landscape;margin:12mm;}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+  html,body{height:auto;overflow:visible;}
+  body::before,body::after{display:none;}
+  .wrap{height:auto;}
+  .main,.cards{break-inside:auto;}
+  .pcard,.senal{break-inside:avoid;}
+  .hcenter h1,.senal-nombre{break-after:avoid;}
+  a[href]:after{content:none;}
+  .no-print{display:none!important;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <img class="logo-mindset"
+      src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/innovation_mindset.jpeg"
+      alt="Innovation Mindset">
+    <div class="vline"></div>
+    <div class="hcenter">
+      <h1>Resultado colectivo</h1>
+      <p>¿Qué tan conectados estamos con lo que viene?</p>
+    </div>
+    <div class="live-badge" id="live-badge">
+      <div class="live-dot"></div>
+      <span class="live-txt" id="live-txt">EN VIVO</span>
+    </div>
+    <div class="total-badge">
+      <div class="total-num" id="hdr-total">0</div>
+      <div class="total-lbl">Participantes</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="cards" id="cards"></div>
+    <div class="senal" id="senal">
+      <div class="senal-lbl">Señal detectada</div>
+      <div class="senal-pulso" id="senal-pulso" style="background:#2a3a2a"></div>
+      <div class="senal-nombre" id="senal-nombre">Esperando participantes</div>
+      <div class="senal-desc" id="senal-desc">El perfil dominante aparecerá aquí conforme lleguen los resultados.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-txt">INNOVATION MINDSET TEST · Dashboard en vivo</div>
+    <div class="update-txt" id="update-txt"></div>
+  </div>
+
+</div>
+
+<script>
+const APPS_URL  = 'https://script.google.com/macros/s/AKfycbz_QiB1ed1fGjgfZ0ffvkDza9-gOIEtSoRfbCtnaUdqgN_Mkedqnht9XKM2OW2ysWH_wA/exec';
+const INTERVALO = 5000;
+const COLORES   = ['#64c8ff','#cc66ff','#ffcc00','#aaff00'];
+
+let PERFILES = [];
+
+function tickReloj(){
+  const n = new Date();
+  document.getElementById('update-txt').textContent =
+    'Actualizado ' + String(n.getHours()).padStart(2,'0') + ':' +
+    String(n.getMinutes()).padStart(2,'0') + ':' +
+    String(n.getSeconds()).padStart(2,'0');
+}
+setInterval(tickReloj, 1000);
+tickReloj();
+
+// Carga los perfiles una vez y arma las tarjetas
+(async function init(){
+  try{
+    const res  = await fetch(APPS_URL + '?accion=config&t=' + Date.now(), {cache:'no-store'});
+    const json = await res.json();
+    PERFILES = json.perfiles || [];
+  }catch(e){ PERFILES = []; }
+
+  const cont = document.getElementById('cards');
+  cont.innerHTML = '';
+  PERFILES.forEach(function(p, i){
+    const c = COLORES[i % COLORES.length];
+    const div = document.createElement('div');
+    div.className = 'pcard';
+    div.id = 'pcard-' + i;
+    div.style.borderColor = c + '55';
+    div.innerHTML =
+      '<div class="pcard-top">' +
+        '<div><div class="pcard-nombre" style="color:'+c+'"></div>' +
+        '<div class="pcard-rango">'+p.min+'–'+p.max+' pts</div></div>' +
+        '<div class="pcard-pct" id="pct-'+i+'" style="color:'+c+'">0%</div>' +
+      '</div>' +
+      '<div><div class="pcard-bar-track"><div class="pcard-bar-fill" id="bar-'+i+'" style="background:'+c+'"></div></div>' +
+      '<div class="pcard-votos" id="vot-'+i+'">0 participantes</div></div>';
+    div.querySelector('.pcard-nombre').textContent = p.perfil;
+    cont.appendChild(div);
+  });
+
+  fetchDatos();
+  setInterval(fetchDatos, INTERVALO);
+})();
+
+function actualizarUI(datos){
+  const c = PERFILES.map(p => datos[p.perfil.toUpperCase()] || 0);
+  const total = c.reduce((a,b) => a+b, 0);
+  document.getElementById('hdr-total').textContent = total;
+
+  const max = Math.max.apply(null, c.concat([0]));
+  const hayEmpate = c.filter(v => v === max).length > 1;
+
+  PERFILES.forEach(function(p, i){
+    const pct = total > 0 ? Math.round(c[i]/total*100) : 0;
+    const col = COLORES[i % COLORES.length];
+    document.getElementById('pct-'+i).textContent = pct + '%';
+    document.getElementById('vot-'+i).textContent = c[i] + ' participante' + (c[i]!==1?'s':'');
+    setTimeout(()=>{ document.getElementById('bar-'+i).style.width = pct + '%'; }, 80);
+
+    const card = document.getElementById('pcard-'+i);
+    const esGanador = !hayEmpate && c[i] === max && total > 0;
+    card.style.borderColor = esGanador ? col : col + '55';
+    card.style.boxShadow   = esGanador ? '0 0 34px ' + col + '33' : 'none';
+  });
+
+  // Señal detectada
+  const senal  = document.getElementById('senal');
+  const nombre = document.getElementById('senal-nombre');
+  const desc   = document.getElementById('senal-desc');
+  const pulso  = document.getElementById('senal-pulso');
+
+  if(total === 0){
+    nombre.textContent = 'Esperando participantes';
+    nombre.style.color = 'var(--text)';
+    desc.textContent   = 'El perfil dominante aparecerá aquí conforme lleguen los resultados.';
+    pulso.style.background = '#2a3a2a';
+    senal.style.borderColor = 'var(--border)';
+    senal.style.boxShadow = 'none';
+  } else if(hayEmpate){
+    nombre.textContent = 'Empate';
+    nombre.style.color = 'var(--yellow)';
+    desc.textContent   = 'Dos o más perfiles van igualados en este momento.';
+    pulso.style.background = 'var(--yellow)';
+    senal.style.borderColor = 'var(--yellow)';
+    senal.style.boxShadow = 'none';
+  } else {
+    const i = c.indexOf(max);
+    const col = COLORES[i % COLORES.length];
+    nombre.textContent = PERFILES[i].perfil;
+    nombre.style.color = col;
+    desc.textContent   = PERFILES[i].descripcion;
+    pulso.style.background = col;
+    senal.style.borderColor = col;
+    senal.style.boxShadow = '0 0 40px ' + col + '2e';
+  }
+}
+
+async function fetchDatos(){
+  const badge = document.getElementById('live-badge');
+  try{
+    const res  = await fetch(APPS_URL + '?accion=leer&t=' + Date.now(), {cache:'no-store'});
+    const json = await res.json();
+    actualizarUI(json);
+    badge.classList.remove('sin-conexion');
+    document.getElementById('live-txt').textContent = 'EN VIVO';
+  } catch(e){
+    badge.classList.add('sin-conexion');
+    document.getElementById('live-txt').textContent = 'SIN CONEXIÓN';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Innovation Mindset Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Kodchasan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#080c08;--card:#0d120d;--border:#1a221a;
+  --green:#aaff00;--cyan:#00ffee;--yellow:#ffee00;--text:#ddeedd;
+  --font:'Kodchasan',sans-serif;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(170,255,0,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(170,255,0,.015) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+.wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;
+  padding:0 0 40px;max-width:720px;margin:0 auto;width:100%;}
+
+.topbar{padding:18px 20px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.logo-mindset{width:100%;max-width:380px;height:auto;display:block;}
+
+.pantalla{display:none;flex-direction:column;gap:18px;padding:24px 18px 0;}
+.pantalla.activa{display:flex;}
+
+/* INICIO */
+.intro-txt{font-size:15px;line-height:1.55;text-align:center;color:var(--text);opacity:.9;}
+.meta-row{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;}
+.meta-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:8px 18px;font-size:12px;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;font-weight:600;}
+.campo-label{font-size:12px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;font-weight:600;}
+input[type=text]{width:100%;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-family:var(--font);font-size:16px;outline:none;}
+input[type=text]:focus{border-color:var(--green);}
+.btn{width:100%;background:var(--green);color:#07090a;border:none;border-radius:12px;padding:16px;font-family:var(--font);font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity .2s;}
+.btn:active{opacity:.8;}
+.btn:disabled{background:#2a3a2a;color:#6a7a6a;cursor:default;}
+
+/* PREGUNTAS */
+.prog-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.prog-num{font-size:13px;color:var(--yellow);font-weight:700;letter-spacing:1px;}
+.prog-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--green);width:0%;transition:width .4s ease;border-radius:3px;}
+.pregunta-txt{font-size:19px;font-weight:700;line-height:1.4;color:var(--text);}
+.opciones{display:flex;flex-direction:column;gap:11px;}
+.opcion{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:14px 16px;font-size:15px;line-height:1.4;cursor:pointer;transition:border-color .15s,background .15s;display:flex;gap:12px;align-items:flex-start;}
+.opcion:active{transform:scale(.99);}
+.opcion.sel{border-color:var(--green);background:rgba(170,255,0,.07);}
+.opcion-letra{font-weight:700;color:var(--cyan);flex-shrink:0;}
+.opcion.sel .opcion-letra{color:var(--green);}
+
+/* RESULTADO */
+.res-wrap{align-items:center;text-align:center;gap:16px;}
+.res-puntos-box{width:190px;height:190px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:6px solid var(--border);margin:6px auto 0;}
+.res-puntos{font-size:62px;font-weight:700;line-height:1;}
+.res-de{font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.7;margin-top:4px;}
+.res-perfil{font-size:26px;font-weight:700;letter-spacing:2px;text-transform:uppercase;line-height:1.2;}
+.res-desc{font-size:15px;line-height:1.6;opacity:.9;max-width:520px;}
+.res-nota{font-size:12px;color:var(--cyan);opacity:.7;letter-spacing:1px;margin-top:6px;}
+
+.cargando{text-align:center;padding:60px 20px;color:var(--cyan);font-size:14px;letter-spacing:1px;}
+.error-box{background:rgba(255,77,77,.08);border:1px solid rgba(255,77,77,.4);border-radius:12px;padding:16px;color:#ff8888;font-size:14px;line-height:1.5;text-align:center;}
+
+@media print{
+  @page{size:Letter;margin:13mm;}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+  body::before{display:none;}
+  .wrap,.pantalla,.opciones{break-inside:auto;}
+  .opcion,.res-puntos-box{break-inside:avoid;}
+  .pregunta-txt,.res-perfil{break-after:avoid;}
+  p,li{orphans:3;widows:3;}
+  a[href]:after{content:none;}
+  .no-print,.btn{display:none!important;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <img class="logo-mindset"
+      src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/rediceberg/img/innovation_mindset.jpeg"
+      alt="Innovation Mindset">
+  </div>
+
+  <!-- CARGANDO -->
+  <div class="cargando" id="cargando">Cargando el test…</div>
+
+  <!-- INICIO -->
+  <div class="pantalla" id="p-inicio">
+    <div class="intro-txt">Un test rápido para descubrir tu nivel de conexión con las tendencias, las señales y las oportunidades del futuro.</div>
+    <div class="meta-row">
+      <div class="meta-chip" id="chip-preguntas">10 preguntas</div>
+      <div class="meta-chip">2 minutos</div>
+    </div>
+    <div class="campo-label">¿Cómo te llamas?</div>
+    <input type="text" id="nombre" placeholder="Tu nombre" autocomplete="off" maxlength="40">
+    <button class="btn" onclick="empezar()">Comenzar</button>
+  </div>
+
+  <!-- PREGUNTAS -->
+  <div class="pantalla" id="p-pregunta">
+    <div class="prog-row">
+      <div class="prog-num" id="prog-num">1/10</div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    </div>
+    <div class="pregunta-txt" id="pregunta-txt"></div>
+    <div class="opciones" id="opciones"></div>
+    <button class="btn" id="btn-siguiente" onclick="siguiente()" disabled>Siguiente</button>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="pantalla res-wrap" id="p-resultado">
+    <div class="res-puntos-box" id="res-box">
+      <div class="res-puntos" id="res-puntos">0</div>
+      <div class="res-de" id="res-de">de 40 puntos</div>
+    </div>
+    <div class="res-perfil" id="res-perfil"></div>
+    <div class="res-desc" id="res-desc"></div>
+    <div class="res-nota">Tu resultado ya se sumó al mapa colectivo</div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="pantalla" id="p-error">
+    <div class="error-box" id="error-txt"></div>
+  </div>
+
+</div>
+
+<script>
+const APPS_URL = 'https://script.google.com/macros/s/AKfycbz_QiB1ed1fGjgfZ0ffvkDza9-gOIEtSoRfbCtnaUdqgN_Mkedqnht9XKM2OW2ysWH_wA/exec';
+const COLORES  = ['#64c8ff','#cc66ff','#ffcc00','#aaff00'];
+const LETRAS   = ['A','B','C','D'];
+
+let PREGUNTAS = [];
+let PERFILES  = [];
+let idx = 0, puntos = 0, seleccion = null, nombre = '';
+
+// ---------- Carga inicial ----------
+(async function init(){
+  try{
+    const res  = await fetch(APPS_URL + '?accion=config&t=' + Date.now(), {cache:'no-store'});
+    const json = await res.json();
+    PREGUNTAS = json.preguntas || [];
+    PERFILES  = json.perfiles  || [];
+    if(!PREGUNTAS.length) throw new Error('sin preguntas');
+
+    document.getElementById('chip-preguntas').textContent = PREGUNTAS.length + ' preguntas';
+    const maxPts = PERFILES.length ? PERFILES[PERFILES.length-1].max : 40;
+    document.getElementById('res-de').textContent = 'de ' + maxPts + ' puntos';
+
+    mostrar('p-inicio');
+  }catch(e){
+    document.getElementById('error-txt').textContent =
+      'No se pudo cargar el test. Revisa tu conexión y vuelve a intentarlo.';
+    mostrar('p-error');
+  }
+  document.getElementById('cargando').style.display = 'none';
+})();
+
+function mostrar(id){
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+  document.getElementById(id).classList.add('activa');
+  window.scrollTo(0,0);
+}
+
+function empezar(){
+  nombre = document.getElementById('nombre').value.trim() || 'Participante';
+  idx = 0; puntos = 0;
+  mostrar('p-pregunta');
+  render();
+}
+
+function render(){
+  const p = PREGUNTAS[idx];
+  seleccion = null;
+
+  document.getElementById('prog-num').textContent  = (idx+1) + '/' + PREGUNTAS.length;
+  document.getElementById('prog-fill').style.width = ((idx) / PREGUNTAS.length * 100) + '%';
+  document.getElementById('pregunta-txt').textContent = p.pregunta;
+
+  const cont = document.getElementById('opciones');
+  cont.innerHTML = '';
+
+  // Mismo orden que el Sheet, sin mezclar
+  p.opciones.forEach(function(op, i){
+    const div = document.createElement('div');
+    div.className = 'opcion';
+    div.innerHTML = '<span class="opcion-letra">' + LETRAS[i] + ')</span><span></span>';
+    div.lastChild.textContent = op.texto;
+    div.onclick = function(){
+      cont.querySelectorAll('.opcion').forEach(o => o.classList.remove('sel'));
+      div.classList.add('sel');
+      seleccion = op.valor;
+      document.getElementById('btn-siguiente').disabled = false;
+    };
+    cont.appendChild(div);
+  });
+
+  const btn = document.getElementById('btn-siguiente');
+  btn.disabled = true;
+  btn.textContent = (idx === PREGUNTAS.length - 1) ? 'Ver mi resultado' : 'Siguiente';
+}
+
+function siguiente(){
+  if(seleccion === null) return;
+  puntos += seleccion;
+  idx++;
+  if(idx < PREGUNTAS.length){ render(); }
+  else { terminar(); }
+}
+
+function terminar(){
+  const perfil = buscarPerfil(puntos);
+
+  // Guardado silencioso
+  const url = APPS_URL + '?accion=guardar'
+    + '&nombre=' + encodeURIComponent(nombre)
+    + '&puntos=' + puntos
+    + '&perfil=' + encodeURIComponent(perfil.perfil);
+  fetch(url, {mode:'no-cors'}).catch(()=>{});
+
+  const color = COLORES[PERFILES.indexOf(perfil) % COLORES.length];
+  document.getElementById('res-puntos').textContent = puntos;
+  document.getElementById('res-puntos').style.color = color;
+  document.getElementById('res-box').style.borderColor = color;
+  document.getElementById('res-perfil').textContent = perfil.perfil;
+  document.getElementById('res-perfil').style.color = color;
+  document.getElementById('res-desc').textContent = perfil.descripcion;
+
+  mostrar('p-resultado');
+}
+
+function buscarPerfil(pts){
+  // Dentro de rango
+  for(const p of PERFILES){
+    if(pts >= p.min && pts <= p.max) return p;
+  }
+  // Si los rangos dejaran un hueco, toma el más cercano
+  let mejor = PERFILES[0], dist = Infinity;
+  for(const p of PERFILES){
+    const d = Math.min(Math.abs(pts - p.min), Math.abs(pts - p.max));
+    if(d < dist){ dist = d; mejor = p; }
+  }
+  return mejor;
+}
+</script>
+</body>
+</html>
