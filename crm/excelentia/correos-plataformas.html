@@ -130,6 +130,22 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 .addbox input{width:100%;padding:.45rem .55rem;border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif;font-size:.82rem;color:#1a2035;background:#fff}
 .addbox input:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
 .hint{font-size:.72rem;color:#8a90a0;line-height:1.4}
+.prow.editando{border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.15);background:#f0f6ff}
+.prow-tools{display:flex;gap:.3rem;flex-shrink:0}
+.tool-edit:hover{background:#dce8f7;border-color:#1a3a6b}
+
+.addbox.modo-edicion{background:#dce8f7;border:1px solid #4a9fd4;border-style:solid}
+.addbox-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.55rem;flex-wrap:wrap}
+.addbox-tit{font-size:.8rem;font-weight:800;color:#1a3a6b;display:flex;align-items:center;gap:.35rem}
+.badge-edit{font-size:.66rem;font-weight:800;background:#1a3a6b;color:#fff;border-radius:20px;padding:.12rem .55rem;letter-spacing:.2px}
+.addbox-btns{display:flex;gap:.5rem;flex-wrap:wrap}
+.addbox-btns .btn{flex:1;justify-content:center;min-width:130px}
+.filtro-aviso{display:none;background:#fff7ed;border:1px solid #fed7aa;border-left:3px solid #f59e0b;border-radius:0 7px 7px 0;padding:.5rem .65rem;font-size:.72rem;color:#92400e;line-height:1.45;margin-bottom:.55rem}
+.filtro-aviso.show{display:block}
+.filtro-aviso code{background:#fff;border:1px solid #fed7aa;border-radius:5px;padding:.05rem .3rem;font-family:ui-monospace,monospace;font-size:.7rem;word-break:break-all}
+.filtro-aviso .btn-fix{margin-top:.4rem;background:#f59e0b;border:none;color:#fff;border-radius:7px;padding:.3rem .7rem;font-family:'Manrope',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer}
+.filtro-aviso .btn-fix:hover{background:#d97706}
+input.campo-mal{border-color:#f59e0b !important;box-shadow:0 0 0 3px rgba(245,158,11,.12) !important}
 
 /* ── Consumo IA ── */
 .ci-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem}
@@ -187,6 +203,11 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
   .modal{max-width:100%;border-radius:14px 14px 0 0;max-height:92vh}
   .addgrid{grid-template-columns:56px 1fr;gap:.45rem}
   .addgrid .f-filtro{grid-column:1/-1}
+  .addbox-btns{flex-direction:column}
+  .addbox-btns .btn{width:100%;min-width:0}
+  .prow{flex-wrap:wrap}
+  .prow-body{flex:1 1 100%;order:2}
+  .prow-tools{order:3;margin-left:auto}
 }
 </style>
 </head>
@@ -235,14 +256,22 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
       </div>
       <div id="platList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
 
-      <div class="addbox">
+      <div class="addbox" id="np-box">
+        <div class="addbox-head">
+          <div class="addbox-tit" id="np-titulo">➕ Agregar plataforma</div>
+          <span class="badge-edit" id="np-badge" style="display:none">EDITANDO</span>
+        </div>
         <div class="addgrid">
           <div><label>Icono</label><input type="text" id="np-icono" maxlength="2" placeholder="📨"></div>
           <div><label>Nombre</label><input type="text" id="np-nombre" placeholder="DigitalOcean"></div>
-          <div class="f-filtro"><label>Filtro (remitente)</label><input type="text" id="np-filtro" placeholder="digitalocean"></div>
+          <div class="f-filtro"><label>Filtro (remitente)</label><input type="text" id="np-filtro" placeholder="digitalocean" oninput="revisarFiltro()"></div>
         </div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="crearPlataforma()">+ Agregar plataforma</button>
-        <div class="hint" style="margin-top:.5rem">Si dejas el filtro vacío se usa el nombre en minúsculas.</div>
+        <div class="filtro-aviso" id="np-aviso"></div>
+        <div class="addbox-btns">
+          <button class="btn btn-primary" id="np-btn-guardar" onclick="guardarPlataforma()">+ Agregar plataforma</button>
+          <button class="btn btn-ghost" id="np-btn-cancelar" style="display:none" onclick="cancelarEdicion()">✕ Cancelar</button>
+        </div>
+        <div class="hint" style="margin-top:.5rem" id="np-hint">Si dejas el filtro vacío se usa el nombre en minúsculas.</div>
       </div>
     </div>
   </div>
@@ -262,6 +291,7 @@ let idx = 0;
 
 // Plataformas vigiladas — vienen de la BD (tabla crm.plataformas_vigiladas)
 let PLATAFORMAS = [];
+let EDITANDO = null;   // id de la plataforma que se está editando (null = alta nueva)
 
 // Colores de fondo por plataforma conocida (solo cosmético)
 const PLAT_BG = {
@@ -771,7 +801,8 @@ function pintarPlataformas(){
     return;
   }
   el.innerHTML = PLATAFORMAS.map(function(p){
-    return '<div class="prow'+(p.activo?'':' off')+'">'
+    const enEdicion = (EDITANDO && EDITANDO === p.id);
+    return '<div class="prow'+(p.activo?'':' off')+(enEdicion?' editando':'')+'">'
       + '<div class="prow-ic">'+esc(p.icono||'📨')+'</div>'
       + '<div class="prow-body">'
       +   '<div class="prow-name">'+esc(p.nombre)+'</div>'
@@ -781,9 +812,94 @@ function pintarPlataformas(){
       +   '<input type="checkbox" '+(p.activo?'checked':'')+' onchange="togglePlataforma(\''+esc(p.id)+'\', this.checked)">'
       +   '<span class="slider"></span>'
       + '</label>'
-      + '<button class="tool tool-del" onclick="borrarPlataforma(\''+esc(p.id)+'\',\''+esc(p.nombre)+'\')" title="Borrar">🗑️</button>'
+      + '<div class="prow-tools">'
+      +   '<button class="tool tool-edit" onclick="editarPlataforma(\''+esc(p.id)+'\')" title="Editar">✏️</button>'
+      +   '<button class="tool tool-del" onclick="borrarPlataforma(\''+esc(p.id)+'\',\''+esc(p.nombre)+'\')" title="Borrar">🗑️</button>'
+      + '</div>'
       + '</div>';
   }).join('');
+}
+
+// ── Filtro seguro para Gmail ──────────────────────────────
+// Gmail lee los espacios sueltos como "Y ADEMÁS": "whatsapp for business"
+// deja de buscar la plataforma y empieza a exigir las 3 palabras.
+// Se entrecomilla cada término que traiga espacios; el OR va en mayúsculas.
+function blindarFiltro(f){
+  return String(f||'').split(/\s+OR\s+/i).map(function(t){
+    t = t.trim();
+    if(!t) return '';
+    if(/^".*"$/.test(t)) return t;
+    return /\s/.test(t) ? '"'+t.replace(/"/g,'')+'"' : t;
+  }).filter(Boolean).join(' OR ');
+}
+function filtroRiesgoso(f){
+  const orig = String(f||'').trim();
+  if(!orig) return false;
+  return blindarFiltro(orig) !== orig;
+}
+
+function revisarFiltro(){
+  const inp   = document.getElementById('np-filtro');
+  const aviso = document.getElementById('np-aviso');
+  if(!inp || !aviso) return;
+  const val = inp.value.trim();
+  if(filtroRiesgoso(val)){
+    inp.classList.add('campo-mal');
+    aviso.classList.add('show');
+    aviso.innerHTML = '⚠️ <strong>Ese filtro trae espacios sueltos.</strong> Gmail los lee como “y además”, '
+      + 'así que la búsqueda dejaría de traer los correos de esta plataforma. Debería quedar así:<br>'
+      + '<code>'+esc(blindarFiltro(val))+'</code><br>'
+      + '<button type="button" class="btn-fix" onclick="aplicarFiltroSeguro()">Arreglarlo por mí</button>';
+  } else {
+    inp.classList.remove('campo-mal');
+    aviso.classList.remove('show');
+    aviso.innerHTML = '';
+  }
+}
+function aplicarFiltroSeguro(){
+  const inp = document.getElementById('np-filtro');
+  inp.value = blindarFiltro(inp.value.trim());
+  revisarFiltro();
+  inp.focus();
+}
+
+// ── Modo edición ──────────────────────────────────────────
+function editarPlataforma(id){
+  const p = PLATAFORMAS.filter(function(x){ return String(x.id) === String(id); })[0];
+  if(!p){ toast('No encontré esa plataforma', false); return; }
+  EDITANDO = p.id;
+  document.getElementById('np-icono').value  = p.icono || '';
+  document.getElementById('np-nombre').value = p.nombre || '';
+  document.getElementById('np-filtro').value = p.filtro || '';
+  document.getElementById('np-box').classList.add('modo-edicion');
+  document.getElementById('np-titulo').textContent = '✏️ Editando: ' + (p.nombre||'');
+  document.getElementById('np-badge').style.display = '';
+  document.getElementById('np-btn-guardar').innerHTML = '💾 Guardar cambios';
+  document.getElementById('np-btn-cancelar').style.display = '';
+  document.getElementById('np-hint').textContent = 'Estás cambiando una plataforma que ya existe. Cancela si no quieres guardar.';
+  revisarFiltro();
+  pintarPlataformas();
+  document.getElementById('np-box').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  document.getElementById('np-nombre').focus();
+}
+
+function cancelarEdicion(){
+  EDITANDO = null;
+  limpiarForm();
+  document.getElementById('np-box').classList.remove('modo-edicion');
+  document.getElementById('np-titulo').textContent = '➕ Agregar plataforma';
+  document.getElementById('np-badge').style.display = 'none';
+  document.getElementById('np-btn-guardar').innerHTML = '+ Agregar plataforma';
+  document.getElementById('np-btn-cancelar').style.display = 'none';
+  document.getElementById('np-hint').textContent = 'Si dejas el filtro vacío se usa el nombre en minúsculas.';
+  pintarPlataformas();
+}
+
+function limpiarForm(){
+  document.getElementById('np-nombre').value = '';
+  document.getElementById('np-filtro').value = '';
+  document.getElementById('np-icono').value  = '';
+  revisarFiltro();
 }
 
 function abrirPlataformas(){
@@ -791,6 +907,7 @@ function abrirPlataformas(){
   cargarPlataformas();
 }
 function cerrarPlataformas(){
+  if(EDITANDO) cancelarEdicion();
   document.getElementById('modalPlat').classList.remove('open');
 }
 document.getElementById('modalPlat').addEventListener('click', function(e){
@@ -805,27 +922,60 @@ async function togglePlataforma(id, activo){
   } catch(e){ toast('No se pudo actualizar', false); await cargarPlataformas(); }
 }
 
-async function crearPlataforma(){
+async function guardarPlataforma(){
   const nombre = document.getElementById('np-nombre').value.trim();
   let filtro   = document.getElementById('np-filtro').value.trim();
   const icono  = document.getElementById('np-icono').value.trim() || '📨';
-  if(!nombre){ toast('Escribe el nombre', false); return; }
+  if(!nombre){ toast('Escribe el nombre', false); document.getElementById('np-nombre').focus(); return; }
   if(!filtro) filtro = nombre.toLowerCase();
+
+  // Blindaje obligatorio: nunca se guarda un filtro con espacios sueltos
+  const seguro = blindarFiltro(filtro);
+  if(seguro !== filtro){
+    filtro = seguro;
+    document.getElementById('np-filtro').value = filtro;
+    revisarFiltro();
+    toast('Filtro ajustado a ' + filtro);
+  }
+
+  const btn = document.getElementById('np-btn-guardar');
+  btn.disabled = true;
   try {
-    await api('plataformas', { op:'crear', plat:{ nombre:nombre, filtro:filtro, icono:icono } });
-    document.getElementById('np-nombre').value = '';
-    document.getElementById('np-filtro').value = '';
-    document.getElementById('np-icono').value  = '';
-    await cargarPlataformas();
-    toast('✅ ' + nombre + ' agregada');
-  } catch(e){ toast('No se pudo agregar', false); }
+    if(EDITANDO){
+      const res = await api('plataformas', { op:'editar', plat:{ id:EDITANDO, nombre:nombre, filtro:filtro, icono:icono } });
+      cancelarEdicion();
+      aplicarLista(res);
+      toast('✅ ' + nombre + ' actualizada');
+    } else {
+      const res = await api('plataformas', { op:'crear', plat:{ nombre:nombre, filtro:filtro, icono:icono } });
+      limpiarForm();
+      aplicarLista(res);
+      toast('✅ ' + nombre + ' agregada');
+    }
+  } catch(e){
+    toast(EDITANDO ? 'No se pudo guardar' : 'No se pudo agregar', false);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// La misma llamada devuelve la lista al día; si no viene, se recarga.
+function aplicarLista(res){
+  if(res && Array.isArray(res.data)){
+    PLATAFORMAS = res.data;
+    pintarSub();
+    pintarPlataformas();
+  } else {
+    cargarPlataformas();
+  }
 }
 
 async function borrarPlataforma(id, nombre){
   if(!confirm('¿Dejar de vigilar "'+nombre+'" y borrarla de la lista?')) return;
   try {
-    await api('plataformas', { op:'eliminar', plat:{ id:id } });
-    await cargarPlataformas();
+    const res = await api('plataformas', { op:'eliminar', plat:{ id:id } });
+    if(EDITANDO === id) cancelarEdicion();
+    aplicarLista(res);
     toast('Plataforma eliminada');
   } catch(e){ toast('No se pudo borrar', false); }
 }
