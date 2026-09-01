@@ -134,20 +134,35 @@
     color:#4a5068; line-height:1.55; max-width:720px}
   @media (max-width:700px){ .cmp{grid-template-columns:1fr} }
 
-  /* reparto por andén (dona) */
-  .dona-wrap{display:flex; gap:1.6rem; align-items:center; flex-wrap:wrap}
-  .dona{width:210px; height:210px; flex-shrink:0; position:relative}
-  .dona svg{transform:rotate(-90deg)}
-  .dona-centro{position:absolute; inset:0; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; text-align:center}
-  .dona-centro b{font-size:27px; font-weight:800; color:var(--txt); font-variant-numeric:tabular-nums}
-  .dona-centro span{font-size:10.5px; font-weight:700; color:var(--txt3)}
-  .leyenda{flex:1; min-width:260px; display:grid; grid-template-columns:repeat(2,1fr); gap:.5rem .9rem}
-  .ley{display:flex; align-items:center; gap:.5rem; font-size:11.5px}
+  /* conexiones por andén (barras verticales, los 34) */
+  .leyenda{display:flex; gap:1.2rem; flex-wrap:wrap; margin-bottom:1rem}
+  .ley{display:flex; align-items:center; gap:.45rem; font-size:11.5px; color:var(--txt2)}
   .ley i{width:10px; height:10px; border-radius:3px; flex-shrink:0}
-  .ley b{color:var(--txt); font-weight:700; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .ley span{font-weight:800; color:var(--txt2); font-variant-numeric:tabular-nums}
-  @media (max-width:700px){ .leyenda{grid-template-columns:1fr} }
+  .ley b{color:var(--txt); font-weight:700}
+
+  .barras-scroll{overflow-x:auto; overflow-y:hidden; padding-bottom:.4rem}
+  .barras{display:flex; gap:1.6rem; align-items:flex-end; width:max-content; min-width:100%}
+  .bgrupo{display:flex; flex-direction:column}
+  .bgtit{display:flex; align-items:center; gap:.45rem; font-size:11.5px; font-weight:800;
+    color:var(--txt2); margin-bottom:.7rem}
+  .bgtit i{width:10px; height:10px; border-radius:3px; flex-shrink:0}
+  .bgtit span{font-weight:600; color:var(--txt3)}
+  .bcols{display:flex; align-items:flex-end; gap:5px;
+    border-bottom:1px solid var(--linea); padding-bottom:0}
+  .bcol{width:23px; display:flex; flex-direction:column; justify-content:flex-end;
+    align-items:center; height:250px}
+  .bval{font-size:10px; font-weight:800; color:var(--txt2);
+    font-variant-numeric:tabular-nums; margin-bottom:3px; white-space:nowrap}
+  .bval.cero{color:#b0b3bd; font-weight:700}
+  .bbar{width:100%; border-radius:4px 4px 0 0; height:0; transition:height .7s ease;
+    min-height:2px}
+  .blab{height:96px; width:23px; display:flex; align-items:flex-start; justify-content:center;
+    padding-top:6px}
+  .blab span{font-size:9.5px; color:var(--txt3); white-space:nowrap;
+    transform:rotate(-60deg); transform-origin:top right; display:block;
+    max-width:92px; overflow:hidden; text-overflow:ellipsis; direction:rtl}
+  .blab.mudo span{color:#c2c6d0}
+  .nota-barras{font-size:11.5px; color:#8a90a0; margin-top:1.1rem; line-height:1.55; max-width:720px}
 
   /* embudo */
   .nota-embudo{font-size:11.5px;color:#8a90a0;margin-top:1.1rem;line-height:1.55;max-width:720px}
@@ -213,12 +228,23 @@
     .vivo, .no-print{ display:none !important }
     .filtros{ display:none !important }
     section, .card, main, div, .tabla-wrap{ break-inside:auto }
-    .kpi, .anden, .paso-e, .aviso-priv, .ley, .dona, .franja, .cmp-col, .cmp-alerta, img{ break-inside:avoid }
+    .kpi, .anden, .paso-e, .aviso-priv, .ley, .bgrupo, .franja, .cmp-col, .cmp-alerta, img{ break-inside:avoid }
     h1,h2,h3,h4, .card h3{ break-after:avoid }
     p, li{ orphans:3; widows:3 }
     thead{ display:table-header-group }
     .kpis{ grid-template-columns:repeat(5,1fr) }
     .grid2{ break-inside:auto }
+    /* La gráfica de los 34 no cabe a tamaño de pantalla: se comprime para
+       que salga completa en la hoja, sin scroll ni recorte. */
+    .barras-scroll{ overflow:visible }
+    .barras{ width:100%; min-width:0; gap:.7rem }
+    .bgrupo{ flex:1 1 0; min-width:0 }
+    .bcols{ gap:2px }
+    .bcol, .blab{ width:auto; flex:1 1 0; min-width:0 }
+    .bcol{ height:170px }
+    .bval{ font-size:7px }
+    .blab{ height:78px }
+    .blab span{ font-size:7px; max-width:76px }
     a[href]:after{ content:none }
   }
 </style>
@@ -352,12 +378,15 @@
   </div>
 
   <div class="card" style="margin-top:.9rem">
-    <h3>Reparto de conexiones por andén <span id="donaPeriodo">Mes</span></h3>
+    <h3>Conexiones por andén · los 34 <span id="barrasPeriodo">Mes</span></h3>
     <div class="body">
-      <div class="dona-wrap">
-        <div class="dona" id="dona"></div>
-        <div class="leyenda" id="leyenda"></div>
+      <div class="leyenda">
+        <div class="ley"><i style="background:#1e5096"></i><b>Línea 1</b></div>
+        <div class="ley"><i style="background:#2c8a45"></i><b>Línea 2</b></div>
+        <div class="ley"><i style="background:#dfe3ea"></i><b>Sin reportar</b></div>
       </div>
+      <div class="barras-scroll"><div class="barras" id="barras"></div></div>
+      <p class="nota-barras" id="notaBarras"></p>
     </div>
   </div>
 
@@ -392,7 +421,7 @@ var CATALOGO = [];                /* andenes dados de alta, por linea */
 var COLORES = ['#E8114B','#E5449A','#7B3F8C','#29ABE2','#8CC63F','#FFC20E','#F7941E'];
 
 /* Cada linea tiene su familia de color: azules la 1, verdes la 2.
-   Asi se distinguen de un golpe de vista en la lista y en la dona. */
+   Asi se distinguen de un golpe de vista en la lista y en las barras. */
 var AZULES  = ['#1e5096','#29ABE2','#1a3a6b','#4a9fd4','#0d1b3e','#7fc4e8'];
 var VERDES  = ['#2c8a45','#8CC63F','#1f6b33','#a8d95f','#145226','#c6e88f'];
 function colorLinea(ln){ return ln === 'Línea 2' ? VERDES[0] : (ln === 'Línea 1' ? AZULES[0] : '#8a90a0'); }
@@ -462,7 +491,7 @@ function cambiarLinea(btn){
 
 function pintarPeriodo(){
   var txt = rotulo();
-  ['embudoPeriodo','andenPeriodo','donaPeriodo','cmpPeriodo'].forEach(function(id){
+  ['embudoPeriodo','andenPeriodo','barrasPeriodo','cmpPeriodo'].forEach(function(id){
     var e = document.getElementById(id);
     if(e) e.textContent = txt;
   });
@@ -532,7 +561,7 @@ function cargar(){
     traer('mexibus_v_anden',      fl),
     traer('mexibus_v_total',      'select=*'),
     traer('mexibus_config',       'select=*'),
-    traer('mexibus_andenes',      'select=nombre,linea'),
+    traer('mexibus_andenes',      'select=clave,nombre,linea,orden&order=orden.asc'),
     traer('mexibus_v_anden',      f)   /* sin filtro: la comparacion siempre ve las dos */
   ])
   .then(function(r){
@@ -679,6 +708,7 @@ function pintarAndenes(filas){
     cajaA.innerHTML = '<div class="vacio"><b>Sin datos por andén</b>Aparecen en cuanto los equipos queden registrados en la bitácora.</div>';
     tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
     document.getElementById('totalReg').textContent = '—';
+    pintarBarras([]);
     return;
   }
 
@@ -718,7 +748,7 @@ function pintarAndenes(filas){
            (ef >= 75 ? 'Buena' : 'Revisar') + '</span></td></tr>';
   }).join('');
   document.getElementById('totalReg').textContent = lista.length + ' andenes con actividad';
-  pintarDona(lista);
+  pintarBarras(lista);
 }
 
 /* ---------- Línea 1 contra Línea 2 ----------
@@ -780,53 +810,93 @@ function avisoCobertura(t, catalogo){
          'sin señal o que todavía no le hayan cargado la liga.</div>';
 }
 
-/* ---------- Reparto de conexiones por andén (dona) ---------- */
-function pintarDona(lista){
-  var caja = document.getElementById('dona');
-  var ley  = document.getElementById('leyenda');
-  if(!caja || !ley) return;
+/* ---------- Conexiones por andén: barras de los 34 ----------
+   Se dibujan TODOS los andenes del catálogo, no solo los que registraron:
+   el que no reportó sale en gris y a la misma escala, que es justo el dato
+   que hay que ver de un golpe. Azules la Línea 1, verdes la Línea 2. */
+function pintarBarras(lista){
+  var caja = document.getElementById('barras');
+  var nota = document.getElementById('notaBarras');
+  if(!caja) return;
 
-  var orden = lista.slice().sort(function(a,b){ return b.registros - a.registros; });
-  var total = orden.reduce(function(a,b){ return a + b.registros; }, 0);
+  /* Lo registrado, indexado por andén + línea (hay nombres que se repiten
+     entre las dos líneas, como 1° de Mayo). */
+  var dato = {};
+  lista.forEach(function(a){ dato[a.linea + '|' + a.anden] = a.registros; });
 
-  if(!total){
-    caja.innerHTML = '';
-    ley.innerHTML  = '<div class="vacio" style="width:100%"><b>Sin conexiones todavía</b>' +
-                     'El reparto aparece en cuanto los andenes empiecen a registrar.</div>';
+  /* El catálogo manda: si todavía no cargó, se usa lo que haya registrado. */
+  var base = (CATALOGO && CATALOGO.length)
+    ? CATALOGO.map(function(c){
+        return { anden:c.nombre, linea:c.linea, orden:c.orden || 0,
+                 registros:dato[c.linea + '|' + c.nombre] || 0 };
+      })
+    : lista.map(function(a){ return { anden:a.anden, linea:a.linea, orden:0, registros:a.registros }; });
+
+  if(LINEA) base = base.filter(function(a){ return a.linea === LINEA; });
+
+  if(!base.length){
+    caja.innerHTML = '<div class="vacio" style="width:100%"><b>Sin andenes cargados</b>' +
+                     'Las barras aparecen en cuanto el catálogo esté disponible.</div>';
+    if(nota) nota.textContent = '';
     return;
   }
 
-  /* Círculo de perímetro 100: cada rebanada se dibuja con el trazo,
-     así el ancho de cada segmento es directamente su porcentaje. */
-  var R = 15.9155, giro = 0, arcos = '';
-  orden.forEach(function(a, i){
-    var pct = a.registros / total * 100;
-    arcos += '<circle cx="21" cy="21" r="' + R + '" fill="none" stroke="' +
-             tonoLinea(a.linea, i) + '" stroke-width="7" ' +
-             'stroke-dasharray="0 100" stroke-dashoffset="' + (-giro) + '" ' +
-             'data-dash="' + pct.toFixed(2) + ' ' + (100 - pct).toFixed(2) + '">' +
-             '<title>' + a.anden + ': ' + n(a.registros) + ' conexiones (' + Math.round(pct) + '%)</title></circle>';
-    giro += pct;
+  base.sort(function(a,b){ return a.orden - b.orden; });
+
+  var max   = Math.max.apply(null, base.map(function(a){ return a.registros; }));
+  var total = base.reduce(function(x,a){ return x + a.registros; }, 0);
+  var conAct = base.filter(function(a){ return a.registros > 0; }).length;
+  if(!max) max = 1;
+
+  var porLinea = {};
+  base.forEach(function(a){
+    if(!porLinea[a.linea]) porLinea[a.linea] = [];
+    porLinea[a.linea].push(a);
   });
 
-  caja.innerHTML = '<svg viewBox="0 0 42 42" width="210" height="210">' + arcos + '</svg>' +
-    '<div class="dona-centro"><b>' + n(total) + '</b><span>conexiones</span></div>';
+  caja.innerHTML = Object.keys(porLinea).sort().map(function(ln){
+    var grupo = porLinea[ln];
+    var suma  = grupo.reduce(function(x,a){ return x + a.registros; }, 0);
+    var vivos = grupo.filter(function(a){ return a.registros > 0; }).length;
 
+    var cols = grupo.map(function(a){
+      var alto = Math.round(a.registros / max * 210);       /* 210 px de pista útil */
+      var col  = a.registros ? colorLinea(a.linea) : '#dfe3ea';
+      var tip  = a.anden + ' · ' + ln + ' · ' +
+                 (a.registros ? n(a.registros) + ' conexiones' : 'sin reportar en este periodo');
+      return '<div class="bcol" title="' + tip + '">' +
+               '<div class="bval' + (a.registros ? '' : ' cero') + '">' +
+                 (a.registros ? n(a.registros) : '0') + '</div>' +
+               '<div class="bbar" style="background:' + col + '" data-h="' +
+                 (a.registros ? Math.max(alto, 3) : 3) + '"></div>' +
+             '</div>';
+    }).join('');
+
+    var labs = grupo.map(function(a){
+      return '<div class="blab' + (a.registros ? '' : ' mudo') + '">' +
+             '<span title="' + a.anden + '">' + a.anden + '</span></div>';
+    }).join('');
+
+    return '<div class="bgrupo">' +
+             '<div class="bgtit"><i style="background:' + colorLinea(ln) + '"></i>' + ln +
+               ' <span>· ' + vivos + ' de ' + grupo.length + ' activos · ' + n(suma) + ' conexiones</span></div>' +
+             '<div class="bcols">' + cols + '</div>' +
+             '<div class="bcols" style="border-bottom:none; align-items:flex-start">' + labs + '</div>' +
+           '</div>';
+  }).join('');
+
+  /* Las barras crecen una tras otra, de izquierda a derecha. */
   setTimeout(function(){
-    caja.querySelectorAll('circle').forEach(function(c, i){
-      setTimeout(function(){
-        c.style.transition = 'stroke-dasharray .7s ease';
-        c.setAttribute('stroke-dasharray', c.dataset.dash);
-      }, i * 70);
+    caja.querySelectorAll('.bbar').forEach(function(b, i){
+      setTimeout(function(){ b.style.height = b.dataset.h + 'px'; }, i * 35);
     });
   }, 150);
 
-  ley.innerHTML = orden.map(function(a, i){
-    var pct = Math.round(a.registros / total * 100);
-    return '<div class="ley"><i style="background:' + tonoLinea(a.linea, i) + '"></i>' +
-           '<b title="' + a.anden + '">' + a.anden + '</b>' +
-           '<span>' + n(a.registros) + ' · ' + pct + '%</span></div>';
-  }).join('');
+  if(nota){
+    nota.innerHTML = '<b>' + conAct + ' de ' + base.length + ' andenes</b> registraron conexiones en el periodo, ' +
+      'con <b>' + n(total) + '</b> en total. Los grises están dados de alta pero no han reportado nada: ' +
+      'puede ser que el equipo esté apagado, sin señal o que todavía no le hayan cargado la liga.';
+  }
 }
 
 /* ---------- Nombre de la campaña ---------- */
