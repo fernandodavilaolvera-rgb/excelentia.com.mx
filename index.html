@@ -1,953 +1,648 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExcelentIA | Inteligencia Artificial con esencia humana</title>
-<meta name="description" content="Implementamos agentes de inteligencia artificial para automatizar tu negocio. Clínicas, inmobiliarias, despachos y más.">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#0d1b3e;
-  --navy-mid:#1a3a6b;
-  --navy-light:#1e5096;
-  --accent:#4a9fd4;
-  --accent-light:#e8f0fb;
-  --bg:#f5f6f8;
-  --white:#ffffff;
-  --border:#dde1e9;
-  --card-head:#dce8f7;
-  --text-main:#1a2035;
-  --text-sub:#4a5068;
-  --text-muted:#8a90a0;
-}
-html{scroll-behavior:smooth}
-body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text-main);font-size:17px;line-height:1.65;overflow-x:hidden}
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(13,27,62,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:2px solid var(--accent)}
-.nav-inner{max-width:1180px;margin:0 auto;padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:80px}
-.nav-brand{display:flex;align-items:center;gap:1rem;text-decoration:none}
-.nav-logo-wrap{background:#fff;border-radius:12px;padding:6px 14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.nav-logo{height:53px;width:auto;display:block}
-.nav-slogan{font-size:15px;font-weight:600;color:rgba(255,255,255,.78);letter-spacing:.01em;line-height:1.3;max-width:220px}
-.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
-.nav-links a{color:rgba(255,255,255,0.82);text-decoration:none;font-size:15px;font-weight:500;transition:color .2s}
-.nav-links a:hover{color:#fff}
-.btn-nav{background:var(--accent);color:#fff !important;padding:.5rem 1.25rem;border-radius:8px;font-weight:700 !important;font-size:14px !important;transition:opacity .2s,transform .15s}
-.btn-nav:hover{opacity:.88;transform:translateY(-1px)}
-.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:none}
-.hamburger span{display:block;width:22px;height:2px;background:rgba(255,255,255,.85);border-radius:2px;transition:.3s}
-.mobile-menu{display:none;background:var(--navy);padding:1.25rem 5% 1.5rem;border-top:1px solid rgba(74,159,212,.2)}
-.mobile-menu.open{display:block}
-.mobile-menu a{display:block;color:rgba(255,255,255,.82);text-decoration:none;font-size:16px;font-weight:500;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
-.mobile-menu .btn-nav{display:inline-block;margin-top:1rem}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* HERO NODES CANVAS */
-#heroCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+  .page {
+    font-family: 'Inter', sans-serif;
+    background: #04091A;
+    color: #fff;
+    overflow-x: hidden;
+  }
 
-/* HERO */
-.hero{min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 58%,var(--navy-light) 100%);display:flex;align-items:center;padding:100px 5% 80px;position:relative;overflow:hidden}
-.hero-grid{position:absolute;inset:0;opacity:.035;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
-.hero-glow{position:absolute;right:-10%;top:10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(74,159,212,.13) 0%,transparent 70%);pointer-events:none}
-.hero-inner{max-width:1180px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;position:relative;z-index:2}
-.hero-text{animation:fadeUp .9s ease both}
-.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(74,159,212,.15);border:1px solid rgba(74,159,212,.35);color:#fff;font-size:13px;font-weight:600;padding:.35rem .9rem;border-radius:100px;margin-bottom:1.5rem;letter-spacing:.04em;text-transform:uppercase}
-.hero-badge::before{content:'';width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
-h1{font-size:clamp(2.1rem,4vw,3.2rem);font-weight:800;color:#fff;line-height:1.18;margin-bottom:1.25rem}
-h1 span{color:var(--accent)}
-.hero-sub{font-size:1.1rem;color:rgba(255,255,255,.72);line-height:1.7;margin-bottom:2.25rem;max-width:480px}
-.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
-.btn-primary{background:var(--accent);color:#fff;padding:.85rem 1.8rem;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;transition:opacity .2s,transform .15s;display:inline-flex;align-items:center;gap:.5rem}
-.btn-primary:hover{opacity:.88;transform:translateY(-2px)}
-.btn-secondary{background:transparent;color:#fff;padding:.85rem 1.8rem;border-radius:10px;text-decoration:none;font-weight:600;font-size:16px;border:1.5px solid rgba(255,255,255,.3);transition:border-color .2s,background .2s}
-.btn-secondary:hover{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.07)}
-.hero-visual{animation:fadeUp 1.1s ease .2s both}
+  /* ── NAV ── */
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2.5rem;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(4,9,26,0.92);
+    backdrop-filter: blur(10px);
+  }
+  .nav-logo { display: flex; align-items: center; }
+  .nav-logo-box { background: #fff; border-radius: 10px; padding: 5px 12px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo-box img { height: 38px; width: auto; display: block; }
+  .nav-links { display: flex; gap: 1.75rem; list-style: none; }
+  .nav-links a { font-size: 0.82rem; color: rgba(255,255,255,0.5); text-decoration: none; }
+  .nav-links a:hover { color: #fff; }
+  .nav-cta {
+    background: linear-gradient(135deg,#00B4D8,#0077B6);
+    color: #fff !important; padding: 0.45rem 1.1rem;
+    border-radius: 6px; font-weight: 500 !important; font-size: 0.82rem !important;
+  }
 
-/* HERO SERVICES CARD */
-.hero-services-card{background:rgba(255,255,255,.07);border:1px solid rgba(74,159,212,.25);border-radius:18px;padding:1.75rem;backdrop-filter:blur(8px)}
-.hero-services-title{color:rgba(255,255,255,.5);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.25rem}
-.svc-row{display:flex;align-items:flex-start;gap:.9rem;padding:.85rem 0;border-bottom:1px solid rgba(255,255,255,.07)}
-.svc-row:last-child{border-bottom:none;padding-bottom:0}
-.svc-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.svc-icon.blue{background:rgba(74,159,212,.2)}
-.svc-icon.green{background:rgba(74,212,130,.15)}
-.svc-icon.purple{background:rgba(150,100,220,.18)}
-.svc-icon.orange{background:rgba(255,160,60,.15)}
-.svc-info{flex:1}
-.svc-name{color:#fff;font-size:14px;font-weight:700;margin-bottom:.2rem}
-.svc-desc{color:rgba(255,255,255,.52);font-size:12.5px;line-height:1.45}
+  /* ── SHARED ── */
+  .section { padding: 5rem 2.5rem; max-width: 1100px; margin: 0 auto; }
+  .section-full { padding: 5rem 2.5rem; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(0,180,216,0.1); border: 0.5px solid rgba(0,180,216,0.3);
+    border-radius: 100px; padding: 0.28rem 0.85rem;
+    font-size: 0.7rem; font-weight: 500; color: #00B4D8;
+    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1.25rem;
+  }
+  .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #00B4D8; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700;
+    line-height: 1.15; letter-spacing: -1px; margin-bottom: 0.75rem;
+  }
+  .section-sub { font-size: 0.95rem; color: rgba(255,255,255,0.5); line-height: 1.7; max-width: 540px; }
+  .accent { color: #00B4D8; }
+  .divider { border: none; border-top: 0.5px solid rgba(255,255,255,0.07); margin: 0; }
 
-/* SECTIONS */
-section{padding:90px 5%}
-.section-inner{max-width:1180px;margin:0 auto}
-.section-label{display:inline-block;color:var(--accent);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}
-h2{font-size:clamp(1.8rem,3vw,2.5rem);font-weight:800;color:var(--text-main);line-height:1.22;margin-bottom:1rem}
-.section-sub{font-size:1.05rem;color:var(--text-sub);max-width:580px;margin-bottom:3rem}
+  /* ── HERO ── */
+  .hero-wrap {
+    position: relative; overflow: hidden;
+    background: linear-gradient(160deg,#04091A 60%,#041828 100%);
+    min-height: 90vh;
+  }
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(0,180,216,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,216,0.06) 1px,transparent 1px);
+    background-size: 52px 52px;
+  }
+  .hero-glow { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle,rgba(0,119,182,0.18) 0%,transparent 70%); top:-150px; right:-100px; pointer-events:none; }
+  .hero-glow2 { position: absolute; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle,rgba(0,180,216,0.08) 0%,transparent 70%); bottom:0; left:-60px; pointer-events:none; }
+  .hero-body {
+    position: relative; z-index: 5;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+    padding: 4rem 2.5rem 3.5rem; max-width: 1100px; margin: 0 auto;
+  }
+  .hero-headline { font-family:'Space Grotesk',sans-serif; font-size: 2.9rem; font-weight: 700; line-height: 1.1; letter-spacing:-1.5px; margin-bottom:1.2rem; }
+  .hero-sub { font-size: 0.97rem; line-height: 1.75; color: rgba(255,255,255,0.52); margin-bottom: 2rem; }
+  .hero-ctas { display: flex; gap: 12px; margin-bottom: 2rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg,#00B4D8,#0077B6);
+    color: #fff; padding: 0.72rem 1.4rem; border-radius: 8px; font-size: 0.88rem;
+    font-weight: 500; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+  }
+  .btn-secondary {
+    background: transparent; color: rgba(255,255,255,0.65); padding: 0.72rem 1.4rem;
+    border-radius: 8px; font-size: 0.88rem; font-weight: 400;
+    border: 0.5px solid rgba(255,255,255,0.2); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+  }
+  .trust-row { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+  .trust-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.38); }
+  .trust-check { width:16px;height:16px;border-radius:50%;background:rgba(0,180,216,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .trust-check svg { width:10px;height:10px; }
 
-/* PILARES */
-.pillars{background:#fff}
-.pillars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
-.pillar-card{border:1px solid var(--border);border-radius:14px;padding:2rem;transition:box-shadow .25s,transform .2s,background .2s}
-.pillar-card:hover{box-shadow:0 8px 32px rgba(74,159,212,.13);transform:translateY(-4px);background:var(--accent-light)}
+  /* hero cards */
+  .hero-right { display: flex; flex-direction: column; gap: 14px; }
+  .hcard {
+    background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 1.2rem 1.4rem; position: relative; overflow: hidden;
+  }
+  .hcard::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,180,216,0.5),transparent); }
+  .card-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem; }
+  .card-lbl { font-size:0.7rem;color:rgba(255,255,255,0.38);text-transform:uppercase;letter-spacing:.06em;font-weight:500; }
+  .badge { font-size:0.68rem;padding:2px 8px;border-radius:100px;font-weight:500; }
+  .badge-blue { background:rgba(0,180,216,0.15);color:#00B4D8;border:0.5px solid rgba(0,180,216,0.3); }
+  .badge-purple { background:rgba(83,74,183,0.15);color:#AFA9EC;border:0.5px solid rgba(83,74,183,0.3); }
+  .chat-row { display:flex;flex-direction:column;gap:8px; }
+  .cmsg { display:flex;gap:8px;align-items:flex-start; }
+  .cavatar { width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:600; }
+  .av-blue { background:rgba(0,180,216,0.15);color:#00B4D8;border:0.5px solid rgba(0,180,216,0.3); }
+  .av-gray { background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.45); }
+  .cbubble { background:rgba(255,255,255,0.06);border-radius:8px;padding:8px 11px;font-size:.76rem;color:rgba(255,255,255,0.68);line-height:1.4;max-width:255px; }
+  .cbubble.ai-bubble { background:rgba(0,119,182,0.15);color:#90E0EF;border:0.5px solid rgba(0,180,216,0.2); }
+  .ctime { font-size:.62rem;color:rgba(255,255,255,0.22);margin-top:2px; }
+  .kpi-row { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
+  .kpi-val { font-family:'Space Grotesk',sans-serif;font-size:1.45rem;font-weight:700;color:#00B4D8;letter-spacing:-.5px;line-height:1; }
+  .kpi-lbl { font-size:.67rem;color:rgba(255,255,255,.32);margin-top:3px; }
+  .bars { display:flex;align-items:flex-end;gap:5px;height:52px;margin-top:.75rem;padding-top:1.2rem;position:relative; }
+  .bar { flex:1;border-radius:3px 3px 0 0;background:rgba(0,180,216,0.2); }
+  .bar.hi { background:linear-gradient(180deg,#00B4D8,#0077B6); }
+  .bar-label-bottom { display:flex;gap:5px;margin-top:4px; }
+  .blb { flex:1;text-align:center;font-size:.58rem;color:rgba(255,255,255,.25); }
 
-/* MOCKUP FLOTANTE */
-.pillar-mockup{display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;background:#fff}
-.mockup-float{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);border-radius:12px 12px 0 0;padding:0 0 14px;animation:floatPillar 4s ease-in-out infinite}
-@keyframes floatPillar{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.mf-topbar{background:rgba(255,255,255,.08);padding:8px 12px;display:flex;align-items:center;gap:5px;border-radius:12px 12px 0 0;margin-bottom:12px}
-.mf-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.mf-title-bar{font-size:11px;font-weight:600;color:rgba(255,255,255,.45);margin-left:6px;letter-spacing:.03em}
-.mf-body{padding:0 14px}
-.mf-chat-row{font-size:11.5px;font-weight:500;padding:5px 9px;border-radius:8px;margin-bottom:5px;line-height:1.45}
-.mf-chat-in{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
-.mf-chat-out{background:rgba(74,159,212,.25);color:#fff;text-align:right}
-.mf-stat-row{display:flex;align-items:center;gap:6px;margin-top:6px;padding:4px 0}
-.mf-stat-icon{font-size:14px}
-.mf-stat-text{font-size:11px;font-weight:600;color:rgba(255,255,255,.5)}
-.mf-kpi-row{display:flex;gap:6px;margin-bottom:10px}
-.mf-kpi{flex:1;background:rgba(255,255,255,.08);border-radius:8px;padding:8px 4px;text-align:center}
-.mf-kpi-val{font-size:16px;font-weight:800;color:#fff;line-height:1}
-.mf-kpi-lbl{font-size:9px;color:rgba(255,255,255,.45);font-weight:600;margin-top:3px}
-.mf-badge-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
-.mf-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;background:rgba(74,159,212,.18);color:#4a9fd4;border:1px solid rgba(74,159,212,.25)}
-.mf-timeline{display:flex;flex-direction:column;gap:6px}
-.mf-tl-row{display:flex;align-items:center;gap:7px}
-.mf-tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.mf-tl-dot.done{background:#28ca41}
-.mf-tl-dot.now{background:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.25)}
-.mf-tl-dot.soon{background:rgba(255,255,255,.2)}
-.mf-tl-text{font-size:11px;color:rgba(255,255,255,.65);font-weight:500}
-.mf-tl-text strong{color:#fff}
-.mf-check-list{display:flex;flex-direction:column;gap:5px}
-.mf-check-row{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(255,255,255,.7);font-weight:500}
-.mf-check-row span{font-size:13px}
-.pillar-mockup h3{font-size:1.1rem;font-weight:700;margin:1.1rem 1.5rem .5rem;color:var(--text-main)}
-.pillar-mockup p{color:var(--text-sub);font-size:15px;line-height:1.6;margin:0 1.5rem 1.5rem}
+  /* metrics strip */
+  .metrics-strip {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    background: rgba(0,180,216,0.05); border-top: 0.5px solid rgba(0,180,216,0.15);
+    border-bottom: 0.5px solid rgba(0,180,216,0.15);
+  }
+  .mc { padding:1.5rem 1.25rem;text-align:center;border-right:0.5px solid rgba(255,255,255,0.07); }
+  .mc:last-child { border-right:none; }
+  .mc-num { font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;color:#00B4D8;letter-spacing:-1px; }
+  .mc-desc { font-size:.72rem;color:rgba(255,255,255,.35);margin-top:4px;line-height:1.4; }
 
-/* AGENTES */
-.agents-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:3rem}
-.agent-card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:box-shadow .25s,transform .2s}
-.agent-card:hover{box-shadow:0 8px 36px rgba(26,58,107,.12);transform:translateY(-4px)}
-.agent-card-head{background:var(--card-head);padding:1.5rem 1.75rem 1.25rem;display:flex;align-items:flex-start;gap:1rem}
-.agent-card-icon{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:#fff;border:1px solid var(--border);flex-shrink:0}
-.agent-card-head-text h3{font-size:1.1rem;font-weight:700;color:var(--navy-mid);margin-bottom:.25rem}
-.agent-card-head-text .tag{font-size:11px;font-weight:700;padding:.2rem .65rem;border-radius:100px}
-.tag-live{background:#d4f5e2;color:#166534}
-.tag-dev{background:#dbeafe;color:#1e40af}
-.tag-dash{background:#ede9fe;color:#5b21b6}
-.agent-card-body{padding:1.5rem 1.75rem}
-.agent-card-body p{color:var(--text-sub);font-size:15px;line-height:1.65;margin-bottom:1.25rem}
-.agent-features{list-style:none;display:flex;flex-direction:column;gap:.5rem}
-.agent-features li{font-size:14px;color:var(--text-sub);display:flex;align-items:center;gap:.5rem}
-.agent-features li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
-.agent-stat-highlight{display:inline-flex;align-items:center;gap:.5rem;background:var(--accent-light);border:1px solid rgba(74,159,212,.25);border-radius:8px;padding:.4rem .85rem;margin-bottom:1rem;font-size:13px;font-weight:700;color:var(--navy-mid)}
-.agent-stat-highlight span{color:var(--accent);font-size:15px}
+  /* ── SERVICIOS ── */
+  .services-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:2.5rem; }
+  .scard {
+    background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.09);
+    border-radius:14px;padding:1.4rem 1.5rem;transition:border-color .2s;
+  }
+  .scard:hover { border-color:rgba(0,180,216,0.35); }
+  .scard-icon { width:40px;height:40px;border-radius:10px;background:rgba(0,180,216,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:.9rem;font-size:1.1rem; }
+  .scard-title { font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;margin-bottom:.4rem; }
+  .scard-desc { font-size:.82rem;color:rgba(255,255,255,.48);line-height:1.6; }
+  .scard-tag { display:inline-block;margin-top:.75rem;font-size:.68rem;color:#00B4D8;background:rgba(0,180,216,0.1);border:0.5px solid rgba(0,180,216,0.25);border-radius:4px;padding:2px 8px; }
 
-/* CRM CARD */
-.crm-card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
-.crm-chip{background:var(--card-head);border:1px solid rgba(74,159,212,.2);border-radius:8px;padding:.4rem .6rem;text-align:center;font-size:11.5px;font-weight:600;color:var(--navy-mid);line-height:1.3}
-.crm-chip span{display:block;font-size:14px;margin-bottom:2px}
+  /* ── POR QUÉ ── */
+  .porque-wrap { background:rgba(0,180,216,0.03);border-top:.5px solid rgba(255,255,255,.06);border-bottom:.5px solid rgba(255,255,255,.06); }
+  .porque-grid { display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center; }
+  .timeline { display:flex;flex-direction:column;gap:0; }
+  .tline-item { display:flex;gap:1rem;padding:1.1rem 0;border-bottom:.5px solid rgba(255,255,255,.06); }
+  .tline-item:last-child { border-bottom:none; }
+  .tline-num { font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:#00B4D8;min-width:30px;line-height:1; }
+  .tline-content h4 { font-size:.9rem;font-weight:500;margin-bottom:.2rem; }
+  .tline-content p { font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.5; }
+  .stat-pills { display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem; }
+  .spill { background:rgba(0,180,216,0.1);border:0.5px solid rgba(0,180,216,0.25);border-radius:8px;padding:.5rem .9rem; }
+  .spill-val { font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;color:#00B4D8; }
+  .spill-lbl { font-size:.68rem;color:rgba(255,255,255,.4);margin-top:1px; }
 
-/* SECTORES — casos de uso */
-.sectors{background:#fff}
-.usecases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.5rem}
-.usecase-card{border:1px solid var(--border);border-radius:14px;padding:1.6rem 1.5rem;transition:background .2s,transform .2s,box-shadow .2s;display:flex;flex-direction:column;gap:.6rem}
-.usecase-card:hover{background:var(--accent-light);transform:translateY(-3px);box-shadow:0 6px 24px rgba(74,159,212,.1)}
-.usecase-icon{font-size:2rem;margin-bottom:.25rem}
-.usecase-card h3{font-size:1rem;font-weight:800;color:var(--navy-mid);margin:0}
-.usecase-card p{font-size:14px;color:var(--text-sub);line-height:1.55;margin:0}
-.usecase-tag{display:inline-flex;align-items:center;gap:.3rem;font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-top:auto}
+  /* ── AGENTES ── */
+  .agentes-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:2.5rem; }
+  .acard { background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.09);border-radius:14px;padding:1.5rem; }
+  .acard.featured { border-color:rgba(0,180,216,.4);background:rgba(0,119,182,.06); }
+  .acard-head { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.8rem; }
+  .acard-icon { font-size:1.4rem; }
+  .astatus { font-size:.67rem;padding:3px 9px;border-radius:100px;font-weight:500; }
+  .s-live { background:rgba(0,200,100,.12);color:#4ade80;border:.5px solid rgba(0,200,100,.3); }
+  .s-dev { background:rgba(255,200,0,.1);color:#fbbf24;border:.5px solid rgba(255,200,0,.25); }
+  .s-avail { background:rgba(0,180,216,.12);color:#00B4D8;border:.5px solid rgba(0,180,216,.3); }
+  .acard-title { font-family:'Space Grotesk',sans-serif;font-size:.98rem;font-weight:600;margin-bottom:.35rem; }
+  .acard-kpi { display:inline-flex;align-items:center;gap:5px;font-size:.72rem;color:#00B4D8;background:rgba(0,180,216,.08);border:.5px solid rgba(0,180,216,.2);border-radius:6px;padding:2px 8px;margin-bottom:.6rem; }
+  .acard-desc { font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:.75rem; }
+  .acard-features { display:flex;flex-direction:column;gap:5px; }
+  .af { display:flex;align-items:flex-start;gap:6px;font-size:.77rem;color:rgba(255,255,255,.5); }
+  .af-dot { width:5px;height:5px;border-radius:50%;background:#00B4D8;margin-top:5px;flex-shrink:0; }
 
-/* NÚMEROS */
-.numbers{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);position:relative;overflow:hidden}
-.numbers::before{content:'';position:absolute;inset:0;opacity:.04;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
-.numbers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;position:relative}
-.number-item{text-align:center}
-.number-big{font-size:3rem;font-weight:800;color:#fff;line-height:1;margin-bottom:.4rem}
-.number-big span{color:var(--accent)}
-.number-label{font-size:14px;color:rgba(255,255,255,.6);font-weight:500;line-height:1.45}
+  /* ── CASOS ── */
+  .casos-bg { background:rgba(255,255,255,.015); }
+  .casos-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:2.5rem; }
+  .ccard { background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.08);border-radius:12px;padding:1.2rem 1.3rem; }
+  .ccard:hover { border-color:rgba(0,180,216,.3); }
+  .ccard-icon { font-size:1.3rem;margin-bottom:.6rem; }
+  .ccard-title { font-size:.88rem;font-weight:500;margin-bottom:.35rem; }
+  .ccard-desc { font-size:.78rem;color:rgba(255,255,255,.42);line-height:1.55; }
+  .ccard-arrow { display:flex;align-items:center;gap:4px;font-size:.72rem;color:#00B4D8;margin-top:.65rem; }
 
-/* METODOLOGÍA */
-.metodologia-section{background:#fff}
-.meto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-top:2.5rem}
-.meto-card{border:1px solid var(--border);border-radius:16px;padding:1.75rem 1.5rem;position:relative;transition:box-shadow .25s,transform .2s,background .2s}
-.meto-card:hover{box-shadow:0 8px 32px rgba(74,159,212,.13);transform:translateY(-4px);background:var(--accent-light)}
-.meto-num{position:absolute;top:1.25rem;right:1.25rem;font-size:2rem;font-weight:900;color:rgba(74,159,212,.12);line-height:1}
-.meto-icon{font-size:2rem;margin-bottom:.9rem}
-.meto-card h3{font-size:1.05rem;font-weight:800;margin-bottom:.5rem;color:var(--navy-mid)}
-.meto-card p{font-size:14px;color:var(--text-sub);line-height:1.6}
-.meto-cta{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:3rem;padding:1.5rem 2rem;background:var(--accent-light);border-radius:14px;border:1px solid rgba(74,159,212,.2);flex-wrap:wrap}
-.meto-cta span{font-size:1.1rem;font-weight:700;color:var(--navy-mid)}
+  /* ── METODOLOGÍA ── */
+  .meto-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:2.5rem; }
+  .meto-card { background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.08);border-radius:12px;padding:1.3rem; }
+  .meto-num { font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:rgba(0,180,216,.3);line-height:1;margin-bottom:.6rem; }
+  .meto-icon { font-size:1.1rem;margin-bottom:.5rem; }
+  .meto-title { font-size:.88rem;font-weight:600;margin-bottom:.35rem; }
+  .meto-desc { font-size:.77rem;color:rgba(255,255,255,.42);line-height:1.55; }
 
-/* DASHBOARDS */
-.dashboards-section{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);position:relative;overflow:hidden}
-.dashboards-section::before{content:'';position:absolute;inset:0;opacity:.04;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
-.dashboards-section .section-label{color:var(--accent)}
-.dashboards-section h2{color:#fff}
-.dashboards-section .section-sub{color:rgba(255,255,255,.7)}
-.dashboards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2.5rem}
-.dash-item{background:rgba(255,255,255,.07);border:1px solid rgba(74,159,212,.18);border-radius:12px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:.9rem;transition:background .2s,box-shadow .2s}
-.dash-item:hover{background:rgba(255,255,255,.12);box-shadow:0 4px 18px rgba(74,159,212,.15)}
-.dash-emoji{font-size:1.6rem;flex-shrink:0}
-.dash-item-text strong{display:block;font-size:15px;font-weight:700;color:#fff;margin-bottom:.15rem}
-.dash-item-text span{font-size:13px;color:rgba(255,255,255,.5)}
+  /* ── WEB ── */
+  .web-grid { display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;margin-top:2.5rem; }
+  .web-features { display:flex;flex-direction:column;gap:1rem; }
+  .wf { display:flex;gap:12px;align-items:flex-start; }
+  .wf-icon { width:36px;height:36px;border-radius:8px;background:rgba(0,180,216,.1);border:.5px solid rgba(0,180,216,.2);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0; }
+  .wf-title { font-size:.88rem;font-weight:500;margin-bottom:.2rem; }
+  .wf-desc { font-size:.78rem;color:rgba(255,255,255,.42);line-height:1.5; }
+  .web-mockup { background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.1);border-radius:14px;padding:1rem;overflow:hidden; }
+  .wm-bar { display:flex;gap:5px;margin-bottom:.75rem; }
+  .wm-dot { width:8px;height:8px;border-radius:50%; }
+  .wm-content { display:flex;flex-direction:column;gap:8px; }
+  .wm-row { height:10px;border-radius:3px;background:rgba(255,255,255,.07); }
+  .wm-row.blue { background:linear-gradient(90deg,rgba(0,180,216,.4),rgba(0,119,182,.2)); }
+  .wm-grid2 { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px; }
+  .wm-card { background:rgba(0,180,216,.07);border:.5px solid rgba(0,180,216,.18);border-radius:6px;padding:.5rem; }
+  .wm-card-title { height:6px;width:60%;background:rgba(0,180,216,.4);border-radius:2px;margin-bottom:4px; }
+  .wm-card-body { height:5px;background:rgba(255,255,255,.1);border-radius:2px; }
+  .wm-cta { margin-top:8px;background:linear-gradient(135deg,rgba(0,180,216,.6),rgba(0,119,182,.6));border-radius:5px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.68rem;color:rgba(255,255,255,.7); }
 
-/* WEB */
-.web-section{background:var(--white)}
-.web-features{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.5rem}
-.web-feat{border:1px solid var(--border);border-radius:12px;padding:1.5rem;transition:background .2s}
-.web-feat:hover{background:var(--accent-light)}
-.web-feat-icon{font-size:1.6rem;margin-bottom:.75rem}
-.web-feat h4{font-size:1rem;font-weight:700;margin-bottom:.4rem;color:var(--text-main)}
-.web-feat p{font-size:14px;color:var(--text-sub);line-height:1.55}
+  /* ── CONTACTO ── */
+  .contacto-bg { background:linear-gradient(160deg,#04091A,#041828); }
+  .contacto-inner { max-width:1100px;margin:0 auto;padding:5rem 2.5rem; }
+  .contacto-grid { display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start; }
+  .contact-team { display:flex;flex-direction:column;gap:12px;margin-top:1.5rem; }
+  .team-card { display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.09);border-radius:10px;padding:.85rem 1rem; }
+  .team-av { width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00B4D8,#0077B6);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;flex-shrink:0; }
+  .team-name { font-size:.87rem;font-weight:500;margin-bottom:2px; }
+  .team-link { font-size:.75rem;color:#00B4D8; }
+  .form-card { background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.09);border-radius:14px;padding:1.75rem; }
+  .form-title { font-size:1rem;font-weight:500;margin-bottom:1.25rem; }
+  .form-field { display:flex;flex-direction:column;gap:5px;margin-bottom:.9rem; }
+  .form-field label { font-size:.75rem;color:rgba(255,255,255,.45); }
+  .form-field input, .form-field textarea {
+    background:rgba(255,255,255,.05);border:.5px solid rgba(255,255,255,.12);border-radius:7px;
+    padding:.6rem .8rem;color:#fff;font-size:.83rem;font-family:'Inter',sans-serif;outline:none;
+  }
+  .form-field textarea { height:72px;resize:none; }
+  .form-btn { width:100%;background:linear-gradient(135deg,#00B4D8,#0077B6);color:#fff;border:none;border-radius:8px;padding:.75rem;font-size:.88rem;font-weight:500;cursor:pointer;margin-top:.25rem; }
+  .cta-chips { display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem; }
+  .chip { display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:.5px solid rgba(255,255,255,.12);border-radius:8px;padding:.55rem .9rem;font-size:.8rem;color:rgba(255,255,255,.65);cursor:pointer; }
+  .chip:hover { border-color:rgba(0,180,216,.4); }
 
-/* CTA */
-.cta-section{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);text-align:center;position:relative;overflow:hidden}
-.cta-section::before{content:'';position:absolute;inset:0;opacity:.04;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
-.cta-inner{position:relative;max-width:680px;margin:0 auto}
-.cta-section h2{color:#fff;margin-bottom:1rem}
-.cta-section p{color:rgba(255,255,255,.7);margin-bottom:2.5rem;font-size:1.05rem}
-.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-.btn-whatsapp{background:#25d366;color:#fff;padding:.9rem 2rem;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:.5rem;transition:opacity .2s,transform .15s}
-.btn-whatsapp:hover{opacity:.88;transform:translateY(-2px)}
-
-/* EQUIPO CONTACTO */
-.contact-team{margin-top:2.5rem;text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(74,159,212,.2);border-radius:16px;padding:1.75rem 2rem}
-.contact-team h3{color:#fff;font-size:1rem;font-weight:700;margin-bottom:1.25rem}
-.contact-team-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
-.contact-person{display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,.05);border-radius:12px;padding:1rem 1.25rem}
-.contact-avatar{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--navy-mid));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
-.contact-info{display:flex;flex-direction:column;gap:.25rem}
-.contact-info strong{color:#fff;font-size:15px;font-weight:700}
-.contact-info a{color:rgba(255,255,255,.6);font-size:13px;text-decoration:none;transition:color .2s}
-.contact-info a:hover{color:#fff}
-.contact-wa{display:inline-flex;align-items:center;gap:.3rem;color:#25d366 !important;font-weight:600}
-.contact-form{margin-top:3rem;background:rgba(255,255,255,.06);border:1px solid rgba(74,159,212,.2);border-radius:16px;padding:2rem;text-align:left}
-.contact-form h3{color:#fff;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
-.form-group{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
-.form-group label{color:rgba(255,255,255,.65);font-size:14px;font-weight:600}
-.form-group input,.form-group textarea{background:rgba(255,255,255,.07);border:1px solid rgba(74,159,212,.25);border-radius:8px;padding:.75rem 1rem;color:#fff;font-family:'Manrope',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
-.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(255,255,255,.3)}
-.form-group input:focus,.form-group textarea:focus{border-color:var(--accent)}
-.form-group textarea{resize:vertical;min-height:110px}
-.btn-submit{background:var(--accent);color:#fff;border:none;padding:.85rem 2rem;border-radius:10px;font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s}
-.btn-submit:hover{opacity:.88}
-
-/* FOOTER */
-footer{background:var(--navy);border-top:2px solid var(--accent);padding:2.5rem 5%}
-.footer-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
-.footer-logo-wrap{background:#fff;border-radius:10px;padding:5px 10px;display:inline-flex;align-items:center}
-.footer-logo{height:34px;width:auto}
-.footer-links{display:flex;gap:1.5rem}
-.footer-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:14px;transition:color .2s}
-.footer-links a:hover{color:#fff}
-.footer-copy{color:rgba(255,255,255,.35);font-size:13px}
-
-/* ── AGENTS CURSOR TYPING ── */
-.agents-cursor{display:inline-block;font-weight:300;color:var(--accent);animation:agCursor .75s step-end infinite;margin-left:1px}
-@keyframes agCursor{0%,100%{opacity:1}50%{opacity:0}}
-
-/* ── NODES CANVAS ── */
-.nodes-section{position:relative;overflow:hidden}
-.nodes-section canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.nodes-section .section-inner{position:relative;z-index:1}
-
-/* ── SECTORS GRAD ANIMADO ── */
-.sectors-grad{background:linear-gradient(270deg,#f0f6ff,#e8f0fb,#dce8f7,#f5f6f8,#e8f0fb);background-size:500% 500%;animation:sectorsGrad 12s ease infinite}
-@keyframes sectorsGrad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.sectors-grad .usecase-card{background:rgba(255,255,255,.75);backdrop-filter:blur(4px)}
-
-/* corner dots */
-.corner-dot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--accent);opacity:.4}
-.corner-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;background:var(--accent);opacity:.18;animation:cdPulse 3s ease-in-out infinite}
-.cd-tl{top:18px;left:18px}.cd-tr{top:18px;right:18px}.cd-bl{bottom:18px;left:18px}.cd-br{bottom:18px;right:18px}
-@keyframes cdPulse{0%{transform:scale(1);opacity:.6}70%{transform:scale(2.5);opacity:0}100%{transform:scale(1);opacity:0}}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
-.reveal.visible{opacity:1;transform:translateY(0)}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .hero-inner{grid-template-columns:1fr;gap:3rem}
-  .hero-visual{display:none}
-  .pillars-grid{grid-template-columns:1fr}
-  .agents-grid{grid-template-columns:1fr}
-  .usecases-grid{grid-template-columns:repeat(2,1fr)}
-  .numbers-grid{grid-template-columns:repeat(2,1fr);gap:2.5rem}
-  .dashboards-grid{grid-template-columns:repeat(2,1fr)}
-  .web-features{grid-template-columns:1fr}
-  .nav-slogan{display:none}
-  .nav-links{display:none}
-  .hamburger{display:flex}
-  .form-row{grid-template-columns:1fr}
-  .footer-inner{flex-direction:column;align-items:flex-start;gap:1rem}
-  .meto-grid{grid-template-columns:repeat(2,1fr)}
-  .contact-team-grid{grid-template-columns:1fr}
-  .crm-card-grid{grid-template-columns:repeat(3,1fr)}
-}
-@media(max-width:600px){
-  section{padding:64px 5%}
-  .usecases-grid{grid-template-columns:1fr}
-  .numbers-grid{grid-template-columns:1fr;gap:2rem}
-  .number-big{font-size:2.4rem}
-  .dashboards-grid{grid-template-columns:1fr}
-  .cta-btns{flex-direction:column;align-items:center}
-  .hero-btns{flex-direction:column}
-  .btn-primary,.btn-secondary{text-align:center;justify-content:center}
-  .meto-grid{grid-template-columns:1fr}
-  .meto-cta{flex-direction:column;text-align:center}
-  .crm-card-grid{grid-template-columns:repeat(2,1fr)}
-}
+  /* ── FOOTER ── */
+  .footer { border-top:.5px solid rgba(255,255,255,.06);padding:1.5rem 2.5rem;display:flex;align-items:center;justify-content:space-between; }
+  .footer-logo-box { background:#fff;border-radius:8px;padding:4px 10px;display:inline-flex;align-items:center; }
+  .footer-logo-box img { height:26px;width:auto;display:block; }
+  .footer-links { display:flex;gap:1.5rem; }
+  .footer-links a { font-size:.75rem;color:rgba(255,255,255,.3);text-decoration:none; }
+  .footer-copy { font-size:.73rem;color:rgba(255,255,255,.25); }
 </style>
-</head>
-<body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-inner">
-    <a class="nav-brand" href="/">
-      <div class="nav-logo-wrap">
-        <img src="https://excelentia.com.mx/assets/logo_excelentIA_clean.png"
-             alt="ExcelentIA" class="nav-logo"
-             onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png';">
+<div class="page">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-box">
+        <img src="https://excelentia.com.mx/assets/logo_excelentIA_clean.png" alt="ExcelentIA" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png';">
       </div>
-      <span class="nav-slogan">Inteligencia Artificial con esencia humana</span>
-    </a>
+      <span style="display:none;font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,#00B4D8,#0077B6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ExcelentIA</span>
+    </div>
     <ul class="nav-links">
-      <li><a href="#servicios">Servicios</a></li>
-      <li><a href="#agentes">Agentes</a></li>
-      <li><a href="#sectores">Casos de uso</a></li>
-      <li><a href="#metodologia">Metodología</a></li>
-      <li><a href="#contacto" class="btn-nav">Agenda una llamada</a></li>
+      <li><a href="#">Servicios</a></li>
+      <li><a href="#">Agentes</a></li>
+      <li><a href="#">Casos de uso</a></li>
+      <li><a href="#">Metodología</a></li>
+      <li><a href="#" class="nav-cta">Agenda una llamada</a></li>
     </ul>
-    <button class="hamburger" onclick="toggleMenu()" aria-label="Menú">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="#servicios" onclick="closeMenu()">Servicios</a>
-    <a href="#agentes" onclick="closeMenu()">Agentes</a>
-    <a href="#sectores" onclick="closeMenu()">Casos de uso</a>
-    <a href="#metodologia" onclick="closeMenu()">Metodología</a>
-    <a href="#contacto" class="btn-nav" onclick="closeMenu()">Agenda una llamada</a>
-  </div>
-</nav>
+  </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-grid"></div>
-  <div class="hero-glow"></div>
-  <canvas id="heroCanvas"></canvas>
-  <div class="hero-inner">
-    <div class="hero-text">
-      <div class="hero-badge">✦ IA práctica para PYMEs en México</div>
-      <h1>Convierte tus procesos en <span>resultados medibles</span> con IA</h1>
-      <p class="hero-sub">Implementamos inteligencia artificial en los procesos críticos de tu negocio — atención, agenda, seguimiento y soporte. Piloto funcional en 2 semanas, ROI comprobable desde el primer mes.</p>
-      <div class="hero-btns">
-        <a href="https://wa.me/525512154800?text=Hola,%20me%20interesa%20saber%20más%20sobre%20ExcelentIA" class="btn-primary" target="_blank">
-          💬 Habla con nosotros
-        </a>
-        <a href="#agentes" class="btn-secondary">Ver nuestros servicios →</a>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="hero-services-card">
-        <div class="hero-services-title">✦ Lo que hacemos</div>
-        <div class="svc-row">
-          <div class="svc-icon blue">🤖</div>
-          <div class="svc-info">
-            <div class="svc-name">Agentes de Inteligencia Artificial</div>
-            <div class="svc-desc">Tu negocio trabaja solo — atiende clientes, agenda citas y genera documentos sin intervención humana, las 24 horas.</div>
-          </div>
+  <!-- HERO -->
+  <div class="hero-wrap">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+    <div class="hero-body">
+      <div>
+        <div class="eyebrow"><div class="dot-live"></div>IA práctica para PYMEs en México</div>
+        <h1 class="hero-headline">Tu negocio,<br>siempre activo.<br><span class="accent">Tu equipo,<br>siempre enfocado.</span></h1>
+        <p class="hero-sub">Implementamos inteligencia artificial en los procesos críticos de tu empresa: atención, agenda, seguimiento y soporte. Piloto funcional en 2 semanas, ROI comprobable desde el primer mes.</p>
+        <div class="hero-ctas">
+          <a href="#" class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Agenda tu diagnóstico gratis
+          </a>
+          <a href="#" class="btn-secondary">Ver nuestros agentes <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
         </div>
-        <div class="svc-row">
-          <div class="svc-icon green">📊</div>
-          <div class="svc-info">
-            <div class="svc-name">Dashboards Inteligentes</div>
-            <div class="svc-desc">Todo tu negocio en una pantalla: correos, agenda, gastos, clientes y proyectos — con IA que te dice qué priorizar.</div>
-          </div>
-        </div>
-        <div class="svc-row">
-          <div class="svc-icon purple">🌐</div>
-          <div class="svc-info">
-            <div class="svc-name">Plataformas y Páginas Web Inteligentes</div>
-            <div class="svc-desc">Sitios que no solo se ven bien — se conectan con tus agentes y convierten visitantes en clientes automáticamente.</div>
-          </div>
-        </div>
-        <div class="svc-row">
-          <div class="svc-icon orange">🤝</div>
-          <div class="svc-info">
-            <div class="svc-name">CRM's a la Medida</div>
-            <div class="svc-desc">Gestión de clientes diseñada exactamente para tu operación — sin pagar por funciones que nunca vas a usar.</div>
-          </div>
+        <div class="trust-row">
+          <div class="trust-item"><div class="trust-check"><svg viewBox="0 0 10 10" fill="none" stroke="#00B4D8" stroke-width="2"><polyline points="2,5 4,7 8,3"/></svg></div>Piloto en 2 semanas</div>
+          <div class="trust-item"><div class="trust-check"><svg viewBox="0 0 10 10" fill="none" stroke="#00B4D8" stroke-width="2"><polyline points="2,5 4,7 8,3"/></svg></div>Sin contratos largos</div>
+          <div class="trust-item"><div class="trust-check"><svg viewBox="0 0 10 10" fill="none" stroke="#00B4D8" stroke-width="2"><polyline points="2,5 4,7 8,3"/></svg></div>ROI medible desde el día 1</div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- PILARES -->
-<section id="servicios" class="pillars">
-  <div class="section-inner">
-    <span class="section-label reveal">¿Por qué ExcelentIA?</span>
-    <h2 class="reveal">IA con esencia humana</h2>
-    <p class="section-sub reveal">Somos el puente entre la tecnología y tu negocio. Convertimos procesos complicados en herramientas sencillas que tu equipo adopta desde el primer día.</p>
-    <div class="pillars-grid">
-
-      <!-- MOCKUP 1: Resultados desde el primer día -->
-      <div class="pillar-card pillar-mockup reveal">
-        <div class="mockup-float">
-          <div class="mf-topbar">
-            <div class="mf-dot" style="background:#ff5f57"></div>
-            <div class="mf-dot" style="background:#ffbd2e"></div>
-            <div class="mf-dot" style="background:#28ca41"></div>
-            <span class="mf-title-bar">Tu negocio en 2 semanas</span>
+      <div class="hero-right">
+        <div class="hcard">
+          <div class="card-top">
+            <span class="card-lbl">Agente activo — Clínica CardioCare</span>
+            <span class="badge badge-blue">En vivo</span>
           </div>
-          <div class="mf-body">
-            <div class="mf-timeline">
-              <div class="mf-tl-row">
-                <div class="mf-tl-dot done"></div>
-                <span class="mf-tl-text"><strong>Semana 1</strong> — Diagnóstico y diseño</span>
-              </div>
-              <div class="mf-tl-row">
-                <div class="mf-tl-dot now"></div>
-                <span class="mf-tl-text"><strong>Semana 2</strong> — Implementación y pruebas</span>
-              </div>
-              <div class="mf-tl-row">
-                <div class="mf-tl-dot soon"></div>
-                <span class="mf-tl-text"><strong>Semana 3+</strong> — Operación y mejora continua</span>
-              </div>
+          <div class="chat-row">
+            <div class="cmsg">
+              <div class="cavatar av-gray">P</div>
+              <div><div class="cbubble">Hola, necesito agendar una consulta con el cardiólogo</div><div class="ctime">Hoy, 11:43 pm</div></div>
             </div>
-            <div class="mf-badge-row" style="margin-top:12px">
-              <span class="mf-badge">✅ Entrega rápida</span>
-              <span class="mf-badge">📊 KPIs incluidos</span>
+            <div class="cmsg" style="justify-content:flex-end">
+              <div><div class="cbubble ai-bubble">Claro, tenemos disponibilidad el martes a las 10:00 am o el jueves a las 4:00 pm. ¿Cuál te acomoda?</div><div class="ctime" style="text-align:right">Respuesta automática — 3 seg</div></div>
+              <div class="cavatar av-blue">IA</div>
             </div>
           </div>
         </div>
-        <h3>Resultados en semanas, no meses</h3>
-        <p>Sin procesos interminables ni consultorías eternas. En 2 semanas tienes un sistema funcionando, con métricas claras y tu equipo capacitado para usarlo.</p>
-      </div>
-
-      <!-- MOCKUP 2: Adaptado a tu industria -->
-      <div class="pillar-card pillar-mockup reveal">
-        <div class="mockup-float" style="animation-delay:.4s">
-          <div class="mf-topbar">
-            <div class="mf-dot" style="background:#ff5f57"></div>
-            <div class="mf-dot" style="background:#ffbd2e"></div>
-            <div class="mf-dot" style="background:#28ca41"></div>
-            <span class="mf-title-bar">Selecciona tu industria</span>
+        <div class="hcard">
+          <div class="card-top">
+            <span class="card-lbl">KPIs del mes — Automatización activa</span>
+            <span class="badge badge-purple">Actualizado hoy</span>
           </div>
-          <div class="mf-body">
-            <div class="mf-check-list">
-              <div class="mf-check-row"><span>🏥</span> Clínicas y consultorios</div>
-              <div class="mf-check-row"><span>🏠</span> Inmobiliarias</div>
-              <div class="mf-check-row"><span>📊</span> Despachos contables</div>
-              <div class="mf-check-row"><span>🏋️</span> Clubes deportivos</div>
-              <div class="mf-check-row"><span>🏫</span> Instituciones educativas</div>
-              <div class="mf-check-row" style="color:#4a9fd4;font-weight:700"><span>✨</span> O cualquier otro negocio</div>
+          <div class="kpi-row">
+            <div><div class="kpi-val">70%</div><div class="kpi-lbl">Tiempo operativo reducido</div></div>
+            <div><div class="kpi-val">+35%</div><div class="kpi-lbl">Más conversiones</div></div>
+            <div><div class="kpi-val">8 sem</div><div class="kpi-lbl">ROI positivo</div></div>
+          </div>
+          <div style="border-top:.5px solid rgba(255,255,255,.07);margin-top:.8rem;padding-top:.7rem;">
+            <div class="bars">
+              <div class="bar" style="height:30%"></div>
+              <div class="bar" style="height:45%"></div>
+              <div class="bar" style="height:58%"></div>
+              <div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:82%"></div>
+              <div class="bar hi" style="height:96%"></div>
+            </div>
+            <div class="bar-label-bottom">
+              <span class="blb">Ene</span><span class="blb">Feb</span><span class="blb">Mar</span>
+              <span class="blb">Abr</span><span class="blb">May</span><span class="blb" style="color:#00B4D8">Jun</span>
             </div>
           </div>
         </div>
-        <h3>Diseñado para tu negocio</h3>
-        <p>No adaptamos plantillas genéricas. Entendemos cómo opera tu industria, hablamos con tu equipo y construimos algo que realmente encaja en tu día a día.</p>
-      </div>
-
-      <!-- MOCKUP 3: ROI medible -->
-      <div class="pillar-card pillar-mockup reveal">
-        <div class="mockup-float" style="animation-delay:.8s">
-          <div class="mf-topbar">
-            <div class="mf-dot" style="background:#ff5f57"></div>
-            <div class="mf-dot" style="background:#ffbd2e"></div>
-            <div class="mf-dot" style="background:#28ca41"></div>
-            <span class="mf-title-bar">Impacto real — antes vs después</span>
-          </div>
-          <div class="mf-body">
-            <div class="mf-kpi-row">
-              <div class="mf-kpi">
-                <div class="mf-kpi-val">70%</div>
-                <div class="mf-kpi-lbl">Menos tiempo operativo</div>
-              </div>
-              <div class="mf-kpi">
-                <div class="mf-kpi-val">35%</div>
-                <div class="mf-kpi-lbl">Más conversiones</div>
-              </div>
-              <div class="mf-kpi">
-                <div class="mf-kpi-val">8sem</div>
-                <div class="mf-kpi-lbl">ROI positivo</div>
-              </div>
-            </div>
-            <svg viewBox="0 0 200 44" style="width:100%;margin-top:10px">
-              <polyline points="0,38 30,34 60,30 90,20 120,16 155,8 200,4"
-                fill="none" stroke="#4a9fd4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <polyline points="0,38 30,34 60,30 90,20 120,16 155,8 200,4 200,44 0,44"
-                fill="rgba(74,159,212,.12)" stroke="none"/>
-              <circle cx="200" cy="4" r="3.5" fill="#4a9fd4"/>
-            </svg>
-          </div>
-        </div>
-        <h3>ROI que puedes mostrarle a tu jefe</h3>
-        <p>Cada proyecto incluye un tablero de KPIs antes/después para que veas — en números reales — cuánto tiempo, dinero y errores está ahorrando la automatización.</p>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- AGENTES -->
-<section id="agentes">
-  <div class="section-inner">
-    <span class="section-label reveal">Productos</span>
-    <h2 class="reveal">Nuestros agentes de IA</h2>
-    <p class="section-sub reveal"><span id="agents-typing"></span><span class="agents-cursor">|</span></p>
-    <div class="agents-grid">
-
-      <div class="agent-card reveal">
-        <div class="agent-card-head">
-          <div class="agent-card-icon">🫀</div>
-          <div class="agent-card-head-text">
-            <h3>Eco-IA — Interpretador de Ecocardiograma</h3>
-            <span class="tag tag-live">✓ En producción</span>
-          </div>
-        </div>
-        <div class="agent-card-body">
-          <div class="agent-stat-highlight">⏱️ Tiempo por estudio: <span>30 min → 4 min</span></div>
-          <p>El cardiólogo llena un formulario web y en segundos obtiene el reporte Word completo listo para entregar al paciente. Cero redacción manual, cero tiempo perdido.</p>
-          <ul class="agent-features">
-            <li>Formulario web integrado — fácil de usar en consulta</li>
-            <li>Generación automática de reporte Word profesional</li>
-            <li>Almacenamiento organizado en Drive por paciente</li>
-            <li>Compatible con cualquier clínica cardiológica</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="agent-card reveal">
-        <div class="agent-card-head">
-          <div class="agent-card-icon">📅</div>
-          <div class="agent-card-head-text">
-            <h3>Agente de Citas Médicas</h3>
-            <span class="tag tag-dev">En desarrollo</span>
-          </div>
-        </div>
-        <div class="agent-card-body">
-          <p>Tu recepcionista virtual que nunca descansa. El paciente escribe por WhatsApp a cualquier hora, el agente verifica disponibilidad, agenda y confirma — todo sin que nadie tenga que contestar el teléfono.</p>
-          <ul class="agent-features">
-            <li>Atención por WhatsApp sin operador, 24/7</li>
-            <li>Sincronización en tiempo real con Google Calendar</li>
-            <li>Confirmaciones y recordatorios automáticos</li>
-            <li>Personalizable para cualquier especialidad médica</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="agent-card reveal">
-        <div class="agent-card-head">
-          <div class="agent-card-icon">📬</div>
-          <div class="agent-card-head-text">
-            <h3>Dashboard CRM Personalizado</h3>
-            <p style="font-size:12px;font-weight:700;color:var(--accent);margin-top:.2rem;letter-spacing:.04em;text-transform:uppercase">Tu negocio en un solo lugar</p>
-            <span class="tag tag-dev">En desarrollo</span>
-          </div>
-        </div>
-        <div class="agent-card-body">
-          <p>Un centro de control para tu negocio, con todo lo que necesitas y nada de lo que no. Diseñado exactamente para tu operación, con IA integrada que te ayuda a priorizar y decidir mejor cada día.</p>
-          <div class="crm-card-grid">
-            <div class="crm-chip"><span>📬</span>Correos</div>
-            <div class="crm-chip"><span>📅</span>Agenda</div>
-            <div class="crm-chip"><span>💸</span>Gastos</div>
-            <div class="crm-chip"><span>📌</span>Notas</div>
-            <div class="crm-chip"><span>🧾</span>Facturas</div>
-            <div class="crm-chip"><span>📖</span>Diario</div>
-            <div class="crm-chip"><span>🤝</span>CRM</div>
-            <div class="crm-chip"><span>📋</span>Proyectos</div>
-            <div class="crm-chip"><span>🗂️</span>Kanban</div>
-            <div class="crm-chip"><span>👤</span>Contactos</div>
-            <div class="crm-chip"><span>📝</span>Time Tracker</div>
-            <div class="crm-chip"><span>📊</span>Estadísticas</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="agent-card reveal">
-        <div class="agent-card-head">
-          <div class="agent-card-icon">⚙️</div>
-          <div class="agent-card-head-text">
-            <h3>Agentes a la Medida</h3>
-            <span class="tag tag-dash">Disponible</span>
-          </div>
-        </div>
-        <div class="agent-card-body">
-          <p>¿Tienes un proceso que consume demasiado tiempo y no encuentras una solución lista? Lo construimos para ti. Desde captura de datos hasta atención al cliente — si se puede automatizar, lo automatizamos.</p>
-          <ul class="agent-features">
-            <li>Diagnóstico gratuito de tu proceso actual</li>
-            <li>Integración con las herramientas que ya usas</li>
-            <li>Entrega en días, no meses</li>
-            <li>Soporte y mejora continua incluidos</li>
-          </ul>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- SECTORES — casos de uso -->
-<section id="sectores" class="sectors sectors-grad">
-  <div class="corner-dot cd-tl"></div><div class="corner-dot cd-tr"></div>
-  <div class="corner-dot cd-bl"></div><div class="corner-dot cd-br"></div>
-  <div class="section-inner">
-    <span class="section-label reveal">Casos de uso</span>
-    <h2 class="reveal">La IA trabaja en cada área de tu negocio</h2>
-    <p class="section-sub reveal">No importa si eres una clínica, una inmobiliaria o un club deportivo. La inteligencia artificial puede eliminar la fricción operativa en cualquier departamento — con resultados medibles desde el primer mes.</p>
-    <div class="usecases-grid">
-      <div class="usecase-card reveal">
-        <div class="usecase-icon">🎯</div>
-        <h3>Atención a clientes</h3>
-        <p>Un agente que responde WhatsApp, correo y chat web al instante — con el tono y conocimiento de tu negocio. Sin tiempos de espera, sin operadores saturados.</p>
-        <span class="usecase-tag">→ Respuesta en segundos, 24/7</span>
-      </div>
-      <div class="usecase-card reveal">
-        <div class="usecase-icon">💰</div>
-        <h3>Cobranza y pagos</h3>
-        <p>Recordatorios automáticos, seguimiento de adeudos y recuperación de cartera por WhatsApp. Tu equipo se enfoca en los casos difíciles, la IA hace el trabajo repetitivo.</p>
-        <span class="usecase-tag">→ Reducción de cartera vencida</span>
-      </div>
-      <div class="usecase-card reveal">
-        <div class="usecase-icon">📦</div>
-        <h3>Logística y seguimiento</h3>
-        <p>Estatus de pedidos, confirmaciones de entrega y alertas de retraso — todo automatizado. Tus clientes siempre informados, tu equipo siempre al día.</p>
-        <span class="usecase-tag">→ Cero llamadas de "¿en qué va mi pedido?"</span>
-      </div>
-      <div class="usecase-card reveal">
-        <div class="usecase-icon">📋</div>
-        <h3>Revisión de documentos</h3>
-        <p>Contratos, expedientes, formularios y reportes revisados por IA en segundos. Extrae datos clave, detecta errores y genera resúmenes listos para tomar decisiones.</p>
-        <span class="usecase-tag">→ De horas a minutos por documento</span>
-      </div>
-      <div class="usecase-card reveal">
-        <div class="usecase-icon">🛡️</div>
-        <h3>Prevención y alertas</h3>
-        <p>La IA monitorea tus datos en tiempo real y te avisa antes de que un problema se convierta en crisis. Desde clientes en riesgo de fuga hasta métricas fuera de rango.</p>
-        <span class="usecase-tag">→ Actúa antes, no después</span>
-      </div>
-      <div class="usecase-card reveal">
-        <div class="usecase-icon">📈</div>
-        <h3>Análisis y reportes</h3>
-        <p>Olvídate de armar reportes en Excel cada semana. La IA recopila, procesa y presenta la información de tu negocio en dashboards automáticos listos para presentar.</p>
-        <span class="usecase-tag">→ Información lista cuando la necesitas</span>
       </div>
     </div>
   </div>
-</section>
 
-<!-- NÚMEROS -->
-<section class="numbers nodes-section">
-  <canvas id="numbersCanvas"></canvas>
-  <div class="section-inner">
-    <div class="numbers-grid">
-      <div class="number-item reveal">
-        <div class="number-big">70<span>%</span></div>
-        <div class="number-label">Reducción en tiempo operativo con tareas automatizadas</div>
+  <!-- MÉTRICAS STRIP -->
+  <div class="metrics-strip">
+    <div class="mc"><div class="mc-num">70%</div><div class="mc-desc">Menos tiempo en tareas repetitivas</div></div>
+    <div class="mc"><div class="mc-num">+35%</div><div class="mc-desc">Incremento en conversiones</div></div>
+    <div class="mc"><div class="mc-num">90%</div><div class="mc-desc">Reducción de errores operativos</div></div>
+    <div class="mc"><div class="mc-num">8 sem</div><div class="mc-desc">Retorno de inversión comprobable</div></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SERVICIOS -->
+  <div class="section">
+    <div class="eyebrow"><div class="dot-live"></div>Lo que hacemos</div>
+    <h2 class="section-title">Cuatro formas de <span class="accent">transformar tu operación</span></h2>
+    <p class="section-sub">No vendemos tecnología. Entregamos resultados operativos medibles — desde el primer mes.</p>
+    <div class="services-grid">
+      <div class="scard">
+        <div class="scard-icon">🤖</div>
+        <div class="scard-title">Automatización inteligente</div>
+        <div class="scard-desc">Agentes que atienden clientes, agendan citas y generan documentos sin supervisión, las 24 horas del día.</div>
+        <span class="scard-tag">Sin intervención humana</span>
       </div>
-      <div class="number-item reveal">
-        <div class="number-big">35<span>%</span></div>
-        <div class="number-label">Incremento promedio en conversiones con respuesta inmediata</div>
+      <div class="scard">
+        <div class="scard-icon">📊</div>
+        <div class="scard-title">Control total en tiempo real</div>
+        <div class="scard-desc">Un centro de mando con IA que prioriza lo urgente y elimina la toma de decisiones a ciegas.</div>
+        <span class="scard-tag">Dashboards inteligentes</span>
       </div>
-      <div class="number-item reveal">
-        <div class="number-big">90<span>%</span></div>
-        <div class="number-label">Reducción de errores en procesos repetitivos automatizados</div>
+      <div class="scard">
+        <div class="scard-icon">🌐</div>
+        <div class="scard-title">Presencia digital que convierte</div>
+        <div class="scard-desc">Sitios conectados con tus automatizaciones, diseñados para transformar visitantes en clientes.</div>
+        <span class="scard-tag">Integración nativa con IA</span>
       </div>
-      <div class="number-item reveal">
-        <div class="number-big">8<span style="font-size:1.5rem;vertical-align:middle"> sem</span></div>
-        <div class="number-label">Tiempo promedio para ver retorno positivo de inversión</div>
+      <div class="scard">
+        <div class="scard-icon">🤝</div>
+        <div class="scard-title">CRM exactamente para ti</div>
+        <div class="scard-desc">Gestión de clientes construida sobre tu operación real, sin módulos innecesarios ni costos excesivos.</div>
+        <span class="scard-tag">A la medida</span>
       </div>
     </div>
   </div>
-</section>
 
-<!-- METODOLOGÍA -->
-<section id="metodologia" class="metodologia-section">
-  <div class="section-inner">
-    <span class="section-label reveal">Cómo trabajamos</span>
-    <h2 class="reveal">De diagnóstico a resultados en 4 fases</h2>
-    <p class="section-sub reveal">Alcance cerrado, entrega rápida, adopción real. Así funciona nuestra metodología estándar para cada cliente.</p>
+  <hr class="divider">
+
+  <!-- POR QUÉ -->
+  <div class="porque-wrap section-full">
+    <div class="section">
+      <div class="porque-grid">
+        <div>
+          <div class="eyebrow"><div class="dot-live"></div>¿Por qué ExcelentIA?</div>
+          <h2 class="section-title">No somos consultores.<br><span class="accent">Implementamos.</span></h2>
+          <p class="section-sub" style="margin-bottom:1.5rem">Mientras otras firmas te entregan decks y recomendaciones, nosotros construimos. En 2 semanas tienes un agente funcionando, métricas claras y tu equipo capacitado — sin jerga técnica, sin procesos interminables.</p>
+          <div class="stat-pills">
+            <div class="spill"><div class="spill-val">2 sem</div><div class="spill-lbl">Piloto funcional</div></div>
+            <div class="spill"><div class="spill-val">KPIs</div><div class="spill-lbl">Incluidos desde el día 1</div></div>
+            <div class="spill"><div class="spill-val">0</div><div class="spill-lbl">Contratos largos</div></div>
+          </div>
+        </div>
+        <div class="timeline">
+          <div class="tline-item">
+            <div class="tline-num">01</div>
+            <div class="tline-content"><h4>Diagnóstico y diseño</h4><p>Identificamos el proceso de mayor impacto. Definimos métricas clave y diseñamos la solución a medida.</p></div>
+          </div>
+          <div class="tline-item">
+            <div class="tline-num">02</div>
+            <div class="tline-content"><h4>Implementación y pruebas</h4><p>Construimos, integramos con tus herramientas actuales y validamos que todo funcione correctamente.</p></div>
+          </div>
+          <div class="tline-item">
+            <div class="tline-num">03</div>
+            <div class="tline-content"><h4>Operación y mejora continua</h4><p>Tu sistema corre en producción. Monitoreamos, optimizamos y escalamos basándonos en datos reales.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- AGENTES -->
+  <div class="section">
+    <div class="eyebrow"><div class="dot-live"></div>Productos</div>
+    <h2 class="section-title">Nuestros <span class="accent">agentes de IA</span></h2>
+    <p class="section-sub">Soluciones construidas para industrias reales, con resultados comprobados desde el primer día.</p>
+    <div class="agentes-grid">
+      <div class="acard featured">
+        <div class="acard-head"><div class="acard-icon">🫀</div><span class="astatus s-live">En producción</span></div>
+        <div class="acard-title">Eco-IA — Interpretador de Ecocardiograma</div>
+        <div class="acard-kpi">⏱ De 30 min → 4 min por estudio</div>
+        <div class="acard-desc">El cardiólogo llena un formulario web y en segundos obtiene el reporte Word completo listo para el paciente. Cero redacción manual, cero tiempo perdido.</div>
+        <div class="acard-features">
+          <div class="af"><div class="af-dot"></div>Formulario web integrado, fácil de usar en consulta</div>
+          <div class="af"><div class="af-dot"></div>Reporte Word profesional en segundos</div>
+          <div class="af"><div class="af-dot"></div>Almacenamiento organizado en Drive por paciente</div>
+        </div>
+      </div>
+      <div class="acard">
+        <div class="acard-head"><div class="acard-icon">📅</div><span class="astatus s-dev">En desarrollo</span></div>
+        <div class="acard-title">Agente de Citas Médicas</div>
+        <div class="acard-kpi">💬 Atención 24/7 sin operador</div>
+        <div class="acard-desc">Tu recepcionista virtual que nunca descansa. El paciente escribe por WhatsApp a cualquier hora y recibe confirmación inmediata sin que nadie tenga que contestar.</div>
+        <div class="acard-features">
+          <div class="af"><div class="af-dot"></div>Sincronización en tiempo real con Google Calendar</div>
+          <div class="af"><div class="af-dot"></div>Confirmaciones y recordatorios automáticos</div>
+          <div class="af"><div class="af-dot"></div>Personalizable para cualquier especialidad</div>
+        </div>
+      </div>
+      <div class="acard">
+        <div class="acard-head"><div class="acard-icon">📬</div><span class="astatus s-dev">En desarrollo</span></div>
+        <div class="acard-title">Dashboard CRM Personalizado</div>
+        <div class="acard-kpi">🖥 Tu negocio en un solo lugar</div>
+        <div class="acard-desc">Un centro de control diseñado exactamente para tu operación. Correos, agenda, clientes, proyectos y métricas — con IA que te indica qué atender primero.</div>
+        <div class="acard-features">
+          <div class="af"><div class="af-dot"></div>Correos, agenda, gastos, CRM y proyectos integrados</div>
+          <div class="af"><div class="af-dot"></div>IA que prioriza lo urgente automáticamente</div>
+          <div class="af"><div class="af-dot"></div>Sin módulos que no necesitas</div>
+        </div>
+      </div>
+      <div class="acard">
+        <div class="acard-head"><div class="acard-icon">⚙️</div><span class="astatus s-avail">Disponible</span></div>
+        <div class="acard-title">Agentes a la Medida</div>
+        <div class="acard-kpi">🔧 Diagnóstico gratuito</div>
+        <div class="acard-desc">¿Tienes un proceso que consume demasiado tiempo? Lo construimos para ti. Si se puede automatizar, lo automatizamos — entrega en días, no meses.</div>
+        <div class="acard-features">
+          <div class="af"><div class="af-dot"></div>Integración con las herramientas que ya usas</div>
+          <div class="af"><div class="af-dot"></div>Entrega en días, no meses</div>
+          <div class="af"><div class="af-dot"></div>Soporte y mejora continua incluidos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CASOS DE USO -->
+  <div class="casos-bg section-full">
+    <div class="section">
+      <div class="eyebrow"><div class="dot-live"></div>Casos de uso</div>
+      <h2 class="section-title">La IA trabaja en <span class="accent">cada área de tu negocio</span></h2>
+      <p class="section-sub">Desde clínicas hasta inmobiliarias — automatización con resultados medibles desde el primer mes.</p>
+      <div class="casos-grid">
+        <div class="ccard">
+          <div class="ccard-icon">🎯</div>
+          <div class="ccard-title">Atención a clientes</div>
+          <div class="ccard-desc">Atención al instante en WhatsApp, correo y chat web con el tono de tu marca. Sin tiempos de espera, sin operadores saturados.</div>
+          <div class="ccard-arrow">→ Respuesta en segundos, 24/7</div>
+        </div>
+        <div class="ccard">
+          <div class="ccard-icon">💰</div>
+          <div class="ccard-title">Cobranza y pagos</div>
+          <div class="ccard-desc">Cobros automáticos y seguimiento inteligente por WhatsApp. Tu equipo solo atiende los casos que realmente lo necesitan.</div>
+          <div class="ccard-arrow">→ Reducción de cartera vencida</div>
+        </div>
+        <div class="ccard">
+          <div class="ccard-icon">📦</div>
+          <div class="ccard-title">Logística y seguimiento</div>
+          <div class="ccard-desc">Clientes siempre informados con estatus, confirmaciones y alertas en tiempo real. Sin llamadas innecesarias, sin fricción.</div>
+          <div class="ccard-arrow">→ Cero llamadas de "¿dónde va mi pedido?"</div>
+        </div>
+        <div class="ccard">
+          <div class="ccard-icon">📋</div>
+          <div class="ccard-title">Revisión de documentos</div>
+          <div class="ccard-desc">Contratos, expedientes y formularios procesados en segundos. Datos clave extraídos, errores detectados, decisiones más rápidas.</div>
+          <div class="ccard-arrow">→ De horas a minutos por documento</div>
+        </div>
+        <div class="ccard">
+          <div class="ccard-icon">🛡️</div>
+          <div class="ccard-title">Prevención y alertas</div>
+          <div class="ccard-desc">Monitoreo continuo de métricas críticas. La IA detecta señales de riesgo antes de que se conviertan en pérdidas.</div>
+          <div class="ccard-arrow">→ Actúa antes, no después</div>
+        </div>
+        <div class="ccard">
+          <div class="ccard-icon">📈</div>
+          <div class="ccard-title">Análisis y reportes</div>
+          <div class="ccard-desc">Dashboards actualizados automáticamente, listos para presentar. Sin Excel manual, sin horas perdidas cada semana.</div>
+          <div class="ccard-arrow">→ Información lista cuando la necesitas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- METODOLOGÍA -->
+  <div class="section">
+    <div class="eyebrow"><div class="dot-live"></div>Cómo trabajamos</div>
+    <h2 class="section-title">De diagnóstico a resultados <span class="accent">en 4 fases</span></h2>
+    <p class="section-sub">Alcance cerrado, entrega rápida, adopción real. Sin sorpresas, sin costos ocultos.</p>
     <div class="meto-grid">
-      <div class="meto-card reveal">
+      <div class="meto-card">
         <div class="meto-num">01</div>
         <div class="meto-icon">🔍</div>
-        <h3>Diagnóstico</h3>
-        <p>1 proceso, 1 caso de uso, 1 métrica clave. Identificamos el punto de mayor impacto en tu operación — sin costo ni compromiso.</p>
+        <div class="meto-title">Diagnóstico gratuito</div>
+        <div class="meto-desc">Identificamos el proceso de mayor impacto en tu operación. Sin costo, sin compromiso.</div>
       </div>
-      <div class="meto-card reveal">
+      <div class="meto-card">
         <div class="meto-num">02</div>
         <div class="meto-icon">🗺️</div>
-        <h3>Roadmap</h3>
-        <p>Plan por etapas: quick wins primero, escalamiento después. Inversión clara, retorno proyectado, cronograma realista.</p>
+        <div class="meto-title">Roadmap ejecutivo</div>
+        <div class="meto-desc">Quick wins al inicio, escalamiento después. Inversión clara y retorno proyectado.</div>
       </div>
-      <div class="meto-card reveal">
+      <div class="meto-card">
         <div class="meto-num">03</div>
         <div class="meto-icon">🚀</div>
-        <h3>Piloto</h3>
-        <p>Implementación mínima viable en 2 semanas. Asistente funcional + tablero de KPIs + capacitación express por rol.</p>
+        <div class="meto-title">Piloto en 2 semanas</div>
+        <div class="meto-desc">Sistema mínimo viable funcionando, tablero de KPIs activo y equipo capacitado.</div>
       </div>
-      <div class="meto-card reveal">
+      <div class="meto-card">
         <div class="meto-num">04</div>
         <div class="meto-icon">📈</div>
-        <h3>Escalamiento</h3>
-        <p>Mejoras e integraciones graduales basadas en datos. Soporte continuo, optimización mensual y reporte de impacto.</p>
-      </div>
-    </div>
-    <div class="meto-cta reveal">
-      <span>¿Listo para arrancar?</span>
-      <a href="#contacto" class="btn-primary" style="font-size:15px;padding:.7rem 1.5rem">Agenda tu diagnóstico gratuito →</a>
-    </div>
-  </div>
-</section>
-
-<!-- PÁGINAS WEB -->
-<section id="web" class="web-section">
-  <div class="section-inner">
-    <span class="section-label reveal">Desarrollo web</span>
-    <h2 class="reveal">Páginas web que convierten</h2>
-    <p class="section-sub reveal">Diseñamos y desarrollamos sitios web modernos, rápidos y conectados con tus automatizaciones de IA. Desde landing pages hasta portales complejos.</p>
-    <div class="web-features">
-      <div class="web-feat reveal">
-        <div class="web-feat-icon">🎨</div>
-        <h4>Diseño moderno y profesional</h4>
-        <p>Sitios con identidad de marca, optimizados para conversión y adaptados a todos los dispositivos.</p>
-      </div>
-      <div class="web-feat reveal">
-        <div class="web-feat-icon">⚙️</div>
-        <h4>Conectados con tus agentes</h4>
-        <p>Formularios, chatbots y flujos que se integran directamente con tus automatizaciones de IA.</p>
-      </div>
-      <div class="web-feat reveal">
-        <div class="web-feat-icon">🚀</div>
-        <h4>Entrega rápida</h4>
-        <p>Landing pages en días. Portales completos en semanas. Sin procesos lentos ni presupuestos inflados.</p>
+        <div class="meto-title">Escalamiento inteligente</div>
+        <div class="meto-desc">Mejoras continuas basadas en datos reales, soporte mensual y reporte de impacto.</div>
       </div>
     </div>
   </div>
-</section>
 
-<!-- CTA + CONTACTO -->
-<section id="contacto" class="cta-section nodes-section">
-  <canvas id="ctaCanvas"></canvas>
-  <div class="section-inner">
-    <div class="cta-inner">
-      <span class="section-label reveal" style="color:var(--accent)">Hablemos</span>
-      <h2 class="reveal" style="color:#fff">¿Listo para tu piloto en 2 semanas?</h2>
-      <p class="reveal" style="color:rgba(255,255,255,.7)">Sin compromisos. Un diagnóstico gratuito para identificar el proceso de mayor impacto en tu negocio y mostrarte qué se puede automatizar — con métricas claras desde el día 1.</p>
-      <div class="cta-btns reveal">
-        <a href="https://wa.me/525512154800?text=Hola,%20quiero%20saber%20cómo%20ExcelentIA%20puede%20ayudar%20a%20mi%20negocio" class="btn-whatsapp" target="_blank">
-          💬 WhatsApp directo
-        </a>
-        <a href="mailto:fdavila@excelentia.com.mx" class="btn-secondary" style="color:#fff;border-color:rgba(255,255,255,.3)">
-          ✉️ Enviar un correo
-        </a>
+  <hr class="divider">
+
+  <!-- WEB -->
+  <div class="porque-wrap section-full">
+    <div class="section">
+      <div class="eyebrow"><div class="dot-live"></div>Desarrollo web</div>
+      <h2 class="section-title">Sitios que trabajan <span class="accent">para tu negocio</span></h2>
+      <div class="web-grid">
+        <div class="web-features">
+          <p style="font-size:.93rem;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:1rem">Diseñamos plataformas modernas conectadas con tus agentes de IA — desde landing pages de alta conversión hasta portales empresariales completos.</p>
+          <div class="wf">
+            <div class="wf-icon">🎨</div>
+            <div><div class="wf-title">Diseño con propósito</div><div class="wf-desc">Identidad de marca, UX optimizado y adaptación a todos los dispositivos.</div></div>
+          </div>
+          <div class="wf">
+            <div class="wf-icon">⚙️</div>
+            <div><div class="wf-title">Integración nativa con IA</div><div class="wf-desc">Formularios, chatbots y flujos conectados directamente con tus automatizaciones.</div></div>
+          </div>
+          <div class="wf">
+            <div class="wf-icon">⚡</div>
+            <div><div class="wf-title">Entrega ágil</div><div class="wf-desc">Landing pages en días. Portales en semanas. Sin presupuestos inflados.</div></div>
+          </div>
+        </div>
+        <div class="web-mockup">
+          <div class="wm-bar"><div class="wm-dot" style="background:#ff5f56"></div><div class="wm-dot" style="background:#ffbd2e"></div><div class="wm-dot" style="background:#27c93f"></div><span style="font-size:.65rem;color:rgba(255,255,255,.25);margin-left:6px">excelentia.com.mx</span></div>
+          <div class="wm-content">
+            <div class="wm-row blue" style="width:60%;height:12px"></div>
+            <div class="wm-row" style="width:90%"></div>
+            <div class="wm-row" style="width:75%"></div>
+            <div class="wm-row" style="width:50%"></div>
+            <div class="wm-grid2">
+              <div class="wm-card"><div class="wm-card-title"></div><div class="wm-card-body"></div></div>
+              <div class="wm-card"><div class="wm-card-title"></div><div class="wm-card-body"></div></div>
+              <div class="wm-card"><div class="wm-card-title"></div><div class="wm-card-body"></div></div>
+              <div class="wm-card"><div class="wm-card-title"></div><div class="wm-card-body"></div></div>
+            </div>
+            <div class="wm-cta">Agenda tu diagnóstico gratuito →</div>
+          </div>
+        </div>
       </div>
-      <div class="contact-team reveal">
-        <h3>Habla directamente con el equipo</h3>
-        <div class="contact-team-grid">
-          <div class="contact-person">
-            <div class="contact-avatar">AC</div>
-            <div class="contact-info">
-              <strong>Adolfo Cabrera</strong>
-              <a href="tel:+525543614898">+52 55 4361-4898</a>
-              <a href="https://wa.me/525543614898?text=Hola%20Adolfo,%20me%20interesa%20conocer%20ExcelentIA" target="_blank" class="contact-wa">💬 WhatsApp</a>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CONTACTO -->
+  <div class="contacto-bg">
+    <div class="contacto-inner">
+      <div style="text-align:center;margin-bottom:3rem">
+        <div class="eyebrow" style="margin:0 auto 1rem"><div class="dot-live"></div>Hablemos</div>
+        <h2 class="section-title" style="font-size:2rem">El primer paso no cuesta nada.<br><span class="accent">El no darlo, sí.</span></h2>
+        <p style="font-size:.92rem;color:rgba(255,255,255,.45);margin-top:.75rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7">En una llamada de 30 minutos identificamos qué proceso automatizar primero y te mostramos qué tan rápido puedes ver resultados.</p>
+        <div class="cta-chips">
+          <div class="chip">💬 WhatsApp directo</div>
+          <div class="chip">✉️ Correo formal</div>
+          <div class="chip">📋 Déjanos tus datos</div>
+        </div>
+      </div>
+      <div class="contacto-grid">
+        <div>
+          <p style="font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em">Habla directamente con el equipo</p>
+          <div class="contact-team">
+            <div class="team-card">
+              <div class="team-av">AC</div>
+              <div>
+                <div class="team-name">Adolfo Cabrera</div>
+                <div class="team-link">+52 55 4361-4898 &nbsp;·&nbsp; WhatsApp</div>
+              </div>
+            </div>
+            <div class="team-card">
+              <div class="team-av">JJ</div>
+              <div>
+                <div class="team-name">Juan José García</div>
+                <div class="team-link">+52 55 9197-1811 &nbsp;·&nbsp; WhatsApp</div>
+              </div>
             </div>
           </div>
-          <div class="contact-person">
-            <div class="contact-avatar">JJ</div>
-            <div class="contact-info">
-              <strong>Juan José García</strong>
-              <a href="tel:+525591971811">+52 55 9197-1811</a>
-              <a href="https://wa.me/525591971811?text=Hola%20Juan%20José,%20me%20interesa%20conocer%20ExcelentIA" target="_blank" class="contact-wa">💬 WhatsApp</a>
-            </div>
-          </div>
         </div>
-      </div>
-      <div class="contact-form reveal">
-        <h3>O déjanos tus datos</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="nombre">Nombre</label>
-            <input type="text" id="nombre" placeholder="Tu nombre completo">
-          </div>
-          <div class="form-group">
-            <label for="email">Correo electrónico</label>
-            <input type="email" id="email" placeholder="tu@empresa.com">
-          </div>
+        <div class="form-card">
+          <div class="form-title">O déjanos tus datos</div>
+          <div class="form-field"><label>Nombre</label><input type="text" placeholder="Tu nombre completo"></div>
+          <div class="form-field"><label>Correo electrónico</label><input type="email" placeholder="correo@empresa.com"></div>
+          <div class="form-field"><label>¿Qué quieres automatizar?</label><textarea placeholder="Cuéntanos brevemente tu proceso..."></textarea></div>
+          <button class="form-btn">Enviar mensaje →</button>
         </div>
-        <div class="form-group">
-          <label for="mensaje">¿Qué quieres automatizar?</label>
-          <textarea id="mensaje" placeholder="Cuéntanos brevemente tu proceso o reto..."></textarea>
-        </div>
-        <button class="btn-submit" onclick="submitForm()">Enviar mensaje →</button>
       </div>
     </div>
   </div>
-</section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-logo-wrap">
-      <img src="https://excelentia.com.mx/assets/logo_excelentIA_clean.png"
-           alt="ExcelentIA" class="footer-logo"
-           onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png';">
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-logo-box">
+      <img src="https://excelentia.com.mx/assets/logo_excelentIA_clean.png" alt="ExcelentIA" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png';">
     </div>
     <div class="footer-links">
-      <a href="/files/privacidad.html">Aviso de Privacidad</a>
-      <a href="/files/terminos.html">Términos y Condiciones</a>
+      <a href="#">Aviso de Privacidad</a>
+      <a href="#">Términos y Condiciones</a>
     </div>
-    <span class="footer-copy">© 2026 ExcelentIA. Todos los derechos reservados.</span>
-  </div>
-</footer>
+    <div class="footer-copy">© 2026 ExcelentIA. Todos los derechos reservados.</div>
+  </footer>
 
-<script>
-// ── NODOS CANVAS (función reutilizable) ──
-function makeNodes(canvasId, alpha){
-  var canvas = document.getElementById(canvasId);
-  if(!canvas) return;
-  var parent = canvas.parentElement;
-  var ctx = canvas.getContext('2d');
-  var N=28, MAX=130, nodes=[];
-  function resize(){ canvas.width=parent.offsetWidth; canvas.height=parent.offsetHeight; init(); }
-  function init(){
-    nodes=[];
-    for(var i=0;i<N;i++) nodes.push({
-      x:Math.random()*canvas.width, y:Math.random()*canvas.height,
-      vx:(Math.random()-.5)*.5, vy:(Math.random()-.5)*.5, r:Math.random()*2+1.2
-    });
-  }
-  resize();
-  window.addEventListener('resize', resize);
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    nodes.forEach(function(n){
-      n.x+=n.vx; n.y+=n.vy;
-      if(n.x<0||n.x>canvas.width)  n.vx*=-1;
-      if(n.y<0||n.y>canvas.height) n.vy*=-1;
-    });
-    for(var i=0;i<N;i++) for(var j=i+1;j<N;j++){
-      var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
-      var d=Math.sqrt(dx*dx+dy*dy);
-      if(d<MAX){
-        ctx.beginPath();
-        ctx.strokeStyle='rgba(74,159,212,'+(alpha*0.9*(1-d/MAX))+')';
-        ctx.lineWidth=.85;
-        ctx.moveTo(nodes[i].x,nodes[i].y);
-        ctx.lineTo(nodes[j].x,nodes[j].y);
-        ctx.stroke();
-      }
-    }
-    nodes.forEach(function(n){
-      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
-      ctx.fillStyle='rgba(74,159,212,'+alpha+')';
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-}
-makeNodes('numbersCanvas', 0.3);
-makeNodes('ctaCanvas',  0.35);
-
-// ── HERO NODES ──
-(function(){
-  var canvas = document.getElementById('heroCanvas');
-  if(!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var nodes = [], N=32, MAX_DIST=130;
-  function resize(){
-    canvas.width=canvas.parentElement.offsetWidth;
-    canvas.height=canvas.parentElement.offsetHeight;
-  }
-  resize();
-  window.addEventListener('resize', function(){ resize(); nodes=[]; init(); });
-  function init(){
-    nodes=[];
-    for(var i=0;i<N;i++) nodes.push({
-      x:Math.random()*canvas.width, y:Math.random()*canvas.height,
-      vx:(Math.random()-.5)*.55, vy:(Math.random()-.5)*.55, r:Math.random()*2.2+1.3
-    });
-  }
-  init();
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    nodes.forEach(function(n){
-      n.x+=n.vx; n.y+=n.vy;
-      if(n.x<0||n.x>canvas.width) n.vx*=-1;
-      if(n.y<0||n.y>canvas.height) n.vy*=-1;
-    });
-    for(var i=0;i<N;i++) for(var j=i+1;j<N;j++){
-      var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
-      var d=Math.sqrt(dx*dx+dy*dy);
-      if(d<MAX_DIST){
-        ctx.beginPath();
-        ctx.strokeStyle='rgba(74,159,212,'+(0.32*(1-d/MAX_DIST))+')';
-        ctx.lineWidth=.9;
-        ctx.moveTo(nodes[i].x,nodes[i].y);
-        ctx.lineTo(nodes[j].x,nodes[j].y);
-        ctx.stroke();
-      }
-    }
-    nodes.forEach(function(n){
-      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
-      ctx.fillStyle='rgba(74,159,212,.65)';
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-// ── NAV ──
-function toggleMenu(){ document.getElementById('mobileMenu').classList.toggle('open'); }
-function closeMenu(){ document.getElementById('mobileMenu').classList.remove('open'); }
-
-// ── REVEAL SCROLL ──
-var observer=new IntersectionObserver(function(entries){
-  entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('visible'); });
-},{threshold:0.12});
-document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
-
-// ── TYPING AGENTES ──
-(function(){
-  var phrases=[
-    'Resuelven problemas reales desde el primer día.',
-    'Cada uno diseñado para un proceso específico.',
-    'Tu equipo los usa — la IA hace el trabajo pesado.',
-    'Sin tecnicismos. Sin promesas vacías. Solo resultados.'
-  ];
-  var el=document.getElementById('agents-typing');
-  if(!el) return;
-  var pi=0, ci=0;
-  function typeNext(){
-    if(ci<=phrases[pi].length){
-      el.textContent=phrases[pi].slice(0,ci++);
-      setTimeout(typeNext,52);
-    } else {
-      setTimeout(function(){ pi=(pi+1)%phrases.length; ci=0; el.textContent=''; typeNext(); },2200);
-    }
-  }
-  typeNext();
-})();
-
-// ── FORMULARIO ──
-function submitForm(){
-  var n=document.getElementById('nombre').value.trim();
-  var e=document.getElementById('email').value.trim();
-  var m=document.getElementById('mensaje').value.trim();
-  if(!n||!e||!m){alert('Por favor completa todos los campos.');return;}
-  window.open('https://wa.me/525512154800?text='+encodeURIComponent('Hola, me contacto desde excelentia.com.mx\n\nNombre: '+n+'\nCorreo: '+e+'\nMensaje: '+m),'_blank');
-}
-</script>
-</body>
-</html>
+</div>
