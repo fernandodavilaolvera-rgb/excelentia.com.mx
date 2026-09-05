@@ -346,6 +346,7 @@ input.monto{font-family:'Fredoka',sans-serif;font-size:23px;font-weight:600;text
   <button onclick="accCats()">🏷️ Categorías y proyectos</button>
   <div class="sep"></div>
   <button onclick="accEnlace()">🔗 Mi enlace</button>
+  <button onclick="accEspacio()">🔑 Entrar a otro espacio</button>
   <button onclick="accAjustes()">⚙️ Ajustes</button>
 </div>
 
@@ -422,6 +423,37 @@ input.monto{font-family:'Fredoka',sans-serif;font-size:23px;font-weight:600;text
   </div>
 </div>
 
+<!-- ============ MODAL: BIENVENIDA / ESPACIO NUEVO ============ -->
+<div class="modal" id="mdNuevo">
+  <h3 class="fk">👋 Espacio nuevo y vacío</h3>
+  <div class="nota" style="margin:0 0 12px">
+    Esta copia de la app arrancó con un espacio recién creado, sin movimientos.
+    Si ya venías capturando en otro dispositivo, entra con ese código y ahí está todo;
+    si es la primera vez, empieza aquí sin problema.
+  </div>
+  <div class="mrow"><div class="tx"><div class="t1" id="nvEspacio">—</div><div class="t2">Código de este espacio</div></div></div>
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Empezar aquí</button>
+    <button class="btn" onclick="accEspacio()">Entrar a otro</button>
+  </div>
+</div>
+
+<!-- ============ MODAL: CAMBIAR DE ESPACIO ============ -->
+<div class="modal" id="mdEspacio">
+  <h3 class="fk">🔑 Entrar a otro espacio</h3>
+  <div class="nota" style="margin:0 0 10px">
+    Pega aquí el código del espacio donde tienes tus movimientos.
+    Lo encuentras en el otro dispositivo, en ☰ → Ajustes.
+  </div>
+  <div class="f"><div class="col full"><label class="lb">Código</label>
+    <input id="espNuevo" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="fm…"></div></div>
+  <div class="mrow"><div class="tx"><div class="t1" id="espActual">—</div><div class="t2">Espacio en el que estás ahora</div></div></div>
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cancelar</button>
+    <button class="btn" onclick="irAEspacio()">Entrar</button>
+  </div>
+</div>
+
 <!-- ============ MODAL: ENLACE ============ -->
 <div class="modal" id="mdEnlace">
   <h3 class="fk">🔗 Mi enlace</h3>
@@ -441,7 +473,10 @@ input.monto{font-family:'Fredoka',sans-serif;font-size:23px;font-weight:600;text
   <div class="acts"><button class="btn gris sm" style="flex:1" onclick="respaldar()">⬇︎ Respaldo JSON</button><button class="btn gris sm" style="flex:1" onclick="restaurar()">⬆︎ Restaurar</button></div>
   <input type="file" id="fileRest" accept="application/json" style="display:none">
   <div class="nota">El respaldo guarda cuentas, categorías y todos los movimientos de este espacio.</div>
-  <div class="acts"><button class="btn gris" onclick="cerrarTodo()">Cerrar</button></div>
+  <div class="acts">
+    <button class="btn gris sm" style="flex:1" onclick="accEspacio()">🔑 Otro espacio</button>
+    <button class="btn gris sm" style="flex:1" onclick="cerrarTodo()">Cerrar</button>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -468,13 +503,13 @@ const ALF = 'abcdefghijkmnopqrstuvwxyz23456789';
 function newEsp(){ let s='fm'; for(let i=0;i<10;i++) s+=ALF[Math.floor(Math.random()*ALF.length)]; return s; }
 function cleanEsp(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,40); }
 
-let ESPACIO = '';
+let ESPACIO = '', ESPACIO_NUEVO = false;
 (function resolverEspacio(){
   const p = new URLSearchParams(location.search);
   let e = cleanEsp(p.get('m'));
   if(e.length < 6) e = '';
   if(!e){ e = cleanEsp(DB.get('ferrock_money_espacio')); if(e.length<6) e=''; }
-  if(!e){ e = newEsp(); }
+  if(!e){ e = newEsp(); ESPACIO_NUEVO = true; }
   ESPACIO = e;
   if(!DB.get('ferrock_money_espacio')) DB.set('ferrock_money_espacio', e);
   if(p.get('m') !== e){ p.set('m', e); history.replaceState(null,'', location.pathname+'?'+p.toString()); }
@@ -1006,7 +1041,7 @@ function delCat(i){
 }
 
 /* ---------- menú y modales ---------- */
-const MODALES = ['mdCuentas','mdCuenta','mdCats','mdEdit','mdEnlace','mdAjustes'];
+const MODALES = ['mdCuentas','mdCuenta','mdCats','mdEdit','mdEnlace','mdAjustes','mdNuevo','mdEspacio'];
 function abrirMenu(){ document.getElementById('menu').classList.add('on'); document.getElementById('bd').classList.add('on'); }
 function abrir(id){ cerrarModales(); document.getElementById(id).classList.add('on'); document.getElementById('bd').classList.add('on'); document.getElementById('menu').classList.remove('on'); }
 function cerrarModales(){ MODALES.forEach(m=>document.getElementById(m).classList.remove('on')); }
@@ -1020,6 +1055,25 @@ function copiarEnlace(){
   if(navigator.clipboard) navigator.clipboard.writeText(el.value);
   else document.execCommand('copy');
   toast('Enlace copiado ✓');
+}
+function accEspacio(){
+  document.getElementById('espActual').textContent = ESPACIO;
+  document.getElementById('espNuevo').value = '';
+  abrir('mdEspacio');
+  setTimeout(()=>document.getElementById('espNuevo').focus(), 120);
+}
+function irAEspacio(){
+  const code = cleanEsp(document.getElementById('espNuevo').value);
+  if(code.length < 6){ toast('El código no se ve completo', true); return; }
+  if(code === ESPACIO){ toast('Ya estás en ese espacio'); cerrarTodo(); return; }
+  DB.set('ferrock_money_espacio', code);
+  location.href = location.pathname + '?m=' + code;
+}
+function avisoEspacioNuevo(){
+  if(!ESPACIO_NUEVO) return;
+  if(movsVivos().length) return;
+  document.getElementById('nvEspacio').textContent = ESPACIO;
+  abrir('mdNuevo');
 }
 function accAjustes(){
   document.getElementById('ajEspacio').textContent = ESPACIO;
@@ -1106,8 +1160,10 @@ async function syncNow(manual){
       dirty = false;
     }
     setNube('ok');
+    if(PRIMER_SYNC){ PRIMER_SYNC = false; avisoEspacioNuevo(); }
   }catch(e){
     setNube('off');
+    if(PRIMER_SYNC){ PRIMER_SYNC = false; avisoEspacioNuevo(); }
     if(manual) console.warn('sync', e);
   }finally{ syncing = false; }
 }
@@ -1146,11 +1202,13 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 window.addEventListener('error', e => {
   try{ console.error('Ferrock Money:', e.message); toast('Error: ' + e.message, true); }catch(_){}
 });
+let PRIMER_SYNC = true;
 cargar();
 document.getElementById('fFecha').value = hoyISO();
 document.getElementById('cTipo').addEventListener('change', tipoCuentaLabel);
 document.getElementById('fFecha').addEventListener('change', function(){ this.dataset.tocada = '1'; });
 document.querySelectorAll('.fchip').forEach(b=>b.addEventListener('click', ()=>setRango(b.dataset.r)));
+document.getElementById('espNuevo').addEventListener('keydown', e=>{ if(e.key==='Enter') irAEspacio(); });
 initCombo();
 setTipo('g');
 render();
