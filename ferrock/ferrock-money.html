@@ -148,7 +148,7 @@ input.monto{font-family:'Fredoka',sans-serif;font-size:23px;font-weight:600;text
 }
 .ic{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;
   font-size:16px;flex-shrink:0}
-.ic.g{background:#FFEDED} .ic.i{background:#E9F9EF} .ic.x{background:#EAF1FE}
+.ic.g{background:#FFEDED} .ic.i{background:#E9F9EF} .ic.x{background:#EAF1FE} .ic.a{background:#F1EEE9}
 .mov .tx{flex:1;min-width:0}
 .mov .t1{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mov .t2{font-size:12px;color:var(--mut);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -357,6 +357,7 @@ input.monto{font-family:'Fredoka',sans-serif;font-size:23px;font-weight:600;text
   <div class="nota">Efectivo, banco y débito arrancan con un saldo del que se va descontando. La tarjeta de crédito arranca con la deuda que ya traes y sube con cada compra.</div>
   <div class="acts">
     <button class="btn gris" onclick="cerrarTodo()">Cerrar</button>
+    <button class="btn gris" onclick="accFusion()">⇄ Fusionar</button>
     <button class="btn" onclick="nuevaCuenta()">＋ Nueva</button>
   </div>
 </div>
@@ -381,6 +382,39 @@ input.monto{font-family:'Fredoka',sans-serif;font-size:23px;font-weight:600;text
   </div>
 </div>
 
+<!-- ============ MODAL: FUSIONAR CUENTAS ============ -->
+<div class="modal" id="mdFusion">
+  <h3 class="fk">⇄ Fusionar cuentas</h3>
+  <div class="nota" style="margin:0 0 11px">
+    Todos los movimientos de la primera cuenta se pasan a la segunda, los saldos iniciales se suman
+    y la primera desaparece. No se pierde ningún registro.
+  </div>
+  <div class="f">
+    <div class="col"><label class="lb">Pasar todo de</label><select id="fusDe"></select></div>
+    <div class="col"><label class="lb">Hacia</label><select id="fusA"></select></div>
+  </div>
+  <div class="acts">
+    <button class="btn gris" onclick="accCuentas()">Cancelar</button>
+    <button class="btn" onclick="fusionar()">Fusionar</button>
+  </div>
+</div>
+
+<!-- ============ MODAL: CUADRAR SALDO ============ -->
+<div class="modal" id="mdCuadre">
+  <h3 class="fk">⚖️ Cuadrar saldo</h3>
+  <div class="mrow"><div class="tx"><div class="t1" id="cqNombre">—</div><div class="t2" id="cqCalc">—</div></div></div>
+  <div class="f">
+    <div class="col"><label class="lb" id="cqLab">Saldo real hoy</label><input class="monto" id="cqReal" type="text" inputmode="decimal" placeholder="0.00"></div>
+    <div class="col"><label class="lb">Diferencia</label><input id="cqDif" type="text" readonly value="—"></div>
+  </div>
+  <div class="f"><div class="col full"><label class="lb">Nota (opcional)</label><input id="cqNota" type="text" placeholder="Ej. cuadre inicial"></div></div>
+  <div class="nota">Se registra un ajuste con la diferencia, fechado hoy. El ajuste mueve el saldo pero no cuenta como ingreso ni como gasto.</div>
+  <div class="acts">
+    <button class="btn gris" onclick="accCuentas()">Cancelar</button>
+    <button class="btn" onclick="aplicarCuadre()">Aplicar ajuste</button>
+  </div>
+</div>
+
 <!-- ============ MODAL: CATEGORÍAS ============ -->
 <div class="modal" id="mdCats">
   <h3 class="fk">🏷️ Categorías y proyectos</h3>
@@ -400,7 +434,7 @@ input.monto{font-family:'Fredoka',sans-serif;font-size:23px;font-weight:600;text
 <!-- ============ MODAL: EDITAR MOVIMIENTO ============ -->
 <div class="modal" id="mdEdit">
   <h3 class="fk" id="edTtl">Editar movimiento</h3>
-  <div class="tipos">
+  <div class="tipos" id="edTipos">
     <button class="tipo" data-e="g" onclick="setTipoEd('g')">− Gasto</button>
     <button class="tipo" data-e="i" onclick="setTipoEd('i')">＋ Ingreso</button>
     <button class="tipo" data-e="x" onclick="setTipoEd('x')">⇄ Traspaso</button>
@@ -524,26 +558,55 @@ const CATS_F = ['Depósito','Transferencia','Efectivo','Cheque','Tarjeta','Pago 
 
 let S = null;
 const ahora = () => Date.now();
+const semilla = arr => arr.map(n => ({n:n, mt:1}));
 const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
 
 function estadoInicial(){
   return {
     v:1,
-    cuentas:[ {id:uid(), nombre:'Efectivo', tipo:'efectivo', ini:0, mt:ahora()} ],
+    cuentas:[ {id:'efectivo-base', nombre:'Efectivo', tipo:'efectivo', ini:0, mt:ahora()} ],
     movs:[],
-    cats:{ g:CATS_G.slice(), i:CATS_I.slice(), f:CATS_F.slice() },
-    catsMt: ahora()
+    cats:{ g:semilla(CATS_G), i:semilla(CATS_I), f:semilla(CATS_F) },
+    catsMt: 1
   };
 }
 function cargar(){
   const raw = DB.get(KEY);
   if(raw){ try{ S = JSON.parse(raw); }catch(e){ S = null; } }
   if(!S || !S.cuentas){ S = estadoInicial(); guardarLocal(); }
-  if(!S.cats) S.cats = { g:CATS_G.slice(), i:CATS_I.slice(), f:CATS_F.slice() };
-  if(!S.cats.f) S.cats.f = CATS_F.slice();
+  if(!S.cats) S.cats = { g:semilla(CATS_G), i:semilla(CATS_I), f:semilla(CATS_F) };
+  S.cats = normCats(S.cats);
+  if(!S.cats.f || !S.cats.f.length) S.cats.f = semilla(CATS_F);
   for(const c of S.cuentas){ if(c.tipo==='tarjeta') c.tipo='credito'; }
 }
 function guardarLocal(){ DB.set(KEY, JSON.stringify(S)); }
+
+/* categorías: siempre como [{n, mt, del}], venga de donde venga */
+function normCats(obj){
+  const out = {};
+  for(const k of ['g','i','f']){
+    const arr = (obj && obj[k]) || [];
+    const vistos = new Set();
+    out[k] = [];
+    for(const it of arr){
+      const o = (typeof it === 'string') ? {n:it, mt:1} : {n:it.n, mt:it.mt||1, del:!!it.del};
+      if(!o.n) continue;
+      const key = norm(o.n);
+      if(vistos.has(key)) continue;
+      vistos.add(key);
+      out[k].push(o);
+    }
+  }
+  return out;
+}
+const catsVivas = k => (S.cats[k]||[]).filter(c=>!c.del);
+const catNames = k => catsVivas(k).map(c=>c.n);
+function addCatA(k, nombre){
+  const ya = (S.cats[k]||[]).find(c => norm(c.n)===norm(nombre));
+  if(ya){ if(ya.del){ ya.del = false; ya.mt = ahora(); } return ya.n; }
+  S.cats[k].push({n:nombre, mt:ahora()});
+  return nombre;
+}
 
 /* ---------- avisos ---------- */
 let toastT = null;
@@ -574,6 +637,7 @@ function saldoDe(id){
   let s = num(c.ini);
   for(const m of movsVivos()){
     const mo = num(m.m);
+    if(m.t==='a'){ if(m.c===id) s += mo; continue; }
     if(esCredito(c.tipo)){
       if(m.t==='g' && m.c===id) s += mo;          // compra sube la deuda
       if(m.t==='i' && m.c===id) s -= mo;          // reembolso baja la deuda
@@ -670,7 +734,7 @@ function renderSelects(){
   if(v2 && cs.some(c=>c.id===v2)) fd.value = v2;
 
   const ff = document.getElementById('fForma'); const vf = ff.value;
-  const lf = (S.cats.f||[]);
+  const lf = catNames('f');
   ff.innerHTML = lf.map(c=>'<option>'+esc(c)+'</option>').join('');
   if(vf && lf.includes(vf)) ff.value = vf;
   if(document.getElementById('catOpts').classList.contains('on')) pintarOpts();
@@ -678,7 +742,7 @@ function renderSelects(){
 
 /* ---------- combo de categorías con búsqueda ---------- */
 const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-const catLista = () => (TIPO==='i' ? S.cats.i : S.cats.g) || [];
+const catLista = () => catNames(TIPO==='i' ? 'i' : 'g');
 let OPT_SEL = -1;
 
 const alfa = (a,b) => String(a).localeCompare(String(b),'es',{sensitivity:'base'});
@@ -808,11 +872,13 @@ function filaMov(m){
   let t1, t2, mn, cls;
   if(m.t==='g'){ t1 = m.k||'Gasto'; t2 = (c?c.nombre:'—') + (m.n?' · '+m.n:''); mn = '−'+fmt(num(m.m)); cls='neg'; }
   else if(m.t==='i'){ t1 = m.k||'Ingreso'; t2 = (m.fm?m.fm+' · ':'') + (c?c.nombre:'—') + (m.n?' · '+m.n:''); mn = '+'+fmt(num(m.m)); cls='pos'; }
+  else if(m.t==='a'){ t1 = 'Ajuste de saldo'; t2 = (c?c.nombre:'—') + (m.n?' · '+m.n:''); 
+    mn = (num(m.m)>0?'+':'')+fmt(num(m.m)); cls = num(m.m)<0?'neg':'pos'; }
   else { const pago = d && esCredito(d.tipo);
     t1 = pago ? 'Pago de tarjeta' : 'Traspaso';
     t2 = (c?c.nombre:'—')+' → '+(d?d.nombre:'—') + (m.n?' · '+m.n:''); mn = fmt(num(m.m)); cls=''; }
   return '<div class="mov">'+
-    '<div class="ic '+m.t+'">'+(m.t==='g'?'−':m.t==='i'?'＋':'⇄')+'</div>'+
+    '<div class="ic '+m.t+'">'+(m.t==='g'?'−':m.t==='i'?'＋':(m.t==='a'?'⚖️':'⇄'))+'</div>'+
     '<div class="tx"><div class="t1">'+esc(t1)+'</div><div class="t2">'+esc(t2)+'</div></div>'+
     '<div class="mn '+cls+'">'+mn+'</div>'+
     '<button class="edit-btn no-print" onclick="abrirEditor(\''+m.id+'\')" title="Editar">✎</button></div>';
@@ -858,7 +924,7 @@ function guardarMov(){
     if(cat){
       const ya = catLista().find(c => norm(c)===norm(cat));
       if(ya){ cat = ya; }
-      else { (TIPO==='i' ? S.cats.i : S.cats.g).push(cat); S.catsMt = ahora(); toast('Categoría «'+cat+'» agregada'); }
+      else { cat = addCatA(TIPO==='i'?'i':'g', cat); S.catsMt = ahora(); toast('Categoría «'+cat+'» agregada'); }
     }
     const mv = {
       id: uid(), t: TIPO, m: monto,
@@ -903,20 +969,23 @@ function abrirEditor(id){
   abrir('mdEdit');
 }
 function pintaEd(cSel, dSel, kSel, fSel){
+  const esAj = (TIPO_ED==='a');
+  document.getElementById('edTipos').style.display = esAj ? 'none' : 'flex';
+  document.getElementById('edTtl').textContent = esAj ? '⚖️ Ajuste de saldo' : 'Editar movimiento';
   document.querySelectorAll('.tipo[data-e]').forEach(b=>b.classList.toggle('on', b.dataset.e===TIPO_ED));
   document.getElementById('ecolDest').style.display = (TIPO_ED==='x')?'':'none';
-  document.getElementById('ecolCat').style.display = (TIPO_ED==='x')?'none':'';
+  document.getElementById('ecolCat').style.display = (TIPO_ED==='x'||esAj)?'none':'';
   document.getElementById('ecolForma').style.display = (TIPO_ED==='i')?'':'none';
-  const lf = (S.cats.f||[]).slice();
+  const lf = catNames('f').slice();
   if(fSel && !lf.some(c=>norm(c)===norm(fSel))) lf.unshift(fSel);
   document.getElementById('eForma').innerHTML = lf.map(c=>'<option'+(norm(c)===norm(fSel||'')?' selected':'')+'>'+esc(c)+'</option>').join('');
-  document.getElementById('elbCuenta').textContent = TIPO_ED==='g'?'Pagué con':(TIPO_ED==='i'?'Entró a':'De');
+  document.getElementById('elbCuenta').textContent = esAj?'Cuenta':(TIPO_ED==='g'?'Pagué con':(TIPO_ED==='i'?'Entró a':'De'));
   document.getElementById('elbCat').textContent = TIPO_ED==='i'?'Proyecto u origen':'Categoría';
   const cs = cuentasVivas();
   const opt = sel => cs.map(c=>'<option value="'+c.id+'"'+(c.id===sel?' selected':'')+'>'+iconCta(c.tipo)+' '+esc(c.nombre)+'</option>').join('');
   document.getElementById('eCuenta').innerHTML = opt(cSel);
   document.getElementById('eDest').innerHTML = opt(dSel);
-  const lista = ((TIPO_ED==='i' ? S.cats.i : S.cats.g) || []).slice().sort(alfa);
+  const lista = catNames(TIPO_ED==='i' ? 'i' : 'g').slice().sort(alfa);
   if(kSel && !lista.some(c=>norm(c)===norm(kSel))) lista.unshift(kSel);
   document.getElementById('eCat').innerHTML = lista.map(c=>'<option'+(norm(c)===norm(kSel||'')?' selected':'')+'>'+esc(c)+'</option>').join('');
 }
@@ -928,7 +997,8 @@ function setTipoEd(t){
 function guardarEdicion(){
   const m = S.movs.find(x=>x.id===MOV_SEL); if(!m){ toast('No encontré el movimiento', true); return; }
   const monto = num(document.getElementById('eMonto').value);
-  if(monto<=0){ toast('El monto debe ser mayor a cero', true); return; }
+  if(TIPO_ED==='a'){ if(monto===0){ toast('El ajuste no puede ser cero', true); return; } }
+  else if(monto<=0){ toast('El monto debe ser mayor a cero', true); return; }
   const c = document.getElementById('eCuenta').value;
   const d = document.getElementById('eDest').value;
   if(TIPO_ED==='x' && c===d){ toast('Origen y destino no pueden ser la misma cuenta', true); return; }
@@ -937,8 +1007,9 @@ function guardarEdicion(){
   m.f = document.getElementById('eFecha').value || hoyISO();
   m.c = c;
   m.d = (TIPO_ED==='x') ? d : '';
-  m.k = (TIPO_ED==='x') ? '' : (document.getElementById('eCat').value || '');
+  m.k = (TIPO_ED==='a') ? 'Ajuste de saldo' : ((TIPO_ED==='x') ? '' : (document.getElementById('eCat').value || ''));
   m.fm = (TIPO_ED==='i') ? (document.getElementById('eForma').value || '') : '';
+  if(TIPO_ED==='a') m.d = '';
   m.n = document.getElementById('eNota').value.trim();
   m.mt = ahora();
   guardarLocal(); render(); queuePush();
@@ -965,6 +1036,7 @@ function accCuentas(){
     return '<div class="mrow"><div class="tx" onclick="editarCuenta(\''+c.id+'\')" style="cursor:pointer">'+
       '<div class="t1">'+iconCta(c.tipo)+' '+esc(c.nombre)+'</div>'+
       '<div class="t2">'+nombreTipo(c.tipo)+' · '+(esCredito(c.tipo)?'deuda ':'saldo ')+fmt(s)+'</div></div>'+
+      '<button class="xbtn" title="Cuadrar saldo" onclick="accCuadrar(\''+c.id+'\')">⚖️</button>'+
       '<button class="xbtn" onclick="borrarCuenta(\''+c.id+'\')">✕</button></div>';
   }).join('') || '<div class="vacio">Sin cuentas</div>';
   abrir('mdCuentas');
@@ -1012,6 +1084,74 @@ function borrarCuenta(id){
   guardarLocal(); render(); queuePush(); accCuentas();
 }
 
+/* ---------- fusionar cuentas ---------- */
+function accFusion(){
+  const cs = cuentasVivas();
+  if(cs.length < 2){ toast('Necesitas al menos dos cuentas', true); return; }
+  const opt = cs.map(c=>'<option value="'+c.id+'">'+iconCta(c.tipo)+' '+esc(c.nombre)+' · '+fmt(saldoDe(c.id))+'</option>').join('');
+  document.getElementById('fusDe').innerHTML = opt;
+  document.getElementById('fusA').innerHTML = opt;
+  document.getElementById('fusA').selectedIndex = 1;
+  abrir('mdFusion');
+}
+function fusionar(){
+  const a = document.getElementById('fusDe').value;
+  const b = document.getElementById('fusA').value;
+  if(a===b){ toast('Elige dos cuentas distintas', true); return; }
+  const ca = getCta(a), cb = getCta(b);
+  if(!ca || !cb) return;
+  const n = movsVivos().filter(m=>m.c===a||m.d===a).length;
+  if(!confirm('Se pasan '+n+' movimiento(s) de «'+ca.nombre+'» a «'+cb.nombre+'» y se elimina «'+ca.nombre+'». ¿Seguir?')) return;
+  for(const m of S.movs){
+    let toco = false;
+    if(m.c===a){ m.c = b; toco = true; }
+    if(m.d===a){ m.d = b; toco = true; }
+    if(toco) m.mt = ahora();
+  }
+  cb.ini = num(cb.ini) + num(ca.ini); cb.mt = ahora();
+  ca.del = true; ca.mt = ahora();
+  guardarLocal(); render(); queuePush();
+  toast('Cuentas fusionadas ✓');
+  accCuentas();
+}
+
+/* ---------- cuadrar saldo ---------- */
+function accCuadrar(id){
+  const c = getCta(id); if(!c) return;
+  CTA_SEL = id;
+  const s = saldoDe(id);
+  document.getElementById('cqNombre').textContent = iconCta(c.tipo)+' '+c.nombre;
+  document.getElementById('cqCalc').textContent = (esCredito(c.tipo)?'Deuda seg\u00fan la app: ':'Saldo seg\u00fan la app: ') + fmt(s);
+  document.getElementById('cqLab').textContent = esCredito(c.tipo)?'Deuda real hoy':'Saldo real hoy';
+  document.getElementById('cqReal').value = '';
+  document.getElementById('cqNota').value = '';
+  document.getElementById('cqDif').value = '—';
+  abrir('mdCuadre');
+  setTimeout(()=>document.getElementById('cqReal').focus(), 120);
+}
+function calcDif(){
+  const c = getCta(CTA_SEL); if(!c) return 0;
+  const txt = document.getElementById('cqReal').value.trim();
+  if(txt==='') { document.getElementById('cqDif').value = '—'; return 0; }
+  const d = Math.round((num(txt) - saldoDe(CTA_SEL))*100)/100;
+  document.getElementById('cqDif').value = (d>0?'+':'')+fmt(d);
+  return d;
+}
+function aplicarCuadre(){
+  const c = getCta(CTA_SEL); if(!c){ toast('Elige una cuenta', true); return; }
+  if(document.getElementById('cqReal').value.trim()===''){ toast('Escribe el saldo real', true); return; }
+  const d = calcDif();
+  if(Math.abs(d) < 0.005){ toast('Esa cuenta ya est\u00e1 cuadrada ✓'); accCuentas(); return; }
+  S.movs.push({
+    id: uid(), t:'a', m:d, f:hoyISO(), c:CTA_SEL, d:'',
+    k:'Ajuste de saldo', n:document.getElementById('cqNota').value.trim(), mt:ahora()
+  });
+  DIAS_ABIERTOS.add(hoyISO());
+  guardarLocal(); render(); queuePush();
+  toast('Saldo cuadrado ✓ ('+(d>0?'+':'')+fmt(d)+')');
+  accCuentas();
+}
+
 /* ---------- categorías ---------- */
 let TAB_CAT = 'g';
 function accCats(){ setTabCat(TAB_CAT); abrir('mdCats'); }
@@ -1020,7 +1160,7 @@ function setTabCat(t){
   document.getElementById('tabG').classList.toggle('on', t==='g');
   document.getElementById('tabI').classList.toggle('on', t==='i');
   document.getElementById('tabF').classList.toggle('on', t==='f');
-  const arr = S.cats[t] || [];
+  const arr = catNames(t).slice().sort(alfa);
   document.getElementById('chipsCat').innerHTML = arr.map((c,i)=>
     '<span class="chip">'+esc(c)+'<button onclick="delCat('+i+')">✕</button></span>').join('')
     || '<div class="vacio">Sin categorías</div>';
@@ -1030,18 +1170,21 @@ function setTabCat(t){
 function addCat(){
   const el = document.getElementById('catNueva');
   const v = el.value.trim(); if(!v) return;
-  if(!S.cats[TAB_CAT].includes(v)) S.cats[TAB_CAT].push(v);
+  addCatA(TAB_CAT, v);
   S.catsMt = ahora(); el.value='';
   guardarLocal(); setTabCat(TAB_CAT); renderSelects(); queuePush();
   toast('Agregado ✓');
 }
 function delCat(i){
-  S.cats[TAB_CAT].splice(i,1); S.catsMt = ahora();
+  const nombre = catNames(TAB_CAT).slice().sort(alfa)[i];
+  const it = (S.cats[TAB_CAT]||[]).find(c => norm(c.n)===norm(nombre||''));
+  if(it){ it.del = true; it.mt = ahora(); }
+  S.catsMt = ahora();
   guardarLocal(); setTabCat(TAB_CAT); renderSelects(); queuePush();
 }
 
 /* ---------- menú y modales ---------- */
-const MODALES = ['mdCuentas','mdCuenta','mdCats','mdEdit','mdEnlace','mdAjustes','mdNuevo','mdEspacio'];
+const MODALES = ['mdCuentas','mdCuenta','mdCats','mdEdit','mdEnlace','mdAjustes','mdNuevo','mdEspacio','mdFusion','mdCuadre'];
 function abrirMenu(){ document.getElementById('menu').classList.add('on'); document.getElementById('bd').classList.add('on'); }
 function abrir(id){ cerrarModales(); document.getElementById(id).classList.add('on'); document.getElementById('bd').classList.add('on'); document.getElementById('menu').classList.remove('on'); }
 function cerrarModales(){ MODALES.forEach(m=>document.getElementById(m).classList.remove('on')); }
@@ -1139,7 +1282,20 @@ function mezclar(rem){
   let cambio = false;
   const c = mergeArr(S.cuentas, rem.cuentas, 'cuentas'); if(c.cambio){ S.cuentas = c.arr; cambio = true; }
   const m = mergeArr(S.movs, rem.movs, 'movs'); if(m.cambio){ S.movs = m.arr; cambio = true; }
-  if(rem.cats && (rem.catsMt||0) > (S.catsMt||0)){ S.cats = rem.cats; S.catsMt = rem.catsMt; cambio = true; }
+  if(rem.cats){
+    const r = normCats(rem.cats);
+    for(const k of ['g','i','f']){
+      const mapa = new Map();
+      for(const it of (S.cats[k]||[])) mapa.set(norm(it.n), it);
+      for(const it of (r[k]||[])){
+        const cur = mapa.get(norm(it.n));
+        if(!cur){ mapa.set(norm(it.n), it); cambio = true; }
+        else if((it.mt||0) > (cur.mt||0)){ mapa.set(norm(it.n), it); cambio = true; }
+      }
+      S.cats[k] = Array.from(mapa.values());
+    }
+    S.catsMt = Math.max(S.catsMt||0, rem.catsMt||0);
+  }
   return cambio;
 }
 async function syncNow(manual){
@@ -1209,6 +1365,7 @@ document.getElementById('cTipo').addEventListener('change', tipoCuentaLabel);
 document.getElementById('fFecha').addEventListener('change', function(){ this.dataset.tocada = '1'; });
 document.querySelectorAll('.fchip').forEach(b=>b.addEventListener('click', ()=>setRango(b.dataset.r)));
 document.getElementById('espNuevo').addEventListener('keydown', e=>{ if(e.key==='Enter') irAEspacio(); });
+document.getElementById('cqReal').addEventListener('input', calcDif);
 initCombo();
 setTipo('g');
 render();
