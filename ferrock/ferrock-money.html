@@ -705,7 +705,7 @@ const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(3
 function estadoInicial(){
   return {
     v:1,
-    cuentas:[ {id:'efectivo-base', nombre:'Efectivo', tipo:'efectivo', ini:0, mt:ahora()} ],
+    cuentas:[ {id:'efectivo-base', nombre:'Efectivo', tipo:'efectivo', ini:0, mt:1} ],
     movs:[],
     cats:{ g:semilla(CATS_G), i:semilla(CATS_I), f:semilla(CATS_F) },
     catsMt: 1,
@@ -1660,8 +1660,18 @@ function mergeArr(local, remoto, campo){
   }
   const out = Array.from(map.values());
   const corte = ahora() - 30*24*3600*1000;
-  const limpio = out.filter(it => !(it.del && (it.mt||0) < corte));
+  const limpio = out.filter(it => !(it.del && it.id !== 'efectivo-base' && (it.mt||0) < corte));
   return { arr: limpio, cambio: cambio || limpio.length !== out.length };
+}
+function limpiarSemilla(){
+  const c = S.cuentas.find(x => x.id === 'efectivo-base');
+  if(!c || c.del) return false;
+  if((c.mt||0) !== 1) return false;
+  if(num(c.ini) !== 0) return false;
+  if(movsVivos().some(m => m.c === c.id || m.d === c.id)) return false;
+  if(!cuentasVivas().some(x => x.id !== 'efectivo-base')) return false;
+  c.del = true; c.mt = 2;
+  return true;
 }
 function mezclar(rem){
   if(!rem || typeof rem !== 'object') return false;
@@ -1693,7 +1703,7 @@ async function syncNow(manual){
     const row = Array.isArray(res) ? res[0] : res;
     if(row){
       if(typeof row.rev === 'number') REV = row.rev;
-      if(row.payload){ if(mezclar(row.payload)){ guardarLocal(); render(); } }
+      if(row.payload){ const camb = mezclar(row.payload); const lim = limpiarSemilla(); if(camb || lim){ guardarLocal(); render(); } }
     }
     if(dirty){
       setNube('save');
