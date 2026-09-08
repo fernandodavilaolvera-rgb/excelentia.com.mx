@@ -1198,5 +1198,103 @@ cargar();
 render();
 syncNow(false);
 </script>
+
+<script>
+/* ============ FERROCK APPS — pill de navegacion + icono comun ============ */
+(function(){
+  var YO = 'plan';
+  var APPS = [
+    {k:'list',  n:'Ferrock List',  s:'Lista del super', f:'ferrock-list',  q:'l', ek:'ferrock_espacio',       ic:'\uD83D\uDED2'},
+    {k:'money', n:'Ferrock Money', s:'Finanzas',        f:'ferrock-money', q:'m', ek:'ferrock_money_espacio', ic:'\uD83D\uDCB0'},
+    {k:'plan',  n:'Ferrock Plan',  s:'Proyecciones',    f:'ferrock-plan',  q:'p', ek:'ferrock_plan_espacio',  ic:'\uD83D\uDCC8'}
+  ];
+  var ICONO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#12A150"/><g fill="none" stroke="#ffffff" stroke-width="6.5" opacity="0.96"><circle cx="256.0" cy="256.0" r="69.3"/><circle cx="325.3" cy="256.0" r="69.3"/><circle cx="290.7" cy="316.0" r="69.3"/><circle cx="221.3" cy="316.0" r="69.3"/><circle cx="186.7" cy="256.0" r="69.3"/><circle cx="221.3" cy="196.0" r="69.3"/><circle cx="290.7" cy="196.0" r="69.3"/><circle cx="394.7" cy="256.0" r="69.3"/><circle cx="325.3" cy="376.1" r="69.3"/><circle cx="186.7" cy="376.1" r="69.3"/><circle cx="117.3" cy="256.0" r="69.3"/><circle cx="186.7" cy="135.9" r="69.3"/><circle cx="325.3" cy="135.9" r="69.3"/><circle cx="360.0" cy="316.0" r="69.3"/><circle cx="256.0" cy="376.1" r="69.3"/><circle cx="152.0" cy="316.0" r="69.3"/><circle cx="152.0" cy="196.0" r="69.3"/><circle cx="256.0" cy="135.9" r="69.3"/><circle cx="360.0" cy="196.0" r="69.3"/><circle cx="256" cy="256" r="208.0"/><circle cx="256" cy="256" r="219.0"/></g></svg>');
+  var EXT = /\.html$/i.test(location.pathname) ? '.html' : '';
+  var CARPETA = location.pathname.replace(/[^\/]*$/, '');
+
+  function leer(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+  function liga(a){
+    var c = leer(a.ek);
+    return CARPETA + a.f + EXT + (c ? ('?' + a.q + '=' + c) : '');
+  }
+
+  /* ---- estilos ---- */
+  var st = document.createElement('style');
+  st.textContent =
+    '.fapps{background:rgba(255,255,255,.22);border:none;color:#fff;border-radius:999px;' +
+    'padding:6px 12px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;' +
+    'display:inline-flex;align-items:center;gap:6px;flex-shrink:0;line-height:1.2}' +
+    '.fapps:active{background:rgba(255,255,255,.34)}' +
+    '.fapps-back{position:fixed;inset:0;z-index:9998;display:none}' +
+    '.fapps-back.on{display:block}' +
+    '.fapps-pop{position:fixed;z-index:9999;background:#fff;border-radius:14px;padding:6px;' +
+    'min-width:216px;box-shadow:0 12px 34px rgba(0,0,0,.24);display:none}' +
+    '.fapps-pop.on{display:block}' +
+    '.fapps-pop a{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:11px;' +
+    'text-decoration:none;color:#22242a;font-family:inherit;font-weight:800;font-size:14.5px}' +
+    '.fapps-pop a:hover{background:#FFF3E6}' +
+    '.fapps-pop .ic{font-size:18px;flex-shrink:0}' +
+    '.fapps-pop small{display:block;font-weight:700;font-size:11.5px;color:#7b7f8a;margin-top:1px}' +
+    '@media print{.fapps,.fapps-pop,.fapps-back{display:none !important}}';
+  document.head.appendChild(st);
+
+  /* ---- menu ---- */
+  var back = document.createElement('div'); back.className = 'fapps-back';
+  var pop = document.createElement('div'); pop.className = 'fapps-pop';
+  var h = '';
+  APPS.filter(function(a){ return a.k !== YO; })
+      .sort(function(a,b){ return a.n.localeCompare(b.n); })
+      .forEach(function(a){
+        h += '<a href="' + liga(a) + '"><span class="ic">' + a.ic + '</span>' +
+             '<span>' + a.n + '<small>' + a.s + '</small></span></a>';
+      });
+  pop.innerHTML = h;
+  document.body.appendChild(back);
+  document.body.appendChild(pop);
+
+  /* ---- pill ---- */
+  var btn = document.createElement('button');
+  btn.className = 'fapps no-print';
+  btn.type = 'button';
+  btn.innerHTML = '\u25A6 Apps';
+  btn.onclick = function(e){
+    e.stopPropagation();
+    var r = btn.getBoundingClientRect();
+    pop.style.top = (r.bottom + 8) + 'px';
+    var izq = Math.min(r.left, window.innerWidth - 232);
+    pop.style.left = Math.max(8, izq) + 'px';
+    pop.classList.add('on'); back.classList.add('on');
+  };
+  back.onclick = function(){ pop.classList.remove('on'); back.classList.remove('on'); };
+
+  var cont = document.querySelector('.hrow');
+  var ancla = document.querySelector('.hgap');
+  if(cont){ if(ancla && ancla.parentNode === cont) cont.insertBefore(btn, ancla); else cont.appendChild(btn); }
+
+  /* ---- manifiesto e icono compartidos ---- */
+  function instalar(){
+    var v = document.querySelectorAll('link[rel="manifest"],link[rel="apple-touch-icon"]');
+    for(var i=0;i<v.length;i++) v[i].parentNode.removeChild(v[i]);
+    var money = APPS[1], c = leer(money.ek);
+    var inicio = CARPETA + money.f + EXT + (c ? ('?m=' + c) : '');
+    var m = {
+      name:'Ferrock', short_name:'Ferrock',
+      scope: CARPETA, start_url: inicio,
+      display:'standalone', background_color:'#FFF6EC', theme_color:'#12A150',
+      icons:[{src:ICONO, sizes:'512x512', type:'image/svg+xml', purpose:'any'}]
+    };
+    try{
+      var l = document.createElement('link'); l.rel = 'manifest';
+      l.href = URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));
+      document.head.appendChild(l);
+    }catch(e){}
+    var al = document.createElement('link'); al.rel = 'apple-touch-icon'; al.href = ICONO;
+    document.head.appendChild(al);
+  }
+  instalar();
+  setTimeout(instalar, 1200);
+})();
+</script>
+
 </body>
 </html>
