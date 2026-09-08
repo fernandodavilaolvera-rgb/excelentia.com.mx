@@ -877,9 +877,17 @@ function installManifest(){
   var CARPETA = location.pathname.replace(/[^\/]*$/, '');
 
   function leer(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
-  function liga(a){
+  function limpio(c){ return String(c||'').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,40); }
+  function irA(a){
     var c = leer(a.ek);
-    return CARPETA + a.f + EXT + (c ? ('?' + a.q + '=' + c) : '');
+    if(c.length < 6){
+      c = limpio(window.prompt('Pega el codigo de tu espacio de ' + a.n +
+            ' (empieza con ' + a.q.replace('l','fl').replace('m','fm').replace('p','fp') + '). ' +
+            'Solo se pide esta vez.', ''));
+      if(c.length < 6) return;
+      try{ localStorage.setItem(a.ek, c); }catch(e){}
+    }
+    location.href = CARPETA + a.f + EXT + '?' + a.q + '=' + c;
   }
 
   /* ---- estilos ---- */
@@ -905,14 +913,16 @@ function installManifest(){
   /* ---- menu ---- */
   var back = document.createElement('div'); back.className = 'fapps-back';
   var pop = document.createElement('div'); pop.className = 'fapps-pop';
-  var h = '';
   APPS.filter(function(a){ return a.k !== YO; })
       .sort(function(a,b){ return a.n.localeCompare(b.n); })
       .forEach(function(a){
-        h += '<a href="' + liga(a) + '"><span class="ic">' + a.ic + '</span>' +
-             '<span>' + a.n + '<small>' + a.s + '</small></span></a>';
+        var el = document.createElement('a');
+        el.href = 'javascript:void(0)';
+        el.innerHTML = '<span class="ic">' + a.ic + '</span>' +
+                       '<span>' + a.n + '<small>' + a.s + '</small></span>';
+        el.onclick = function(ev){ ev.preventDefault(); irA(a); };
+        pop.appendChild(el);
       });
-  pop.innerHTML = h;
   document.body.appendChild(back);
   document.body.appendChild(pop);
 
