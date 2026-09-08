@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12A150">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Ferrock Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF6EC; --card:#ffffff; --ink:#22242a; --mut:#7b7f8a; --line:#eadfd2;
+  --naranja:#FF7A1A; --verde:#12A150; --verde2:#7ED957; --verde3:#0B8A45;
+  --rojo:#E5484D; --azul:#2F6FED; --morado:#8B5CF6;
+  --maxw:720px; --wide:1180px; --r:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Nunito',system-ui,-apple-system,sans-serif;
+  font-size:16px; -webkit-text-size-adjust:100%;
+  padding-bottom:40px;
+}
+h1,h2,h3,.fk{font-family:'Fredoka','Nunito',sans-serif;font-weight:600}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 14px}
+.wrapw{max-width:var(--wide);margin:0 auto;padding:0 14px}
+
+/* ---------- Header ---------- */
+header{
+  background:linear-gradient(135deg,#7ED957 0%,#12A150 55%,#0B8A45 100%);
+  border-radius:0 0 16px 16px; padding:8px 0 9px;
+  padding-top:calc(8px + env(safe-area-inset-top));
+  box-shadow:0 3px 11px rgba(11,138,69,.18);
+}
+.hrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.htitle{color:#fff;font-size:18px;letter-spacing:.2px;flex:0 0 auto;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hemoji{font-size:19px}
+.hgap{flex:1;min-width:0}
+.hper{color:rgba(255,255,255,.9);font-size:11.5px;font-weight:700;flex-shrink:0;white-space:nowrap}
+.hrow .filtros{flex:0 1 auto;padding:0}
+.hrow .fchip{background:rgba(255,255,255,.22);border-color:transparent;color:#fff;padding:6px 12px}
+.hrow .fchip.on{background:#fff;color:var(--verde3)}
+.hrow .minibtn{background:rgba(255,255,255,.92);border-color:transparent;color:var(--verde3);padding:6px 11px}
+.nube{
+  display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
+  background:rgba(255,255,255,.92); border:none; cursor:pointer;
+  border-radius:999px; padding:6px 10px; font-family:'Nunito',sans-serif;
+  font-size:12px; font-weight:800; color:var(--verde3);
+}
+.nube .dot{width:8px;height:8px;border-radius:50%;background:var(--verde)}
+.nube.warn{color:#9a6400} .nube.warn .dot{background:#F5A524}
+.nube.err{color:#a3282c} .nube.err .dot{background:var(--rojo)}
+.btn-menu{
+  background:rgba(255,255,255,.92);border:none;border-radius:12px;
+  width:38px;height:34px;font-size:18px;cursor:pointer;color:var(--verde3);
+  flex-shrink:0;line-height:1;
+}
+
+/* ---------- Resumen compacto ---------- */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 2px 10px rgba(180,140,90,.08);
+}
+.alerta{
+  background:#FFF1F1;border:1px solid #f7cfcf;border-left:4px solid var(--rojo);
+  border-radius:999px;padding:4px 12px;font-size:11.5px;
+  font-weight:800;color:#8c2f33;line-height:1.5
+}
+
+/* ---------- Controles ---------- */
+label.lb{display:block;font-size:11.5px;font-weight:800;color:var(--mut);margin:0 0 3px 2px;text-transform:uppercase;letter-spacing:.5px}
+input,select,textarea{
+  width:100%;font-family:'Nunito',sans-serif;font-size:16px;font-weight:600;
+  border:1.5px solid var(--line);border-radius:12px;padding:10px 11px;
+  background:#FFFBF5;color:var(--ink);outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--naranja);background:#fff}
+select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%237b7f8a' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+.btn{
+  border:none;border-radius:13px;padding:12px 16px;cursor:pointer;
+  font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;color:#fff;background:var(--naranja);
+  width:100%;box-shadow:0 3px 10px rgba(255,122,26,.28);
+}
+.btn:active{transform:translateY(1px)}
+.btn.gris{background:#fff;color:var(--mut);border:1.5px solid var(--line);box-shadow:none}
+.btn.rojo{background:var(--rojo);box-shadow:none}
+.btn.sm{padding:9px 13px;font-size:14px;width:auto}
+.f{display:flex;flex-wrap:wrap;gap:8px}
+.f > .col{flex:1;min-width:calc(50% - 4px)}
+.f > .col.full{min-width:100%}
+
+.filtros{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:none}
+.filtros::-webkit-scrollbar{display:none}
+.fchip{
+  flex:0 0 auto;border:1.5px solid var(--line);background:#fff;border-radius:999px;
+  padding:7px 13px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
+  color:var(--mut);cursor:pointer;white-space:nowrap
+}
+.fchip.on{background:var(--verde);color:#fff;border-color:transparent}
+.secttl{font-family:'Fredoka',sans-serif;font-size:14px;font-weight:600;color:var(--mut);
+  margin:16px 2px 7px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.minibtn{
+  background:#FFF3E6;border:1.5px solid #ffd9b8;color:#a35a12;border-radius:999px;
+  padding:5px 12px;font-family:'Fredoka',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;line-height:1.2;flex-shrink:0
+}
+
+/* ---------- Rejilla ---------- */
+.gridbox{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 2px 10px rgba(180,140,90,.08);overflow:auto;-webkit-overflow-scrolling:touch;
+  max-height:calc(100vh - 118px);
+}
+table.grid{border-collapse:separate;border-spacing:0;font-size:13px;width:auto}
+table.grid th,table.grid td{border-bottom:1px solid #f2e8dc;border-right:1px solid #f6efe6;
+  padding:0;white-space:nowrap}
+table.grid thead th{
+  position:sticky;top:0;z-index:6;background:#FFF3E6;color:#8a5a20;
+  font-family:'Fredoka',sans-serif;font-weight:600;font-size:12px;
+  height:34px;padding:0 8px;text-align:center;min-width:88px;border-bottom:1.5px solid #ffd9b8
+}
+table.grid thead tr.fix th{
+  height:26px;padding:0 8px;text-align:center;font-size:12.5px;font-weight:700;
+  border-bottom:1px solid #f0e4d6;color:var(--mut)
+}
+table.grid thead tr.fix th.pos{color:var(--verde3)}
+table.grid thead tr.fix th.neg{color:var(--rojo)}
+table.grid thead tr.f2 th{top:34px;background:#F7F4EF;z-index:6}
+table.grid thead tr.f3 th{top:60px;background:#EAF6EF;z-index:6;border-bottom:1.5px solid #cbe8d8}
+table.grid thead tr.fix th.cabc{text-align:left;z-index:9;color:var(--mut);
+  font-size:12px;border-right:1.5px solid #ffd9b8}
+table.grid thead tr.f2 th.cabc{background:#F7F4EF}
+table.grid thead tr.f3 th.cabc{background:#EAF6EF}
+table.colg tr.rg{display:none}
+table.coli tr.ri{display:none}
+.secc .fl{display:inline-block;transition:transform .18s;font-size:10px;color:var(--mut)}
+.secc .abre{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;flex:1;min-width:0}
+.secc .secrow{display:flex;align-items:center;gap:6px}
+.mas{
+  background:#FFF3E6;border:1px solid #ffd9b8;color:var(--naranja);border-radius:8px;
+  width:22px;height:22px;font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;padding:0;
+  font-weight:800
+}
+.mas:active{background:var(--naranja);color:#fff}
+.secc .abre.on .fl{transform:rotate(90deg)}
+table.grid thead th.cabc{
+  left:0;z-index:8;text-align:left;min-width:186px;width:186px;
+  border-right:1.5px solid #ffd9b8
+}
+table.grid td.cnc{
+  position:sticky;left:0;z-index:5;background:var(--card);
+  min-width:186px;width:186px;border-right:1.5px solid #f0e4d6;
+  padding:0 3px 0 10px
+}
+.ord{display:flex;flex-direction:column;gap:0;flex-shrink:0}
+.ord button{background:none;border:none;color:#cfc2b3;font-size:9px;cursor:pointer;
+  padding:0 2px;line-height:1.1}
+.ord button:hover{color:var(--naranja)}
+.cncrow{display:flex;align-items:center;gap:4px}
+.cncrow .nm{flex:1;min-width:0;font-weight:800;font-size:13px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;padding:4px 0;line-height:16px}
+.micro{background:none;border:none;color:var(--mut);font-size:12px;cursor:pointer;
+  padding:2px 3px;line-height:1;flex-shrink:0;border-radius:7px}
+.micro:active{background:#FFF3E6}
+.cel{display:flex;align-items:center;gap:1px;padding:1px 3px}
+.cel input{
+  border:none;background:transparent;text-align:right;font-size:13px;font-weight:700;
+  padding:4px 3px;border-radius:7px;width:100%;min-width:0;color:var(--ink);line-height:16px
+}
+.cel input:focus{background:#fff;box-shadow:0 0 0 1.5px var(--naranja)}
+.cel .ck{
+  background:none;border:none;color:#ded2c4;font-size:11px;cursor:pointer;
+  padding:2px;line-height:1;flex-shrink:0;width:15px
+}
+td.ok{background:#EDFAF2}
+td.ok .ck{color:var(--verde);visibility:visible}
+td.zz .ck{visibility:hidden}
+td.zz:hover .ck,td.zz:focus-within .ck{visibility:visible}
+td.hoy{box-shadow:inset 2px 0 0 var(--naranja)}
+th.hoy{background:#FFE7CF;color:#a35a12}
+tr.secc td{
+  background:#FFFBF5;font-family:'Fredoka',sans-serif;font-weight:600;font-size:12px;
+  color:var(--mut);text-transform:uppercase;letter-spacing:.6px;padding:7px 10px
+}
+tr.secc td.cnc{background:#FFFBF5}
+tr.tot td{background:#FFF9F1;font-weight:800}
+tr.tot td.cnc{background:#FFF9F1}
+tr.tot .val{padding:4px 8px;text-align:right;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px}
+tr.dif td{background:#F7F4EF}
+tr.dif td.cnc{background:#F7F4EF}
+tr.saldo td{background:#EAF6EF;border-top:1.5px solid #cbe8d8}
+tr.saldo td.cnc{background:#EAF6EF}
+tr.dif .val,tr.saldo .val{
+  height:26px;line-height:26px;padding:0 8px;text-align:center;
+  font-family:'Fredoka',sans-serif;font-size:12.5px;font-weight:700;color:var(--mut)
+}
+tr.dif .val.pos,tr.saldo .val.pos{color:var(--verde3)}
+tr.dif .val.neg,tr.saldo .val.neg{color:var(--rojo)}
+.pos{color:var(--verde3)} .neg{color:var(--rojo)}
+.vacio{text-align:center;color:var(--mut);font-weight:600;padding:26px 10px;font-size:14px}
+
+/* ---------- Vista foco ---------- */
+.foconav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.foconav .nav{
+  background:#fff;border:1.5px solid var(--line);border-radius:12px;width:42px;height:40px;
+  font-size:16px;cursor:pointer;color:var(--mut);flex-shrink:0
+}
+.foconav .tit{flex:1;text-align:center}
+.foconav .tit .s1{font-family:'Fredoka',sans-serif;font-size:19px;font-weight:600;text-transform:capitalize}
+.foconav .tit .s2{font-size:11.5px;color:var(--mut);font-weight:700}
+.frow{
+  display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--card);
+  border:1px solid var(--line);border-radius:13px;margin-bottom:6px
+}
+.frow.ok{background:#EDFAF2;border-color:#cbe8d8}
+.frow .nm{flex:1;min-width:0;font-weight:800;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow input{width:112px;text-align:right;font-family:'Fredoka',sans-serif;font-size:16px;
+  padding:7px 9px;flex-shrink:0}
+.frow .ck2{
+  background:#fff;border:1.5px solid var(--line);border-radius:10px;width:34px;height:34px;
+  font-size:13px;cursor:pointer;color:#ded2c4;flex-shrink:0;line-height:1
+}
+.frow.ok .ck2{background:var(--verde);border-color:transparent;color:#fff}
+.totrow{display:flex;gap:7px;margin:10px 0}
+.totrow div{flex:1;background:#FFFBF5;border:1px solid var(--line);border-radius:11px;padding:7px 9px;
+  font-size:11.5px;font-weight:800;color:var(--mut);text-align:center}
+.totrow b{display:block;font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;margin-top:1px}
+
+/* ---------- Menú y modales ---------- */
+.backdrop{position:fixed;inset:0;background:rgba(20,15,10,.42);z-index:40;display:none}
+.backdrop.on{display:block}
+.menu{
+  position:fixed;top:0;right:0;z-index:41;display:none;
+  background:#fff;border-radius:0 0 0 18px;padding:8px;min-width:224px;
+  box-shadow:0 10px 30px rgba(0,0,0,.22);padding-top:calc(8px + env(safe-area-inset-top));
+}
+.menu.on{display:block}
+.menu button{
+  display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;
+  font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--ink);
+  padding:11px 12px;border-radius:11px;cursor:pointer;text-align:left;
+}
+.menu button:active{background:#FFF3E6}
+.menu .sep{height:1px;background:var(--line);margin:5px 8px}
+.modal{
+  position:fixed;z-index:42;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(94vw,var(--maxw));max-height:86vh;overflow:auto;display:none;
+  background:#fff;border-radius:20px;padding:17px;box-shadow:0 16px 44px rgba(0,0,0,.26);
+}
+.modal.on{display:block}
+.modal h3{margin:0 0 12px;font-size:19px}
+.mrow{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--line);
+  border-radius:13px;margin-bottom:7px;background:#FFFBF5}
+.mrow .tx{flex:1;min-width:0}
+.mrow .t1{font-weight:800;font-size:15px}
+.mrow .t2{font-size:12px;color:var(--mut);font-weight:600}
+.acts{display:flex;gap:8px;margin-top:13px}
+.acts .btn{flex:1}
+.nota{font-size:12.5px;color:var(--mut);font-weight:600;line-height:1.45;margin:8px 2px 0}
+.tabs{display:flex;gap:6px;margin-bottom:11px}
+.tabs button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:8px;
+  font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:var(--mut);cursor:pointer}
+.tabs button.on{background:var(--naranja);color:#fff;border-color:transparent}
+#toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+  background:#22242a;color:#fff;font-weight:800;font-size:14px;padding:11px 18px;
+  border-radius:999px;z-index:60;opacity:0;pointer-events:none;transition:.22s;
+  max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.3)
+}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.bad{background:var(--rojo)}
+
+@media (max-width:600px){
+  .htitle{font-size:17px}
+  .hrow .filtros{order:10;flex:1 1 100%;margin-top:2px}
+  .hrow .minibtn{order:11;margin-top:2px}
+  .hper{display:none}
+  .f > .col{min-width:100%}
+  .gridbox{max-height:calc(100vh - 172px)}
+  table.grid thead th{min-width:82px;font-size:11.5px}
+  table.grid thead th.cabc,table.grid td.cnc{min-width:146px;width:146px}
+  .cncrow .nm{font-size:12px}
+  .res3{flex-wrap:wrap}
+  .res3 > div{min-width:calc(50% - 4px)}
+}
+
+/* ---------- Impresión ---------- */
+@page{size:Letter landscape;margin:12mm}
+@media print{
+  body{background:#fff;padding:0}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .no-print{display:none !important}
+  header{border-radius:0;box-shadow:none}
+  section,.card,main,div{break-inside:auto}
+  .gridbox{max-height:none;overflow:visible;box-shadow:none}
+  .mrow,.frow,.res3 > div,.alerta{break-inside:avoid}
+  table.grid thead th{position:static}
+  table.grid thead tr.fix th{position:static}
+  table.grid td.cnc{position:static}
+  tr{break-inside:avoid}
+  h1,h2,h3,h4,.secttl{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  thead{display:table-header-group}
+  a[href]:after{content:none}
+  .cel input{border:none;background:transparent}
+}
+</style>
+</head>
+<body>
+
+<header class="no-print">
+  <div class="wrapw hrow">
+    <span class="hemoji">📈</span>
+    <div class="htitle fk">Ferrock Plan</div>
+    <span class="hper" id="hper"></span>
+    <div class="filtros" id="vistas">
+      <button class="fchip on" data-v="sem" onclick="setVista('sem')">Semanas</button>
+      <button class="fchip" data-v="mes" onclick="setVista('mes')">Meses</button>
+      <button class="fchip" data-v="foco" onclick="setVista('foco')">Foco</button>
+    </div>
+    <button class="minibtn" onclick="exportarExcel()">⤓ Excel</button>
+    <button class="minibtn" onclick="abrirRepetir()">⟳ Recurrente</button>
+    <div class="hgap"></div>
+    <button class="nube" id="nube" onclick="syncNow(true)"><span class="dot"></span><span id="nubeTxt">En la nube</span></button>
+    <button class="btn-menu" onclick="abrirMenu()">☰</button>
+  </div>
+</header>
+
+<div class="wrapw" id="alertaWrap" style="display:none;padding-top:8px"><div class="alerta" id="alerta"></div></div>
+
+<div class="wrapw">
+  <div id="vistaTabla">
+    <div class="gridbox"><div id="tabla"></div></div>
+  </div>
+
+  <div id="vistaFoco" style="display:none">
+    <div class="wrap" style="padding:0">
+      <div class="foconav no-print">
+        <button class="nav" onclick="moverFoco(-1)">‹</button>
+        <div class="tit"><div class="s1" id="focoTit">—</div><div class="s2" id="focoSub">—</div></div>
+        <button class="nav" onclick="moverFoco(1)">›</button>
+      </div>
+      <div class="totrow">
+        <div>Ingresos<b class="pos" id="fIng">—</b></div>
+        <div>Gastos<b class="neg" id="fGas">—</b></div>
+        <div>Saldo<b id="fSal">—</b></div>
+      </div>
+      <div id="focoBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="backdrop no-print" id="backdrop" onclick="cerrarTodo()"></div>
+
+<div class="menu no-print" id="menu">
+  <button onclick="abrirAjustes()">⚙️ Ajustes del plan</button>
+  <button onclick="abrirRepetir()">⟳ Movimiento recurrente</button>
+  <button onclick="abrirConceptos()">🏷️ Conceptos</button>
+  <button onclick="cerrarTodo();masSemanas()">＋4 semanas</button>
+  <div class="sep"></div>
+  <button onclick="exportarExcel()">⤓ Exportar a Excel</button>
+  <button onclick="cerrarTodo();window.print()">🖨️ Imprimir / PDF</button>
+  <button onclick="abrirBackup()">💾 Respaldo</button>
+  <div class="sep"></div>
+  <button onclick="copiarEnlace()">🔗 Mi enlace</button>
+  <button onclick="abrirEspacio()">🔑 Entrar a otro espacio</button>
+</div>
+
+<!-- AJUSTES -->
+<div class="modal no-print" id="mdAjustes">
+  <h3 class="fk">⚙️ Ajustes del plan</h3>
+  <div class="f">
+    <div class="col full"><label class="lb">Saldo inicial</label><input id="aIni" inputmode="decimal" placeholder="0"></div>
+    <div class="col"><label class="lb">Primera semana</label><input id="aInicio" type="date"></div>
+    <div class="col"><label class="lb">Cuántas semanas</label><input id="aNsem" inputmode="numeric" placeholder="47"></div>
+  </div>
+  <div class="nota">La proyección arranca del saldo inicial y va sumando la diferencia de cada semana. Si cambias la primera semana, los montos se quedan pegados a su fecha.</div>
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cancelar</button>
+    <button class="btn" onclick="guardarAjustes()">Guardar</button>
+  </div>
+</div>
+
+<!-- CONCEPTO -->
+<div class="modal no-print" id="mdConcepto">
+  <h3 class="fk" id="cTitulo">Nuevo concepto</h3>
+  <div class="tabs" id="cTabs">
+    <button data-t="g" onclick="setTipoConcepto('g')">Gasto</button>
+    <button data-t="i" onclick="setTipoConcepto('i')">Ingreso</button>
+  </div>
+  <label class="lb">Nombre</label>
+  <input id="cNombre" placeholder="Renta, Berimbau, CFE…">
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cancelar</button>
+    <button class="btn" onclick="guardarConcepto()">Guardar</button>
+  </div>
+  <div class="acts" id="cBorrarWrap" style="display:none">
+    <button class="btn rojo" onclick="borrarConcepto()">Eliminar concepto</button>
+  </div>
+</div>
+
+<!-- LISTA DE CONCEPTOS -->
+<div class="modal no-print" id="mdConceptos">
+  <h3 class="fk">🏷️ Conceptos</h3>
+  <div id="listaConceptos"></div>
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cerrar</button>
+    <button class="btn" onclick="nuevoConcepto('g')">＋ Nuevo</button>
+  </div>
+</div>
+
+<!-- RECURRENTE -->
+<div class="modal no-print" id="mdRepetir">
+  <h3 class="fk">⟳ Movimiento recurrente</h3>
+  <label class="lb">Concepto</label>
+  <select id="rConcepto"></select>
+  <div class="f" style="margin-top:8px">
+    <div class="col"><label class="lb">Monto</label><input id="rMonto" inputmode="decimal" placeholder="0"></div>
+    <div class="col"><label class="lb">Desde la semana</label><select id="rDesde"></select></div>
+    <div class="col"><label class="lb">Cada cuántas semanas</label><input id="rCada" inputmode="numeric" value="1"></div>
+    <div class="col"><label class="lb">Cuántas veces</label><input id="rVeces" inputmode="numeric" value="4"></div>
+  </div>
+  <div class="nota">Escribe el monto una vez y se reparte solo. Si pones 0 borra esas celdas. Cada 4 semanas ≈ mensual.</div>
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cancelar</button>
+    <button class="btn" onclick="aplicarRepetir()">Aplicar</button>
+  </div>
+</div>
+
+<!-- ESPACIO -->
+<div class="modal no-print" id="mdEspacio">
+  <h3 class="fk">🔑 Entrar a otro espacio</h3>
+  <label class="lb">Código del espacio</label>
+  <input id="eCodigo" placeholder="fp…">
+  <div class="nota">Tu espacio actual es <b id="eActual">—</b>. Al entrar a otro, este dispositivo lo usará por default.</div>
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cancelar</button>
+    <button class="btn" onclick="entrarEspacio()">Entrar</button>
+  </div>
+</div>
+
+<!-- BACKUP -->
+<div class="modal no-print" id="mdBackup">
+  <h3 class="fk">💾 Respaldo</h3>
+  <label class="lb">Copia este texto para guardarlo, o pega uno para restaurar</label>
+  <textarea id="bTxt" rows="8" style="font-size:12px;font-family:monospace"></textarea>
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cerrar</button>
+    <button class="btn" onclick="restaurar()">Restaurar</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   FERROCK PLAN — proyeccion semanal de ingresos y gastos
+   Un solo archivo. Sync: Supabase excelentia-core (ferrock_pull/push)
+   ============================================================ */
+
+const SB_URL = 'https://rcotlydvsubvdapubnkx.supabase.co';
+const SB_KEY = 'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T';
+
+/* ---------- almacenamiento ---------- */
+const MEM = {};
+const DB = {
+  get(k){ try{ const v = localStorage.getItem(k); return v===null?(k in MEM?MEM[k]:null):v; }catch(e){ return k in MEM?MEM[k]:null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ MEM[k]=v; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} delete MEM[k]; }
+};
+
+/* ---------- espacio ---------- */
+const ALF = 'abcdefghijkmnopqrstuvwxyz23456789';
+function newEsp(){ let s='fp'; for(let i=0;i<10;i++) s+=ALF[Math.floor(Math.random()*ALF.length)]; return s; }
+function cleanEsp(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,40); }
+
+let ESPACIO = '', ESPACIO_NUEVO = false;
+(function resolverEspacio(){
+  const p = new URLSearchParams(location.search);
+  let e = cleanEsp(p.get('p'));
+  if(e.length < 6) e = '';
+  if(!e){ e = cleanEsp(DB.get('ferrock_plan_espacio')); if(e.length<6) e=''; }
+  if(!e){ e = newEsp(); ESPACIO_NUEVO = true; }
+  ESPACIO = e;
+  if(!DB.get('ferrock_plan_espacio')) DB.set('ferrock_plan_espacio', e);
+  if(p.get('p') !== e){ p.set('p', e); history.replaceState(null,'', location.pathname+'?'+p.toString()); }
+})();
+const KEY = 'ferrock_plan_v1_' + ESPACIO;
+
+/* ---------- utilidades ---------- */
+const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESL = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const ahora = () => Date.now();
+const num = v => { const n = parseFloat(String(v==null?'':v).replace(/[^0-9.\-]/g,'')); return isNaN(n)?0:n; };
+function fmt(n){
+  const s = Math.round(Math.abs(n)).toLocaleString('es-MX');
+  return (n<0?'-$':'$') + s;
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function isoSuma(iso, dias){
+  const p = String(iso).split('-').map(Number);
+  const d = new Date(Date.UTC(p[0], p[1]-1, p[2]));
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0,10);
+}
+function partes(iso){ const p = String(iso).split('-').map(Number); return {y:p[0], m:p[1]-1, d:p[2]}; }
+function labSem(iso){ const q = partes(iso); return MES[q.m] + ' ' + q.d; }
+function labSemLargo(iso){ const q = partes(iso); return q.d + ' de ' + MESL[q.m] + ' ' + q.y; }
+function labMes(iso){ const q = partes(iso); return MES[q.m] + ' ' + String(q.y).slice(2); }
+function lunesDeHoy(){
+  const d = new Date();
+  const dow = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - dow);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+/* ---------- semillas (la hoja de calculo original) ---------- */
+const SEED_G = [
+  ['Renta Tannia',   [[4,7500],[8,7500]]],
+  ['Renta Veracruz', [[3,18000],[8,18000]]],
+  ['Prestamo Mary',  [[1,5000],[6,5000]]],
+  ['Gastos Tannia',  [[1,13000]]],
+  ['Fer',            [[0,2000],[1,2000],[2,2000],[3,2000],[4,2000],[5,2000],[6,2000],[7,2000],[8,2000]]],
+  ['Total play',     [[3,820],[7,820]]],
+  ['Azteca',         [[0,356],[1,356],[2,356],[3,356],[4,356],[5,356],[6,356],[7,356]]],
+  ['Scarlett',       []],
+  ['Cred Monis',     []],
+  ['CFE',            [[8,5000]]],
+  ['Redes',          [[1,758],[5,758]]]
+];
+const SEED_I = [
+  ['Get',            [[0,1485]]],
+  ['Bank',           [[0,28139]]],
+  ['Villas House',   [[4,10000],[8,10000]]],
+  ['Berimbau',       [[4,2000],[8,2000]]],
+  ['4PL',            [[3,482236]]],
+  ['Dr Andres',      [[4,1800],[8,1800]]],
+  ['ENSO',           [[2,38645]]],
+  ['Mexibus Iguala', [[0,6000],[4,6000],[8,6000]]],
+  ['Scarlett',       [[1,1500]]]
+];
+const INICIO_SEED = '2026-09-07', NSEM_SEED = 18;
+
+function slug(s){
+  return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,28);
+}
+function estadoInicial(){
+  const conceptos = [], celdas = [];
+  const cargar = (arr, t) => {
+    arr.forEach((row, orden) => {
+      const id = t + '-' + slug(row[0]);
+      conceptos.push({id, t, n:row[0], o:orden, mt:1});
+      row[1].forEach(par => {
+        const iso = isoSuma(INICIO_SEED, par[0]*7);
+        celdas.push({id:id+'@'+iso, c:id, s:iso, v:par[1], ok:false, mt:1});
+      });
+    });
+  };
+  cargar(SEED_G, 'g');
+  cargar(SEED_I, 'i');
+  return { v:1, cfg:{ini:0, inicio:INICIO_SEED, nsem:NSEM_SEED, mt:1}, conceptos, celdas };
+}
+
+let S = null, CEL = new Map();
+function indexar(){
+  CEL = new Map();
+  for(const c of S.celdas){ if(!c.del) CEL.set(c.c + '@' + c.s, c); }
+}
+function cargar(){
+  const raw = DB.get(KEY);
+  if(raw){ try{ S = JSON.parse(raw); }catch(e){ S = null; } }
+  if(!S || !S.conceptos){ S = estadoInicial(); guardarLocal(); }
+  if(!S.cfg) S.cfg = {ini:0, inicio:INICIO_SEED, nsem:NSEM_SEED, mt:1};
+  if(!Array.isArray(S.celdas)) S.celdas = [];
+  if(!Array.isArray(S.conceptos)) S.conceptos = [];
+  if(S.cfg.inicio === '2026-02-16' && (S.cfg.mt||0) <= 2){
+    S.cfg.inicio = INICIO_SEED; S.cfg.nsem = NSEM_SEED; S.cfg.mt = 2;
+  }
+  normalizarOrden();
+  indexar();
+}
+function guardarLocal(){ DB.set(KEY, JSON.stringify(S)); }
+function tocar(){ guardarLocal(); queuePush(); }
+
+/* ---------- avisos ---------- */
+let toastT = null;
+function toast(msg, malo){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'on' + (malo?' bad':'');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>{ t.className = ''; }, 2600);
+}
+
+/* ---------- modelo ---------- */
+function semanas(){
+  const out = [], n = Math.max(1, Math.min(260, parseInt(S.cfg.nsem)||47));
+  for(let i=0;i<n;i++){ const iso = isoSuma(S.cfg.inicio, i*7); out.push({i, iso, lab:labSem(iso)}); }
+  return out;
+}
+const conceptosDe = t => S.conceptos.filter(c => !c.del && c.t===t).sort((a,b)=>(a.o||0)-(b.o||0));
+function normalizarOrden(){
+  for(const t of ['g','i']) conceptosDe(t).forEach((c,i) => { c.o = i; });
+}
+function moverConcepto(id, dir){
+  const c = S.conceptos.find(x => x.id===id);
+  if(!c) return;
+  const lista = conceptosDe(c.t);
+  const i = lista.findIndex(x => x.id===id), j = i + dir;
+  if(j < 0 || j >= lista.length) return;
+  const otro = lista[j];
+  const tmp = c.o; c.o = otro.o; otro.o = tmp;
+  c.mt = ahora(); otro.mt = ahora();
+  tocar(); render();
+}
+function valor(cid, iso){ const c = CEL.get(cid+'@'+iso); return c ? num(c.v) : 0; }
+function conf(cid, iso){ const c = CEL.get(cid+'@'+iso); return !!(c && c.ok); }
+function setCel(cid, iso, v, ok){
+  const k = cid + '@' + iso;
+  let c = S.celdas.find(x => x.id === k);
+  const vacio = (!v || num(v)===0);
+  if(!c){
+    if(vacio) return;
+    c = {id:k, c:cid, s:iso, v:num(v), ok:!!ok, mt:ahora()};
+    S.celdas.push(c);
+  } else {
+    c.v = num(v); c.ok = (ok===undefined) ? !!c.ok : !!ok;
+    c.del = vacio ? true : false;
+    c.mt = ahora();
+  }
+  indexar();
+}
+function toggleOk(cid, iso){
+  const c = CEL.get(cid+'@'+iso);
+  if(!c){ toast('Primero escribe un monto'); return; }
+  c.ok = !c.ok; c.mt = ahora();
+  tocar(); render();
+}
+
+function calcular(){
+  const sem = semanas();
+  const gs = conceptosDe('g'), is = conceptosDe('i');
+  const tg = [], ti = [], dif = [], sal = [];
+  let acum = num(S.cfg.ini);
+  sem.forEach(w => {
+    let a = 0, b = 0;
+    gs.forEach(c => a += valor(c.id, w.iso));
+    is.forEach(c => b += valor(c.id, w.iso));
+    tg.push(a); ti.push(b); dif.push(b-a);
+    acum += (b-a); sal.push(acum);
+  });
+  return {sem, gs, is, tg, ti, dif, sal};
+}
+
+/* ---------- render resumen ---------- */
+function renderResumen(D){
+  document.getElementById('hper').textContent =
+    D.sem.length + ' semanas · ' + labSem(D.sem[0].iso) + ' a ' + labSem(D.sem[D.sem.length-1].iso);
+  let peor = null;
+  D.sal.forEach((v,i)=>{ if(v<0 && (peor===null || v<D.sal[peor])) peor = i; });
+  const w = document.getElementById('alertaWrap');
+  if(peor!==null){
+    w.style.display = '';
+    document.getElementById('alerta').textContent =
+      '⚠️ Saldo negativo en la semana del ' + labSem(D.sem[peor].iso) + ': ' + fmt(D.sal[peor]);
+  } else { w.style.display = 'none'; }
+}
+
+/* ---------- render tabla semanal ---------- */
+let VISTA = 'sem', FOCO = 0;
+const COLAP = {g:false, i:false};
+function colapsar(t){
+  COLAP[t] = !COLAP[t];
+  const tb = document.querySelector('table.grid');
+  if(tb){
+    tb.classList.toggle(t==='g'?'colg':'coli', COLAP[t]);
+    const a = tb.querySelectorAll('.secc .abre')[t==='g'?0:1];
+    if(a) a.classList.toggle('on', !COLAP[t]);
+  }
+}
+const HOY = lunesDeHoy();
+
+function filaConcepto(c, sem, editable, cls){
+  let h = '<tr class="'+(cls||'')+'"><td class="cnc"><div class="cncrow">' +
+    (editable ? '<div class="ord no-print">' +
+        '<button onclick="moverConcepto(\''+c.id+'\',-1)" title="Subir">▲</button>' +
+        '<button onclick="moverConcepto(\''+c.id+'\',1)" title="Bajar">▼</button></div>' : '') +
+    '<div class="nm" title="'+esc(c.n)+'">'+esc(c.n)+'</div>' +
+    (editable ? '<button class="micro no-print" onclick="editarConcepto(\''+c.id+'\')" title="Editar">✎</button>' +
+                '<button class="micro no-print" onclick="abrirRepetir(\''+c.id+'\')" title="Repetir">⟳</button>' : '') +
+    '</div></td>';
+  sem.forEach(w => {
+    const v = valor(c.id, w.iso), ok = conf(c.id, w.iso);
+    h += '<td class="'+(ok?'ok ':(v?'':'zz '))+(w.iso===HOY?'hoy':'')+'" id="td-'+c.id+'-'+w.i+'"><div class="cel">' +
+      '<button class="ck no-print" onclick="toggleOk(\''+c.id+'\',\''+w.iso+'\')" title="Marcar como ya pagado o ya cobrado">✓</button>' +
+      '<input inputmode="decimal" value="'+(v?v:'')+'" data-c="'+c.id+'" data-s="'+w.iso+'" ' +
+      'oninput="editarCelda(this)" onfocus="this.select()"></div></td>';
+  });
+  return h + '</tr>';
+}
+function filaTotales(cls, pref, nombre, arr, sem, colorear){
+  let h = '<tr class="'+cls+'"><td class="cnc"><div class="cncrow"><div class="nm">'+esc(nombre)+'</div></div></td>';
+  sem.forEach((w,i) => {
+    const v = arr[i];
+    const cl = colorear ? (v>0?'pos':(v<0?'neg':'')) : '';
+    h += '<td class="'+(w.iso===HOY?'hoy':'')+'"><div class="val '+cl+'" id="'+pref+'-'+i+'">'+(v?esc(fmt(v)):'—')+'</div></td>';
+  });
+  return h + '</tr>';
+}
+
+function filaFija(cls, pref, nombre, arr, sem){
+  let h = '<tr class="fix '+cls+'"><th class="cabc">'+esc(nombre)+'</th>';
+  sem.forEach((w,i) => {
+    const v = arr[i];
+    h += '<th class="'+(v>0?'pos':(v<0?'neg':''))+'" id="'+pref+'-'+i+'">'+(v?esc(fmt(v)):'—')+'</th>';
+  });
+  return h + '</tr>';
+}
+function cabSeccion(t, nombre, sem){
+  return '<tr class="secc"><td class="cnc"><div class="secrow">' +
+    '<div class="abre'+(COLAP[t]?'':' on')+'" onclick="colapsar(\''+t+'\')">' +
+    '<span class="fl">▶</span><span>'+esc(nombre)+'</span></div>' +
+    '<button class="mas no-print" onclick="nuevoConcepto(\''+t+'\')" title="Agregar">＋</button>' +
+    '</div></td><td colspan="'+sem.length+'"></td></tr>';
+}
+function renderSemanas(D){
+  const sem = D.sem;
+  let h = '<table class="grid'+(COLAP.g?' colg':'')+(COLAP.i?' coli':'')+'"><thead><tr><th class="cabc">Concepto</th>';
+  sem.forEach(w => { h += '<th class="'+(w.iso===HOY?'hoy':'')+'">'+esc(w.lab)+'</th>'; });
+  h += '</tr>';
+  h += filaFija('f2','hdif','Diferencia', D.dif, sem);
+  h += filaFija('f3','hsal','Saldo', D.sal, sem);
+  h += '</thead><tbody>';
+
+  h += cabSeccion('g','Gastos', sem);
+  if(!D.gs.length) h += '<tr class="rg"><td class="cnc"><div class="cncrow"><div class="nm" style="color:#a5a9b3">Sin gastos</div></div></td><td colspan="'+sem.length+'"></td></tr>';
+  D.gs.forEach(c => { h += filaConcepto(c, sem, true, 'rg'); });
+  h += filaTotales('tot','tg','Total gastos', D.tg, sem, false);
+
+  h += cabSeccion('i','Ingresos', sem);
+  if(!D.is.length) h += '<tr class="ri"><td class="cnc"><div class="cncrow"><div class="nm" style="color:#a5a9b3">Sin ingresos</div></div></td><td colspan="'+sem.length+'"></td></tr>';
+  D.is.forEach(c => { h += filaConcepto(c, sem, true, 'ri'); });
+  h += filaTotales('tot','ti','Total ingresos', D.ti, sem, false);
+
+  h += filaTotales('dif','dif','Diferencia', D.dif, sem, true);
+  h += filaTotales('saldo','saldo','Saldo', D.sal, sem, true);
+  h += '</tbody></table>';
+  document.getElementById('tabla').innerHTML = h;
+}
+
+/* ---------- render meses ---------- */
+function renderMeses(D){
+  const meses = [], idx = new Map();
+  D.sem.forEach((w,i) => {
+    const q = partes(w.iso), k = q.y + '-' + q.m;
+    if(!idx.has(k)){ idx.set(k, meses.length); meses.push({k, lab:labMes(w.iso), sem:[]}); }
+    meses[idx.get(k)].sem.push(i);
+  });
+  const sumaMes = (arr, m) => m.sem.reduce((a,i)=>a+arr[i],0);
+
+  const difM = meses.map(m => sumaMes(D.dif, m));
+  const salM = meses.map(m => D.sal[m.sem[m.sem.length-1]]);
+  let h = '<table class="grid'+(COLAP.g?' colg':'')+(COLAP.i?' coli':'')+'"><thead><tr><th class="cabc">Concepto</th>';
+  meses.forEach(m => { h += '<th>'+esc(m.lab)+'</th>'; });
+  h += '</tr>';
+  h += filaFija('f2','mdif','Diferencia', difM, meses);
+  h += filaFija('f3','msal','Saldo al cierre', salM, meses);
+  h += '</thead><tbody>';
+
+  const filaC = (c, cls) => {
+    let r = '<tr class="'+(cls||'')+'"><td class="cnc"><div class="cncrow"><div class="nm" title="'+esc(c.n)+'">'+esc(c.n)+'</div></div></td>';
+    meses.forEach(m => {
+      let v = 0; m.sem.forEach(i => v += valor(c.id, D.sem[i].iso));
+      r += '<td><div class="val" style="padding:8px;text-align:right;font-weight:700">'+(v?esc(fmt(v)):'—')+'</div></td>';
+    });
+    return r + '</tr>';
+  };
+  const filaT = (cls, nombre, arr, colorear) => {
+    let r = '<tr class="'+cls+'"><td class="cnc"><div class="cncrow"><div class="nm">'+esc(nombre)+'</div></div></td>';
+    meses.forEach(m => {
+      const v = sumaMes(arr, m);
+      r += '<td><div class="val '+(colorear?(v>0?'pos':(v<0?'neg':'')):'')+'">'+(v?esc(fmt(v)):'—')+'</div></td>';
+    });
+    return r + '</tr>';
+  };
+
+  h += cabSeccion('g','Gastos', meses);
+  D.gs.forEach(c => { h += filaC(c, 'rg'); });
+  h += filaT('tot','Total gastos', D.tg, false);
+  h += cabSeccion('i','Ingresos', meses);
+  D.is.forEach(c => { h += filaC(c, 'ri'); });
+  h += filaT('tot','Total ingresos', D.ti, false);
+  h += filaT('dif','Diferencia', D.dif, true);
+
+  let r = '<tr class="saldo"><td class="cnc"><div class="cncrow"><div class="nm">Saldo al cierre</div></div></td>';
+  meses.forEach(m => {
+    const v = D.sal[m.sem[m.sem.length-1]];
+    r += '<td><div class="val '+(v<0?'neg':'pos')+'">'+esc(fmt(v))+'</div></td>';
+  });
+  h += r + '</tr></tbody></table>';
+  document.getElementById('tabla').innerHTML = h;
+}
+
+/* ---------- render foco ---------- */
+function renderFoco(D){
+  if(FOCO >= D.sem.length) FOCO = D.sem.length - 1;
+  if(FOCO < 0) FOCO = 0;
+  const w = D.sem[FOCO];
+  document.getElementById('focoTit').textContent = labSemLargo(w.iso);
+  document.getElementById('focoSub').textContent = 'Semana ' + (FOCO+1) + ' de ' + D.sem.length;
+  document.getElementById('fIng').textContent = fmt(D.ti[FOCO]);
+  document.getElementById('fGas').textContent = fmt(D.tg[FOCO]);
+  const fs = document.getElementById('fSal');
+  fs.textContent = fmt(D.sal[FOCO]);
+  fs.className = D.sal[FOCO] < 0 ? 'neg' : 'pos';
+
+  const bloque = (titulo, lista, t) => {
+    let h = '<div class="secttl"><span>'+titulo+'</span>' +
+      '<button class="mas no-print" onclick="nuevoConcepto(\''+t+'\')" title="Agregar">＋</button></div>';
+    if(!lista.length) return h + '<div class="vacio">Sin conceptos.</div>';
+    lista.forEach(c => {
+      const v = valor(c.id, w.iso), ok = conf(c.id, w.iso);
+      h += '<div class="frow'+(ok?' ok':'')+'">' +
+        '<div class="nm">'+esc(c.n)+'</div>' +
+        '<input inputmode="decimal" value="'+(v?v:'')+'" data-c="'+c.id+'" data-s="'+w.iso+'" oninput="editarCelda(this)" onfocus="this.select()">' +
+        '<button class="ck2 no-print" onclick="toggleOk(\''+c.id+'\',\''+w.iso+'\')">✓</button></div>';
+    });
+    return h;
+  };
+  document.getElementById('focoBody').innerHTML =
+    bloque('Gastos', D.gs, 'g') + bloque('Ingresos', D.is, 'i');
+}
+
+/* ---------- render maestro ---------- */
+function render(){
+  const D = calcular();
+  renderResumen(D);
+  document.getElementById('vistaTabla').style.display = (VISTA==='foco') ? 'none' : '';
+  document.getElementById('vistaFoco').style.display = (VISTA==='foco') ? '' : 'none';
+  if(VISTA==='sem') renderSemanas(D);
+  else if(VISTA==='mes') renderMeses(D);
+  else renderFoco(D);
+  document.querySelectorAll('#vistas .fchip').forEach(b => {
+    b.classList.toggle('on', b.dataset.v === VISTA);
+  });
+}
+function setVista(v){ VISTA = v; render(); }
+function moverFoco(d){ FOCO += d; render(); }
+function masSemanas(){
+  S.cfg.nsem = (parseInt(S.cfg.nsem)||47) + 4;
+  S.cfg.mt = ahora();
+  tocar(); render();
+  toast('Ahora son ' + S.cfg.nsem + ' semanas');
+}
+
+/* ---------- edicion de celda sin re-render ---------- */
+let recalcT = null;
+function editarCelda(inp){
+  setCel(inp.dataset.c, inp.dataset.s, inp.value);
+  const td = inp.closest('td');
+  if(td && !td.classList.contains('ok')) td.classList.toggle('zz', !num(inp.value));
+  clearTimeout(recalcT);
+  recalcT = setTimeout(()=>{ recalcTotales(); tocar(); }, 260);
+}
+function recalcTotales(){
+  const D = calcular();
+  renderResumen(D);
+  if(VISTA==='sem'){
+    D.sem.forEach((w,i) => {
+      const set = (id, v, color) => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.textContent = v ? fmt(v) : '—';
+        if(color) el.className = 'val ' + (v>0?'pos':(v<0?'neg':''));
+      };
+      set('tg-'+i, D.tg[i], false);
+      set('ti-'+i, D.ti[i], false);
+      set('dif-'+i, D.dif[i], true);
+      set('saldo-'+i, D.sal[i], true);
+      const hd = document.getElementById('hdif-'+i);
+      if(hd){ hd.textContent = D.dif[i] ? fmt(D.dif[i]) : '—';
+        hd.className = D.dif[i]>0?'pos':(D.dif[i]<0?'neg':''); }
+      const hs = document.getElementById('hsal-'+i);
+      if(hs){ hs.textContent = D.sal[i] ? fmt(D.sal[i]) : '—';
+        hs.className = D.sal[i]>0?'pos':(D.sal[i]<0?'neg':''); }
+    });
+  } else if(VISTA==='foco'){
+    document.getElementById('fIng').textContent = fmt(D.ti[FOCO]);
+    document.getElementById('fGas').textContent = fmt(D.tg[FOCO]);
+    const fs = document.getElementById('fSal');
+    fs.textContent = fmt(D.sal[FOCO]);
+    fs.className = D.sal[FOCO] < 0 ? 'neg' : 'pos';
+  }
+}
+
+/* ---------- conceptos ---------- */
+let EDIT_C = null, TIPO_C = 'g';
+function setTipoConcepto(t){
+  TIPO_C = t;
+  document.querySelectorAll('#cTabs button').forEach(b => b.classList.toggle('on', b.dataset.t===t));
+}
+function nuevoConcepto(t){
+  EDIT_C = null; setTipoConcepto(t);
+  document.getElementById('cTitulo').textContent = 'Nuevo concepto';
+  document.getElementById('cNombre').value = '';
+  document.getElementById('cBorrarWrap').style.display = 'none';
+  document.getElementById('cTabs').style.display = '';
+  abrir('mdConcepto');
+  setTimeout(()=>document.getElementById('cNombre').focus(), 120);
+}
+function editarConcepto(id){
+  const c = S.conceptos.find(x => x.id===id);
+  if(!c) return;
+  EDIT_C = c; setTipoConcepto(c.t);
+  document.getElementById('cTitulo').textContent = 'Editar concepto';
+  document.getElementById('cNombre').value = c.n;
+  document.getElementById('cBorrarWrap').style.display = '';
+  document.getElementById('cTabs').style.display = 'none';
+  abrir('mdConcepto');
+}
+function guardarConcepto(){
+  const n = document.getElementById('cNombre').value.trim();
+  if(!n){ toast('Ponle nombre', true); return; }
+  if(EDIT_C){ EDIT_C.n = n; EDIT_C.mt = ahora(); }
+  else{
+    const base = TIPO_C + '-' + (slug(n) || 'concepto');
+    let id = base, k = 2;
+    while(S.conceptos.some(x => x.id===id)){ id = base + '-' + (k++); }
+    const orden = S.conceptos.filter(x => x.t===TIPO_C).length;
+    S.conceptos.push({id, t:TIPO_C, n, o:orden, mt:ahora()});
+  }
+  normalizarOrden(); tocar(); cerrarTodo(); render();
+  toast('Listo');
+}
+function borrarConcepto(){
+  if(!EDIT_C) return;
+  if(!confirm('¿Eliminar «' + EDIT_C.n + '» y sus montos?')) return;
+  EDIT_C.del = true; EDIT_C.mt = ahora();
+  S.celdas.forEach(c => { if(c.c===EDIT_C.id && !c.del){ c.del = true; c.mt = ahora(); } });
+  indexar(); tocar(); cerrarTodo(); render();
+  toast('Concepto eliminado');
+}
+function abrirConceptos(){
+  const pinta = (t, titulo) => {
+    const l = conceptosDe(t);
+    let h = '<div class="secttl" style="margin-top:10px">'+titulo+'</div>';
+    if(!l.length) return h + '<div class="vacio">Ninguno.</div>';
+    l.forEach(c => {
+      h += '<div class="mrow"><div class="tx"><div class="t1">'+esc(c.n)+'</div>' +
+        '<div class="t2">'+(t==='g'?'Gasto':'Ingreso')+'</div></div>' +
+        '<button class="micro" onclick="editarConcepto(\''+c.id+'\')">✎</button></div>';
+    });
+    return h;
+  };
+  document.getElementById('listaConceptos').innerHTML = pinta('g','Gastos') + pinta('i','Ingresos');
+  abrir('mdConceptos');
+}
+
+/* ---------- recurrente ---------- */
+function abrirRepetir(cid){
+  const sel = document.getElementById('rConcepto');
+  let h = '<optgroup label="Gastos">';
+  conceptosDe('g').forEach(c => { h += '<option value="'+c.id+'">'+esc(c.n)+'</option>'; });
+  h += '</optgroup><optgroup label="Ingresos">';
+  conceptosDe('i').forEach(c => { h += '<option value="'+c.id+'">'+esc(c.n)+'</option>'; });
+  sel.innerHTML = h + '</optgroup>';
+  if(cid) sel.value = cid;
+
+  const sem = semanas();
+  let hs = '';
+  sem.forEach(w => { hs += '<option value="'+w.iso+'"'+(w.iso===HOY?' selected':'')+'>'+esc(w.lab)+'</option>'; });
+  document.getElementById('rDesde').innerHTML = hs;
+  document.getElementById('rMonto').value = '';
+  abrir('mdRepetir');
+}
+function aplicarRepetir(){
+  const cid = document.getElementById('rConcepto').value;
+  const monto = num(document.getElementById('rMonto').value);
+  const desde = document.getElementById('rDesde').value;
+  const cada = Math.max(1, parseInt(document.getElementById('rCada').value)||1);
+  const veces = Math.max(1, parseInt(document.getElementById('rVeces').value)||1);
+  if(!cid){ toast('Elige un concepto', true); return; }
+  const sem = semanas();
+  const start = sem.findIndex(w => w.iso===desde);
+  if(start < 0){ toast('Elige la semana de inicio', true); return; }
+  let n = 0;
+  for(let k=0;k<veces;k++){
+    const i = start + k*cada;
+    if(i >= sem.length) break;
+    setCel(cid, sem[i].iso, monto);
+    n++;
+  }
+  tocar(); cerrarTodo(); render();
+  toast(monto ? ('Aplicado en ' + n + ' semanas') : ('Limpiado en ' + n + ' semanas'));
+}
+
+/* ---------- exportar ---------- */
+function exportarExcel(){
+  const D = calcular();
+  const q = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+  const lin = [];
+  lin.push([q('Concepto')].concat(D.sem.map(w => q(w.lab + ' ' + partes(w.iso).y))).join(','));
+  lin.push([q('GASTOS')].concat(D.sem.map(()=>'')).join(','));
+  D.gs.forEach(c => lin.push([q(c.n)].concat(D.sem.map(w => valor(c.id,w.iso)||'')).join(',')));
+  lin.push([q('Total gastos')].concat(D.tg).join(','));
+  lin.push([q('')].concat(D.sem.map(()=>'')).join(','));
+  lin.push([q('INGRESOS')].concat(D.sem.map(()=>'')).join(','));
+  D.is.forEach(c => lin.push([q(c.n)].concat(D.sem.map(w => valor(c.id,w.iso)||'')).join(',')));
+  lin.push([q('Total ingresos')].concat(D.ti).join(','));
+  lin.push([q('Diferencia')].concat(D.dif).join(','));
+  lin.push([q('Saldo')].concat(D.sal).join(','));
+
+  const blob = new Blob(['\ufeff' + lin.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ferrock-plan-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  cerrarTodo();
+  toast('Archivo descargado');
+}
+
+/* ---------- ajustes ---------- */
+function abrirAjustes(){
+  document.getElementById('aIni').value = num(S.cfg.ini) || '';
+  document.getElementById('aInicio').value = S.cfg.inicio;
+  document.getElementById('aNsem').value = S.cfg.nsem;
+  abrir('mdAjustes');
+}
+function guardarAjustes(){
+  const ini = num(document.getElementById('aIni').value);
+  const inicio = document.getElementById('aInicio').value || S.cfg.inicio;
+  const nsem = Math.max(1, Math.min(260, parseInt(document.getElementById('aNsem').value)||47));
+  S.cfg = {ini, inicio, nsem, mt:ahora()};
+  tocar(); cerrarTodo(); render();
+  toast('Ajustes guardados');
+}
+
+/* ---------- espacio / respaldo ---------- */
+function copiarEnlace(){
+  const url = location.origin + location.pathname + '?p=' + ESPACIO;
+  try{ navigator.clipboard.writeText(url); toast('Enlace copiado'); }
+  catch(e){ prompt('Copia tu enlace:', url); }
+  cerrarTodo();
+}
+function abrirEspacio(){
+  document.getElementById('eActual').textContent = ESPACIO;
+  document.getElementById('eCodigo').value = '';
+  abrir('mdEspacio');
+}
+function entrarEspacio(){
+  const e = cleanEsp(document.getElementById('eCodigo').value);
+  if(e.length < 6){ toast('Código muy corto', true); return; }
+  DB.set('ferrock_plan_espacio', e);
+  location.href = location.pathname + '?p=' + e;
+}
+function abrirBackup(){
+  document.getElementById('bTxt').value = JSON.stringify(S);
+  abrir('mdBackup');
+}
+function restaurar(){
+  try{
+    const o = JSON.parse(document.getElementById('bTxt').value);
+    if(!o || !o.conceptos) throw new Error('formato');
+    S = o; if(!S.cfg) S.cfg = {ini:0, inicio:INICIO_SEED, nsem:NSEM_SEED, mt:ahora()};
+    indexar(); tocar(); cerrarTodo(); render();
+    toast('Respaldo restaurado');
+  }catch(e){ toast('Ese texto no sirve', true); }
+}
+
+/* ---------- modales ---------- */
+function abrir(id){
+  document.getElementById('backdrop').classList.add('on');
+  document.getElementById('menu').classList.remove('on');
+  document.querySelectorAll('.modal').forEach(m => m.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+function abrirMenu(){
+  document.getElementById('backdrop').classList.add('on');
+  document.getElementById('menu').classList.add('on');
+}
+function cerrarTodo(){
+  document.getElementById('backdrop').classList.remove('on');
+  document.getElementById('menu').classList.remove('on');
+  document.querySelectorAll('.modal').forEach(m => m.classList.remove('on'));
+}
+
+/* ---------- sincronizacion ---------- */
+let REV = 0, dirty = false, pushT = null, syncing = false, PRIMER_SYNC = true;
+function setNube(estado){
+  const n = document.getElementById('nube'), t = document.getElementById('nubeTxt');
+  n.className = 'nube no-print' + (estado==='save'?' warn':(estado==='off'?' err':''));
+  t.textContent = estado==='save' ? 'Guardando…' : (estado==='off' ? 'Sin conexión' : 'En la nube');
+}
+async function rpc(fn, body){
+  const r = await fetch(SB_URL+'/rest/v1/rpc/'+fn, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+    body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('rpc '+r.status);
+  return await r.json();
+}
+function mergeArr(local, remoto){
+  const map = new Map();
+  for(const it of local) map.set(it.id, it);
+  let cambio = false;
+  for(const it of (remoto||[])){
+    const cur = map.get(it.id);
+    if(!cur || (it.mt||0) > (cur.mt||0)){ map.set(it.id, it); cambio = true; }
+  }
+  const out = Array.from(map.values());
+  const corte = ahora() - 30*24*3600*1000;
+  const limpio = out.filter(it => !(it.del && (it.mt||0) < corte));
+  return { arr: limpio, cambio: cambio || limpio.length !== out.length };
+}
+function mezclar(rem){
+  if(!rem || typeof rem !== 'object') return false;
+  let cambio = false;
+  const c = mergeArr(S.conceptos, rem.conceptos); if(c.cambio){ S.conceptos = c.arr; cambio = true; }
+  const d = mergeArr(S.celdas, rem.celdas); if(d.cambio){ S.celdas = d.arr; cambio = true; }
+  if(rem.cfg && (rem.cfg.mt||0) > (S.cfg.mt||0)){ S.cfg = rem.cfg; cambio = true; }
+  if(cambio) indexar();
+  return cambio;
+}
+async function syncNow(manual){
+  if(syncing) return; syncing = true;
+  if(dirty) setNube('save');
+  try{
+    const res = await rpc('ferrock_pull', {p_codigo: ESPACIO, p_rev: REV});
+    const row = Array.isArray(res) ? res[0] : res;
+    if(row){
+      if(typeof row.rev === 'number') REV = row.rev;
+      if(row.payload){ if(mezclar(row.payload)){ guardarLocal(); render(); } }
+    }
+    if(dirty){
+      setNube('save');
+      const rev = await rpc('ferrock_push', {p_codigo: ESPACIO, p_payload: S});
+      const nr = Array.isArray(rev) ? rev[0] : rev;
+      REV = (typeof nr === 'number') ? nr : (nr && nr.rev) || REV;
+      dirty = false;
+    }
+    setNube('ok');
+    if(PRIMER_SYNC){ PRIMER_SYNC = false; avisoEspacioNuevo(); }
+  }catch(e){
+    setNube('off');
+    if(PRIMER_SYNC){ PRIMER_SYNC = false; avisoEspacioNuevo(); }
+    if(manual) console.warn('sync', e);
+  }finally{ syncing = false; }
+}
+function queuePush(){
+  dirty = true; setNube('save');
+  clearTimeout(pushT);
+  pushT = setTimeout(()=>syncNow(false), 1200);
+}
+function avisoEspacioNuevo(){
+  if(!ESPACIO_NUEVO) return;
+  toast('Espacio nuevo: ' + ESPACIO + ' — guarda tu enlace');
+}
+setInterval(()=>{ if(document.visibilityState==='visible') syncNow(false); }, 7000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') syncNow(false); });
+
+/* ---------- PWA ---------- */
+(function manifest(){
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">' +
+    '<rect width="192" height="192" rx="42" fill="#12A150"/>' +
+    '<path d="M40 130 L78 92 L104 116 L152 62" stroke="#ffffff" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const icon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  const mf = {
+    name:'Ferrock Plan', short_name:'Plan',
+    start_url: location.pathname + location.search,
+    display:'standalone', background_color:'#FFF6EC', theme_color:'#12A150',
+    icons:[{src:icon, sizes:'192x192', type:'image/svg+xml'}]
+  };
+  const l = document.createElement('link');
+  l.rel = 'manifest';
+  l.href = URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/json'}));
+  document.head.appendChild(l);
+})();
+
+/* ---------- arranque ---------- */
+window.addEventListener('error', e => {
+  try{ console.error('Ferrock Plan:', e.message); toast('Error: ' + e.message, true); }catch(_){}
+});
+cargar();
+(function focoInicial(){
+  const sem = semanas();
+  const i = sem.findIndex(w => w.iso === HOY);
+  FOCO = i >= 0 ? i : 0;
+})();
+render();
+syncNow(false);
+</script>
+</body>
+</html>
