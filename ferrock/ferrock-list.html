@@ -936,27 +936,57 @@ function installManifest(){
   if(cont){ if(ancla && ancla.parentNode === cont) cont.insertBefore(btn, ancla); else cont.appendChild(btn); }
 
   /* ---- manifiesto e icono compartidos ---- */
-  function instalar(){
-    var v = document.querySelectorAll('link[rel="manifest"],link[rel="apple-touch-icon"]');
+  function instalar(src, tipo){
+    var v = document.querySelectorAll('link[rel="manifest"],link[rel="apple-touch-icon"],' +
+      'link[rel="apple-touch-icon-precomposed"],link[rel="icon"],meta[name="apple-mobile-web-app-title"]');
     for(var i=0;i<v.length;i++) v[i].parentNode.removeChild(v[i]);
+
+    var mt = document.createElement('meta');
+    mt.name = 'apple-mobile-web-app-title'; mt.content = 'Ferrock';
+    document.head.appendChild(mt);
+
     var money = APPS[1], c = leer(money.ek);
     var inicio = CARPETA + money.f + EXT + (c ? ('?m=' + c) : '');
     var m = {
       name:'Ferrock', short_name:'Ferrock',
       scope: CARPETA, start_url: inicio,
       display:'standalone', background_color:'#FFF6EC', theme_color:'#12A150',
-      icons:[{src:ICONO, sizes:'512x512', type:'image/svg+xml', purpose:'any'}]
+      icons:[{src:src, sizes:'512x512', type:tipo, purpose:'any'},
+             {src:src, sizes:'192x192', type:tipo, purpose:'any'}]
     };
     try{
       var l = document.createElement('link'); l.rel = 'manifest';
       l.href = URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));
       document.head.appendChild(l);
     }catch(e){}
-    var al = document.createElement('link'); al.rel = 'apple-touch-icon'; al.href = ICONO;
+    var al = document.createElement('link');
+    al.rel = 'apple-touch-icon'; al.setAttribute('sizes','180x180'); al.href = src;
     document.head.appendChild(al);
+    var fv = document.createElement('link');
+    fv.rel = 'icon'; fv.type = tipo; fv.href = src;
+    document.head.appendChild(fv);
   }
-  instalar();
-  setTimeout(instalar, 1200);
+
+  function aImagen(cb){
+    try{
+      var img = new Image();
+      img.onload = function(){
+        try{
+          var cv = document.createElement('canvas'); cv.width = 512; cv.height = 512;
+          cv.getContext('2d').drawImage(img, 0, 0, 512, 512);
+          cb(cv.toDataURL('image/png'), 'image/png');
+        }catch(e){ cb(ICONO, 'image/svg+xml'); }
+      };
+      img.onerror = function(){ cb(ICONO, 'image/svg+xml'); };
+      img.src = ICONO;
+    }catch(e){ cb(ICONO, 'image/svg+xml'); }
+  }
+
+  instalar(ICONO, 'image/svg+xml');
+  aImagen(function(src, tipo){
+    instalar(src, tipo);
+    setTimeout(function(){ instalar(src, tipo); }, 1400);
+  });
 })();
 </script>
 
