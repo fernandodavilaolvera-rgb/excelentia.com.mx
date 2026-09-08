@@ -85,6 +85,8 @@ th[data-col]{cursor:pointer;user-select:none;transition:.15s}
 th[data-col]:hover{background:#c8d9f0}
 .sort-ind{font-size:.68rem;color:#1a3a6b;margin-left:.15rem}
 .socio-nom{font-weight:700;color:#1a2035;white-space:nowrap}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th.num{text-align:right}
 .rb-mas{padding:.45rem .6rem;font-size:.78rem;color:#1a3a6b;background:#f0f4ff;border-top:1px solid #dde1e9;text-align:center;cursor:pointer;font-weight:600}
 .rb-mas:hover{background:#dce8f7}
 .desc-cell{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
@@ -301,7 +303,7 @@ textarea{resize:vertical;min-height:70px}
             <th data-col="fecha" onclick="sortTabla('gastos','fecha')">Fecha <span class="sort-ind"></span></th>
             <th data-col="descripcion" onclick="sortTabla('gastos','descripcion')">Descripción <span class="sort-ind"></span></th>
             <th data-col="categoria" onclick="sortTabla('gastos','categoria')">Categoría <span class="sort-ind"></span></th>
-            <th data-col="monto_mxn" onclick="sortTabla('gastos','monto_mxn')">Monto <span class="sort-ind"></span></th>
+            <th class="num" data-col="monto_mxn" onclick="sortTabla('gastos','monto_mxn')">Monto <span class="sort-ind"></span></th>
             <th data-col="pagado_por" onclick="sortTabla('gastos','pagado_por')">Pagó <span class="sort-ind"></span></th>
             <th data-col="origen" onclick="sortTabla('gastos','origen')">Origen fondos <span class="sort-ind"></span></th>
             <th data-col="proyecto_nombre" onclick="sortTabla('gastos','proyecto_nombre')">Proyecto <span class="sort-ind"></span></th>
@@ -349,7 +351,7 @@ textarea{resize:vertical;min-height:70px}
             <th data-col="concepto" onclick="sortTabla('ingresos','concepto')">Concepto <span class="sort-ind"></span></th>
             <th data-col="cliente" onclick="sortTabla('ingresos','cliente')">Cliente <span class="sort-ind"></span></th>
             <th data-col="proyecto_nombre" onclick="sortTabla('ingresos','proyecto_nombre')">Proyecto <span class="sort-ind"></span></th>
-            <th data-col="monto_mxn" onclick="sortTabla('ingresos','monto_mxn')">Monto <span class="sort-ind"></span></th>
+            <th class="num" data-col="monto_mxn" onclick="sortTabla('ingresos','monto_mxn')">Monto <span class="sort-ind"></span></th>
             <th data-col="metodo" onclick="sortTabla('ingresos','metodo')">Método <span class="sort-ind"></span></th>
             <th data-col="status_cobro" onclick="sortTabla('ingresos','status_cobro')">Status <span class="sort-ind"></span></th>
             <th></th>
@@ -535,9 +537,9 @@ textarea{resize:vertical;min-height:70px}
               <th data-col onclick="ordenarProy('fecha')">Fecha<span class="sort-ind" id="sp-fecha"></span></th>
               <th data-col onclick="ordenarProy('socio')">Socio<span class="sort-ind" id="sp-socio"></span></th>
               <th data-col onclick="ordenarProy('ingreso')">Concepto<span class="sort-ind" id="sp-ingreso"></span></th>
-              <th data-col onclick="ordenarProy('base_calculo')">Base<span class="sort-ind" id="sp-base_calculo"></span></th>
-              <th data-col onclick="ordenarProy('porcentaje')">Porcentaje<span class="sort-ind" id="sp-porcentaje"></span></th>
-              <th data-col onclick="ordenarProy('monto_mxn')">Monto<span class="sort-ind" id="sp-monto_mxn"></span></th>
+              <th class="num" data-col onclick="ordenarProy('base_calculo')">Base<span class="sort-ind" id="sp-base_calculo"></span></th>
+              <th class="num" data-col onclick="ordenarProy('porcentaje')">Porcentaje<span class="sort-ind" id="sp-porcentaje"></span></th>
+              <th class="num" data-col onclick="ordenarProy('monto_mxn')">Monto<span class="sort-ind" id="sp-monto_mxn"></span></th>
               <th class="no-print">Acciones</th>
             </tr></thead>
             <tbody id="rb-pagosproy"></tbody>
@@ -573,7 +575,7 @@ textarea{resize:vertical;min-height:70px}
             <thead><tr>
               <th data-col onclick="ordenarReem('fecha')">Fecha<span class="sort-ind" id="sr-fecha"></span></th>
               <th data-col onclick="ordenarReem('socio')">Socio<span class="sort-ind" id="sr-socio"></span></th>
-              <th data-col onclick="ordenarReem('monto_mxn')">Monto<span class="sort-ind" id="sr-monto_mxn"></span></th>
+              <th class="num" data-col onclick="ordenarReem('monto_mxn')">Monto<span class="sort-ind" id="sr-monto_mxn"></span></th>
               <th data-col onclick="ordenarReem('concepto')">Concepto<span class="sort-ind" id="sr-concepto"></span></th>
               <th data-col onclick="ordenarReem('metodo')">Método<span class="sort-ind" id="sr-metodo"></span></th>
               <th class="no-print">Acciones</th>
@@ -1052,7 +1054,7 @@ function renderGastos(){
         <td>${fmtDate(g.fecha)}</td>
         <td><div class="desc-cell"><strong>${escHtml(g.descripcion)}</strong>${recur}</div></td>
         <td>${catBadge(g.categoria)}</td>
-        <td>${montoCell(g.moneda,g.monto_original,g.monto_mxn)}</td>
+        <td class="num">${montoCell(g.moneda,g.monto_original,g.monto_mxn)}</td>
         <td>${socioBadge(g.pagado_por)}</td>
         <td style="font-size:.76rem;color:#4a5068">${origenLabel(g)}</td>
         <td style="font-size:.76rem;color:#4a5068">${escHtml(g.proyecto_nombre||'—')}</td>
@@ -1228,7 +1230,7 @@ function renderIngresos(){
       <td><strong>${escHtml(i.concepto)}</strong></td>
       <td>${escHtml(i.cliente||'—')}</td>
       <td style="font-size:.78rem;color:#4a5068">${escHtml(i.proyecto_nombre||'—')}</td>
-      <td>${montoCell(i.moneda,i.monto_original,i.monto_mxn)}</td>
+      <td class="num">${montoCell(i.moneda,i.monto_original,i.monto_mxn)}</td>
       <td style="font-size:.78rem">${escHtml(i.metodo||'-')}</td>
       <td>${statusBadge(i.status_cobro)}</td>
       <td style="white-space:nowrap">
@@ -1382,7 +1384,7 @@ function renderReembolso(){
       <tr>
         <td>${fmtDate(p.fecha)}</td>
         <td>${socioLink(p.socio)}</td>
-        <td><strong>${fmt$(p.monto_mxn)}</strong></td>
+        <td class="num"><strong>${fmt$(p.monto_mxn)}</strong></td>
         <td>${escHtml(p.concepto)||'<span class="text-muted">—</span>'}</td>
         <td>${escHtml(p.metodo)||'—'}</td>
         <td class="no-print col-acc"><button class="btn-icon" onclick="openPago('${p.id}')" title="Editar">✏️</button> <button class="btn-icon" onclick="borrarPago('${p.id}')" title="Eliminar">🗑️</button></td>
@@ -1671,7 +1673,7 @@ function pieTotal(tfootId, lista, colsAntes, colsDespues){
   const etiqueta = RB_FILTRO ? `Total de ${USERS[RB_FILTRO].nombre}` : 'Total';
   el.innerHTML = `<tr class="tot-row">
     <td class="tot-lbl" colspan="${colsAntes}">${etiqueta} · ${lista.length} movimiento${lista.length===1?'':'s'}</td>
-    <td>${fmt$(suma)}</td>
+    <td class="num">${fmt$(suma)}</td>
     <td class="no-print" colspan="${colsDespues}"></td>
   </tr>`;
 }
@@ -1701,9 +1703,9 @@ function renderPagosProy(){
       <td>${fmtDate(p.fecha)}</td>
       <td>${socioLink(p.socio)}</td>
       <td>${ing ? escHtml(ing.concepto||'(sin concepto)') + (ing.cliente?' · '+escHtml(ing.cliente):'') : '<span class="text-muted">Sin ingreso</span>'}</td>
-      <td>${base > 0 ? fmt$(base) : '<span class="text-muted">—</span>'}</td>
-      <td>${pct > 0 ? pct.toFixed(2).replace(/\.00$/,'') + '%' : '<span class="text-muted">—</span>'}</td>
-      <td><strong>${fmt$(p.monto_mxn)}</strong></td>
+      <td class="num">${base > 0 ? fmt$(base) : '<span class="text-muted">—</span>'}</td>
+      <td class="num">${pct > 0 ? pct.toFixed(2).replace(/\.00$/,'') + '%' : '<span class="text-muted">—</span>'}</td>
+      <td class="num"><strong>${fmt$(p.monto_mxn)}</strong></td>
       <td class="no-print col-acc"><button class="btn-icon" onclick="openPagoProy('${p.id}')" title="Editar">✏️</button> <button class="btn-icon" onclick="borrarPagoProy('${p.id}')" title="Eliminar">🗑️</button></td>
     </tr>`;
   }).join('');
