@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motor de Tarifas · 4P Logistics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',-apple-system,sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.42;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1rem 3rem}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.7rem 0;margin-bottom:1.1rem}
+.hd{max-width:1180px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.7rem}
+.logo-box{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback{font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:11px;font-weight:500;color:#fff;letter-spacing:.2px}
+.hd-title{display:flex;align-items:center;gap:.75rem;text-align:right}
+.hd-title h1{font-size:14px;font-weight:800;color:#fff}
+.hd-title p{font-size:10.5px;color:#b9d3ec;font-weight:500}
+.logo-box-4pl{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;flex-shrink:0}
+.logo-box-4pl img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback-4pl{font-size:14px;font-weight:800;color:#1a3a6b;display:none;white-space:nowrap}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:1.1rem}
+.card h2{font-size:15px;font-weight:800;color:#1a2035;margin-bottom:.15rem}
+.card .sub{font-size:12.5px;color:#4a5068;margin-bottom:.9rem;max-width:720px}
+
+/* BARRA DE EMPRESA */
+.empresas{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.emp{font-size:12.5px;font-weight:700;padding:.42rem .85rem;border-radius:20px;border:1px solid #dde1e9;background:#fff;color:#4a5068;cursor:pointer;transition:.15s}
+.emp:hover{background:#e8f0fb;border-color:#4a9fd4}
+.emp.on{background:#1a3a6b;border-color:#1a3a6b;color:#fff}
+.emp-add{border-style:dashed;color:#8a90a0}
+.emp-lbl{font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#8a90a0;margin-right:.2rem}
+
+/* FORM */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.85rem;max-width:960px}
+.f{display:flex;flex-direction:column;gap:.22rem}
+.f label{font-size:11.5px;font-weight:700;color:#4a5068}
+.f .hint{font-size:10.5px;color:#8a90a0;font-weight:500}
+input,select{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a2035;border:1px solid #dde1e9;border-radius:8px;padding:.48rem .6rem;background:#fff;width:100%;max-width:320px}
+input:focus,select:focus{outline:2px solid #4a9fd4;outline-offset:-1px;border-color:#4a9fd4}
+input.wide{max-width:100%}
+.f.full{grid-column:1/-1}
+.f.full input{max-width:100%}
+
+/* AUTOCOMPLETADO */
+.ac{position:relative;max-width:320px}
+.ac input{width:100%}
+.ac-list{position:absolute;z-index:40;top:100%;left:0;right:0;background:#fff;border:1px solid #dde1e9;
+  border-radius:8px;margin-top:.2rem;max-height:250px;overflow-y:auto;box-shadow:0 6px 18px rgba(13,27,62,.13)}
+.ac-op{padding:.42rem .6rem;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
+.ac-op:hover,.ac-op.sel{background:#e8f0fb}
+.ac-op .est{font-size:11px;color:#8a90a0;font-weight:500}
+.ac-op.rec{background:#f5faff}
+.ac-op.rec:hover,.ac-op.rec.sel{background:#e8f0fb}
+.ac-sep{padding:.3rem .6rem;font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:#8a90a0;background:#f5f6f8;border-top:1px solid #eef0f4;border-bottom:1px solid #eef0f4}
+.ac-nueva{padding:.42rem .6rem;font-size:12.5px;color:#4a5068;cursor:pointer;border-top:1px solid #eef0f4}
+.ac-nueva:hover,.ac-nueva.sel{background:#e8f0fb}
+
+/* CAMPO CON AGENTE */
+.dual{display:flex;gap:.4rem;align-items:center;max-width:320px}
+.dual input{flex:1;min-width:0}
+.dual .auto{font-size:12.5px;font-weight:700;color:#2e7d5b;background:#e8f5ee;border:1px solid #bfe0cd;
+  border-radius:7px;padding:.42rem .55rem;white-space:nowrap;cursor:pointer}
+.dual .auto:hover{background:#d8eee2}
+.dual .auto.off{color:#8a90a0;background:#f5f6f8;border-color:#dde1e9}
+.agente{font-size:10.5px;color:#2e7d5b;font-weight:600}
+.agente.off{color:#8a90a0}
+.agente.buscando{color:#4a9fd4}
+
+/* BOTONES */
+.btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:.5rem .95rem;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;transition:.15s}
+.btn:hover{background:#1e5096}
+.btn.ghost{background:#fff;color:#1a3a6b}
+.btn.ghost:hover{background:#e8f0fb}
+.btn.green{background:#2e9e5b;border-color:#2e9e5b}
+.btn.green:hover{background:#268a4e}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
+.link{font-size:11.5px;color:#8a90a0;background:none;border:none;font-family:inherit;cursor:pointer;text-decoration:underline;padding:.2rem 0}
+.link:hover{color:#1a3a6b}
+
+/* RESULTADO */
+.precios{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;margin-bottom:1rem}
+.pbox{border:1px solid #dde1e9;border-radius:10px;padding:.85rem .95rem;background:#fff}
+.pbox .lb{font-size:11px;font-weight:700;color:#8a90a0;letter-spacing:.5px;margin-bottom:.15rem}
+.pbox .vl{font-size:22px;font-weight:800;color:#1a2035;line-height:1.15}
+.pbox .hint{font-size:11.5px;color:#4a5068;margin-top:.15rem}
+.pbox.piso{background:#fdf6e3;border-color:#ecdcae}
+.pbox.piso .vl{color:#b8860b}
+.pbox.meta{background:#e8f5ee;border-color:#bfe0cd}
+.pbox.meta .vl{color:#2e7d5b}
+.pbox.costo{background:#f5f6f8}
+
+/* DESGLOSE */
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:460px}
+thead th{background:#dce8f7;color:#1a3a6b;font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;text-align:left;padding:.5rem .7rem;border:1px solid #dde1e9;white-space:nowrap}
+tbody td{padding:.48rem .7rem;border:1px solid #dde1e9;color:#4a5068}
+tbody td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr.sum td{background:#eef4fc;font-weight:800;color:#1a2035}
+tbody tr.total td{background:#dce8f7;font-weight:800;color:#0d1b3e;font-size:14.5px}
+tbody td b{color:#1a2035}
+.dim{color:#8a90a0;font-size:11.5px}
+
+/* AVISOS */
+.aviso{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.8rem .95rem;margin:.9rem 0;max-width:720px}
+.aviso .t{font-size:12.5px;font-weight:800;color:#1a3a6b;margin-bottom:.25rem}
+.aviso p{font-size:12.5px;color:#4a5068}
+.aviso.duda{background:#fdf6e3;border-color:#ecdcae;border-left-color:#b8860b}
+.aviso.duda .t{color:#8a6d0b}
+.aviso ul{margin:.4rem 0 0 1.1rem}
+.aviso li{font-size:12.5px;color:#4a5068;margin-bottom:.2rem}
+
+.porconf{display:inline-block;font-size:10px;font-weight:800;color:#8a6d0b;background:#fdf6e3;border:1px solid #ecdcae;border-radius:10px;padding:.03rem .38rem;margin-left:.3rem;vertical-align:middle}
+
+/* COMPARADOR */
+.rutas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem;max-width:960px}
+.ruta{border:1px solid #dde1e9;border-radius:10px;padding:.85rem;background:#fff}
+.ruta h4{font-size:13px;font-weight:800;margin-bottom:.5rem;color:#1a2035}
+.ruta .res{margin-top:.6rem;padding-top:.6rem;border-top:1px solid #dde1e9;font-size:12.5px;color:#4a5068}
+.ruta .res b{display:block;font-size:18px;font-weight:800;color:#1a2035}
+.ruta.gana{border-color:#2e9e5b;background:#f4fbf7}
+.ruta.gana .res b{color:#2e7d5b}
+
+footer{text-align:center;padding:1.2rem 1rem;color:#8a90a0;font-size:11.5px;border-top:1px solid #dde1e9;margin-top:1rem}
+
+.hidden{display:none!important}
+.acc{border:1px solid #dde1e9;border-radius:10px;margin-bottom:.7rem;background:#fff}
+.acc>summary{padding:.7rem .95rem;font-size:13px;font-weight:800;color:#1a3a6b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary::after{content:'▾';color:#8a90a0;font-size:12px}
+.acc[open]>summary::after{content:'▴'}
+.acc>summary:hover{background:#e8f0fb}
+.acc .bd{padding:.3rem .95rem 1rem}
+
+/* MOVIL */
+@media (max-width:600px){
+  .wrap{padding:0 .7rem 2.5rem}
+  header{padding:.6rem 0}
+  .hd{flex-direction:column;align-items:flex-start;gap:.7rem}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .hd-title{text-align:left;flex-direction:column;align-items:flex-start;gap:.5rem}
+  .card{padding:.9rem;border-radius:10px}
+  .grid{grid-template-columns:1fr}
+  input,select{max-width:100%}
+  .precios{grid-template-columns:1fr}
+  .rutas{grid-template-columns:1fr}
+  table{font-size:12.5px}
+  thead th,tbody td{padding:.4rem .5rem}
+}
+
+/* IMPRESION */
+@page{size:Letter;margin:13mm 13mm 15mm}
+@media print{
+  body{background:#fff;font-size:10pt;line-height:1.38}
+  .wrap{max-width:none;padding:0}
+  .no-print{display:none!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  header{padding:.6rem 0;margin-bottom:.7rem;break-inside:avoid;break-after:avoid}
+  .logo-box img,.logo-box-4pl img{height:36px}
+  .card{break-inside:auto;border-radius:0;border:none;border-bottom:1px solid #dde1e9;padding:.5rem 0;margin-bottom:.5rem}
+  .card h2{break-after:avoid;font-size:11.5pt}
+  .pbox,.aviso,.ruta{break-inside:avoid}
+  .precios{break-inside:avoid;grid-template-columns:repeat(3,1fr)}
+  .tblwrap{overflow:visible;break-inside:auto}
+  table{min-width:0;font-size:9.4pt}
+  thead{display:table-header-group}
+  tbody tr{break-inside:avoid}
+  p,li{orphans:3;widows:3}
+  .acc{break-inside:avoid;border:none}
+  .acc .bd{padding:.2rem 0}
+  footer{break-inside:avoid;font-size:8.5pt}
+  a[href]:after{content:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="hd-title">
+      <div>
+        <h1>Motor de Tarifas · 4P Logistics</h1>
+        <p>Versión inicial para revisión conjunta</p>
+      </div>
+      <div class="logo-box-4pl">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/4p-logistics/assets4plogistics/Logo%204pLogistics.jpeg" alt="4P Logistics"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback-4pl">4P Logistics</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="empresas no-print" id="empresas"></div>
+
+  <div id="estadoAg" class="no-print" style="margin-bottom:.7rem"></div>
+
+  <div class="aviso duda no-print">
+    <div class="t">Antes de usarlo, lee esto</div>
+    <p>Los números marcados <span class="porconf">por confirmar</span> son estimaciones nuestras, puestas para que la herramienta ya calcule algo. Todos son editables. La idea de esta versión es que los corrijas viendo el resultado, en lugar de llenar un formulario en abstracto.</p>
+  </div>
+
+  <!-- COTIZADOR -->
+  <section class="card">
+    <h2>Cotizar un viaje</h2>
+    <p class="sub">Captura la ruta y el sistema calcula el costo real y el rango de precio al que conviene venderla.</p>
+    <div class="grid" id="fViaje"></div>
+    <div class="btnrow no-print">
+      <button class="btn green" id="btnCalc">Calcular</button>
+      <button class="btn ghost" id="btnLimpiar">Limpiar</button>
+      <button class="btn ghost" id="btnImprimir">Imprimir cotización</button>
+    </div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section class="card hidden" id="cardRes">
+    <h2 id="resTitulo">Resultado</h2>
+    <p class="sub" id="resSub"></p>
+    <div class="precios" id="precios"></div>
+    <div class="tblwrap"><table id="tblDesglose"></table></div>
+    <div id="calibra"></div>
+    <div id="notasRes"></div>
+  </section>
+
+  <!-- COMPARADOR -->
+  <section class="card">
+    <h2>Comparar dos rutas</h2>
+    <p class="sub">Para el mismo servicio, cuando existe alternativa entre autopista y camino libre, o cuando cambia el orden de las entregas.</p>
+    <div class="rutas" id="comparador"></div>
+    <div class="btnrow no-print">
+      <button class="btn" id="btnComparar">Comparar</button>
+    </div>
+    <div id="resComparador"></div>
+  </section>
+
+  <!-- CONFIGURACION -->
+  <details class="acc no-print" id="accConfig">
+    <summary>Datos de la empresa · unidades, costos y márgenes</summary>
+    <div class="bd">
+      <p class="sub">Cada empresa tiene sus propios valores. Lo que cambies aquí solo aplica a la empresa seleccionada arriba.</p>
+
+      <h2 style="font-size:13.5px;margin:.9rem 0 .5rem">Costos generales</h2>
+      <div class="grid" id="fGenerales"></div>
+
+      <h2 style="font-size:13.5px;margin:1.2rem 0 .5rem">Utilidad objetivo por tipo de cliente</h2>
+      <div class="grid" id="fUtilidad"></div>
+
+      <h2 style="font-size:13.5px;margin:1.2rem 0 .5rem">Unidades</h2>
+      <p class="sub">El rendimiento define el gasto de diésel; los ejes definen el costo de casetas.</p>
+      <div class="tblwrap"><table id="tblUnidades"></table></div>
+      <div class="btnrow">
+        <button class="btn ghost" id="btnAddUnidad">Agregar unidad</button>
+        <button class="link" id="btnRestaurar">Restaurar valores iniciales de esta empresa</button>
+      </div>
+    </div>
+  </details>
+
+  <div class="aviso no-print">
+    <div class="t">Lo que falta para que deje de estimar</div>
+    <ul>
+      <li>El rendimiento real de cada unidad. Sabemos el del tractocamión; el de rabón, 3.5 y 1.5 toneladas está calculado hacia atrás desde una tarifa conocida.</li>
+      <li>El porcentaje de comisión del operador, y si cambia según la ruta o el tipo de viaje.</li>
+      <li>Los rangos de utilidad reales: cuál es el piso más apretado que se acepta y cuál el techo.</li>
+      <li>El costo real de casetas por ruta. El agente propone y cada vez que se reporta lo que de verdad se pagó, esa ruta queda corregida para siempre.</li>
+    </ul>
+  </div>
+
+  <footer>ExcelentIA · Motor de Tarifas Logística Armada · versión para revisión</footer>
+</div>
+
+<script>
+/* ============ Motor de Tarifas · v2 ============ */
+const $ = s => document.querySelector(s);
+const LS = '4pl_tarifario_v0';
+
+const mny = n => n == null || isNaN(n) ? '—' : '$' + Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const mny0 = n => n == null || isNaN(n) ? '—' : '$' + Math.round(n).toLocaleString('es-MX');
+const pct = n => (n * 100).toFixed(1) + '%';
+const num = v => { const n = parseFloat(String(v).replace(/[$,\s]/g, '')); return isNaN(n) ? 0 : n; };
+
+/* ---------- perfil base ----------
+   Los valores marcados porConfirmar son estimaciones nuestras.
+   El rendimiento del tractocamion viene de la sesion; los demas se
+   calcularon hacia atras desde Mexico-Monterrey en rabon a $22,000. */
+function perfilBase(nombre) {
+  return {
+    nombre: nombre,
+    diesel: 26.00,
+    dieselAgente: null,
+    dieselFuente: '',
+    dieselFecha: '',
+    comisionOperador: 15,
+    mantenimiento: 30,
+    casetaPorKm: 1.10,
+    utilidad: { directo: 25, logistica: 15, piso: 10 },
+    unidades: [
+      { nombre: '1.5 toneladas',  rend: 9.5, ejes: 2, conf: false },
+      { nombre: '3.5 toneladas',  rend: 7.0, ejes: 2, conf: false },
+      { nombre: 'Torton / rabón', rend: 5.4, ejes: 3, conf: false },
+      { nombre: 'Tráiler',        rend: 2.7, ejes: 5, conf: true  },
+      { nombre: 'Tráiler nuevo',  rend: 3.3, ejes: 5, conf: true  }
+    ]
+  };
+}
+
+let DATOS = { activa: '4P Logistics', empresas: {} };
+try {
+  const g = localStorage.getItem(LS);
+  if (g) DATOS = JSON.parse(g);
+} catch (e) { }
+if (!DATOS.empresas || !Object.keys(DATOS.empresas).length) {
+  DATOS = {
+    activa: '4P Logistics',
+    empresas: {
+      '4P Logistics': perfilBase('4P Logistics'),
+      'Transporte propio': perfilBase('Transporte propio')
+    }
+  };
+}
+function guardar() { try { localStorage.setItem(LS, JSON.stringify(DATOS)); } catch (e) { } }
+const P = () => DATOS.empresas[DATOS.activa];
+
+/* ---------- barra de empresas ---------- */
+function renderEmpresas() {
+  const nombres = Object.keys(DATOS.empresas);
+  $('#empresas').innerHTML =
+    '<span class="emp-lbl">Empresa</span>' +
+    nombres.map(n => `<span class="emp ${n === DATOS.activa ? 'on' : ''}" data-emp="${n}">${n}</span>`).join('') +
+    '<span class="emp emp-add" id="empAdd">+ agregar</span>' +
+    (nombres.length > 1 ? '<button class="link" id="empDel">quitar esta empresa</button>' : '');
+
+  document.querySelectorAll('#empresas [data-emp]').forEach(el => el.onclick = () => {
+    DATOS.activa = el.dataset.emp; guardar(); redibujar();
+  });
+  $('#empAdd').onclick = () => {
+    const n = prompt('Nombre de la empresa');
+    if (!n || !n.trim()) return;
+    const k = n.trim();
+    if (DATOS.empresas[k]) { alert('Ya existe una empresa con ese nombre.'); return; }
+    DATOS.empresas[k] = perfilBase(k);
+    DATOS.activa = k; guardar(); redibujar();
+  };
+  const d = $('#empDel');
+  if (d) d.onclick = () => {
+    if (!confirm('Se quitan los datos de ' + DATOS.activa + '. ¿Continuar?')) return;
+    delete DATOS.empresas[DATOS.activa];
+    DATOS.activa = Object.keys(DATOS.empresas)[0];
+    guardar(); redibujar();
+  };
+}
+
+/* ============ agentes ============ */
+const AG_URL = 'https://n8n.excelentia.com.mx/webhook/4pl-tarifario';
+const LS_REC = '4pl_ciudades_recientes';
+
+let CIUDADES = [];        // catalogo que trae el agente
+let RECIENTES = [];       // ultimas cotizadas, se guardan en el equipo
+let AG_VIVO = null;       // null = sin probar, true/false = resultado
+try { RECIENTES = JSON.parse(localStorage.getItem(LS_REC) || '[]'); } catch (e) { RECIENTES = []; }
+
+const CIUDADES_BASE = ['CDMX / Zona metropolitana','Acapulco','Aguascalientes','Atlacomulco','Campeche',
+  'Cancún','Celaya','Chalco','Chihuahua','Ciudad Juárez','Ciudad Obregón','Ciudad Victoria','Coatzacoalcos',
+  'Colima','Cuautitlán','Cuernavaca','Culiacán','Durango','Ecatepec','El Salto','Guadalajara','Hermosillo',
+  'Irapuato','Ixtapaluca','León','Manzanillo','Matamoros','Mazatlán','Mérida','Metepec','Mexicali','Monterrey',
+  'Morelia','Nuevo Laredo','Oaxaca','Pachuca','Puebla','Querétaro','Reynosa','Saltillo','San Luis Potosí',
+  'Tampico','Tehuacán','Tepotzotlán','Tijuana','Tlalnepantla','Toluca','Torreón','Tulancingo',
+  'Tuxtla Gutiérrez','Veracruz','Villahermosa','Zacatecas','Zapopan'].map(n => ({ nombre: n, estado: '' }));
+
+async function agente(cuerpo, msTope) {
+  const ctrl = new AbortController();
+  const reloj = setTimeout(function () { ctrl.abort(); }, msTope || 7000);
+  try {
+    const res = await fetch(AG_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo), signal: ctrl.signal
+    });
+    clearTimeout(reloj);
+    if (!res.ok) { AG_VIVO = false; return null; }
+    const d = await res.json();
+    AG_VIVO = !!(d && d.ok);
+    return AG_VIVO ? d : null;
+  } catch (e) { clearTimeout(reloj); AG_VIVO = false; return null; }
+}
+
+async function cargarCiudades() {
+  const d = await agente({ accion: 'ciudades' }, 7000);
+  CIUDADES = (d && d.datos && d.datos.length) ? d.datos : CIUDADES_BASE;
+  pintarEstadoAgente();
+}
+
+function recordarCiudad(n) {
+  if (!n || !n.trim()) return;
+  const v = n.trim();
+  RECIENTES = [v].concat(RECIENTES.filter(x => x.toLowerCase() !== v.toLowerCase())).slice(0, 4);
+  try { localStorage.setItem(LS_REC, JSON.stringify(RECIENTES)); } catch (e) { }
+}
+
+/* ---------- autocompletado ---------- */
+function autocompletar(idInput) {
+  const inp = document.getElementById(idInput);
+  if (!inp) return;
+  const caja = inp.parentElement;
+  let lista = null, marcado = -1, opciones = [];
+
+  function cerrar() { if (lista) { lista.remove(); lista = null; } marcado = -1; }
+
+  function abrir() {
+    cerrar();
+    const q = inp.value.trim().toLowerCase();
+    const cat = CIUDADES.length ? CIUDADES : CIUDADES_BASE;
+    const recs = RECIENTES.filter(r => !q || r.toLowerCase().indexOf(q) >= 0);
+    const resto = cat.filter(c => (!q || c.nombre.toLowerCase().indexOf(q) >= 0) &&
+                                  !RECIENTES.some(r => r.toLowerCase() === c.nombre.toLowerCase()));
+    opciones = recs.map(r => ({ nombre: r, estado: '', rec: true }))
+               .concat(resto.slice(0, 60));
+    if (!opciones.length && !inp.value.trim()) return;
+
+    lista = document.createElement('div');
+    lista.className = 'ac-list';
+    let html = '';
+    if (recs.length) html += '<div class="ac-sep">Últimas cotizadas</div>';
+    recs.forEach((r, i) => { html += `<div class="ac-op rec" data-i="${i}">${r}</div>`; });
+    if (resto.length) html += '<div class="ac-sep">Todas las ciudades</div>';
+    resto.slice(0, 60).forEach((c, i) => {
+      html += `<div class="ac-op" data-i="${recs.length + i}">${c.nombre}${c.estado ? '<span class="est">' + c.estado + '</span>' : ''}</div>`;
+    });
+    const escrito = inp.value.trim();
+    const existe = opciones.some(o => o.nombre.toLowerCase() === escrito.toLowerCase());
+    if (escrito && !existe) html += `<div class="ac-nueva" data-nueva="1">Usar <b>${escrito}</b> como destino nuevo</div>`;
+    if (!html) return;
+    lista.innerHTML = html;
+    caja.appendChild(lista);
+
+    lista.querySelectorAll('[data-i]').forEach(el => el.onmousedown = ev => {
+      ev.preventDefault(); elegir(opciones[Number(el.dataset.i)].nombre);
+    });
+    const nueva = lista.querySelector('[data-nueva]');
+    if (nueva) nueva.onmousedown = ev => { ev.preventDefault(); elegir(escrito); };
+  }
+
+  function elegir(v) {
+    inp.value = v; cerrar();
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  inp.addEventListener('focus', abrir);
+  inp.addEventListener('input', abrir);
+  inp.addEventListener('blur', () => setTimeout(cerrar, 120));
+  inp.addEventListener('keydown', e => {
+    if (!lista) { if (e.key === 'ArrowDown') abrir(); return; }
+    const ops = lista.querySelectorAll('.ac-op, .ac-nueva');
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      marcado += e.key === 'ArrowDown' ? 1 : -1;
+      if (marcado < 0) marcado = ops.length - 1;
+      if (marcado >= ops.length) marcado = 0;
+      ops.forEach((o, i) => o.classList.toggle('sel', i === marcado));
+      ops[marcado].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter' && marcado >= 0) {
+      e.preventDefault();
+      const el = ops[marcado];
+      elegir(el.dataset.nueva ? inp.value.trim() : opciones[Number(el.dataset.i)].nombre);
+    } else if (e.key === 'Escape') cerrar();
+  });
+}
+
+/* ---------- formulario del viaje ---------- */
+const V = {
+  origen: 'CDMX / Zona metropolitana', destino: '', unidad: 'Torton / rabón', via: 'cuota',
+  km: 900, kmPatio: 0, casetas: 0, regreso: 'vacio', cliente: 'logistica',
+  maniobra: 0, extras: 0, actual: 0, kmFuente: '', casetasFuente: ''
+};
+
+function renderViaje() {
+  const u = P().unidades;
+  $('#fViaje').innerHTML = `
+    <div class="f"><label>Origen</label><div class="ac"><input id="vOrigen" value="${V.origen}" autocomplete="off" placeholder="escribe para buscar"></div></div>
+    <div class="f"><label>Destino</label><div class="ac"><input id="vDestino" value="${V.destino}" autocomplete="off" placeholder="escribe para buscar"></div></div>
+    <div class="f"><label>Unidad</label>
+      <select id="vUnidad">${u.map(x => `<option ${x.nombre === V.unidad ? 'selected' : ''}>${x.nombre}</option>`).join('')}</select></div>
+    <div class="f"><label>Ruta</label>
+      <select id="vVia">
+        <option value="cuota" ${V.via === 'cuota' ? 'selected' : ''}>Por autopista de cuota</option>
+        <option value="libre" ${V.via === 'libre' ? 'selected' : ''}>Por camino libre</option>
+      </select></div>
+    <div class="f"><label>Kilómetros del servicio</label>
+      <input id="vKm" type="number" value="${V.km}">
+      <span class="hint agente ${AG_VIVO === false ? 'off' : ''}" id="hKm">${V.kmFuente || 'solo la ida, del punto de carga al destino'}</span></div>
+    <div class="f"><label>Kilómetros de patio a carga</label>
+      <input id="vKmPatio" type="number" value="${V.kmPatio}"><span class="hint">el traslado antes de cargar</span></div>
+    <div class="f"><label>Casetas de ida</label>
+      <input id="vCasetas" type="number" value="${V.casetas}">
+      <span class="hint agente ${AG_VIVO === false ? 'off' : ''}" id="hCas">${V.casetasFuente || 'déjalo en cero y lo estimo por kilómetros'}</span></div>
+    <div class="f"><label>Regreso</label>
+      <select id="vRegreso">
+        <option value="vacio" ${V.regreso === 'vacio' ? 'selected' : ''}>Regresa vacío</option>
+        <option value="cargado" ${V.regreso === 'cargado' ? 'selected' : ''}>Regresa cargado</option>
+        <option value="no" ${V.regreso === 'no' ? 'selected' : ''}>No aplica regreso</option>
+      </select></div>
+    <div class="f"><label>Tipo de cliente</label>
+      <select id="vCliente">
+        <option value="directo" ${V.cliente === 'directo' ? 'selected' : ''}>Cliente directo</option>
+        <option value="logistica" ${V.cliente === 'logistica' ? 'selected' : ''}>Operador logístico</option>
+      </select></div>
+    <div class="f"><label>Maniobra</label>
+      <input id="vManiobra" type="number" value="${V.maniobra}"><span class="hint">se cobra aparte del flete</span></div>
+    <div class="f"><label>Otros cargos</label>
+      <input id="vExtras" type="number" value="${V.extras}"><span class="hint">estadías, pernocta, custodia</span></div>
+    <div class="f"><label>Tarifa que cobras hoy</label>
+      <input id="vActual" type="number" value="${V.actual}"><span class="hint">opcional · para comparar contra el cálculo</span></div>`;
+}
+
+function leerViaje() {
+  V.origen = $('#vOrigen').value;
+  V.destino = $('#vDestino').value;
+  V.unidad = $('#vUnidad').value;
+  V.via = $('#vVia').value;
+  V.km = num($('#vKm').value);
+  V.kmPatio = num($('#vKmPatio').value);
+  V.casetas = num($('#vCasetas').value);
+  V.regreso = $('#vRegreso').value;
+  V.cliente = $('#vCliente').value;
+  V.maniobra = num($('#vManiobra').value);
+  V.extras = num($('#vExtras').value);
+  V.actual = num($('#vActual').value);
+}
+
+/* ---------- el calculo ---------- */
+function calcular(v, p) {
+  const uni = p.unidades.find(x => x.nombre === v.unidad) || p.unidades[0];
+  const kmIda = v.km + v.kmPatio;
+  const kmVuelta = v.regreso === 'no' ? 0 : v.km;
+  const kmTotal = kmIda + kmVuelta;
+
+  const litros = uni.rend > 0 ? kmTotal / uni.rend : 0;
+  const combustible = litros * p.diesel;
+
+  // casetas: si no se capturan, se estiman por km y ejes
+  const factorEjes = 1 + (uni.ejes - 2) * 0.22;
+  const casetasIda = v.casetas > 0 ? v.casetas : kmIda * p.casetaPorKm * factorEjes;
+  const casetasVuelta = kmVuelta > 0 ? casetasIda * (v.km / Math.max(kmIda, 1)) : 0;
+  const casetas = casetasIda + casetasVuelta;
+  const casetasEstimadas = v.casetas <= 0;
+
+  // costos que no dependen del precio
+  const costoDirecto = combustible + casetas;
+
+  // la comision del operador es un porcentaje del flete, asi que el
+  // precio se despeja: precio = (costoDirecto * (1+mant)) / (1 - com*(1+mant) - utilidad)
+  const mant = p.mantenimiento / 100;
+  const com = p.comisionOperador / 100;
+
+  function precioPara(utilPct) {
+    const u = utilPct / 100;
+    const den = 1 - com * (1 + mant) - u;
+    if (den <= 0) return null;
+    return (costoDirecto * (1 + mant)) / den;
+  }
+  function costoDe(precio) {
+    const comision = precio * com;
+    const sub = costoDirecto + comision;
+    return { comision: comision, subtotal: sub, mantenimiento: sub * mant, total: sub * (1 + mant) };
+  }
+
+  const objetivo = precioPara(p.utilidad[v.cliente]);
+  const piso = precioPara(p.utilidad.piso);
+  const techo = precioPara(p.utilidad.directo);
+
+  return {
+    uni: uni, kmIda: kmIda, kmVuelta: kmVuelta, kmTotal: kmTotal,
+    litros: litros, combustible: combustible,
+    casetas: casetas, casetasEstimadas: casetasEstimadas,
+    costoDirecto: costoDirecto,
+    objetivo: objetivo, piso: piso, techo: techo,
+    detalle: objetivo ? costoDe(objetivo) : null,
+    maniobra: v.maniobra, extras: v.extras
+  };
+}
+
+/* ---------- resultado ---------- */
+function renderResultado(r, v, p) {
+  const nom = v.destino ? (v.origen + ' → ' + v.destino) : 'Cotización';
+  $('#resTitulo').textContent = nom;
+  $('#resSub').textContent = r.uni.nombre + ' · ' + Math.round(r.kmTotal).toLocaleString('es-MX') +
+    ' km en total (' + Math.round(r.kmIda).toLocaleString('es-MX') + ' de ida' +
+    (r.kmVuelta ? ' y ' + Math.round(r.kmVuelta).toLocaleString('es-MX') + ' de regreso' : ', sin regreso') + ')';
+
+  const etiqueta = v.cliente === 'directo' ? 'cliente directo' : 'operador logístico';
+  const flete = r.objetivo || 0;
+  const totalVenta = flete + r.maniobra + r.extras;
+  const utilFlete = flete - (r.detalle ? r.detalle.total : 0);
+
+  $('#precios').innerHTML = `
+    <div class="pbox piso"><div class="lb">Precio mínimo</div><div class="vl">${mny0(r.piso)}</div>
+      <div class="hint">deja ${p.utilidad.piso}% de utilidad · por debajo de aquí no conviene</div></div>
+    <div class="pbox meta"><div class="lb">Precio recomendado</div><div class="vl">${mny0(r.objetivo)}</div>
+      <div class="hint">deja ${p.utilidad[v.cliente]}% · tarifa de ${etiqueta}</div></div>
+    <div class="pbox"><div class="lb">Precio de lista</div><div class="vl">${mny0(r.techo)}</div>
+      <div class="hint">deja ${p.utilidad.directo}% · con quien lo acepte</div></div>
+    <div class="pbox costo"><div class="lb">Costo del viaje</div><div class="vl">${mny0(r.detalle ? r.detalle.total : null)}</div>
+      <div class="hint">lo que cuesta operarlo al precio recomendado</div></div>`;
+
+  const d = r.detalle;
+  $('#tblDesglose').innerHTML = `
+    <thead><tr><th>Concepto</th><th style="text-align:right">Importe</th><th>Cómo se calculó</th></tr></thead>
+    <tbody>
+      <tr><td>Combustible</td><td class="num">${mny(r.combustible)}</td>
+        <td class="dim">${Math.round(r.litros)} litros a ${mny(p.diesel)} · rendimiento ${r.uni.rend} km/l</td></tr>
+      <tr><td>Casetas</td><td class="num">${mny(r.casetas)}</td>
+        <td class="dim">${r.casetasEstimadas ? 'estimadas por kilómetros y ' + r.uni.ejes + ' ejes' : 'capturadas a mano'}</td></tr>
+      <tr><td>Comisión del operador</td><td class="num">${mny(d ? d.comision : null)}</td>
+        <td class="dim">${p.comisionOperador}% sobre el flete</td></tr>
+      <tr class="sum"><td>Suma de gastos del viaje</td><td class="num">${mny(d ? d.subtotal : null)}</td><td></td></tr>
+      <tr><td>Mantenimiento y estructura</td><td class="num">${mny(d ? d.mantenimiento : null)}</td>
+        <td class="dim">${p.mantenimiento}% · incluye seguros, GPS y administración</td></tr>
+      <tr class="sum"><td>Costo total del viaje</td><td class="num">${mny(d ? d.total : null)}</td><td></td></tr>
+      <tr><td>Utilidad del flete</td><td class="num">${mny(utilFlete)}</td>
+        <td class="dim">${flete ? pct(utilFlete / flete) : '—'} sobre el precio</td></tr>
+      <tr class="sum"><td><b>Flete</b></td><td class="num"><b>${mny(flete)}</b></td><td class="dim">precio recomendado</td></tr>
+      ${r.maniobra ? `<tr><td>Maniobra</td><td class="num">${mny(r.maniobra)}</td><td class="dim">se cobra aparte del flete</td></tr>` : ''}
+      ${r.extras ? `<tr><td>Otros cargos</td><td class="num">${mny(r.extras)}</td><td class="dim">estadías, pernocta, custodia</td></tr>` : ''}
+      <tr class="total"><td>Total a cobrar</td><td class="num">${mny(totalVenta)}</td><td></td></tr>
+    </tbody>`;
+
+  // comparacion contra lo que se cobra hoy: sirve para calibrar el motor
+  if (v.actual > 0 && r.detalle) {
+    const utilReal = v.actual - r.detalle.total;
+    const utilPct = v.actual ? utilReal / v.actual : 0;
+    const dif = v.actual - flete;
+    const alto = dif > 0;
+    const cerca = Math.abs(dif) / v.actual < 0.05;
+    $('#calibra').innerHTML = `<div class="aviso ${utilReal <= 0 ? 'duda' : ''}">
+      <div class="t">Contra la tarifa que cobras hoy</div>
+      <p>A <b>${mny0(v.actual)}</b> este viaje deja <b>${mny0(utilReal)}</b> de utilidad, ${pct(utilPct)} sobre el precio.
+      ${cerca ? 'Prácticamente coincide con lo que calcula el motor, así que los supuestos van bien.'
+              : (alto ? 'Estás cobrando ' + mny0(dif) + ' por encima de lo que el motor recomienda; o la ruta da más de lo estimado, o algún costo está sobrado.'
+                      : 'Estás cobrando ' + mny0(Math.abs(dif)) + ' por debajo de lo recomendado; o hay un costo que el motor sobreestima, o esa ruta está dejando poco.')}</p>
+      ${utilReal <= 0 ? '<p><b>A ese precio el viaje no deja utilidad.</b> Vale la pena revisar los supuestos antes de concluir, porque puede ser un dato nuestro el que esté mal.</p>' : ''}
+    </div>`;
+  } else { $('#calibra').innerHTML = ''; }
+
+  const notas = [];
+  if (r.casetasEstimadas) notas.push('Las casetas están estimadas por kilómetros y número de ejes, no consultadas. Si conoces el importe real de esta ruta, captúralo y el cálculo se ajusta.');
+  if (v.regreso === 'vacio') notas.push('El regreso vacío está cargado al costo de este viaje. Si se consigue carga de regreso, la utilidad real sube.');
+  if (v.regreso === 'no') notas.push('No se consideró regreso, así que el costo corresponde solo al trayecto de ida.');
+  if (!r.uni.conf) notas.push('El rendimiento de esta unidad es una estimación nuestra. Corrígelo en los datos de la empresa y todas las rutas se recalculan.');
+
+  $('#notasRes').innerHTML = (notas.length
+    ? `<div class="aviso"><div class="t">Sobre este cálculo</div>${notas.map(n => '<p>' + n + '</p>').join('')}</div>` : '')
+    + (v.destino ? `<div class="aviso no-print">
+        <div class="t">Cuando sepas lo que se pagó de casetas</div>
+        <p>Captúralo aquí y esta ruta queda corregida para todos. Es así como el sistema deja de estimar.</p>
+        <div class="dual" style="margin-top:.5rem">
+          <input id="casReal" type="number" placeholder="importe real de casetas">
+          <button class="btn ghost" id="btnCasReal">Guardar</button>
+        </div>
+        <span class="hint" id="casRealMsg"></span>
+      </div>` : '');
+  $('#cardRes').classList.remove('hidden');
+
+  const bc = $('#btnCasReal');
+  if (bc) bc.onclick = async () => {
+    const imp = num($('#casReal').value);
+    if (imp <= 0) { alert('Captura el importe que se pagó de casetas.'); return; }
+    $('#casRealMsg').textContent = 'guardando…';
+    const d = await agente({
+      accion: 'casetasReales', origen: v.origen, destino: v.destino, via: v.via,
+      ejes: r.uni.ejes, importe: imp, empresa: DATOS.activa, usuario: DATOS.activa
+    }, 7000);
+    $('#casRealMsg').textContent = d
+      ? 'Listo. Esta ruta ya usa el dato real; la próxima cotización lo toma solo.'
+      : 'No se pudo guardar. Vuelve a intentarlo cuando haya conexión.';
+  };
+}
+
+/* ---------- comparador ---------- */
+const C = [
+  { nombre: 'Por autopista', km: 320, casetas: 0 },
+  { nombre: 'Por camino libre', km: 355, casetas: 0 }
+];
+function renderComparador() {
+  $('#comparador').innerHTML = C.map((c, i) => `
+    <div class="ruta" id="ruta${i}">
+      <h4><input class="wide" id="cNom${i}" value="${c.nombre}" style="font-weight:800;font-size:13px;border:none;padding:.1rem 0;max-width:100%"></h4>
+      <div class="f" style="margin-bottom:.5rem"><label>Kilómetros</label><input id="cKm${i}" type="number" value="${c.km}"></div>
+      <div class="f"><label>Casetas</label><input id="cCas${i}" type="number" value="${c.casetas}"><span class="hint">cero para estimarlas</span></div>
+      <div class="res" id="cRes${i}"></div>
+    </div>`).join('');
+}
+function comparar() {
+  leerViaje();
+  const p = P();
+  const res = C.map((c, i) => {
+    c.nombre = $('#cNom' + i).value;
+    c.km = num($('#cKm' + i).value);
+    c.casetas = num($('#cCas' + i).value);
+    const v = Object.assign({}, V, { km: c.km, casetas: c.casetas, via: i === 0 ? 'cuota' : 'libre' });
+    return calcular(v, p);
+  });
+  const mejor = res[0].objetivo <= res[1].objetivo ? 0 : 1;
+  res.forEach((r, i) => {
+    const dif = r.objetivo - res[mejor].objetivo;
+    $('#ruta' + i).classList.toggle('gana', i === mejor);
+    $('#cRes' + i).innerHTML =
+      `<b>${mny0(r.objetivo)}</b>Precio recomendado · costo ${mny0(r.detalle ? r.detalle.total : null)}<br>
+       <span class="dim">${i === mejor ? 'Es la opción más barata' : 'Cuesta ' + mny0(dif) + ' más'}</span>`;
+  });
+  $('#resComparador').innerHTML = `<div class="aviso"><div class="t">Qué conviene</div>
+    <p>Cotizando <b>${C[mejor].nombre.toLowerCase()}</b> el viaje sale ${mny0(Math.abs(res[0].objetivo - res[1].objetivo))} más barato,
+    manteniendo la misma utilidad. Si el cliente exige la otra ruta, ese diferencial se traslada al precio.</p></div>`;
+}
+
+/* ---------- configuracion ---------- */
+function renderConfig() {
+  const p = P();
+  $('#fGenerales').innerHTML = `
+    <div class="f"><label>Precio del diésel por litro</label>
+      <div class="dual">
+        <input id="cDiesel" type="number" step="0.01" value="${p.diesel}">
+        ${p.dieselAgente ? `<span class="auto" id="usarDiesel" title="Tomar el precio que trae el agente">usar ${mny(p.dieselAgente)}</span>` : ''}
+      </div>
+      <span class="hint agente ${p.dieselAgente ? '' : 'off'}">${p.dieselAgente
+        ? 'el agente encontró ' + mny(p.dieselAgente) + (p.dieselFecha ? ' al ' + p.dieselFecha : '') + ' · puedes dejar el tuyo'
+        : 'sin dato del agente · se usa el que captures'}</span></div>
+    <div class="f"><label>Comisión del operador <span class="porconf">por confirmar</span></label>
+      <input id="cCom" type="number" step="0.5" value="${p.comisionOperador}"><span class="hint">porcentaje sobre el flete</span></div>
+    <div class="f"><label>Mantenimiento y estructura</label>
+      <input id="cMant" type="number" step="0.5" value="${p.mantenimiento}"><span class="hint">incluye seguros, GPS y administración</span></div>
+    <div class="f"><label>Caseta por kilómetro <span class="porconf">por confirmar</span></label>
+      <input id="cCaseta" type="number" step="0.05" value="${p.casetaPorKm}"><span class="hint">base para 2 ejes; sube según los ejes</span></div>`;
+
+  $('#fUtilidad').innerHTML = `
+    <div class="f"><label>Cliente directo</label><input id="uDir" type="number" step="0.5" value="${p.utilidad.directo}"><span class="hint">es donde más se gana</span></div>
+    <div class="f"><label>Operador logístico</label><input id="uLog" type="number" step="0.5" value="${p.utilidad.logistica}"><span class="hint">dejan menos margen</span></div>
+    <div class="f"><label>Piso · lo mínimo aceptable <span class="porconf">por confirmar</span></label><input id="uPiso" type="number" step="0.5" value="${p.utilidad.piso}"><span class="hint">por debajo de esto no conviene tomar el viaje</span></div>`;
+
+  $('#tblUnidades').innerHTML = `
+    <thead><tr><th>Unidad</th><th>Rendimiento km/l</th><th>Ejes</th><th></th></tr></thead>
+    <tbody>${p.unidades.map((u, i) => `<tr>
+      <td><input data-u="${i}" data-k="nombre" value="${u.nombre}"></td>
+      <td><input data-u="${i}" data-k="rend" type="number" step="0.1" value="${u.rend}" style="max-width:120px">${u.conf ? '' : '<span class="porconf">por confirmar</span>'}</td>
+      <td><input data-u="${i}" data-k="ejes" type="number" value="${u.ejes}" style="max-width:90px"></td>
+      <td><button class="link" data-del="${i}">quitar</button></td></tr>`).join('')}</tbody>`;
+
+  document.querySelectorAll('#accConfig input').forEach(el => el.addEventListener('change', leerConfig));
+  const ud = $('#usarDiesel');
+  if (ud) ud.onclick = () => { $('#cDiesel').value = P().dieselAgente; leerConfig(); renderConfig(); };
+  document.querySelectorAll('#tblUnidades [data-del]').forEach(b => b.onclick = () => {
+    if (p.unidades.length < 2) { alert('Debe quedar al menos una unidad.'); return; }
+    p.unidades.splice(Number(b.dataset.del), 1); guardar(); redibujar();
+  });
+}
+function leerConfig() {
+  const p = P();
+  p.diesel = num($('#cDiesel').value);
+  p.comisionOperador = num($('#cCom').value);
+  p.mantenimiento = num($('#cMant').value);
+  p.casetaPorKm = num($('#cCaseta').value);
+  p.utilidad.directo = num($('#uDir').value);
+  p.utilidad.logistica = num($('#uLog').value);
+  p.utilidad.piso = num($('#uPiso').value);
+  document.querySelectorAll('#tblUnidades [data-u]').forEach(el => {
+    const u = p.unidades[Number(el.dataset.u)], k = el.dataset.k;
+    if (!u) return;
+    if (k === 'nombre') u.nombre = el.value;
+    else { u[k] = num(el.value); u.conf = true; }
+  });
+  guardar();
+  const sel = $('#vUnidad'); const previa = sel ? sel.value : V.unidad;
+  renderViaje();
+  const s2 = $('#vUnidad');
+  if (s2 && p.unidades.some(x => x.nombre === previa)) s2.value = previa;
+}
+
+/* ---------- el agente busca la ruta ---------- */
+async function buscarRuta() {
+  const ori = $('#vOrigen').value.trim(), des = $('#vDestino').value.trim();
+  if (!ori || !des) return;
+  const p = P();
+  const uni = p.unidades.find(x => x.nombre === $('#vUnidad').value) || p.unidades[0];
+  const via = $('#vVia') ? $('#vVia').value : 'cuota';
+
+  $('#hKm').textContent = 'buscando…'; $('#hKm').className = 'hint agente buscando';
+  $('#hCas').textContent = 'buscando…'; $('#hCas').className = 'hint agente buscando';
+
+  const d = await agente({ accion: 'ruta', origen: ori, destino: des, via: via, ejes: uni.ejes }, 15000);
+  const r = d && d.datos && d.datos[0];
+
+  if (r && r.encontrada) {
+    if (r.km) { $('#vKm').value = Math.round(Number(r.km)); V.kmFuente = 'ruta conocida'; }
+    if (r.casetas) { $('#vCasetas').value = Math.round(Number(r.casetas)); }
+    var fk = String(r.km_fuente || '');
+    var esGoogle = fk.toLowerCase().indexOf('google') >= 0;
+    if (!r.km) { $('#hKm').textContent = 'sin kilometraje guardado'; }
+    else if (esGoogle) { $('#hKm').textContent = 'lo trajo el agente de rutas · por confirmar'; }
+    else { $('#hKm').textContent = 'ruta ya registrada'; }
+    $('#hKm').className = 'hint agente' + ((r.km && esGoogle) ? ' off' : '');
+    V.kmFuente = fk || V.kmFuente;
+    $('#hCas').textContent = r.casetas_confirmadas
+      ? String(r.casetas_fuente)
+      : 'estimado · confírmalo con el importe real';
+    $('#hCas').className = 'hint agente' + (r.casetas_confirmadas ? '' : ' off');
+    V.casetasFuente = $('#hCas').textContent;
+  } else {
+    $('#hKm').textContent = AG_VIVO === false
+      ? 'sin conexión · captura los kilómetros'
+      : 'ruta nueva · captura los kilómetros y se guardan';
+    $('#hKm').className = 'hint agente off';
+    $('#hCas').textContent = 'sin dato guardado · se estima por kilómetros';
+    $('#hCas').className = 'hint agente off';
+    V.kmFuente = ''; V.casetasFuente = '';
+  }
+  pintarEstadoAgente();
+}
+
+// cuando se cotiza una ruta nueva, queda registrada para la proxima
+async function registrarRuta() {
+  if (AG_VIVO === false) return;
+  const ori = $('#vOrigen').value.trim(), des = $('#vDestino').value.trim();
+  if (!ori || !des || !V.km) return;
+  await agente({
+    accion: 'guardarRuta', origen: ori, destino: des, via: V.via,
+    km: V.km, kmFuente: 'capturado en el tarifador',
+    casetas: V.casetas > 0 ? V.casetas : null,
+    casetasFuente: V.casetas > 0 ? 'capturado en el tarifador' : null
+  }, 6000);
+}
+
+async function traerDiesel() {
+  let d = await agente({ accion: 'diesel', estado: 'ZONA METROPOLITANA' }, 6000);
+  let r = d && d.datos && d.datos[0];
+  if (!r || !r.precio) {
+    d = await agente({ accion: 'diesel', estado: 'NACIONAL' }, 6000);
+    r = d && d.datos && d.datos[0];
+  }
+  if (r && r.precio) {
+    P().dieselAgente = Number(r.precio);
+    P().dieselFuente = r.fuente || '';
+    P().dieselFecha = r.vigente_al || '';
+    guardar();
+  }
+  pintarEstadoAgente();
+}
+
+function pintarEstadoAgente() {
+  const el = $('#estadoAg');
+  if (!el) return;
+  const p = P();
+  if (AG_VIVO === false) {
+    el.innerHTML = '<span class="agente off">Sin conexión con los agentes · el tarifador funciona con los valores capturados</span>';
+  } else if (AG_VIVO === true) {
+    const dd = p.dieselAgente
+      ? ' · diésel ' + mny(p.dieselAgente) + (p.dieselFecha ? ' al ' + p.dieselFecha : '')
+      : '';
+    el.innerHTML = '<span class="agente">Agentes conectados · ' + (CIUDADES.length || 0) + ' ciudades' + dd + '</span>';
+  } else { el.innerHTML = ''; }
+}
+
+/* ---------- flujo ---------- */
+function redibujar() {
+  renderEmpresas(); renderViaje(); renderComparador(); renderConfig();
+  autocompletar('vOrigen'); autocompletar('vDestino');
+  $('#vDestino').addEventListener('change', buscarRuta);
+  $('#vOrigen').addEventListener('change', buscarRuta);
+  $('#vUnidad').addEventListener('change', buscarRuta);
+  $('#vVia').addEventListener('change', buscarRuta);
+  $('#cardRes').classList.add('hidden');
+  $('#resComparador').innerHTML = '';
+  pintarEstadoAgente();
+}
+redibujar();
+cargarCiudades();
+traerDiesel();
+
+$('#btnCalc').onclick = () => {
+  leerViaje();
+  if (!V.km) { alert('Falta el kilometraje del servicio.'); return; }
+  const p = P();
+  renderResultado(calcular(V, p), V, p);
+  recordarCiudad(V.destino); recordarCiudad(V.origen);
+  registrarRuta();
+  $('#cardRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+$('#btnLimpiar').onclick = () => {
+  V.destino = ''; V.km = 0; V.kmPatio = 0; V.casetas = 0; V.maniobra = 0; V.extras = 0; V.actual = 0;
+  renderViaje(); $('#cardRes').classList.add('hidden');
+};
+$('#btnImprimir').onclick = () => window.print();
+$('#btnComparar').onclick = comparar;
+$('#btnAddUnidad').onclick = () => {
+  P().unidades.push({ nombre: 'Unidad nueva', rend: 4.0, ejes: 2, conf: true });
+  guardar(); redibujar(); $('#accConfig').open = true;
+};
+$('#btnRestaurar').onclick = () => {
+  if (!confirm('Se regresan los valores iniciales de ' + DATOS.activa + '. ¿Continuar?')) return;
+  DATOS.empresas[DATOS.activa] = perfilBase(DATOS.activa);
+  guardar(); redibujar();
+};
+</script>
+</body>
+</html>
