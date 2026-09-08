@@ -31,29 +31,37 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .mode-local{background:#fef9c3;color:#713f12;border-bottom:1px solid #fde68a}
 .mode-cloud{background:#d1fae5;color:#065f46;border-bottom:1px solid #a7f3d0}
 
-/* ── SUB-NAV ── */
-.sub-nav{background:#fff;border-bottom:2px solid #dde1e9;padding:0 1.5rem;display:flex;gap:0;overflow-x:auto}
-.sub-tab{padding:.75rem 1.1rem;font-size:.85rem;font-weight:600;color:#4a5068;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:.2s;display:flex;align-items:center;gap:.35rem;background:none;border-left:none;border-right:none;border-top:none;font-family:'Manrope',sans-serif}
-.sub-tab:hover{color:#1a3a6b;background:#f0f4ff}
-.sub-tab.active{color:#1a3a6b;border-bottom-color:#4a9fd4;background:#f0f4ff}
+/* ── MENU LATERAL ── */
+.shell{display:flex;align-items:flex-start;gap:0;min-height:100vh}
+.side-nav{width:186px;flex-shrink:0;background:#fff;border-right:1px solid #dde1e9;padding:.6rem .5rem;position:sticky;top:0;align-self:stretch;transition:width .18s}
+.side-nav.mini{width:52px}
+.side-toggle{width:100%;background:#f0f4ff;border:1px solid #dde1e9;color:#1a3a6b;border-radius:8px;padding:.4rem;font-size:.9rem;cursor:pointer;margin-bottom:.5rem;font-family:'Manrope',sans-serif}
+.side-toggle:hover{background:#dce8f7}
+.side-item{width:100%;display:flex;align-items:center;gap:.5rem;padding:.5rem .6rem;margin-bottom:.2rem;border:none;background:none;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.83rem;font-weight:600;color:#4a5068;cursor:pointer;text-align:left;white-space:nowrap;transition:.15s}
+.side-item:hover{background:#e8f0fb;color:#1a3a6b}
+.side-item.active{background:#dce8f7;color:#1a3a6b;box-shadow:inset 3px 0 0 #4a9fd4}
+.side-item .si-ico{flex-shrink:0;font-size:.95rem}
+.side-nav.mini .si-txt{display:none}
+.side-nav.mini .side-item{justify-content:center;padding:.5rem .2rem}
+.main-area{flex:1;min-width:0}
 
 /* ── LAYOUT ── */
-.page{display:none;padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
+.page{display:none;padding:.85rem 1.1rem;max-width:1400px;margin:0 auto}
 .page.active{display:block}
 
 /* ── BARRA TIPO DE CAMBIO ── */
-.tc-bar{max-width:1400px;margin:.75rem auto 0;padding:0 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.tc-bar{max-width:1400px;margin:.6rem auto 0;padding:0 1.1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
 .tc-box{background:#fff;border:1px solid #dde1e9;border-radius:10px;padding:.5rem .9rem;display:flex;align-items:center;gap:.6rem}
 .tc-box label{font-size:.78rem;font-weight:700;color:#4a5068}
 .tc-box input{width:78px;padding:.35rem .5rem;border:1px solid #dde1e9;border-radius:7px;font-family:'Manrope',sans-serif;font-size:.83rem;font-weight:600;text-align:right}
 .tc-note{font-size:.73rem;color:#8a90a0}
 
 /* ── CARDS ── */
-.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
-.card-head{background:#dce8f7;padding:.7rem 1rem;font-weight:700;font-size:.88rem;color:#1a2035;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
-.card-body{padding:1rem}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:.7rem}
+.card-head{background:#dce8f7;padding:.5rem .85rem;font-weight:700;font-size:.88rem;color:#1a2035;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.card-body{padding:.75rem .85rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 
 /* ── BOTONES ── */
 .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Manrope',sans-serif}
@@ -62,18 +70,23 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
 .btn-secondary{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#dce8f7}
 .btn-sm{padding:.3rem .65rem;font-size:.78rem}
-.btn-icon{padding:.35rem .45rem;border-radius:6px}
+.btn-icon{padding:.12rem .3rem;border-radius:5px;font-size:.75rem;line-height:1}
+td.col-acc{white-space:nowrap}
+td.col-acc .btn-icon{vertical-align:middle}
 
 /* ── TABLAS ── */
 .table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.83rem}
-th{background:#dce8f7;padding:.6rem .8rem;text-align:left;font-weight:700;color:#1a2035;border-bottom:2px solid #c8d9f0;white-space:nowrap}
-td{padding:.55rem .8rem;border-bottom:1px solid #eef2f8;color:#1a2035;vertical-align:middle}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{background:#dce8f7;padding:.34rem .55rem;text-align:left;font-weight:700;color:#1a2035;border-bottom:2px solid #c8d9f0;white-space:nowrap}
+td{padding:.18rem .55rem;border-bottom:1px solid #eef2f8;color:#1a2035;vertical-align:middle;line-height:1.25}
 tr:hover td{background:#f8faff}
 tr:last-child td{border-bottom:none}
 th[data-col]{cursor:pointer;user-select:none;transition:.15s}
 th[data-col]:hover{background:#c8d9f0}
 .sort-ind{font-size:.68rem;color:#1a3a6b;margin-left:.15rem}
+.socio-nom{font-weight:700;color:#1a2035;white-space:nowrap}
+.rb-mas{padding:.45rem .6rem;font-size:.78rem;color:#1a3a6b;background:#f0f4ff;border-top:1px solid #dde1e9;text-align:center;cursor:pointer;font-weight:600}
+.rb-mas:hover{background:#dce8f7}
 .desc-cell{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
 .desc-cell .recur-tag{flex-shrink:0}
 
@@ -88,14 +101,14 @@ th[data-col]:hover{background:#c8d9f0}
 .badge-orange{background:#fed7aa;color:#9a3412}
 
 /* ── STAT CARDS ── */
-.stat-card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.25rem}
-.stats-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
-.stat-val{font-size:1.55rem;font-weight:800;color:#1a3a6b}
+.stat-card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.7rem .9rem;display:flex;flex-direction:column;gap:.25rem}
+.stats-4{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+.stat-val{font-size:1.3rem;font-weight:800;color:#1a3a6b}
 .stat-lbl{font-size:.78rem;color:#4a5068;font-weight:600}
 .stat-sub{font-size:.75rem;color:#8a90a0}
 
 /* ── FILTROS ── */
-.filters{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center}
+.filters{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.7rem;align-items:center}
 .filter-input{width:210px;max-width:100%;padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem}
 .filter-select{width:auto;min-width:140px;padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff}
 
@@ -116,6 +129,64 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9fd4;box-sh
 textarea{resize:vertical;min-height:70px}
 .modal-foot{padding:.85rem 1.25rem;border-top:1px solid #eef2f8;display:flex;gap:.6rem;justify-content:flex-end;position:sticky;bottom:0;background:#fff}
 .help-txt{font-size:.72rem;color:#8a90a0;margin-top:.15rem}
+
+
+/* ── REEMBOLSO SOCIOS ── */
+.rb-wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:1rem}
+.rb-nota{background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:0 9px 9px 0;padding:.8rem 1rem;font-size:.8rem;color:#4a5068;line-height:1.55;max-width:720px}
+.rb-nota strong{color:#1a2035}
+.rb-titulo{font-size:.98rem;font-weight:800;color:#1a2035;margin:.9rem 0 .5rem}
+.rb-chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem}
+.rb-chip{padding:.3rem .8rem;border-radius:20px;border:1px solid #dde1e9;background:#fff;font-family:'Manrope',sans-serif;font-size:.8rem;font-weight:600;color:#4a5068;cursor:pointer;transition:.15s}
+.rb-chip:hover{background:#e8f0fb;color:#1a3a6b}
+.rb-chip.active{background:#1a3a6b;border-color:#1a3a6b;color:#fff}
+.rb-resumen{font-size:.8rem;color:#4a5068;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:0 9px 9px 0;padding:.5rem .8rem;margin-bottom:.7rem;max-width:720px;display:none}
+.rb-resumen.on{display:block}
+.rango-fechas{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
+.rango-fechas label{font-size:.75rem;font-weight:600;color:#4a5068}
+.rango-fechas input{width:auto;padding:.22rem .4rem;font-size:.75rem;border-radius:6px}
+.btn-limpiar{background:#fff;border:1px solid #dde1e9;color:#8a90a0;border-radius:6px;padding:.18rem .4rem;font-size:.75rem;cursor:pointer;font-family:'Manrope',sans-serif;display:none}
+.btn-limpiar.on{display:inline-block}
+.btn-limpiar:hover{background:#f0f4ff;color:#1a3a6b}
+.tot-row td{background:#f0f6ff;border-top:2px solid #c8d9f0;font-weight:800;color:#1a2035;padding:.4rem .55rem}
+.tot-row .tot-lbl{color:#4a5068;font-weight:700}
+.rb-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
+.rb-card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.7rem .85rem;break-inside:avoid}
+.rb-card.saldado{border-color:#86efac;background:#f0fdf4}
+.rb-card-top{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.65rem}
+.rb-card-nom{font-size:.9rem;font-weight:800;color:#1a2035}
+.rb-row{display:flex;justify-content:space-between;font-size:.78rem;color:#4a5068;padding:.18rem 0}
+.rb-row b{color:#1a2035;font-weight:700}
+.rb-hasta{color:#8a90a0;font-size:.7rem;font-weight:500}
+.rb-falta{border-top:1px solid #eef2f8;margin-top:.45rem;padding-top:.45rem;font-size:.83rem}
+.rb-falta b{color:#dc2626;font-size:.95rem}
+.rb-card.saldado .rb-falta b{color:#059669}
+.rb-bar{height:7px;background:#eef2f8;border-radius:20px;overflow:hidden;margin-top:.6rem}
+.rb-bar span{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#4a9fd4,#1a3a6b)}
+.rb-card.saldado .rb-bar span{background:#059669}
+.rb-fut{color:#8a90a0;font-style:italic}
+.rb-liq{font-size:.68rem;font-weight:800;background:#059669;color:#fff;border-radius:20px;padding:.1rem .5rem}
+#rb-tabla-plan td:first-child{font-weight:700;color:#1a2035}
+.rb-vacio{padding:1rem;text-align:center;color:#8a90a0;font-size:.82rem}
+@media (max-width:600px){ .rb-cards{grid-template-columns:1fr} }
+
+
+/* ── IMPRESIÓN / PDF ── */
+@media print{
+  @page{size:Letter;margin:13mm}
+  body{background:#fff}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .no-print,.sub-nav,.modal-backdrop,.btn,.btn-icon,.filter-select,.tc-bar,input,select{display:none !important}
+  .page{display:none !important}
+  .page.active{display:block !important}
+  section,.card,main,div,.table-wrap,.rb-wrap{break-inside:auto}
+  .rb-card,.rb-nota,.stat-card,tr,img{break-inside:avoid}
+  h1,h2,h3,h4,.card-head{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  thead{display:table-header-group}
+  a[href]:after{content:none}
+  .card{box-shadow:none;border:1px solid #dde1e9}
+}
 
 /* ── MISC ── */
 .empty-state{text-align:center;padding:2.5rem 1rem;color:#8a90a0}
@@ -154,7 +225,12 @@ textarea{resize:vertical;min-height:70px}
   .modal{max-width:100%;border-radius:14px 14px 0 0;align-self:flex-end;max-height:95vh}
   .modal-backdrop{align-items:flex-end;padding:0}
   table{font-size:.78rem}
-  th,td{padding:.45rem .55rem}
+  th,td{padding:.35rem .5rem}
+  .shell{flex-direction:column}
+  .side-nav{width:100%!important;position:static;display:flex;gap:.3rem;overflow-x:auto;border-right:none;border-bottom:1px solid #dde1e9;padding:.45rem .6rem}
+  .side-toggle{display:none}
+  .side-item{width:auto;margin-bottom:0;flex-shrink:0}
+  .side-nav.mini .si-txt{display:inline}
 }
 </style>
 </head>
@@ -162,25 +238,18 @@ textarea{resize:vertical;min-height:70px}
 
 <!-- Header quitado: lo pone el HTML concentrador de iframes. El usuario se toma de ?user=xxx -->
 
-<!-- Barra tipo de cambio -->
-<div class="tc-bar">
-  <div class="tc-box">
-    <label>🇪🇺 EUR → MXN</label>
-    <input type="number" id="tcEur" step="0.01" onchange="setTC()">
-  </div>
-  <div class="tc-box">
-    <label>🇺🇸 USD → MXN</label>
-    <input type="number" id="tcUsd" step="0.01" onchange="setTC()">
-  </div>
-  <span class="tc-note">Editable. Se usa para convertir montos nuevos; cada registro guarda el TC con el que se capturó.</span>
-</div>
+<div class="shell">
 
-<!-- ══════════ SUB-NAV ══════════ -->
-<nav class="sub-nav">
-  <button class="sub-tab active" onclick="showTab('gastos')" data-tab="gastos">💸 Gastos</button>
-  <button class="sub-tab" onclick="showTab('ingresos')" data-tab="ingresos">💰 Ingresos</button>
-  <button class="sub-tab" onclick="showTab('resumen')" data-tab="resumen">📊 Resumen</button>
-</nav>
+<!-- ══════════ MENÚ LATERAL ══════════ -->
+<aside class="side-nav no-print" id="sideNav">
+  <button class="side-toggle" onclick="toggleNav()" title="Contraer / expandir">☰</button>
+  <button class="side-item active" data-tab="gastos"    onclick="showTab('gastos')"><span class="si-ico">💸</span><span class="si-txt">Gastos</span></button>
+  <button class="side-item"        data-tab="ingresos"  onclick="showTab('ingresos')"><span class="si-ico">💰</span><span class="si-txt">Ingresos</span></button>
+  <button class="side-item"        data-tab="reembolso" onclick="showTab('reembolso')"><span class="si-ico">🤝</span><span class="si-txt">Pago Socios</span></button>
+  <button class="side-item"        data-tab="resumen"   onclick="showTab('resumen')"><span class="si-ico">📊</span><span class="si-txt">Resumen</span></button>
+</aside>
+
+<main class="main-area">
 
 <!-- ══════════ TAB: GASTOS ══════════ -->
 <div class="page active" id="tab-gastos">
@@ -344,6 +413,19 @@ textarea{resize:vertical;min-height:70px}
     <div class="card-head">📈 Evolución mensual del gasto</div>
     <div class="card-body"><div style="position:relative;height:260px"><canvas id="chartLinea"></canvas></div></div>
   </div>
+
+  <!-- Tipo de cambio: vive solo en Resumen -->
+  <div class="tc-bar" style="padding:0;margin:1rem 0 0">
+    <div class="tc-box">
+      <label>🇪🇺 EUR → MXN</label>
+      <input type="number" id="tcEur" step="0.01" onchange="setTC()">
+    </div>
+    <div class="tc-box">
+      <label>🇺🇸 USD → MXN</label>
+      <input type="number" id="tcUsd" step="0.01" onchange="setTC()">
+    </div>
+    <span class="tc-note">Editable. Se usa para convertir montos nuevos; cada registro guarda el TC con el que se capturó.</span>
+  </div>
 </div>
 
 <!-- ══════════ MODAL: GASTO ══════════ -->
@@ -423,7 +505,172 @@ textarea{resize:vertical;min-height:70px}
       <button class="btn btn-primary" onclick="saveIngreso()">Guardar ingreso</button>
     </div>
   </div>
+
 </div>
+
+<!-- ══════════ TAB: PAGO A SOCIOS ══════════ -->
+<div class="page" id="tab-reembolso">
+
+  <div class="rb-wrap">
+
+    <!-- 0. Filtro por socio: afecta las dos tablas -->
+    <div class="rb-chips no-print" id="rb-chips"></div>
+    <div class="rb-resumen" id="rb-resumen"></div>
+
+    <!-- 1. Pago a socios (reparto de igualas y desarrollos) -->
+    <div class="card">
+      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <span>💵 Pago a socios <span class="text-muted" style="font-weight:400">· reparto de igualas y desarrollos</span></span>
+        <div class="rango-fechas no-print">
+          <label>Del</label><input type="date" id="pp-f-desde" onchange="rbRangoCambio()">
+          <label>al</label><input type="date" id="pp-f-hasta" onchange="rbRangoCambio()">
+          <button class="btn-limpiar" id="pp-f-limpiar" onclick="rbRangoLimpiar()" title="Quitar el filtro de fechas">✕</button>
+        </div>
+        <button class="btn btn-primary no-print" onclick="openPagoProy()">+ Agregar pago</button>
+      </div>
+      <div class="card-body" style="padding-bottom:0">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th data-col onclick="ordenarProy('fecha')">Fecha<span class="sort-ind" id="sp-fecha"></span></th>
+              <th data-col onclick="ordenarProy('socio')">Socio<span class="sort-ind" id="sp-socio"></span></th>
+              <th data-col onclick="ordenarProy('ingreso')">Concepto<span class="sort-ind" id="sp-ingreso"></span></th>
+              <th data-col onclick="ordenarProy('base_calculo')">Base<span class="sort-ind" id="sp-base_calculo"></span></th>
+              <th data-col onclick="ordenarProy('porcentaje')">Porcentaje<span class="sort-ind" id="sp-porcentaje"></span></th>
+              <th data-col onclick="ordenarProy('monto_mxn')">Monto<span class="sort-ind" id="sp-monto_mxn"></span></th>
+              <th class="no-print">Acciones</th>
+            </tr></thead>
+            <tbody id="rb-pagosproy"></tbody>
+            <tfoot id="rb-tot-proy"></tfoot>
+          </table>
+        </div>
+      </div>
+      <div id="rb-mas-proy"></div>
+    </div>
+
+    <!-- 2. Reembolso a socios -->
+    <h2 class="rb-titulo">🤝 Reembolso a socios</h2>
+
+    <div class="rb-nota">
+      <strong>Cómo funciona.</strong> La bolsa que se reparte es solo la iguala del Dr Andrés menos los gastos de ese mes.
+      Los anticipos de proyectos (Berimbau, 4pLogistics) no entran aquí; esos se reparten por separado.
+      Lo que sobra cada mes va primero a Fernando hasta liquidarlo; luego mitad y mitad entre Juan José y Adolfo;
+      cuando Adolfo quede saldado, todo pasa a Juan José; y ya liquidados los tres, se reparte en tres partes iguales.
+    </div>
+
+    <!-- 3. Tarjetas de los 3 socios -->
+    <div class="rb-cards" id="rb-tarjetas"></div>
+
+    <!-- 4. Captura manual de reembolsos -->
+    <div class="card">
+      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <span>💵 Reembolsos registrados</span>
+        <button class="btn btn-primary no-print" onclick="openPago()">+ Registrar reembolso</button>
+      </div>
+      <div class="card-body" style="padding-bottom:0">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th data-col onclick="ordenarReem('fecha')">Fecha<span class="sort-ind" id="sr-fecha"></span></th>
+              <th data-col onclick="ordenarReem('socio')">Socio<span class="sort-ind" id="sr-socio"></span></th>
+              <th data-col onclick="ordenarReem('monto_mxn')">Monto<span class="sort-ind" id="sr-monto_mxn"></span></th>
+              <th data-col onclick="ordenarReem('concepto')">Concepto<span class="sort-ind" id="sr-concepto"></span></th>
+              <th data-col onclick="ordenarReem('metodo')">Método<span class="sort-ind" id="sr-metodo"></span></th>
+              <th class="no-print">Acciones</th>
+            </tr></thead>
+            <tbody id="rb-pagos"></tbody>
+            <tfoot id="rb-tot-reem"></tfoot>
+          </table>
+        </div>
+      </div>
+      <div id="rb-mas-reem"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ MODAL: PAGO A SOCIO ══════════ -->
+<div class="modal-backdrop" id="modal-pago">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modal-pago-title">💵 Registrar reembolso</h3>
+      <button class="modal-close" onclick="closeModal('modal-pago')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Fecha *</label><input type="date" id="p-fecha"></div>
+        <div class="form-group"><label>Socio *</label>
+          <select id="p-socio" onchange="pistaPago()">
+            <option value="fernando">Fernando</option>
+            <option value="juanjose">Juan José</option>
+            <option value="adolfo">Adolfo</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>Monto en MXN *</label>
+          <input type="number" id="p-monto" step="0.01" placeholder="0.00">
+          <div class="help-txt" id="p-pista"></div>
+        </div>
+        <div class="form-group full"><label>Concepto</label><input type="text" id="p-concepto" placeholder="Reembolso de aportación · septiembre"></div>
+        <div class="form-group"><label>Método</label>
+          <select id="p-metodo"><option>Transferencia</option><option>Efectivo</option><option>PayPal</option><option>Otro</option></select>
+        </div>
+        <div class="form-group"><label>Notas</label><input type="text" id="p-notas" placeholder="Opcional"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pago')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPago()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: PAGO A SOCIO POR PROYECTO ══════════ -->
+<div class="modal-backdrop" id="modal-pagoproy">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modal-pagoproy-title">💵 Pago a socio</h3>
+      <button class="modal-close" onclick="closeModal('modal-pagoproy')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Fecha *</label><input type="date" id="pp-fecha"></div>
+        <div class="form-group"><label>Socio *</label>
+          <select id="pp-socio">
+            <option value="fernando">Fernando</option>
+            <option value="juanjose">Juan José</option>
+            <option value="adolfo">Adolfo</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>Ingreso del que sale</label>
+          <select id="pp-ingreso" onchange="ppCambioIngreso()"></select>
+          <div class="help-txt" id="pp-disp"></div>
+        </div>
+        <div class="form-group"><label>Disponible del ingreso</label>
+          <input type="text" id="pp-libre" readonly style="background:#f5f6f8">
+        </div>
+        <div class="form-group"><label>Menos costos</label>
+          <input type="number" id="pp-costo" step="0.01" placeholder="0.00" oninput="ppRecalcular()">
+        </div>
+        <div class="form-group"><label>Base de reparto</label>
+          <input type="text" id="pp-base" readonly style="background:#f5f6f8">
+        </div>
+        <div class="form-group"><label>Porcentaje</label>
+          <input type="number" id="pp-pct" step="0.01" placeholder="Ej. 30" oninput="ppDesdePct()">
+        </div>
+        <div class="form-group"><label>Monto en MXN *</label>
+          <input type="number" id="pp-monto" step="0.01" placeholder="0.00" oninput="ppMontoManual()">
+          <div class="help-txt" id="pp-alerta" style="color:#c0392b"></div>
+        </div>
+        <div class="form-group full"><label>Concepto</label><input type="text" id="pp-concepto" placeholder="Reparto de iguala · septiembre"></div>
+        <div class="form-group full"><label>Notas</label><input type="text" id="pp-notas" placeholder="Opcional"></div>
+      </div>
+      <div class="help-txt" style="margin-top:.4rem">Escribe el porcentaje y el monto se calcula solo sobre la base; o teclea el monto directo y el porcentaje se limpia.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pagoproy')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPagoProy()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+</main>
+</div><!-- /shell -->
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -435,7 +682,7 @@ const N8N_BASE = 'https://n8n.excelentia.com.mx/webhook';
 const ENDPOINT = '/finanzas';
 
 // Nombres de tabla que entiende el webhook
-const TABLA_API = { finanzas_gastos: 'gastos', finanzas_ingresos: 'ingresos' };
+const TABLA_API = { finanzas_gastos: 'gastos', finanzas_ingresos: 'ingresos', pagos_socios: 'pagos_socios', pagos_proyectos: 'pagos_proyectos' };
 
 // ═══════════════════════════════════════════════════════════════
 //  CONSTANTES
@@ -456,6 +703,11 @@ const MONEDA_SIMB = { MXN:'$', USD:'US$', EUR:'€' };
 // ═══════════════════════════════════════════════════════════════
 //  ESTADO
 // ═══════════════════════════════════════════════════════════════
+let PAGOS = [];
+let PAGOS_PROY = [];
+const RB_TOPE = 10;              // cuantos renglones se ven sin desplegar
+let RB_VER_TODO_PROY = false;
+let RB_VER_TODO_REEM = false;
 let currentUser = 'fernando';
 let TC = { EUR:20.17, USD:17.35 };
 let GASTOS = [];
@@ -541,7 +793,7 @@ function fmt$(n){ return new Intl.NumberFormat('es-MX',{style:'currency',currenc
 function fmtDate(d){ if(!d)return''; const dt=new Date(String(d).slice(0,10)+'T12:00:00'); return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 function genId(p){ return `${p}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`; }
 function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function socioBadge(uid){ const u=USERS[uid]||{nombre:uid||'-',color:'#8a90a0'}; return `<span class="badge" style="background:${u.color}20;color:${u.color}">${u.nombre}</span>`; }
+function socioBadge(uid){ const u=USERS[uid]||{nombre:uid||'-'}; return `<span class="socio-nom">${u.nombre}</span>`; }
 function statusBadge(s){
   const map={'Pagado':'badge-green','Pendiente':'badge-yellow','Por reembolsar':'badge-orange','Cobrado':'badge-green','Facturado':'badge-blue'};
   return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
@@ -566,12 +818,19 @@ function showToast(msg,tipo='ok'){
 //  NAVEGACIÓN
 // ═══════════════════════════════════════════════════════════════
 function showTab(tab){
-  document.querySelectorAll('.sub-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.side-item').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelector(`.sub-tab[data-tab="${tab}"]`).classList.add('active');
+  document.querySelector(`.side-item[data-tab="${tab}"]`)?.classList.add('active');
   document.getElementById(`tab-${tab}`).classList.add('active');
   if(tab==='resumen') renderResumen();
+  if(tab==='reembolso') renderReembolso();
 }
+function toggleNav(){
+  const n = document.getElementById('sideNav');
+  n.classList.toggle('mini');
+  try{ localStorage.setItem('fin_nav_mini', n.classList.contains('mini') ? '1' : '0'); }catch(e){}
+}
+try{ if(localStorage.getItem('fin_nav_mini') === '1') document.getElementById('sideNav').classList.add('mini'); }catch(e){}
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
@@ -625,10 +884,12 @@ async function cargarTodo(){
   const data = await apiCall('get');
   if(!data){
     showToast('No se pudieron cargar los datos','err');
-    GASTOS = []; INGRESOS = []; PROYECTOS = [];
+    GASTOS = []; INGRESOS = []; PAGOS = []; PAGOS_PROY = []; PROYECTOS = [];
   }else{
     GASTOS    = data.gastos   || [];
     INGRESOS  = data.ingresos || [];
+    PAGOS     = data.pagos_socios || [];
+    PAGOS_PROY = data.pagos_proyectos || [];
     PROYECTOS = (data.proyectos || []).map(p=>({ id:p.id, nombre:p.nombre||'(sin nombre)', empresa:p.empresa||'' }));
   }
   llenarProyectos();
@@ -1029,6 +1290,491 @@ function pintarIndicadores(tabla){
 const PALETA=['#ea5c0a','#4285f4','#d97706','#10b981','#8b5cf6','#ec4899','#06b6d4','#6b7280','#2563eb','#059669'];
 let CHARTS={};
 function destroyCharts(){ Object.values(CHARTS).forEach(c=>{ if(c) c.destroy(); }); CHARTS={}; }
+
+// ═══════════════════════════════════════════════════════════════
+//  REEMBOLSO A SOCIOS
+//  Bolsa = iguala del Dr Andres menos los gastos de ese mes.
+//  Orden: Fernando -> (Juan Jose 50% + Adolfo 50%) -> el que quede -> tres iguales.
+// ═══════════════════════════════════════════════════════════════
+const RB_CLIENTE = 'Dr Andrés';      // de que cliente sale la bolsa
+const RB_ORDEN   = ['fernando','juanjose','adolfo'];
+
+// Lo que puso cada socio de su bolsa (gastos sin origen de fondos)
+function rbAportes(){
+  const a = {};
+  RB_ORDEN.forEach(u => a[u] = 0);
+  GASTOS.forEach(g=>{
+    if(g.origen_fondos) return;                 // lo pago la empresa
+    if(a[g.pagado_por] === undefined) return;
+    a[g.pagado_por] += parseFloat(g.monto_mxn||0);
+  });
+  return a;
+}
+
+// Lo que ya se le devolvio a cada socio
+function rbDevuelto(){
+  const d = {};
+  RB_ORDEN.forEach(u => d[u] = 0);
+  PAGOS.forEach(p=>{
+    if(d[p.socio] === undefined) return;
+    d[p.socio] += parseFloat(p.monto_mxn||0);
+  });
+  return d;
+}
+
+// Hasta que mes se le ha devuelto a cada socio (clave YYYY-MM del pago mas reciente)
+function rbHasta(){
+  const h = {};
+  RB_ORDEN.forEach(u => h[u] = null);
+  PAGOS.forEach(p=>{
+    if(h[p.socio] === undefined) return;
+    if(!p.fecha) return;
+    const k = mesKey(p.fecha);
+    if(!h[p.socio] || k > h[p.socio]) h[p.socio] = k;
+  });
+  return h;
+}
+
+function renderReembolso(){
+  const aportes  = rbAportes();
+  const devuelto = rbDevuelto();
+  const hasta    = rbHasta();
+
+  // ── Tarjetas por socio ──
+  document.getElementById('rb-tarjetas').innerHTML = RB_ORDEN.map(u=>{
+    const puso  = aportes[u] || 0;
+    const pag   = devuelto[u] || 0;
+    const alMes = hasta[u] ? ` <span class="rb-hasta">· al cierre de ${mesLabel(hasta[u])}</span>` : '';
+    const falta = Math.max(0, puso - pag);
+    const pct   = puso > 0 ? Math.min(100, (pag/puso)*100) : 0;
+    const ok    = falta < 0.01 && puso > 0;
+    return `<div class="rb-card${ok?' saldado':''}">
+      <div class="rb-card-top">
+        <span class="rb-card-nom">${USERS[u].nombre}</span>
+        ${ok ? '<span class="rb-liq">SALDADO</span>' : ''}
+      </div>
+      <div class="rb-row"><span>Puso</span><b>${fmt$(puso)}</b></div>
+      <div class="rb-row"><span>Se le ha devuelto${alMes}</span><b>${fmt$(pag)}</b></div>
+      <div class="rb-row rb-falta"><span>Le falta</span><b>${fmt$(falta)}</b></div>
+      <div class="rb-bar"><span style="width:${pct}%"></span></div>
+    </div>`;
+  }).join('');
+
+  // ── Filtro por socio ──
+  renderChips();
+
+  // ── Pagos a socios (repartos) ──
+  renderPagosProy();
+
+  // ── Reembolsos capturados ──
+  const tb = document.getElementById('rb-pagos');
+  if(!rbSoloFiltro(PAGOS).length){
+    tb.innerHTML = `<tr><td colspan="6" class="rb-vacio">${RB_FILTRO ? 'Sin reembolsos de '+USERS[RB_FILTRO].nombre+'.' : 'Aún no hay reembolsos registrados. Usa “Registrar reembolso” cuando transfieras.'}</td></tr>`;
+    pieLista('rb-mas-reem', 0, 0, 'verTodoReem');
+    pieTotal('rb-tot-reem', [], 2, 3);
+  } else {
+    const ordenR = rbOrdenar(rbSoloFiltro(PAGOS), RB_ORD_REEM);
+    rbFlechas('sr', RB_ORD_REEM);
+    pieTotal('rb-tot-reem', ordenR, 2, 3);
+    const listaR = RB_VER_TODO_REEM ? ordenR : ordenR.slice(0, RB_TOPE);
+    pieLista('rb-mas-reem', ordenR.length, listaR.length, 'verTodoReem');
+    tb.innerHTML = listaR.map(p=>`
+      <tr>
+        <td>${fmtDate(p.fecha)}</td>
+        <td>${socioLink(p.socio)}</td>
+        <td><strong>${fmt$(p.monto_mxn)}</strong></td>
+        <td>${escHtml(p.concepto)||'<span class="text-muted">—</span>'}</td>
+        <td>${escHtml(p.metodo)||'—'}</td>
+        <td class="no-print col-acc"><button class="btn-icon" onclick="openPago('${p.id}')" title="Editar">✏️</button> <button class="btn-icon" onclick="borrarPago('${p.id}')" title="Eliminar">🗑️</button></td>
+      </tr>`).join('');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PAGOS A SOCIOS  ·  repartos de igualas y desarrollos
+//  Bolsa distinta a la de reembolsos: nunca se cuentan juntos.
+// ═══════════════════════════════════════════════════════════════
+
+// Etiqueta legible de un ingreso
+function ppIngLabel(i){
+  if(!i) return 'Sin ingreso ligado';
+  const quien = i.cliente || i.proyecto_nombre || '';
+  return `${fmtDate(i.fecha)} · ${i.concepto||'(sin concepto)'}${quien?' · '+quien:''} · ${fmt$(i.monto_mxn)}`;
+}
+function ppIngreso(id){ return INGRESOS.find(i => i.id === id) || null; }
+
+// Cuanto se ha repartido ya de un ingreso, y el costo que se le capturo
+// exceptId: al editar, el propio registro no cuenta como ya repartido
+function ppRepartido(ingId, exceptId){
+  return PAGOS_PROY.filter(p => p.ingreso_id === ingId && p.id !== exceptId)
+                   .reduce((a,p)=> a + parseFloat(p.monto_mxn||0), 0);
+}
+function ppCostoPrevio(ingId){
+  const con = PAGOS_PROY.filter(p => p.ingreso_id === ingId && parseFloat(p.costo_descontado||0) > 0);
+  return con.length ? parseFloat(con[0].costo_descontado) : 0;
+}
+
+// Base sobre la que se calcula el porcentaje = ingreso - costos
+function ppBase(){
+  const ing = ppIngreso(document.getElementById('pp-ingreso').value);
+  const bruto = ing ? parseFloat(ing.monto_mxn||0) : 0;
+  const costo = parseFloat(document.getElementById('pp-costo').value)||0;
+  return Math.max(0, bruto - costo);
+}
+
+// Lo que queda libre de ese ingreso, descontando lo ya repartido
+function ppLibre(){
+  const id = document.getElementById('pp-ingreso').value;
+  if(!id) return 0;
+  return Math.max(0, ppBase() - ppRepartido(id, PP_EDIT));
+}
+
+function ppRecalcular(){
+  const base = ppBase();
+  document.getElementById('pp-base').value  = base > 0 ? fmt$(base) : '—';
+  const libre = ppLibre();
+  document.getElementById('pp-libre').value = document.getElementById('pp-ingreso').value ? fmt$(libre) : '—';
+  const pct = parseFloat(document.getElementById('pp-pct').value);
+  if(!isNaN(pct) && base > 0) document.getElementById('pp-monto').value = (base * pct / 100).toFixed(2);
+  ppAvisar();
+}
+
+// Avisa si el monto se pasa de lo que queda libre
+function ppAvisar(){
+  const el = document.getElementById('pp-alerta');
+  if(!el) return;
+  const monto = parseFloat(document.getElementById('pp-monto').value)||0;
+  const id    = document.getElementById('pp-ingreso').value;
+  if(!id || monto <= 0){ el.textContent=''; return; }
+  const libre = ppLibre();
+  el.textContent = monto > libre + 0.005
+    ? `Ojo: te estás pasando ${fmt$(monto - libre)} de lo que queda libre de este ingreso.`
+    : '';
+}
+
+function ppDesdePct(){ ppRecalcular(); }
+function ppMontoManual(){ document.getElementById('pp-pct').value = ''; ppAvisar(); }
+
+function ppCambioIngreso(){
+  const id  = document.getElementById('pp-ingreso').value;
+  const ing = ppIngreso(id);
+  const pista = document.getElementById('pp-disp');
+  if(!ing){
+    pista.textContent = 'Sin ingreso ligado: el monto se captura a mano.';
+    document.getElementById('pp-costo').value = '';
+    ppRecalcular();
+    return;
+  }
+  // El costo se recuerda por ingreso: si ya se capturo antes, se pre-llena
+  const previo = ppCostoPrevio(id);
+  if(previo > 0 && !document.getElementById('pp-costo').value) document.getElementById('pp-costo').value = previo;
+  const bruto = parseFloat(ing.monto_mxn||0);
+  const ya    = ppRepartido(id, PP_EDIT);
+  pista.textContent = `De los ${fmt$(bruto)} ya repartiste ${fmt$(ya)}; quedan ${fmt$(Math.max(0, bruto - ya))}.`;
+  ppRecalcular();
+}
+
+let PP_EDIT = null;   // id del pago que se esta editando, o null si es alta
+
+function openPagoProy(id){
+  const ed = id ? PAGOS_PROY.find(p => p.id === id) : null;
+  PP_EDIT  = ed ? ed.id : null;
+  document.getElementById('modal-pagoproy-title').textContent = ed ? '✏️ Editar pago a socio' : '💵 Pago a socio';
+
+  document.getElementById('pp-ingreso').innerHTML =
+    '<option value="">— Sin ingreso ligado —</option>' +
+    INGRESOS.slice().sort((a,b)=> String(b.fecha).localeCompare(String(a.fecha)))
+            .map(i=>`<option value="${i.id}">${escHtml(ppIngLabel(i))}</option>`).join('');
+
+  document.getElementById('pp-fecha').value    = ed ? String(ed.fecha).slice(0,10) : new Date().toISOString().slice(0,10);
+  document.getElementById('pp-socio').value    = ed ? ed.socio : 'juanjose';
+  document.getElementById('pp-ingreso').value  = ed ? (ed.ingreso_id||'') : '';
+  document.getElementById('pp-costo').value    = ed && parseFloat(ed.costo_descontado||0) > 0 ? ed.costo_descontado : '';
+  document.getElementById('pp-pct').value      = '';
+  document.getElementById('pp-monto').value    = ed ? ed.monto_mxn : '';
+  document.getElementById('pp-concepto').value = ed ? (ed.concepto||'') : '';
+  document.getElementById('pp-notas').value    = ed ? (ed.notas||'') : '';
+  ppCambioIngreso();
+  openModal('modal-pagoproy');
+}
+
+async function guardarPagoProy(){
+  const fecha = document.getElementById('pp-fecha').value;
+  const monto = parseFloat(document.getElementById('pp-monto').value)||0;
+  if(!fecha){ showToast('Falta la fecha','err'); return; }
+  if(monto <= 0){ showToast('El monto debe ser mayor a cero','err'); return; }
+
+  const base   = ppBase();
+  const pctRaw = parseFloat(document.getElementById('pp-pct').value);
+  // Si el monto se capturo a mano, se calcula que porcentaje represento de la base
+  const pct = !isNaN(pctRaw) ? pctRaw : (base > 0 ? (monto / base) * 100 : 0);
+
+  const datos = {
+    fecha: fecha,
+    socio: document.getElementById('pp-socio').value,
+    ingreso_id: document.getElementById('pp-ingreso').value,
+    costo_descontado: parseFloat(document.getElementById('pp-costo').value)||0,
+    base_calculo: base,
+    porcentaje: Math.round(pct * 100) / 100,
+    monto_mxn: monto,
+    concepto: document.getElementById('pp-concepto').value,
+    notas: document.getElementById('pp-notas').value,
+    user_registro: currentUser
+  };
+
+  if(PP_EDIT){
+    const r = await apiCall('editar', { tabla: TABLA_API.pagos_proyectos, id: PP_EDIT, data: datos });
+    if(!r || r.ok === false){ showToast('No se pudo guardar','err'); return; }
+    const i = PAGOS_PROY.findIndex(p => p.id === PP_EDIT);
+    if(i >= 0) PAGOS_PROY[i] = Object.assign({}, PAGOS_PROY[i], datos);
+    showToast('Pago actualizado');
+  }else{
+    const fila = Object.assign({ id: genId('PP') }, datos);
+    const r = await apiCall('crear', { tabla: TABLA_API.pagos_proyectos, data: fila });
+    if(!r || r.ok === false){ showToast('No se pudo guardar','err'); return; }
+    PAGOS_PROY.push(fila);
+    showToast('Pago registrado');
+  }
+  PP_EDIT = null;
+  closeModal('modal-pagoproy');
+  renderReembolso();
+}
+
+async function borrarPagoProy(id){
+  if(!confirm('¿Eliminar este pago?')) return;
+  const r = await apiCall('eliminar', { tabla: TABLA_API.pagos_proyectos, id: id });
+  if(!r || r.ok === false){ showToast('No se pudo eliminar','err'); return; }
+  PAGOS_PROY = PAGOS_PROY.filter(p => p.id !== id);
+  renderReembolso();
+  showToast('Pago eliminado');
+}
+
+// ── Filtro por socio: afecta las dos tablas de esta pestaña ──
+const RB_ALFA = ['adolfo','fernando','juanjose'];   // orden alfabetico de los chips
+let RB_FILTRO = '';                                 // '' = todos
+
+function filtrarSocio(u){
+  RB_FILTRO = (RB_FILTRO === u) ? '' : u;           // volver a dar clic quita el filtro
+  RB_VER_TODO_PROY = false; RB_VER_TODO_REEM = false;
+  renderReembolso();
+}
+function rbSoloFiltro(lista){
+  return RB_FILTRO ? lista.filter(p => p.socio === RB_FILTRO) : lista;
+}
+
+// ── Rango de fechas (solo la tabla de Pago a socios) ──
+let RB_DESDE = '', RB_HASTA = '';
+function rbRangoCambio(){
+  RB_DESDE = document.getElementById('pp-f-desde').value || '';
+  RB_HASTA = document.getElementById('pp-f-hasta').value || '';
+  RB_VER_TODO_PROY = false;
+  renderPagosProy();
+}
+function rbRangoLimpiar(){
+  document.getElementById('pp-f-desde').value = '';
+  document.getElementById('pp-f-hasta').value = '';
+  rbRangoCambio();
+}
+function rbEnRango(lista){
+  if(!RB_DESDE && !RB_HASTA) return lista;
+  return lista.filter(p=>{
+    const f = String(p.fecha||'').slice(0,10);
+    if(!f) return false;
+    if(RB_DESDE && f < RB_DESDE) return false;
+    if(RB_HASTA && f > RB_HASTA) return false;
+    return true;
+  });
+}
+// Nombre en las tablas de esta pestaña (texto plano, sin clic)
+function socioLink(uid){
+  const u = USERS[uid] || { nombre: uid || '-' };
+  return `<span class="socio-nom">${u.nombre}</span>`;
+}
+function renderChips(){
+  const c = document.getElementById('rb-chips');
+  if(!c) return;
+  c.innerHTML = `<button class="rb-chip${RB_FILTRO?'':' active'}" onclick="filtrarSocio('')">Todos</button>` +
+    RB_ALFA.map(u=>`<button class="rb-chip${RB_FILTRO===u?' active':''}" onclick="filtrarSocio('${u}')">${USERS[u].nombre}</button>`).join('');
+
+  const r = document.getElementById('rb-resumen');
+  if(!r) return;
+  if(!RB_FILTRO){ r.className = 'rb-resumen'; r.innerHTML = ''; return; }
+  const nom  = USERS[RB_FILTRO].nombre;
+  const pp   = PAGOS_PROY.filter(p => p.socio === RB_FILTRO);
+  const re   = PAGOS.filter(p => p.socio === RB_FILTRO);
+  const sPP  = pp.reduce((a,p)=> a + parseFloat(p.monto_mxn||0), 0);
+  const sRE  = re.reduce((a,p)=> a + parseFloat(p.monto_mxn||0), 0);
+  const puso = rbAportes()[RB_FILTRO] || 0;
+  r.className = 'rb-resumen on';
+  r.innerHTML = `<strong>${nom}</strong> · Pagos de proyectos: <strong>${fmt$(sPP)}</strong> en ${pp.length} ` +
+                `movimiento${pp.length===1?'':'s'} · Reembolsos recibidos: <strong>${fmt$(sRE)}</strong> en ${re.length} ` +
+                `movimiento${re.length===1?'':'s'} · Le falta por recuperar: <strong>${fmt$(Math.max(0, puso - sRE))}</strong>`;
+}
+
+// ── Ordenamiento de las dos tablas de pagos ──
+let RB_ORD_PROY = { col:'fecha', dir:-1 };
+let RB_ORD_REEM = { col:'fecha', dir:-1 };
+
+function ordenarProy(col){
+  RB_ORD_PROY = (RB_ORD_PROY.col === col) ? { col:col, dir:-RB_ORD_PROY.dir } : { col:col, dir:1 };
+  renderPagosProy();
+}
+function ordenarReem(col){
+  RB_ORD_REEM = (RB_ORD_REEM.col === col) ? { col:col, dir:-RB_ORD_REEM.dir } : { col:col, dir:1 };
+  renderReembolso();
+}
+
+// Valor con el que se compara cada renglon
+function rbValor(p, col){
+  if(col === 'socio')   return (USERS[p.socio]?.nombre || p.socio || '').toLowerCase();
+  if(col === 'ingreso'){ const i = ppIngreso(p.ingreso_id); return (i ? (i.concepto||'') + ' ' + (i.cliente||'') : '').toLowerCase(); }
+  if(col === 'base_calculo' || col === 'porcentaje' || col === 'monto_mxn') return parseFloat(p[col]||0);
+  if(col === 'fecha') return String(p.fecha||'');
+  return String(p[col]||'').toLowerCase();
+}
+function rbOrdenar(lista, ord){
+  return lista.slice().sort((a,b)=>{
+    const va = rbValor(a, ord.col), vb = rbValor(b, ord.col);
+    if(va < vb) return -1 * ord.dir;
+    if(va > vb) return  1 * ord.dir;
+    return 0;
+  });
+}
+// Pinta la flechita en el encabezado activo
+function rbFlechas(pref, ord){
+  document.querySelectorAll(`[id^="${pref}-"].sort-ind`).forEach(e=> e.textContent = '');
+  const e = document.getElementById(`${pref}-${ord.col}`);
+  if(e) e.textContent = ord.dir === 1 ? ' ▲' : ' ▼';
+}
+
+function verTodoProy(){ RB_VER_TODO_PROY = !RB_VER_TODO_PROY; renderPagosProy(); }
+function verTodoReem(){ RB_VER_TODO_REEM = !RB_VER_TODO_REEM; renderReembolso(); }
+
+// Pinta el pie "Ver las N restantes" / "Ver solo las 10 recientes"
+function pieLista(divId, total, mostradas, fn){
+  const d = document.getElementById(divId);
+  if(!d) return;
+  if(total <= RB_TOPE){ d.innerHTML=''; return; }
+  d.className = 'rb-mas no-print';
+  d.setAttribute('onclick', fn+'()');
+  d.textContent = mostradas < total
+    ? `Ver las ${total - mostradas} restantes ▾`
+    : `Ver solo las ${RB_TOPE} más recientes ▴`;
+}
+
+// Renglon de total al pie de cada tabla. Suma todo lo filtrado, no solo lo visible.
+function pieTotal(tfootId, lista, colsAntes, colsDespues){
+  const el = document.getElementById(tfootId);
+  if(!el) return;
+  if(!lista.length){ el.innerHTML = ''; return; }
+  const suma = lista.reduce((a,p)=> a + parseFloat(p.monto_mxn||0), 0);
+  const etiqueta = RB_FILTRO ? `Total de ${USERS[RB_FILTRO].nombre}` : 'Total';
+  el.innerHTML = `<tr class="tot-row">
+    <td class="tot-lbl" colspan="${colsAntes}">${etiqueta} · ${lista.length} movimiento${lista.length===1?'':'s'}</td>
+    <td>${fmt$(suma)}</td>
+    <td class="no-print" colspan="${colsDespues}"></td>
+  </tr>`;
+}
+
+function renderPagosProy(){
+  const tb = document.getElementById('rb-pagosproy');
+  if(!tb) return;
+  const btnL = document.getElementById('pp-f-limpiar');
+  if(btnL) btnL.className = 'btn-limpiar' + ((RB_DESDE || RB_HASTA) ? ' on' : '');
+  if(!rbEnRango(rbSoloFiltro(PAGOS_PROY)).length){
+    const porRango = (RB_DESDE || RB_HASTA) ? ' en ese rango de fechas' : '';
+    tb.innerHTML = `<tr><td colspan="7" class="rb-vacio">${RB_FILTRO ? 'Sin pagos de '+USERS[RB_FILTRO].nombre+porRango+'.' : (porRango ? 'Sin pagos'+porRango+'.' : 'Aún no hay pagos a socios. Usa “Agregar pago” cuando repartas un ingreso.')}</td></tr>`;
+    pieLista('rb-mas-proy', 0, 0, 'verTodoProy');
+    pieTotal('rb-tot-proy', [], 5, 1);
+    return;
+  }
+  const orden = rbOrdenar(rbEnRango(rbSoloFiltro(PAGOS_PROY)), RB_ORD_PROY);
+  rbFlechas('sp', RB_ORD_PROY);
+  pieTotal('rb-tot-proy', orden, 5, 1);
+  const lista = RB_VER_TODO_PROY ? orden : orden.slice(0, RB_TOPE);
+  pieLista('rb-mas-proy', orden.length, lista.length, 'verTodoProy');
+  tb.innerHTML = lista.map(p=>{
+    const ing  = ppIngreso(p.ingreso_id);
+    const pct  = parseFloat(p.porcentaje||0);
+    const base = parseFloat(p.base_calculo||0);
+    return `<tr>
+      <td>${fmtDate(p.fecha)}</td>
+      <td>${socioLink(p.socio)}</td>
+      <td>${ing ? escHtml(ing.concepto||'(sin concepto)') + (ing.cliente?' · '+escHtml(ing.cliente):'') : '<span class="text-muted">Sin ingreso</span>'}</td>
+      <td>${base > 0 ? fmt$(base) : '<span class="text-muted">—</span>'}</td>
+      <td>${pct > 0 ? pct.toFixed(2).replace(/\.00$/,'') + '%' : '<span class="text-muted">—</span>'}</td>
+      <td><strong>${fmt$(p.monto_mxn)}</strong></td>
+      <td class="no-print col-acc"><button class="btn-icon" onclick="openPagoProy('${p.id}')" title="Editar">✏️</button> <button class="btn-icon" onclick="borrarPagoProy('${p.id}')" title="Eliminar">🗑️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Alta o edición de reembolso ──
+let P_EDIT = null;   // id del reembolso que se esta editando, o null si es alta
+
+function openPago(id){
+  const ed = id ? PAGOS.find(p => p.id === id) : null;
+  P_EDIT   = ed ? ed.id : null;
+  document.getElementById('modal-pago-title').textContent = ed ? '✏️ Editar reembolso' : '💵 Registrar reembolso';
+  document.getElementById('p-fecha').value    = ed ? String(ed.fecha).slice(0,10) : new Date().toISOString().slice(0,10);
+  document.getElementById('p-socio').value    = ed ? ed.socio : currentUser;
+  document.getElementById('p-monto').value    = ed ? ed.monto_mxn : '';
+  document.getElementById('p-concepto').value = ed ? (ed.concepto||'') : 'Reembolso de aportación';
+  document.getElementById('p-metodo').value   = ed ? (ed.metodo||'Transferencia') : 'Transferencia';
+  document.getElementById('p-notas').value    = ed ? (ed.notas||'') : '';
+  pistaPago();
+  openModal('modal-pago');
+}
+
+function pistaPago(){
+  const u = document.getElementById('p-socio').value;
+  const falta = Math.max(0, (rbAportes()[u]||0) - (rbDevuelto()[u]||0));
+  document.getElementById('p-pista').textContent = falta > 0.01
+    ? `A ${USERS[u].nombre} le faltan ${fmt$(falta)} por recuperar.`
+    : `${USERS[u].nombre} ya está saldado.`;
+}
+
+async function guardarPago(){
+  const monto = parseFloat(document.getElementById('p-monto').value)||0;
+  const fecha = document.getElementById('p-fecha').value;
+  if(!fecha){ showToast('Falta la fecha','err'); return; }
+  if(monto <= 0){ showToast('El monto debe ser mayor a cero','err'); return; }
+  const datos = {
+    fecha: fecha,
+    socio: document.getElementById('p-socio').value,
+    monto_mxn: monto,
+    concepto: document.getElementById('p-concepto').value,
+    metodo: document.getElementById('p-metodo').value,
+    notas: document.getElementById('p-notas').value,
+    user_registro: currentUser
+  };
+  if(P_EDIT){
+    const r = await apiCall('editar', { tabla: TABLA_API.pagos_socios, id: P_EDIT, data: datos });
+    if(!r || r.ok === false){ showToast('No se pudo guardar','err'); return; }
+    const i = PAGOS.findIndex(p => p.id === P_EDIT);
+    if(i >= 0) PAGOS[i] = Object.assign({}, PAGOS[i], datos);
+    showToast('Reembolso actualizado');
+  }else{
+    const fila = Object.assign({ id: genId('P') }, datos);
+    const r = await apiCall('crear', { tabla: TABLA_API.pagos_socios, data: fila });
+    if(!r || r.ok === false){ showToast('No se pudo guardar','err'); return; }
+    PAGOS.push(fila);
+    showToast('Reembolso registrado');
+  }
+  P_EDIT = null;
+  closeModal('modal-pago');
+  renderReembolso();
+}
+
+async function borrarPago(id){
+  if(!confirm('¿Eliminar este pago?')) return;
+  const r = await apiCall('eliminar', { tabla: TABLA_API.pagos_socios, id: id });
+  if(!r || r.ok === false){ showToast('No se pudo eliminar','err'); return; }
+  PAGOS = PAGOS.filter(p => p.id !== id);
+  renderReembolso();
+  showToast('Pago eliminado');
+}
+
 function mesKey(f){ const d=new Date(String(f).slice(0,10)+'T12:00:00'); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 function mesLabel(k){ const [y,m]=k.split('-'); const M=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; return `${M[parseInt(m)]} ${y.slice(2)}`; }
 const FONT={family:'Manrope'};
