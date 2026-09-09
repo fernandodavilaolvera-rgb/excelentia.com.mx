@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de envíos — Club Berimbau</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f8; --surface:#ffffff; --border:#dde1e9;
+    --header-grad:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);
+    --accent:#4a9fd4; --accent-dark:#1a3a6b;
+    --card-head:#dce8f7; --hover:#e8f0fb;
+    --text:#1a2035; --text2:#4a5068; --text3:#8a90a0;
+    --rojo:#c0392b; --rojo-bg:#fdf2f2; --rojo-bd:#f5b7b1;
+    --verde:#1a5c18; --verde-bg:#f0faf0; --verde-bd:#bfe3bf;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Manrope',sans-serif; font-size:15px; line-height:1.6;
+  }
+
+  /* ===== HEADER ===== */
+  header{background:var(--header-grad); border-bottom:2px solid var(--accent); padding:20px 22px}
+  .header-inner{max-width:820px; margin:0 auto}
+  .logo-header-wrap{display:flex; align-items:center; gap:.9rem}
+  .logo-box{
+    background:#fff; border-radius:10px; padding:.4rem .75rem;
+    display:flex; align-items:center; justify-content:center;
+    min-width:80px; min-height:52px; flex-shrink:0;
+  }
+  .logo-box img{height:48px; width:auto; display:block}
+  .logo-fallback{font-family:'Manrope',sans-serif; font-size:15px; font-weight:800; color:#1a3a6b; display:none}
+  .logo-slogan{font-size:13px; font-weight:500; color:#fff; letter-spacing:.2px}
+  .header-title{color:#fff; font-size:1.5rem; font-weight:800; margin:18px 0 4px; line-height:1.22}
+  .header-sub{color:#cfe0f2; font-size:.87rem; font-weight:500}
+
+  /* ===== LAYOUT ===== */
+  main{max-width:820px; margin:0 auto; padding:26px 22px 50px}
+  .box{
+    max-width:720px; margin:0 auto 18px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:16px 18px;
+  }
+  h2.seccion{
+    max-width:720px; margin:30px auto 12px; font-size:1.08rem;
+    font-weight:800; color:var(--accent-dark);
+    border-bottom:2px solid var(--card-head); padding-bottom:6px;
+  }
+
+  /* ===== PORTADA ===== */
+  .intro{
+    max-width:720px; margin:0 auto 22px; background:var(--surface);
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:0 12px 12px 0; padding:16px 20px;
+  }
+  .intro p{margin:0 0 9px; font-size:.92rem; color:var(--text2)}
+  .intro p:last-child{margin-bottom:0}
+
+  .idx{max-width:720px; margin:0 auto 18px}
+  .idx-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; overflow:hidden; margin-bottom:12px;
+  }
+  .idx-head{
+    background:var(--card-head); padding:10px 16px;
+    font-weight:800; font-size:.93rem; color:var(--accent-dark);
+  }
+  .idx-body{padding:6px 0}
+  .idx-row{
+    display:flex; align-items:center; gap:12px; padding:9px 16px;
+    border-bottom:1px solid #eef1f6; text-decoration:none; color:inherit;
+  }
+  .idx-row:last-child{border-bottom:none}
+  .idx-row:hover{background:var(--hover)}
+  .idx-ico{flex-shrink:0; font-size:1.15rem; width:26px; text-align:center}
+  .idx-txt{flex:1; min-width:0}
+  .idx-nom{font-weight:700; font-size:.9rem; color:var(--text)}
+  .idx-desc{font-size:.78rem; color:var(--text3); line-height:1.4}
+  .idx-cap{
+    flex-shrink:0; font-size:.72rem; font-weight:800; color:var(--accent-dark);
+    background:var(--card-head); border-radius:20px; padding:2px 10px; white-space:nowrap;
+  }
+
+  /* ===== CAPITULOS ===== */
+  .cap{
+    max-width:720px; margin:0 auto 20px; background:var(--surface);
+    border:1px solid var(--border); border-radius:12px; overflow:hidden;
+  }
+  .cap-head{
+    background:var(--header-grad); padding:14px 18px;
+    display:flex; align-items:center; gap:13px;
+  }
+  .cap-num{
+    flex-shrink:0; width:34px; height:34px; border-radius:9px;
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3);
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:.9rem;
+  }
+  .cap-info{flex:1; min-width:0}
+  .cap-tit{color:#fff; font-weight:800; font-size:1.02rem; line-height:1.3}
+  .cap-sub{color:#cfe0f2; font-size:.76rem; font-weight:500; margin-top:2px}
+  .cap-body{padding:16px 18px}
+  .cap-body > p{margin:0 0 10px; font-size:.9rem; color:var(--text2)}
+  .cap-body > p:last-child{margin-bottom:0}
+
+  .ficha{
+    background:#f0f6ff; border:1px solid #c8d9f0; border-radius:10px;
+    padding:11px 14px; margin:0 0 14px; font-size:.83rem;
+  }
+  .ficha-row{display:flex; gap:8px; padding:3px 0; align-items:baseline}
+  .ficha-k{flex-shrink:0; width:112px; font-weight:800; color:var(--accent-dark)}
+  .ficha-v{flex:1; color:var(--text2)}
+
+  h3.sub{
+    font-size:.9rem; font-weight:800; color:var(--accent-dark);
+    margin:18px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--card-head);
+  }
+  h3.sub:first-child{margin-top:0}
+
+  /* ===== PASOS ===== */
+  .paso{
+    border:1px solid var(--border); border-radius:10px;
+    overflow:hidden; margin-bottom:10px;
+  }
+  .paso-head{
+    background:var(--card-head); padding:9px 14px;
+    display:flex; align-items:center; gap:11px;
+  }
+  .paso-num{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%;
+    background:var(--accent-dark); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:.8rem;
+  }
+  .paso-tit{font-weight:800; font-size:.9rem; color:var(--accent-dark)}
+  .paso-body{padding:12px 14px; font-size:.87rem; color:var(--text2)}
+  .paso-body p{margin:0 0 8px}
+  .paso-body p:last-child{margin-bottom:0}
+
+  .pantalla{
+    display:inline-block; background:var(--bg); border:1px solid var(--border);
+    border-radius:6px; padding:1px 8px; font-weight:700;
+    color:var(--text); font-size:.85rem; white-space:nowrap;
+  }
+  .teclear{
+    display:inline-block; background:#fff; border:2px solid var(--rojo-bd);
+    border-radius:6px; padding:2px 12px; font-weight:800;
+    color:#922b21; letter-spacing:1.5px; font-size:.88rem;
+  }
+
+  .nota,.ojo,.ok{
+    border-radius:0 8px 8px 0; padding:9px 13px; margin:10px 0 0;
+    font-size:.82rem; line-height:1.55;
+  }
+  .nota{background:#f0f6ff; border:1px solid #c8d9f0; border-left:3px solid var(--accent); color:var(--accent-dark)}
+  .ojo{background:var(--rojo-bg); border:1px solid var(--rojo-bd); border-left:3px solid var(--rojo); color:#922b21}
+  .ok{background:var(--verde-bg); border:1px solid var(--verde-bd); border-left:3px solid #3AAA35; color:var(--verde)}
+
+  ul.lista{margin:8px 0 0; padding-left:20px; font-size:.87rem; color:var(--text2)}
+  ul.lista li{margin-bottom:6px}
+
+  .tabla-wrap{overflow-x:auto; margin:10px 0 0}
+  table{width:100%; border-collapse:collapse; font-size:.82rem; min-width:420px}
+  th{
+    background:var(--card-head); color:var(--accent-dark); text-align:left;
+    padding:8px 11px; font-weight:800; border-bottom:1px solid var(--border);
+  }
+  td{padding:8px 11px; border-bottom:1px solid #eef1f6; color:var(--text2); vertical-align:top}
+  tr:last-child td{border-bottom:none}
+
+  .volver{
+    display:block; max-width:720px; margin:0 auto 24px; text-align:right;
+    font-size:.78rem; font-weight:700; color:var(--accent-dark); text-decoration:none;
+  }
+  .volver:hover{text-decoration:underline}
+  .volver-top{margin:-6px auto 8px}
+
+  footer{
+    max-width:720px; margin:34px auto 0; padding-top:14px;
+    border-top:1px solid var(--border);
+    font-size:.76rem; color:var(--text3); text-align:center;
+  }
+
+  /* ===== MOVIL ===== */
+  @media (max-width:600px){
+    body{font-size:14px}
+    header{padding:14px 16px}
+    .logo-header-wrap{flex-direction:column; align-items:flex-start; gap:.3rem}
+    .logo-slogan{font-size:11px}
+    .header-title{font-size:1.16rem; margin-top:12px}
+    main{padding:18px 14px 40px}
+    .box,.intro,.idx,.cap,h2.seccion,.volver{margin-left:0; margin-right:0}
+    .cap-head{padding:12px 13px; gap:10px}
+    .cap-body{padding:13px 13px}
+    .paso-head{padding:9px 11px; gap:9px}
+    .paso-body{padding:11px 11px; font-size:.85rem}
+    .pantalla{white-space:normal}
+    .idx-row{flex-wrap:wrap; gap:8px}
+    .idx-cap{order:3}
+    .ficha-row{flex-direction:column; gap:1px}
+    .ficha-k{width:auto}
+  }
+
+  /* ===== IMPRESION ===== */
+  @page{ size:Letter; margin:13mm; }
+  @media print{
+    body{background:#fff; font-size:11pt}
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    header,main,section,div,.box,.cap,.cap-body,.idx{ break-inside:auto; }
+    .paso,.nota,.ojo,.ok,.ficha,.paso-head,.cap-head,.idx-row,tr{ break-inside:avoid; }
+    h1,h2,h3,h4,.paso-tit,.cap-tit,.idx-head{ break-after:avoid; }
+    p,li{ orphans:3; widows:3; }
+    thead{ display:table-header-group; }
+    .no-print,.volver{ display:none !important; }
+    a[href]:after{ content:none; }
+    a{color:inherit; text-decoration:none}
+    .cap{break-before:page}
+    main{padding-top:10px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="header-title">Manual de envíos del Dashboard</div>
+    <div class="header-sub">Club Berimbau · Los diez avisos, uno por uno · Septiembre 2026</div>
+  </div>
+</header>
+
+<main id="top">
+
+  <div class="intro">
+    <p><strong>Para qué sirve este manual.</strong> El Dashboard manda diez tipos de aviso distintos y no
+    todos funcionan igual: unos salen solos, otros hay que autorizarlos cada mes y otros los tiene que
+    mandar una persona. Aquí está cada uno con sus pasos, con los nombres tal como aparecen en pantalla.</p>
+    <p><strong>Cómo usarlo.</strong> Hay dos formas de encontrar lo que se busca, y las dos llevan al mismo
+    capítulo. Si ya se sabe en qué parte del Dashboard vive el aviso, se usa el primer índice; si lo que se
+    quiere es mandar algo y no se sabe dónde está, se usa el segundo.</p>
+  </div>
+
+  <h2 class="seccion">Índice 1 · Por dónde se entra en el Dashboard</h2>
+
+  <div class="idx">
+
+    <div class="idx-card">
+      <div class="idx-head">✉️ Módulo de Avisos · General</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap1">
+          <span class="idx-ico">⚙️</span>
+          <span class="idx-txt"><span class="idx-nom">General</span>
+          <span class="idx-desc">Día, hora y remitente de los avisos de cobranza; el interruptor de todo</span></span>
+          <span class="idx-cap">Cap. 1</span>
+        </a>
+        <a class="idx-row" href="#cap2">
+          <span class="idx-ico">✍️</span>
+          <span class="idx-txt"><span class="idx-nom">Envío manual</span>
+          <span class="idx-desc">Mandar un correo de cobranza en el momento, sin esperar a la fecha</span></span>
+          <span class="idx-cap">Cap. 2</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="idx-card">
+      <div class="idx-head">✉️ Módulo de Avisos · Cobranza por segmento</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap3">
+          <span class="idx-ico">🟡</span>
+          <span class="idx-txt"><span class="idx-nom">0–30 días · Olvido / Descuido</span>
+          <span class="idx-desc">Los cuatro tramos comparten capítulo: aquí solo vive el texto del mensaje</span></span>
+          <span class="idx-cap">Cap. 3</span>
+        </a>
+        <a class="idx-row" href="#cap3">
+          <span class="idx-ico">🟠</span>
+          <span class="idx-txt"><span class="idx-nom">31–60 días · Problema temporal</span></span>
+          <span class="idx-cap">Cap. 3</span>
+        </a>
+        <a class="idx-row" href="#cap3">
+          <span class="idx-ico">🔴</span>
+          <span class="idx-txt"><span class="idx-nom">61–90 días · Riesgo alto</span></span>
+          <span class="idx-cap">Cap. 3</span>
+        </a>
+        <a class="idx-row" href="#cap3">
+          <span class="idx-ico">⛔</span>
+          <span class="idx-txt"><span class="idx-nom">+90 días · Posible abandono</span></span>
+          <span class="idx-cap">Cap. 3</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="idx-card">
+      <div class="idx-head">✉️ Módulo de Avisos · Avisos automáticos</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap4">
+          <span class="idx-ico">📅</span>
+          <span class="idx-txt"><span class="idx-nom">Campaña anual</span>
+          <span class="idx-desc">Renovación del pago anual · 1 oct, 1 nov, 1 dic y 1 ene</span></span>
+          <span class="idx-cap">Cap. 4</span>
+        </a>
+        <a class="idx-row" href="#cap5">
+          <span class="idx-ico">🏦</span>
+          <span class="idx-txt"><span class="idx-nom">Domiciliado</span>
+          <span class="idx-desc">Aviso previo del cargo automático · se autoriza cada mes</span></span>
+          <span class="idx-cap">Cap. 5</span>
+        </a>
+        <a class="idx-row" href="#cap6">
+          <span class="idx-ico">🏦❌</span>
+          <span class="idx-txt"><span class="idx-nom">Cargo fallido</span>
+          <span class="idx-desc">Está bajo este letrero pero <strong>no es automático</strong>: lo manda una persona</span></span>
+          <span class="idx-cap">Cap. 6</span>
+        </a>
+        <a class="idx-row" href="#cap7">
+          <span class="idx-ico">🎂</span>
+          <span class="idx-txt"><span class="idx-nom">Cumpleaños</span>
+          <span class="idx-desc">Felicitación el día exacto, a las 8:00 de la mañana</span></span>
+          <span class="idx-cap">Cap. 7</span>
+        </a>
+        <a class="idx-row" href="#cap8">
+          <span class="idx-ico">🔔</span>
+          <span class="idx-txt"><span class="idx-nom">Alerta 26</span>
+          <span class="idx-desc">Dependientes próximos a cumplir 26 · tiene aviso automático <em>y</em> botón manual</span></span>
+          <span class="idx-cap">Cap. 8</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="idx-card">
+      <div class="idx-head">✉️ Módulo de Avisos · Anuales</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap9">
+          <span class="idx-ico">👨‍👩‍👧</span>
+          <span class="idx-txt"><span class="idx-nom">Dependientes con adeudo</span>
+          <span class="idx-desc">Está bajo «Anuales» pero tampoco es automático: lo manda una persona</span></span>
+          <span class="idx-cap">Cap. 9</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="idx-card">
+      <div class="idx-head">Otras pestañas del Dashboard</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap10">
+          <span class="idx-ico">🔔</span>
+          <span class="idx-txt"><span class="idx-nom">Notificaciones</span>
+          <span class="idx-desc">No manda nada: son los casos que necesitan que alguien los mire</span></span>
+          <span class="idx-cap">Cap. 10</span>
+        </a>
+        <a class="idx-row" href="#cap11">
+          <span class="idx-ico">🕘</span>
+          <span class="idx-txt"><span class="idx-nom">Historial</span>
+          <span class="idx-desc">Dónde se comprueba que un aviso salió, sea cual sea</span></span>
+          <span class="idx-cap">Cap. 11</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <h2 class="seccion">Índice 2 · Por cómo se dispara el aviso</h2>
+
+  <div class="box" style="margin-bottom:14px">
+    <p style="margin:0; font-size:.88rem; color:var(--text2)">Esta es la parte que más confunde y por eso va
+    aparte: <strong>el letrero del menú no dice cómo se dispara el aviso</strong>. Bajo «Avisos automáticos»
+    hay uno que no lo es, y bajo «Anuales» hay otro igual. Aquí están agrupados por lo que de verdad hay que
+    hacer para que salgan.</p>
+  </div>
+
+  <div class="idx">
+
+    <div class="idx-card">
+      <div class="idx-head">🟢 Salen solos · se prenden una vez y ya</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap7">
+          <span class="idx-ico">🎂</span>
+          <span class="idx-txt"><span class="idx-nom">Cumpleaños</span>
+          <span class="idx-desc">Todos los días a las 8:00 am, a quien cumpla ese día</span></span>
+          <span class="idx-cap">Cap. 7</span>
+        </a>
+        <a class="idx-row" href="#cap8">
+          <span class="idx-ico">🔔</span>
+          <span class="idx-txt"><span class="idx-nom">Alerta 26 — el aviso automático</span>
+          <span class="idx-desc">Todos los días a las 10:00 am, 30 días antes del cumpleaños 26</span></span>
+          <span class="idx-cap">Cap. 8</span>
+        </a>
+        <a class="idx-row" href="#cap4">
+          <span class="idx-ico">📅</span>
+          <span class="idx-txt"><span class="idx-nom">Campaña anual</span>
+          <span class="idx-desc">Se prende una vez y cubre las cuatro fechas de la temporada</span></span>
+          <span class="idx-cap">Cap. 4</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="idx-card">
+      <div class="idx-head">🔴 Hay que autorizarlo cada mes, antes de la hora</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap5">
+          <span class="idx-ico">🏦</span>
+          <span class="idx-txt"><span class="idx-nom">Domiciliado — aviso previo</span>
+          <span class="idx-desc">El día 1 a las 10:00 am, pero solo si alguien prendió el interruptor antes</span></span>
+          <span class="idx-cap">Cap. 5</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="idx-card">
+      <div class="idx-head">✋ Los manda una persona, cuando decide mandarlos</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap6">
+          <span class="idx-ico">🏦❌</span>
+          <span class="idx-txt"><span class="idx-nom">Cargo fallido</span>
+          <span class="idx-desc">Se revisa la lista, se palomea y se manda. No hay hora ni interruptor</span></span>
+          <span class="idx-cap">Cap. 6</span>
+        </a>
+        <a class="idx-row" href="#cap9">
+          <span class="idx-ico">👨‍👩‍👧</span>
+          <span class="idx-txt"><span class="idx-nom">Dependientes con adeudo</span>
+          <span class="idx-desc">Se revisa el detalle y se manda a los titulares</span></span>
+          <span class="idx-cap">Cap. 9</span>
+        </a>
+        <a class="idx-row" href="#cap8">
+          <span class="idx-ico">📤</span>
+          <span class="idx-txt"><span class="idx-nom">Alerta 26 — el botón manual</span>
+          <span class="idx-desc">Para los casos que ya se pasaron de los 30 días; funciona aunque el automático esté apagado</span></span>
+          <span class="idx-cap">Cap. 8</span>
+        </a>
+        <a class="idx-row" href="#cap2">
+          <span class="idx-ico">✍️</span>
+          <span class="idx-txt"><span class="idx-nom">Envío manual de cobranza</span>
+          <span class="idx-desc">Un correo a un segmento o a socios elegidos a mano, en el momento</span></span>
+          <span class="idx-cap">Cap. 2</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="idx-card">
+      <div class="idx-head">📅 Se programa para una fecha y una hora</div>
+      <div class="idx-body">
+        <a class="idx-row" href="#cap1">
+          <span class="idx-ico">⚙️</span>
+          <span class="idx-txt"><span class="idx-nom">Cobranza por segmento</span>
+          <span class="idx-desc">El texto vive en cada tramo, pero la fecha y el disparo se ponen en General</span></span>
+          <span class="idx-cap">Cap. 1 y 3</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="box">
+    <p style="margin:0 0 8px"><strong>Tres cosas que valen para todos los capítulos.</strong></p>
+    <ul class="lista" style="margin-top:0">
+      <li><strong>El modo prueba manda sobre todo lo demás.</strong> Lo primero que aparece al entrar a
+      <span class="pantalla">✉️ Módulo de Avisos</span> es el recuadro <span class="pantalla">🔒 Modo prueba</span>.
+      Si dice <span class="pantalla">Modo prueba ACTIVO</span>, ningún aviso llega a socios del Club: todos se
+      van al equipo de prueba. Conviene revisarlo antes de cualquier envío.</li>
+      <li><strong>Los botones que dicen «Probar» nunca llegan a socios.</strong> Le mandan el mensaje al
+      equipo de prueba para ver cómo se ve. Sirven para revisar un texto, no para enviar.</li>
+      <li><strong>Todo lo que sale queda registrado en</strong> <span class="pantalla">🕘 Historial</span>,
+      con el módulo que lo envió y el estado de cada mensaje. Es donde se comprueba, siempre.</li>
+    </ul>
+  </div>
+
+  <h2 class="seccion">Capítulo 1 · ⚙️ General</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap1">
+    <div class="cap-head">
+      <div class="cap-num">1</div>
+      <div class="cap-info">
+        <div class="cap-tit">⚙️ General — Programación Automática Mensual</div>
+        <div class="cap-sub">Aquí se decide qué día, a qué hora y desde qué correo salen los avisos de cobranza</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → ⚙️ General</div></div>
+        <div class="ficha-row"><div class="ficha-k">Qué manda</div><div class="ficha-v">Los avisos de cobranza por segmento (los cuatro tramos del capítulo 3)</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cómo se dispara</div><div class="ficha-v">Se programa una fecha y una hora; el sistema lo manda ese día</div></div>
+        <div class="ficha-row"><div class="ficha-k">Canal</div><div class="ficha-v">Correo</div></div>
+      </div>
+
+      <p>Esta pantalla es la que hace que los avisos de cobranza salgan. Los cuatro tramos —0–30, 31–60,
+      61–90 y +90 días— guardan el texto del mensaje, pero <strong>ninguno de ellos envía por su cuenta</strong>:
+      el disparo se arma aquí.</p>
+
+      <h3 class="sub">Lo que hay en la pantalla</h3>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Control</th><th>Para qué es</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pantalla">Envíos automáticos: OFF</span></td><td>El interruptor general de la programación de cobranza. Es distinto del interruptor de cada tramo</td></tr>
+            <tr><td><span class="pantalla">Día de envío</span></td><td>Qué día del mes sale el aviso. Admite del 1 al 28</td></tr>
+            <tr><td><span class="pantalla">Hora de envío</span></td><td>La hora a la que sale ese día</td></tr>
+            <tr><td><span class="pantalla">Correo remitente</span></td><td>Desde qué dirección se manda. Para envíos a socios va la de <span class="pantalla">cobranza@clubberimbau.com.mx (Producción)</span></td></tr>
+            <tr><td><span class="pantalla">📅 Programar envío</span></td><td>Guarda la programación y la deja en la fila de pendientes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Los pasos</h3>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Deja encendido un solo tramo</div></div>
+        <div class="paso-body">
+          <p>Antes de venir aquí, en el menú de la izquierda entra al tramo que quieres mandar
+          (por ejemplo <span class="pantalla">🟠 31–60 días</span>) y enciende su interruptor.
+          <strong>Revisa que los otros tres estén apagados.</strong></p>
+          <div class="ojo"><strong>Esto es lo más importante de este capítulo.</strong> Al programar, el
+          sistema toma <strong>el primer tramo que encuentra encendido</strong>, no todos. Si quedan dos
+          prendidos, solo sale uno y en pantalla nada avisa que el otro se quedó fuera.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Revisa el texto del tramo</div></div>
+        <div class="paso-body">
+          <p>La programación se lleva el <span class="pantalla">Asunto del correo</span> y el
+          <span class="pantalla">Mensaje</span> del tramo encendido, tal como estén guardados en ese momento.
+          Si hay que corregir algo, se corrige allá y se guarda antes de venir aquí.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Pon día, hora y remitente</div></div>
+        <div class="paso-body">
+          <p>Llena <span class="pantalla">Día de envío</span> y <span class="pantalla">Hora de envío</span>,
+          y en <span class="pantalla">Correo remitente</span> elige la dirección de producción.</p>
+          <div class="nota">La otra opción de la lista es de demostración y sirve para pruebas internas de
+          ExcelentIA; para un envío a socios va siempre la de cobranza del Club.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">4</div><div class="paso-tit">Presiona «Programar envío»</div></div>
+        <div class="paso-body">
+          <p>El botón <span class="pantalla">📅 Programar envío</span> guarda la programación. Aparece un
+          mensajito confirmando la hora y el tramo que quedó programado; conviene leerlo, porque ahí se ve
+          <strong>cuál tramo tomó</strong>.</p>
+          <div class="ok">Si el mensajito nombra el tramo que querías, quedó bien. Si nombra otro, es que
+          había más de un interruptor encendido: apaga los que sobran y vuelve a programar.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">5</div><div class="paso-tit">Verifica en la lista de pendientes</div></div>
+        <div class="paso-body">
+          <p>Más abajo, en esa misma pantalla, está la lista de <strong>envíos programados pendientes</strong>,
+          con la fecha, la hora y el tramo de cada uno. Ahí debe aparecer el que acabas de crear; el botón
+          <span class="pantalla">🔄 Actualizar</span> vuelve a preguntarle al servidor.</p>
+        </div>
+      </div>
+
+      <div class="ojo" style="margin-top:14px"><strong>Si el envío ya pasó su hora, no se recupera solo.</strong>
+      Programar algo para una hora que ya pasó no lo dispara hacia atrás: ese día se queda sin envío y no
+      aparece ningún error. Si se pasó la hora, se usa el <strong>envío manual</strong> del capítulo 2.</div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 2 · ✍️ Envío manual</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap2">
+    <div class="cap-head">
+      <div class="cap-num">2</div>
+      <div class="cap-info">
+        <div class="cap-tit">✍️ Envío manual — Enviar correo ahora</div>
+        <div class="cap-sub">Un aviso de cobranza en el momento, a un tramo completo o a socios elegidos uno por uno</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → ✍️ Envío manual</div></div>
+        <div class="ficha-row"><div class="ficha-k">Qué manda</div><div class="ficha-v">El aviso de cobranza de un tramo, o uno redactado para socios elegidos a mano</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cómo se dispara</div><div class="ficha-v">Lo manda una persona, en ese momento</div></div>
+        <div class="ficha-row"><div class="ficha-k">Canal</div><div class="ficha-v">Correo, y opcionalmente también WhatsApp</div></div>
+      </div>
+
+      <p>Es la salida para cuando no se quiere esperar a la fecha programada: se elige a quién, se revisa el
+      texto y se manda. Sirve igual para mandarle a un tramo completo que a tres socios en particular.</p>
+
+      <h3 class="sub">Los pasos</h3>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Elige el segmento destino</div></div>
+        <div class="paso-body">
+          <p>En <span class="pantalla">Segmento destino</span> hay cinco opciones: los cuatro tramos
+          —<span class="pantalla">🟡 0–30 días (olvido)</span>, <span class="pantalla">🟠 31–60 días (temporal)</span>,
+          <span class="pantalla">🔴 61–90 días (riesgo)</span> y <span class="pantalla">⛔ +90 días (abandono)</span>—
+          y <span class="pantalla">✏️ Selección manual de destinatarios</span>.</p>
+          <p>Al elegir un tramo, <strong>la plantilla de ese tramo se carga sola</strong> y se puede editar
+          antes de mandar. Lo que se edite aquí vale solo para este envío.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Revisa a quién le va a llegar</div></div>
+        <div class="paso-body">
+          <p>Aparece la lista de destinatarios con sus casillas. Los botones
+          <span class="pantalla">✓ Todos</span> y <span class="pantalla">✕ Ninguno</span> ayudan a marcar
+          rápido, y de ahí se destilda a quien no deba recibirlo.</p>
+          <p>Si se eligió <span class="pantalla">✏️ Selección manual de destinatarios</span>, los socios se
+          buscan y se palomean uno por uno.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Agrega correos de fuera, si hace falta</div></div>
+        <div class="paso-body">
+          <p>Hay un campo para escribir un correo y el botón <span class="pantalla">+ Agregar</span>.
+          Sirve para mandarle copia a alguien que no está en el padrón; cada correo agregado aparece como
+          una etiqueta que se puede quitar.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">4</div><div class="paso-tit">Decide si también va por WhatsApp</div></div>
+        <div class="paso-body">
+          <p>Junto al botón de enviar está la casilla <span class="pantalla">📱 Enviar también por WhatsApp</span>.
+          Apagada, el aviso sale solo por correo; encendida, sale por los dos canales a quien tenga celular
+          capturado.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">5</div><div class="paso-tit">Mira la vista previa</div></div>
+        <div class="paso-body">
+          <p>El botón <span class="pantalla">👁 Vista previa</span> muestra cómo queda el mensaje ya con los
+          datos del socio sustituidos. Vale la pena antes de mandar, sobre todo si se editó el texto.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">6</div><div class="paso-tit">Manda y confirma</div></div>
+        <div class="paso-body">
+          <p>El botón dice <span class="pantalla">✉️ Enviar a N socios</span> con el número de marcados.
+          Ese número tiene que ser el que esperabas. Se abre una ventana de confirmación antes de que
+          salga nada.</p>
+          <div class="ojo"><strong>Aquí los mensajes salen en ese momento</strong>, no es una autorización
+          para después. Una vez enviado no hay forma de recogerlo.</div>
+        </div>
+      </div>
+
+      <div class="nota" style="margin-top:14px">Las variables que se pueden usar en el texto son las mismas
+      de los tramos: <span class="pantalla">{{nombre}}</span>, <span class="pantalla">{{mes}}</span>,
+      <span class="pantalla">{{dias}}</span> y <span class="pantalla">{{membresia}}</span>. El sistema
+      informa el atraso en <strong>días exactos</strong>, no en meses.</div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 3 · 🟡🟠🔴⛔ Cobranza por segmento</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap3">
+    <div class="cap-head">
+      <div class="cap-num">3</div>
+      <div class="cap-info">
+        <div class="cap-tit">Los cuatro tramos de cobranza</div>
+        <div class="cap-sub">0–30 · 31–60 · 61–90 · +90 días · Aquí vive el texto, no el envío</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde están</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → los cuatro renglones del grupo «Cobranza por segmento»</div></div>
+        <div class="ficha-row"><div class="ficha-k">Qué guardan</div><div class="ficha-v">El asunto y el cuerpo del correo de cada tramo</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cómo se envían</div><div class="ficha-v">Desde ⚙️ General (programado) o desde ✍️ Envío manual (en el momento)</div></div>
+      </div>
+
+      <div class="ojo" style="margin-top:0"><strong>Estos cuatro módulos no tienen botón de enviar, y es a
+      propósito.</strong> Cada uno guarda el mensaje de su tramo y poco más. Si se busca dónde mandarlos,
+      está en el capítulo 1 o en el capítulo 2.</div>
+
+      <h3 class="sub">Los cuatro, y a quién le habla cada uno</h3>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Tramo</th><th>Cómo se llama en pantalla</th><th>De qué trata el mensaje</th></tr></thead>
+          <tbody>
+            <tr><td>🟡</td><td><strong>0–30 días · Olvido / Descuido</strong></td><td>Un recordatorio amable: se asume que fue un descuido</td></tr>
+            <tr><td>🟠</td><td><strong>31–60 días · Problema temporal</strong></td><td>Ya se nota el atraso y se invita a ponerse en contacto</td></tr>
+            <tr><td>🔴</td><td><strong>61–90 días · Riesgo alto</strong></td><td>Se marca la urgencia de regularizar</td></tr>
+            <tr><td>⛔</td><td><strong>+90 días · Posible abandono</strong></td><td>Se busca recuperar al socio, con un tono de acercamiento</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Qué hay dentro de cada uno</h3>
+
+      <p>Los cuatro son idénticos por dentro. Al abrir cualquiera aparece:</p>
+      <ul class="lista">
+        <li><strong>El interruptor del tramo</strong>, arriba a la derecha. No manda nada por sí solo:
+        marca cuál tramo se lleva ⚙️ General al programar.</li>
+        <li><span class="pantalla">Asunto del correo</span> — el renglón que ve el socio en su bandeja.</li>
+        <li><span class="pantalla">Mensaje (cuerpo del correo)</span> — el texto completo del aviso.</li>
+        <li><strong>Las variables</strong> <span class="pantalla">{{nombre}}</span>,
+        <span class="pantalla">{{mes}}</span>, <span class="pantalla">{{dias}}</span> y
+        <span class="pantalla">{{membresia}}</span>, que el sistema sustituye por los datos de cada socio.</li>
+        <li><span class="pantalla">💾 Guardar</span> — guarda el texto de ese tramo.</li>
+      </ul>
+
+      <div class="nota">Un texto editado y no guardado se pierde al cambiar de módulo, y el envío se llevaría
+      la versión anterior sin avisar. Conviene guardar antes de salir.</div>
+
+      <h3 class="sub">Cómo mandar un tramo, en corto</h3>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Si se quiere…</th><th>Se hace así</th></tr></thead>
+          <tbody>
+            <tr><td>Que salga en una fecha</td><td>Encender solo ese tramo y programarlo en ⚙️ General <em>(capítulo 1)</em></td></tr>
+            <tr><td>Mandarlo ahora mismo</td><td>Ir a ✍️ Envío manual y elegirlo en «Segmento destino» <em>(capítulo 2)</em></td></tr>
+            <tr><td>Ver cómo quedó el texto</td><td>Usar la vista previa del envío manual, sin llegar a enviar</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 4 · 📅 Campaña anual</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap4">
+    <div class="cap-head">
+      <div class="cap-num">4</div>
+      <div class="cap-info">
+        <div class="cap-tit">📅 Pago Anual — Campaña de Renovación</div>
+        <div class="cap-sub">Cuatro disparos de temporada: 1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → 📅 Campaña anual</div></div>
+        <div class="ficha-row"><div class="ficha-k">A quién le llega</div><div class="ficha-v">Solo a quien ya tiene pago anual vigente, y solo a la cuota base: Titular, Cónyuge, Individual e Individual Menor. Dependientes y becados quedan fuera</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cuándo sale</div><div class="ficha-v">1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero, a las 8:00 de la mañana</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cómo se dispara</div><div class="ficha-v">Se prende una sola vez y cubre las cuatro fechas</div></div>
+        <div class="ficha-row"><div class="ficha-k">Canal</div><div class="ficha-v">Correo y WhatsApp</div></div>
+      </div>
+
+      <p>Las membresías con pago anual terminan todas el 31 de diciembre, así que no hay vencimientos
+      individuales: es una campaña de temporada, con cuatro fechas iguales para todos.</p>
+
+      <div class="ojo"><strong>El envío del 1 de octubre es el más grande del año: alrededor de 460 correos
+      de una sola vez.</strong> Conviene tenerlo presente y revisar el Historial ese día.</div>
+
+      <h3 class="sub">Las tres plantillas para las cuatro fechas</h3>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Plantilla</th><th>De qué habla</th></tr></thead>
+          <tbody>
+            <tr><td>1 de octubre</td><td><strong>Plantilla — 1 de octubre</strong></td><td>Anuncia que ya casi llegan los beneficios y que a partir del 1 de noviembre se puede pedir cotización</td></tr>
+            <tr><td>1 de noviembre</td><td><strong>Plantilla — 1 de noviembre</strong></td><td>Invita a renovar antes de la fecha límite. Usa la variable <span class="pantalla">{{fecha_limite}}</span>, que el sistema cambia por «31 de diciembre de [año]»</td></tr>
+            <tr><td>1 de dic y 1 de ene</td><td><strong>Plantilla — cierre</strong></td><td>Recuerda que todavía se pueden obtener los beneficios. Las dos fechas comparten el mismo texto</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Los pasos para activarla</h3>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Revisa que el modo prueba esté apagado</div></div>
+        <div class="paso-body">
+          <p>Arriba de la pantalla de avisos, el recuadro <span class="pantalla">🔒 Modo prueba</span> tiene
+          que decir <span class="pantalla">Modo prueba apagado</span>.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Lee los tres textos</div></div>
+        <div class="paso-body">
+          <p>Cada plantilla tiene su <span class="pantalla">Asunto</span> y su cuerpo, y se pueden editar
+          desde ahí mismo. Vale la pena leer los tres antes de encender, porque el interruptor autoriza los
+          cuatro disparos de golpe.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Elige los canales</div></div>
+        <div class="paso-body">
+          <p>Arriba del módulo están los botones <span class="pantalla">✉️ Correo</span> y
+          <span class="pantalla">📱 WhatsApp</span>. Encendidos los dos, el aviso sale por ambos a quien
+          tenga los dos datos capturados.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">4</div><div class="paso-tit">Prueba el disparo que quieras ver</div></div>
+        <div class="paso-body">
+          <p>En <span class="pantalla">🧪 ¿Qué disparo quieres probar?</span> se elige cuál de las tres
+          plantillas mandar, y el botón <span class="pantalla">🧪 Probar (seleccionados)</span> se la manda
+          al equipo de prueba marcado abajo.</p>
+          <div class="nota">Este botón nunca le llega a un socio del Club, aunque el modo prueba esté apagado.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">5</div><div class="paso-tit">Enciende la campaña</div></div>
+        <div class="paso-body">
+          <p>Baja al bloque <span class="pantalla">🔌 ¿Está activa la campaña?</span>. Apagada, el recuadro
+          es gris y dice <span class="pantalla">⚫ Apagada</span>. Presiona
+          <span class="pantalla">🟢 Activar la campaña</span>.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">6</div><div class="paso-tit">Confirma escribiendo la palabra</div></div>
+        <div class="paso-body">
+          <p>Se abre la ventana <span class="pantalla">🟢 Activar la campaña de renovación anual</span>, que
+          recuerda las cuatro fechas y el tamaño del envío de octubre. Escribe
+          <span class="teclear">ACTIVAR</span>, con mayúsculas; el botón se enciende hasta que la palabra
+          queda bien escrita.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">7</div><div class="paso-tit">Verifica que haya quedado</div></div>
+        <div class="paso-body">
+          <p>El recuadro cambia de gris a verde y dice <span class="pantalla">🟢 Activada</span>, y arriba,
+          en el encabezado del módulo, la etiqueta pasa de <span class="pantalla">⏸ Pausado</span> a
+          <span class="pantalla">✅ Activo</span>.</p>
+          <div class="ok">Si quedó en verde, ya está: los cuatro avisos van a salir solos en sus fechas.</div>
+        </div>
+      </div>
+
+      <h3 class="sub">Dos cosas que conviene saber</h3>
+
+      <p><strong>No se apaga solo.</strong> A diferencia del aviso de domiciliados, este queda encendido hasta
+      que alguien lo apague. Es a propósito: si se apagara después del primer disparo, el del mes siguiente
+      no saldría y nadie se enteraría hasta que un socio lo reclamara.</p>
+
+      <p style="margin-bottom:0"><strong>Las cuatro fechas no se editan.</strong> Aparecen como etiquetas
+      —<span class="pantalla">1 de octubre</span>, <span class="pantalla">1 de noviembre</span>,
+      <span class="pantalla">1 de diciembre</span> y <span class="pantalla">1 de enero</span>— y son fijas.
+      El interruptor las prende y las apaga juntas; no se activan por separado.</p>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 5 · 🏦 Domiciliado — aviso previo</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap5">
+    <div class="cap-head">
+      <div class="cap-num">5</div>
+      <div class="cap-info">
+        <div class="cap-tit">🏦 Cómo activar el aviso previo de cargo domiciliado</div>
+        <div class="cap-sub">Hay que autorizarlo cada mes, antes de la hora del envío · 8 pasos, unos 2 minutos</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → 🏦 Domiciliado</div></div>
+        <div class="ficha-row"><div class="ficha-k">Qué avisa</div><div class="ficha-v">Que en los primeros días del mes se hace el cargo automático del mantenimiento</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cuándo sale</div><div class="ficha-v">El día 1 de cada mes a las 10:00 de la mañana</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cómo se dispara</div><div class="ficha-v">Sale solo, pero <strong>solo si alguien encendió el interruptor antes de esa hora</strong></div></div>
+        <div class="ficha-row"><div class="ficha-k">Canal</div><div class="ficha-v">Correo a todos, y WhatsApp a quien tenga celular capturado</div></div>
+      </div>
+
+      <div class="ojo" style="margin-top:0"><strong>El interruptor se apaga solo después de enviar.</strong>
+      Es a propósito: cada mes alguien tiene que activarlo a conciencia, para que nunca salga un envío que
+      nadie autorizó. Hay que repetir estos pasos <strong>el día 1 de cada mes, antes de las 10:00</strong>.</div>
+
+      <p style="margin-top:14px"><strong>Qué se va a enviar.</strong> El recordatorio del cargo automático del
+      mes. Va a alrededor de 310 membresías. Quien ya trae días de adeudo queda fuera automáticamente, porque
+      a esa persona le toca el aviso de cobranza y no este; el número exacto se calcula en el momento del envío.</p>
+
+      <h3 class="sub">Los pasos</h3>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Abre el Dashboard</div></div>
+        <div class="paso-body">
+          <p>Entra con la liga de siempre, desde la computadora o el celular.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Ve a la pestaña de avisos</div></div>
+        <div class="paso-body">
+          <p>En la barra de pestañas de arriba, entra a <span class="pantalla">✉️ Módulo de Avisos</span>.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Revisa que el modo prueba esté apagado</div></div>
+        <div class="paso-body">
+          <p>Lo primero que aparece en esa pantalla es el recuadro <span class="pantalla">🔒 Modo prueba</span>.
+          Abajo del título tiene que decir <span class="pantalla">Modo prueba apagado</span>.</p>
+          <div class="ojo"><strong>Si dice «Modo prueba ACTIVO»</strong> (y se ve una franja verde debajo), el
+          aviso no les llegaría a los socios: se iría solo al equipo de prueba. Apaga el interruptor antes de
+          seguir.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">4</div><div class="paso-tit">Entra al módulo Domiciliado</div></div>
+        <div class="paso-body">
+          <p>En el menú de la izquierda de esa misma pantalla, elige
+          <span class="pantalla">🏦 Domiciliado</span>. Se abre el módulo
+          <strong>Domiciliados — Aviso Previo</strong>.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">5</div><div class="paso-tit">Busca el recuadro del interruptor</div></div>
+        <div class="paso-body">
+          <p>Baja un poco hasta el bloque que dice
+          <span class="pantalla">🔌 ¿Va a salir el aviso este mes?</span>.
+          Cuando está apagado el recuadro es gris y dice <span class="pantalla">⚫ Apagado</span>.</p>
+          <div class="ojo"><strong>Ese es el interruptor que manda.</strong> Más abajo, junto a los botones,
+          hay otro que dice <span class="pantalla">PAUSADO</span>: ese es otro control y no decide si el aviso
+          sale. No hace falta tocarlo.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">6</div><div class="paso-tit">Presiona el botón rojo</div></div>
+        <div class="paso-body">
+          <p>Dentro de ese recuadro, del lado derecho, está el botón
+          <span class="pantalla">🔴 Activar el aviso del día 1</span>. Presiónalo.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">7</div><div class="paso-tit">Confirma escribiendo la palabra</div></div>
+        <div class="paso-body">
+          <p>Se abre una ventana que te dice a cuántas membresías les va a llegar. Para confirmar,
+          escribe en el recuadro la palabra <span class="teclear">ACTIVAR</span>, con mayúsculas.</p>
+          <p>El botón rojo <span class="pantalla">🔴 Activar</span> se enciende hasta que la palabra queda
+          bien escrita. Presiónalo.</p>
+          <div class="nota">Este botón <strong>no envía en ese momento</strong>: autoriza el envío. Los
+          mensajes los manda el sistema solo, a la hora programada.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">8</div><div class="paso-tit">Verifica que haya quedado</div></div>
+        <div class="paso-body">
+          <p>El recuadro cambia de gris a rosa y ahora dice <span class="pantalla">🔴 Activado</span>.
+          También aparece un mensajito abajo confirmando que quedó activado.</p>
+          <div class="ok"><strong>Si el recuadro se puso rosa y dice Activado, ya está.</strong> No hay que
+          hacer nada más; el aviso sale solo. Si se quedó gris, no quedó guardado: vuelve a intentar y, si
+          sigue igual, avísanos por el chat.</div>
+        </div>
+      </div>
+
+      <h3 class="sub">Cómo comprobar que salió</h3>
+
+      <p>Después de la hora del envío, entra a la pestaña <span class="pantalla">🕘 Historial</span>. Ahí
+      aparecen los mensajes del día agrupados por socio, con el módulo <strong>Domiciliado Previo</strong> y
+      el estado de entrega de cada uno.</p>
+      <ul class="lista">
+        <li>El interruptor debe verse otra vez en gris, <span class="pantalla">⚫ Apagado</span>: eso confirma
+        que el envío se ejecutó.</li>
+        <li>En el Historial deben aparecer los envíos del día con la fecha de hoy.</li>
+      </ul>
+      <div class="nota">Si a la hora del envío el Historial sigue vacío, avísanos por el chat y lo revisamos
+      de inmediato.</div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 6 · 🏦❌ Cargo fallido</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap6">
+    <div class="cap-head">
+      <div class="cap-num">6</div>
+      <div class="cap-info">
+        <div class="cap-tit">🏦❌ Cómo enviar el aviso de cargo fallido</div>
+        <div class="cap-sub">Este aviso no sale solo: alguien lo tiene que enviar · 9 pasos, unos 5 minutos</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → 🏦❌ Cargo fallido</div></div>
+        <div class="ficha-row"><div class="ficha-k">Qué avisa</div><div class="ficha-v">Que el banco rechazó el cargo automático de la mensualidad, con la invitación a comunicarse con el Club</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cuándo sale</div><div class="ficha-v">Cuando una persona lo manda; no hay hora ni fecha fija</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cómo se dispara</div><div class="ficha-v">A mano, revisando la lista uno por uno</div></div>
+        <div class="ficha-row"><div class="ficha-k">Canal</div><div class="ficha-v">Correo y WhatsApp, según lo que tenga capturado cada socio</div></div>
+      </div>
+
+      <div class="ojo" style="margin-top:0"><strong>Está bajo el letrero «Avisos automáticos» y no lo es.</strong>
+      A diferencia del aviso de cargo domiciliado, aquí no hay interruptor ni hora programada: el Dashboard
+      muestra quiénes traen el cargo rechazado y una persona del Club revisa la lista y manda los avisos.
+      Si nadie entra, no sale nada, y no aparece ningún error.</div>
+
+      <p style="margin-top:14px">No hay prisa de horario: se puede hacer a cualquier hora del día. Lo que sí
+      conviene es hacerlo de una sola sentada, sin cerrar la pestaña a media faena. La cantidad ronda la
+      docena de membresías, pero el número real lo dice la pantalla en el momento en que se carga la lista.</p>
+
+      <h3 class="sub">Los pasos</h3>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Abre el Dashboard</div></div>
+        <div class="paso-body">
+          <p>Entra con la liga de siempre. Para este envío conviene la computadora, porque hay que revisar
+          una lista con nombres.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Entra al módulo de cargo fallido</div></div>
+        <div class="paso-body">
+          <p>En la barra de pestañas de arriba entra a <span class="pantalla">✉️ Módulo de Avisos</span> y, en
+          el menú de la izquierda, elige <span class="pantalla">🏦❌ Cargo fallido</span>. Se abre el módulo
+          <strong>Domiciliados — Cargo Fallido</strong>.</p>
+          <p>Baja hasta el bloque que dice <span class="pantalla">🏦❌ Socios con cargo rechazado</span>.
+          Ahí se hace todo.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Cambia a envío real</div></div>
+        <div class="paso-body">
+          <p>En el recuadro verde <span class="pantalla">🔒 ¿A quién le va a llegar?</span> hay dos opciones.
+          Siempre arranca en <span class="pantalla">🧪 Prueba</span>; hay que marcar
+          <span class="pantalla">🔴 Envío real</span>. El recuadro se pone rosa y aparece el letrero de que
+          los mensajes llegan a socios del Club. Así se sabe que quedó.</p>
+          <div class="ojo">Este paso va <strong>antes</strong> de cargar la lista. Si se cambia después, la
+          lista se borra y hay que volver a pedirla; en modo prueba los avisos se van a socios de mentiras y
+          ningún socio del Club recibe nada.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">4</div><div class="paso-tit">Deja el envío por los dos canales</div></div>
+        <div class="paso-body">
+          <p>Abajo está el recuadro <span class="pantalla">📨 ¿Por dónde se manda?</span>, que viene en
+          <span class="pantalla">Ambos</span>. Así se manda por correo y por WhatsApp a quien tenga los dos,
+          y por el que tenga a los demás. Para el envío normal del mes, no hay que tocarlo.</p>
+          <div class="nota">Las otras dos opciones sirven para reenviar: si a alguien ya se le mandó el correo
+          y solo falta el WhatsApp, se elige <span class="pantalla">📱 Solo WhatsApp</span> y no se le repite
+          el correo. La pantalla avisa cuántos de la lista quedan bloqueados por no tener ese dato.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">5</div><div class="paso-tit">Presiona «Cargar lista»</div></div>
+        <div class="paso-body">
+          <p>Presiona el botón <span class="pantalla">🔄 Cargar lista</span>. Tarda unos segundos y aparece
+          la lista de membresías con el cargo rechazado, con las casillas ya marcadas.</p>
+          <div class="nota">La lista se pregunta al servidor en ese momento, así que siempre está al día;
+          no es lo que traía cargado la pantalla.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">6</div><div class="paso-tit">Revisa la lista y quita a quien no deba recibirlo</div></div>
+        <div class="paso-body">
+          <p>Este es el paso importante y es el que no puede hacer el sistema solo. Cada renglón trae la
+          membresía, el nombre, los canales por los que le va a llegar y, cuando aplica, una etiqueta de
+          color. Se destilda la casilla de quien no deba recibir el aviso; arriba se ve el contador de
+          cuántos van seleccionados.</p>
+          <div class="tabla-wrap">
+            <table>
+              <thead><tr><th>Etiqueta</th><th>Qué significa</th></tr></thead>
+              <tbody>
+                <tr><td><strong>⚠️ Se recomienda omitir</strong></td><td>Esa persona ya trae días de adeudo, así que le corresponde el aviso de cobranza y no este. Vienen destildados; lo normal es dejarlos así</td></tr>
+                <tr><td><strong>📨 Ya se le avisó</strong></td><td>Recibió este mismo aviso en los últimos 30 días. También viene destildado, para no repetirle el mensaje. Si se vuelve a marcar, la pantalla de confirmación lo recuerda antes de mandar</td></tr>
+                <tr><td><strong>↪️ El aviso no le llega al titular</strong></td><td>El titular no tiene correo ni WhatsApp capturado, así que el mensaje va a otro integrante de la membresía. Vale la pena leerlo: el texto habla de «tu membresía» y quien lo recibe puede no ser quien paga</td></tr>
+                <tr><td><strong>🚫 Sin canal capturado</strong></td><td>No tiene correo ni celular, así que no hay por dónde avisarle. La casilla aparece apagada y no se puede marcar. A esa persona hay que buscarla por teléfono</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">7</div><div class="paso-tit">Presiona el botón de enviar</div></div>
+        <div class="paso-body">
+          <p>Abajo de la lista está el botón
+          <span class="pantalla">📤 Enviar aviso a los seleccionados</span>, con el número entre paréntesis.
+          Ese número tiene que coincidir con los que quedaron marcados.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">8</div><div class="paso-tit">Revisa la ventana y escribe la palabra</div></div>
+        <div class="paso-body">
+          <p>Se abre la ventana <span class="pantalla">🔴 Envío REAL a socios del Club</span> con la lista
+          completa de a quién le va a llegar. Es el último vistazo antes de que salgan los mensajes: vale la
+          pena leerla, sobre todo los avisos de arriba, los que ya habían recibido el mensaje y los que no le
+          llegan al titular.</p>
+          <p>Para confirmar, escribe en el recuadro la palabra <span class="teclear">ENVIAR</span>, con
+          mayúsculas. El botón <span class="pantalla">🔴 Enviar de verdad</span> se enciende hasta que la
+          palabra queda bien escrita. Presiónalo.</p>
+          <div class="ojo">Aquí sí salen los mensajes, <strong>en ese momento</strong>. No es una autorización
+          para después, como en el aviso domiciliado.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">9</div><div class="paso-tit">Espera a que termine</div></div>
+        <div class="paso-body">
+          <p>Los avisos salen de uno en uno, así que el botón va contando
+          <span class="pantalla">⏳ Enviando 3/12...</span> y tarda un poco. No cierres la pestaña ni
+          recargues mientras cuenta.</p>
+          <p>Al terminar aparece el resumen —<span class="pantalla">🔴 Envío real · 11 de 12 enviados</span>—
+          y abajo cada membresía con una palomita si salió, o con una explicación si no.</p>
+          <div class="ok">Si el resumen dice que salieron todos, ya está. Si alguno aparece con
+          <span class="pantalla">⛔</span>, léenos el mensaje que trae por el chat y lo revisamos.</div>
+        </div>
+      </div>
+
+      <h3 class="sub">Dos cosas que conviene saber</h3>
+
+      <p><strong>El letrero que dice PAUSADO no manda.</strong> Hasta abajo del módulo hay un interruptor con
+      esa palabra; es otro control y no decide si el aviso sale. No hace falta tocarlo.</p>
+
+      <p><strong>El botón «Probar (seleccionados)» es otra cosa.</strong> Más abajo hay una sección de envío
+      manual que le manda el aviso al equipo de prueba, no a los socios. Sirve para ver cómo se ve el
+      mensaje; para el envío del mes se usa la lista de arriba.</p>
+
+      <h3 class="sub">Cómo comprobar que salió</h3>
+
+      <p>Además del resumen en pantalla, entra a la pestaña <span class="pantalla">🕘 Historial</span>. Ahí
+      aparecen los mensajes del día agrupados por socio, con el módulo <strong>Cargo Fallido</strong> y el
+      estado de entrega de cada uno.</p>
+      <ul class="lista">
+        <li>Deben aparecer con la fecha de hoy y el mismo número de membresías del resumen.</li>
+        <li>De cada socio se ve por qué canal salió, correo o WhatsApp.</li>
+      </ul>
+      <div class="nota">Si el Historial no muestra los envíos, avísanos por el chat y lo revisamos de
+      inmediato.</div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 7 · 🎂 Cumpleaños</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap7">
+    <div class="cap-head">
+      <div class="cap-num">7</div>
+      <div class="cap-info">
+        <div class="cap-tit">🎂 Cumpleaños</div>
+        <div class="cap-sub">Felicitación automática el día exacto, a las 8:00 de la mañana</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → 🎂 Cumpleaños</div></div>
+        <div class="ficha-row"><div class="ficha-k">A quién le llega</div><div class="ficha-v">A los socios que cumplen años ese día</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cuándo sale</div><div class="ficha-v">Todos los días a las 8:00 de la mañana, el día exacto del cumpleaños</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cómo se dispara</div><div class="ficha-v">Sale solo una vez encendido; no se apaga solo</div></div>
+        <div class="ficha-row"><div class="ficha-k">Canal</div><div class="ficha-v">Correo y WhatsApp</div></div>
+      </div>
+
+      <p>Es el aviso que menos atención pide: se enciende una vez y trabaja todos los días. El módulo muestra
+      cuántos cumpleaños vienen en los próximos 30 días.</p>
+
+      <h3 class="sub">Lo que hay en la pantalla</h3>
+
+      <ul class="lista">
+        <li><span class="pantalla">⚙️ ¿Cuándo se envía?</span> — informa que es el día exacto, a las 8:00 de
+        la mañana. <strong>Es una regla fija del sistema y no se cambia desde aquí.</strong></li>
+        <li><span class="pantalla">✏️ Plantilla de correo</span> — el asunto y el cuerpo de la felicitación,
+        editables, con la variable <span class="pantalla">{{nombre}}</span>.</li>
+        <li><span class="pantalla">✉️ Correo</span> y <span class="pantalla">📱 WhatsApp</span> — los canales
+        por los que sale.</li>
+        <li><span class="pantalla">🔌 ¿Está activo este aviso?</span> — el interruptor de verdad.</li>
+        <li><span class="pantalla">🧪 Probar (seleccionados)</span> y
+        <span class="pantalla">💾 Guardar configuración</span>.</li>
+      </ul>
+
+      <h3 class="sub">Cómo se enciende</h3>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Revisa el texto y los canales</div></div>
+        <div class="paso-body">
+          <p>Lee la plantilla y deja encendidos los canales por los que quieras que salga. Si cambias el
+          texto, presiona <span class="pantalla">💾 Guardar configuración</span>.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Enciende el aviso</div></div>
+        <div class="paso-body">
+          <p>En el bloque <span class="pantalla">🔌 ¿Está activo este aviso?</span>, apagado se ve gris y dice
+          <span class="pantalla">⚫ Apagado</span>. Presiona
+          <span class="pantalla">🟢 Activar las felicitaciones de cumpleaños</span> y confirma escribiendo
+          <span class="teclear">ACTIVAR</span>.</p>
+          <div class="nota">La primera felicitación sale <strong>a partir del día siguiente</strong>: el
+          sistema revisa cada mañana quién cumple ese día, así que encenderlo hoy no alcanza a los cumpleaños
+          de hoy.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Verifica</div></div>
+        <div class="paso-body">
+          <p>El recuadro se pone verde y dice <span class="pantalla">🟢 Activado</span>, y la etiqueta del
+          encabezado pasa a <span class="pantalla">✅ Activo</span>.</p>
+          <div class="ok">Encendido, ya no hay que volver a entrar. Queda así hasta que alguien lo apague.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 8 · 🔔 Alerta 26</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap8">
+    <div class="cap-head">
+      <div class="cap-num">8</div>
+      <div class="cap-info">
+        <div class="cap-tit">🔔 Alerta — Próximos a 26 años</div>
+        <div class="cap-sub">Es el único módulo con dos formas de enviar: el aviso automático y un botón manual</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → 🔔 Alerta 26</div></div>
+        <div class="ficha-row"><div class="ficha-k">Qué avisa</div><div class="ficha-v">Que un dependiente cumple 26 años en 30 días y dejará de estar cubierto en la membresía familiar</div></div>
+        <div class="ficha-row"><div class="ficha-k">A quién le llega</div><div class="ficha-v"><strong>Siempre al titular de la membresía</strong>, no al dependiente, con copia a Cobranza</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cuándo sale</div><div class="ficha-v">El automático, todos los días a las 10:00 de la mañana. El manual, cuando alguien lo manda</div></div>
+        <div class="ficha-row"><div class="ficha-k">Canal</div><div class="ficha-v">Correo y WhatsApp</div></div>
+      </div>
+
+      <p><strong>La regla del club.</strong> Los dependientes menores de 26 años forman parte de la membresía
+      familiar. Al cumplir 26, el sistema del Club los reclasifica como socio individual automáticamente.
+      Este aviso alerta 30 días antes para que el Club y la familia puedan gestionar la renovación.</p>
+
+      <div class="ojo"><strong>Las dos formas de enviar son independientes.</strong> El interruptor de abajo
+      solo controla el aviso automático de las 10 de la mañana. <strong>El botón manual funciona siempre</strong>,
+      esté el interruptor encendido o apagado. Si alguien lee «apagado» y cree que su botón tampoco sirve,
+      está leyendo mal la pantalla.</p>
+
+      <h3 class="sub">A · El aviso automático</h3>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Revisa los destinatarios y el texto</div></div>
+        <div class="paso-body">
+          <p>En <span class="pantalla">⚙️ Destinatarios del aviso</span> están marcados
+          <span class="pantalla">Titular de la membresía</span> y
+          <span class="pantalla">Nancy / Cobranza</span>, con el campo del correo de cobranza abajo. La
+          tercera casilla, <span class="pantalla">Integrante que cumple 26</span>, está pendiente de
+          confirmar con el Club y viene apagada.</p>
+          <p>Más abajo está la <span class="pantalla">✏️ Plantilla — Correo al titular</span>, con las
+          variables <span class="pantalla">{{nombre}}</span>,
+          <span class="pantalla">{{nombre_dependiente}}</span>, <span class="pantalla">{{fecha_26}}</span> y
+          <span class="pantalla">{{membresia}}</span>.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Mira quiénes vienen</div></div>
+        <div class="paso-body">
+          <p>El bloque <span class="pantalla">🔔 Dependientes próximos a 26 años</span> muestra la lista de
+          quienes entran en la ventana de 30 días.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Enciende el aviso automático</div></div>
+        <div class="paso-body">
+          <p>Baja al bloque <span class="pantalla">🔌 ¿Está activo el aviso automático?</span> y presiona
+          <span class="pantalla">🟢 Activar el aviso automático</span>. Se abre la ventana
+          <span class="pantalla">🟢 Activar el aviso automático de 26 años</span>: confirma escribiendo
+          <span class="teclear">ACTIVAR</span>.</p>
+          <div class="ok">El recuadro se pone verde y dice <span class="pantalla">🟢 Activado</span>.
+          <strong>No se apaga solo:</strong> queda encendido hasta que alguien lo apague aquí.</div>
+        </div>
+      </div>
+
+      <h3 class="sub">B · El envío manual, para los casos que ya se pasaron</h3>
+
+      <p>Sirve para los dependientes que <strong>ya se pasaron de los 30 días</strong> y a quienes el aviso
+      automático nunca les va a alcanzar. El mensaje lo arma el sistema con la plantilla aprobada, según el
+      titular, y manda copia a Cobranza; aquí solo se elige <strong>a quién</strong>.</p>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Busca el bloque de envío</div></div>
+        <div class="paso-body">
+          <p>Es el que dice <span class="pantalla">📤 Enviar el aviso a un dependiente</span>.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Cambia a envío real</div></div>
+        <div class="paso-body">
+          <p>En el recuadro verde <span class="pantalla">🔒 ¿A quién le va a llegar?</span> siempre arranca en
+          <span class="pantalla">🧪 Prueba</span>. Marca <span class="pantalla">🔴 Envío real</span> y
+          aparece el letrero de que el aviso llega al titular de una membresía del Club.</p>
+          <div class="ojo">Igual que en cargo fallido: este paso va <strong>antes</strong> de cargar la lista.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Carga la lista y elige</div></div>
+        <div class="paso-body">
+          <p>Presiona <span class="pantalla">🔄 Cargar lista</span>. Aparecen los renglones con
+          <span class="pantalla">Seleccionar todos</span> arriba y el contador
+          <span class="pantalla">0 de 0 seleccionados</span>. Palomea únicamente a quien deba recibirlo.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">4</div><div class="paso-tit">Manda y confirma</div></div>
+        <div class="paso-body">
+          <p>El botón <span class="pantalla">📤 Enviar aviso a los seleccionados</span> trae el número entre
+          paréntesis y se enciende cuando hay al menos uno marcado. Se abre la ventana
+          <span class="pantalla">🔴 Envío REAL a socios del Club</span>: confirma escribiendo
+          <span class="teclear">ENVIAR</span>, con mayúsculas.</p>
+          <div class="ojo">Los mensajes salen en ese momento. Recuerda que <strong>le llegan al titular</strong>,
+          no al dependiente que cumple años.</div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">5</div><div class="paso-tit">Lee el resultado</div></div>
+        <div class="paso-body">
+          <p>Abajo aparece el resumen de lo que salió y lo que no. Si algo falló, ese mensaje es el que hay
+          que pasarnos por el chat.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 9 · 👨‍👩‍👧 Dependientes con adeudo</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap9">
+    <div class="cap-head">
+      <div class="cap-num">9</div>
+      <div class="cap-info">
+        <div class="cap-tit">👨‍👩‍👧 Anuales — Dependientes con adeudo</div>
+        <div class="cap-sub">Está bajo «Anuales», pero tampoco es automático: lo manda una persona</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">✉️ Módulo de Avisos → menú de la izquierda → 👨‍👩‍👧 Dependientes con adeudo</div></div>
+        <div class="ficha-row"><div class="ficha-k">A quién le llega</div><div class="ficha-v"><strong>Siempre al titular</strong> de la membresía —nunca al dependiente— o a la persona designada como responsable de pago</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cuándo sale</div><div class="ficha-v">Cuando una persona lo manda</div></div>
+        <div class="ficha-row"><div class="ficha-k">Cómo se dispara</div><div class="ficha-v">A mano, sin interruptor ni hora</div></div>
+        <div class="ficha-row"><div class="ficha-k">Canal</div><div class="ficha-v">Correo</div></div>
+      </div>
+
+      <p><strong>Por qué existe este módulo.</strong> El sistema ve estas membresías como «al corriente»
+      porque el titular pagó su anualidad, pero adentro hay dependientes que deben. Sin este filtro nunca se
+      les cobra: no caen en ningún tramo de cobranza y no aparecen en ninguna otra lista.</p>
+
+      <div class="ojo"><strong>No tiene interruptor ni reloj.</strong> Igual que cargo fallido, si nadie entra
+      a mandarlo no sale nada y no aparece ningún error. Conviene revisarlo con la misma periodicidad que la
+      cobranza.</div>
+
+      <h3 class="sub">Los pasos</h3>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">1</div><div class="paso-tit">Entra al módulo</div></div>
+        <div class="paso-body">
+          <p>En el menú de la izquierda, <span class="pantalla">👨‍👩‍👧 Dependientes con adeudo</span>.
+          El encabezado muestra cuántas membresías están en esa situación.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">2</div><div class="paso-tit">Mira el detalle antes de mandar</div></div>
+        <div class="paso-body">
+          <p>El botón <span class="pantalla">👁 Ver detalle y contactar</span> abre la lista con las
+          membresías y sus dependientes en adeudo. Es el paso que conviene no saltarse: aquí se ve si el caso
+          es real o si ya se resolvió.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">3</div><div class="paso-tit">Revisa el texto</div></div>
+        <div class="paso-body">
+          <p>En <span class="pantalla">✏️ Plantilla — Correo al titular</span> están el asunto y el cuerpo.
+          Usa cuatro variables: <span class="pantalla">{{nombre}}</span>,
+          <span class="pantalla">{{membresia}}</span>, <span class="pantalla">{{total}}</span> —cuántos
+          integrantes deben— y <span class="pantalla">{{lista_deudores}}</span>, que el sistema sustituye por
+          los nombres de quienes traen adeudo.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">4</div><div class="paso-tit">Revisa los destinatarios</div></div>
+        <div class="paso-body">
+          <p>El bloque <span class="pantalla">📨 Destinatarios</span> muestra a quiénes les va a llegar.
+          Es el último vistazo antes de mandar.</p>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-head"><div class="paso-num">5</div><div class="paso-tit">Manda</div></div>
+        <div class="paso-body">
+          <p>El botón <span class="pantalla">📨 Enviar a titulares</span> dispara los correos en ese momento.</p>
+          <div class="ojo">Antes de presionarlo, revisa que el <span class="pantalla">🔒 Modo prueba</span> de
+          arriba esté apagado si quieres que llegue de verdad a los socios.</div>
+        </div>
+      </div>
+
+      <div class="nota" style="margin-top:14px">Después, comprueba en <span class="pantalla">🕘 Historial</span>
+      que aparezcan los envíos del día.</div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 10 · 🔔 Notificaciones</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap10">
+    <div class="cap-head">
+      <div class="cap-num">10</div>
+      <div class="cap-info">
+        <div class="cap-tit">🔔 Notificaciones</div>
+        <div class="cap-sub">De consulta · No manda ningún aviso</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <div class="ficha">
+        <div class="ficha-row"><div class="ficha-k">Dónde está</div><div class="ficha-v">Es una pestaña propia, arriba: 🔔 Notificaciones</div></div>
+        <div class="ficha-row"><div class="ficha-k">Qué hace</div><div class="ficha-v">Junta los casos que requieren revisión humana</div></div>
+        <div class="ficha-row"><div class="ficha-k">Qué envía</div><div class="ficha-v">Nada</div></div>
+      </div>
+
+      <p>La propia pantalla lo dice: son <strong>casos que requieren revisión humana</strong>, y aclara que
+      <strong>no son errores del sistema</strong>. Son situaciones que ningún aviso automático puede resolver
+      —datos que faltan, casos que no encajan en ninguna regla— y que alguien del Club tiene que mirar.</p>
+
+      <p>El único botón de esta pantalla es <span class="pantalla">⬇️ Exportar socios a Excel</span>, que baja
+      el padrón completo en un archivo de Excel para trabajarlo fuera del Dashboard.</p>
+
+      <div class="nota">Conviene darle una vuelta antes de un envío grande: varios de los casos que aparecen
+      aquí son justamente los que después salen como «sin canal capturado» en las listas de envío.</div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Capítulo 11 · 🕘 Historial</h2>
+
+  <a class="volver volver-top" href="#top">↑ Volver al índice</a>
+  <div class="cap" id="cap11">
+    <div class="cap-head">
+      <div class="cap-num">11</div>
+      <div class="cap-info">
+        <div class="cap-tit">🕘 Historial</div>
+        <div class="cap-sub">Donde se comprueba que un aviso salió, sea cual sea</div>
+      </div>
+    </div>
+    <div class="cap-body">
+
+      <p>Todos los avisos de este manual terminan aquí. Es una pestaña propia, arriba, y muestra los mensajes
+      agrupados por socio, con el módulo que los envió y el estado de entrega de cada uno.</p>
+
+      <h3 class="sub">Con qué nombre aparece cada aviso</h3>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Capítulo</th><th>Módulo en el Historial</th></tr></thead>
+          <tbody>
+            <tr><td>🏦 Domiciliado</td><td><strong>Domiciliado Previo</strong></td></tr>
+            <tr><td>🏦❌ Cargo fallido</td><td><strong>Cargo Fallido</strong></td></tr>
+            <tr><td>Los demás</td><td>Con el nombre de su propio módulo</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Qué revisar después de un envío</h3>
+
+      <ul class="lista">
+        <li><strong>Que aparezcan con la fecha de hoy</strong> y en el número que esperabas.</li>
+        <li><strong>Por qué canal salió cada uno</strong>, correo o WhatsApp.</li>
+        <li>En los avisos que se autorizan mes con mes, <strong>que el interruptor haya vuelto a apagarse</strong>:
+        eso confirma que el envío se ejecutó.</li>
+      </ul>
+
+      <div class="ojo"><strong>Si un envío no aparece, no supongas que sí salió.</strong> Un aviso que no se
+      envió no deja renglón, así que la pantalla se ve limpia y correcta aunque falten mensajes. Cuando el
+      número no cuadre con lo que decía la lista antes de mandar, avísanos por el chat: eso es justo lo que
+      hay que revisar.</div>
+
+    </div>
+  </div>
+  <a class="volver" href="#top">↑ Volver al índice</a>
+
+  <h2 class="seccion">Resumen de una sola hoja</h2>
+
+  <div class="box">
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>Aviso</th><th>¿Sale solo?</th><th>Qué hay que hacer</th></tr></thead>
+        <tbody>
+          <tr><td>🟡🟠🔴⛔ Cobranza</td><td>Programado</td><td>Encender un solo tramo y programar día y hora en ⚙️ General</td></tr>
+          <tr><td>📅 Campaña anual</td><td>Sí</td><td>Encenderla una vez; cubre las cuatro fechas de la temporada</td></tr>
+          <tr><td>🏦 Domiciliado</td><td>Con permiso</td><td><strong>Activarlo cada mes</strong>, el día 1 antes de las 10:00</td></tr>
+          <tr><td>🏦❌ Cargo fallido</td><td><strong>No</strong></td><td>Cargar la lista, revisarla y mandarla a mano</td></tr>
+          <tr><td>🎂 Cumpleaños</td><td>Sí</td><td>Encenderlo una vez y ya</td></tr>
+          <tr><td>🔔 Alerta 26 — automático</td><td>Sí</td><td>Encenderlo una vez y ya</td></tr>
+          <tr><td>📤 Alerta 26 — manual</td><td><strong>No</strong></td><td>Para los casos pasados de 30 días; funciona siempre</td></tr>
+          <tr><td>👨‍👩‍👧 Dependientes con adeudo</td><td><strong>No</strong></td><td>Ver el detalle y mandar a titulares</td></tr>
+          <tr><td>✍️ Envío manual</td><td><strong>No</strong></td><td>Elegir segmento o socios y enviar en el momento</td></tr>
+          <tr><td>🔔 Notificaciones</td><td>—</td><td>No envía; se revisa</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    ExcelentIA para Club Berimbau · Manual de envíos · Septiembre de 2026
+  </footer>
+
+</main>
+</body>
+</html>
