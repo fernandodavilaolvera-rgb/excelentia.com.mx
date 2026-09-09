@@ -1515,6 +1515,51 @@ syncNow(false);
   var ancla = document.querySelector('.hgap');
   if(cont){ if(ancla && ancla.parentNode === cont) cont.insertBefore(btn, ancla); else cont.appendChild(btn); }
 
+  /* ---- cambiar mi codigo de espacio ---- */
+  var PREF = {list:'ferrock_list_v4_', money:'ferrock_money_v1_', plan:'ferrock_plan_v1_'};
+  function miApp(){ for(var i=0;i<APPS.length;i++) if(APPS[i].k===YO) return APPS[i]; }
+  function cambiarCodigo(){
+    var yo = miApp(), act = leer(yo.ek);
+    var nuevo = window.prompt('Codigo nuevo para ' + yo.n + ' (minimo 6 caracteres).\n' +
+      'Tus datos se van contigo. Tratalo como una contrasena.', act);
+    if(nuevo === null) return;
+    nuevo = limpio(nuevo);
+    if(nuevo.length < 6){ alert('El codigo debe tener al menos 6 caracteres.'); return; }
+    if(nuevo === act) return;
+    try{
+      var datos = localStorage.getItem(PREF[YO] + act);
+      if(datos) localStorage.setItem(PREF[YO] + nuevo, datos);
+      localStorage.setItem(yo.ek, nuevo);
+      localStorage.setItem('ferrock_subir_' + nuevo, '1');
+    }catch(e){}
+    location.href = CARPETA + yo.f + EXT + '?' + yo.q + '=' + nuevo;
+  }
+
+  /* si acabamos de mudarnos de codigo, forzar que suba a la nube */
+  (function(){
+    var yo = miApp(), c = leer(yo.ek);
+    if(!c) return;
+    try{
+      if(localStorage.getItem('ferrock_subir_' + c)){
+        localStorage.removeItem('ferrock_subir_' + c);
+        setTimeout(function(){
+          if(typeof window.queuePush === 'function') window.queuePush();
+        }, 1500);
+      }
+    }catch(e){}
+  })();
+
+  /* boton en el menu de la app */
+  (function(){
+    var m = document.getElementById('menu') || document.getElementById('menuPop');
+    if(!m) return;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = '\uD83D\uDD11 Cambiar mi codigo';
+    b.onclick = cambiarCodigo;
+    m.appendChild(b);
+  })();
+
   /* ---- manifiesto, icono y modo sin senal (archivos reales en /ferrock/) ---- */
   function instalar(){
     var v = document.querySelectorAll('link[rel="manifest"],link[rel="apple-touch-icon"],' +
