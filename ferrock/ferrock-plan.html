@@ -205,6 +205,48 @@ tr.dif .val.neg,tr.saldo .val.neg{color:var(--rojo)}
 .pos{color:var(--verde3)} .neg{color:var(--rojo)}
 .vacio{text-align:center;color:var(--mut);font-weight:600;padding:26px 10px;font-size:14px}
 
+/* ---------- Vista info (tablas) ---------- */
+.infowrap{display:flex;gap:12px;overflow-x:auto;align-items:flex-start;padding:2px 2px 12px;
+  -webkit-overflow-scrolling:touch}
+.tb{flex:0 0 322px;background:var(--card);border:1px solid var(--line);border-radius:15px;
+  overflow:hidden;box-shadow:0 2px 10px rgba(180,140,90,.08)}
+.tb.hi{box-shadow:0 0 0 2px var(--naranja),0 2px 10px rgba(180,140,90,.08)}
+.tb-h{background:linear-gradient(135deg,#12A150 0%,#0B8A45 100%);color:#fff;
+  padding:7px 8px 7px 12px;display:flex;align-items:center;gap:5px}
+.tb-nm{flex:1;min-width:0;font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;
+  cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  display:flex;align-items:center;gap:5px}
+.tb-nm .cv{font-size:9px;opacity:.85}
+.tb-h button{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;
+  width:24px;height:24px;font-size:11px;cursor:pointer;flex-shrink:0;padding:0;line-height:1}
+.tb-h button:active{background:rgba(255,255,255,.35)}
+.tb-sum{background:#0B7A3E;color:#fff;padding:5px 12px;display:flex;justify-content:space-between;
+  align-items:baseline;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px}
+.tb-sum b{font-size:16px}
+.tb-sum b.neg{color:#FFC9C9}
+.tb-cab{display:flex;justify-content:space-between;padding:5px 12px;background:#FFF3E6;
+  color:#8a5a20;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.reg{display:flex;align-items:center;gap:3px;padding:1px 5px 1px 3px;border-bottom:1px solid #f6efe6}
+.reg:last-child{border-bottom:none}
+.reg .ord button{font-size:8px}
+.reg input{border:none;background:transparent;padding:5px 4px;border-radius:7px;
+  font-size:13.5px;font-weight:700;line-height:16px}
+.reg input.c{flex:1;min-width:0;text-align:left}
+.reg input.m{width:92px;text-align:right;flex-shrink:0;font-weight:800}
+.reg input:focus{background:#FFFBF5;box-shadow:0 0 0 1.5px var(--naranja)}
+.reg .x{background:none;border:none;color:#ded2c4;font-size:12px;cursor:pointer;
+  padding:2px 3px;flex-shrink:0;line-height:1}
+.reg .x:hover{color:var(--rojo)}
+.reg.nota input.m{color:#b9ac9c}
+.tb-pie{padding:5px 8px;text-align:center}
+.tb-pie button{background:#FFF3E6;border:1px solid #ffd9b8;color:#a35a12;border-radius:9px;
+  padding:5px 12px;font-family:'Fredoka',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;width:100%}
+.tblista a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 11px;
+  border-radius:11px;cursor:pointer;font-weight:800;font-size:14.5px;color:var(--ink);text-decoration:none}
+.tblista a:hover{background:#FFF3E6}
+.tblista a small{font-family:'Fredoka',sans-serif;font-size:13px;font-weight:600;color:var(--verde3)}
+.tblista a small.neg{color:var(--rojo)}
+
 /* ---------- Vista foco ---------- */
 .foconav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .foconav .nav{
@@ -286,6 +328,7 @@ tr.dif .val.neg,tr.saldo .val.neg{color:var(--rojo)}
   table.grid thead th{min-width:82px;font-size:11.5px}
   table.grid thead th.cabc,table.grid td.cnc{min-width:146px;width:146px}
   .cncrow .nm{font-size:12px}
+  .tb{flex:0 0 86vw}
   .res3{flex-wrap:wrap}
   .res3 > div{min-width:calc(50% - 4px)}
 }
@@ -299,7 +342,8 @@ tr.dif .val.neg,tr.saldo .val.neg{color:var(--rojo)}
   header{border-radius:0;box-shadow:none}
   section,.card,main,div{break-inside:auto}
   .gridbox{max-height:none;overflow:visible;box-shadow:none}
-  .mrow,.frow,.res3 > div,.alerta{break-inside:avoid}
+  .mrow,.frow,.res3 > div,.alerta,.tb{break-inside:avoid}
+  .infowrap{flex-wrap:wrap;overflow:visible}
   table.grid thead th{position:static}
   table.grid thead tr.fix th{position:static}
   table.grid td.cnc{position:static}
@@ -323,9 +367,11 @@ tr.dif .val.neg,tr.saldo .val.neg{color:var(--rojo)}
       <button class="fchip on" data-v="sem" onclick="setVista('sem')">Semanas</button>
       <button class="fchip" data-v="mes" onclick="setVista('mes')">Meses</button>
       <button class="fchip" data-v="foco" onclick="setVista('foco')">Foco</button>
+      <button class="fchip" data-v="info" onclick="setVista('info')">Info</button>
     </div>
     <button class="minibtn" onclick="exportarExcel()">⤓ Excel</button>
-    <button class="minibtn" onclick="abrirRepetir()">⟳ Recurrente</button>
+    <button class="minibtn" id="btnRec" onclick="abrirRepetir()">⟳ Recurrente</button>
+    <button class="minibtn" id="btnTabla" style="display:none" onclick="nuevaTabla()">＋ Tabla</button>
     <div class="hgap"></div>
     <button class="nube" id="nube" onclick="syncNow(true)"><span class="dot"></span><span id="nubeTxt">En la nube</span></button>
     <button class="btn-menu" onclick="abrirMenu()">☰</button>
@@ -337,6 +383,10 @@ tr.dif .val.neg,tr.saldo .val.neg{color:var(--rojo)}
 <div class="wrapw">
   <div id="vistaTabla">
     <div class="gridbox"><div id="tabla"></div></div>
+  </div>
+
+  <div id="vistaInfo" style="display:none">
+    <div class="infowrap" id="infoBody"></div>
   </div>
 
   <div id="vistaFoco" style="display:none">
@@ -362,6 +412,7 @@ tr.dif .val.neg,tr.saldo .val.neg{color:var(--rojo)}
   <button onclick="abrirAjustes()">⚙️ Ajustes del plan</button>
   <button onclick="abrirRepetir()">⟳ Movimiento recurrente</button>
   <button onclick="abrirConceptos()">🏷️ Conceptos</button>
+  <button onclick="abrirTablas()">📋 Mis tablas</button>
   <button onclick="cerrarTodo();masSemanas()">＋4 semanas</button>
   <div class="sep"></div>
   <button onclick="exportarExcel()">⤓ Exportar a Excel</button>
@@ -430,6 +481,30 @@ tr.dif .val.neg,tr.saldo .val.neg{color:var(--rojo)}
   <div class="acts">
     <button class="btn gris" onclick="cerrarTodo()">Cancelar</button>
     <button class="btn" onclick="aplicarRepetir()">Aplicar</button>
+  </div>
+</div>
+
+<!-- TABLA -->
+<div class="modal no-print" id="mdTabla">
+  <h3 class="fk" id="tbTitulo">Nueva tabla</h3>
+  <label class="lb">Nombre</label>
+  <input id="tbNombre" placeholder="Mary, Ahorro para el viaje…">
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cancelar</button>
+    <button class="btn" onclick="guardarTabla()">Guardar</button>
+  </div>
+  <div class="acts" id="tbBorrarWrap" style="display:none">
+    <button class="btn rojo" onclick="borrarTabla()">Eliminar tabla</button>
+  </div>
+</div>
+
+<!-- LISTA DE TABLAS -->
+<div class="modal no-print" id="mdTablas">
+  <h3 class="fk">📋 Mis tablas</h3>
+  <div class="tblista" id="tbLista"></div>
+  <div class="acts">
+    <button class="btn gris" onclick="cerrarTodo()">Cerrar</button>
+    <button class="btn" onclick="nuevaTabla()">＋ Nueva</button>
   </div>
 </div>
 
@@ -565,7 +640,8 @@ function estadoInicial(){
   };
   cargar(SEED_G, 'g');
   cargar(SEED_I, 'i');
-  return { v:1, cfg:{ini:0, inicio:INICIO_SEED, nsem:NSEM_SEED, mt:1}, conceptos, celdas };
+  return { v:1, cfg:{ini:0, inicio:INICIO_SEED, nsem:NSEM_SEED, mt:1}, conceptos, celdas,
+           tablas:[], regs:[] };
 }
 
 let S = null, CEL = new Map();
@@ -580,6 +656,8 @@ function cargar(){
   if(!S.cfg) S.cfg = {ini:0, inicio:INICIO_SEED, nsem:NSEM_SEED, mt:1};
   if(!Array.isArray(S.celdas)) S.celdas = [];
   if(!Array.isArray(S.conceptos)) S.conceptos = [];
+  if(!Array.isArray(S.tablas)) S.tablas = [];
+  if(!Array.isArray(S.regs)) S.regs = [];
   if(S.cfg.inicio === '2026-02-16' && (S.cfg.mt||0) <= 2){
     S.cfg.inicio = INICIO_SEED; S.cfg.nsem = NSEM_SEED; S.cfg.mt = 2;
   }
@@ -842,10 +920,14 @@ function renderFoco(D){
 function render(){
   const D = calcular();
   renderResumen(D);
-  document.getElementById('vistaTabla').style.display = (VISTA==='foco') ? 'none' : '';
+  document.getElementById('vistaTabla').style.display = (VISTA==='sem'||VISTA==='mes') ? '' : 'none';
   document.getElementById('vistaFoco').style.display = (VISTA==='foco') ? '' : 'none';
+  document.getElementById('vistaInfo').style.display = (VISTA==='info') ? '' : 'none';
+  document.getElementById('btnRec').style.display = (VISTA==='info') ? 'none' : '';
+  document.getElementById('btnTabla').style.display = (VISTA==='info') ? '' : 'none';
   if(VISTA==='sem') renderSemanas(D);
   else if(VISTA==='mes') renderMeses(D);
+  else if(VISTA==='info') renderInfo();
   else renderFoco(D);
   document.querySelectorAll('#vistas .fchip').forEach(b => {
     b.classList.toggle('on', b.dataset.v === VISTA);
@@ -1001,6 +1083,158 @@ function aplicarRepetir(){
   toast(monto ? ('Aplicado en ' + n + ' semanas') : ('Limpiado en ' + n + ' semanas'));
 }
 
+/* ---------- tablas de info ---------- */
+const tablasDe = () => S.tablas.filter(t => !t.del).sort((a,b)=>(a.o||0)-(b.o||0));
+const regsDe = id => S.regs.filter(r => !r.del && r.tb===id).sort((a,b)=>(a.o||0)-(b.o||0));
+const sumaTb = id => regsDe(id).reduce((a,r)=>a+num(r.v),0);
+function nid(pre){ return pre + Date.now().toString(36) + Math.floor(Math.random()*9999).toString(36); }
+
+let EDIT_TB = null;
+function nuevaTabla(){
+  EDIT_TB = null;
+  document.getElementById('tbTitulo').textContent = 'Nueva tabla';
+  document.getElementById('tbNombre').value = '';
+  document.getElementById('tbBorrarWrap').style.display = 'none';
+  abrir('mdTabla');
+  setTimeout(()=>document.getElementById('tbNombre').focus(), 120);
+}
+function editarTabla(id){
+  const t = S.tablas.find(x => x.id===id);
+  if(!t) return;
+  EDIT_TB = t;
+  document.getElementById('tbTitulo').textContent = 'Editar tabla';
+  document.getElementById('tbNombre').value = t.n;
+  document.getElementById('tbBorrarWrap').style.display = '';
+  abrir('mdTabla');
+}
+function guardarTabla(){
+  const n = document.getElementById('tbNombre').value.trim();
+  if(!n){ toast('Ponle nombre', true); return; }
+  if(EDIT_TB){ EDIT_TB.n = n; EDIT_TB.mt = ahora(); }
+  else{
+    const t = {id:nid('t'), n, o:tablasDe().length, mt:ahora()};
+    S.tablas.push(t);
+    S.regs.push({id:nid('r'), tb:t.id, n:'', v:0, o:0, mt:ahora()});
+  }
+  VISTA = 'info';
+  tocar(); cerrarTodo(); render();
+  toast('Listo');
+}
+function borrarTabla(){
+  if(!EDIT_TB) return;
+  if(!confirm('¿Eliminar la tabla «' + EDIT_TB.n + '» y sus registros?')) return;
+  EDIT_TB.del = true; EDIT_TB.mt = ahora();
+  S.regs.forEach(r => { if(r.tb===EDIT_TB.id && !r.del){ r.del = true; r.mt = ahora(); } });
+  tocar(); cerrarTodo(); render();
+  toast('Tabla eliminada');
+}
+function moverTabla(id, dir){
+  const lista = tablasDe(), i = lista.findIndex(x => x.id===id), j = i + dir;
+  if(i < 0 || j < 0 || j >= lista.length) return;
+  const a = lista[i], b = lista[j], tmp = a.o;
+  a.o = b.o; b.o = tmp; a.mt = ahora(); b.mt = ahora();
+  tocar(); render();
+}
+function nuevoReg(tbid){
+  const l = regsDe(tbid);
+  S.regs.push({id:nid('r'), tb:tbid, n:'', v:0, o:(l.length?(l[l.length-1].o||0)+1:0), mt:ahora()});
+  tocar(); render();
+  setTimeout(()=>{
+    const c = document.querySelectorAll('#tb-'+tbid+' .reg input.c');
+    if(c.length) c[c.length-1].focus();
+  }, 60);
+}
+function borrarReg(id){
+  const r = S.regs.find(x => x.id===id);
+  if(!r) return;
+  r.del = true; r.mt = ahora();
+  tocar(); render();
+}
+function moverReg(id, dir){
+  const r = S.regs.find(x => x.id===id);
+  if(!r) return;
+  const lista = regsDe(r.tb), i = lista.findIndex(x => x.id===id), j = i + dir;
+  if(j < 0 || j >= lista.length) return;
+  const b = lista[j], tmp = r.o;
+  r.o = b.o; b.o = tmp; r.mt = ahora(); b.mt = ahora();
+  tocar(); render();
+}
+let regT = null;
+function editarReg(inp){
+  const r = S.regs.find(x => x.id===inp.dataset.r);
+  if(!r) return;
+  if(inp.dataset.f === 'n') r.n = inp.value;
+  else r.v = num(inp.value);
+  r.mt = ahora();
+  const fila = inp.closest('.reg');
+  if(fila) fila.classList.toggle('nota', !num(r.v));
+  const el = document.getElementById('sum-' + r.tb);
+  if(el){
+    const v = sumaTb(r.tb);
+    el.textContent = fmt(v);
+    el.className = v < 0 ? 'neg' : '';
+  }
+  clearTimeout(regT);
+  regT = setTimeout(tocar, 300);
+}
+function abrirTablas(){
+  const l = tablasDe().slice().sort((a,b)=>a.n.localeCompare(b.n));
+  let h = '';
+  if(!l.length) h = '<div class="vacio">Todavía no hay tablas.</div>';
+  l.forEach(t => {
+    const v = sumaTb(t.id);
+    h += '<a onclick="irATabla(\''+t.id+'\')"><span>'+esc(t.n)+'</span>' +
+         '<small class="'+(v<0?'neg':'')+'">'+esc(fmt(v))+'</small></a>';
+  });
+  document.getElementById('tbLista').innerHTML = h;
+  abrir('mdTablas');
+}
+function irATabla(id){
+  cerrarTodo();
+  if(VISTA !== 'info'){ setVista('info'); }
+  setTimeout(()=>{
+    const el = document.getElementById('tb-'+id);
+    if(!el) return;
+    el.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+    el.classList.add('hi');
+    setTimeout(()=>el.classList.remove('hi'), 1600);
+  }, 90);
+}
+function renderInfo(){
+  const l = tablasDe();
+  if(!l.length){
+    document.getElementById('infoBody').innerHTML =
+      '<div class="vacio" style="width:100%">Sin tablas todavía. Usa ＋ Tabla para crear la primera: deudas, préstamos, o cuánto te falta ahorrar.</div>';
+    return;
+  }
+  let h = '';
+  l.forEach(t => {
+    const regs = regsDe(t.id), v = sumaTb(t.id);
+    h += '<div class="tb" id="tb-'+t.id+'">' +
+      '<div class="tb-h">' +
+        '<div class="tb-nm" onclick="abrirTablas()" title="Ver todas las tablas">' +
+          '<span>'+esc(t.n)+'</span><span class="cv">▼</span></div>' +
+        '<button class="no-print" onclick="moverTabla(\''+t.id+'\',-1)" title="Mover a la izquierda">◀</button>' +
+        '<button class="no-print" onclick="moverTabla(\''+t.id+'\',1)" title="Mover a la derecha">▶</button>' +
+        '<button class="no-print" onclick="editarTabla(\''+t.id+'\')" title="Editar">✎</button>' +
+      '</div>' +
+      '<div class="tb-sum"><span>Suma</span><b id="sum-'+t.id+'" class="'+(v<0?'neg':'')+'">'+esc(fmt(v))+'</b></div>' +
+      '<div class="tb-cab"><span>Concepto</span><span>Monto</span></div>';
+    regs.forEach(r => {
+      h += '<div class="reg'+(num(r.v)?'':' nota')+'">' +
+        '<div class="ord no-print">' +
+          '<button onclick="moverReg(\''+r.id+'\',-1)">▲</button>' +
+          '<button onclick="moverReg(\''+r.id+'\',1)">▼</button></div>' +
+        '<input class="c" value="'+esc(r.n)+'" placeholder="Concepto o nota" data-r="'+r.id+'" data-f="n" oninput="editarReg(this)">' +
+        '<input class="m" inputmode="decimal" value="'+(num(r.v)?r.v:'')+'" placeholder="—" data-r="'+r.id+'" data-f="v" oninput="editarReg(this)" onfocus="this.select()">' +
+        '<button class="x no-print" onclick="borrarReg(\''+r.id+'\')" title="Quitar">✕</button>' +
+      '</div>';
+    });
+    h += '<div class="tb-pie no-print"><button onclick="nuevoReg(\''+t.id+'\')">＋ Registro</button></div></div>';
+  });
+  document.getElementById('infoBody').innerHTML = h;
+}
+
 /* ---------- exportar ---------- */
 function exportarExcel(){
   const D = calcular();
@@ -1126,6 +1360,8 @@ function mezclar(rem){
   let cambio = false;
   const c = mergeArr(S.conceptos, rem.conceptos); if(c.cambio){ S.conceptos = c.arr; cambio = true; }
   const d = mergeArr(S.celdas, rem.celdas); if(d.cambio){ S.celdas = d.arr; cambio = true; }
+  const t = mergeArr(S.tablas, rem.tablas || []); if(t.cambio){ S.tablas = t.arr; cambio = true; }
+  const g = mergeArr(S.regs, rem.regs || []); if(g.cambio){ S.regs = g.arr; cambio = true; }
   if(rem.cfg && (rem.cfg.mt||0) > (S.cfg.mt||0)){ S.cfg = rem.cfg; cambio = true; }
   if(cambio) indexar();
   return cambio;
