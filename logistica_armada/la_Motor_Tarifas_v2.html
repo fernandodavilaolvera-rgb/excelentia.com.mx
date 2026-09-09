@@ -309,6 +309,7 @@ function perfilBase(nombre) {
     dieselAgente: null,
     dieselFuente: '',
     dieselFecha: '',
+    dieselManual: false,
     comisionOperador: 15,
     mantenimiento: 30,
     casetaPorKm: 1.10,
@@ -384,6 +385,7 @@ const LS_REC = '4pl_ciudades_recientes';
 let CIUDADES = [];        // catalogo que trae el agente
 let RECIENTES = [];       // ultimas cotizadas, se guardan en el equipo
 let AG_VIVO = null;       // null = sin probar, true/false = resultado
+let RUTA_BASE = { enBase: false, km: null };  // que trajo la base en la ultima busqueda
 try { RECIENTES = JSON.parse(localStorage.getItem(LS_REC) || '[]'); } catch (e) { RECIENTES = []; }
 
 const CIUDADES_BASE = ['CDMX / Zona metropolitana','Acapulco','Aguascalientes','Atlacomulco','Campeche',
@@ -633,7 +635,7 @@ function renderResultado(r, v, p) {
     <thead><tr><th>Concepto</th><th style="text-align:right">Importe</th><th>Cómo se calculó</th></tr></thead>
     <tbody>
       <tr><td>Combustible</td><td class="num">${mny(r.combustible)}</td>
-        <td class="dim">${Math.round(r.litros)} litros a ${mny(p.diesel)} · rendimiento ${r.uni.rend} km/l</td></tr>
+        <td class="dim">${Math.round(r.litros)} litros a ${mny(p.diesel)}${p.dieselManual ? ' · capturado a mano' : (p.dieselAgente ? ' · lo trajo el agente' + (p.dieselFecha ? ' al ' + p.dieselFecha : '') : '')} · rendimiento ${r.uni.rend} km/l</td></tr>
       <tr><td>Casetas</td><td class="num">${mny(r.casetas)}</td>
         <td class="dim">${r.casetasEstimadas ? 'estimadas por kilómetros y ' + r.uni.ejes + ' ejes' : 'capturadas a mano'}</td></tr>
       <tr><td>Comisión del operador</td><td class="num">${mny(d ? d.comision : null)}</td>
@@ -748,7 +750,7 @@ function renderConfig() {
         ${p.dieselAgente ? `<span class="auto" id="usarDiesel" title="Tomar el precio que trae el agente">usar ${mny(p.dieselAgente)}</span>` : ''}
       </div>
       <span class="hint agente ${p.dieselAgente ? '' : 'off'}">${p.dieselAgente
-        ? 'el agente encontró ' + mny(p.dieselAgente) + (p.dieselFecha ? ' al ' + p.dieselFecha : '') + ' · puedes dejar el tuyo'
+        ? 'el agente encontró ' + mny(p.dieselAgente) + (p.dieselFecha ? ' al ' + p.dieselFecha : '') + (p.dieselManual ? ' · estás usando el tuyo, cámbialo al del agente para que se actualice solo' : ' · se actualiza solo cada día')
         : 'sin dato del agente · se usa el que captures'}</span></div>
     <div class="f"><label>Comisión del operador <span class="porconf">por confirmar</span></label>
       <input id="cCom" type="number" step="0.5" value="${p.comisionOperador}"><span class="hint">porcentaje sobre el flete</span></div>
@@ -781,6 +783,9 @@ function renderConfig() {
 function leerConfig() {
   const p = P();
   p.diesel = num($('#cDiesel').value);
+  // si el precio capturado difiere del que trae el agente, manda el capturado
+  // y deja de actualizarse solo; si coincide, sigue siguiendo al agente
+  p.dieselManual = !(p.dieselAgente && Math.abs(p.diesel - p.dieselAgente) < 0.005);
   p.comisionOperador = num($('#cCom').value);
   p.mantenimiento = num($('#cMant').value);
   p.casetaPorKm = num($('#cCaseta').value);
@@ -815,6 +820,7 @@ async function buscarRuta() {
   const r = d && d.datos && d.datos[0];
 
   if (r && r.encontrada) {
+    RUTA_BASE = { enBase: true, km: r.km ? Math.round(Number(r.km)) : null };
     if (r.km) { $('#vKm').value = Math.round(Number(r.km)); V.kmFuente = 'ruta conocida'; }
     if (r.casetas) { $('#vCasetas').value = Math.round(Number(r.casetas)); }
     var fk = String(r.km_fuente || '');
@@ -830,6 +836,7 @@ async function buscarRuta() {
     $('#hCas').className = 'hint agente' + (r.casetas_confirmadas ? '' : ' off');
     V.casetasFuente = $('#hCas').textContent;
   } else {
+    RUTA_BASE = { enBase: false, km: null };
     $('#hKm').textContent = AG_VIVO === false
       ? 'sin conexión · captura los kilómetros'
       : 'ruta nueva · captura los kilómetros y se guardan';
@@ -841,17 +848,27 @@ async function buscarRuta() {
   pintarEstadoAgente();
 }
 
-// cuando se cotiza una ruta nueva, queda registrada para la proxima
+// La ruta solo se registra cuando es nueva o cuando alguien corrigio los
+// kilometros a mano. Lo que trajo el agente no se vuelve a guardar encima.
+// Las casetas nunca se escriben desde aqui: la base las guarda en tarifa de
+// 2 ejes y les aplica el ajuste al leer, asi que devolverle el numero ya
+// ajustado las infla de nuevo en cada cotizacion. Entran solo por el agente
+// o por la captura de lo que se pago al liquidar.
 async function registrarRuta() {
   if (AG_VIVO === false) return;
   const ori = $('#vOrigen').value.trim(), des = $('#vDestino').value.trim();
   if (!ori || !des || !V.km) return;
+
+  const cambio = !RUTA_BASE.enBase || RUTA_BASE.km === null || Number(V.km) !== RUTA_BASE.km;
+  if (!cambio) return;
+
   await agente({
     accion: 'guardarRuta', origen: ori, destino: des, via: V.via,
-    km: V.km, kmFuente: 'capturado en el tarifador',
-    casetas: V.casetas > 0 ? V.casetas : null,
-    casetasFuente: V.casetas > 0 ? 'capturado en el tarifador' : null
+    km: V.km,
+    kmFuente: RUTA_BASE.enBase ? 'corregido en el tarifador' : 'capturado en el tarifador'
   }, 6000);
+
+  RUTA_BASE = { enBase: true, km: Number(V.km) };
 }
 
 async function traerDiesel() {
@@ -862,10 +879,14 @@ async function traerDiesel() {
     r = d && d.datos && d.datos[0];
   }
   if (r && r.precio) {
-    P().dieselAgente = Number(r.precio);
-    P().dieselFuente = r.fuente || '';
-    P().dieselFecha = r.vigente_al || '';
+    const p = P();
+    p.dieselAgente = Number(r.precio);
+    p.dieselFuente = r.fuente || '';
+    p.dieselFecha = r.vigente_al || '';
+    // el precio del agente manda, salvo que alguien haya capturado el suyo
+    if (!p.dieselManual) p.diesel = p.dieselAgente;
     guardar();
+    if ($('#cDiesel')) renderConfig();
   }
   pintarEstadoAgente();
 }
