@@ -1444,6 +1444,77 @@ syncNow(false);
     {k:'money', n:'Ferrock Money', s:'Finanzas',        f:'ferrock-money', q:'m', ek:'ferrock_money_espacio', ic:'\uD83D\uDCB0'},
     {k:'plan',  n:'Ferrock Plan',  s:'Proyecciones',    f:'ferrock-plan',  q:'p', ek:'ferrock_plan_espacio',  ic:'\uD83D\uDCC8'}
   ];
+  var EXT = /\.html$/i.test(location.pathname) ? '.html' : '';
+  var CARPETA = location.pathname.replace(/[^\/]*$/, '');
+
+  function leer(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+  function limpio(c){ return String(c||'').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,40); }
+  function irA(a){
+    var c = leer(a.ek);
+    if(c.length < 6){
+      var pre = a.q === 'l' ? 'fl' : (a.q === 'm' ? 'fm' : 'fp');
+      c = limpio(window.prompt('Pega el codigo de tu espacio de ' + a.n +
+            ' (empieza con ' + pre + '). Solo se pide esta vez.', ''));
+      if(c.length < 6) return;
+      try{ localStorage.setItem(a.ek, c); }catch(e){}
+    }
+    location.href = CARPETA + a.f + EXT + '?' + a.q + '=' + c;
+  }
+
+  /* ---- estilos ---- */
+  var st = document.createElement('style');
+  st.textContent =
+    '.fapps{background:rgba(255,255,255,.22);border:none;color:#fff;border-radius:999px;' +
+    'padding:6px 12px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;' +
+    'display:inline-flex;align-items:center;gap:6px;flex-shrink:0;line-height:1.2}' +
+    '.fapps:active{background:rgba(255,255,255,.34)}' +
+    '.fapps-back{position:fixed;inset:0;z-index:9998;display:none}' +
+    '.fapps-back.on{display:block}' +
+    '.fapps-pop{position:fixed;z-index:9999;background:#fff;border-radius:14px;padding:6px;' +
+    'min-width:216px;box-shadow:0 12px 34px rgba(0,0,0,.24);display:none}' +
+    '.fapps-pop.on{display:block}' +
+    '.fapps-pop a{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:11px;' +
+    'text-decoration:none;color:#22242a;font-family:inherit;font-weight:800;font-size:14.5px;cursor:pointer}' +
+    '.fapps-pop a:hover{background:#FFF3E6}' +
+    '.fapps-pop .ic{font-size:18px;flex-shrink:0}' +
+    '.fapps-pop small{display:block;font-weight:700;font-size:11.5px;color:#7b7f8a;margin-top:1px}' +
+    '@media print{.fapps,.fapps-pop,.fapps-back{display:none !important}}';
+  document.head.appendChild(st);
+
+  /* ---- menu ---- */
+  var back = document.createElement('div'); back.className = 'fapps-back';
+  var pop = document.createElement('div'); pop.className = 'fapps-pop';
+  APPS.filter(function(a){ return a.k !== YO; })
+      .sort(function(a,b){ return a.n.localeCompare(b.n); })
+      .forEach(function(a){
+        var el = document.createElement('a');
+        el.innerHTML = '<span class="ic">' + a.ic + '</span>' +
+                       '<span>' + a.n + '<small>' + a.s + '</small></span>';
+        el.onclick = function(ev){ ev.preventDefault(); irA(a); };
+        pop.appendChild(el);
+      });
+  document.body.appendChild(back);
+  document.body.appendChild(pop);
+
+  /* ---- pill ---- */
+  var btn = document.createElement('button');
+  btn.className = 'fapps no-print';
+  btn.type = 'button';
+  btn.innerHTML = '\u25A6 Apps';
+  btn.onclick = function(e){
+    e.stopPropagation();
+    var r = btn.getBoundingClientRect();
+    pop.style.top = (r.bottom + 8) + 'px';
+    var izq = Math.min(r.left, window.innerWidth - 232);
+    pop.style.left = Math.max(8, izq) + 'px';
+    pop.classList.add('on'); back.classList.add('on');
+  };
+  back.onclick = function(){ pop.classList.remove('on'); back.classList.remove('on'); };
+
+  var cont = document.querySelector('.hrow');
+  var ancla = document.querySelector('.hgap');
+  if(cont){ if(ancla && ancla.parentNode === cont) cont.insertBefore(btn, ancla); else cont.appendChild(btn); }
+
   /* ---- manifiesto, icono y modo sin senal (archivos reales en /ferrock/) ---- */
   function instalar(){
     var v = document.querySelectorAll('link[rel="manifest"],link[rel="apple-touch-icon"],' +
