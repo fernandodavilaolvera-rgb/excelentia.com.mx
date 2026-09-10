@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logística Armada · Inventario de la base Armadamyl</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.42;font-size:14px}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px 48px}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:4px solid #4a9fd4;padding:1.4rem 0;margin-bottom:1.6rem;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.head-inner{max-width:960px;margin:0 auto;padding:0 16px;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+.head-title{text-align:right;color:#fff}
+.head-title h1{font-size:17px;font-weight:800;letter-spacing:.2px}
+.head-title span{font-size:12px;font-weight:500;color:#c9dcf2}
+
+/* BLOQUES */
+h2{font-size:15px;font-weight:800;color:#0d1b3e;margin:1.6rem 0 .6rem;padding-bottom:.35rem;border-bottom:2px solid #dde1e9;break-after:avoid}
+h3{font-size:13.5px;font-weight:700;color:#1a3a6b;margin:1rem 0 .45rem;break-after:avoid}
+p,li{orphans:3;widows:3}
+p{margin-bottom:.6rem;color:#4a5068}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem;break-inside:auto}
+.card h2{margin-top:0}
+
+.resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1.2rem}
+.kpi{background:#fff;border:1px solid #dde1e9;border-left:4px solid #4a9fd4;border-radius:8px;padding:.7rem .85rem;break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.kpi .n{font-size:20px;font-weight:800;color:#1a3a6b;line-height:1.1}
+.kpi .l{font-size:11px;font-weight:600;color:#8a90a0;text-transform:uppercase;letter-spacing:.3px;margin-top:.15rem}
+
+.nota{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.75rem .9rem;margin:.8rem 0;break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.nota strong{color:#0d1b3e}
+.pie{background:#eef4fc;border-left:4px solid #1a3a6b;border-radius:6px;padding:.6rem .8rem;font-size:12.5px;color:#4a5068;margin-top:.7rem;break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+
+/* TABLAS */
+.tabla-wrap{overflow-x:auto;break-inside:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:.3rem}
+thead{display:table-header-group}
+th{background:#dce8f7;color:#0d1b3e;font-weight:700;text-align:left;padding:.45rem .55rem;border:1px solid #dde1e9;font-size:11.5px;text-transform:uppercase;letter-spacing:.2px;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+td{padding:.45rem .55rem;border:1px solid #dde1e9;vertical-align:top;color:#4a5068;break-inside:avoid}
+td.tb{font-weight:700;color:#1a2035;white-space:nowrap}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600;color:#1a2035}
+tbody tr:hover{background:#e8f0fb}
+.mark{font-weight:700}
+.m1{color:#1e5096}
+.m2{color:#4a5068}
+.m3{color:#8a90a0}
+code{font-family:'Manrope',sans-serif;font-weight:700;color:#1a3a6b;font-size:12px}
+
+ul{margin:.3rem 0 .6rem 1.1rem}
+li{margin-bottom:.3rem;color:#4a5068}
+
+footer{text-align:center;font-size:11.5px;color:#8a90a0;margin-top:1.6rem;padding-top:.8rem;border-top:1px solid #dde1e9}
+
+/* MOVIL */
+@media (max-width:600px){
+  .head-inner{flex-direction:column;align-items:flex-start}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .logo-slogan{font-size:11px}
+  .head-title{text-align:left}
+  .resumen{grid-template-columns:repeat(2,1fr)}
+  body{font-size:13px}
+  table{font-size:11.5px}
+  .wrap{padding:0 10px 32px}
+}
+
+/* IMPRESION */
+@page{size:Letter;margin:12mm}
+@media print{
+  body{background:#fff}
+  .no-print{display:none!important}
+  a[href]:after{content:none}
+  .card,section,main,div,.tabla-wrap{break-inside:auto}
+  .kpi,.nota,.pie,tr,img{break-inside:avoid}
+  h1,h2,h3,h4{break-after:avoid}
+  header{margin-bottom:1rem}
+  .wrap{max-width:none;padding:0}
+  tbody tr:hover{background:transparent}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="head-title">
+      <h1>Inventario de la base Armadamyl</h1>
+      <span>Logística Armada · 9 de septiembre de 2026</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="resumen">
+  <div class="kpi"><div class="n">47</div><div class="l">Tablas</div></div>
+  <div class="kpi"><div class="n">1,895</div><div class="l">Viajes</div></div>
+  <div class="kpi"><div class="n">1,135</div><div class="l">Facturas</div></div>
+  <div class="kpi"><div class="n">907</div><div class="l">Renglones de tarifa</div></div>
+</div>
+
+<div class="card">
+  <h2>Qué alcance tenemos</h2>
+  <p>El usuario que autorizó el proveedor de la plataforma da lectura a <strong>la base completa</strong>: las 47 tablas, sin excepciones. No hay vistas recortadas ni tablas bloqueadas. La conexión sale del servidor de n8n, cuya dirección quedó registrada del lado de ellos.</p>
+  <div class="nota">
+    <strong>Es solo lectura.</strong> Nada de lo que hagamos escribe en la plataforma; los datos que el sistema aprenda viven del lado nuestro. Eso conviene decirlo en la junta, porque quita de tajo la preocupación de que le movamos algo a su operación.
+  </div>
+</div>
+
+<div class="card">
+  <h2>Lo que la base resuelve y no sabíamos</h2>
+  <p>Hay seis cosas que estaban en la lista de insumos por pedir a Luis, a Fernanda o al proveedor de la plataforma, y que ya estaban aquí adentro:</p>
+  <ul>
+    <li><span class="mark m1">La marca de viaje padre e hijo.</span> La tabla de viajes tiene los campos que dicen si un viaje tiene repartos, cuál es su viaje padre y si él mismo es un reparto. Ya no hay que pedirla.</li>
+    <li><span class="mark m1">Los costos capturados a mano.</span> Viven en una tabla aparte de costos extra por viaje, con concepto, importe y si se factura o no. 129 registros.</li>
+    <li><span class="mark m1">El histórico de modificaciones de tarifa.</span> Cada viaje guarda la tarifa original, la editada, el motivo del cambio, quién lo hizo y cuándo. Para flete, maniobra, reparto, estadía y custodia por separado.</li>
+    <li><span class="mark m1">Los viajes rechazados con su precio.</span> Hay campos de rechazo con la tarifa original y la ofrecida; es justo lo que se le pidió a Luis para conocer el piso real de negociación.</li>
+    <li><span class="mark m1">El parque vehicular.</span> 193 unidades con marca, año, capacidad, medidas de caja y peso máximo.</li>
+    <li><span class="mark m1">El tabulador de maniobras y estadías</span>, cargado por tipo de unidad.</li>
+  </ul>
+  <div class="pie">Ninguno de estos seis puntos necesita ya una junta ni un correo; se resuelven leyendo. Lo que sí sigue haciendo falta es que Luis confirme los criterios de negocio, porque el dato existe pero no dice por qué se capturó así.</div>
+</div>
+
+<h2>1 · Tarifario — el corazón para el Motor</h2>
+<div class="card">
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Tabla</th><th class="num">Reng.</th><th>Qué guarda</th><th>Para qué nos sirve</th></tr></thead>
+<tbody>
+<tr><td class="tb">Tarifario</td><td class="num">697</td><td>Lo que cobra cada transportista, por proveedor, tipo de unidad y zona de destino. Incluye el tiempo estimado de viaje.</td><td><span class="mark m1">Clave.</span> Es el costo de compra real, proveedor por proveedor. Con esto se calcula margen y se compara entre transportistas.</td></tr>
+<tr><td class="tb">Tarifario4PL</td><td class="num">210</td><td>Lo que se le cobra al cliente por unidad y zona. Tres renglones por combinación: flete, maniobra y estadía. La columna de costo viene vacía.</td><td><span class="mark m1">Clave.</span> Es el precio de venta oficial. 17 destinos cargados de 37 posibles.</td></tr>
+<tr><td class="tb">TarifarioCiudades</td><td class="num">37</td><td>Catálogo de zonas de destino. Mezcla ciudades con estados completos, e incluye una zona local y otra de más de 30 kilómetros.</td><td><span class="mark m1">Clave.</span> Ahí vive la regla de local contra foráneo que faltaba.</td></tr>
+<tr><td class="tb">TarifarioExtras</td><td class="num">47</td><td>Conceptos sueltos por proveedor y unidad, con su importe.</td><td>Útil para los cargos que hoy se buscan en mensajes.</td></tr>
+<tr><td class="tb">TarifarioConceptos</td><td class="num">3</td><td>Catálogo de los tres conceptos tarifables.</td><td><span class="mark m3">De apoyo.</span></td></tr>
+<tr><td class="tb">Tarifario_PorCiudad</td><td class="num">0</td><td>Versión vieja, con las ciudades como columnas fijas. Vacía.</td><td><span class="mark m3">Ignorar.</span> Quedó en desuso.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="pie">El catálogo de zonas tiene 37 entradas y solo 17 con tarifa cargada. Ese hueco es exactamente el espacio donde entra el Motor: cotizar el destino que nadie capturó.</div>
+</div>
+
+<h2>2 · Viajes — donde está la operación real</h2>
+<div class="card">
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Tabla</th><th class="num">Reng.</th><th>Qué guarda</th><th>Para qué nos sirve</th></tr></thead>
+<tbody>
+<tr><td class="tb">Viajes</td><td class="num">1,895</td><td>202 columnas por viaje: cliente, cadena, origen y destino, piezas, peso, tarimas, unidad, fechas de carga y de cita, y las cinco tarifas (flete, maniobra, reparto, estadía y custodia) con su valor original, su edición, el motivo, quién y cuándo. Más falso flete, rechazo, proveedor asignado, chofer, unidad y diez hitos de proceso con hora y responsable.</td><td><span class="mark m1">La tabla más valiosa del sistema.</span> De aquí sale el margen real por ruta, el histórico de cambios y el piso de negociación.</td></tr>
+<tr><td class="tb">ViajesCostosExtras</td><td class="num">129</td><td>Concepto, importe y si se factura al cliente.</td><td><span class="mark m1">Clave.</span> Son los costos que hoy no aparecen en el reporte.</td></tr>
+<tr><td class="tb">ViajesComplementos</td><td class="num">102</td><td>Conceptos adicionales con su costo.</td><td>Complementa lo anterior.</td></tr>
+<tr><td class="tb">ViajesHistorial</td><td class="num">10,626</td><td>Cada cambio de estatus, con usuario y tipo de cuenta.</td><td>Tiempos reales de ciclo, para el módulo de rentabilidad.</td></tr>
+<tr><td class="tb">ViajesEvidencias</td><td class="num">3,560</td><td>Fotos de entrega por viaje.</td><td><span class="mark m3">No aporta al Motor.</span></td></tr>
+<tr><td class="tb">ViajesRepartos</td><td class="num">6</td><td>Repartos ligados a una dirección concreta, con su tarifa.</td><td><span class="mark m2">Ojo:</span> solo 6 registros. La relación padre e hijo de verdad está en la tabla de viajes, no aquí.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<h2>3 · Facturación — lo que de verdad se cobró</h2>
+<div class="card">
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Tabla</th><th class="num">Reng.</th><th>Qué guarda</th><th>Para qué nos sirve</th></tr></thead>
+<tbody>
+<tr><td class="tb">Facturas</td><td class="num">1,135</td><td>El comprobante fiscal completo: folio, sello, timbrado, emisor y receptor, importes, impuestos, archivos y estatus de pago.</td><td><span class="mark m1">Clave para conciliación.</span> Es lo cobrado contra lo cotizado.</td></tr>
+<tr><td class="tb">FacturasConceptos</td><td class="num">1,352</td><td>Desglose renglón por renglón de cada comprobante.</td><td>Permite ver qué se facturó como flete y qué como maniobra.</td></tr>
+<tr><td class="tb">FacturasViajes</td><td class="num">24</td><td>Amarre entre factura y viaje.</td><td><span class="mark m2">Poco usada.</span> El amarre real viene dentro de la tabla de viajes.</td></tr>
+<tr><td class="tb">Servicios · ServiciosConceptos</td><td class="num">13 · 24</td><td>Servicios contratados a proveedores, con su factura y comprobante de pago.</td><td>Insumo del módulo de conciliación de pagos.</td></tr>
+<tr><td class="tb">Catálogos fiscales</td><td class="num">89</td><td>Formas y métodos de pago, usos de comprobante, regímenes, impuestos y claves de producto y unidad.</td><td><span class="mark m3">De apoyo.</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<h2>4 · Flota</h2>
+<div class="card">
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Tabla</th><th class="num">Reng.</th><th>Qué guarda</th><th>Para qué nos sirve</th></tr></thead>
+<tbody>
+<tr><td class="tb">UnidadesTransporte</td><td class="num">193</td><td>Placas, proveedor, tipo, marca, color, año, capacidad, medidas de caja, peso máximo.</td><td><span class="mark m1">Clave.</span> Resuelve el catálogo de unidades que faltaba, y el año permite estimar rendimiento por antigüedad.</td></tr>
+<tr><td class="tb">TiposUnidades</td><td class="num">12</td><td>Nueve tipos activos: tráiler, torton o rabón, 3.5, 2 y 1.5 toneladas, y 1 tonelada, 750, 700 y 500 kilos.</td><td><span class="mark m1">Clave.</span> El Motor hoy solo maneja cuatro; faltan cinco tipos chicos.</td></tr>
+<tr><td class="tb">UnidadesMarcas · UnidadesColores</td><td class="num">24 · 10</td><td>Catálogos de apoyo.</td><td><span class="mark m3">De apoyo.</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<h2>5 · Catálogos de negocio</h2>
+<div class="card">
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Tabla</th><th class="num">Reng.</th><th>Qué guarda</th><th>Para qué nos sirve</th></tr></thead>
+<tbody>
+<tr><td class="tb">Direcciones</td><td class="num">402</td><td>Puntos de entrega con calle, colonia, municipio, estado y, sobre todo, la zona de tarifario a la que pertenecen.</td><td><span class="mark m1">Clave.</span> Es el puente entre la dirección real y la zona que cobra el tarifario.</td></tr>
+<tr><td class="tb">Cadenas</td><td class="num">40</td><td>Agrupaciones de destinos por cliente.</td><td>Corrige el estimador de cadena del Copiloto.</td></tr>
+<tr><td class="tb">Clientes</td><td class="num">19</td><td>Datos comerciales y fiscales.</td><td>Rentabilidad y utilidad por cliente.</td></tr>
+<tr><td class="tb">Proveedores</td><td class="num">19</td><td>Transportistas subcontratados.</td><td>Comparar costo entre proveedores para la misma ruta.</td></tr>
+<tr><td class="tb">Estados · Alcaldias · Paises</td><td class="num">32 · 16 · 227</td><td>Geografía.</td><td><span class="mark m3">De apoyo.</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<h2>6 · Cuentas, accesos y sistema</h2>
+<div class="card">
+<p>Diez tablas que administran usuarios, permisos de menú, sesiones abiertas, historial de accesos y configuración visual de la plataforma. Suman poco más de 6,600 registros, casi todos de sesiones.</p>
+<p><span class="mark m3">No aportan nada al proyecto</span> y no se van a tocar. Se listan solo para dejar constancia de que se revisaron: cuentas de usuarios, de clientes y de proveedores, las tres tablas de sesiones, el historial de accesos, los tres catálogos de puestos, los archivos permitidos y la paleta de color del sistema.</p>
+</div>
+
+<h2>Cómo esto fortalece el Motor de Tarifas</h2>
+<div class="card">
+  <h3>Deja de estimar en cuatro frentes</h3>
+  <ul>
+    <li><strong>Las unidades.</strong> Hoy el Motor calcula con cuatro tipos y dos de ellos traen rendimiento estimado; la base tiene nueve tipos activos y 193 unidades con año y capacidad, así que el rendimiento se puede acotar por antigüedad en vez de suponerlo.</li>
+    <li><strong>Las maniobras.</strong> Estaban en la lista de cosas por pedir; ya existen cargadas por tipo de unidad. Falta cotejar contra lo que se cobra de verdad, porque el tabulador de la plataforma se ve viejo.</li>
+    <li><strong>El piso de negociación.</strong> Los campos de rechazo guardan la tarifa que se pidió y la que se ofreció; con eso el Motor puede decir a partir de qué precio ese cliente sí acepta, en vez de proponer un rango teórico.</li>
+    <li><strong>El margen real.</strong> Cruzando el costo por proveedor contra el precio de venta se obtiene la utilidad por ruta sin depender de supuestos.</li>
+  </ul>
+
+  <h3>Y le da algo que hoy no tiene: contra qué compararse</h3>
+  <p>El Motor calcula desde cero, con kilómetros, casetas y diésel. La base tiene 17 destinos con precio ya fijado y 1,895 viajes hechos. Poner una cosa junto a la otra es lo que convierte la herramienta en algo auditable: no dice solo cuánto debería costar, dice en qué rutas el precio que se cobra hoy se aleja de lo que cuesta operarlas.</p>
+
+  <div class="nota">
+    <strong>El argumento para la junta.</strong> Dos destinos muy distintos tienen exactamente el mismo precio en tres de las cuatro unidades, aunque uno de ellos sale más caro de operar por casetas y retenes. La plataforma no tiene forma de mostrar eso, porque solo guarda lo que se cobró. El Motor sí, porque calcula lo que costó llegar.
+  </div>
+</div>
+
+<h2>Lo que sigue haciendo falta</h2>
+<div class="card">
+  <p>La base da el dato, no el criterio. Estas siguen siendo preguntas para Luis:</p>
+  <ul>
+    <li>Por qué 20 de los 37 destinos no tienen tarifa cargada: si es que no se hacen, o solo que nadie los capturó.</li>
+    <li>Si el tabulador de maniobras de la plataforma es el vigente o quedó atrás.</li>
+    <li>Qué porcentaje de utilidad busca por tipo de cliente, y cuál es su piso.</li>
+    <li>El rendimiento real de sus unidades chicas, que es donde el Motor todavía estima.</li>
+    <li>Su criterio de corte de mes, que no coincide con la fecha de cita.</li>
+  </ul>
+  <div class="pie">Ninguna de estas bloquea el trabajo; se pueden ir resolviendo en la marcha y todas se pueden preguntar en una sola conversación.</div>
+</div>
+
+<footer>
+  ExcelentIA · Documento interno de trabajo · Proyecto Logística Armada · 9 de septiembre de 2026
+</footer>
+
+</div>
+</body>
+</html>
