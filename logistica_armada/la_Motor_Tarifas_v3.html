@@ -964,6 +964,12 @@ async function buscarRuta() {
   const d = await agente({ accion: 'ruta', origen: ori, destino: des, via: via, ejes: uni.ejes }, 15000);
   const r = d && d.datos && d.datos[0];
 
+  // al cambiar de ruta no se arrastran datos de la consulta anterior
+  $('#vKm').value = 0;
+  $('#vCasetas').value = 0;
+  $('#vActual').value = 0;
+  $('#cardRes').classList.add('hidden');
+
   if (r && r.encontrada) {
     RUTA_BASE = {
       enBase: true,
