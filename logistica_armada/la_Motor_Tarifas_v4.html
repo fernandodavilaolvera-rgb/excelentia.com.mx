@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motor de Tarifas v4 · Logística Armada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',-apple-system,sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.42;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1rem 3rem}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.7rem 0;margin-bottom:1.1rem}
+.hd{max-width:1180px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.7rem}
+.logo-box{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback{font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:11px;font-weight:500;color:#fff;letter-spacing:.2px}
+.hd-title{display:flex;align-items:center;gap:.75rem;text-align:right}
+.hd-title h1{font-size:14px;font-weight:800;color:#fff}
+.hd-title p{font-size:10.5px;color:#b9d3ec;font-weight:500}
+.logo-box-4pl{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;flex-shrink:0}
+.logo-box-4pl img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback-4pl{font-size:14px;font-weight:800;color:#1a3a6b;display:none;white-space:nowrap}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:1.1rem}
+.card h2{font-size:15px;font-weight:800;color:#1a2035;margin-bottom:.15rem}
+.card .sub{font-size:12.5px;color:#4a5068;margin-bottom:.9rem;max-width:720px}
+
+/* BARRA DE EMPRESA */
+.empresas{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.emp{font-size:12.5px;font-weight:700;padding:.42rem .85rem;border-radius:20px;border:1px solid #dde1e9;background:#fff;color:#4a5068;cursor:pointer;transition:.15s}
+.emp:hover{background:#e8f0fb;border-color:#4a9fd4}
+.emp.on{background:#1a3a6b;border-color:#1a3a6b;color:#fff}
+.emp-add{border-style:dashed;color:#8a90a0}
+.emp-lbl{font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#8a90a0;margin-right:.2rem}
+
+/* FORM */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.85rem;max-width:960px}
+.f{display:flex;flex-direction:column;gap:.22rem}
+.f label{font-size:11.5px;font-weight:700;color:#4a5068}
+.f .hint{font-size:10.5px;color:#8a90a0;font-weight:500}
+input,select{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a2035;border:1px solid #dde1e9;border-radius:8px;padding:.48rem .6rem;background:#fff;width:100%;max-width:320px}
+input:focus,select:focus{outline:2px solid #4a9fd4;outline-offset:-1px;border-color:#4a9fd4}
+input.wide{max-width:100%}
+.f.full{grid-column:1/-1}
+.f.full input{max-width:100%}
+
+/* AUTOCOMPLETADO */
+.ac{position:relative;max-width:320px}
+.ac input{width:100%}
+.ac-list{position:absolute;z-index:40;top:100%;left:0;right:0;background:#fff;border:1px solid #dde1e9;
+  border-radius:8px;margin-top:.2rem;max-height:250px;overflow-y:auto;box-shadow:0 6px 18px rgba(13,27,62,.13)}
+.ac-op{padding:.42rem .6rem;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
+.ac-op:hover,.ac-op.sel{background:#e8f0fb}
+.ac-op .est{font-size:11px;color:#8a90a0;font-weight:500}
+.ac-op.rec{background:#f5faff}
+.ac-op.rec:hover,.ac-op.rec.sel{background:#e8f0fb}
+.ac-sep{padding:.3rem .6rem;font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:#8a90a0;background:#f5f6f8;border-top:1px solid #eef0f4;border-bottom:1px solid #eef0f4}
+.ac-nueva{padding:.42rem .6rem;font-size:12.5px;color:#4a5068;cursor:pointer;border-top:1px solid #eef0f4}
+.ac-nueva:hover,.ac-nueva.sel{background:#e8f0fb}
+
+/* CAMPO CON AGENTE */
+.dual{display:flex;gap:.4rem;align-items:center;max-width:320px}
+.dual input{flex:1;min-width:0}
+.dual .auto{font-size:12.5px;font-weight:700;color:#2e7d5b;background:#e8f5ee;border:1px solid #bfe0cd;
+  border-radius:7px;padding:.42rem .55rem;white-space:nowrap;cursor:pointer}
+.dual .auto:hover{background:#d8eee2}
+.dual .auto.off{color:#8a90a0;background:#f5f6f8;border-color:#dde1e9}
+.agente{font-size:10.5px;color:#2e7d5b;font-weight:600}
+.agente.off{color:#8a90a0}
+.agente.buscando{color:#4a9fd4}
+
+/* BOTONES */
+.btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:.5rem .95rem;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;transition:.15s}
+.btn:hover{background:#1e5096}
+.btn.ghost{background:#fff;color:#1a3a6b}
+.btn.ghost:hover{background:#e8f0fb}
+.btn.green{background:#2e9e5b;border-color:#2e9e5b}
+.btn.green:hover{background:#268a4e}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
+.link{font-size:11.5px;color:#8a90a0;background:none;border:none;font-family:inherit;cursor:pointer;text-decoration:underline;padding:.2rem 0}
+.link:hover{color:#1a3a6b}
+
+/* RESULTADO */
+.precios{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;margin-bottom:1rem}
+.pbox{border:1px solid #dde1e9;border-radius:10px;padding:.85rem .95rem;background:#fff}
+.pbox .lb{font-size:11px;font-weight:700;color:#8a90a0;letter-spacing:.5px;margin-bottom:.15rem}
+.pbox .vl{font-size:22px;font-weight:800;color:#1a2035;line-height:1.15}
+.pbox .hint{font-size:11.5px;color:#4a5068;margin-top:.15rem}
+.pbox.piso{background:#fdf6e3;border-color:#ecdcae}
+.pbox.piso .vl{color:#b8860b}
+.pbox.meta{background:#e8f5ee;border-color:#bfe0cd}
+.pbox.meta .vl{color:#2e7d5b}
+.pbox.costo{background:#f5f6f8}
+
+/* DESGLOSE */
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:460px}
+thead th{background:#dce8f7;color:#1a3a6b;font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;text-align:left;padding:.5rem .7rem;border:1px solid #dde1e9;white-space:nowrap}
+tbody td{padding:.48rem .7rem;border:1px solid #dde1e9;color:#4a5068}
+tbody td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr.sum td{background:#eef4fc;font-weight:800;color:#1a2035}
+tbody tr.total td{background:#dce8f7;font-weight:800;color:#0d1b3e;font-size:14.5px}
+tbody td b{color:#1a2035}
+.dim{color:#8a90a0;font-size:11.5px}
+
+/* AVISOS */
+.aviso{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.8rem .95rem;margin:.9rem 0;max-width:720px}
+.aviso .t{font-size:12.5px;font-weight:800;color:#1a3a6b;margin-bottom:.25rem}
+.aviso p{font-size:12.5px;color:#4a5068}
+.aviso.duda{background:#fdf6e3;border-color:#ecdcae;border-left-color:#b8860b}
+.aviso.duda .t{color:#8a6d0b}
+.aviso ul{margin:.4rem 0 0 1.1rem}
+.aviso li{font-size:12.5px;color:#4a5068;margin-bottom:.2rem}
+
+.porconf{display:inline-block;font-size:10px;font-weight:800;color:#8a6d0b;background:#fdf6e3;border:1px solid #ecdcae;border-radius:10px;padding:.03rem .38rem;margin-left:.3rem;vertical-align:middle}
+
+/* COMPARADOR */
+.rutas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem;max-width:960px}
+.ruta{border:1px solid #dde1e9;border-radius:10px;padding:.85rem;background:#fff}
+.ruta h4{font-size:13px;font-weight:800;margin-bottom:.5rem;color:#1a2035}
+.ruta .res{margin-top:.6rem;padding-top:.6rem;border-top:1px solid #dde1e9;font-size:12.5px;color:#4a5068}
+.ruta .res b{display:block;font-size:18px;font-weight:800;color:#1a2035}
+.ruta.gana{border-color:#2e9e5b;background:#f4fbf7}
+.ruta.gana .res b{color:#2e7d5b}
+
+footer{text-align:center;padding:1.2rem 1rem;color:#8a90a0;font-size:11.5px;border-top:1px solid #dde1e9;margin-top:1rem}
+
+.hidden{display:none!important}
+.acc{border:1px solid #dde1e9;border-radius:10px;margin-bottom:.7rem;background:#fff}
+.acc>summary{padding:.7rem .95rem;font-size:13px;font-weight:800;color:#1a3a6b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary::after{content:'▾';color:#8a90a0;font-size:12px}
+.acc[open]>summary::after{content:'▴'}
+.acc>summary:hover{background:#e8f0fb}
+.acc .bd{padding:.3rem .95rem 1rem}
+
+/* MOVIL */
+@media (max-width:600px){
+  .wrap{padding:0 .7rem 2.5rem}
+  header{padding:.6rem 0}
+  .hd{flex-direction:column;align-items:flex-start;gap:.7rem}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .hd-title{text-align:left;flex-direction:column;align-items:flex-start;gap:.5rem}
+  .card{padding:.9rem;border-radius:10px}
+  .grid{grid-template-columns:1fr}
+  input,select{max-width:100%}
+  .precios{grid-template-columns:1fr}
+  .rutas{grid-template-columns:1fr}
+  table{font-size:12.5px}
+  thead th,tbody td{padding:.4rem .5rem}
+}
+
+/* IMPRESION */
+@page{size:Letter;margin:13mm 13mm 15mm}
+@media print{
+  body{background:#fff;font-size:10pt;line-height:1.38}
+  .wrap{max-width:none;padding:0}
+  .no-print{display:none!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  header{padding:.6rem 0;margin-bottom:.7rem;break-inside:avoid;break-after:avoid}
+  .logo-box img,.logo-box-4pl img{height:36px}
+  .card{break-inside:auto;border-radius:0;border:none;border-bottom:1px solid #dde1e9;padding:.5rem 0;margin-bottom:.5rem}
+  .card h2{break-after:avoid;font-size:11.5pt}
+  .pbox,.aviso,.ruta{break-inside:avoid}
+  .precios{break-inside:avoid;grid-template-columns:repeat(3,1fr)}
+  .tblwrap{overflow:visible;break-inside:auto}
+  table{min-width:0;font-size:9.4pt}
+  thead{display:table-header-group}
+  tbody tr{break-inside:avoid}
+  p,li{orphans:3;widows:3}
+  .acc{break-inside:avoid;border:none}
+  .acc .bd{padding:.2rem 0}
+  footer{break-inside:avoid;font-size:8.5pt}
+  a[href]:after{content:none}
+}
+
+/* ============ PESTAÑAS Y MARGEN POR RUTA (v3) ============ */
+.vistas{display:flex;gap:.4rem;margin-bottom:1rem;border-bottom:1px solid #dde1e9}
+.vista{font-family:inherit;font-size:13.5px;font-weight:700;color:#4a5068;background:none;border:none;border-bottom:3px solid transparent;padding:.55rem .9rem;cursor:pointer;margin-bottom:-1px}
+.vista:hover{color:#1a3a6b;background:#e8f0fb}
+.vista.on{color:#1a3a6b;border-bottom-color:#4a9fd4}
+.mr-foto{font-size:11.5px;color:#8a90a0;font-weight:600}
+.mr-pills{margin:.3rem 0 .9rem}
+.mr-u{display:none}
+.mr-u.on{display:block}
+.mr-uni{font-size:15px;color:#1a3a6b;margin-bottom:.6rem}
+.mr-h3{font-size:13.5px;font-weight:800;color:#1a2035;margin:1.1rem 0 .1rem}
+.mr-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:960px}
+.mr-kpi{background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:8px;padding:.55rem .7rem}
+.mr-kpi b{display:block;font-size:17px;font-weight:800;color:#1a3a6b}
+.mr-kpi span{font-size:11.5px;color:#4a5068}
+table.mr-t{min-width:1060px;font-size:12.5px}
+.mr-neg{color:#b42318}
+table.mr-t thead th{text-align:left;vertical-align:bottom;line-height:1.25}
+table.mr-t thead th.num{text-align:right}
+table.mr-t thead th.mr-ref{background:#eef0f4;color:#4a5068}
+table.mr-t tbody td{vertical-align:top}
+table.mr-t tbody tr:hover td{background:#e8f0fb}
+.mr-dest{font-weight:700;color:#1a2035!important;white-space:nowrap}
+.mr-sep{border-left:3px solid #c8d9f0!important}
+.mr-g{color:#b0b5c0!important}
+.mr-n{display:block;font-size:10.5px;color:#8a90a0;font-weight:500}
+.mr-lec{min-width:150px}
+.mr-b{display:inline-block;font-size:10.5px;font-weight:700;border-radius:10px;padding:.08rem .45rem;margin:0 .15rem .15rem 0;white-space:nowrap}
+.mr-b.rojo{background:#fde8e8;color:#b42318}
+.mr-b.ambar{background:#fff4dc;color:#9a5b00}
+.mr-b.gris{background:#eef0f4;color:#4a5068}
+.mr-ley{display:flex;flex-wrap:wrap;gap:.3rem .9rem;font-size:12px;color:#4a5068;margin-top:.7rem}
+.mr-sup{list-style:none;max-width:720px}
+.mr-sup li{padding:.35rem 0;border-bottom:1px solid #eef0f4;font-size:12.5px;color:#4a5068}
+.mr-sup li:last-child{border-bottom:none}
+.mr-sup b{color:#1a2035}
+#vMargen .aviso{max-width:720px}
+@media (max-width:600px){
+  .vistas{overflow-x:auto}
+  .vista{white-space:nowrap;padding:.5rem .7rem}
+  .mr-kpis{grid-template-columns:1fr 1fr}
+}
+@media print{
+  .mr-u{display:block!important;break-before:page}
+  .mr-u:first-of-type{break-before:auto}
+  .mr-kpi,.mr-b{break-inside:avoid}
+  .mr-uni,.mr-h3{break-after:avoid}
+  table.mr-t{min-width:0;font-size:8.6pt}
+  #vMargen .acc{break-inside:auto}
+}
+
+/* ---------- v4 ---------- */
+.mk{margin:.2rem 0 1rem;border-top:1px solid #dde1e9;padding-top:.8rem}
+.mk-hd{display:flex;flex-wrap:wrap;gap:.45rem .9rem;align-items:center;margin:0 0 .65rem}
+.mk-hd h3{font-size:14px;font-weight:800;color:#1a3a6b;margin:0;break-after:avoid}
+.mk-hd select{max-width:240px}
+.pbox.merc{background:#e8f0fb;border-color:#c8d9f0}
+.pbox.merc .vl{color:#1a3a6b}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:.05rem .45rem;margin-left:.35rem;white-space:nowrap;vertical-align:1px}
+.tag.barato{background:#e8f5ee;color:#2e7d5b}
+.tag.usado{background:#dce8f7;color:#1a3a6b}
+.tag.sin{background:#f5f6f8;color:#8a90a0;border:1px solid #dde1e9}
+tr.alt td{background:#f0f6ff}
+.pv-list{margin:.2rem 0 .4rem 1.1rem;padding:0;max-width:720px}
+.pv-list li{margin:.3rem 0;font-size:13px;orphans:3;widows:3}
+.pv-list .link{font-size:13px;padding:0}
+@media print{
+  .pbox,.tag,tr.alt td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pbox,.pv-list li,tr{break-inside:avoid}
+  .mk-hd h3{break-after:avoid}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="hd-title">
+      <div>
+        <h1>Motor de Tarifas · Logística Armada</h1>
+        <p>v4 · Cotizador, Proveedores y Margen por ruta</p>
+      </div>
+      <div class="logo-box-4pl">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback-4pl">Logística Armada</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="vistas no-print">
+    <button class="vista on" data-v="cotizar">Cotizador</button>
+    <button class="vista" data-v="prov">Proveedores por ruta</button>
+    <button class="vista" data-v="margen">Margen por ruta</button>
+  </div>
+
+  <div id="vCotizar">
+  <div class="empresas no-print" id="empresas"></div>
+
+  <div id="estadoAg" class="no-print" style="margin-bottom:.7rem"></div>
+
+  <div class="aviso duda no-print">
+    <div class="t">Antes de usarlo, lee esto</div>
+    <p>Los números marcados <span class="porconf">por confirmar</span> son estimaciones nuestras, puestas para que la herramienta ya calcule algo. Todos son editables. La idea de esta versión es que los corrijas viendo el resultado, en lugar de llenar un formulario en abstracto.</p>
+  </div>
+
+  <!-- COTIZADOR -->
+  <section class="card">
+    <h2>Cotizar un viaje</h2>
+    <p class="sub">Captura la ruta y el sistema calcula el costo real y el rango de precio al que conviene venderla.</p>
+    <div class="grid" id="fViaje"></div>
+    <div class="btnrow no-print">
+      <button class="btn green" id="btnCalc">Calcular</button>
+      <button class="btn ghost" id="btnLimpiar">Limpiar</button>
+      <button class="btn ghost" id="btnImprimir">Imprimir cotización</button>
+    </div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section class="card hidden" id="cardRes">
+    <h2 id="resTitulo">Resultado</h2>
+    <p class="sub" id="resSub"></p>
+    <div class="precios" id="precios"></div>
+    <div id="mercado"></div>
+    <div class="tblwrap"><table id="tblDesglose"></table></div>
+    <div id="calibra"></div>
+    <div id="notasRes"></div>
+  </section>
+
+  <!-- COMPARADOR -->
+  <section class="card">
+    <h2>Comparar dos rutas</h2>
+    <p class="sub">Para el mismo servicio, cuando existe alternativa entre autopista y camino libre, o cuando cambia el orden de las entregas.</p>
+    <div class="rutas" id="comparador"></div>
+    <div class="btnrow no-print">
+      <button class="btn" id="btnComparar">Comparar</button>
+    </div>
+    <div id="resComparador"></div>
+  </section>
+
+  <!-- CONFIGURACION -->
+  <details class="acc no-print" id="accConfig">
+    <summary>Datos de la empresa · unidades, costos y márgenes</summary>
+    <div class="bd">
+      <p class="sub">Cada empresa tiene sus propios valores. Lo que cambies aquí solo aplica a la empresa seleccionada arriba.</p>
+
+      <h2 style="font-size:13.5px;margin:.9rem 0 .5rem">Costos generales</h2>
+      <div class="grid" id="fGenerales"></div>
+
+      <h2 style="font-size:13.5px;margin:1.2rem 0 .5rem">Utilidad objetivo por tipo de cliente</h2>
+      <div class="grid" id="fUtilidad"></div>
+
+      <h2 style="font-size:13.5px;margin:1.2rem 0 .5rem">Unidades</h2>
+      <p class="sub">El rendimiento define el gasto de diésel; los ejes definen el costo de casetas.</p>
+      <div class="tblwrap"><table id="tblUnidades"></table></div>
+      <div class="btnrow">
+        <button class="btn ghost" id="btnAddUnidad">Agregar unidad</button>
+        <button class="link" id="btnRestaurar">Restaurar valores iniciales de esta empresa</button>
+      </div>
+    </div>
+  </details>
+
+  <div class="aviso no-print">
+    <div class="t">Lo que falta para que deje de estimar</div>
+    <ul>
+      <li>El rendimiento real de cada unidad. Sabemos el del tractocamión; el de rabón, 3.5 y 1.5 toneladas está calculado hacia atrás desde una tarifa conocida.</li>
+      <li>La comisión del operador de cada ruta, de ida y de regreso. Ya se captura como monto y queda guardada; mientras no esté, se estima como porcentaje del flete.</li>
+      <li>Los rangos de utilidad reales: cuál es el piso más apretado que se acepta y cuál el techo.</li>
+      <li>El costo real de casetas por ruta. El agente propone y cada vez que se reporta lo que de verdad se pagó, esa ruta queda corregida para siempre.</li>
+    </ul>
+  </div>
+
+  </div>
+
+  <!-- ============ PROVEEDORES POR RUTA (v4) ============ -->
+  <div id="vProv" class="hidden">
+  <section class="card">
+    <h2>Proveedores por ruta</h2>
+    <p class="sub">Para el mismo destino y la misma unidad: la tarifa que cada transportista tiene cargada en tu plataforma, cuántos viajes le diste y lo que le pagaste, del 1 de junio al 10 de septiembre.</p>
+    <div class="grid no-print">
+      <div class="f"><label>Destino · zona de tu tabulador</label><select id="pZona"></select></div>
+      <div class="f"><label>Unidad</label><select id="pUni"></select></div>
+    </div>
+    <div id="pRes"></div>
+  </section>
+  <section class="card" id="pSalio"></section>
+  <details class="acc">
+    <summary>De dónde sale cada número</summary>
+    <div class="bd"><ul class="mr-sup">
+      <li><b>Tarifa cargada:</b> tabulador de proveedores de tu plataforma, 697 renglones; se omiten los proveedores de prueba y los que no son transportistas.</li>
+      <li><b>Viajes y lo que le pagaste:</b> viajes activos con cita del 1 de junio al 10 de septiembre, sin viajes padre ni repartos; lo pagado es la mediana por transportista.</li>
+      <li><b>Diferencia:</b> por cada ruta se toma el transportista que la trabajó al menor precio con al menos 2 viajes, y se suma lo que costaron de más los viajes de los demás. Es una referencia para preguntar, no un ahorro seguro.</li>
+      <li><b>Piso para negociar</b> (en el Cotizador): lo menos que has pagado por esa ruta y unidad; si nadie la trabajó, la tarifa más baja cargada.</li>
+    </ul></div>
+  </details>
+  </div>
+
+  <!-- ============ MARGEN POR RUTA ============ -->
+  <div id="vMargen" class="hidden">
+  <section class="card">
+    <h2>¿Cuánto deja cada ruta de tu tarifario?</h2>
+    <p class="sub">Esta pestaña toma cada destino de tu tarifario y lo compara, unidad por unidad, contra lo que realmente le pagaste a tus transportistas por esa misma ruta de junio a la fecha; donde no hubo viajes, contra el tarifario que tienen cargado. La diferencia es tu margen, antes de maniobras y estadías. Las rutas marcadas en rojo o ámbar son las que dejan menos del 10%.</p>
+    <p class="sub">La última parte compara tu precio contra lo que costaría hacer el viaje con unidad propia, según el Motor. Esa referencia todavía se está calibrando con tus números, así que se lee como orientación y no como dato firme.</p>
+    <p class="mr-foto">Datos de Logística Armada al 10 de septiembre de 2026 · 17 destinos con tarifa cargada · 4 unidades</p>
+  </section>
+
+  <section class="card">
+    <h2>Lo que salió</h2>
+    <div class="aviso"><div class="t">Tres rutas pierden dinero con lo que se pagó de verdad</div>
+      <p>Puebla en rabón queda en −9.4%: la mediana de sus tres viajes pagados es $11,600 y tu precio es $10,604; Chalco en tráiler en −7.3%, y Puebla en tráiler en −68.8%, esta última con un solo viaje a $27,000 que conviene revisar. En total, 19 de las 68 combinaciones dejan menos del 10% y la mediana general es 13.1%.</p></div>
+    <div class="aviso"><div class="t">Ocho combinaciones dejan exactamente 9.1%</div>
+      <p>Es costo más 10% al centavo, y seis de las ocho son de 3.5 toneladas; todo indica que así se armó esa parte del tabulador. Es un margen parejo, pero delgado para rutas largas como Mexicali, Mérida o Villahermosa.</p></div>
+    <div class="aviso"><div class="t">Donde hay viajes, lo pagado cambia la foto</div>
+      <p>Querétaro en 1.5 toneladas deja 42.2% con lo pagado en 19 viajes ($3,200), contra 9.6% si se toma el tarifario de proveedores. Por eso la tabla usa lo pagado siempre que existe y el tarifario solo donde no hubo viajes.</p></div>
+    <div class="aviso"><div class="t">Dos capturas para revisar</div>
+      <p>En Mexicali el rabón ($97,864) sale más barato que el 3.5 toneladas ($100,980); y Mérida y Culiacán tienen tarifa idéntica en 3.5 toneladas, rabón y tráiler, aunque Mérida queda 147 km más lejos.</p></div>
+    <div class="aviso"><div class="t">Monterrey en tráiler deja si se subcontrata, no con unidad propia</div>
+      <p>A $32,237 deja 13.1% sobre el tarifario de proveedores (no hubo viajes en el periodo), pero queda 22.1% abajo de lo que el Motor calcula para operar un tráiler propio; es el único foráneo por debajo del piso.</p></div>
+    <div class="aviso duda"><div class="t">Lo que el Motor todavía no sabe</div>
+      <p>Tu precio queda arriba del Motor, y la distancia crece mientras más chica es la unidad: 23% en tráiler, 45% en rabón, 53% en 1.5 toneladas y 56% en 3.5 toneladas. No significa que la tarifa esté alta; el Motor aún no incluye costos que no dependen del kilómetro, como sueldo, viáticos o un mínimo por viaje, y el rendimiento de las unidades chicas es estimado. Es la calibración que sigue y se hace con tus números.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Destino por destino</h2>
+    <div class="empresas no-print mr-pills"><button class="emp on" data-mu="mu0">1.5 toneladas</button><button class="emp" data-mu="mu1">3.5 toneladas</button><button class="emp" data-mu="mu2">Torton / rabón</button><button class="emp" data-mu="mu3">Tráiler</button></div>
+    <div class="mr-u on" id="mu0"><h2 class="mr-uni">1.5 toneladas</h2><div class="mr-kpis"><div class="mr-kpi"><b>25.4%</b><span>margen mediano sobre transportistas</span></div><div class="mr-kpi"><b>2 de 17</b><span>destinos con margen menor al 10%</span></div><div class="mr-kpi"><b>+53.1%</b><span>tu precio contra el Motor, mediana de foráneos</span></div><div class="mr-kpi"><b>9.5 km/l · 2 ejes</b><span>rendimiento por confirmar</span></div></div><h3 class="mr-h3">Foráneos</h3><p class="sub">En estas rutas el costo lo mandan el diésel y las casetas, así que la referencia del Motor sí aplica.</p><div class="tblwrap"><table class="mr-t"><thead><tr><th colspan="6">Tu tarifario contra tus transportistas</th><th colspan="6" class="mr-sep mr-ref">Referencia del Motor · en calibración</th></tr><tr><th>Destino</th><th class="num">Tu precio</th><th class="num">Tarifario<br>proveedores</th><th class="num">Pagado real<br>jun–sep</th><th class="num">Margen</th><th>Lectura</th><th class="num mr-sep">Km ida</th><th class="num">Casetas<br>vuelta</th><th class="num">Motor<br>al 15%</th><th class="num">Diferencia</th><th class="num">Dif. %</th><th class="num">Utilidad<br>unidad propia</th></tr></thead><tbody><tr><td class="mr-dest">Querétaro</td><td class="num"><b>$5,533</b></td><td class="num">$5,000<span class="mr-n">8 tarifas</span></td><td class="num">$3,200<span class="mr-n">19 viajes</span></td><td class="num"><b class="">42.2%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">187</td><td class="num">$758</td><td class="num">$3,613</td><td class="num">+$1,920</td><td class="num">+53.1%</td><td class="num">37.7%</td></tr><tr><td class="mr-dest">Puebla</td><td class="num"><b>$8,829</b></td><td class="num">$6,590<span class="mr-n">7 tarifas</span></td><td class="num">$6,590<span class="mr-n">3 viajes</span></td><td class="num"><b class="">25.4%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">174</td><td class="num">$1,572</td><td class="num">$5,082</td><td class="num">+$3,747</td><td class="num">+73.7%</td><td class="num">42.8%</td></tr><tr><td class="mr-dest">Silao</td><td class="num"><b>$11,445</b></td><td class="num">$8,800<span class="mr-n">7 tarifas</span></td><td class="num">$10,000<span class="mr-n">1 viaje</span></td><td class="num"><b class="">12.6%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">322</td><td class="num">$1,374</td><td class="num">$6,358</td><td class="num">+$5,087</td><td class="num">+80.0%</td><td class="num">44.1%</td></tr><tr><td class="mr-dest">Veracruz</td><td class="num"><b>$15,304</b></td><td class="num">$11,126<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">27.3%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">436</td><td class="num">$2,630</td><td class="num">$10,137</td><td class="num">+$5,167</td><td class="num">+51.0%</td><td class="num">37.1%</td></tr><tr><td class="mr-dest">Guadalajara</td><td class="num"><b>$16,225</b></td><td class="num">$13,025<span class="mr-n">7 tarifas</span></td><td class="num">$13,025<span class="mr-n">6 viajes</span></td><td class="num"><b class="">19.7%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">521</td><td class="num">$2,826</td><td class="num">$11,484</td><td class="num">+$4,741</td><td class="num">+41.3%</td><td class="num">34.1%</td></tr><tr><td class="mr-dest">Monterrey</td><td class="num"><b>$18,929</b></td><td class="num">$15,468<span class="mr-n">7 tarifas</span></td><td class="num">$15,468<span class="mr-n">4 viajes</span></td><td class="num"><b class="">18.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">879</td><td class="num">$1,982</td><td class="num">$13,847</td><td class="num">+$5,082</td><td class="num">+36.7%</td><td class="num">32.6%</td></tr><tr><td class="mr-dest">Villahermosa</td><td class="num"><b>$24,877</b></td><td class="num">$18,872<span class="mr-n">7 tarifas</span></td><td class="num">$20,936<span class="mr-n">2 viajes</span></td><td class="num"><b class="">15.8%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">789</td><td class="num">$3,734</td><td class="num">$16,309</td><td class="num">+$8,568</td><td class="num">+52.5%</td><td class="num">37.6%</td></tr><tr><td class="mr-dest">Culiacán</td><td class="num"><b>$36,212</b></td><td class="num">$26,452<span class="mr-n">7 tarifas</span></td><td class="num">$26,452<span class="mr-n">1 viaje</span></td><td class="num"><b class="">27.0%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">1,203</td><td class="num">$2,647<span class="mr-n">estimadas</span></td><td class="num">$18,820</td><td class="num">+$17,392</td><td class="num">+92.4%</td><td class="num">46.5%</td></tr><tr><td class="mr-dest">Mérida</td><td class="num"><b>$36,493</b></td><td class="num">$28,840<span class="mr-n">7 tarifas</span></td><td class="num">$33,480<span class="mr-n">1 viaje</span></td><td class="num"><b class="">8.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep">1,350</td><td class="num">$4,508</td><td class="num">$24,172</td><td class="num">+$12,321</td><td class="num">+51.0%</td><td class="num">37.1%</td></tr><tr><td class="mr-dest">Chihuahua</td><td class="num"><b>$37,670</b></td><td class="num">$25,875<span class="mr-n">7 tarifas</span></td><td class="num">$25,875<span class="mr-n">2 viajes</span></td><td class="num"><b class="">31.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">1,362</td><td class="num">$3,342</td><td class="num">$21,993</td><td class="num">+$15,677</td><td class="num">+71.3%</td><td class="num">42.3%</td></tr><tr><td class="mr-dest">Mexicali</td><td class="num"><b>$90,916</b></td><td class="num">$52,440<span class="mr-n">6 tarifas</span></td><td class="num">$52,440<span class="mr-n">1 viaje</span></td><td class="num"><b class="">42.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">2,569</td><td class="num">$5,652<span class="mr-n">estimadas</span></td><td class="num">$40,189</td><td class="num">+$50,727</td><td class="num">+126.2%</td><td class="num">51.5%</td></tr></tbody></table></div><h3 class="mr-h3">Zona metropolitana y cercanos</h3><p class="sub">Tarifa de reparto; el Motor calcula por kilómetro y aquí no aplica, por eso sus columnas van en gris.</p><div class="tblwrap"><table class="mr-t"><thead><tr><th colspan="6">Tu tarifario contra tus transportistas</th><th colspan="6" class="mr-sep mr-ref">Referencia del Motor · en calibración</th></tr><tr><th>Destino</th><th class="num">Tu precio</th><th class="num">Tarifario<br>proveedores</th><th class="num">Pagado real<br>jun–sep</th><th class="num">Margen</th><th>Lectura</th><th class="num mr-sep">Km ida</th><th class="num">Casetas<br>vuelta</th><th class="num">Motor<br>al 15%</th><th class="num">Diferencia</th><th class="num">Dif. %</th><th class="num">Utilidad<br>unidad propia</th></tr></thead><tbody><tr><td class="mr-dest">CDMX / Edo. de México</td><td class="num"><b>$2,337</b></td><td class="num">$1,840<span class="mr-n">9 tarifas</span></td><td class="num">$1,840<span class="mr-n">136 viajes</span></td><td class="num"><b class="">21.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">46</td><td class="num mr-g">$362</td><td class="num mr-g">$1,237</td><td class="num mr-g">+$1,100</td><td class="num mr-g">+88.9%</td><td class="num mr-g">45.8%</td></tr><tr><td class="mr-dest">Ajusco</td><td class="num"><b>$5,193</b></td><td class="num">$2,875<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">44.6%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">62</td><td class="num mr-g">$654</td><td class="num mr-g">$1,997</td><td class="num mr-g">+$3,196</td><td class="num mr-g">+160.0%</td><td class="num mr-g">55.3%</td></tr><tr><td class="mr-dest">Chalco</td><td class="num"><b>$5,193</b></td><td class="num">$2,875<span class="mr-n">8 tarifas</span></td><td class="num">$2,875<span class="mr-n">12 viajes</span></td><td class="num"><b class="">44.6%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">80</td><td class="num mr-g">$892</td><td class="num mr-g">$2,673</td><td class="num mr-g">+$2,520</td><td class="num mr-g">+94.3%</td><td class="num mr-g">46.8%</td></tr><tr><td class="mr-dest">Toluca</td><td class="num"><b>$5,193</b></td><td class="num">$4,400<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">15.3%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">92</td><td class="num mr-g">$770</td><td class="num mr-g">$2,566</td><td class="num mr-g">+$2,627</td><td class="num mr-g">+102.4%</td><td class="num mr-g">48.1%</td></tr><tr><td class="mr-dest">Jilotepec</td><td class="num"><b>$3,488</b></td><td class="num">$3,200<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">8.3%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep mr-g">69</td><td class="num mr-g">$532</td><td class="num mr-g">$1,834</td><td class="num mr-g">+$1,654</td><td class="num mr-g">+90.2%</td><td class="num mr-g">46.1%</td></tr><tr><td class="mr-dest">Tepeji</td><td class="num"><b>$4,905</b></td><td class="num">$2,650<span class="mr-n">6 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">46.0%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">45</td><td class="num mr-g">$532</td><td class="num mr-g">$1,563</td><td class="num mr-g">+$3,342</td><td class="num mr-g">+213.8%</td><td class="num mr-g">59.6%</td></tr></tbody></table></div></div><div class="mr-u" id="mu1"><h2 class="mr-uni">3.5 toneladas</h2><div class="mr-kpis"><div class="mr-kpi"><b>12.1%</b><span>margen mediano sobre transportistas</span></div><div class="mr-kpi"><b>7 de 17</b><span>destinos con margen menor al 10%</span></div><div class="mr-kpi"><b>+55.6%</b><span>tu precio contra el Motor, mediana de foráneos</span></div><div class="mr-kpi"><b>7.0 km/l · 2 ejes</b><span>rendimiento por confirmar</span></div></div><h3 class="mr-h3">Foráneos</h3><p class="sub">En estas rutas el costo lo mandan el diésel y las casetas, así que la referencia del Motor sí aplica.</p><div class="tblwrap"><table class="mr-t"><thead><tr><th colspan="6">Tu tarifario contra tus transportistas</th><th colspan="6" class="mr-sep mr-ref">Referencia del Motor · en calibración</th></tr><tr><th>Destino</th><th class="num">Tu precio</th><th class="num">Tarifario<br>proveedores</th><th class="num">Pagado real<br>jun–sep</th><th class="num">Margen</th><th>Lectura</th><th class="num mr-sep">Km ida</th><th class="num">Casetas<br>vuelta</th><th class="num">Motor<br>al 15%</th><th class="num">Diferencia</th><th class="num">Dif. %</th><th class="num">Utilidad<br>unidad propia</th></tr></thead><tbody><tr><td class="mr-dest">Querétaro</td><td class="num"><b>$8,316</b></td><td class="num">$7,250<span class="mr-n">8 tarifas</span></td><td class="num">$4,000<span class="mr-n">3 viajes</span></td><td class="num"><b class="">51.9%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">187</td><td class="num">$758</td><td class="num">$4,366</td><td class="num">+$3,950</td><td class="num">+90.5%</td><td class="num">46.1%</td></tr><tr><td class="mr-dest">Puebla</td><td class="num"><b>$9,385</b></td><td class="num">$8,000<span class="mr-n">8 tarifas</span></td><td class="num">$8,532<span class="mr-n">1 viaje</span></td><td class="num"><b class="">9.1%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep">174</td><td class="num">$1,572</td><td class="num">$5,783</td><td class="num">+$3,602</td><td class="num">+62.3%</td><td class="num">40.1%</td></tr><tr><td class="mr-dest">Silao</td><td class="num"><b>$17,600</b></td><td class="num">$12,800<span class="mr-n">8 tarifas</span></td><td class="num">$12,099<span class="mr-n">1 viaje</span></td><td class="num"><b class="">31.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">322</td><td class="num">$1,374</td><td class="num">$7,655</td><td class="num">+$9,945</td><td class="num">+129.9%</td><td class="num">52.0%</td></tr><tr><td class="mr-dest">Veracruz</td><td class="num"><b>$17,820</b></td><td class="num">$14,599<span class="mr-n">8 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">18.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">436</td><td class="num">$2,630</td><td class="num">$11,893</td><td class="num">+$5,927</td><td class="num">+49.8%</td><td class="num">36.8%</td></tr><tr><td class="mr-dest">Guadalajara</td><td class="num"><b>$19,250</b></td><td class="num">$16,000<span class="mr-n">7 tarifas</span></td><td class="num">$17,500<span class="mr-n">2 viajes</span></td><td class="num"><b class="">9.1%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep">521</td><td class="num">$2,826</td><td class="num">$13,583</td><td class="num">+$5,667</td><td class="num">+41.7%</td><td class="num">34.3%</td></tr><tr><td class="mr-dest">Monterrey</td><td class="num"><b>$22,000</b></td><td class="num">$19,000<span class="mr-n">8 tarifas</span></td><td class="num">$20,000<span class="mr-n">2 viajes</span></td><td class="num"><b class="">9.1%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep">879</td><td class="num">$1,982</td><td class="num">$17,387</td><td class="num">+$4,613</td><td class="num">+26.5%</td><td class="num">28.7%</td></tr><tr><td class="mr-dest">Villahermosa</td><td class="num"><b>$29,700</b></td><td class="num">$24,195<span class="mr-n">8 tarifas</span></td><td class="num">$27,000<span class="mr-n">1 viaje</span></td><td class="num"><b class="">9.1%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep">789</td><td class="num">$3,734</td><td class="num">$19,487</td><td class="num">+$10,213</td><td class="num">+52.4%</td><td class="num">37.5%</td></tr><tr><td class="mr-dest">Culiacán</td><td class="num"><b>$42,900</b></td><td class="num">$38,400<span class="mr-n">8 tarifas</span></td><td class="num">$38,000<span class="mr-n">1 viaje</span></td><td class="num"><b class="">11.4%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b gris">igual a Mérida</span></td><td class="num mr-sep">1,203</td><td class="num">$2,647<span class="mr-n">estimadas</span></td><td class="num">$23,665</td><td class="num">+$19,235</td><td class="num">+81.3%</td><td class="num">44.4%</td></tr><tr><td class="mr-dest">Mérida</td><td class="num"><b>$42,900</b></td><td class="num">$42,728<span class="mr-n">8 tarifas</span></td><td class="num">$39,000<span class="mr-n">1 viaje</span></td><td class="num"><b class="">9.1%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span> <span class="mr-b gris">igual a Culiacán</span></td><td class="num mr-sep">1,350</td><td class="num">$4,508</td><td class="num">$29,609</td><td class="num">+$13,291</td><td class="num">+44.9%</td><td class="num">35.3%</td></tr><tr><td class="mr-dest">Chihuahua</td><td class="num"><b>$42,768</b></td><td class="num">$34,022<span class="mr-n">8 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">20.4%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">1,362</td><td class="num">$3,342</td><td class="num">$27,479</td><td class="num">+$15,289</td><td class="num">+55.6%</td><td class="num">38.4%</td></tr><tr><td class="mr-dest">Mexicali</td><td class="num"><b>$100,980</b></td><td class="num">$66,635<span class="mr-n">7 tarifas</span></td><td class="num">$91,800<span class="mr-n">1 viaje</span></td><td class="num"><b class="">9.1%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep">2,569</td><td class="num">$5,652<span class="mr-n">estimadas</span></td><td class="num">$50,536</td><td class="num">+$50,444</td><td class="num">+99.8%</td><td class="num">47.7%</td></tr></tbody></table></div><h3 class="mr-h3">Zona metropolitana y cercanos</h3><p class="sub">Tarifa de reparto; el Motor calcula por kilómetro y aquí no aplica, por eso sus columnas van en gris.</p><div class="tblwrap"><table class="mr-t"><thead><tr><th colspan="6">Tu tarifario contra tus transportistas</th><th colspan="6" class="mr-sep mr-ref">Referencia del Motor · en calibración</th></tr><tr><th>Destino</th><th class="num">Tu precio</th><th class="num">Tarifario<br>proveedores</th><th class="num">Pagado real<br>jun–sep</th><th class="num">Margen</th><th>Lectura</th><th class="num mr-sep">Km ida</th><th class="num">Casetas<br>vuelta</th><th class="num">Motor<br>al 15%</th><th class="num">Diferencia</th><th class="num">Dif. %</th><th class="num">Utilidad<br>unidad propia</th></tr></thead><tbody><tr><td class="mr-dest">CDMX / Edo. de México</td><td class="num"><b>$2,863</b></td><td class="num">$2,300<span class="mr-n">10 tarifas</span></td><td class="num">$2,300<span class="mr-n">28 viajes</span></td><td class="num"><b class="">19.7%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">46</td><td class="num mr-g">$362</td><td class="num mr-g">$1,423</td><td class="num mr-g">+$1,440</td><td class="num mr-g">+101.3%</td><td class="num mr-g">48.0%</td></tr><tr><td class="mr-dest">Ajusco</td><td class="num"><b>$6,600</b></td><td class="num">$4,025<span class="mr-n">8 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">39.0%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">62</td><td class="num mr-g">$654</td><td class="num mr-g">$2,247</td><td class="num mr-g">+$4,353</td><td class="num mr-g">+193.7%</td><td class="num mr-g">58.2%</td></tr><tr><td class="mr-dest">Chalco</td><td class="num"><b>$6,600</b></td><td class="num">$4,025<span class="mr-n">10 tarifas</span></td><td class="num">$4,025<span class="mr-n">3 viajes</span></td><td class="num"><b class="">39.0%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">80</td><td class="num mr-g">$892</td><td class="num mr-g">$2,995</td><td class="num mr-g">+$3,605</td><td class="num mr-g">+120.4%</td><td class="num mr-g">50.8%</td></tr><tr><td class="mr-dest">Toluca</td><td class="num"><b>$6,600</b></td><td class="num">$5,800<span class="mr-n">9 tarifas</span></td><td class="num">$5,800<span class="mr-n">1 viaje</span></td><td class="num"><b class="">12.1%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">92</td><td class="num mr-g">$770</td><td class="num mr-g">$2,936</td><td class="num mr-g">+$3,664</td><td class="num mr-g">+124.8%</td><td class="num mr-g">51.4%</td></tr><tr><td class="mr-dest">Jilotepec</td><td class="num"><b>$4,400</b></td><td class="num">$4,000<span class="mr-n">9 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">9.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep mr-g">69</td><td class="num mr-g">$532</td><td class="num mr-g">$2,112</td><td class="num mr-g">+$2,288</td><td class="num mr-g">+108.3%</td><td class="num mr-g">49.1%</td></tr><tr><td class="mr-dest">Tepeji</td><td class="num"><b>$6,160</b></td><td class="num">$4,000<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">35.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">45</td><td class="num mr-g">$532</td><td class="num mr-g">$1,745</td><td class="num mr-g">+$4,415</td><td class="num mr-g">+253.1%</td><td class="num mr-g">62.0%</td></tr></tbody></table></div></div><div class="mr-u" id="mu2"><h2 class="mr-uni">Torton / rabón</h2><div class="mr-kpis"><div class="mr-kpi"><b>11.6%</b><span>margen mediano sobre transportistas</span></div><div class="mr-kpi"><b>5 de 17</b><span>destinos con margen menor al 10%</span></div><div class="mr-kpi"><b>+45.1%</b><span>tu precio contra el Motor, mediana de foráneos</span></div><div class="mr-kpi"><b>5.4 km/l · 3 ejes</b><span>rendimiento por confirmar</span></div></div><h3 class="mr-h3">Foráneos</h3><p class="sub">En estas rutas el costo lo mandan el diésel y las casetas, así que la referencia del Motor sí aplica.</p><div class="tblwrap"><table class="mr-t"><thead><tr><th colspan="6">Tu tarifario contra tus transportistas</th><th colspan="6" class="mr-sep mr-ref">Referencia del Motor · en calibración</th></tr><tr><th>Destino</th><th class="num">Tu precio</th><th class="num">Tarifario<br>proveedores</th><th class="num">Pagado real<br>jun–sep</th><th class="num">Margen</th><th>Lectura</th><th class="num mr-sep">Km ida</th><th class="num">Casetas<br>vuelta</th><th class="num">Motor<br>al 15%</th><th class="num">Diferencia</th><th class="num">Dif. %</th><th class="num">Utilidad<br>unidad propia</th></tr></thead><tbody><tr><td class="mr-dest">Querétaro</td><td class="num"><b>$11,012</b></td><td class="num">$8,000<span class="mr-n">8 tarifas</span></td><td class="num">$7,000<span class="mr-n">2 viajes</span></td><td class="num"><b class="">36.4%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">187</td><td class="num">$924</td><td class="num">$5,544</td><td class="num">+$5,468</td><td class="num">+98.6%</td><td class="num">47.5%</td></tr><tr><td class="mr-dest">Puebla</td><td class="num"><b>$10,604</b></td><td class="num">$8,600<span class="mr-n">8 tarifas</span></td><td class="num">$11,600<span class="mr-n">3 viajes</span></td><td class="num"><b class="mr-neg">−9.4%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b rojo">pierde dinero</span></td><td class="num mr-sep">174</td><td class="num">$1,918</td><td class="num">$7,259</td><td class="num">+$3,345</td><td class="num">+46.1%</td><td class="num">35.7%</td></tr><tr><td class="mr-dest">Silao</td><td class="num"><b>$19,190</b></td><td class="num">$17,000<span class="mr-n">8 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">11.4%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">322</td><td class="num">$1,676</td><td class="num">$9,715</td><td class="num">+$9,475</td><td class="num">+97.5%</td><td class="num">47.3%</td></tr><tr><td class="mr-dest">Veracruz</td><td class="num"><b>$21,785</b></td><td class="num">$17,214<span class="mr-n">8 tarifas</span></td><td class="num">$17,857<span class="mr-n">2 viajes</span></td><td class="num"><b class="">18.0%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">436</td><td class="num">$3,208</td><td class="num">$15,017</td><td class="num">+$6,768</td><td class="num">+45.1%</td><td class="num">35.4%</td></tr><tr><td class="mr-dest">Guadalajara</td><td class="num"><b>$23,454</b></td><td class="num">$22,000<span class="mr-n">9 tarifas</span></td><td class="num">$22,000<span class="mr-n">3 viajes</span></td><td class="num"><b class="">6.2%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep">521</td><td class="num">$3,448</td><td class="num">$17,180</td><td class="num">+$6,274</td><td class="num">+36.5%</td><td class="num">32.5%</td></tr><tr><td class="mr-dest">Monterrey</td><td class="num"><b>$26,038</b></td><td class="num">$21,500<span class="mr-n">9 tarifas</span></td><td class="num">$21,500<span class="mr-n">1 viaje</span></td><td class="num"><b class="">17.4%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">879</td><td class="num">$2,418</td><td class="num">$22,238</td><td class="num">+$3,800</td><td class="num">+17.1%</td><td class="num">24.6%</td></tr><tr><td class="mr-dest">Villahermosa</td><td class="num"><b>$35,181</b></td><td class="num">$30,000<span class="mr-n">9 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">14.7%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">789</td><td class="num">$4,556</td><td class="num">$24,696</td><td class="num">+$10,485</td><td class="num">+42.5%</td><td class="num">34.5%</td></tr><tr><td class="mr-dest">Culiacán</td><td class="num"><b>$49,039</b></td><td class="num">$46,000<span class="mr-n">9 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">6.2%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span> <span class="mr-b gris">igual a Mérida</span></td><td class="num mr-sep">1,203</td><td class="num">$3,229<span class="mr-n">estimadas</span></td><td class="num">$30,276</td><td class="num">+$18,763</td><td class="num">+62.0%</td><td class="num">40.1%</td></tr><tr><td class="mr-dest">Mérida</td><td class="num"><b>$49,039</b></td><td class="num">$42,000<span class="mr-n">8 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">14.3%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b gris">igual a Culiacán</span></td><td class="num mr-sep">1,350</td><td class="num">$5,500</td><td class="num">$37,700</td><td class="num">+$11,339</td><td class="num">+30.1%</td><td class="num">30.1%</td></tr><tr><td class="mr-dest">Chihuahua</td><td class="num"><b>$48,357</b></td><td class="num">$42,500<span class="mr-n">9 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">12.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">1,362</td><td class="num">$4,078</td><td class="num">$35,116</td><td class="num">+$13,241</td><td class="num">+37.7%</td><td class="num">32.9%</td></tr><tr><td class="mr-dest">Mexicali</td><td class="num"><b>$97,864</b></td><td class="num">$85,000<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">13.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b ambar">rabón más barato que 3.5 t</span></td><td class="num mr-sep">2,569</td><td class="num">$6,895<span class="mr-n">estimadas</span></td><td class="num">$64,654</td><td class="num">+$33,210</td><td class="num">+51.4%</td><td class="num">37.2%</td></tr></tbody></table></div><h3 class="mr-h3">Zona metropolitana y cercanos</h3><p class="sub">Tarifa de reparto; el Motor calcula por kilómetro y aquí no aplica, por eso sus columnas van en gris.</p><div class="tblwrap"><table class="mr-t"><thead><tr><th colspan="6">Tu tarifario contra tus transportistas</th><th colspan="6" class="mr-sep mr-ref">Referencia del Motor · en calibración</th></tr><tr><th>Destino</th><th class="num">Tu precio</th><th class="num">Tarifario<br>proveedores</th><th class="num">Pagado real<br>jun–sep</th><th class="num">Margen</th><th>Lectura</th><th class="num mr-sep">Km ida</th><th class="num">Casetas<br>vuelta</th><th class="num">Motor<br>al 15%</th><th class="num">Diferencia</th><th class="num">Dif. %</th><th class="num">Utilidad<br>unidad propia</th></tr></thead><tbody><tr><td class="mr-dest">CDMX / Edo. de México</td><td class="num"><b>$4,906</b></td><td class="num">$4,400<span class="mr-n">10 tarifas</span></td><td class="num">$4,400<span class="mr-n">33 viajes</span></td><td class="num"><b class="">10.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">46</td><td class="num mr-g">$440</td><td class="num mr-g">$1,786</td><td class="num mr-g">+$3,120</td><td class="num mr-g">+174.7%</td><td class="num mr-g">56.7%</td></tr><tr><td class="mr-dest">Ajusco</td><td class="num"><b>$7,463</b></td><td class="num">$6,600<span class="mr-n">9 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">11.6%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">62</td><td class="num mr-g">$798</td><td class="num mr-g">$2,814</td><td class="num mr-g">+$4,649</td><td class="num mr-g">+165.2%</td><td class="num mr-g">55.8%</td></tr><tr><td class="mr-dest">Chalco</td><td class="num"><b>$7,463</b></td><td class="num">$6,600<span class="mr-n">9 tarifas</span></td><td class="num">$6,900<span class="mr-n">2 viajes</span></td><td class="num"><b class="">7.5%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep mr-g">80</td><td class="num mr-g">$1,088</td><td class="num mr-g">$3,747</td><td class="num mr-g">+$3,716</td><td class="num mr-g">+99.2%</td><td class="num mr-g">47.6%</td></tr><tr><td class="mr-dest">Toluca</td><td class="num"><b>$7,463</b></td><td class="num">$6,600<span class="mr-n">9 tarifas</span></td><td class="num">$6,600<span class="mr-n">2 viajes</span></td><td class="num"><b class="">11.6%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">92</td><td class="num mr-g">$940</td><td class="num mr-g">$3,691</td><td class="num mr-g">+$3,772</td><td class="num mr-g">+102.2%</td><td class="num mr-g">48.1%</td></tr><tr><td class="mr-dest">Jilotepec</td><td class="num"><b>$5,864</b></td><td class="num">$5,500<span class="mr-n">7 tarifas</span></td><td class="num">$5,500<span class="mr-n">1 viaje</span></td><td class="num"><b class="">6.2%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep mr-g">69</td><td class="num mr-g">$650</td><td class="num mr-g">$2,659</td><td class="num mr-g">+$3,205</td><td class="num mr-g">+120.5%</td><td class="num mr-g">50.8%</td></tr><tr><td class="mr-dest">Tepeji</td><td class="num"><b>$7,037</b></td><td class="num">$4,800<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">31.8%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">45</td><td class="num mr-g">$650</td><td class="num mr-g">$2,183</td><td class="num mr-g">+$4,854</td><td class="num mr-g">+222.4%</td><td class="num mr-g">60.2%</td></tr></tbody></table></div></div><div class="mr-u" id="mu3"><h2 class="mr-uni">Tráiler</h2><div class="mr-kpis"><div class="mr-kpi"><b>13.1%</b><span>margen mediano sobre transportistas</span></div><div class="mr-kpi"><b>5 de 17</b><span>destinos con margen menor al 10%</span></div><div class="mr-kpi"><b>+22.7%</b><span>tu precio contra el Motor, mediana de foráneos</span></div><div class="mr-kpi"><b>2.7 km/l · 5 ejes</b><span>dato de la sesión</span></div></div><h3 class="mr-h3">Foráneos</h3><p class="sub">En estas rutas el costo lo mandan el diésel y las casetas, así que la referencia del Motor sí aplica.</p><div class="tblwrap"><table class="mr-t"><thead><tr><th colspan="6">Tu tarifario contra tus transportistas</th><th colspan="6" class="mr-sep mr-ref">Referencia del Motor · en calibración</th></tr><tr><th>Destino</th><th class="num">Tu precio</th><th class="num">Tarifario<br>proveedores</th><th class="num">Pagado real<br>jun–sep</th><th class="num">Margen</th><th>Lectura</th><th class="num mr-sep">Km ida</th><th class="num">Casetas<br>vuelta</th><th class="num">Motor<br>al 15%</th><th class="num">Diferencia</th><th class="num">Dif. %</th><th class="num">Utilidad<br>unidad propia</th></tr></thead><tbody><tr><td class="mr-dest">Querétaro</td><td class="num"><b>$14,925</b></td><td class="num">$13,500<span class="mr-n">6 tarifas</span></td><td class="num">$11,000<span class="mr-n">5 viajes</span></td><td class="num"><b class="">26.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">187</td><td class="num">$1,258</td><td class="num">$9,917</td><td class="num">+$5,008</td><td class="num">+50.5%</td><td class="num">37.0%</td></tr><tr><td class="mr-dest">Puebla</td><td class="num"><b>$15,991</b></td><td class="num">$13,550<span class="mr-n">6 tarifas</span></td><td class="num">$27,000<span class="mr-n">1 viaje</span></td><td class="num"><b class="mr-neg">−68.8%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b rojo">pierde dinero</span></td><td class="num mr-sep">174</td><td class="num">$2,610</td><td class="num">$12,084</td><td class="num">+$3,907</td><td class="num">+32.3%</td><td class="num">31.0%</td></tr><tr><td class="mr-dest">Silao</td><td class="num"><b>$21,321</b></td><td class="num">$19,000<span class="mr-n">7 tarifas</span></td><td class="num">$20,000<span class="mr-n">1 viaje</span></td><td class="num"><b class="">6.2%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span></td><td class="num mr-sep">322</td><td class="num">$2,280</td><td class="num">$17,302</td><td class="num">+$4,019</td><td class="num">+23.2%</td><td class="num">27.4%</td></tr><tr><td class="mr-dest">Veracruz</td><td class="num"><b>$28,783</b></td><td class="num">$25,000<span class="mr-n">6 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">13.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">436</td><td class="num">$4,366</td><td class="num">$25,966</td><td class="num">+$2,817</td><td class="num">+10.8%</td><td class="num">21.4%</td></tr><tr><td class="mr-dest">Guadalajara</td><td class="num"><b>$29,849</b></td><td class="num">$25,000<span class="mr-n">8 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">16.2%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">521</td><td class="num">$4,692</td><td class="num">$29,986</td><td class="num">−$137</td><td class="num">−0.5%</td><td class="num">14.7%</td></tr><tr><td class="mr-dest">Monterrey</td><td class="num"><b>$32,237</b></td><td class="num">$28,000<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">13.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b rojo">abajo del piso del Motor</span></td><td class="num mr-sep">879</td><td class="num">$3,290</td><td class="num">$41,408</td><td class="num">−$9,171</td><td class="num">−22.1%</td><td class="num">−3.6%</td></tr><tr><td class="mr-dest">Villahermosa</td><td class="num"><b>$43,708</b></td><td class="num">$39,000<span class="mr-n">6 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">10.8%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">789</td><td class="num">$6,198</td><td class="num">$43,609</td><td class="num">+$99</td><td class="num">+0.2%</td><td class="num">15.2%</td></tr><tr><td class="mr-dest">Culiacán</td><td class="num"><b>$69,293</b></td><td class="num">$62,000<span class="mr-n">6 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">10.5%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b gris">igual a Mérida</span></td><td class="num mr-sep">1,203</td><td class="num">$4,393<span class="mr-n">estimadas</span></td><td class="num">$56,455</td><td class="num">+$12,838</td><td class="num">+22.7%</td><td class="num">27.1%</td></tr><tr><td class="mr-dest">Mérida</td><td class="num"><b>$69,293</b></td><td class="num">$63,000<span class="mr-n">5 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">9.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b ambar">margen delgado</span> <span class="mr-b gris">igual a Culiacán</span></td><td class="num mr-sep">1,350</td><td class="num">$7,484</td><td class="num">$68,422</td><td class="num">+$871</td><td class="num">+1.3%</td><td class="num">15.8%</td></tr><tr><td class="mr-dest">Chihuahua</td><td class="num"><b>$86,350</b></td><td class="num">$75,000<span class="mr-n">5 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">13.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">1,362</td><td class="num">$5,548</td><td class="num">$65,055</td><td class="num">+$21,295</td><td class="num">+32.7%</td><td class="num">31.1%</td></tr><tr><td class="mr-dest">Mexicali</td><td class="num"><b>$172,700</b></td><td class="num">$150,000<span class="mr-n">6 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">13.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep">2,569</td><td class="num">$9,382<span class="mr-n">estimadas</span></td><td class="num">$120,559</td><td class="num">+$52,141</td><td class="num">+43.2%</td><td class="num">34.8%</td></tr></tbody></table></div><h3 class="mr-h3">Zona metropolitana y cercanos</h3><p class="sub">Tarifa de reparto; el Motor calcula por kilómetro y aquí no aplica, por eso sus columnas van en gris.</p><div class="tblwrap"><table class="mr-t"><thead><tr><th colspan="6">Tu tarifario contra tus transportistas</th><th colspan="6" class="mr-sep mr-ref">Referencia del Motor · en calibración</th></tr><tr><th>Destino</th><th class="num">Tu precio</th><th class="num">Tarifario<br>proveedores</th><th class="num">Pagado real<br>jun–sep</th><th class="num">Margen</th><th>Lectura</th><th class="num mr-sep">Km ida</th><th class="num">Casetas<br>vuelta</th><th class="num">Motor<br>al 15%</th><th class="num">Diferencia</th><th class="num">Dif. %</th><th class="num">Utilidad<br>unidad propia</th></tr></thead><tbody><tr><td class="mr-dest">CDMX / Edo. de México</td><td class="num"><b>$6,929</b></td><td class="num">$6,000<span class="mr-n">7 tarifas</span></td><td class="num">$6,200<span class="mr-n">16 viajes</span></td><td class="num"><b class="">10.5%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">46</td><td class="num mr-g">$600</td><td class="num mr-g">$3,016</td><td class="num mr-g">+$3,913</td><td class="num mr-g">+129.7%</td><td class="num mr-g">52.0%</td></tr><tr><td class="mr-dest">Ajusco</td><td class="num"><b>$11,513</b></td><td class="num">$10,000<span class="mr-n">6 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">13.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">62</td><td class="num mr-g">$1,086</td><td class="num mr-g">$4,616</td><td class="num mr-g">+$6,897</td><td class="num mr-g">+149.4%</td><td class="num mr-g">54.2%</td></tr><tr><td class="mr-dest">Chalco</td><td class="num"><b>$9,786</b></td><td class="num">$9,340<span class="mr-n">8 tarifas</span></td><td class="num">$10,500<span class="mr-n">1 viaje</span></td><td class="num"><b class="mr-neg">−7.3%</b><span class="mr-n">con lo pagado</span></td><td class="mr-lec"><span class="mr-b rojo">pierde dinero</span></td><td class="num mr-sep mr-g">80</td><td class="num mr-g">$1,480</td><td class="num mr-g">$6,112</td><td class="num mr-g">+$3,674</td><td class="num mr-g">+60.1%</td><td class="num mr-g">39.6%</td></tr><tr><td class="mr-dest">Toluca</td><td class="num"><b>$11,513</b></td><td class="num">$10,000<span class="mr-n">6 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">13.1%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">92</td><td class="num mr-g">$1,278</td><td class="num mr-g">$6,187</td><td class="num mr-g">+$5,326</td><td class="num mr-g">+86.1%</td><td class="num mr-g">45.3%</td></tr><tr><td class="mr-dest">Jilotepec</td><td class="num"><b>$9,594</b></td><td class="num">$9,315<span class="mr-n">7 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">2.9%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="mr-b rojo">margen muy delgado</span></td><td class="num mr-sep mr-g">69</td><td class="num mr-g">$884</td><td class="num mr-g">$4,492</td><td class="num mr-g">+$5,102</td><td class="num mr-g">+113.6%</td><td class="num mr-g">49.8%</td></tr><tr><td class="mr-dest">Tepeji</td><td class="num"><b>$9,594</b></td><td class="num">$7,500<span class="mr-n">6 tarifas</span></td><td class="num dim">sin viajes</td><td class="num"><b class="">21.8%</b><span class="mr-n">con tarifario</span></td><td class="mr-lec"><span class="dim">—</span></td><td class="num mr-sep mr-g">45</td><td class="num mr-g">$884</td><td class="num mr-g">$3,540</td><td class="num mr-g">+$6,054</td><td class="num mr-g">+171.0%</td><td class="num mr-g">56.3%</td></tr></tbody></table></div></div>
+    <div class="mr-ley">
+      <span><span class="mr-b rojo">pierde dinero</span> lo pagado supera tu precio</span>
+      <span><span class="mr-b rojo">margen muy delgado</span> menos de 5% sobre transportistas</span>
+      <span><span class="mr-b ambar">margen delgado</span> entre 5% y 10%</span>
+      <span><span class="mr-b rojo">abajo del piso del Motor</span> con unidad propia dejaría menos de 10%</span>
+    </div>
+  </section>
+
+  <details class="acc" open>
+    <summary>De dónde sale cada número</summary>
+    <div class="bd">
+      <ul class="mr-sup">
+        <li><b>Origen:</b> 4PL Almacén en Tultepec; de ahí sale el 95% de los viajes registrados, 1,802 de 1,895.</li>
+        <li><b>Tu precio:</b> tarifario 4PL de la plataforma, solo flete.</li>
+        <li><b>Pagado real:</b> mediana de lo que se le pagó al transportista en viajes activos con cita del 1 de junio al 10 de septiembre, sin contar viajes padre ni repartos, que traen el flete repartido. Son 306 viajes y cubren 38 de las 68 combinaciones.</li>
+        <li><b>Tarifario de proveedores:</b> mediana de las tarifas cargadas para ese destino y unidad; se usa solo donde no hubo viajes, y la mediana evita que pesen capturas atípicas, como un tráiler a Monterrey en $1,200.</li>
+        <li><b>Kilómetros y casetas:</b> los trajo el agente de Google desde Tultepec, con casetas a tarifa de automóvil ajustadas 22% por cada eje arriba de dos. A Culiacán y Mexicali Google no devolvió casetas y se estimaron por kilómetro.</li>
+        <li><b>Motor:</b> vuelta completa con regreso vacío, diésel a $26.99 (Comisión Nacional de Energía, Valle de México, 9-sep), comisión del operador 15% del flete, mantenimiento y estructura 30%, precio al 15% de utilidad.</li>
+        <li><b>Diferencia %</b> sobre el precio del Motor. <b>Utilidad unidad propia:</b> lo que dejaría tu precio operando con camión propio, con la comisión calculada sobre tu precio.</li>
+      </ul>
+    </div>
+  </details>
+  </div>
+
+  <footer>ExcelentIA · Motor de Tarifas Logística Armada · v4 · versión para revisión</footer>
+</div>
+
+<script>
+/* ============ Motor de Tarifas · v4 ============ */
+const $ = s => document.querySelector(s);
+const LS = '4pl_tarifario_v0';
+
+const mny = n => n == null || isNaN(n) ? '—' : '$' + Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const mny0 = n => n == null || isNaN(n) ? '—' : '$' + Math.round(n).toLocaleString('es-MX');
+const pct = n => (n * 100).toFixed(1) + '%';
+const num = v => { const n = parseFloat(String(v).replace(/[$,\s]/g, '')); return isNaN(n) ? 0 : n; };
+
+/* ---------- perfil base ----------
+   Los valores marcados porConfirmar son estimaciones nuestras.
+   El rendimiento del tractocamion viene de la sesion; los demas se
+   calcularon hacia atras desde Mexico-Monterrey en rabon a $22,000. */
+function perfilBase(nombre) {
+  return {
+    nombre: nombre,
+    diesel: 26.00,
+    dieselAgente: null,
+    dieselFuente: '',
+    dieselFecha: '',
+    dieselManual: false,
+    comisionOperador: 15,
+    mantenimiento: 30,
+    casetaPorKm: 1.10,
+    utilidad: { directo: 25, logistica: 15, piso: 10 },
+    unidades: [
+      { nombre: '1.5 toneladas',  rend: 9.5, ejes: 2, conf: false },
+      { nombre: '3.5 toneladas',  rend: 7.0, ejes: 2, conf: false },
+      { nombre: 'Torton / rabón', rend: 5.4, ejes: 3, conf: false },
+      { nombre: 'Tráiler',        rend: 2.7, ejes: 5, conf: true  },
+      { nombre: 'Tráiler nuevo',  rend: 3.3, ejes: 5, conf: true  }
+    ]
+  };
+}
+
+let DATOS = { activa: 'Logística Armada', empresas: {} };
+try {
+  const g = localStorage.getItem(LS);
+  if (g) DATOS = JSON.parse(g);
+} catch (e) { }
+// el cliente cambio de nombre: se conserva lo ya capturado
+if (DATOS.empresas && DATOS.empresas['4P Logistics'] && !DATOS.empresas['Logística Armada']) {
+  const viejo = DATOS.empresas['4P Logistics'];
+  viejo.nombre = 'Logística Armada';
+  DATOS.empresas['Logística Armada'] = viejo;
+  delete DATOS.empresas['4P Logistics'];
+  if (DATOS.activa === '4P Logistics') DATOS.activa = 'Logística Armada';
+}
+if (!DATOS.empresas || !Object.keys(DATOS.empresas).length) {
+  DATOS = {
+    activa: 'Logística Armada',
+    empresas: {
+      'Logística Armada': perfilBase('Logística Armada'),
+      'Transporte propio': perfilBase('Transporte propio')
+    }
+  };
+}
+function guardar() { try { localStorage.setItem(LS, JSON.stringify(DATOS)); } catch (e) { } }
+const P = () => DATOS.empresas[DATOS.activa];
+
+/* ---------- barra de empresas ---------- */
+function renderEmpresas() {
+  const nombres = Object.keys(DATOS.empresas);
+  $('#empresas').innerHTML =
+    '<span class="emp-lbl">Empresa</span>' +
+    nombres.map(n => `<span class="emp ${n === DATOS.activa ? 'on' : ''}" data-emp="${n}">${n}</span>`).join('') +
+    '<span class="emp emp-add" id="empAdd">+ agregar</span>' +
+    (nombres.length > 1 ? '<button class="link" id="empDel">quitar esta empresa</button>' : '');
+
+  document.querySelectorAll('#empresas [data-emp]').forEach(el => el.onclick = () => {
+    DATOS.activa = el.dataset.emp; guardar(); redibujar();
+  });
+  $('#empAdd').onclick = () => {
+    const n = prompt('Nombre de la empresa');
+    if (!n || !n.trim()) return;
+    const k = n.trim();
+    if (DATOS.empresas[k]) { alert('Ya existe una empresa con ese nombre.'); return; }
+    DATOS.empresas[k] = perfilBase(k);
+    DATOS.activa = k; guardar(); redibujar();
+  };
+  const d = $('#empDel');
+  if (d) d.onclick = () => {
+    if (!confirm('Se quitan los datos de ' + DATOS.activa + '. ¿Continuar?')) return;
+    delete DATOS.empresas[DATOS.activa];
+    DATOS.activa = Object.keys(DATOS.empresas)[0];
+    guardar(); redibujar();
+  };
+}
+
+/* ============ agentes ============ */
+const AG_URL = 'https://n8n.excelentia.com.mx/webhook/4pl-tarifario';
+const LS_REC = '4pl_ciudades_recientes';
+
+let CIUDADES = [];        // catalogo que trae el agente
+let RECIENTES = [];       // ultimas cotizadas, se guardan en el equipo
+let AG_VIVO = null;       // null = sin probar, true/false = resultado
+let RUTA_BASE = { enBase: false, km: null, casetas: null, casetasFuente: '', casetasConfirmadas: false };  // que trajo la base en la ultima busqueda
+try { RECIENTES = JSON.parse(localStorage.getItem(LS_REC) || '[]'); } catch (e) { RECIENTES = []; }
+
+const CIUDADES_BASE = ['CDMX / Zona metropolitana','Acapulco','Ajusco','Aguascalientes','Atlacomulco','Campeche',
+  'Cancún','Celaya','Chalco','Chihuahua','Ciudad Juárez','Ciudad Obregón','Ciudad Victoria','Coatzacoalcos',
+  'Colima','Cuautitlán','Cuernavaca','Culiacán','Durango','Ecatepec','El Salto','Guadalajara','Hermosillo',
+  'Irapuato','Ixtapaluca','Jilotepec','León','Manzanillo','Matamoros','Mazatlán','Mérida','Metepec','Mexicali','Monterrey',
+  'Morelia','Nuevo Laredo','Oaxaca','Pachuca','Puebla','Querétaro','Reynosa','Saltillo','San Luis Potosí','Silao',
+  'Tampico','Tehuacán','Tepeji del Río','Tepotzotlán','Tijuana','Tlalnepantla','Toluca','Torreón','Tulancingo',
+  'Tultepec','Tuxtla Gutiérrez','Veracruz','Villahermosa','Zacatecas','Zapopan'].map(n => ({ nombre: n, estado: '' }));
+
+async function agente(cuerpo, msTope) {
+  const ctrl = new AbortController();
+  const reloj = setTimeout(function () { ctrl.abort(); }, msTope || 7000);
+  try {
+    const res = await fetch(AG_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo), signal: ctrl.signal
+    });
+    clearTimeout(reloj);
+    if (!res.ok) { AG_VIVO = false; return null; }
+    const d = await res.json();
+    AG_VIVO = !!(d && d.ok);
+    return AG_VIVO ? d : null;
+  } catch (e) { clearTimeout(reloj); AG_VIVO = false; return null; }
+}
+
+async function cargarCiudades() {
+  const d = await agente({ accion: 'ciudades' }, 7000);
+  CIUDADES = (d && d.datos && d.datos.length) ? d.datos : CIUDADES_BASE;
+  pintarEstadoAgente();
+}
+
+function recordarCiudad(n) {
+  if (!n || !n.trim()) return;
+  const v = n.trim();
+  RECIENTES = [v].concat(RECIENTES.filter(x => x.toLowerCase() !== v.toLowerCase())).slice(0, 4);
+  try { localStorage.setItem(LS_REC, JSON.stringify(RECIENTES)); } catch (e) { }
+}
+
+/* ---------- autocompletado ---------- */
+function autocompletar(idInput) {
+  const inp = document.getElementById(idInput);
+  if (!inp) return;
+  const caja = inp.parentElement;
+  let lista = null, marcado = -1, opciones = [];
+
+  function cerrar() { if (lista) { lista.remove(); lista = null; } marcado = -1; }
+
+  function abrir() {
+    cerrar();
+    const q = inp.value.trim().toLowerCase();
+    const cat = CIUDADES.length ? CIUDADES : CIUDADES_BASE;
+    const recs = RECIENTES.filter(r => !q || r.toLowerCase().indexOf(q) >= 0);
+    const resto = cat.filter(c => (!q || c.nombre.toLowerCase().indexOf(q) >= 0) &&
+                                  !RECIENTES.some(r => r.toLowerCase() === c.nombre.toLowerCase()));
+    opciones = recs.map(r => ({ nombre: r, estado: '', rec: true }))
+               .concat(resto.slice(0, 60));
+    if (!opciones.length && !inp.value.trim()) return;
+
+    lista = document.createElement('div');
+    lista.className = 'ac-list';
+    let html = '';
+    if (recs.length) html += '<div class="ac-sep">Últimas cotizadas</div>';
+    recs.forEach((r, i) => { html += `<div class="ac-op rec" data-i="${i}">${r}</div>`; });
+    if (resto.length) html += '<div class="ac-sep">Todas las ciudades</div>';
+    resto.slice(0, 60).forEach((c, i) => {
+      html += `<div class="ac-op" data-i="${recs.length + i}">${c.nombre}${c.estado ? '<span class="est">' + c.estado + '</span>' : ''}</div>`;
+    });
+    const escrito = inp.value.trim();
+    const existe = opciones.some(o => o.nombre.toLowerCase() === escrito.toLowerCase());
+    if (escrito && !existe) html += `<div class="ac-nueva" data-nueva="1">Usar <b>${escrito}</b> como destino nuevo</div>`;
+    if (!html) return;
+    lista.innerHTML = html;
+    caja.appendChild(lista);
+
+    lista.querySelectorAll('[data-i]').forEach(el => el.onmousedown = ev => {
+      ev.preventDefault(); elegir(opciones[Number(el.dataset.i)].nombre);
+    });
+    const nueva = lista.querySelector('[data-nueva]');
+    if (nueva) nueva.onmousedown = ev => { ev.preventDefault(); elegir(escrito); };
+  }
+
+  function elegir(v) {
+    inp.value = v; cerrar();
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  inp.addEventListener('focus', abrir);
+  inp.addEventListener('input', abrir);
+  inp.addEventListener('blur', () => setTimeout(cerrar, 120));
+  inp.addEventListener('keydown', e => {
+    if (!lista) { if (e.key === 'ArrowDown') abrir(); return; }
+    const ops = lista.querySelectorAll('.ac-op, .ac-nueva');
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      marcado += e.key === 'ArrowDown' ? 1 : -1;
+      if (marcado < 0) marcado = ops.length - 1;
+      if (marcado >= ops.length) marcado = 0;
+      ops.forEach((o, i) => o.classList.toggle('sel', i === marcado));
+      ops[marcado].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter' && marcado >= 0) {
+      e.preventDefault();
+      const el = ops[marcado];
+      elegir(el.dataset.nueva ? inp.value.trim() : opciones[Number(el.dataset.i)].nombre);
+    } else if (e.key === 'Escape') cerrar();
+  });
+}
+
+/* ---------- formulario del viaje ---------- */
+const V = {
+  origen: 'Tultepec', destino: '', unidad: 'Torton / rabón', via: 'cuota',
+  km: 900, kmPatio: 0, casetas: 0, regreso: 'vacio', cliente: 'logistica',
+  maniobra: 0, extras: 0, actual: 0, comIda: 0, comReg: 0, kmFuente: '', casetasFuente: ''
+};
+
+function renderViaje() {
+  const u = P().unidades;
+  $('#fViaje').innerHTML = `
+    <div class="f"><label>Origen</label><div class="ac"><input id="vOrigen" value="${V.origen}" autocomplete="off" placeholder="escribe para buscar"></div></div>
+    <div class="f"><label>Destino</label><div class="ac"><input id="vDestino" value="${V.destino}" autocomplete="off" placeholder="escribe para buscar"></div></div>
+    <div class="f"><label>Unidad</label>
+      <select id="vUnidad">${u.map(x => `<option ${x.nombre === V.unidad ? 'selected' : ''}>${x.nombre}</option>`).join('')}</select></div>
+    <div class="f"><label>Ruta</label>
+      <select id="vVia">
+        <option value="cuota" ${V.via === 'cuota' ? 'selected' : ''}>Por autopista de cuota</option>
+        <option value="libre" ${V.via === 'libre' ? 'selected' : ''}>Por camino libre</option>
+      </select></div>
+    <div class="f"><label>Kilómetros del servicio</label>
+      <input id="vKm" type="number" value="${V.km}">
+      <span class="hint agente ${AG_VIVO === false ? 'off' : ''}" id="hKm">${V.kmFuente || 'solo la ida, del punto de carga al destino'}</span></div>
+    <div class="f"><label>Kilómetros de patio a carga</label>
+      <input id="vKmPatio" type="number" value="${V.kmPatio}"><span class="hint">el traslado antes de cargar</span></div>
+    <div class="f"><label>Casetas de ida</label>
+      <input id="vCasetas" type="number" value="${V.casetas}">
+      <span class="hint agente ${AG_VIVO === false ? 'off' : ''}" id="hCas">${V.casetasFuente || 'déjalo en cero y lo estimo por kilómetros'}</span></div>
+    <div class="f"><label>Regreso</label>
+      <select id="vRegreso">
+        <option value="vacio" ${V.regreso === 'vacio' ? 'selected' : ''}>Regresa vacío</option>
+        <option value="cargado" ${V.regreso === 'cargado' ? 'selected' : ''}>Regresa cargado</option>
+        <option value="no" ${V.regreso === 'no' ? 'selected' : ''}>No aplica regreso</option>
+      </select></div>
+    <div class="f"><label>Tipo de cliente</label>
+      <select id="vCliente">
+        <option value="directo" ${V.cliente === 'directo' ? 'selected' : ''}>Cliente directo</option>
+        <option value="logistica" ${V.cliente === 'logistica' ? 'selected' : ''}>Operador logístico</option>
+      </select></div>
+    <div class="f"><label>Comisión del operador · ida y regreso</label>
+      <div class="dual"><input id="vComIda" type="number" value="${V.comIda}" placeholder="ida"><input id="vComReg" type="number" value="${V.comReg}" placeholder="regreso"></div>
+      <span class="hint" id="hCom">${(V.comIda || V.comReg) ? 'monto guardado para esta ruta' : 'monto de ida y de regreso · en cero se usa el porcentaje'}</span></div>
+    <div class="f"><label>Maniobra</label>
+      <input id="vManiobra" type="number" value="${V.maniobra}"><span class="hint">se cobra aparte del flete</span></div>
+    <div class="f"><label>Otros cargos</label>
+      <input id="vExtras" type="number" value="${V.extras}"><span class="hint">estadías, pernocta, custodia</span></div>
+    <div class="f"><label>Tarifa que cobras hoy</label>
+      <input id="vActual" type="number" value="${V.actual}"><span class="hint">opcional · para comparar contra el cálculo</span></div>`;
+}
+
+function leerViaje() {
+  V.origen = $('#vOrigen').value;
+  V.destino = $('#vDestino').value;
+  V.unidad = $('#vUnidad').value;
+  V.via = $('#vVia').value;
+  V.km = num($('#vKm').value);
+  V.kmPatio = num($('#vKmPatio').value);
+  V.casetas = num($('#vCasetas').value);
+  V.regreso = $('#vRegreso').value;
+  V.cliente = $('#vCliente').value;
+  V.maniobra = num($('#vManiobra').value);
+  V.extras = num($('#vExtras').value);
+  V.actual = num($('#vActual').value);
+  V.comIda = num($('#vComIda').value);
+  V.comReg = num($('#vComReg').value);
+}
+
+/* de donde salieron las casetas que se estan usando en este calculo */
+function origenCasetas(v, ejes) {
+  if (v.casetas <= 0) return { texto: 'estimadas por kilómetros y ' + ejes + ' ejes', firme: false };
+  if (RUTA_BASE.casetas !== null && Math.round(v.casetas) === RUTA_BASE.casetas) {
+    if (RUTA_BASE.casetasConfirmadas) return { texto: RUTA_BASE.casetasFuente, firme: true };
+    const f = RUTA_BASE.casetasFuente.toLowerCase();
+    if (f.indexOf('google') >= 0) return { texto: 'las trajo el agente de Google · por confirmar', firme: false };
+    return { texto: 'estimadas por el agente · por confirmar', firme: false };
+  }
+  return { texto: 'capturadas a mano', firme: true };
+}
+
+/* ---------- el calculo ---------- */
+function calcular(v, p) {
+  const uni = p.unidades.find(x => x.nombre === v.unidad) || p.unidades[0];
+  const kmIda = v.km + v.kmPatio;
+  const kmVuelta = v.regreso === 'no' ? 0 : v.km;
+  const kmTotal = kmIda + kmVuelta;
+
+  const litros = uni.rend > 0 ? kmTotal / uni.rend : 0;
+  const combustible = litros * p.diesel;
+
+  // casetas: si no se capturan, se estiman por km y ejes
+  const factorEjes = 1 + (uni.ejes - 2) * 0.22;
+  const casetasIda = v.casetas > 0 ? v.casetas : kmIda * p.casetaPorKm * factorEjes;
+  const casetasVuelta = kmVuelta > 0 ? casetasIda * (v.km / Math.max(kmIda, 1)) : 0;
+  const casetas = casetasIda + casetasVuelta;
+  const casetasEstimadas = v.casetas <= 0;
+
+  // costos que no dependen del precio
+  const costoDirecto = combustible + casetas;
+
+  // la comision del operador es un porcentaje del flete, asi que el
+  // precio se despeja: precio = (costoDirecto * (1+mant)) / (1 - com*(1+mant) - utilidad)
+  const mant = p.mantenimiento / 100;
+  // la comision es un monto por ruta (ida + regreso); si no se capturo, se usa el porcentaje del flete
+  const comIda = v.comIda || 0, comReg = kmVuelta > 0 ? (v.comReg || 0) : 0;
+  const comMonto = comIda + comReg;
+  const com = comMonto > 0 ? 0 : p.comisionOperador / 100;
+
+  function precioPara(utilPct) {
+    const u = utilPct / 100;
+    const den = 1 - com * (1 + mant) - u;
+    if (den <= 0) return null;
+    return ((costoDirecto + comMonto) * (1 + mant)) / den;
+  }
+  function costoDe(precio) {
+    const comision = comMonto > 0 ? comMonto : precio * com;
+    const sub = costoDirecto + comision;
+    return { comision: comision, subtotal: sub, mantenimiento: sub * mant, total: sub * (1 + mant) };
+  }
+
+  const objetivo = precioPara(p.utilidad[v.cliente]);
+  const piso = precioPara(p.utilidad.piso);
+  const techo = precioPara(p.utilidad.directo);
+
+  return {
+    uni: uni, kmIda: kmIda, kmVuelta: kmVuelta, kmTotal: kmTotal,
+    litros: litros, combustible: combustible,
+    casetas: casetas, casetasEstimadas: casetasEstimadas,
+    costoDirecto: costoDirecto,
+    objetivo: objetivo, piso: piso, techo: techo,
+    detalle: objetivo ? costoDe(objetivo) : null,
+    costoDe: costoDe,
+    maniobra: v.maniobra, extras: v.extras,
+    comMonto: comMonto, comIda: comIda, comReg: comReg
+  };
+}
+
+/* ---------- resultado ---------- */
+function renderResultado(r, v, p) {
+  const nom = v.destino ? (v.origen + ' → ' + v.destino) : 'Cotización';
+  $('#resTitulo').textContent = nom;
+  $('#resSub').textContent = r.uni.nombre + ' · ' + Math.round(r.kmTotal).toLocaleString('es-MX') +
+    ' km en total (' + Math.round(r.kmIda).toLocaleString('es-MX') + ' de ida' +
+    (r.kmVuelta ? ' y ' + Math.round(r.kmVuelta).toLocaleString('es-MX') + ' de regreso' : ', sin regreso') + ')';
+
+  const etiqueta = v.cliente === 'directo' ? 'cliente directo' : 'operador logístico';
+  const flete = r.objetivo || 0;
+  const totalVenta = flete + r.maniobra + r.extras;
+  const utilFlete = flete - (r.detalle ? r.detalle.total : 0);
+
+  $('#precios').innerHTML = `
+    <div class="pbox piso"><div class="lb">Precio mínimo</div><div class="vl">${mny0(r.piso)}</div>
+      <div class="hint">deja ${p.utilidad.piso}% de utilidad · por debajo de aquí no conviene</div></div>
+    <div class="pbox meta"><div class="lb">Precio recomendado</div><div class="vl">${mny0(r.objetivo)}</div>
+      <div class="hint">deja ${p.utilidad[v.cliente]}% · tarifa de ${etiqueta}</div></div>
+    <div class="pbox"><div class="lb">Precio de lista</div><div class="vl">${mny0(r.techo)}</div>
+      <div class="hint">deja ${p.utilidad.directo}% · con quien lo acepte</div></div>
+    <div class="pbox costo"><div class="lb">Costo del viaje</div><div class="vl">${mny0(r.detalle ? r.detalle.total : null)}</div>
+      <div class="hint">lo que cuesta operarlo al precio recomendado</div></div>`;
+
+  const d = r.detalle;
+  $('#tblDesglose').innerHTML = `
+    <thead><tr><th>Concepto</th><th style="text-align:right">Importe</th><th>Cómo se calculó</th></tr></thead>
+    <tbody>
+      <tr><td>Combustible</td><td class="num">${mny(r.combustible)}</td>
+        <td class="dim">${Math.round(r.litros)} litros a ${mny(p.diesel)}${p.dieselManual ? ' · capturado a mano' : (p.dieselAgente ? ' · lo trajo el agente' + (p.dieselFecha ? ' al ' + p.dieselFecha : '') : '')} · rendimiento ${r.uni.rend} km/l</td></tr>
+      <tr><td>Casetas</td><td class="num">${mny(r.casetas)}</td>
+        <td class="dim">${origenCasetas(v, r.uni.ejes).texto}</td></tr>
+      <tr><td>Comisión del operador</td><td class="num">${mny(d ? d.comision : null)}</td>
+        <td class="dim">${r.comMonto ? 'monto de la ruta: ' + mny0(r.comIda) + ' de ida' + (r.comReg ? ' y ' + mny0(r.comReg) + ' de regreso' : '') : p.comisionOperador + '% sobre el flete · por confirmar'}</td></tr>
+      <tr class="sum"><td>Suma de gastos del viaje</td><td class="num">${mny(d ? d.subtotal : null)}</td><td></td></tr>
+      <tr><td>Mantenimiento y estructura</td><td class="num">${mny(d ? d.mantenimiento : null)}</td>
+        <td class="dim">${p.mantenimiento}% · incluye seguros, GPS y administración</td></tr>
+      <tr class="sum"><td>Costo total del viaje</td><td class="num">${mny(d ? d.total : null)}</td><td></td></tr>
+      <tr><td>Utilidad del flete</td><td class="num">${mny(utilFlete)}</td>
+        <td class="dim">${flete ? pct(utilFlete / flete) : '—'} sobre el precio</td></tr>
+      <tr class="sum"><td><b>Flete</b></td><td class="num"><b>${mny(flete)}</b></td><td class="dim">precio recomendado</td></tr>
+      ${r.maniobra ? `<tr><td>Maniobra</td><td class="num">${mny(r.maniobra)}</td><td class="dim">se cobra aparte del flete</td></tr>` : ''}
+      ${r.extras ? `<tr><td>Otros cargos</td><td class="num">${mny(r.extras)}</td><td class="dim">estadías, pernocta, custodia</td></tr>` : ''}
+      <tr class="total"><td>Total a cobrar</td><td class="num">${mny(totalVenta)}</td><td></td></tr>
+    </tbody>`;
+
+  // comparacion contra lo que se cobra hoy: sirve para calibrar el motor
+  if (v.actual > 0 && r.detalle) {
+    // la comision del operador se calcula sobre lo que se cobra de verdad, no sobre el precio recomendado
+    const utilReal = v.actual - r.costoDe(v.actual).total;
+    const utilPct = v.actual ? utilReal / v.actual : 0;
+    const dif = v.actual - flete;
+    const alto = dif > 0;
+    const cerca = Math.abs(dif) / v.actual < 0.05;
+    $('#calibra').innerHTML = `<div class="aviso ${utilReal <= 0 ? 'duda' : ''}">
+      <div class="t">Contra la tarifa que cobras hoy</div>
+      <p>A <b>${mny0(v.actual)}</b> este viaje deja <b>${mny0(utilReal)}</b> de utilidad, ${pct(utilPct)} sobre el precio.
+      ${cerca ? 'Prácticamente coincide con lo que calcula el motor, así que los supuestos van bien.'
+              : (alto ? 'Estás cobrando ' + mny0(dif) + ' por encima de lo que el motor recomienda; o la ruta da más de lo estimado, o algún costo está sobrado.'
+                      : 'Estás cobrando ' + mny0(Math.abs(dif)) + ' por debajo de lo recomendado; o hay un costo que el motor sobreestima, o esa ruta está dejando poco.')}</p>
+      ${utilReal <= 0 ? '<p><b>A ese precio el viaje no deja utilidad.</b> Vale la pena revisar los supuestos antes de concluir, porque puede ser un dato nuestro el que esté mal.</p>' : ''}
+    </div>`;
+  } else { $('#calibra').innerHTML = ''; }
+
+  const notas = [];
+  const oc = origenCasetas(v, r.uni.ejes);
+  if (!oc.firme) notas.push(r.casetasEstimadas
+    ? 'Las casetas están estimadas por kilómetros y número de ejes, no consultadas. Si conoces el importe real de esta ruta, captúralo y el cálculo se ajusta.'
+    : 'Las casetas son una estimación del agente, ajustada al número de ejes. Cuando sepas lo que se pagó, captúralo y esta ruta queda corregida para todos.');
+  if (v.regreso === 'vacio') notas.push('El regreso vacío está cargado al costo de este viaje. Si se consigue carga de regreso, la utilidad real sube.');
+  if (v.regreso === 'no') notas.push('No se consideró regreso, así que el costo corresponde solo al trayecto de ida.');
+  if (!r.comMonto) notas.push('La comisión del operador va como ' + p.comisionOperador + '% del flete porque esta ruta no tiene monto capturado. Captura lo que le pagas al operador de ida y de regreso y queda guardado para la ruta.');
+  if (!r.uni.conf) notas.push('El rendimiento de esta unidad es una estimación nuestra. Corrígelo en los datos de la empresa y todas las rutas se recalculan.');
+
+  $('#notasRes').innerHTML = (notas.length
+    ? `<div class="aviso"><div class="t">Sobre este cálculo</div>${notas.map(n => '<p>' + n + '</p>').join('')}</div>` : '')
+    + (v.destino ? `<div class="aviso no-print">
+        <div class="t">Cuando sepas lo que se pagó de casetas</div>
+        <p>Captura lo que se pagó y marca si es del viaje redondo o solo de ida; esta ruta queda corregida para todos. Es así como el sistema deja de estimar.</p>
+        <div class="dual" style="margin-top:.5rem">
+          <input id="casReal" type="number" placeholder="importe real de casetas">
+          <select id="casTramo" style="max-width:135px"><option value="redondo">viaje redondo</option><option value="ida">solo ida</option></select>
+        </div>
+        <div class="btnrow" style="margin-top:.5rem"><button class="btn ghost" id="btnCasReal">Guardar</button></div>
+        <span class="hint" id="casRealMsg"></span>
+      </div>` : '');
+  $('#cardRes').classList.remove('hidden');
+  renderMercado(r, v);
+
+  const bc = $('#btnCasReal');
+  if (bc) bc.onclick = async () => {
+    const imp = num($('#casReal').value);
+    if (imp <= 0) { alert('Captura el importe que se pagó de casetas.'); return; }
+    // la base guarda casetas de ida y el calculo les suma el regreso;
+    // si lo capturado es del viaje redondo se convierte a su parte de ida
+    const tramo = $('#casTramo').value;
+    const factor = (tramo === 'redondo' && r.kmVuelta > 0) ? 1 + v.km / Math.max(r.kmIda, 1) : 1;
+    const ida = Math.round(imp / factor * 100) / 100;
+    bc.disabled = true;
+    $('#casRealMsg').textContent = 'guardando…';
+    const d = await agente({
+      accion: 'casetasReales', origen: v.origen, destino: v.destino, via: v.via,
+      ejes: r.uni.ejes, importe: ida, empresa: DATOS.activa, usuario: DATOS.activa
+    }, 7000);
+    if (!d) {
+      $('#casRealMsg').textContent = 'No se pudo guardar. Vuelve a intentarlo cuando haya conexión.';
+      bc.disabled = false;
+      return;
+    }
+    // vuelve a leer la ruta de la base y recalcula, para que el cambio se vea de inmediato
+    await buscarRuta();
+    leerViaje();
+    const p2 = P();
+    renderResultado(calcular(V, p2), V, p2);
+    const msg = $('#casRealMsg');
+    if (msg) msg.textContent = 'Listo. Se guardaron ' + mny0(imp) + (tramo === 'redondo' ? ' del viaje redondo' : ' de ida') + ' y el cálculo ya usa el dato real.';
+  };
+}
+
+/* ---------- comparador ---------- */
+const C = [
+  { nombre: 'Por autopista', km: 320, casetas: 0 },
+  { nombre: 'Por camino libre', km: 355, casetas: 0 }
+];
+function renderComparador() {
+  $('#comparador').innerHTML = C.map((c, i) => `
+    <div class="ruta" id="ruta${i}">
+      <h4><input class="wide" id="cNom${i}" value="${c.nombre}" style="font-weight:800;font-size:13px;border:none;padding:.1rem 0;max-width:100%"></h4>
+      <div class="f" style="margin-bottom:.5rem"><label>Kilómetros</label><input id="cKm${i}" type="number" value="${c.km}"></div>
+      <div class="f"><label>Casetas</label><input id="cCas${i}" type="number" value="${c.casetas}"><span class="hint">cero para estimarlas</span></div>
+      <div class="res" id="cRes${i}"></div>
+    </div>`).join('');
+}
+function comparar() {
+  leerViaje();
+  const p = P();
+  const res = C.map((c, i) => {
+    c.nombre = $('#cNom' + i).value;
+    c.km = num($('#cKm' + i).value);
+    c.casetas = num($('#cCas' + i).value);
+    const v = Object.assign({}, V, { km: c.km, casetas: c.casetas, via: i === 0 ? 'cuota' : 'libre' });
+    return calcular(v, p);
+  });
+  const mejor = res[0].objetivo <= res[1].objetivo ? 0 : 1;
+  res.forEach((r, i) => {
+    const dif = r.objetivo - res[mejor].objetivo;
+    $('#ruta' + i).classList.toggle('gana', i === mejor);
+    $('#cRes' + i).innerHTML =
+      `<b>${mny0(r.objetivo)}</b>Precio recomendado · costo ${mny0(r.detalle ? r.detalle.total : null)}<br>
+       <span class="dim">${i === mejor ? 'Es la opción más barata' : 'Cuesta ' + mny0(dif) + ' más'}</span>`;
+  });
+  $('#resComparador').innerHTML = `<div class="aviso"><div class="t">Qué conviene</div>
+    <p>Cotizando <b>${C[mejor].nombre.toLowerCase()}</b> el viaje sale ${mny0(Math.abs(res[0].objetivo - res[1].objetivo))} más barato,
+    manteniendo la misma utilidad. Si el cliente exige la otra ruta, ese diferencial se traslada al precio.</p></div>`;
+}
+
+/* ---------- configuracion ---------- */
+function renderConfig() {
+  const p = P();
+  $('#fGenerales').innerHTML = `
+    <div class="f"><label>Precio del diésel por litro</label>
+      <div class="dual">
+        <input id="cDiesel" type="number" step="0.01" value="${p.diesel}">
+        ${p.dieselAgente ? `<span class="auto" id="usarDiesel" title="Tomar el precio que trae el agente">usar ${mny(p.dieselAgente)}</span>` : ''}
+      </div>
+      <span class="hint agente ${p.dieselAgente ? '' : 'off'}">${p.dieselAgente
+        ? 'el agente encontró ' + mny(p.dieselAgente) + (p.dieselFecha ? ' al ' + p.dieselFecha : '') + (p.dieselManual ? ' · estás usando el tuyo, cámbialo al del agente para que se actualice solo' : ' · se actualiza solo cada día')
+        : 'sin dato del agente · se usa el que captures'}</span></div>
+    <div class="f"><label>Comisión del operador <span class="porconf">por confirmar</span></label>
+      <input id="cCom" type="number" step="0.5" value="${p.comisionOperador}"><span class="hint">porcentaje sobre el flete · solo si la ruta no tiene monto capturado</span></div>
+    <div class="f"><label>Mantenimiento y estructura</label>
+      <input id="cMant" type="number" step="0.5" value="${p.mantenimiento}"><span class="hint">incluye seguros, GPS y administración</span></div>
+    <div class="f"><label>Caseta por kilómetro <span class="porconf">por confirmar</span></label>
+      <input id="cCaseta" type="number" step="0.05" value="${p.casetaPorKm}"><span class="hint">base para 2 ejes; sube según los ejes</span></div>`;
+
+  $('#fUtilidad').innerHTML = `
+    <div class="f"><label>Cliente directo</label><input id="uDir" type="number" step="0.5" value="${p.utilidad.directo}"><span class="hint">es donde más se gana</span></div>
+    <div class="f"><label>Operador logístico</label><input id="uLog" type="number" step="0.5" value="${p.utilidad.logistica}"><span class="hint">dejan menos margen</span></div>
+    <div class="f"><label>Piso · lo mínimo aceptable <span class="porconf">por confirmar</span></label><input id="uPiso" type="number" step="0.5" value="${p.utilidad.piso}"><span class="hint">por debajo de esto no conviene tomar el viaje</span></div>`;
+
+  $('#tblUnidades').innerHTML = `
+    <thead><tr><th>Unidad</th><th>Rendimiento km/l</th><th>Ejes</th><th></th></tr></thead>
+    <tbody>${p.unidades.map((u, i) => `<tr>
+      <td><input data-u="${i}" data-k="nombre" value="${u.nombre}"></td>
+      <td><input data-u="${i}" data-k="rend" type="number" step="0.1" value="${u.rend}" style="max-width:120px">${u.conf ? '' : '<span class="porconf">por confirmar</span>'}</td>
+      <td><input data-u="${i}" data-k="ejes" type="number" value="${u.ejes}" style="max-width:90px"></td>
+      <td><button class="link" data-del="${i}">quitar</button></td></tr>`).join('')}</tbody>`;
+
+  document.querySelectorAll('#accConfig input').forEach(el => el.addEventListener('change', leerConfig));
+  const ud = $('#usarDiesel');
+  if (ud) ud.onclick = () => { $('#cDiesel').value = P().dieselAgente; leerConfig(); renderConfig(); };
+  document.querySelectorAll('#tblUnidades [data-del]').forEach(b => b.onclick = () => {
+    if (p.unidades.length < 2) { alert('Debe quedar al menos una unidad.'); return; }
+    p.unidades.splice(Number(b.dataset.del), 1); guardar(); redibujar();
+  });
+}
+function leerConfig() {
+  const p = P();
+  p.diesel = num($('#cDiesel').value);
+  // si el precio capturado difiere del que trae el agente, manda el capturado
+  // y deja de actualizarse solo; si coincide, sigue siguiendo al agente
+  p.dieselManual = !(p.dieselAgente && Math.abs(p.diesel - p.dieselAgente) < 0.005);
+  p.comisionOperador = num($('#cCom').value);
+  p.mantenimiento = num($('#cMant').value);
+  p.casetaPorKm = num($('#cCaseta').value);
+  p.utilidad.directo = num($('#uDir').value);
+  p.utilidad.logistica = num($('#uLog').value);
+  p.utilidad.piso = num($('#uPiso').value);
+  document.querySelectorAll('#tblUnidades [data-u]').forEach(el => {
+    const u = p.unidades[Number(el.dataset.u)], k = el.dataset.k;
+    if (!u) return;
+    if (k === 'nombre') u.nombre = el.value;
+    else { u[k] = num(el.value); u.conf = true; }
+  });
+  guardar();
+  const sel = $('#vUnidad'); const previa = sel ? sel.value : V.unidad;
+  renderViaje();
+  const s2 = $('#vUnidad');
+  if (s2 && p.unidades.some(x => x.nombre === previa)) s2.value = previa;
+}
+
+/* ---------- el agente busca la ruta ---------- */
+async function buscarRuta() {
+  const ori = $('#vOrigen').value.trim(), des = $('#vDestino').value.trim();
+  if (!ori || !des) return;
+  const p = P();
+  const uni = p.unidades.find(x => x.nombre === $('#vUnidad').value) || p.unidades[0];
+  const via = $('#vVia') ? $('#vVia').value : 'cuota';
+
+  $('#hKm').textContent = 'buscando…'; $('#hKm').className = 'hint agente buscando';
+  $('#hCas').textContent = 'buscando…'; $('#hCas').className = 'hint agente buscando';
+
+  const d = await agente({ accion: 'ruta', origen: ori, destino: des, via: via, ejes: uni.ejes }, 15000);
+  const r = d && d.datos && d.datos[0];
+
+  // al cambiar de ruta no se arrastran datos de la consulta anterior
+  $('#vKm').value = 0;
+  $('#vCasetas').value = 0;
+  $('#vActual').value = 0;
+  const cg = comisionGuardada(ori, des, $('#vUnidad').value);
+  $('#vComIda').value = cg ? cg.ida : 0;
+  $('#vComReg').value = cg ? cg.reg : 0;
+  $('#hCom').textContent = cg ? 'monto guardado para esta ruta' : 'monto de ida y de regreso · en cero se usa el porcentaje';
+  $('#cardRes').classList.add('hidden');
+
+  if (r && r.encontrada) {
+    RUTA_BASE = {
+      enBase: true,
+      km: r.km ? Math.round(Number(r.km)) : null,
+      casetas: r.casetas ? Math.round(Number(r.casetas)) : null,
+      casetasFuente: String(r.casetas_fuente || ''),
+      casetasConfirmadas: !!r.casetas_confirmadas
+    };
+    if (r.km) { $('#vKm').value = Math.round(Number(r.km)); V.kmFuente = 'ruta conocida'; }
+    if (r.casetas) { $('#vCasetas').value = Math.round(Number(r.casetas)); }
+    var fk = String(r.km_fuente || '');
+    var esGoogle = fk.toLowerCase().indexOf('google') >= 0;
+    if (!r.km) { $('#hKm').textContent = 'sin kilometraje guardado'; }
+    else if (esGoogle) { $('#hKm').textContent = 'lo trajo el agente de rutas · por confirmar'; }
+    else { $('#hKm').textContent = 'ruta ya registrada'; }
+    $('#hKm').className = 'hint agente' + ((r.km && esGoogle) ? ' off' : '');
+    V.kmFuente = fk || V.kmFuente;
+    $('#hCas').textContent = r.casetas_confirmadas
+      ? String(r.casetas_fuente)
+      : 'estimado · confírmalo con el importe real';
+    $('#hCas').className = 'hint agente' + (r.casetas_confirmadas ? '' : ' off');
+    V.casetasFuente = $('#hCas').textContent;
+  } else {
+    RUTA_BASE = { enBase: false, km: null, casetas: null, casetasFuente: '', casetasConfirmadas: false };
+    $('#hKm').textContent = AG_VIVO === false
+      ? 'sin conexión · captura los kilómetros'
+      : 'ruta nueva · captura los kilómetros y se guardan';
+    $('#hKm').className = 'hint agente off';
+    $('#hCas').textContent = 'sin dato guardado · se estima por kilómetros';
+    $('#hCas').className = 'hint agente off';
+    V.kmFuente = ''; V.casetasFuente = '';
+  }
+  pintarEstadoAgente();
+}
+
+// La ruta solo se registra cuando es nueva o cuando alguien corrigio los
+// kilometros a mano. Lo que trajo el agente no se vuelve a guardar encima.
+// Las casetas nunca se escriben desde aqui: la base las guarda en tarifa de
+// 2 ejes y les aplica el ajuste al leer, asi que devolverle el numero ya
+// ajustado las infla de nuevo en cada cotizacion. Entran solo por el agente
+// o por la captura de lo que se pago al liquidar.
+async function registrarRuta() {
+  if (AG_VIVO === false) return;
+  const ori = $('#vOrigen').value.trim(), des = $('#vDestino').value.trim();
+  if (!ori || !des || !V.km) return;
+
+  const cambio = !RUTA_BASE.enBase || RUTA_BASE.km === null || Number(V.km) !== RUTA_BASE.km;
+  if (!cambio) return;
+
+  await agente({
+    accion: 'guardarRuta', origen: ori, destino: des, via: V.via,
+    km: V.km,
+    kmFuente: RUTA_BASE.enBase ? 'corregido en el tarifador' : 'capturado en el tarifador'
+  }, 6000);
+
+  RUTA_BASE = { enBase: true, km: Number(V.km) };
+}
+
+async function traerDiesel() {
+  let d = await agente({ accion: 'diesel', estado: 'ZONA METROPOLITANA' }, 6000);
+  let r = d && d.datos && d.datos[0];
+  if (!r || !r.precio) {
+    d = await agente({ accion: 'diesel', estado: 'NACIONAL' }, 6000);
+    r = d && d.datos && d.datos[0];
+  }
+  if (r && r.precio) {
+    const p = P();
+    p.dieselAgente = Number(r.precio);
+    p.dieselFuente = r.fuente || '';
+    p.dieselFecha = r.vigente_al || '';
+    // el precio del agente manda, salvo que alguien haya capturado el suyo
+    if (!p.dieselManual) p.diesel = p.dieselAgente;
+    guardar();
+    if ($('#cDiesel')) renderConfig();
+  }
+  pintarEstadoAgente();
+}
+
+function pintarEstadoAgente() {
+  const el = $('#estadoAg');
+  if (!el) return;
+  const p = P();
+  if (AG_VIVO === false) {
+    el.innerHTML = '<span class="agente off">Sin conexión con los agentes · el tarifador funciona con los valores capturados</span>';
+  } else if (AG_VIVO === true) {
+    const dd = p.dieselAgente
+      ? ' · diésel ' + mny(p.dieselAgente) + (p.dieselFecha ? ' al ' + p.dieselFecha : '')
+      : '';
+    el.innerHTML = '<span class="agente">Agentes conectados · ' + (CIUDADES.length || 0) + ' ciudades' + dd + '</span>';
+  } else { el.innerHTML = ''; }
+}
+
+/* ---------- flujo ---------- */
+/* ============ v4 · precio de mercado, proveedores y comisión por ruta ============ */
+const MERC = {"3|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,5270,0,0],[30,10000,0,0],[33,10000,0,0],[28,10800,0,0]]},"12|5":{"n":2,"med":7000,"min":5500,"max":8500,"p":[[31,7040,0,0],[37,7800,0,0],[30,7800,1,5500],[33,7800,0,0],[28,8200,0,0],[39,8200,0,0],[29,8500,1,8500]]},"24|3":{"n":1,"med":7000,"min":7000,"max":7000,"p":[[38,4000,0,0],[35,4000,0,0],[32,5500,0,0]]},"37|5":{"n":1,"med":23000,"min":23000,"max":23000,"p":[[28,23000,1,23000]]},"6|4":{"n":2,"med":20000,"min":20000,"max":20000,"p":[[31,16500,0,0],[37,19000,0,0],[29,19000,0,0],[32,19000,0,0],[30,19000,0,0],[28,20000,2,20000],[39,20000,0,0]]},"27|3":{"n":0,"med":0,"min":0,"max":0,"p":[[32,26000,0,0]]},"37|1":{"n":1,"med":30000,"min":30000,"max":30000,"p":[[36,30000,1,30000]]},"18|1":{"n":1,"med":13000,"min":13000,"max":13000,"p":[[36,0,1,13000]]},"17|4":{"n":0,"med":0,"min":0,"max":0,"p":[[38,4000,0,0],[28,4000,0,0],[32,4000,0,0],[37,4000,0,0],[30,4000,0,0],[39,4000,0,0],[29,4500,0,0],[33,4500,0,0]]},"10|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,51700,0,0],[30,63000,0,0],[33,63000,0,0],[28,65000,0,0]]},"31|3":{"n":1,"med":10000,"min":10000,"max":10000,"p":[[32,10000,1,10000]]},"11|3":{"n":3,"med":6590,"min":6590,"max":9000,"p":[[31,5730,0,0],[33,6590,0,0],[30,6590,0,0],[32,6590,3,6590],[28,8100,0,0],[39,8100,0,0]]},"7|3":{"n":1,"med":26452,"min":26452,"max":26452,"p":[[31,23002,0,0],[30,26452,0,0],[33,26452,0,0],[32,26452,1,26452],[39,33480,0,0],[28,33480,0,0]]},"24|1":{"n":0,"med":0,"min":0,"max":0,"p":[[36,13000,0,0]]},"9|3":{"n":2,"med":25875,"min":25875,"max":25875,"p":[[31,22500,0,0],[33,25845,0,0],[30,25875,0,0],[32,25875,2,25875],[28,34560,0,0],[39,34560,0,0]]},"1|1":{"n":15,"med":6200,"min":5500,"max":10500,"p":[[27,5500,3,5500],[30,6000,0,0],[33,6000,2,8250],[36,6200,9,6200],[28,6500,1,6500]]},"23|5":{"n":1,"med":9300,"min":9300,"max":9300,"p":[[32,15500,0,0],[28,0,1,9300]]},"2|5":{"n":2,"med":6900,"min":6600,"max":7200,"p":[[31,3953,0,0],[32,6325,0,0],[30,6600,0,0],[37,6600,0,0],[29,6600,1,6600],[28,7000,0,0],[39,7000,0,0],[33,7200,1,7200]]},"9|5":{"n":0,"med":0,"min":0,"max":0,"p":[[31,31000,0,0],[37,42000,0,0],[30,42000,0,0],[33,42000,0,0],[29,42500,0,0],[39,45360,0,0],[28,45360,0,0],[32,47955,0,0]]},"19|5":{"n":2,"med":17500,"min":17000,"max":18000,"p":[[33,9000,0,0],[28,0,1,18000],[29,0,1,17000]]},"8|3":{"n":2,"med":20936,"min":18872,"max":23000,"p":[[31,16410,0,0],[30,18872,0,0],[33,18872,0,0],[32,18872,1,18872],[28,23000,1,23000],[39,23000,0,0]]},"14|1":{"n":1,"med":20000,"min":20000,"max":20000,"p":[[27,17600,0,0],[30,19000,0,0],[33,19000,0,0],[36,20000,0,0],[28,20000,1,20000]]},"20|3":{"n":1,"med":15000,"min":15000,"max":15000,"p":[[33,13000,0,0],[28,0,1,15000]]},"4|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,7800,0,0],[30,10000,0,0],[33,10000,0,0],[28,10800,0,0]]},"11|4":{"n":1,"med":8532,"min":8532,"max":8532,"p":[[31,6800,0,0],[29,8000,0,0],[37,8000,0,0],[30,8000,0,0],[32,8000,0,0],[39,8532,0,0],[28,8532,1,8532]]},"4|3":{"n":0,"med":0,"min":0,"max":0,"p":[[31,3500,0,0],[33,4400,0,0],[30,4400,0,0],[32,4400,0,0],[39,4800,0,0],[28,4800,0,0]]},"10|3":{"n":1,"med":33480,"min":33480,"max":33480,"p":[[31,23100,0,0],[30,28804,0,0],[32,28804,0,0],[33,28840,0,0],[28,33480,1,33480],[39,33480,0,0]]},"13|5":{"n":2,"med":17857,"min":17214,"max":18500,"p":[[31,15000,0,0],[33,17214,0,0],[30,17214,0,0],[29,17214,1,17214],[37,17214,0,0],[28,18500,1,18500],[39,18500,0,0]]},"15|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,115000,0,0],[30,150000,0,0],[33,150000,0,0],[28,162000,0,0]]},"22|1":{"n":0,"med":0,"min":0,"max":0,"p":[[36,6500,0,0]]},"31|4":{"n":0,"med":0,"min":0,"max":0,"p":[[28,16500,0,0]]},"8|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,35200,0,0],[30,39000,0,0],[33,39000,0,0],[28,41000,0,0]]},"8|5":{"n":0,"med":0,"min":0,"max":0,"p":[[31,26400,0,0],[30,30000,0,0],[37,30000,0,0],[33,30000,0,0],[29,30000,0,0],[28,33000,0,0],[39,33000,0,0],[32,35005,0,0]]},"1|5":{"n":34,"med":4400,"min":4000,"max":21300,"p":[[31,3700,0,0],[33,4000,3,4400],[32,4360,2,5342],[29,4400,3,4400],[30,4400,1,4400],[37,4400,19,4400],[36,4400,0,0],[28,4600,4,4600],[39,4600,1,4600]]},"2|1":{"n":1,"med":10500,"min":10500,"max":10500,"p":[[33,8800,0,0],[30,8800,0,0],[28,9180,0,0],[27,10500,0,0],[36,10500,1,10500],[32,12500,0,0]]},"3|3":{"n":0,"med":0,"min":0,"max":0,"p":[[31,1976,0,0],[32,2875,0,0],[30,2875,0,0],[33,2875,0,0],[39,4800,0,0],[28,4800,0,0]]},"12|1":{"n":5,"med":11000,"min":9000,"max":14000,"p":[[27,11000,0,0],[30,13000,0,0],[33,13000,0,0],[36,14000,4,11000],[28,14040,1,9000]]},"17|1":{"n":0,"med":0,"min":0,"max":0,"p":[[33,9000,0,0],[28,9000,0,0],[30,9000,0,0],[37,10000,0,0],[36,11000,0,0],[27,12000,0,0]]},"13|4":{"n":0,"med":0,"min":0,"max":0,"p":[[31,12650,0,0],[29,14599,0,0],[30,14599,0,0],[37,14599,0,0],[32,14599,0,0],[28,16200,0,0],[39,16200,0,0]]},"5|5":{"n":3,"med":22000,"min":22000,"max":24814,"p":[[31,17500,0,0],[30,20814,0,0],[37,20814,0,0],[29,20814,0,0],[28,22000,2,22000],[39,22000,0,0],[32,22067,0,0],[33,24814,1,24814]]},"20|4":{"n":0,"med":0,"min":0,"max":0,"p":[[33,16000,0,0]]},"25|5":{"n":2,"med":21000,"min":20000,"max":22000,"p":[[33,20000,1,20000],[32,22000,1,22000]]},"6|3":{"n":4,"med":15468,"min":15468,"max":17500,"p":[[31,13450,0,0],[30,15468,0,0],[32,15468,2,15468],[33,15468,1,15468],[28,17500,1,17500],[39,17500,0,0]]},"18|3":{"n":1,"med":5500,"min":5500,"max":5500,"p":[[32,9000,1,5500]]},"22|5":{"n":2,"med":7400,"min":5500,"max":9300,"p":[[33,4400,0,0],[39,4600,0,0],[37,5000,0,0],[36,5500,1,5500],[29,5500,0,0],[28,0,1,9300]]},"21|5":{"n":2,"med":13272,"min":9545,"max":17000,"p":[[29,0,1,17000],[32,0,1,9545]]},"2|3":{"n":12,"med":2875,"min":2875,"max":2875,"p":[[31,1980,0,0],[32,2875,12,2875],[33,2875,0,0],[30,2875,0,0],[38,2875,0,0],[28,4800,0,0],[39,4800,0,0]]},"13|3":{"n":0,"med":0,"min":0,"max":0,"p":[[31,9675,0,0],[32,11126,0,0],[33,11126,0,0],[30,11126,0,0],[39,14040,0,0],[28,14040,0,0]]},"31|5":{"n":0,"med":0,"min":0,"max":0,"p":[[28,21300,0,0]]},"3|5":{"n":0,"med":0,"min":0,"max":0,"p":[[31,3953,0,0],[32,6325,0,0],[30,6600,0,0],[33,6600,0,0],[29,6600,0,0],[37,6600,0,0],[39,7000,0,0],[28,7000,0,0]]},"4|4":{"n":1,"med":5800,"min":5800,"max":5800,"p":[[31,3850,0,0],[37,5800,0,0],[30,5800,0,0],[29,5800,0,0],[32,5800,0,0],[33,5800,1,5800],[28,6000,0,0],[39,6000,0,0]]},"19|3":{"n":2,"med":10973,"min":10973,"max":10973,"p":[]},"25|4":{"n":1,"med":14000,"min":14000,"max":14000,"p":[[39,14000,1,14000],[29,15000,0,0]]},"18|5":{"n":2,"med":12050,"min":8600,"max":15500,"p":[[29,0,1,8600],[32,0,1,15500]]},"5|4":{"n":2,"med":17500,"min":17500,"max":17500,"p":[[31,13500,0,0],[30,16000,0,0],[32,16000,0,0],[29,16000,0,0],[37,16000,0,0],[28,17500,2,17500]]},"15|4":{"n":1,"med":91800,"min":91800,"max":91800,"p":[[31,52180,0,0],[30,66635,0,0],[37,66635,0,0],[32,66635,0,0],[29,70000,0,0],[28,91800,1,91800]]},"6|5":{"n":1,"med":21500,"min":21500,"max":21500,"p":[[31,19800,0,0],[30,21000,0,0],[33,21000,0,0],[37,21000,0,0],[29,21500,1,21500],[28,22500,0,0],[39,22500,0,0],[32,26050,0,0]]},"6|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,26000,0,0],[33,28000,0,0],[30,28000,0,0],[28,30240,0,0],[32,35000,0,0]]},"10|4":{"n":1,"med":39000,"min":39000,"max":39000,"p":[[31,30000,0,0],[39,39000,0,0],[28,39000,1,39000],[37,44505,0,0],[29,44505,0,0],[32,44505,0,0],[30,44505,0,0]]},"14|4":{"n":1,"med":12099,"min":12099,"max":12099,"p":[[37,12099,0,0],[32,12099,1,12099],[30,12099,0,0],[31,12100,0,0],[29,13500,0,0],[28,16000,0,0],[39,16000,0,0]]},"7|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,47000,0,0],[33,62000,0,0],[30,62000,0,0],[28,65000,0,0]]},"16|4":{"n":0,"med":0,"min":0,"max":0,"p":[[37,3000,0,0],[30,3000,0,0],[32,3000,0,0],[28,4000,0,0],[29,4250,0,0],[39,5500,0,0]]},"1|4":{"n":28,"med":2300,"min":2300,"max":3000,"p":[[31,2000,0,0],[38,2300,2,2300],[37,2300,15,2300],[32,2300,2,2300],[33,2300,1,2300],[29,2300,0,0],[30,2300,7,2300],[39,2646,1,2646],[28,2646,0,0]]},"21|3":{"n":0,"med":0,"min":0,"max":0,"p":[[33,8500,0,0],[28,9000,0,0]]},"22|3":{"n":0,"med":0,"min":0,"max":0,"p":[[35,2000,0,0],[32,2100,0,0],[39,2160,0,0],[38,3000,0,0]]},"1|3":{"n":136,"med":1840,"min":1500,"max":4400,"p":[[35,1500,23,1500],[31,1600,0,0],[30,1840,1,1840],[32,1840,56,1840],[33,1840,9,1840],[38,2000,6,2000],[39,2160,6,2160],[28,2160,1,2160]]},"15|3":{"n":1,"med":52440,"min":52440,"max":52440,"p":[[31,30000,0,0],[33,52440,0,0],[30,52440,0,0],[32,52440,1,52440],[28,83409,0,0]]},"33|3":{"n":0,"med":0,"min":0,"max":0,"p":[[32,45000,0,0]]},"30|4":{"n":0,"med":0,"min":0,"max":0,"p":[[28,55000,0,0]]},"8|4":{"n":1,"med":27000,"min":27000,"max":27000,"p":[[31,21000,0,0],[32,24195,0,0],[30,24195,0,0],[37,24195,0,0],[29,24195,0,0],[28,27000,1,27000],[39,27000,0,0]]},"12|3":{"n":19,"med":3200,"min":3000,"max":5304,"p":[[31,3850,0,0],[30,5000,0,0],[33,5000,2,4100],[32,5000,8,3200],[38,5000,1,3000],[28,5076,0,0],[39,5076,0,0]]},"7|5":{"n":0,"med":0,"min":0,"max":0,"p":[[31,35000,0,0],[39,46000,0,0],[30,46000,0,0],[29,46000,0,0],[37,46000,0,0],[33,46000,0,0],[28,46000,0,0],[32,51750,0,0]]},"23|4":{"n":2,"med":7766,"min":7000,"max":8532,"p":[[32,6500,0,0],[28,0,1,8532],[37,0,1,7000]]},"15|5":{"n":0,"med":0,"min":0,"max":0,"p":[[31,68500,0,0],[30,85000,0,0],[33,85000,0,0],[29,85000,0,0],[37,85000,0,0],[28,91800,0,0]]},"9|4":{"n":0,"med":0,"min":0,"max":0,"p":[[31,28000,0,0],[32,32545,0,0],[30,32545,0,0],[37,32545,0,0],[29,35500,0,0],[39,38880,0,0],[28,38880,0,0]]},"11|5":{"n":3,"med":11600,"min":9300,"max":15500,"p":[[31,7150,0,0],[30,8600,0,0],[29,8600,0,0],[37,8600,0,0],[33,8600,0,0],[28,9300,2,10450],[39,9300,0,0],[32,0,1,15500]]},"5|3":{"n":6,"med":13025,"min":13025,"max":13025,"p":[[31,11326,0,0],[32,13025,6,13025],[33,13025,0,0],[30,13025,0,0],[28,15000,0,0],[39,15000,0,0]]},"25|3":{"n":1,"med":15000,"min":15000,"max":15000,"p":[[39,0,1,15000]]},"5|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,21000,0,0],[36,23000,0,0],[30,25000,0,0],[37,25000,0,0],[33,25000,0,0],[28,28000,0,0]]},"16|3":{"n":0,"med":0,"min":0,"max":0,"p":[[33,2200,0,0],[32,2200,0,0],[30,2200,0,0],[28,3100,0,0],[39,3100,0,0]]},"14|3":{"n":1,"med":10000,"min":10000,"max":10000,"p":[[30,8749,0,0],[33,8749,0,0],[32,8749,1,10000],[31,8800,0,0],[28,10500,0,0],[39,10500,0,0]]},"4|5":{"n":2,"med":6600,"min":6600,"max":6600,"p":[[31,5500,0,0],[30,6600,0,0],[37,6600,0,0],[29,6600,0,0],[33,6600,2,6600],[39,7000,0,0],[28,7000,0,0],[32,9545,0,0]]},"13|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,18700,0,0],[33,25000,0,0],[30,25000,0,0],[28,27000,0,0]]},"16|5":{"n":0,"med":0,"min":0,"max":0,"p":[[30,4800,0,0],[29,4800,0,0],[37,4800,0,0],[33,4800,0,0],[39,5500,0,0],[28,5500,0,0]]},"12|4":{"n":3,"med":4000,"min":4000,"max":4500,"p":[[31,6200,0,0],[37,7000,2,4000],[30,7000,0,0],[32,7000,0,0],[29,7500,0,0],[39,7560,0,0],[28,7560,0,0],[33,0,1,4500]]},"11|1":{"n":1,"med":27000,"min":27000,"max":27000,"p":[[30,11500,0,0],[33,11500,0,0],[27,12100,0,0],[28,15000,0,0],[32,27000,1,27000]]},"21|4":{"n":0,"med":0,"min":0,"max":0,"p":[[28,4000,0,0],[33,4400,0,0],[37,5000,0,0]]},"22|4":{"n":2,"med":4500,"min":3000,"max":6000,"p":[[39,2646,0,0],[30,3000,1,3000],[37,3000,0,0],[38,3000,0,0],[32,3000,0,0],[28,0,1,6000]]},"7|4":{"n":1,"med":38000,"min":38000,"max":38000,"p":[[31,29700,0,0],[32,38000,1,38000],[30,38000,0,0],[37,38000,0,0],[29,38800,0,0],[28,39000,0,0],[39,39000,0,0]]},"23|3":{"n":1,"med":4500,"min":4500,"max":4500,"p":[[35,4000,0,0],[32,4500,1,4500]]},"9|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,49500,0,0],[33,75000,0,0],[30,75000,0,0],[28,81000,0,0]]},"2|4":{"n":3,"med":4025,"min":4025,"max":4025,"p":[[31,2450,0,0],[37,4025,0,0],[32,4025,2,4025],[30,4025,0,0],[38,4025,1,4025],[29,4025,0,0],[33,5000,0,0],[39,6000,0,0],[28,6000,0,0]]},"3|4":{"n":0,"med":0,"min":0,"max":0,"p":[[31,2416,0,0],[37,4025,0,0],[30,4025,0,0],[29,4025,0,0],[32,4025,0,0],[39,6000,0,0],[28,6000,0,0]]},"17|3":{"n":0,"med":0,"min":0,"max":0,"p":[[38,3000,0,0],[28,3100,0,0],[39,3100,0,0],[32,3200,0,0],[30,3200,0,0],[33,3200,0,0]]},"17|5":{"n":1,"med":5500,"min":5500,"max":5500,"p":[[39,5500,0,0],[33,5500,0,0],[28,5500,0,0],[30,5500,0,0],[37,5500,0,0],[29,5500,1,5500]]},"16|1":{"n":0,"med":0,"min":0,"max":0,"p":[[27,6500,0,0],[33,7500,0,0],[30,7500,0,0],[28,9000,0,0]]},"10|5":{"n":0,"med":0,"min":0,"max":0,"p":[[31,39300,0,0],[29,42000,0,0],[37,42000,0,0],[30,42000,0,0],[33,42000,0,0],[39,46000,0,0],[28,46000,0,0]]},"14|5":{"n":0,"med":0,"min":0,"max":0,"p":[[31,14300,0,0],[30,17000,0,0],[29,17000,0,0],[33,17000,0,0],[37,17000,0,0],[28,18000,0,0],[39,18000,0,0]]}};
+const PROVN = {"27":"Trasportes Pérez","28":"TYR","29":"Alfa Trasportes","30":"MEL Logistics","31":"Trasportes Bautista","32":"Trasportes García","33":"Trasportes Mendiola","35":"Transguca","36":"Transporte S.O.R.","37":"Transporte Rodbar","38":"Transporte González","39":"Transportes 4PL","40":"Transportes MAS"};
+const ZONAS = {1:'CDMX / Edo. de México',2:'Chalco',3:'Ajusco',4:'Toluca',5:'Guadalajara',6:'Monterrey',7:'Culiacán',8:'Villahermosa',9:'Chihuahua',10:'Mérida',11:'Puebla',12:'Querétaro',13:'Veracruz',14:'Silao',15:'Mexicali',16:'Tepeji',17:'Jilotepec',18:'Morelos',19:'Guanajuato',20:'Jalisco',21:'Michoacán',22:'CDMX +30KM',23:'Pachuca, Hgo.',24:'Cuernavaca',25:'Aguascalientes',27:'Coahuila',28:'Tijuana',30:'Campeche',31:'San Luis Potosí',32:'Zacatecas',33:'Sonora',34:'Tlaxcala',35:'Chiapas',36:'Oaxaca',37:'Guerrero'};
+// precio de venta del tabulador 4PL, solo flete: zona -> {unidad: precio}
+const TAB4PL = {1:{3:2337,4:2863,5:4906,1:6929},3:{3:5193,4:6600,5:7463,1:11513},2:{3:5193,4:6600,5:7463,1:9786},4:{3:5193,4:6600,5:7463,1:11513},
+  17:{3:3488,4:4400,5:5864,1:9594},16:{3:4905,4:6160,5:7037,1:9594},12:{3:5533,4:8316,5:11012,1:14925},11:{3:8829,4:9385,5:10604,1:15991},
+  14:{3:11445,4:17600,5:19190,1:21321},13:{3:15304,4:17820,5:21785,1:28783},5:{3:16225,4:19250,5:23454,1:29849},6:{3:18929,4:22000,5:26038,1:32237},
+  8:{3:24877,4:29700,5:35181,1:43708},7:{3:36212,4:42900,5:49039,1:69293},10:{3:36493,4:42900,5:49039,1:69293},9:{3:37670,4:42768,5:48357,1:86350},
+  15:{3:90916,4:100980,5:97864,1:172700}};
+const UNI_TXT = {3:'1.5 toneladas',4:'3.5 toneladas',5:'Torton / rabón',1:'Tráiler'};
+const METRO = [1, 2, 3, 22];
+const uniId = n => /1\.5/.test(n) ? 3 : /3\.5/.test(n) ? 4 : /rab|torton/i.test(n) ? 5 : /tr[aá]iler/i.test(n) ? 1 : null;
+const normz = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+const CIUDAD_ZONA = {'CDMX ZONA METROPOLITANA':1,'CIUDAD DE MEXICO':1,'CUAUTITLAN':1,'ECATEPEC':1,'TLALNEPANTLA':1,'TULTEPEC':1,
+  'CHALCO':2,'AJUSCO':3,'TOLUCA':4,'METEPEC':4,'GUADALAJARA':5,'ZAPOPAN':5,'EL SALTO':5,'MONTERREY':6,'CULIACAN':7,'VILLAHERMOSA':8,
+  'CHIHUAHUA':9,'MERIDA':10,'PUEBLA':11,'QUERETARO':12,'VERACRUZ':13,'SILAO':14,'MEXICALI':15,'TEPEJI DEL RIO':16,'TEPEJI':16,
+  'JILOTEPEC':17,'LEON':19,'MORELIA':21,'PACHUCA':23,'CUERNAVACA':24,'AGUASCALIENTES':25,'SALTILLO':27,'TORREON':27,'TIJUANA':28,
+  'CAMPECHE':30,'SAN LUIS POTOSI':31,'ZACATECAS':32,'HERMOSILLO':33,'CIUDAD OBREGON':33,'TLAXCALA':34,'TUXTLA GUTIERREZ':35,'OAXACA':36,'ACAPULCO':37};
+function zonaDe(dest) {
+  const n = normz(dest);
+  if (!n) return null;
+  if (CIUDAD_ZONA[n]) return CIUDAD_ZONA[n];
+  const k = Object.keys(CIUDAD_ZONA).find(c => n.indexOf(c) >= 0);
+  return k ? CIUDAD_ZONA[k] : null;
+}
+function mediana(a) {
+  const s = a.slice().sort((x, y) => x - y), m = Math.floor(s.length / 2);
+  return s.length ? (s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2) : 0;
+}
+const MK = { dest: null, zona: null };
+
+/* ---------- comisión del operador como monto por ruta ---------- */
+const claveCom = (o, d, u) => normz(o) + '|' + normz(d) + '|' + normz(u);
+function comisionGuardada(o, d, u) {
+  const c = P().comisiones || {};
+  return c[claveCom(o, d, u)] || null;
+}
+function guardarComision(v) {
+  if (!v.origen || !v.destino) return;
+  const p = P();
+  p.comisiones = p.comisiones || {};
+  const k = claveCom(v.origen, v.destino, v.unidad);
+  if (v.comIda > 0 || v.comReg > 0) p.comisiones[k] = { ida: v.comIda, reg: v.comReg };
+  else delete p.comisiones[k];
+  guardar();
+  const h = $('#hCom');
+  if (h) h.textContent = (v.comIda > 0 || v.comReg > 0) ? 'monto guardado para esta ruta' : 'monto de ida y de regreso · en cero se usa el porcentaje';
+}
+
+/* ---------- precio de mercado en el resultado ---------- */
+function datosMercado(z, u, km) {
+  const m = MERC[z + '|' + u] || { n: 0, med: 0, min: 0, max: 0, p: [] };
+  const tar = m.p.filter(x => x[1] > 0).map(x => x[1]);
+  const regla = (u === 3 && METRO.indexOf(z) < 0 && km > 0) ? 1881 + 20 * km : 0;
+  let merc = 0, fuente = '', firme = false;
+  if (m.n >= 2) { merc = m.med; firme = true; fuente = 'mediana de ' + m.n + ' viajes que les pagaste a tus transportistas, del 1 de junio al 10 de septiembre · de ' + mny0(m.min) + ' a ' + mny0(m.max); }
+  else if (regla) { merc = regla; fuente = 'regla de 1.5 toneladas: $1,881 + $20 por km de ida (' + Math.round(km).toLocaleString('es-MX') + ' km)'; }
+  else if (m.n === 1) { merc = m.med; fuente = 'un solo viaje pagado en el periodo'; }
+  else if (tar.length) { merc = mediana(tar); fuente = 'mediana de ' + tar.length + ' tarifas cargadas por tus transportistas; sin viajes en el periodo'; }
+  // el piso se toma de quien trabajo la ruta al menos 2 veces; con un solo viaje es poco firme
+  const hechos = m.p.filter(x => x[2] > 0).sort((a, b) => ((b[2] >= 2) - (a[2] >= 2)) || (a[3] - b[3]));
+  const cargadas = m.p.filter(x => x[1] > 0).sort((a, b) => a[1] - b[1]);
+  let piso = 0, pisoTxt = '';
+  if (hechos.length) { piso = hechos[0][3]; pisoTxt = 'lo menos que has pagado: ' + PROVN[hechos[0][0]] + ', ' + hechos[0][2] + ' viaje' + (hechos[0][2] > 1 ? 's' : '') + (hechos[0][2] < 2 ? ' · poco firme' : ''); }
+  else if (cargadas.length) { piso = cargadas[0][1]; pisoTxt = 'tarifa más baja cargada (' + PROVN[cargadas[0][0]] + '), sin viajes que la confirmen'; }
+  return { m: m, merc: merc, fuente: fuente, firme: firme, regla: regla, piso: piso, pisoTxt: pisoTxt, tuyo: (TAB4PL[z] || {})[u] || 0 };
+}
+
+function renderMercado(r, v) {
+  const box = $('#mercado');
+  if (!box) return;
+  if (MK.dest !== v.destino) { MK.dest = v.destino; MK.zona = zonaDe(v.destino); }
+  const z = MK.zona, u = uniId(r.uni.nombre);
+  const opts = '<option value="">elige la zona</option>' + Object.keys(ZONAS).map(k =>
+    `<option value="${k}" ${+k === z ? 'selected' : ''}>${ZONAS[k]}</option>`).join('');
+  let cuerpo = '';
+  if (!u) cuerpo = '<p class="sub">Esta unidad no está en tu plataforma; el precio de mercado sale para tráiler, rabón, 3.5 y 1.5 toneladas.</p>';
+  else if (!z) cuerpo = '<p class="sub">No identifiqué la zona de tu tabulador para este destino. Elígela arriba y aparece lo que te cobran tus transportistas.</p>';
+  else {
+    const d = datosMercado(z, u, v.km);
+    const propio = r.detalle ? r.detalle.total : 0;
+    const dif = (d.tuyo && d.merc) ? d.tuyo - d.merc : null;
+    cuerpo = `<div class="precios">
+      <div class="pbox merc"><div class="lb">Lo que te cobran tus transportistas</div><div class="vl">${d.merc ? mny0(d.merc) : '—'}</div>
+        <div class="hint">${d.fuente || 'sin viajes ni tarifas cargadas para esta ruta'}</div></div>
+      <div class="pbox piso"><div class="lb">Piso para negociar</div><div class="vl">${d.piso ? mny0(d.piso) : '—'}</div>
+        <div class="hint">abajo de aquí pierdes aunque lo subcontrates · ${d.pisoTxt || 'sin dato'}</div></div>
+      <div class="pbox"><div class="lb">Tu precio en el tabulador</div><div class="vl">${d.tuyo ? mny0(d.tuyo) : '—'}</div>
+        <div class="hint">${d.tuyo ? (dif !== null ? (dif >= 0 ? '+' : '−') + mny0(Math.abs(dif)) + ' contra lo que te cobran' : 'solo flete') : 'esta zona no tiene tarifa en tu tabulador'}</div></div>
+      <div class="pbox costo"><div class="lb">Con camión propio · Motor</div><div class="vl">${propio ? mny0(propio) : '—'}</div>
+        <div class="hint">costo de operarlo tú, con los supuestos por confirmar</div></div>
+    </div>`;
+    const lineas = [];
+    if (propio && d.merc) lineas.push('Subcontratarlo te cuesta <b>' + mny0(d.merc) + '</b>; operarlo con camión propio, <b>' + mny0(propio) + '</b> según el Motor. ' +
+      (propio > d.merc ? 'Con los supuestos de hoy conviene subcontratar.' : 'Con los supuestos de hoy el Motor lo calcula más barato con camión propio, pero todavía le faltan los costos fijos por viaje.'));
+    if (d.regla && d.m.n >= 2) lineas.push('La regla de 1.5 toneladas daría ' + mny0(d.regla) + ' para esta distancia.');
+    if (d.m.p.length) lineas.push(d.m.p.filter(x => x[1] > 0).length + ' transportistas tienen tarifa cargada para esta ruta y ' + d.m.p.filter(x => x[2] > 0).length + ' la trabajaron en el periodo.');
+    lineas.push('Si hay rechazo de mercancía, en tu plataforma el transportista cobra la mitad del flete en rechazo parcial y el flete completo en rechazo total.');
+    cuerpo += `<div class="aviso">${lineas.map(x => '<p>' + x + '</p>').join('')}
+      <div class="btnrow no-print" style="margin-top:.5rem"><button class="btn ghost" id="btnVerProv">Ver los transportistas de esta ruta</button></div></div>`;
+  }
+  box.innerHTML = `<div class="mk"><div class="mk-hd"><h3>Precio de mercado</h3>
+    <div class="f" style="margin:0"><select id="mkZona" aria-label="Zona de tu tabulador">${opts}</select></div>
+    <span class="hint">${z ? (zonaDe(v.destino) === z ? 'zona detectada por el destino' : 'zona elegida a mano') : ''}</span></div>${cuerpo}</div>`;
+  $('#mkZona').onchange = e => { MK.zona = e.target.value ? +e.target.value : null; renderMercado(r, v); };
+  const bv = $('#btnVerProv');
+  if (bv) bv.onclick = () => abrirProveedores(z, u);
+}
+
+/* ---------- pestaña Proveedores por ruta ---------- */
+function ahorroRuta(m) {
+  const usados = m.p.filter(x => x[2] > 0);
+  const alt = usados.filter(x => x[2] >= 2);
+  if (usados.length < 2 || !alt.length) return null;
+  const mejor = alt.reduce((a, b) => b[3] < a[3] ? b : a);
+  let dif = 0;
+  usados.forEach(x => { if (x[3] > mejor[3]) dif += x[2] * (x[3] - mejor[3]); });
+  return dif > 0 ? { mejor: mejor, dif: dif } : null;
+}
+function renderProv() {
+  const z = +$('#pZona').value, u = +$('#pUni').value;
+  const m = MERC[z + '|' + u];
+  if (!m || !m.p.length) { $('#pRes').innerHTML = '<p class="sub">No hay tarifas cargadas ni viajes para ' + ZONAS[z] + ' en ' + UNI_TXT[u] + '.</p>'; return; }
+  const cargadas = m.p.filter(x => x[1] > 0);
+  const barato = cargadas.length ? cargadas.reduce((a, b) => b[1] < a[1] ? b : a) : null;
+  const usados = m.p.filter(x => x[2] > 0);
+  const masUsado = usados.length ? usados.reduce((a, b) => b[2] > a[2] ? b : a) : null;
+  const a = ahorroRuta(m);
+  const filas = m.p.map(x => {
+    const tags = (barato && x[0] === barato[0] ? '<span class="tag barato">tarifa más baja</span>' : '') +
+      (masUsado && x[0] === masUsado[0] ? '<span class="tag usado">el que más usas</span>' : '') +
+      (x[1] > 0 && !x[2] ? '<span class="tag sin">sin viajes</span>' : '');
+    const contra = (a && x[2] > 0 && x[3] > a.mejor[3]) ? '+' + mny0(x[3] - a.mejor[3]) + ' por viaje' : (a && x[0] === a.mejor[0] ? 'referencia' : '');
+    return `<tr class="${a && x[0] === a.mejor[0] ? 'alt' : ''}"><td>${PROVN[x[0]] || 'Sin proveedor'}${tags}</td>
+      <td class="num">${x[1] ? mny0(x[1]) : 'sin tarifa'}</td><td class="num">${x[2] || '—'}</td>
+      <td class="num">${x[2] ? mny0(x[3]) : '—'}</td><td class="dim">${contra}</td></tr>`;
+  }).join('');
+  const frases = [];
+  if (a) frases.push(`${PROVN[a.mejor[0]]} ya trabajó esta ruta ${a.mejor[2]} veces a ${mny0(a.mejor[3])}. Si los demás viajes del periodo se hubieran pagado a ese precio, la diferencia sería de <b>${mny0(a.dif)}</b>.`);
+  if (masUsado && barato && masUsado[0] !== barato[0]) frases.push(`Al que más viajes le diste es ${PROVN[masUsado[0]]} (${masUsado[2]}, a ${mny0(masUsado[3])}); la tarifa más baja cargada es de ${PROVN[barato[0]]}, ${mny0(barato[1])}${barato[2] ? '' : ', que no hizo viajes en el periodo'}.`);
+  if (!usados.length) frases.push('Nadie trabajó esta ruta en el periodo; las tarifas son lo que cada transportista tiene cargado.');
+  frases.push('No siempre se puede mover un viaje: disponibilidad, tipo de carga y confianza cuentan. El número sirve para saber dónde vale la pena preguntar.');
+  $('#pRes').innerHTML = `<div class="tblwrap"><table>
+    <thead><tr><th>Transportista</th><th style="text-align:right">Tarifa cargada</th><th style="text-align:right">Viajes</th><th style="text-align:right">Lo que le pagaste</th><th>Contra el que ya la trabajó más barato</th></tr></thead>
+    <tbody>${filas}</tbody></table></div>
+    <div class="aviso">${frases.map(f => '<p>' + f + '</p>').join('')}</div>`;
+}
+function hallazgosProveedores() {
+  let total = 0; const rutas = [];
+  Object.keys(MERC).forEach(k => { const a = ahorroRuta(MERC[k]); if (a) { total += a.dif; rutas.push([k, a]); } });
+  rutas.sort((x, y) => y[1].dif - x[1].dif);
+  const cuenta = {};
+  Object.keys(MERC).forEach(k => {
+    const c = MERC[k].p.filter(x => x[1] > 0);
+    if (c.length < 2) return;
+    const b = c.reduce((a, x) => x[1] < a[1] ? x : a);
+    cuenta[b[0]] = cuenta[b[0]] || { baratas: 0, cargadas: 0, viajes: 0 };
+    cuenta[b[0]].baratas++;
+  });
+  Object.keys(MERC).forEach(k => MERC[k].p.forEach(x => { if (cuenta[x[0]]) { if (x[1] > 0) cuenta[x[0]].cargadas++; cuenta[x[0]].viajes += x[2]; } }));
+  const top = Object.keys(cuenta).sort((a, b) => cuenta[b].baratas - cuenta[a].baratas)[0];
+  const t = top ? cuenta[top] : null;
+  const nom = k => { const [z, u] = k.split('|'); return ZONAS[z] + ' en ' + UNI_TXT[u].toLowerCase(); };
+  $('#pSalio').innerHTML = `<h2>Lo que salió</h2>
+    <div class="precios">
+      <div class="pbox merc"><div class="lb">Diferencia en el periodo</div><div class="vl">${mny0(total)}</div>
+        <div class="hint">en ${rutas.length} rutas, contra el transportista más barato que ya trabajó cada una</div></div>
+      ${t ? `<div class="pbox"><div class="lb">Tarifa más baja sin viajes</div><div class="vl">${t.baratas} de ${t.cargadas}</div>
+        <div class="hint">rutas donde ${PROVN[top]} tiene la tarifa más baja; ${t.viajes ? t.viajes + ' viajes en el periodo' : 'no hizo viajes en el periodo'}</div></div>` : ''}
+    </div>
+    <ul class="pv-list">${rutas.slice(0, 4).map(([k, a]) => `<li><button class="link" data-pk="${k}">${nom(k)}</button>: ${mny0(a.dif)}; ${PROVN[a.mejor[0]]} la trabajó ${a.mejor[2]} veces a ${mny0(a.mejor[3])}.</li>`).join('')}</ul>
+    ${t && !t.viajes ? `<div class="aviso duda"><div class="t">Para preguntar</div><p>${PROVN[top]} tiene la tarifa más baja en ${t.baratas} rutas y no trabajó ninguna del 1 de junio al 10 de septiembre. ¿Sus tarifas siguen vigentes?</p></div>` : ''}`;
+  document.querySelectorAll('[data-pk]').forEach(b => b.onclick = () => { const [z, u] = b.dataset.pk.split('|'); abrirProveedores(+z, +u); });
+}
+function iniciarProveedores() {
+  const zonas = [...new Set(Object.keys(MERC).map(k => +k.split('|')[0]))].sort((a, b) => a - b);
+  $('#pZona').innerHTML = zonas.map(z => `<option value="${z}">${ZONAS[z] || 'Zona ' + z}</option>`).join('');
+  $('#pUni').innerHTML = [3, 4, 5, 1].map(u => `<option value="${u}">${UNI_TXT[u]}</option>`).join('');
+  $('#pZona').value = '1'; $('#pUni').value = '3';
+  $('#pZona').onchange = renderProv; $('#pUni').onchange = renderProv;
+  renderProv(); hallazgosProveedores();
+}
+function abrirProveedores(z, u) {
+  if (z && MERC[z + '|' + (u || 3)]) { $('#pZona').value = String(z); $('#pUni').value = String(u || 3); }
+  renderProv();
+  const b = document.querySelector('.vista[data-v="prov"]');
+  if (b) b.click();
+}
+
+function redibujar() {
+  renderEmpresas(); renderViaje(); renderComparador(); renderConfig();
+  autocompletar('vOrigen'); autocompletar('vDestino');
+  $('#vDestino').addEventListener('change', buscarRuta);
+  $('#vOrigen').addEventListener('change', buscarRuta);
+  $('#vUnidad').addEventListener('change', buscarRuta);
+  $('#vVia').addEventListener('change', buscarRuta);
+  $('#cardRes').classList.add('hidden');
+  $('#resComparador').innerHTML = '';
+  pintarEstadoAgente();
+}
+redibujar();
+cargarCiudades();
+traerDiesel();
+iniciarProveedores();
+
+$('#btnCalc').onclick = () => {
+  leerViaje();
+  if (!V.km) { alert('Falta el kilometraje del servicio.'); return; }
+  const p = P();
+  guardarComision(V);
+  renderResultado(calcular(V, p), V, p);
+  recordarCiudad(V.destino); recordarCiudad(V.origen);
+  registrarRuta();
+  $('#cardRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+$('#btnLimpiar').onclick = () => {
+  V.destino = ''; V.km = 0; V.kmPatio = 0; V.casetas = 0; V.maniobra = 0; V.extras = 0; V.actual = 0; V.comIda = 0; V.comReg = 0;
+  renderViaje(); $('#cardRes').classList.add('hidden');
+};
+$('#btnImprimir').onclick = () => window.print();
+$('#btnComparar').onclick = comparar;
+$('#btnAddUnidad').onclick = () => {
+  P().unidades.push({ nombre: 'Unidad nueva', rend: 4.0, ejes: 2, conf: true });
+  guardar(); redibujar(); $('#accConfig').open = true;
+};
+$('#btnRestaurar').onclick = () => {
+  if (!confirm('Se regresan los valores iniciales de ' + DATOS.activa + '. ¿Continuar?')) return;
+  DATOS.empresas[DATOS.activa] = perfilBase(DATOS.activa);
+  guardar(); redibujar();
+};
+</script>
+
+<script>
+/* ============ pestañas del Motor · v4 ============ */
+(function(){
+  var vistas={cotizar:document.getElementById('vCotizar'),prov:document.getElementById('vProv'),margen:document.getElementById('vMargen')};
+  document.querySelectorAll('.vista').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.vista').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+      Object.keys(vistas).forEach(function(k){vistas[k].classList.toggle('hidden',k!==b.dataset.v)});
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+  document.querySelectorAll('[data-mu]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('[data-mu]').forEach(function(x){x.classList.remove('on')});
+      document.querySelectorAll('.mr-u').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');document.getElementById(b.dataset.mu).classList.add('on');
+    });
+  });
+})();
+</script>
+</body>
+</html>
