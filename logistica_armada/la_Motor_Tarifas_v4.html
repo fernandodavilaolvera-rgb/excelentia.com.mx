@@ -594,10 +594,11 @@ function autocompletar(idInput) {
 
   function abrir() {
     cerrar();
-    const q = inp.value.trim().toLowerCase();
+    const sa = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = sa(inp.value.trim());
     const cat = CIUDADES.length ? CIUDADES : CIUDADES_BASE;
-    const recs = RECIENTES.filter(r => !q || r.toLowerCase().indexOf(q) >= 0);
-    const resto = cat.filter(c => (!q || c.nombre.toLowerCase().indexOf(q) >= 0) &&
+    const recs = RECIENTES.filter(r => !q || sa(r).indexOf(q) >= 0);
+    const resto = cat.filter(c => (!q || sa(c.nombre).indexOf(q) >= 0) &&
                                   !RECIENTES.some(r => r.toLowerCase() === c.nombre.toLowerCase()));
     opciones = recs.map(r => ({ nombre: r, estado: '', rec: true }))
                .concat(resto.slice(0, 60));
@@ -613,7 +614,7 @@ function autocompletar(idInput) {
       html += `<div class="ac-op" data-i="${recs.length + i}">${c.nombre}${c.estado ? '<span class="est">' + c.estado + '</span>' : ''}</div>`;
     });
     const escrito = inp.value.trim();
-    const existe = opciones.some(o => o.nombre.toLowerCase() === escrito.toLowerCase());
+    const existe = opciones.some(o => sa(o.nombre) === sa(escrito));
     if (escrito && !existe) html += `<div class="ac-nueva" data-nueva="1">Usar <b>${escrito}</b> como destino nuevo</div>`;
     if (!html) return;
     lista.innerHTML = html;
@@ -1002,7 +1003,7 @@ function leerConfig() {
   });
   guardar();
   const sel = $('#vUnidad'); const previa = sel ? sel.value : V.unidad;
-  renderViaje();
+  renderViaje(); enlazarViaje();
   const s2 = $('#vUnidad');
   if (s2 && p.unidades.some(x => x.nombre === previa)) s2.value = previa;
 }
@@ -1314,13 +1315,16 @@ function abrirProveedores(z, u) {
   if (b) b.click();
 }
 
-function redibujar() {
-  renderEmpresas(); renderViaje(); renderComparador(); renderConfig();
+function enlazarViaje() {
   autocompletar('vOrigen'); autocompletar('vDestino');
   $('#vDestino').addEventListener('change', buscarRuta);
   $('#vOrigen').addEventListener('change', buscarRuta);
   $('#vUnidad').addEventListener('change', buscarRuta);
   $('#vVia').addEventListener('change', buscarRuta);
+}
+function redibujar() {
+  renderEmpresas(); renderViaje(); renderComparador(); renderConfig();
+  enlazarViaje();
   $('#cardRes').classList.add('hidden');
   $('#resComparador').innerHTML = '';
   pintarEstadoAgente();
@@ -1342,7 +1346,7 @@ $('#btnCalc').onclick = () => {
 };
 $('#btnLimpiar').onclick = () => {
   V.destino = ''; V.km = 0; V.kmPatio = 0; V.casetas = 0; V.maniobra = 0; V.extras = 0; V.actual = 0; V.comIda = 0; V.comReg = 0;
-  renderViaje(); $('#cardRes').classList.add('hidden');
+  renderViaje(); enlazarViaje(); $('#cardRes').classList.add('hidden');
 };
 $('#btnImprimir').onclick = () => window.print();
 $('#btnComparar').onclick = comparar;
