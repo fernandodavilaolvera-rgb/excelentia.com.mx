@@ -109,6 +109,9 @@
     .franja-dato b{font-size:36px}
   }
 
+  .grupo-esc{font-size:10.5px; color:var(--txt3); margin-top:.15rem; padding-top:.3rem;
+    border-top:1px dashed var(--linea)}
+
   /* grupos por linea */
   .grupo-linea{margin-bottom:1.1rem}
   .grupo-linea:last-child{margin-bottom:0}
@@ -686,22 +689,34 @@ function pintarAndenes(filas){
 
   /* Los andenes se agrupan bajo su linea y se colorean segun a cual
      pertenecen: azules la 1, verdes la 2. */
-  var maxA = lista[0].registros || 1;
   var porLinea = {};
   lista.forEach(function(a){
     if(!porLinea[a.linea]) porLinea[a.linea] = [];
     porLinea[a.linea].push(a);
   });
 
+  /* Cada linea se mide contra su propio andén más alto, no contra el de
+     todo el tablero. Si no, los andenes de una linea que apenas arranca
+     quedan como rayitas junto a los de la linea consolidada y se leen
+     como si no tuvieran nada. */
+  var maxPorLinea = {};
+  Object.keys(porLinea).forEach(function(ln){
+    maxPorLinea[ln] = Math.max.apply(null, porLinea[ln].map(function(a){ return a.registros; })) || 1;
+  });
+
   cajaA.innerHTML = Object.keys(porLinea).sort().map(function(ln){
+    var maxL  = maxPorLinea[ln];
+    var sumaL = porLinea[ln].reduce(function(x,a){ return x + a.registros; }, 0);
     return '<div class="grupo-linea"><div class="grupo-tit">' + ln +
-           ' <span>' + porLinea[ln].length + ' andenes</span></div>' +
+           ' <span>' + porLinea[ln].length + ' andenes · ' + n(sumaL) + ' conexiones</span></div>' +
       porLinea[ln].map(function(a){
+        var w = a.registros / maxL * 100;
         return '<div class="anden"><div class="anden-top"><b>' + a.anden + '</b><span>' +
                n(a.registros) + '</span></div>' +
                '<div class="anden-bar"><i style="width:0;background:' + colorLinea(a.linea) +
-               '" data-w="' + (a.registros / maxA * 100) + '"></i></div></div>';
-      }).join('') + '</div>';
+               '" data-w="' + (a.registros ? Math.max(w, 2) : 0) + '"></i></div></div>';
+      }).join('') + '<div class="grupo-esc">La barra más larga de este bloque es ' +
+        n(maxL) + ' conexiones</div></div>';
   }).join('');
   setTimeout(function(){
     document.querySelectorAll('.anden-bar i').forEach(function(b, i){
@@ -817,10 +832,8 @@ function pintarBarras(lista){
 
   base.sort(function(a,b){ return a.orden - b.orden; });
 
-  var max   = Math.max.apply(null, base.map(function(a){ return a.registros; }));
   var total = base.reduce(function(x,a){ return x + a.registros; }, 0);
   var conAct = base.filter(function(a){ return a.registros > 0; }).length;
-  if(!max) max = 1;
 
   var porLinea = {};
   base.forEach(function(a){
@@ -833,8 +846,10 @@ function pintarBarras(lista){
     var suma  = grupo.reduce(function(x,a){ return x + a.registros; }, 0);
     var vivos = grupo.filter(function(a){ return a.registros > 0; }).length;
 
+    var maxG = Math.max.apply(null, grupo.map(function(a){ return a.registros; })) || 1;
+
     var cols = grupo.map(function(a){
-      var alto = Math.round(a.registros / max * 210);       /* 210 px de pista útil */
+      var alto = Math.round(a.registros / maxG * 210);      /* 210 px de pista útil, por linea */
       var col  = a.registros ? colorLinea(a.linea) : '#dfe3ea';
       var tip  = a.anden + ' · ' + ln + ' · ' +
                  (a.registros ? n(a.registros) + ' conexiones' : 'sin reportar en este periodo');
@@ -853,7 +868,8 @@ function pintarBarras(lista){
 
     return '<div class="bgrupo">' +
              '<div class="bgtit"><i style="background:' + colorLinea(ln) + '"></i>' + ln +
-               ' <span>· ' + vivos + ' de ' + grupo.length + ' activos · ' + n(suma) + ' conexiones</span></div>' +
+               ' <span>· ' + vivos + ' de ' + grupo.length + ' activos · ' + n(suma) +
+               ' conexiones · barra más alta ' + n(maxG) + '</span></div>' +
              '<div class="bcols">' + cols + '</div>' +
              '<div class="bcols" style="border-bottom:none; align-items:flex-start">' + labs + '</div>' +
            '</div>';
@@ -869,7 +885,9 @@ function pintarBarras(lista){
   if(nota){
     nota.innerHTML = '<b>' + conAct + ' de ' + base.length + ' andenes</b> registraron conexiones en el periodo, ' +
       'con <b>' + n(total) + '</b> en total. Los grises están dados de alta pero no han reportado nada: ' +
-      'puede ser que el equipo esté apagado, sin señal o que todavía no le hayan cargado la liga.';
+      'puede ser que el equipo esté apagado, sin señal o que todavía no le hayan cargado la liga. ' +
+      'Cada línea se mide contra su propio andén más alto, así que las alturas se comparan dentro ' +
+      'del bloque y no entre bloques.';
   }
 }
 
