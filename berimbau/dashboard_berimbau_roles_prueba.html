@@ -2359,14 +2359,9 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
       return;
     }
     pintarSesion(j);
-    if(j.rol === 'administrador'){
-      // 17-sep-2026: el Administrador solo ve la pestaña de usuarios; el Dashboard NO arranca.
-      const ovA = document.getElementById('brb-login');
-      if(ovA) ovA.classList.add('oculto');
-      if(typeof window.__brbModoAdministrador === 'function') window.__brbModoAdministrador();
-      return;
-    }
-    if(j.rol === 'maestro' && typeof window.__brbMostrarPestanaUsuarios === 'function') window.__brbMostrarPestanaUsuarios();
+    // 17-sep-2026: el Administrador tiene todo lo del Operador y además la pestaña de usuarios,
+    // igual que el maestro (decisión de Fernando). El Dashboard arranca completo para los dos.
+    if((j.rol === 'maestro' || j.rol === 'administrador') && typeof window.__brbMostrarPestanaUsuarios === 'function') window.__brbMostrarPestanaUsuarios();
     const ov = document.getElementById('brb-login');
     if(ov) ov.classList.add('oculto');
     if(!arrancado && typeof window.__arrancarDashboard === 'function'){
@@ -2553,7 +2548,7 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
   const URL_ROL    = BASE + 'berimbau-usuarios-rol';
   const ROL_TXT = { maestro:'Administrador maestro', administrador:'Administrador', operador:'Operador', lector:'Lector' };
   const ROL_DESC = {
-    administrador:'<b>Administrador</b>: solo da de alta usuarios y les asigna Operador o Lector; no ve datos ni envía.',
+    administrador:'<b>Administrador</b>: todo lo del Operador, y además da de alta usuarios y les asigna Operador o Lector.',
     operador:'<b>Operador</b>: ve todo, envía avisos, programa envíos, prende y apaga interruptores y exporta.',
     lector:'<b>Lector</b>: solo ve.'
   };
@@ -2732,15 +2727,6 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     const tab = $('brb-tab-usuarios'); if(tab) tab.style.display = '';
   };
 
-  // Administrador: solo la pestaña de usuarios; el Dashboard no arranca.
-  window.__brbModoAdministrador = function(){
-    const tab = $('brb-tab-usuarios');
-    document.querySelectorAll('.tabs .tab').forEach(t => { if(t !== tab) t.style.display = 'none'; });
-    if(tab) tab.style.display = '';
-    const ov = $('loading-overlay'); if(ov) ov.style.display = 'none';
-    if(typeof showTab === 'function' && tab) showTab('usuarios', tab);
-    window.brbUsuariosCargar();
-  };
 })();
 </script>
 <script>
