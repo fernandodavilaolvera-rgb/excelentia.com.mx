@@ -629,6 +629,16 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 .brb-sesion button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:6px;padding:2px 10px;font-size:.72rem;cursor:pointer}
 @media(max-width:640px){.brb-sesion{justify-content:flex-start}.brb-card{padding:22px 18px}}
 @media print{#brb-login,.brb-sesion button{display:none !important}}
+/* ===== 17-sep-2026 · LECTOR = solo consulta: se esconden botones de enviar, guardar y borrar,
+   y los interruptores se ven pero no se pueden mover. Es cosmético: el candado real es n8n. ===== */
+body.brb-lector [onclick*="PedirCambio"],body.brb-lector [onclick*="saveModule"],body.brb-lector [onclick*="probarAviso"],
+body.brb-lector [onclick^="guardarPlantilla("],body.brb-lector [onclick*="guardarProg"],body.brb-lector [onclick*="cancelarProgramacion"],
+body.brb-lector #btn-send-manual,body.brb-lector [onclick*="agregarCorreoExtra"],body.brb-lector #cf-btn-enviar,body.brb-lector #m26-btn-enviar,
+body.brb-lector #btn-send-anuales,body.brb-lector [onclick*="enviarCargoFallido"],body.brb-lector .btn-nueva-plantilla,
+body.brb-lector .btn-bib-edit,body.brb-lector .btn-bib-del,body.brb-lector [onclick*="guardarPlantillaBib"],
+body.brb-lector .btn-obs-edit,body.brb-lector .btn-obs-del,body.brb-lector .btn-obs-save,body.brb-lector [onclick*="borrarObs"],
+body.brb-lector #btn-sync,body.brb-lector .btn-exportar,body.brb-lector [onclick*="guardarCopiaAviso"],body.brb-lector [onclick*="guardarResponsable"]{display:none !important}
+body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),body.brb-lector .obs-input{pointer-events:none !important;opacity:.6}
 /* ===== 17-sep-2026 · USUARIOS CON ROLES: pestaña de usuarios ===== */
 .brbu-wrap{max-width:720px;margin:0 auto}
 .brbu-card{background:#fff;border:1px solid var(--gray-mid);border-radius:12px;padding:18px 20px;margin:0 auto 16px;max-width:720px}
@@ -2307,10 +2317,29 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     return refrescando;
   }
 
+  // 17-sep-2026 · Direcciones que envían, guardan o borran. Un Lector no las puede llamar desde
+  // esta página (red de seguridad por si algún botón quedó visible). El candado real es n8n.
+  const ESCRITURA = ['avisos-enviar','wa-enviar','cargo-fallido','alerta26-enviar','programar-envio',
+    'programaciones-cancelar','avisos-guardar','plantillas-guardar','plantillas-borrar','obs-guardar',
+    'obs-borrar','responsable-guardar','export-socios','sync-socios','config-guardar'];
+  function esEscritura(url, init){
+    const dir = url.slice(PREFIJO.length).split('?')[0];
+    if(ESCRITURA.indexOf(dir) === -1) return false;
+    if(dir === 'config-guardar'){
+      try{ const b = JSON.parse((init && init.body) || '{}'); if(b && b.leer === true) return false; }catch(e){}
+    }
+    return true;
+  }
+
   // Todas las llamadas a los webhooks del Club llevan la credencial de quien entro.
   window.fetch = async function(input, init){
     const url = typeof input === 'string' ? input : ((input && input.url) || '');
     if(url.indexOf(PREFIJO) !== 0) return fetchOriginal(input, init);
+    if(window.BRB_USUARIO && window.BRB_USUARIO.rol === 'lector' && esEscritura(url, init)){
+      const aviso = 'Tu usuario es de solo consulta; no puede enviar, guardar ni borrar.';
+      try{ if(typeof showToast === 'function') showToast(aviso); }catch(e){}
+      return new Response(JSON.stringify({ ok:false, mensaje:aviso, motivo:'solo consulta' }), { status:403, headers:{ 'Content-Type':'application/json' } });
+    }
     const tok = await tokenVigente();
     const opciones = Object.assign({}, init || {});
     const h = new Headers(opciones.headers || (typeof input !== 'string' && input.headers) || {});
@@ -2336,6 +2365,7 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     if(r) r.textContent = ROLES[yo.rol] || yo.rol || '';
     if(box) box.style.display = 'flex';
     window.BRB_USUARIO = { nombre: yo.nombre, correo: yo.correo, rol: yo.rol };
+    document.body.classList.toggle('brb-lector', yo.rol === 'lector');
   }
 
   // Pregunta a n8n quien es y con que rol. Si n8n no lo reconoce, no se arranca nada.
