@@ -625,6 +625,45 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 .brb-sesion button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:6px;padding:2px 10px;font-size:.72rem;cursor:pointer}
 @media(max-width:640px){.brb-sesion{justify-content:flex-start}.brb-card{padding:22px 18px}}
 @media print{#brb-login,.brb-sesion button{display:none !important}}
+/* ===== 17-sep-2026 · USUARIOS CON ROLES: pestaña de usuarios ===== */
+.brbu-wrap{max-width:720px;margin:0 auto}
+.brbu-card{background:#fff;border:1px solid var(--gray-mid);border-radius:12px;padding:18px 20px;margin:0 auto 16px;max-width:720px}
+.brbu-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.brbu-titulo{font-family:'Montserrat',sans-serif;font-weight:700;font-size:.95rem;color:var(--negro)}
+.brbu-sub{font-size:.76rem;color:var(--gray-text);margin:4px 0 14px}
+.brbu-form{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.brbu-form label,.brbu-editor label{display:block;font-family:'Montserrat',sans-serif;font-size:.66rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.brbu-form input,.brbu-form select,.brbu-editor input,.brbu-editor select{width:100%;box-sizing:border-box;border:1px solid var(--gray-mid);border-radius:8px;padding:8px 10px;font-size:.84rem;font-family:'Open Sans',sans-serif;background:#fff}
+.brbu-form input:focus,.brbu-form select:focus,.brbu-editor input:focus,.brbu-editor select:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(58,170,53,.15)}
+.brbu-form .brbu-full{grid-column:1 / -1}
+.brbu-btn{border:0;border-radius:20px;padding:8px 18px;background:var(--verde);color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.74rem;cursor:pointer}
+.brbu-btn:hover{background:#2d8a28}
+.brbu-btn:disabled,.brbu-btn-sec:disabled{opacity:.55;cursor:wait}
+.brbu-btn-sec{border:1px solid var(--gray-mid);border-radius:20px;padding:6px 14px;background:var(--gray-light);color:var(--gray-text);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.7rem;cursor:pointer}
+.brbu-btn-sec:hover{background:var(--gray-mid)}
+.brbu-btn-peligro{border-color:#fecaca;background:#fee2e2;color:#dc2626}
+.brbu-btn-peligro:hover{background:#fecaca}
+.brbu-msg{min-height:18px;font-size:.78rem;margin-top:10px;font-weight:600}
+.brbu-msg.ok{color:#2d8a28}.brbu-msg.err{color:var(--naranja)}
+.brbu-aviso{background:#fff4ee;border:1px solid #fbd0bf;border-left:4px solid var(--naranja);border-radius:8px;padding:8px 12px;font-size:.74rem;color:#7a2e12;margin-bottom:10px}
+.brbu-user{border:1px solid var(--gray-mid);border-radius:10px;padding:12px 14px;margin-bottom:10px;break-inside:avoid}
+.brbu-user.baja{background:var(--gray-light)}
+.brbu-fila{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brbu-nombre{font-family:'Montserrat',sans-serif;font-weight:700;font-size:.86rem;color:var(--negro)}
+.brbu-correo{font-size:.76rem;color:var(--gray-text);word-break:break-all}
+.brbu-pills{display:flex;gap:6px;flex-wrap:wrap}
+.brbu-pill{border-radius:10px;padding:2px 9px;font-size:.66rem;font-weight:700;white-space:nowrap}
+.brbu-pill.rol{background:#e8f7f0;color:#1a6b3a;border:1px solid #bfe3cc}
+.brbu-pill.activo{background:#e8f7e7;color:#2d8a28}
+.brbu-pill.pendiente{background:#fdf8ec;color:#8a6d1a;border:1px solid #ecd9a0}
+.brbu-pill.baja{background:#e4e6ea;color:#4a5068}
+.brbu-meta{font-size:.7rem;color:#8a90a0;margin-top:6px}
+.brbu-acciones{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.brbu-editor{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:10px;background:#f0f6ff;border:1px solid #c8d9f0;border-radius:8px;padding:10px}
+.brbu-editor > div{flex:1 1 220px}
+.brbu-nota{max-width:720px;margin:0 auto 16px;font-size:.72rem;color:var(--gray-text);background:#fff;border:1px solid var(--gray-mid);border-left:4px solid var(--verde);border-radius:8px;padding:10px 14px;line-height:1.55}
+@media (max-width:600px){.brbu-form{grid-template-columns:1fr}.brbu-card{padding:14px}.brbu-fila{flex-direction:column}.brbu-acciones .brbu-btn-sec{flex:1 1 auto}}
+@media print{.brbu-form,#brbu-crear,.brbu-acciones,.brbu-editor,.brbu-head button{display:none !important}.brbu-card,.brbu-wrap{break-inside:auto}.brbu-titulo{break-after:avoid}}
 </style>
 </head>
 <body>
@@ -674,6 +713,7 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
     <button class="tab" onclick="showTab('historial',this)">🕘 Historial <span class="badge" id="badge-historial">…</span></button>
     <button class="tab" onclick="showTab('graficas',this)">📊 Gráficas</button>
     <button class="tab" onclick="showTab('notificaciones',this)">🔔 Notificaciones <span class="badge" id="badge-notif">…</span></button>
+    <button class="tab" id="brb-tab-usuarios" style="display:none" onclick="showTab('usuarios',this);brbUsuariosCargar()">👥 Usuarios</button>
   </div>
 
   <!-- ===== DIRECTORIO ===== -->
@@ -2151,6 +2191,32 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     </div>
   </div>
 
+  <!-- ===== 17-sep-2026 · USUARIOS CON ROLES: pestaña de usuarios (solo maestro y Administrador) ===== -->
+  <div id="panel-usuarios" class="panel">
+    <div class="brbu-wrap">
+      <div class="brbu-card">
+        <div class="brbu-titulo">👥 Dar de alta a una persona</div>
+        <p class="brbu-sub">Cada persona entra con su propio correo. La invitación sale desde el correo del Club y la liga dura 24 horas; al abrirla elige su contraseña.</p>
+        <div class="brbu-form">
+          <div><label for="brbu-nombre">Nombre</label><input id="brbu-nombre" maxlength="80" autocomplete="off"></div>
+          <div><label for="brbu-correo">Correo</label><input id="brbu-correo" type="email" inputmode="email" autocomplete="off"></div>
+          <div><label for="brbu-rol">Rol</label><select id="brbu-rol"></select></div>
+          <div style="display:flex;align-items:flex-end"><button class="brbu-btn" id="brbu-crear" type="button" onclick="brbUsuariosCrear()" style="width:100%">Dar de alta y enviar invitación</button></div>
+        </div>
+        <div id="brbu-msg" class="brbu-msg"></div>
+      </div>
+      <div class="brbu-card">
+        <div class="brbu-head">
+          <div class="brbu-titulo">Usuarios <span id="brbu-cuenta" style="font-weight:600;color:var(--gray-text);font-size:.78rem"></span></div>
+          <button class="brbu-btn-sec" id="brbu-actualizar" type="button" onclick="brbUsuariosCargar()">🔄 Actualizar</button>
+        </div>
+        <div id="brbu-aviso"></div>
+        <div id="brbu-lista" style="font-size:.8rem;color:var(--gray-text)">Cargando…</div>
+      </div>
+      <div class="brbu-nota" id="brbu-roles-nota"></div>
+    </div>
+  </div>
+
 </div>
 
 </div>
@@ -2269,10 +2335,13 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     }
     pintarSesion(j);
     if(j.rol === 'administrador'){
-      // Carlos Parrales: solo alta de usuarios. Su pantalla aun no existe.
-      mostrarLogin('Entraste como Administrador. La pantalla de usuarios está en construcción.');
+      // 17-sep-2026: el Administrador solo ve la pestaña de usuarios; el Dashboard NO arranca.
+      const ovA = document.getElementById('brb-login');
+      if(ovA) ovA.classList.add('oculto');
+      if(typeof window.__brbModoAdministrador === 'function') window.__brbModoAdministrador();
       return;
     }
+    if(j.rol === 'maestro' && typeof window.__brbMostrarPestanaUsuarios === 'function') window.__brbMostrarPestanaUsuarios();
     const ov = document.getElementById('brb-login');
     if(ov) ov.classList.add('oculto');
     if(!arrancado && typeof window.__arrancarDashboard === 'function'){
@@ -2320,6 +2389,212 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     [p, c].forEach(el => el && el.addEventListener('keydown', e => { if(e.key === 'Enter') window.brbEntrar(); }));
     if(leer()){ msg('Verificando tu sesión…'); validarYArrancar(); } else mostrarLogin('');
   });
+})();
+</script>
+<script>
+// =====================================================================
+// 17-sep-2026 · USUARIOS CON ROLES — pestaña de usuarios
+// ---------------------------------------------------------------------
+// Solo la ven el maestro y el Administrador. Lo que cada quien puede
+// hacer lo decide n8n (Berimbau — Usuarios API + Verificar Rol); aquí solo
+// se pinta la lista y se mandan los pedidos. El window.fetch envuelto de la
+// sesión agrega la credencial a estas llamadas.
+// =====================================================================
+(function(){
+  const BASE = 'https://n8n.excelentia.com.mx/webhook/';
+  const URL_LISTAR = BASE + 'berimbau-usuarios-listar';
+  const URL_CREAR  = BASE + 'berimbau-usuarios-crear';
+  const URL_ROL    = BASE + 'berimbau-usuarios-rol';
+  const ROL_TXT = { maestro:'Administrador maestro', administrador:'Administrador', operador:'Operador', lector:'Lector' };
+  const ROL_DESC = {
+    administrador:'<b>Administrador</b>: solo da de alta usuarios y les asigna Operador o Lector; no ve datos ni envía.',
+    operador:'<b>Operador</b>: ve todo, envía avisos, programa envíos, prende y apaga interruptores y exporta.',
+    lector:'<b>Lector</b>: solo ve.'
+  };
+  const EST_TXT = { activo:'Activo', pendiente:'Invitación pendiente', baja:'De baja' };
+  let datos = null;       // última respuesta de listar
+  let editando = null;    // { i, tipo }
+  let ocupado = false;
+
+  function esc(t){ return String(t == null ? '' : t).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split('"').join('&quot;'); }
+  function $(id){ return document.getElementById(id); }
+  function volverA(){ return location.origin + location.pathname; }
+  function fecha(x){
+    if(!x) return '';
+    try{ return new Date(x).toLocaleString('es-MX', { timeZone:'America/Mexico_City', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+    catch(e){ return String(x); }
+  }
+  function msg(t, ok){ const el = $('brbu-msg'); if(!el) return; el.textContent = t || ''; el.className = 'brbu-msg ' + (t ? (ok ? 'ok' : 'err') : ''); }
+
+  async function pedir(url, body){
+    let r, j = {};
+    try{
+      r = await window.fetch(url, body ? { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) } : { cache:'no-store' });
+      try{ j = await r.json(); }catch(e){ j = {}; }
+    }catch(e){
+      return { ok:false, mensaje:'No se pudo conectar. Revisa tu conexión e intenta de nuevo.' };
+    }
+    if(r.status === 401) return { ok:false, mensaje:'Tu sesión venció o no tienes permiso. Sal y vuelve a entrar.' };
+    if(!r.ok || !j.ok) return { ok:false, mensaje: j.mensaje || ('No se pudo completar (código ' + r.status + ').') };
+    return j;
+  }
+
+  function llenarRoles(){
+    const sel = $('brbu-rol'); const nota = $('brbu-roles-nota');
+    const roles = (datos && datos.roles_asignables) || [];
+    if(sel){
+      const antes = sel.value;
+      sel.innerHTML = roles.map(r => '<option value="' + esc(r) + '">' + esc(ROL_TXT[r] || r) + '</option>').join('');
+      if(roles.indexOf(antes) !== -1) sel.value = antes;
+      else if(roles.indexOf('operador') !== -1) sel.value = 'operador';
+    }
+    if(nota) nota.innerHTML = 'Qué puede cada rol:<br>' + roles.map(r => ROL_DESC[r] || '').filter(Boolean).join('<br>');
+  }
+
+  function botones(u, i){
+    if(!u.editable) return '';
+    const b = [];
+    if(u.estado === 'pendiente'){
+      b.push('<button type="button" class="brbu-btn-sec" onclick="brbU.reenviar(' + i + ')">✉️ Reenviar invitación</button>');
+      b.push('<button type="button" class="brbu-btn-sec" onclick="brbU.editar(' + i + ',\'correo\')">✏️ Corregir correo</button>');
+    }
+    if(u.estado !== 'baja'){
+      b.push('<button type="button" class="brbu-btn-sec" onclick="brbU.editar(' + i + ',\'rol\')">🔁 Cambiar rol</button>');
+      b.push('<button type="button" class="brbu-btn-sec brbu-btn-peligro" onclick="brbU.baja(' + i + ')">⛔ Dar de baja</button>');
+    } else {
+      b.push('<button type="button" class="brbu-btn-sec" onclick="brbU.reactivar(' + i + ')">↩️ Reactivar</button>');
+    }
+    return '<div class="brbu-acciones">' + b.join('') + '</div>';
+  }
+
+  function editor(u, i){
+    if(!editando || editando.i !== i) return '';
+    if(editando.tipo === 'rol'){
+      const opciones = ((datos && datos.roles_asignables) || []).filter(r => r !== u.rol);
+      return '<div class="brbu-editor"><div><label>Nuevo rol</label><select id="brbu-ed-rol">'
+        + opciones.map(r => '<option value="' + esc(r) + '">' + esc(ROL_TXT[r] || r) + '</option>').join('')
+        + '</select></div><button type="button" class="brbu-btn" onclick="brbU.guardarRol(' + i + ')">Guardar</button>'
+        + '<button type="button" class="brbu-btn-sec" onclick="brbU.cancelar()">Cancelar</button></div>';
+    }
+    return '<div class="brbu-editor"><div><label>Correo correcto</label><input id="brbu-ed-correo" type="email" inputmode="email" value="' + esc(u.correo) + '"></div>'
+      + '<button type="button" class="brbu-btn" onclick="brbU.guardarCorreo(' + i + ')">Guardar y reenviar</button>'
+      + '<button type="button" class="brbu-btn-sec" onclick="brbU.cancelar()">Cancelar</button></div>';
+  }
+
+  function pintar(){
+    const cont = $('brbu-lista'); if(!cont) return;
+    const yo = (datos && datos.yo) || {};
+    const lista = (datos && datos.usuarios) || [];
+    const cuenta = $('brbu-cuenta');
+    if(cuenta) cuenta.textContent = lista.length ? '· ' + lista.filter(u => u.estado !== 'baja').length + ' con acceso de ' + lista.length : '';
+    $('brbu-aviso').innerHTML = (datos && datos.auth_ok === false)
+      ? '<div class="brbu-aviso">No se pudo leer el estado de las cuentas; por eso todas aparecen como invitación pendiente. Intenta Actualizar en un momento.</div>' : '';
+    if(!lista.length){ cont.innerHTML = 'Todavía no hay usuarios.'; return; }
+    cont.innerHTML = lista.map((u, i) => {
+      const esYo = u.user_id === yo.user_id;
+      const meta = [];
+      if(u.estado === 'pendiente') meta.push('Aún no abre su liga');
+      else meta.push(u.ultimo_acceso ? 'Último acceso: ' + esc(fecha(u.ultimo_acceso)) : 'Nunca ha entrado');
+      if(u.creado_at) meta.push('Alta: ' + esc(fecha(u.creado_at)));
+      return '<div class="brbu-user' + (u.estado === 'baja' ? ' baja' : '') + '">'
+        + '<div class="brbu-fila"><div><div class="brbu-nombre">' + esc(u.nombre || '—') + (esYo ? ' <span style="color:var(--gray-text);font-weight:600">(tú)</span>' : '') + '</div>'
+        + '<div class="brbu-correo">' + esc(u.correo) + '</div></div>'
+        + '<div class="brbu-pills"><span class="brbu-pill rol">' + esc(ROL_TXT[u.rol] || u.rol) + '</span>'
+        + '<span class="brbu-pill ' + esc(u.estado) + '">' + esc(EST_TXT[u.estado] || u.estado) + '</span></div></div>'
+        + '<div class="brbu-meta">' + meta.join(' · ') + '</div>'
+        + botones(u, i) + editor(u, i) + '</div>';
+    }).join('');
+  }
+
+  function bloquear(si){
+    ocupado = si;
+    document.querySelectorAll('#panel-usuarios button').forEach(b => { b.disabled = si; });
+  }
+
+  window.brbUsuariosCargar = async function(silencioso){
+    if(ocupado) return;
+    const cont = $('brbu-lista');
+    if(cont && !datos) cont.textContent = 'Cargando…';
+    bloquear(true);
+    const j = await pedir(URL_LISTAR);
+    bloquear(false);
+    if(!j.ok){
+      if(cont && !datos) cont.textContent = j.mensaje;
+      if(!silencioso) msg(j.mensaje, false);
+      return;
+    }
+    datos = j; editando = null;
+    llenarRoles(); pintar();
+  };
+
+  async function accion(pedido, confirmar, tras){
+    if(ocupado) return;
+    if(confirmar && !window.confirm(confirmar)) return;
+    bloquear(true); msg('Procesando…', true);
+    const j = await pedir(pedido.url, pedido.body);
+    bloquear(false);
+    msg(j.mensaje || (j.ok ? 'Listo.' : 'No se pudo completar.'), !!j.ok);
+    if(j.ok && tras) tras();
+    window.brbUsuariosCargar(true);
+  }
+
+  window.brbUsuariosCrear = function(){
+    const nombre = ($('brbu-nombre').value || '').trim();
+    const correo = ($('brbu-correo').value || '').trim().toLowerCase();
+    const rol = $('brbu-rol').value;
+    if(nombre.length < 2){ msg('Escribe el nombre de la persona.', false); return; }
+    if(correo.indexOf('@') < 1 || correo.lastIndexOf('.') < correo.indexOf('@')){ msg('El correo no parece válido; revísalo.', false); return; }
+    if(!rol){ msg('Elige un rol.', false); return; }
+    accion({ url:URL_CREAR, body:{ nombre, correo, rol, volver_a: volverA() } },
+      'Se dará de alta a ' + nombre + ' (' + correo + ') como ' + (ROL_TXT[rol] || rol) + ' y le llegará la invitación por correo. ¿Continuar?',
+      function(){ $('brbu-nombre').value = ''; $('brbu-correo').value = ''; });
+  };
+
+  window.brbU = {
+    reenviar: function(i){
+      const u = datos.usuarios[i];
+      accion({ url:URL_CREAR, body:{ nombre:u.nombre, correo:u.correo, rol:u.rol, volver_a: volverA() } },
+        '¿Reenviar la invitación a ' + u.correo + '? La liga anterior deja de servir.');
+    },
+    editar: function(i, tipo){ editando = { i, tipo }; pintar(); const el = $(tipo === 'rol' ? 'brbu-ed-rol' : 'brbu-ed-correo'); if(el) el.focus(); },
+    cancelar: function(){ editando = null; pintar(); },
+    guardarRol: function(i){
+      const u = datos.usuarios[i]; const rol = ($('brbu-ed-rol') || {}).value;
+      if(!rol) return;
+      accion({ url:URL_ROL, body:{ user_id:u.user_id, accion:'rol', rol } },
+        '¿Cambiar a ' + u.nombre + ' de ' + (ROL_TXT[u.rol] || u.rol) + ' a ' + (ROL_TXT[rol] || rol) + '?');
+    },
+    guardarCorreo: function(i){
+      const u = datos.usuarios[i]; const correo = (($('brbu-ed-correo') || {}).value || '').trim().toLowerCase();
+      if(correo.indexOf('@') < 1){ msg('El correo no parece válido; revísalo.', false); return; }
+      accion({ url:URL_ROL, body:{ user_id:u.user_id, accion:'correo', correo, volver_a: volverA() } },
+        '¿Cambiar el correo de ' + u.nombre + ' a ' + correo + ' y mandarle ahí una invitación nueva?');
+    },
+    baja: function(i){
+      const u = datos.usuarios[i];
+      accion({ url:URL_ROL, body:{ user_id:u.user_id, accion:'baja' } },
+        '¿Dar de baja a ' + u.nombre + '? Pierde el acceso de inmediato; se puede reactivar después.');
+    },
+    reactivar: function(i){
+      const u = datos.usuarios[i];
+      accion({ url:URL_ROL, body:{ user_id:u.user_id, accion:'reactivar' } }, '¿Reactivar a ' + u.nombre + '?');
+    }
+  };
+
+  // Maestro: ve la pestaña junto con el resto del Dashboard.
+  window.__brbMostrarPestanaUsuarios = function(){
+    const tab = $('brb-tab-usuarios'); if(tab) tab.style.display = '';
+  };
+
+  // Administrador: solo la pestaña de usuarios; el Dashboard no arranca.
+  window.__brbModoAdministrador = function(){
+    const tab = $('brb-tab-usuarios');
+    document.querySelectorAll('.tabs .tab').forEach(t => { if(t !== tab) t.style.display = 'none'; });
+    if(tab) tab.style.display = '';
+    const ov = $('loading-overlay'); if(ov) ov.style.display = 'none';
+    if(typeof showTab === 'function' && tab) showTab('usuarios', tab);
+    window.brbUsuariosCargar();
+  };
 })();
 </script>
 <script>
