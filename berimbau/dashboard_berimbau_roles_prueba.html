@@ -620,6 +620,10 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 .brb-card button{width:100%;border:0;border-radius:8px;padding:11px;background:var(--verde);color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer}
 .brb-card button:disabled{opacity:.6;cursor:wait}
 #brb-msg{min-height:18px;font-size:.78rem;color:var(--naranja);margin:10px 0 0}
+#brb-msg.ok{color:#2d8a28}
+.brb-link{display:inline-block;margin-top:12px;font-size:.76rem;color:#1e6fb0;text-decoration:none;font-weight:600}
+.brb-link:hover{text-decoration:underline}
+.brb-ayuda{font-size:.72rem;color:var(--gray-text);text-align:left;margin:-4px 0 12px;line-height:1.45}
 .brb-sesion{margin-top:6px;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;color:#fff;font-size:.74rem}
 .brb-sesion .brb-rol{background:rgba(58,170,53,.25);border:1px solid var(--verde);border-radius:10px;padding:1px 8px;font-weight:600}
 .brb-sesion button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:6px;padding:2px 10px;font-size:.72rem;cursor:pointer}
@@ -672,13 +676,33 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 <div id="brb-login">
   <div class="brb-card">
     <img src="https://excelentia.com.mx/logo_club_berimbau.png" alt="Club Berimbau" onerror="this.style.display='none'">
-    <h2>Dashboard Inteligente de Socios</h2>
-    <p class="brb-sub">Entra con tu usuario del Club</p>
-    <label for="brb-correo">Correo</label>
-    <input id="brb-correo" type="email" autocomplete="username" inputmode="email">
-    <label for="brb-pass">Contraseña</label>
-    <input id="brb-pass" type="password" autocomplete="current-password">
-    <button id="brb-entrar" type="button" onclick="brbEntrar()">Entrar</button>
+    <h2 id="brb-titulo">Dashboard Inteligente de Socios</h2>
+    <p class="brb-sub" id="brb-subtitulo">Entra con tu usuario del Club</p>
+    <!-- Vista 1: entrar -->
+    <div id="brb-vista-entrar">
+      <label for="brb-correo">Correo</label>
+      <input id="brb-correo" type="email" autocomplete="username" inputmode="email">
+      <label for="brb-pass">Contraseña</label>
+      <input id="brb-pass" type="password" autocomplete="current-password">
+      <button id="brb-entrar" type="button" onclick="brbEntrar()">Entrar</button>
+      <a href="#" class="brb-link" onclick="brbVista('olvide');return false;">Olvidé mi contraseña</a>
+    </div>
+    <!-- Vista 2: elegir contraseña (al abrir la liga de invitación o de recuperación) -->
+    <div id="brb-vista-clave" style="display:none">
+      <label for="brb-clave1">Nueva contraseña</label>
+      <input id="brb-clave1" type="password" autocomplete="new-password">
+      <label for="brb-clave2">Escríbela otra vez</label>
+      <input id="brb-clave2" type="password" autocomplete="new-password">
+      <p class="brb-ayuda">Mínimo 8 caracteres. Solo tú la conoces; nadie del Club ni de ExcelentIA te la va a pedir.</p>
+      <button id="brb-guardar-clave" type="button" onclick="brbGuardarClave()">Guardar y entrar</button>
+    </div>
+    <!-- Vista 3: olvidé mi contraseña -->
+    <div id="brb-vista-olvide" style="display:none">
+      <label for="brb-correo-olvide">Correo</label>
+      <input id="brb-correo-olvide" type="email" autocomplete="username" inputmode="email">
+      <button id="brb-enviar-liga" type="button" onclick="brbPedirLiga()">Enviarme una liga</button>
+      <a href="#" class="brb-link" onclick="brbVista('entrar');return false;">Volver a entrar</a>
+    </div>
     <div id="brb-msg"></div>
   </div>
 </div>
@@ -2249,7 +2273,7 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
   function leer(){ try{ return JSON.parse(localStorage.getItem(LS) || 'null'); }catch(e){ return null; } }
   function guardar(s){ try{ localStorage.setItem(LS, JSON.stringify(s)); }catch(e){} }
   function borrar(){ try{ localStorage.removeItem(LS); }catch(e){} }
-  function msg(t){ const el=document.getElementById('brb-msg'); if(el) el.textContent=t||''; }
+  function msg(t, ok){ const el=document.getElementById('brb-msg'); if(el){ el.textContent=t||''; el.className = ok ? 'ok' : ''; } }
   function ahora(){ return Math.floor(Date.now()/1000); }
 
   function empacar(j, correo){
@@ -2298,6 +2322,7 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
   function mostrarLogin(texto){
     const ov = document.getElementById('brb-login');
     if(ov) ov.classList.remove('oculto');
+    if(typeof window.brbVista === 'function') window.brbVista('entrar');
     msg(texto || '');
     const c = document.getElementById('brb-correo');
     if(c && !c.value) setTimeout(() => c.focus(), 50);
@@ -2372,6 +2397,122 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     }
   };
 
+  // ===================================================================
+  // 17-sep-2026 · Elegir contraseña (liga del correo) y Olvidé mi contraseña
+  // La liga regresa con los datos en el # de la URL:
+  //   #access_token=...&refresh_token=...&expires_in=...&type=invite|recovery
+  // o, si ya venció o ya se usó, con #error=...&error_code=...
+  // ===================================================================
+  const URL_RECUPERAR = PREFIJO + 'recuperar';
+  let ligaSesion = null;   // credencial que trajo la liga; se guarda solo al poner la contraseña
+
+  window.brbVista = function(v, texto, ok){
+    ['entrar','clave','olvide'].forEach(n => { const el = document.getElementById('brb-vista-' + n); if(el) el.style.display = (n === v) ? '' : 'none'; });
+    const t = document.getElementById('brb-titulo'), st = document.getElementById('brb-subtitulo');
+    if(v === 'entrar'){ t.textContent = 'Dashboard Inteligente de Socios'; st.textContent = 'Entra con tu usuario del Club'; }
+    if(v === 'olvide'){
+      t.textContent = 'Olvidé mi contraseña'; st.textContent = 'Escribe tu correo y te mandamos una liga para elegir una nueva';
+      const c = document.getElementById('brb-correo'), co = document.getElementById('brb-correo-olvide');
+      if(co && c && !co.value) co.value = c.value;
+    }
+    const ov = document.getElementById('brb-login'); if(ov) ov.classList.remove('oculto');
+    msg(texto || '', ok);
+    const foco = { entrar:'brb-correo', clave:'brb-clave1', olvide:'brb-correo-olvide' }[v];
+    setTimeout(() => { const f = document.getElementById(foco); if(f) f.focus(); }, 50);
+  };
+
+  function leerLiga(){
+    const h = String(location.hash || '');
+    const q = String(location.search || '');
+    if(h.indexOf('access_token=') === -1 && h.indexOf('error') === -1 && q.indexOf('error_code=') === -1) return null;
+    const p = new URLSearchParams(h.slice(1));
+    const pq = new URLSearchParams(q.slice(1));
+    const d = {
+      access_token: p.get('access_token'), refresh_token: p.get('refresh_token'),
+      expires_at: Number(p.get('expires_at') || 0), expires_in: Number(p.get('expires_in') || 0),
+      tipo: p.get('type') || '', error: p.get('error') || pq.get('error') || '', error_code: p.get('error_code') || pq.get('error_code') || ''
+    };
+    // Se borra de la barra para que la credencial no quede a la vista ni en el historial.
+    try{ history.replaceState(null, '', location.pathname); }catch(e){}
+    return d;
+  }
+
+  async function abrirLiga(d){
+    if(d.error || !d.access_token){
+      window.brbVista('olvide', d.error_code === 'otp_expired'
+        ? 'Tu liga ya venció o ya se usó. Escribe tu correo y te mandamos una nueva.'
+        : 'Tu liga no es válida. Escribe tu correo y te mandamos una nueva.');
+      return;
+    }
+    window.brbVista('clave', 'Verificando tu liga…', true);
+    const boton = document.getElementById('brb-guardar-clave'); if(boton) boton.disabled = true;
+    try{
+      const r = await fetchOriginal(SB_URL + '/auth/v1/user', { headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer ' + d.access_token } });
+      if(!r.ok){ window.brbVista('olvide', 'Tu liga ya venció o ya se usó. Escribe tu correo y te mandamos una nueva.'); return; }
+      const u = await r.json();
+      ligaSesion = { access_token:d.access_token, refresh_token:d.refresh_token,
+        expires_at: d.expires_at || (ahora() + (d.expires_in || 3600)), correo:(u && u.email) || '' };
+      borrar();   // si había otra sesión abierta en este navegador, deja de valer
+      document.getElementById('brb-titulo').textContent = d.tipo === 'recovery' ? 'Elige tu nueva contraseña' : 'Bienvenido, elige tu contraseña';
+      document.getElementById('brb-subtitulo').textContent = ligaSesion.correo;
+      msg('');
+    }catch(e){
+      window.brbVista('olvide', 'No se pudo verificar tu liga. Revisa tu conexión o pide una nueva.');
+    }finally{
+      if(boton) boton.disabled = false;
+    }
+  }
+
+  window.brbGuardarClave = async function(){
+    const c1 = document.getElementById('brb-clave1').value || '';
+    const c2 = document.getElementById('brb-clave2').value || '';
+    if(!ligaSesion){ window.brbVista('olvide', 'Pide una liga nueva para elegir tu contraseña.'); return; }
+    if(c1.length < 8){ msg('La contraseña debe tener mínimo 8 caracteres.'); return; }
+    if(c1 !== c2){ msg('Las dos contraseñas no son iguales.'); return; }
+    const btn = document.getElementById('brb-guardar-clave');
+    btn.disabled = true; btn.textContent = 'Guardando…'; msg('');
+    try{
+      const r = await fetchOriginal(SB_URL + '/auth/v1/user', {
+        method:'PUT', headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer ' + ligaSesion.access_token, 'Content-Type':'application/json' },
+        body: JSON.stringify({ password: c1 })
+      });
+      let j = {}; try{ j = await r.json(); }catch(e){}
+      if(!r.ok){
+        const cod = String(j.error_code || j.code || '');
+        if(cod === 'same_password') msg('Esa ya es tu contraseña; elige una distinta.');
+        else if(cod === 'weak_password') msg('La contraseña es muy débil; usa una más larga, con letras y números.');
+        else if(r.status === 401 || r.status === 403) window.brbVista('olvide', 'Tu liga ya venció. Escribe tu correo y te mandamos una nueva.');
+        else msg('No se pudo guardar tu contraseña (código ' + r.status + '). Intenta de nuevo.');
+        return;
+      }
+      guardar(ligaSesion); ligaSesion = null;
+      document.getElementById('brb-clave1').value = ''; document.getElementById('brb-clave2').value = '';
+      msg('Contraseña guardada. Entrando…', true);
+      await validarYArrancar();
+    }catch(e){
+      msg('No se pudo conectar. Intenta de nuevo.');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Guardar y entrar';
+    }
+  };
+
+  window.brbPedirLiga = async function(){
+    const correo = (document.getElementById('brb-correo-olvide').value || '').trim().toLowerCase();
+    if(correo.indexOf('@') < 1 || correo.lastIndexOf('.') < correo.indexOf('@')){ msg('Escribe tu correo completo.'); return; }
+    const btn = document.getElementById('brb-enviar-liga');
+    btn.disabled = true; btn.textContent = 'Enviando…'; msg('');
+    try{
+      // Sin credencial a propósito: esta dirección no pide sesión.
+      await fetchOriginal(URL_RECUPERAR, { method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ correo: correo, volver_a: location.origin + location.pathname }) });
+      msg('Si ese correo tiene acceso al Dashboard, en unos minutos le llegará una liga para elegir contraseña. Revisa también la carpeta de spam.', true);
+    }catch(e){
+      msg('No se pudo conectar. Intenta de nuevo.');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Enviarme una liga';
+    }
+  };
+
   window.brbSalir = async function(){
     const s = leer();
     borrar();
@@ -2387,6 +2528,11 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     const p = document.getElementById('brb-pass');
     const c = document.getElementById('brb-correo');
     [p, c].forEach(el => el && el.addEventListener('keydown', e => { if(e.key === 'Enter') window.brbEntrar(); }));
+    const c2 = document.getElementById('brb-clave2'), co = document.getElementById('brb-correo-olvide');
+    if(c2) c2.addEventListener('keydown', e => { if(e.key === 'Enter') window.brbGuardarClave(); });
+    if(co) co.addEventListener('keydown', e => { if(e.key === 'Enter') window.brbPedirLiga(); });
+    const liga = leerLiga();
+    if(liga){ abrirLiga(liga); return; }
     if(leer()){ msg('Verificando tu sesión…'); validarYArrancar(); } else mostrarLogin('');
   });
 })();
