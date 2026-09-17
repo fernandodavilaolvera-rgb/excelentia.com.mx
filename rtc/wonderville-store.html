@@ -559,6 +559,23 @@ header .subtitle {
 #pendingBar button:disabled{opacity:.5;}
 #pendingBar.sending{background:rgba(0,229,255,.14); border-color:var(--neon-cyan); color:var(--neon-cyan);}
 #pendingBar.sending button{background:var(--neon-cyan);}
+
+/* ── ARTÍCULOS EXTRA (10 configurables) ── */
+.art-head{display:flex; align-items:center; justify-content:space-between; gap:.6rem; margin-bottom:.35rem;}
+.art-reset{
+  background:transparent; border:1px solid rgba(255,45,120,.5); color:var(--neon-magenta);
+  border-radius:8px; padding:.28rem .6rem;
+  font-family:'Nunito',sans-serif; font-weight:800; font-size:10px; letter-spacing:.04em;
+  cursor:pointer; white-space:nowrap;
+}
+.art-reset:active{background:rgba(255,45,120,.15);}
+.art-hint{
+  font-family:'Nunito',sans-serif; font-weight:700; font-size:10.5px;
+  color:var(--neon-cyan); opacity:.75; margin:0 0 .5rem 0; letter-spacing:.03em;
+}
+/* los que no están configurados no compiten con los que sí */
+.art-btn.art-vacio{opacity:.4;}
+.art-btn.art-vacio:active{opacity:.7;}
 </style>
 </head>
 <body>
@@ -660,7 +677,11 @@ header .subtitle {
 
 <!-- SECCIÓN 6: ART 2-6 -->
 <div class="section">
-  <p class="section-label">Artículos extra <span style="opacity:0.4;font-size:9px;letter-spacing:0.1em">· toca dos veces para editar</span></p>
+  <div class="art-head">
+    <p class="section-label" style="margin:0">Artículos extra <span style="opacity:0.4;font-size:9px;letter-spacing:0.1em">· toca dos veces para editar</span></p>
+    <button class="art-reset" id="artResetBtn" onclick="resetArtConfigs()">Borrar todos</button>
+  </div>
+  <p class="art-hint" id="artHint"></p>
   <div class="btn-grid-3" id="artGrid"></div>
 </div>
 
@@ -685,12 +706,29 @@ const FIXED_PRODUCTS = [
   { key:'gorras',    name:'Gorra',     basePrice:150 },
   { key:'stickers',  name:'Stickers',  basePrice:120 },
 ];
-const ART_COUNT = 3;
+const ART_COUNT = 10;
 
 // ── ESTADO ──
 let fixedQty    = FIXED_PRODUCTS.map(()=>0);
 let fixedPrices = FIXED_PRODUCTS.map(p=>p.basePrice);
-let artConfigs  = Array(ART_COUNT).fill(null).map(()=>({name:'',icon:'🎁',price:0,configured:false}));
+const ART_KEY = 'wv_articulos_extra';
+function cargarArtConfigs(){
+  const vacio = Array(ART_COUNT).fill(null).map(()=>({name:'',icon:'🎁',price:0,configured:false}));
+  try{
+    const g = JSON.parse(localStorage.getItem(ART_KEY) || 'null');
+    if(!Array.isArray(g)) return vacio;
+    return vacio.map((v,i)=>{
+      const c = g[i];
+      return (c && c.configured && c.name)
+        ? {name:String(c.name), icon:'🎁', price:Number(c.price)||0, configured:true}
+        : v;
+    });
+  }catch(e){ return vacio; }
+}
+function guardarArtConfigs(){
+  try{ localStorage.setItem(ART_KEY, JSON.stringify(artConfigs)); }catch(e){}
+}
+let artConfigs  = cargarArtConfigs();
 let artQty      = Array(ART_COUNT).fill(0);
 let artPrices   = Array(ART_COUNT).fill(0);
 let paymentMethod = null;
@@ -871,6 +909,7 @@ function updateUI() {
 
   // Art
   for(let i=0;i<ART_COUNT;i++) updateArtBtn(i);
+  updateArtHint();
 
   // Total
   const total = calcTotal();
@@ -915,11 +954,36 @@ function updateArtBtn(i) {
     if(price) price.textContent = '$'+artPrices[i];
     if(badge){ badge.textContent=artQty[i]; badge.className='qty-badge'+(artQty[i]>0?' visible':''); }
   } else {
-    btn.className = isArt1?'main-btn':'art-btn';
+    btn.className = isArt1?'main-btn':'art-btn art-vacio';
     layerE.style.display='';
     layerC.style.display='none';
     if(badge){ badge.textContent='0'; badge.className='qty-badge'; }
   }
+}
+
+// Cuántos artículos extra hay puestos
+function updateArtHint(){
+  const hint = document.getElementById('artHint');
+  const btn  = document.getElementById('artResetBtn');
+  if(!hint) return;
+  const n = artConfigs.filter(c=>c.configured).length;
+  hint.textContent = n
+    ? `✓ ${n} de ${ART_COUNT} puestos · se quedan guardados para la próxima función`
+    : `Toca un botón vacío para ponerle nombre y precio · quedan guardados`;
+  if(btn) btn.style.display = n ? '' : 'none';
+}
+
+// Borra la configuración de TODOS los artículos extra
+function resetArtConfigs(){
+  const n = artConfigs.filter(c=>c.configured).length;
+  if(!n) return;
+  if(!confirm(`¿Borrar los ${n} artículos extra configurados?\n\nSolo se borran los botones. Las ventas ya registradas no se tocan.`)) return;
+  artConfigs = Array(ART_COUNT).fill(null).map(()=>({name:'',icon:'🎁',price:0,configured:false}));
+  artQty     = Array(ART_COUNT).fill(0);
+  artPrices  = Array(ART_COUNT).fill(0);
+  guardarArtConfigs();
+  updateUI();
+  showToast('Artículos extra borrados');
 }
 
 function calcTotal(){
@@ -1018,6 +1082,7 @@ function openConfigArt(idx){
     if(!name){ showToast('Escribe un nombre',true); return; }
     artConfigs[idx]={name,icon:'🎁',price,configured:true};
     artPrices[idx]=price;
+    guardarArtConfigs();
     if(artQty[idx]===0) artQty[idx]=1; // agrega 1 automáticamente al configurar
     closeModal(); updateUI();
   };
@@ -1146,9 +1211,11 @@ async function registerSale(){
     mischa:fixedQty[3],
     ricky:fixedQty[5],
     karnak:fixedQty[7],
-    art1:artConfigs[0].configured?artQty[0]:0,
-    art2:artConfigs[1].configured?artQty[1]:0,
-    art3:artConfigs[2].configured?artQty[2]:0,
+    // Todos los artículos extra suman en Art 1. El NOMBRE de cada uno viaja
+    // en "items" (col. Productos), que es de donde el dashboard los separa.
+    art1:artQty.reduce((a,q,i)=>a+(artConfigs[i].configured?q:0),0),
+    art2:0,
+    art3:0,
     items, total,
     efectivo:esEfectivo,
     tarjeta:esTarjeta,
