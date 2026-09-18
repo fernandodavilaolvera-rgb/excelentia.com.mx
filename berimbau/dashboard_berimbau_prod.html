@@ -607,9 +607,118 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
   letter-spacing:.2px;vertical-align:middle;white-space:nowrap}
 .pill-tit{background:#dce8f7;color:#1a3a6b;font-weight:800}
 .pill-dep{background:#f5f6f8;color:#4a5068;border:1px solid #dde1e9;font-weight:700}
+/* ===== 16-sep-2026 · USUARIOS CON ROLES: pantalla de entrada ===== */
+#brb-login{position:fixed;inset:0;z-index:100000;background:linear-gradient(135deg,#0d1b1a 0%,#1a3a1a 60%,#1e5020 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+#brb-login.oculto{display:none}
+.brb-card{background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.35);width:100%;max-width:380px;margin:0 auto;padding:28px 26px 24px;text-align:center}
+.brb-card img{height:56px;width:auto;margin-bottom:10px}
+.brb-card h2{font-family:'Montserrat',sans-serif;font-size:1.05rem;color:var(--negro);margin:0 0 4px}
+.brb-card p.brb-sub{font-size:.78rem;color:var(--gray-text);margin:0 0 18px}
+.brb-card label{display:block;text-align:left;font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.3px;margin:0 0 4px}
+.brb-card input{width:100%;box-sizing:border-box;border:1px solid var(--gray-mid);border-radius:8px;padding:10px 12px;font-size:.9rem;margin:0 0 12px;font-family:'Open Sans',sans-serif}
+.brb-card input:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(58,170,53,.15)}
+.brb-card button{width:100%;border:0;border-radius:8px;padding:11px;background:var(--verde);color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer}
+.brb-card button:disabled{opacity:.6;cursor:wait}
+#brb-msg{min-height:18px;font-size:.78rem;color:var(--naranja);margin:10px 0 0}
+#brb-msg.ok{color:#2d8a28}
+.brb-link{display:inline-block;margin-top:12px;font-size:.76rem;color:#1e6fb0;text-decoration:none;font-weight:600}
+.brb-link:hover{text-decoration:underline}
+.brb-ayuda{font-size:.72rem;color:var(--gray-text);text-align:left;margin:-4px 0 12px;line-height:1.45}
+.brb-sesion{margin-top:6px;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;color:#fff;font-size:.74rem}
+.brb-sesion .brb-rol{background:rgba(58,170,53,.25);border:1px solid var(--verde);border-radius:10px;padding:1px 8px;font-weight:600}
+.brb-sesion button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:6px;padding:2px 10px;font-size:.72rem;cursor:pointer}
+@media(max-width:640px){.brb-sesion{justify-content:flex-start}.brb-card{padding:22px 18px}}
+@media print{#brb-login,.brb-sesion button{display:none !important}}
+/* ===== 17-sep-2026 · LECTOR = solo consulta: se esconden botones de enviar, guardar y borrar,
+   y los interruptores se ven pero no se pueden mover. Es cosmético: el candado real es n8n. ===== */
+body.brb-lector [onclick*="PedirCambio"],body.brb-lector [onclick*="saveModule"],body.brb-lector [onclick*="probarAviso"],
+body.brb-lector [onclick^="guardarPlantilla("],body.brb-lector [onclick*="guardarProg"],body.brb-lector [onclick*="cancelarProgramacion"],
+body.brb-lector #btn-send-manual,body.brb-lector [onclick*="agregarCorreoExtra"],body.brb-lector #cf-btn-enviar,body.brb-lector #m26-btn-enviar,
+body.brb-lector #btn-send-anuales,body.brb-lector [onclick*="enviarCargoFallido"],body.brb-lector .btn-nueva-plantilla,
+body.brb-lector .btn-bib-edit,body.brb-lector .btn-bib-del,body.brb-lector [onclick*="guardarPlantillaBib"],
+body.brb-lector .btn-obs-edit,body.brb-lector .btn-obs-del,body.brb-lector .btn-obs-save,body.brb-lector [onclick*="borrarObs"],
+body.brb-lector #btn-sync,body.brb-lector .btn-exportar,body.brb-lector [onclick*="guardarCopiaAviso"],body.brb-lector [onclick*="guardarResponsable"]{display:none !important}
+.brb-aviso-lector{display:none;max-width:720px;margin:0 auto 16px;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:12px 16px;font-size:.8rem;line-height:1.5;color:#1a2035}
+body.brb-lector .brb-aviso-lector{display:block}
+@media print{.brb-aviso-lector{break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),body.brb-lector .obs-input{pointer-events:none !important;opacity:.6}
+/* ===== 17-sep-2026 · USUARIOS CON ROLES: pestaña de usuarios ===== */
+.brbu-wrap{max-width:720px;margin:0 auto}
+.brbu-card{background:#fff;border:1px solid var(--gray-mid);border-radius:12px;padding:18px 20px;margin:0 auto 16px;max-width:720px}
+.brbu-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.brbu-titulo{font-family:'Montserrat',sans-serif;font-weight:700;font-size:.95rem;color:var(--negro)}
+.brbu-sub{font-size:.76rem;color:var(--gray-text);margin:4px 0 14px}
+.brbu-form{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.brbu-form label,.brbu-editor label{display:block;font-family:'Montserrat',sans-serif;font-size:.66rem;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.brbu-form input,.brbu-form select,.brbu-editor input,.brbu-editor select{width:100%;box-sizing:border-box;border:1px solid var(--gray-mid);border-radius:8px;padding:8px 10px;font-size:.84rem;font-family:'Open Sans',sans-serif;background:#fff}
+.brbu-form input:focus,.brbu-form select:focus,.brbu-editor input:focus,.brbu-editor select:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(58,170,53,.15)}
+.brbu-form .brbu-full{grid-column:1 / -1}
+.brbu-btn{border:0;border-radius:20px;padding:8px 18px;background:var(--verde);color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.74rem;cursor:pointer}
+.brbu-btn:hover{background:#2d8a28}
+.brbu-btn:disabled,.brbu-btn-sec:disabled{opacity:.55;cursor:wait}
+.brbu-btn-sec{border:1px solid var(--gray-mid);border-radius:20px;padding:6px 14px;background:var(--gray-light);color:var(--gray-text);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.7rem;cursor:pointer}
+.brbu-btn-sec:hover{background:var(--gray-mid)}
+.brbu-btn-peligro{border-color:#fecaca;background:#fee2e2;color:#dc2626}
+.brbu-btn-peligro:hover{background:#fecaca}
+.brbu-msg{min-height:18px;font-size:.78rem;margin-top:10px;font-weight:600}
+.brbu-msg.ok{color:#2d8a28}.brbu-msg.err{color:var(--naranja)}
+.brbu-aviso{background:#fff4ee;border:1px solid #fbd0bf;border-left:4px solid var(--naranja);border-radius:8px;padding:8px 12px;font-size:.74rem;color:#7a2e12;margin-bottom:10px}
+.brbu-user{border:1px solid var(--gray-mid);border-radius:10px;padding:12px 14px;margin-bottom:10px;break-inside:avoid}
+.brbu-user.baja{background:var(--gray-light)}
+.brbu-fila{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brbu-nombre{font-family:'Montserrat',sans-serif;font-weight:700;font-size:.86rem;color:var(--negro)}
+.brbu-correo{font-size:.76rem;color:var(--gray-text);word-break:break-all}
+.brbu-pills{display:flex;gap:6px;flex-wrap:wrap}
+.brbu-pill{border-radius:10px;padding:2px 9px;font-size:.66rem;font-weight:700;white-space:nowrap}
+.brbu-pill.rol{background:#e8f7f0;color:#1a6b3a;border:1px solid #bfe3cc}
+.brbu-pill.activo{background:#e8f7e7;color:#2d8a28}
+.brbu-pill.pendiente{background:#fdf8ec;color:#8a6d1a;border:1px solid #ecd9a0}
+.brbu-pill.baja{background:#e4e6ea;color:#4a5068}
+.brbu-meta{font-size:.7rem;color:#8a90a0;margin-top:6px}
+.brbu-acciones{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.brbu-editor{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:10px;background:#f0f6ff;border:1px solid #c8d9f0;border-radius:8px;padding:10px}
+.brbu-editor > div{flex:1 1 220px}
+.brbu-nota{max-width:720px;margin:0 auto 16px;font-size:.72rem;color:var(--gray-text);background:#fff;border:1px solid var(--gray-mid);border-left:4px solid var(--verde);border-radius:8px;padding:10px 14px;line-height:1.55}
+@media (max-width:600px){.brbu-form{grid-template-columns:1fr}.brbu-card{padding:14px}.brbu-fila{flex-direction:column}.brbu-acciones .brbu-btn-sec{flex:1 1 auto}}
+@media print{.brbu-form,#brbu-crear,.brbu-acciones,.brbu-editor,.brbu-head button{display:none !important}.brbu-card,.brbu-wrap{break-inside:auto}.brbu-titulo{break-after:avoid}}
 </style>
 </head>
 <body>
+
+<!-- 16-sep-2026 · USUARIOS CON ROLES: nadie ve el Dashboard sin entrar con su usuario -->
+<div id="brb-login">
+  <div class="brb-card">
+    <img src="https://excelentia.com.mx/logo_club_berimbau.png" alt="Club Berimbau" onerror="this.style.display='none'">
+    <h2 id="brb-titulo">Dashboard Inteligente de Socios</h2>
+    <p class="brb-sub" id="brb-subtitulo">Entra con tu usuario del Club</p>
+    <!-- Vista 1: entrar -->
+    <div id="brb-vista-entrar">
+      <label for="brb-correo">Correo</label>
+      <input id="brb-correo" type="email" autocomplete="username" inputmode="email">
+      <label for="brb-pass">Contraseña</label>
+      <input id="brb-pass" type="password" autocomplete="current-password">
+      <button id="brb-entrar" type="button" onclick="brbEntrar()">Entrar</button>
+      <a href="#" class="brb-link" onclick="brbVista('olvide');return false;">Olvidé mi contraseña</a>
+    </div>
+    <!-- Vista 2: elegir contraseña (al abrir la liga de invitación o de recuperación) -->
+    <div id="brb-vista-clave" style="display:none">
+      <label for="brb-clave1">Nueva contraseña</label>
+      <input id="brb-clave1" type="password" autocomplete="new-password">
+      <label for="brb-clave2">Escríbela otra vez</label>
+      <input id="brb-clave2" type="password" autocomplete="new-password">
+      <p class="brb-ayuda">Mínimo 8 caracteres. Solo tú la conoces; nadie del Club ni de ExcelentIA te la va a pedir.</p>
+      <button id="brb-guardar-clave" type="button" onclick="brbGuardarClave()">Guardar y entrar</button>
+    </div>
+    <!-- Vista 3: olvidé mi contraseña -->
+    <div id="brb-vista-olvide" style="display:none">
+      <label for="brb-correo-olvide">Correo</label>
+      <input id="brb-correo-olvide" type="email" autocomplete="username" inputmode="email">
+      <button id="brb-enviar-liga" type="button" onclick="brbPedirLiga()">Enviarme una liga</button>
+      <a href="#" class="brb-link" onclick="brbVista('entrar');return false;">Volver a entrar</a>
+    </div>
+    <div id="brb-msg"></div>
+  </div>
+</div>
 
 <div id="loading-overlay">
   <div class="spinner"></div>
@@ -628,6 +737,7 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
   <div class="header-date">
     <strong id="fecha-hoy"></strong>
     Datos: <span class="rango-largo">Abril–Junio 2026</span> · Regla: adeudo desde día 6 · Trimestral: día 1 del mes 4
+    <div class="brb-sesion" id="brb-sesion" style="display:none">👤 <span id="brb-nombre"></span> <span class="brb-rol" id="brb-rol"></span> <button type="button" onclick="brbSalir()">Salir</button></div>
   </div>
 </div>
 
@@ -640,6 +750,7 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
     <button class="tab" onclick="showTab('historial',this)">🕘 Historial <span class="badge" id="badge-historial">…</span></button>
     <button class="tab" onclick="showTab('graficas',this)">📊 Gráficas</button>
     <button class="tab" onclick="showTab('notificaciones',this)">🔔 Notificaciones <span class="badge" id="badge-notif">…</span></button>
+    <button class="tab" id="brb-tab-usuarios" style="display:none" onclick="showTab('usuarios',this);brbUsuariosCargar()">👥 Usuarios</button>
   </div>
 
   <!-- ===== DIRECTORIO ===== -->
@@ -999,6 +1110,8 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 
   <!-- ===== AVISOS CORREO v10 ===== -->
   <div id="panel-avisos" class="panel">
+    <!-- 17-sep-2026 · Letrero solo para el Lector -->
+    <div class="brb-aviso-lector">👀 <b>Tu usuario es de solo consulta.</b> Puedes ver los avisos, sus textos y si los envíos automáticos están prendidos, pero no puedes enviar, programar ni cambiar ningún mensaje o aviso.</div>
 
     <!-- INTERRUPTOR MODO PRUEBA -->
     <div style="max-width:720px;margin:0 auto 16px;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -2117,11 +2230,540 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     </div>
   </div>
 
+  <!-- ===== 17-sep-2026 · USUARIOS CON ROLES: pestaña de usuarios (solo maestro y Administrador) ===== -->
+  <div id="panel-usuarios" class="panel">
+    <div class="brbu-wrap">
+      <div class="brbu-card">
+        <div class="brbu-titulo">👥 Dar de alta a una persona</div>
+        <p class="brbu-sub">Cada persona entra con su propio correo. La invitación sale desde el correo del Club y la liga dura 24 horas; al abrirla elige su contraseña.</p>
+        <div class="brbu-form">
+          <div><label for="brbu-nombre">Nombre</label><input id="brbu-nombre" maxlength="80" autocomplete="off"></div>
+          <div><label for="brbu-correo">Correo</label><input id="brbu-correo" type="email" inputmode="email" autocomplete="off"></div>
+          <div><label for="brbu-rol">Rol</label><select id="brbu-rol"></select></div>
+          <div style="display:flex;align-items:flex-end"><button class="brbu-btn" id="brbu-crear" type="button" onclick="brbUsuariosCrear()" style="width:100%">Dar de alta y enviar invitación</button></div>
+        </div>
+        <div id="brbu-msg" class="brbu-msg"></div>
+      </div>
+      <div class="brbu-card">
+        <div class="brbu-head">
+          <div class="brbu-titulo">Usuarios <span id="brbu-cuenta" style="font-weight:600;color:var(--gray-text);font-size:.78rem"></span></div>
+          <button class="brbu-btn-sec" id="brbu-actualizar" type="button" onclick="brbUsuariosCargar()">🔄 Actualizar</button>
+        </div>
+        <div id="brbu-aviso"></div>
+        <div id="brbu-lista" style="font-size:.8rem;color:var(--gray-text)">Cargando…</div>
+      </div>
+      <div class="brbu-nota" id="brbu-roles-nota"></div>
+    </div>
+  </div>
+
 </div>
 
 </div>
 <div class="toast" id="toast"></div>
 
+<script>
+// =====================================================================
+// 16-sep-2026 · USUARIOS CON ROLES — sesion del Dashboard
+// ---------------------------------------------------------------------
+// El Dashboard vive en GitHub Pages: aqui NO se decide quien puede que.
+// Esta pieza solo (1) pide correo y contrasena a Supabase Auth, (2) guarda
+// la sesion en el navegador y (3) agrega la credencial a TODAS las llamadas
+// a los webhooks del Club. Quien decide si/no es n8n (Verificar Rol).
+// La llave de abajo es la PUBLICABLE del proyecto: es publica por diseno.
+// Todo va dentro de una funcion para no chocar con las variables del
+// Dashboard (ya existe un 'TODOS' global, por ejemplo).
+// Sin CDN, a proposito: el Dashboard no carga scripts externos.
+// =====================================================================
+(function(){
+  const SB_URL = 'https://rcotlydvsubvdapubnkx.supabase.co';
+  const SB_KEY = 'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T';
+  const PREFIJO = 'https://n8n.excelentia.com.mx/webhook/berimbau-';
+  const URL_YO  = PREFIJO + 'yo';
+  const LS = 'berimbau_sesion_v1';
+  const ROLES = { maestro:'Administrador maestro', administrador:'Administrador', operador:'Operador', lector:'Lector' };
+  const fetchOriginal = window.fetch.bind(window);
+  let refrescando = null;
+  let arrancado = false;
+
+  function leer(){ try{ return JSON.parse(localStorage.getItem(LS) || 'null'); }catch(e){ return null; } }
+  function guardar(s){ try{ localStorage.setItem(LS, JSON.stringify(s)); }catch(e){} }
+  function borrar(){ try{ localStorage.removeItem(LS); }catch(e){} }
+  function msg(t, ok){ const el=document.getElementById('brb-msg'); if(el){ el.textContent=t||''; el.className = ok ? 'ok' : ''; } }
+  function ahora(){ return Math.floor(Date.now()/1000); }
+
+  function empacar(j, correo){
+    return { access_token:j.access_token, refresh_token:j.refresh_token,
+             expires_at:(j.expires_at || (ahora() + Number(j.expires_in||3600))),
+             correo:(j.user && j.user.email) || correo || '' };
+  }
+
+  async function refrescar(s){
+    const r = await fetchOriginal(SB_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method:'POST', headers:{ 'apikey':SB_KEY, 'Content-Type':'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    });
+    if(!r.ok) throw new Error('refresh ' + r.status);
+    const n = empacar(await r.json(), s.correo);
+    guardar(n);
+    return n;
+  }
+
+  // Devuelve una credencial vigente o null. Si faltan menos de 2 minutos, la renueva.
+  // Varias llamadas al mismo tiempo comparten UNA sola renovacion.
+  async function tokenVigente(){
+    const s = leer();
+    if(!s || !s.access_token) return null;
+    if((s.expires_at||0) - ahora() > 120) return s.access_token;
+    if(!refrescando){
+      refrescando = refrescar(s).then(n => n.access_token)
+        .catch(() => { borrar(); return null; })
+        .finally(() => { setTimeout(() => { refrescando = null; }, 0); });
+    }
+    return refrescando;
+  }
+
+  // 17-sep-2026 · Direcciones que envían, guardan o borran. Un Lector no las puede llamar desde
+  // esta página (red de seguridad por si algún botón quedó visible). El candado real es n8n.
+  const ESCRITURA = ['avisos-enviar','wa-enviar','cargo-fallido','alerta26-enviar','programar-envio',
+    'programaciones-cancelar','avisos-guardar','plantillas-guardar','plantillas-borrar','obs-guardar',
+    'obs-borrar','responsable-guardar','export-socios','sync-socios','config-guardar'];
+  function esEscritura(url, init){
+    const dir = url.slice(PREFIJO.length).split('?')[0];
+    if(ESCRITURA.indexOf(dir) === -1) return false;
+    if(dir === 'config-guardar'){
+      try{ const b = JSON.parse((init && init.body) || '{}'); if(b && b.leer === true) return false; }catch(e){}
+    }
+    return true;
+  }
+
+  // Todas las llamadas a los webhooks del Club llevan la credencial de quien entro.
+  window.fetch = async function(input, init){
+    const url = typeof input === 'string' ? input : ((input && input.url) || '');
+    if(url.indexOf(PREFIJO) !== 0) return fetchOriginal(input, init);
+    if(window.BRB_USUARIO && window.BRB_USUARIO.rol === 'lector' && esEscritura(url, init)){
+      const aviso = 'Tu usuario es de solo consulta; no puede enviar, guardar ni borrar.';
+      try{ if(typeof showToast === 'function') showToast(aviso); }catch(e){}
+      return new Response(JSON.stringify({ ok:false, mensaje:aviso, motivo:'solo consulta' }), { status:403, headers:{ 'Content-Type':'application/json' } });
+    }
+    const tok = await tokenVigente();
+    const opciones = Object.assign({}, init || {});
+    const h = new Headers(opciones.headers || (typeof input !== 'string' && input.headers) || {});
+    if(tok) h.set('Authorization', 'Bearer ' + tok);
+    opciones.headers = h;
+    return fetchOriginal(input, opciones);
+  };
+
+  function mostrarLogin(texto){
+    const ov = document.getElementById('brb-login');
+    if(ov) ov.classList.remove('oculto');
+    if(typeof window.brbVista === 'function') window.brbVista('entrar');
+    msg(texto || '');
+    const c = document.getElementById('brb-correo');
+    if(c && !c.value) setTimeout(() => c.focus(), 50);
+  }
+
+  function pintarSesion(yo){
+    const box = document.getElementById('brb-sesion');
+    const n = document.getElementById('brb-nombre');
+    const r = document.getElementById('brb-rol');
+    if(n) n.textContent = yo.nombre || yo.correo || '';
+    if(r) r.textContent = ROLES[yo.rol] || yo.rol || '';
+    if(box) box.style.display = 'flex';
+    window.BRB_USUARIO = { nombre: yo.nombre, correo: yo.correo, rol: yo.rol };
+    document.body.classList.toggle('brb-lector', yo.rol === 'lector');
+  }
+
+  // Pregunta a n8n quien es y con que rol. Si n8n no lo reconoce, no se arranca nada.
+  async function validarYArrancar(){
+    let r, j = {};
+    try{
+      r = await window.fetch(URL_YO, { cache:'no-store' });
+      try{ j = await r.json(); }catch(e){ j = {}; }
+    }catch(e){
+      mostrarLogin('No se pudo verificar tu acceso. Revisa tu conexión e intenta de nuevo.');
+      return;
+    }
+    if(!r.ok || !j.ok){
+      const m = String(j.motivo || '');
+      borrar();
+      if(m.indexOf('sin rol') !== -1 || m.indexOf('inactivo') !== -1){
+        mostrarLogin('Tu usuario no tiene acceso al Dashboard del Club.');
+      } else {
+        mostrarLogin('Tu sesión venció. Vuelve a entrar.');
+      }
+      return;
+    }
+    pintarSesion(j);
+    // 17-sep-2026: el Administrador tiene todo lo del Operador y además la pestaña de usuarios,
+    // igual que el maestro (decisión de Fernando). El Dashboard arranca completo para los dos.
+    if((j.rol === 'maestro' || j.rol === 'administrador') && typeof window.__brbMostrarPestanaUsuarios === 'function') window.__brbMostrarPestanaUsuarios();
+    const ov = document.getElementById('brb-login');
+    if(ov) ov.classList.add('oculto');
+    if(!arrancado && typeof window.__arrancarDashboard === 'function'){
+      arrancado = true;
+      window.__arrancarDashboard();
+    }
+  }
+
+  window.brbEntrar = async function(){
+    const correo = (document.getElementById('brb-correo').value || '').trim().toLowerCase();
+    const pass = document.getElementById('brb-pass').value || '';
+    const btn = document.getElementById('brb-entrar');
+    if(!correo || !pass){ msg('Escribe tu correo y tu contraseña.'); return; }
+    btn.disabled = true; btn.textContent = 'Entrando…'; msg('');
+    try{
+      const r = await fetchOriginal(SB_URL + '/auth/v1/token?grant_type=password', {
+        method:'POST', headers:{ 'apikey':SB_KEY, 'Content-Type':'application/json' },
+        body: JSON.stringify({ email: correo, password: pass })
+      });
+      if(!r.ok){ msg('Correo o contraseña incorrectos.'); return; }
+      guardar(empacar(await r.json(), correo));
+      document.getElementById('brb-pass').value = '';
+      await validarYArrancar();
+    }catch(e){
+      msg('No se pudo conectar. Intenta de nuevo.');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Entrar';
+    }
+  };
+
+  // ===================================================================
+  // 17-sep-2026 · Elegir contraseña (liga del correo) y Olvidé mi contraseña
+  // La liga regresa con los datos en el # de la URL:
+  //   #access_token=...&refresh_token=...&expires_in=...&type=invite|recovery
+  // o, si ya venció o ya se usó, con #error=...&error_code=...
+  // ===================================================================
+  const URL_RECUPERAR = PREFIJO + 'recuperar';
+  let ligaSesion = null;   // credencial que trajo la liga; se guarda solo al poner la contraseña
+
+  window.brbVista = function(v, texto, ok){
+    ['entrar','clave','olvide'].forEach(n => { const el = document.getElementById('brb-vista-' + n); if(el) el.style.display = (n === v) ? '' : 'none'; });
+    const t = document.getElementById('brb-titulo'), st = document.getElementById('brb-subtitulo');
+    if(v === 'entrar'){ t.textContent = 'Dashboard Inteligente de Socios'; st.textContent = 'Entra con tu usuario del Club'; }
+    if(v === 'olvide'){
+      t.textContent = 'Olvidé mi contraseña'; st.textContent = 'Escribe tu correo y te mandamos una liga para elegir una nueva';
+      const c = document.getElementById('brb-correo'), co = document.getElementById('brb-correo-olvide');
+      if(co && c && !co.value) co.value = c.value;
+    }
+    const ov = document.getElementById('brb-login'); if(ov) ov.classList.remove('oculto');
+    msg(texto || '', ok);
+    const foco = { entrar:'brb-correo', clave:'brb-clave1', olvide:'brb-correo-olvide' }[v];
+    setTimeout(() => { const f = document.getElementById(foco); if(f) f.focus(); }, 50);
+  };
+
+  function leerLiga(){
+    const h = String(location.hash || '');
+    const q = String(location.search || '');
+    if(h.indexOf('access_token=') === -1 && h.indexOf('error') === -1 && q.indexOf('error_code=') === -1) return null;
+    const p = new URLSearchParams(h.slice(1));
+    const pq = new URLSearchParams(q.slice(1));
+    const d = {
+      access_token: p.get('access_token'), refresh_token: p.get('refresh_token'),
+      expires_at: Number(p.get('expires_at') || 0), expires_in: Number(p.get('expires_in') || 0),
+      tipo: p.get('type') || '', error: p.get('error') || pq.get('error') || '', error_code: p.get('error_code') || pq.get('error_code') || ''
+    };
+    // Se borra de la barra para que la credencial no quede a la vista ni en el historial.
+    try{ history.replaceState(null, '', location.pathname); }catch(e){}
+    return d;
+  }
+
+  async function abrirLiga(d){
+    if(d.error || !d.access_token){
+      window.brbVista('olvide', d.error_code === 'otp_expired'
+        ? 'Tu liga ya venció o ya se usó. Escribe tu correo y te mandamos una nueva.'
+        : 'Tu liga no es válida. Escribe tu correo y te mandamos una nueva.');
+      return;
+    }
+    window.brbVista('clave', 'Verificando tu liga…', true);
+    const boton = document.getElementById('brb-guardar-clave'); if(boton) boton.disabled = true;
+    try{
+      const r = await fetchOriginal(SB_URL + '/auth/v1/user', { headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer ' + d.access_token } });
+      if(!r.ok){ window.brbVista('olvide', 'Tu liga ya venció o ya se usó. Escribe tu correo y te mandamos una nueva.'); return; }
+      const u = await r.json();
+      ligaSesion = { access_token:d.access_token, refresh_token:d.refresh_token,
+        expires_at: d.expires_at || (ahora() + (d.expires_in || 3600)), correo:(u && u.email) || '' };
+      borrar();   // si había otra sesión abierta en este navegador, deja de valer
+      document.getElementById('brb-titulo').textContent = d.tipo === 'recovery' ? 'Elige tu nueva contraseña' : 'Bienvenido, elige tu contraseña';
+      document.getElementById('brb-subtitulo').textContent = ligaSesion.correo;
+      msg('');
+    }catch(e){
+      window.brbVista('olvide', 'No se pudo verificar tu liga. Revisa tu conexión o pide una nueva.');
+    }finally{
+      if(boton) boton.disabled = false;
+    }
+  }
+
+  window.brbGuardarClave = async function(){
+    const c1 = document.getElementById('brb-clave1').value || '';
+    const c2 = document.getElementById('brb-clave2').value || '';
+    if(!ligaSesion){ window.brbVista('olvide', 'Pide una liga nueva para elegir tu contraseña.'); return; }
+    if(c1.length < 8){ msg('La contraseña debe tener mínimo 8 caracteres.'); return; }
+    if(c1 !== c2){ msg('Las dos contraseñas no son iguales.'); return; }
+    const btn = document.getElementById('brb-guardar-clave');
+    btn.disabled = true; btn.textContent = 'Guardando…'; msg('');
+    try{
+      const r = await fetchOriginal(SB_URL + '/auth/v1/user', {
+        method:'PUT', headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer ' + ligaSesion.access_token, 'Content-Type':'application/json' },
+        body: JSON.stringify({ password: c1 })
+      });
+      let j = {}; try{ j = await r.json(); }catch(e){}
+      if(!r.ok){
+        const cod = String(j.error_code || j.code || '');
+        if(cod === 'same_password') msg('Esa ya es tu contraseña; elige una distinta.');
+        else if(cod === 'weak_password') msg('La contraseña es muy débil; usa una más larga, con letras y números.');
+        else if(r.status === 401 || r.status === 403) window.brbVista('olvide', 'Tu liga ya venció. Escribe tu correo y te mandamos una nueva.');
+        else msg('No se pudo guardar tu contraseña (código ' + r.status + '). Intenta de nuevo.');
+        return;
+      }
+      guardar(ligaSesion); ligaSesion = null;
+      document.getElementById('brb-clave1').value = ''; document.getElementById('brb-clave2').value = '';
+      msg('Contraseña guardada. Entrando…', true);
+      await validarYArrancar();
+    }catch(e){
+      msg('No se pudo conectar. Intenta de nuevo.');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Guardar y entrar';
+    }
+  };
+
+  window.brbPedirLiga = async function(){
+    const correo = (document.getElementById('brb-correo-olvide').value || '').trim().toLowerCase();
+    if(correo.indexOf('@') < 1 || correo.lastIndexOf('.') < correo.indexOf('@')){ msg('Escribe tu correo completo.'); return; }
+    const btn = document.getElementById('brb-enviar-liga');
+    btn.disabled = true; btn.textContent = 'Enviando…'; msg('');
+    try{
+      // Sin credencial a propósito: esta dirección no pide sesión.
+      await fetchOriginal(URL_RECUPERAR, { method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ correo: correo, volver_a: location.origin + location.pathname }) });
+      msg('Si ese correo tiene acceso al Dashboard, en unos minutos le llegará una liga para elegir contraseña. Revisa también la carpeta de spam.', true);
+    }catch(e){
+      msg('No se pudo conectar. Intenta de nuevo.');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Enviarme una liga';
+    }
+  };
+
+  window.brbSalir = async function(){
+    const s = leer();
+    borrar();
+    try{
+      if(s && s.access_token){
+        await fetchOriginal(SB_URL + '/auth/v1/logout', { method:'POST', headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer ' + s.access_token } });
+      }
+    }catch(e){}
+    location.reload();
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const p = document.getElementById('brb-pass');
+    const c = document.getElementById('brb-correo');
+    [p, c].forEach(el => el && el.addEventListener('keydown', e => { if(e.key === 'Enter') window.brbEntrar(); }));
+    const c2 = document.getElementById('brb-clave2'), co = document.getElementById('brb-correo-olvide');
+    if(c2) c2.addEventListener('keydown', e => { if(e.key === 'Enter') window.brbGuardarClave(); });
+    if(co) co.addEventListener('keydown', e => { if(e.key === 'Enter') window.brbPedirLiga(); });
+    const liga = leerLiga();
+    if(liga){ abrirLiga(liga); return; }
+    if(leer()){ msg('Verificando tu sesión…'); validarYArrancar(); } else mostrarLogin('');
+  });
+})();
+</script>
+<script>
+// =====================================================================
+// 17-sep-2026 · USUARIOS CON ROLES — pestaña de usuarios
+// ---------------------------------------------------------------------
+// Solo la ven el maestro y el Administrador. Lo que cada quien puede
+// hacer lo decide n8n (Berimbau — Usuarios API + Verificar Rol); aquí solo
+// se pinta la lista y se mandan los pedidos. El window.fetch envuelto de la
+// sesión agrega la credencial a estas llamadas.
+// =====================================================================
+(function(){
+  const BASE = 'https://n8n.excelentia.com.mx/webhook/';
+  const URL_LISTAR = BASE + 'berimbau-usuarios-listar';
+  const URL_CREAR  = BASE + 'berimbau-usuarios-crear';
+  const URL_ROL    = BASE + 'berimbau-usuarios-rol';
+  const ROL_TXT = { maestro:'Administrador maestro', administrador:'Administrador', operador:'Operador', lector:'Lector' };
+  const ROL_DESC = {
+    administrador:'<b>Administrador</b>: todo lo del Operador, y además da de alta usuarios y les asigna Operador o Lector.',
+    operador:'<b>Operador</b>: ve todo, envía avisos, programa envíos, prende y apaga interruptores y exporta.',
+    lector:'<b>Lector</b>: solo ve.'
+  };
+  const EST_TXT = { activo:'Activo', pendiente:'Invitación pendiente', baja:'De baja' };
+  let datos = null;       // última respuesta de listar
+  let editando = null;    // { i, tipo }
+  let ocupado = false;
+
+  function esc(t){ return String(t == null ? '' : t).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split('"').join('&quot;'); }
+  function $(id){ return document.getElementById(id); }
+  function volverA(){ return location.origin + location.pathname; }
+  function fecha(x){
+    if(!x) return '';
+    try{ return new Date(x).toLocaleString('es-MX', { timeZone:'America/Mexico_City', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+    catch(e){ return String(x); }
+  }
+  function msg(t, ok){ const el = $('brbu-msg'); if(!el) return; el.textContent = t || ''; el.className = 'brbu-msg ' + (t ? (ok ? 'ok' : 'err') : ''); }
+
+  async function pedir(url, body){
+    let r, j = {};
+    try{
+      r = await window.fetch(url, body ? { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) } : { cache:'no-store' });
+      try{ j = await r.json(); }catch(e){ j = {}; }
+    }catch(e){
+      return { ok:false, mensaje:'No se pudo conectar. Revisa tu conexión e intenta de nuevo.' };
+    }
+    if(r.status === 401) return { ok:false, mensaje:'Tu sesión venció o no tienes permiso. Sal y vuelve a entrar.' };
+    if(!r.ok || !j.ok) return { ok:false, mensaje: j.mensaje || ('No se pudo completar (código ' + r.status + ').') };
+    return j;
+  }
+
+  function llenarRoles(){
+    const sel = $('brbu-rol'); const nota = $('brbu-roles-nota');
+    const roles = (datos && datos.roles_asignables) || [];
+    if(sel){
+      const antes = sel.value;
+      sel.innerHTML = roles.map(r => '<option value="' + esc(r) + '">' + esc(ROL_TXT[r] || r) + '</option>').join('');
+      if(roles.indexOf(antes) !== -1) sel.value = antes;
+      else if(roles.indexOf('operador') !== -1) sel.value = 'operador';
+    }
+    if(nota) nota.innerHTML = 'Qué puede cada rol:<br>' + roles.map(r => ROL_DESC[r] || '').filter(Boolean).join('<br>');
+  }
+
+  function botones(u, i){
+    if(!u.editable) return '';
+    const b = [];
+    if(u.estado === 'pendiente'){
+      b.push('<button type="button" class="brbu-btn-sec" onclick="brbU.reenviar(' + i + ')">✉️ Reenviar invitación</button>');
+      b.push('<button type="button" class="brbu-btn-sec" onclick="brbU.editar(' + i + ',\'correo\')">✏️ Corregir correo</button>');
+    }
+    if(u.estado !== 'baja'){
+      b.push('<button type="button" class="brbu-btn-sec" onclick="brbU.editar(' + i + ',\'rol\')">🔁 Cambiar rol</button>');
+      b.push('<button type="button" class="brbu-btn-sec brbu-btn-peligro" onclick="brbU.baja(' + i + ')">⛔ Dar de baja</button>');
+    } else {
+      b.push('<button type="button" class="brbu-btn-sec" onclick="brbU.reactivar(' + i + ')">↩️ Reactivar</button>');
+    }
+    return '<div class="brbu-acciones">' + b.join('') + '</div>';
+  }
+
+  function editor(u, i){
+    if(!editando || editando.i !== i) return '';
+    if(editando.tipo === 'rol'){
+      const opciones = ((datos && datos.roles_asignables) || []).filter(r => r !== u.rol);
+      return '<div class="brbu-editor"><div><label>Nuevo rol</label><select id="brbu-ed-rol">'
+        + opciones.map(r => '<option value="' + esc(r) + '">' + esc(ROL_TXT[r] || r) + '</option>').join('')
+        + '</select></div><button type="button" class="brbu-btn" onclick="brbU.guardarRol(' + i + ')">Guardar</button>'
+        + '<button type="button" class="brbu-btn-sec" onclick="brbU.cancelar()">Cancelar</button></div>';
+    }
+    return '<div class="brbu-editor"><div><label>Correo correcto</label><input id="brbu-ed-correo" type="email" inputmode="email" value="' + esc(u.correo) + '"></div>'
+      + '<button type="button" class="brbu-btn" onclick="brbU.guardarCorreo(' + i + ')">Guardar y reenviar</button>'
+      + '<button type="button" class="brbu-btn-sec" onclick="brbU.cancelar()">Cancelar</button></div>';
+  }
+
+  function pintar(){
+    const cont = $('brbu-lista'); if(!cont) return;
+    const yo = (datos && datos.yo) || {};
+    const lista = (datos && datos.usuarios) || [];
+    const cuenta = $('brbu-cuenta');
+    if(cuenta) cuenta.textContent = lista.length ? '· ' + lista.filter(u => u.estado !== 'baja').length + ' con acceso de ' + lista.length : '';
+    $('brbu-aviso').innerHTML = (datos && datos.auth_ok === false)
+      ? '<div class="brbu-aviso">No se pudo leer el estado de las cuentas; por eso todas aparecen como invitación pendiente. Intenta Actualizar en un momento.</div>' : '';
+    if(!lista.length){ cont.innerHTML = 'Todavía no hay usuarios.'; return; }
+    cont.innerHTML = lista.map((u, i) => {
+      const esYo = u.user_id === yo.user_id;
+      const meta = [];
+      if(u.estado === 'pendiente') meta.push('Aún no abre su liga');
+      else meta.push(u.ultimo_acceso ? 'Último acceso: ' + esc(fecha(u.ultimo_acceso)) : 'Nunca ha entrado');
+      if(u.creado_at) meta.push('Alta: ' + esc(fecha(u.creado_at)));
+      return '<div class="brbu-user' + (u.estado === 'baja' ? ' baja' : '') + '">'
+        + '<div class="brbu-fila"><div><div class="brbu-nombre">' + esc(u.nombre || '—') + (esYo ? ' <span style="color:var(--gray-text);font-weight:600">(tú)</span>' : '') + '</div>'
+        + '<div class="brbu-correo">' + esc(u.correo) + '</div></div>'
+        + '<div class="brbu-pills"><span class="brbu-pill rol">' + esc(ROL_TXT[u.rol] || u.rol) + '</span>'
+        + '<span class="brbu-pill ' + esc(u.estado) + '">' + esc(EST_TXT[u.estado] || u.estado) + '</span></div></div>'
+        + '<div class="brbu-meta">' + meta.join(' · ') + '</div>'
+        + botones(u, i) + editor(u, i) + '</div>';
+    }).join('');
+  }
+
+  function bloquear(si){
+    ocupado = si;
+    document.querySelectorAll('#panel-usuarios button').forEach(b => { b.disabled = si; });
+  }
+
+  window.brbUsuariosCargar = async function(silencioso){
+    if(ocupado) return;
+    const cont = $('brbu-lista');
+    if(cont && !datos) cont.textContent = 'Cargando…';
+    bloquear(true);
+    const j = await pedir(URL_LISTAR);
+    bloquear(false);
+    if(!j.ok){
+      if(cont && !datos) cont.textContent = j.mensaje;
+      if(!silencioso) msg(j.mensaje, false);
+      return;
+    }
+    datos = j; editando = null;
+    llenarRoles(); pintar();
+  };
+
+  async function accion(pedido, confirmar, tras){
+    if(ocupado) return;
+    if(confirmar && !window.confirm(confirmar)) return;
+    bloquear(true); msg('Procesando…', true);
+    const j = await pedir(pedido.url, pedido.body);
+    bloquear(false);
+    msg(j.mensaje || (j.ok ? 'Listo.' : 'No se pudo completar.'), !!j.ok);
+    if(j.ok && tras) tras();
+    window.brbUsuariosCargar(true);
+  }
+
+  window.brbUsuariosCrear = function(){
+    const nombre = ($('brbu-nombre').value || '').trim();
+    const correo = ($('brbu-correo').value || '').trim().toLowerCase();
+    const rol = $('brbu-rol').value;
+    if(nombre.length < 2){ msg('Escribe el nombre de la persona.', false); return; }
+    if(correo.indexOf('@') < 1 || correo.lastIndexOf('.') < correo.indexOf('@')){ msg('El correo no parece válido; revísalo.', false); return; }
+    if(!rol){ msg('Elige un rol.', false); return; }
+    accion({ url:URL_CREAR, body:{ nombre, correo, rol, volver_a: volverA() } },
+      'Se dará de alta a ' + nombre + ' (' + correo + ') como ' + (ROL_TXT[rol] || rol) + ' y le llegará la invitación por correo. ¿Continuar?',
+      function(){ $('brbu-nombre').value = ''; $('brbu-correo').value = ''; });
+  };
+
+  window.brbU = {
+    reenviar: function(i){
+      const u = datos.usuarios[i];
+      accion({ url:URL_CREAR, body:{ nombre:u.nombre, correo:u.correo, rol:u.rol, volver_a: volverA() } },
+        '¿Reenviar la invitación a ' + u.correo + '? La liga anterior deja de servir.');
+    },
+    editar: function(i, tipo){ editando = { i, tipo }; pintar(); const el = $(tipo === 'rol' ? 'brbu-ed-rol' : 'brbu-ed-correo'); if(el) el.focus(); },
+    cancelar: function(){ editando = null; pintar(); },
+    guardarRol: function(i){
+      const u = datos.usuarios[i]; const rol = ($('brbu-ed-rol') || {}).value;
+      if(!rol) return;
+      accion({ url:URL_ROL, body:{ user_id:u.user_id, accion:'rol', rol } },
+        '¿Cambiar a ' + u.nombre + ' de ' + (ROL_TXT[u.rol] || u.rol) + ' a ' + (ROL_TXT[rol] || rol) + '?');
+    },
+    guardarCorreo: function(i){
+      const u = datos.usuarios[i]; const correo = (($('brbu-ed-correo') || {}).value || '').trim().toLowerCase();
+      if(correo.indexOf('@') < 1){ msg('El correo no parece válido; revísalo.', false); return; }
+      accion({ url:URL_ROL, body:{ user_id:u.user_id, accion:'correo', correo, volver_a: volverA() } },
+        '¿Cambiar el correo de ' + u.nombre + ' a ' + correo + ' y mandarle ahí una invitación nueva?');
+    },
+    baja: function(i){
+      const u = datos.usuarios[i];
+      accion({ url:URL_ROL, body:{ user_id:u.user_id, accion:'baja' } },
+        '¿Dar de baja a ' + u.nombre + '? Pierde el acceso de inmediato; se puede reactivar después.');
+    },
+    reactivar: function(i){
+      const u = datos.usuarios[i];
+      accion({ url:URL_ROL, body:{ user_id:u.user_id, accion:'reactivar' } }, '¿Reactivar a ' + u.nombre + '?');
+    }
+  };
+
+  // Maestro: ve la pestaña junto con el resto del Dashboard.
+  window.__brbMostrarPestanaUsuarios = function(){
+    const tab = $('brb-tab-usuarios'); if(tab) tab.style.display = '';
+  };
+
+})();
+</script>
 <script>
 // ===== DATOS — v21: cargados en vivo desde n8n (antes era un array fijo) =====
 let DATA = [];
@@ -3210,7 +3852,9 @@ async function borrarObs(m){
 }
 
 // ===== START =====
-cargarDirectorio();
+// 16-sep-2026 · USUARIOS CON ROLES: el Dashboard ya no arranca solo al abrir la
+// pagina. Lo arranca la pantalla de entrada cuando n8n confirma quien entro.
+window.__arrancarDashboard = function(){ cargarDirectorio(); };
 
 // ===== AVISOS CORREO =====
 const SHEET_ID_AV = '1LINqYng5wuA7s0pcoDnt1YNsfCp5GdosBMZs6KeCM-8';
@@ -7638,9 +8282,25 @@ async function guardarResponsable(m, borrar){
 }
 
 // ===================== v52: EXPORTAR A EXCEL =====================
-function exportarSocios(){
+// 16-sep-2026 · USUARIOS CON ROLES: antes abria la liga en otra pestana, y una
+// pestana nueva no lleva la credencial. Ahora se descarga con fetch (que si la
+// lleva). Si el navegador bloqueara la descarga, cae a la forma anterior para no
+// dejar al Club sin exportar mientras n8n todavia no pide rol.
+async function exportarSocios(){
   showToast('⬇️ Preparando el archivo…');
-  window.open(URL_EXPORTAR, '_blank');
+  try{
+    const r = await fetch(URL_EXPORTAR, { cache:'no-store' });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const hoy = new Date().toISOString().slice(0,10);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'socios_berimbau_' + hoy + '.xlsx';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }catch(e){
+    window.open(URL_EXPORTAR, '_blank');
+  }
 }
 
 // ===================== v52: NOTIFICACIONES =====================
