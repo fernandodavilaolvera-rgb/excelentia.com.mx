@@ -644,12 +644,18 @@ function agruparT2(rows){
     const idx = funcionIndex(fecha);
     if (!grupos[idx]){
       grupos[idx] = {
-        num: idx + 1, fecha: fechaFuncion(idx), rango: rangoFuncion(idx),
+        idx: idx, num: idx + 1, fecha: fechaFuncion(idx), rango: rangoFuncion(idx),
+        dias: {},
         efectivo:0, tarjeta:0, transfer:0, total:0,
         bolsas:0, stickers:0, oraculos:0, gorras:0, playeras:0, chars:{}, especiales:{}, espRev:0
       };
     }
     const g = grupos[idx];
+    // día real de la venta (para mostrar la fecha verdadera de la función)
+    const kDia = `${fecha.getFullYear()}-${fecha.getMonth()}-${fecha.getDate()}`;
+    if (!g.dias[kDia]) g.dias[kDia] = { d: new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()), total: 0, n: 0 };
+    g.dias[kDia].total += total;
+    g.dias[kDia].n++;
     g.bolsas   += cell(row, 1);
     g.stickers += cell(row, 2);
     g.oraculos += cell(row, 3);
@@ -688,7 +694,20 @@ function agruparT2(rows){
   Object.values(grupos).forEach(g => {
     g.playeras = Object.values(g.chars).reduce((a,v)=>a+v, 0);
   });
-  return Object.values(grupos).sort((a,b) => a.num - b.num);
+  // Numeración por FUNCIONES REALIZADAS, no por semanas de calendario:
+  // las semanas sin ventas (pausas) no consumen número de función.
+  const lista = Object.values(grupos).sort((a,b) => a.idx - b.idx);
+  lista.forEach((g, i) => {
+    g.num = i + 1;
+    // fecha mostrada = día real con más venta dentro de esa semana
+    const dias = Object.values(g.dias || {});
+    if (dias.length){
+      dias.sort((a,b) => (b.total - a.total) || (b.n - a.n) || (a.d - b.d));
+      const d = dias[0].d;
+      g.fecha = `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;
+    }
+  });
+  return lista;
 }
 
 let t2Timer = null;
