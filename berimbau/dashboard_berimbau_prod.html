@@ -628,7 +628,7 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 .brb-sesion .brb-rol{background:rgba(58,170,53,.25);border:1px solid var(--verde);border-radius:10px;padding:1px 8px;font-weight:600}
 .brb-sesion button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:6px;padding:2px 10px;font-size:.72rem;cursor:pointer}
 @media(max-width:640px){.brb-sesion{justify-content:flex-start}.brb-card{padding:22px 18px}}
-@media print{#brb-login,.brb-sesion button{display:none !important}}
+@media print{#brb-login,.brb-sesion button,#brb-401{display:none !important}}
 /* ===== 17-sep-2026 · LECTOR = solo consulta: se esconden botones de enviar, guardar y borrar,
    y los interruptores se ven pero no se pueden mover. Es cosmético: el candado real es n8n. ===== */
 body.brb-lector [onclick*="PedirCambio"],body.brb-lector [onclick*="saveModule"],body.brb-lector [onclick*="probarAviso"],
@@ -2336,6 +2336,29 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     return true;
   }
 
+  // 18-sep-2026 · CANDADO paso 0: aviso unico cuando n8n responde 401. Sin esto, varias
+  // pantallas se verian vacias y mudas (Historial, Lista de Cargo Fallido, Programaciones),
+  // que se lee como "no hay nada" en vez de "no pude leer". No expulsa a nadie: un 401 por
+  // permiso no es una sesion vencida, y a media captura no se le borra el trabajo a nadie.
+  function brbAviso401(){
+    let b = document.getElementById('brb-401');
+    if(b) return;
+    b = document.createElement('div');
+    b.id = 'brb-401';
+    b.className = 'no-print';
+    b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#1a3a6b;color:#fff;' +
+      'font-family:Manrope,sans-serif;font-size:14px;line-height:1.4;padding:.7rem 1rem;text-align:center;' +
+      'box-shadow:0 2px 8px rgba(0,0,0,.25)';
+    b.innerHTML = 'Tu sesion termino o no tienes permiso para esta accion. Lo que ves en pantalla puede estar incompleto. ' +
+      '<button type="button" style="margin-left:.6rem;padding:.25rem .8rem;border:0;border-radius:6px;cursor:pointer;' +
+      'font-family:Manrope,sans-serif;font-size:13px;font-weight:700;background:#fff;color:#1a3a6b">Volver a entrar</button>';
+    b.querySelector('button').onclick = function(){
+      b.remove();
+      mostrarLogin('Vuelve a entrar con tu correo y contrasena.');
+    };
+    document.body.appendChild(b);
+  }
+
   // Todas las llamadas a los webhooks del Club llevan la credencial de quien entro.
   window.fetch = async function(input, init){
     const url = typeof input === 'string' ? input : ((input && input.url) || '');
@@ -2350,7 +2373,9 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
     const h = new Headers(opciones.headers || (typeof input !== 'string' && input.headers) || {});
     if(tok) h.set('Authorization', 'Bearer ' + tok);
     opciones.headers = h;
-    return fetchOriginal(input, opciones);
+    const resp = await fetchOriginal(input, opciones);
+    if(resp.status === 401) brbAviso401();
+    return resp;
   };
 
   function mostrarLogin(texto){
@@ -8299,7 +8324,9 @@ async function exportarSocios(){
     document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
   }catch(e){
-    window.open(URL_EXPORTAR, '_blank');
+    // 18-sep-2026 · CANDADO paso 0 (H6): una pestana nueva no lleva la credencial y con el
+    // candado encendido devolveria un 401 crudo en vez del archivo. Se quita esa caida.
+    showToast('❌ No se pudo descargar el archivo. Intenta de nuevo o vuelve a entrar.');
   }
 }
 
