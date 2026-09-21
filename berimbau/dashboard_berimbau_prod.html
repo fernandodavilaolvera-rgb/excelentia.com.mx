@@ -307,6 +307,19 @@ h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
   .gd-table td,.gd-table thead th{padding:6px 5px}
 }
 @media print{ #graf-tip,.gd-overlay{display:none !important} }
+/* 21-sep-2026 (s74) — ACCESOS POR MES (pestana Accesos). Comprometido con el Club. */
+.acc-mes-card{background:var(--blanco);border:1px solid var(--gray-mid);border-radius:12px;padding:18px;max-width:720px;margin:0 auto 18px}
+.acc-mes-title{font-family:'Montserrat',sans-serif;font-size:.85rem;font-weight:700;color:var(--negro);margin-bottom:4px}
+.acc-mes-sub{font-size:.7rem;color:var(--gray-text);margin-bottom:12px}
+.acc-mes-tabla{width:100%;border-collapse:collapse;font-size:.78rem}
+.acc-mes-tabla th{text-align:left;font-size:.68rem;color:var(--gray-text);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--gray-mid)}
+.acc-mes-tabla td{padding:6px 8px;border-bottom:1px solid #f0f1f4;vertical-align:middle}
+.acc-mes-tabla td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.acc-mes-barra{height:10px;border-radius:5px;background:#3AAA35;min-width:2px}
+.acc-mes-parcial{font-size:.66rem;color:#EF4B1F;font-weight:600;margin-left:4px}
+@media (max-width:600px){.acc-mes-card{padding:12px}.acc-mes-tabla{font-size:.72rem}.acc-mes-col-barra{display:none}}
+@media print{.acc-mes-card{break-inside:auto;print-color-adjust:exact;-webkit-print-color-adjust:exact}.acc-mes-title{break-after:avoid}.acc-mes-tabla thead{display:table-header-group}.acc-mes-tabla tr{break-inside:avoid}}
+
 .graf-grid-perfil .graf-card{min-width:0;overflow:hidden}
 .graf-grid-perfil .graf-canvas-wrap{width:100%;display:block}
 .graf-grid-perfil canvas{display:block;width:100%;max-width:100%}
@@ -816,6 +829,14 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
   <!-- ===== ACCESOS ===== -->
   <div id="panel-accesos" class="panel">
     <div class="kpi-grid" id="kpi-accesos"></div>
+    <!-- 21-sep-2026 (s74): accesos por mes, alimentado por la llave accesos_mes de berimbau-datos -->
+    <div class="acc-mes-card" id="acc-mes-card" style="display:none">
+      <div class="acc-mes-title">📅 Accesos por mes</div>
+      <div class="acc-mes-sub">Entradas registradas cada mes y cuántas personas y membresías distintas vinieron</div>
+      <div class="scroll-x"><table class="acc-mes-tabla"><thead><tr>
+        <th>Mes</th><th class="acc-mes-col-barra"></th><th style="text-align:right">Accesos</th><th style="text-align:right">Personas</th><th style="text-align:right">Membresías</th>
+      </tr></thead><tbody id="acc-mes-body"></tbody></table></div>
+    </div>
     <div class="filters">
       <div class="filter-group"><label>Buscar socio</label><input type="text" id="buscar-acc" placeholder="Nombre o Membresía..." oninput="renderAcc()"></div>
       <div class="filter-group"><label>Actividad <span class="rango-corto">Abr–Jun</span></label>
@@ -2878,6 +2899,8 @@ async function cargarDirectorio(){
     SYNC_INFO = json.sync || {};
     if(typeof json.modo_prueba==='boolean') MODO_PRUEBA = json.modo_prueba;
     setRangoLabels(json.entradas_rango);
+    ACCESOS_MES = Array.isArray(json.accesos_mes) ? json.accesos_mes : [];
+    try{ renderAccesosMes(); }catch(e){ console.error('accesos por mes:', e); }
     renderModoPruebaUI();
   }catch(e){
     console.error('Error cargando directorio desde Supabase:', e);
@@ -3528,6 +3551,34 @@ function getAccData(){
     if(q&&!norm(d.n).includes(q)&&!String(d.m).includes(q)) return false;
     return true;
   });
+}
+// 21-sep-2026 (s74) — ACCESOS POR MES. Una fila por mes con accesos, personas y membresias
+// distintas. Si la API no manda la llave (version vieja), la tarjeta se queda oculta.
+var ACCESOS_MES = [];
+function renderAccesosMes(){
+  const card=document.getElementById('acc-mes-card'), body=document.getElementById('acc-mes-body');
+  if(!card||!body) return;
+  if(!ACCESOS_MES.length){ card.style.display='none'; return; }
+  const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const max=Math.max.apply(null, ACCESOS_MES.map(r=>Number(r.accesos)||0)) || 1;
+  const fmt=n=>(Number(n)||0).toLocaleString('es-MX');
+  body.innerHTML = ACCESOS_MES.map(r=>{
+    const partes=String(r.mes||'').split('-'), anio=partes[0], mi=Number(partes[1])-1;
+    const nombre=(MESES[mi]||r.mes)+' '+anio;
+    // Mes incompleto: el ultimo dia con registros no es el fin de ese mes
+    let parcial='';
+    if(r.ultimo){
+      const u=String(r.ultimo).split('-'), finMes=new Date(Date.UTC(Number(u[0]), Number(u[1]), 0)).getUTCDate();
+      if(Number(u[2])<finMes) parcial='<span class="acc-mes-parcial">al '+Number(u[2])+'</span>';
+    }
+    const w=Math.max(1, Math.round((Number(r.accesos)||0)/max*100));
+    return '<tr><td>'+nombre+parcial+'</td>'+
+           '<td class="acc-mes-col-barra" style="width:40%"><div class="acc-mes-barra" style="width:'+w+'%"></div></td>'+
+           '<td class="num"><strong>'+fmt(r.accesos)+'</strong></td>'+
+           '<td class="num">'+fmt(r.personas)+'</td>'+
+           '<td class="num">'+fmt(r.membresias)+'</td></tr>';
+  }).join('');
+  card.style.display='';
 }
 function renderAcc(){
   // v63 — visitas y adeudo INDIVIDUALES; una fila por persona.
