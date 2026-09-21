@@ -1904,7 +1904,7 @@ Por favor comunícate con nosotros a la brevedad para regularizar tu situación 
         <div class="av-sub-section">
           <div class="av-sub-title">⚙️ ¿Cuándo se envía?</div>
           <div style="font-size:.76rem;color:#4a5068;line-height:1.55;max-width:720px">
-            <strong style="color:#1a2035">El día exacto del cumpleaños</strong>, a las 8:00 de la mañana.
+            <strong style="color:#1a2035">El día exacto del cumpleaños</strong>, a las 10:05 de la mañana.
             Es una regla fija del sistema y no se cambia desde aquí.
           </div>
           <div style="display:none">
@@ -2915,13 +2915,15 @@ async function cargarDirectorio(){
   // Mismo criterio que COB_MEMB (v63): la membresía entra si ALGUIEN de su núcleo
   // trae el cargo rechazado, y se pinta el renglón de la cabeza.
   // INCLUYE Baja Temporal (para que aparezca la membresía 23).
+  // s76 (21-sep-2026) — sin las membresías de prueba (990000+): la pastilla contaba 9 cuando
+  // los cargos reales eran 6. El módulo de Avisos NO se toca: su lista la da su propio endpoint.
   const CF_SET = new Set(
-    DATA.filter(d => d.fl === 1 && (d.sit === 'Activo' || d.sit === 'Baja Temporal'))
+    DATA.filter(d => d.fl === 1 && Number(d.m) < 990000 && (d.sit === 'Activo' || d.sit === 'Baja Temporal'))
         .map(d => String(d.m))
   );
   const CF_CUENTA = {};
   DATA.forEach(d => {
-    if(d.fl === 1 && (d.sit === 'Activo' || d.sit === 'Baja Temporal')){
+    if(d.fl === 1 && Number(d.m) < 990000 && (d.sit === 'Activo' || d.sit === 'Baja Temporal')){
       const k = String(d.m);
       CF_CUENTA[k] = (CF_CUENTA[k] || 0) + 1;
     }
@@ -7724,7 +7726,7 @@ function renderSwitchCumple(){
         + (CUMPLE_ACTIVO ? '🟢 Activado' : '⚫ Apagado') + '</div>'
       + '<div style="font-size:.74rem;color:#4a5068;margin-top:4px;line-height:1.55">'
         + (CUMPLE_ACTIVO
-            ? 'Todos los días a las <strong>8:00 de la mañana</strong> se manda la felicitación '
+            ? 'Todos los días a las <strong>10:05 de la mañana</strong> se manda la felicitación '
               + 'por correo a los socios que cumplan años ese día. Sigue haciéndolo hasta que se apague aquí.'
             : 'La felicitación <strong>no se está enviando</strong>. El sistema despierta cada mañana, '
               + 've el interruptor apagado y termina sin mandar nada.')
@@ -7751,7 +7753,7 @@ function cumplePedirCambio(prender){
     '<div class="modal-box" style="max-width:500px;text-align:left">'
     + '<h3 style="text-align:center">🟢 Activar las felicitaciones de cumpleaños</h3>'
     + '<p style="text-align:center;margin-bottom:14px">A partir de mañana, <strong>todos los días '
-      + 'a las 8:00</strong> se enviará la felicitación por correo a los socios que cumplan años ese día.</p>'
+      + 'a las 10:05</strong> se enviará la felicitación por correo a los socios que cumplan años ese día.</p>'
     + '<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;'
       + 'border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:.74rem;color:#1a3a6b;line-height:1.55">'
       + 'Este interruptor <strong>no se apaga solo</strong>: queda encendido hasta que alguien lo apague aquí.<br>'
@@ -7802,7 +7804,7 @@ async function cumpleGuardar(valor){
     CUMPLE_ACTIVO = (j && j.cumpleanos_activo === true);
     renderSwitchCumple();
     showToast(CUMPLE_ACTIVO
-      ? '🟢 Felicitaciones ACTIVADAS — cada día a las 8:00, solo por correo'
+      ? '🟢 Felicitaciones ACTIVADAS — cada día a las 10:05, solo por correo'
       : '⏸ Felicitaciones apagadas — no se envía nada');
   }catch(e){
     showToast('⚠️ No se pudo guardar — verifica n8n');
@@ -7870,7 +7872,7 @@ function renderSwitchAnual(){
       + '<div style="font-size:.74rem;color:#4a5068;margin-top:4px;line-height:1.55">'
         + (ANUAL_ACTIVO
             ? 'Los avisos de renovación <strong>van a salir</strong> en sus cuatro fechas: '
-              + '1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero, a las 8:00 de la mañana.'
+              + '1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero, a las 11:20 de la mañana.'
             : 'Los avisos de renovación <strong>no van a salir</strong> en ninguna de sus cuatro fechas. '
               + 'El sistema despierta esos días, ve el interruptor apagado y termina sin mandar nada.')
       + '</div>'
@@ -7896,7 +7898,7 @@ function anualPedirCambio(prender){
     + '<h3 style="text-align:center">🟢 Activar la campaña de renovación anual</h3>'
     + '<p style="text-align:center;margin-bottom:14px">Quedan autorizados los <strong>cuatro avisos '
       + 'de la temporada</strong>: 1 de octubre, 1 de noviembre, 1 de diciembre y 1 de enero, '
-      + 'a las 8:00 de la mañana.</p>'
+      + 'a las 11:20 de la mañana.</p>'
     + '<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;'
       + 'border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:.74rem;color:#1a3a6b;line-height:1.55">'
       + 'El de octubre es el envío más grande del año: <strong>alrededor de 460 correos</strong> '
@@ -8259,8 +8261,6 @@ function abrirCopiaAviso(m){
     +'Los avisos de <strong>Cobranza, Cargo Fallido y vencimiento Anual</strong> le llegarán '
     +'también a esta persona, por correo y por WhatsApp. Solo aparecen los integrantes '
     +'<strong>mayores de 18 años</strong>; quien no tenga ningún dato de contacto sale en gris.</p>'
-    +'<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;padding:9px 11px;font-size:.72rem;color:#1a3a6b;margin:0 0 14px">'
-    +'⏳ Por ahora esto <strong>se guarda pero todavía no se envía doble</strong>: falta conectar los tres avisos. Se puede ir capturando desde hoy.</div>'
     +cuerpo
     +'<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">'
     +(actual?'<button onclick="guardarCopiaAviso('+m+',true)" style="background:#fff;color:#c0392b;border:1px solid #f0c8c8;border-radius:20px;padding:8px 16px;font-size:.76rem;font-weight:700;cursor:pointer">Quitar copia</button>':'')
@@ -8282,7 +8282,10 @@ async function guardarCopiaAviso(m, borrar){
     body.copia_whats=primerTel(p.wa);
   }
   try{
-    await fetch(URL_RESP_GUARDAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    // s76 — antes mostraba ✅ aunque el servidor fallara; ahora solo si confirma.
+    const resp = await fetch(URL_RESP_GUARDAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const j = resp.ok ? await resp.json().catch(()=>null) : null;
+    if(!j || j.ok !== true){ showToast('⚠️ No se pudo guardar'+(j&&j.mensaje?': '+j.mensaje:'')); return; }
     const k=String(m);
     RESPONSABLES[k] = Object.assign({}, RESPONSABLES[k]||{}, borrar
       ? {copia_socio_id:null, copia_nombre:null, copia_correo:null, copia_whats:null}
@@ -8340,10 +8343,16 @@ async function guardarResponsable(m, borrar){
     body.nota=nota;
   }
   try{
-    await fetch(URL_RESP_GUARDAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(borrar) delete RESPONSABLES[String(m)];
-    else RESPONSABLES[String(m)] = {membresia:m, socio_id:body.socio_id, nombre:body.nombre,
-                                    correo:body.correo, whats:body.whats, nota:body.nota};
+    // s76 — solo confirma si el servidor confirma, y al quitar o guardar el responsable
+    // se tocan SOLO sus datos: la copia de avisos de la misma membresía se conserva.
+    const resp = await fetch(URL_RESP_GUARDAR,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const j = resp.ok ? await resp.json().catch(()=>null) : null;
+    if(!j || j.ok !== true){ showToast('⚠️ No se pudo guardar'+(j&&j.mensaje?': '+j.mensaje:'')); return; }
+    const k = String(m);
+    RESPONSABLES[k] = Object.assign({}, RESPONSABLES[k]||{}, borrar
+      ? {socio_id:null, nombre:null, correo:null, whats:null, nota:null}
+      : {membresia:m, socio_id:body.socio_id, nombre:body.nombre,
+         correo:body.correo, whats:body.whats, nota:body.nota});
     document.getElementById('resp-modal')?.remove();
     showToast(borrar?'✅ Se restauró el titular':'✅ Responsable actualizado');
     if(typeof renderCob==='function') renderCob();
@@ -8440,7 +8449,8 @@ function calcNotificaciones(){
     txt:'Por indicación del Club, estas membresías no reciben avisos automáticos; cada caso se maneja de forma particular.',
     items:becados.map(d=>({m:d.m,id:d.id,n:d.n,extra:'no recibe avisos'}))});
 
-  const resp = Object.keys(RESPONSABLES||{});
+  // s76 — solo las que de verdad tienen responsable: una fila puede traer solo la copia de avisos.
+  const resp = Object.keys(RESPONSABLES||{}).filter(k => RESPONSABLES[k] && (RESPONSABLES[k].nombre || RESPONSABLES[k].correo));
   if(resp.length) out.push({tipo:'ok', ico:'👤',
     tit:resp.length+' membresía'+(resp.length>1?'s':'')+' con responsable de pago asignado',
     txt:'En estas membresías el cobro no se dirige al titular sino a la persona designada manualmente.',
@@ -8508,7 +8518,7 @@ function renderAnualesEnvio(){
     +'<th style="'+th+'">Memb.</th><th style="'+th+'">Se enviará a</th><th style="'+th+'">Deben</th><th style="'+th+'">Estado</th></tr></thead><tbody>'
     +arr.map(a=>{
       const n=a.miembros_en_adeudo!=null?a.miembros_en_adeudo:(a.deudores?a.deudores.length:0);
-      const manual = !!RESPONSABLES[String(a.m)];
+      const manual = !!(RESPONSABLES[String(a.m)] && (RESPONSABLES[String(a.m)].nombre || RESPONSABLES[String(a.m)].correo));
       const est = a.envio_ok
         ? '<span style="color:#1a8a6e;font-weight:700">✅ Listo</span>'
         : '<span style="color:#c0392b;font-weight:700">⚠️ Sin correo</span>';
