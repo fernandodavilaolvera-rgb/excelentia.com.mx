@@ -1213,13 +1213,6 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
           <label>Hora de envío</label>
           <input type="time" id="av-hora-envio" value="09:00" onchange="calcNextSend()" style="height:34px;border:1px solid var(--gray-mid);border-radius:7px;padding:0 10px;font-size:.78rem;font-family:'Open Sans',sans-serif;color:var(--negro);background:var(--blanco);outline:none;min-width:140px;cursor:pointer">
         </div>
-        <div class="av-prog-field">
-          <label>Correo remitente</label>
-          <select id="av-remitente" style="min-width:280px;height:34px;border:1px solid var(--gray-mid);border-radius:7px;padding:0 10px;font-size:.78rem;font-family:'Open Sans',sans-serif;color:var(--negro);background:var(--blanco);outline:none">
-            <option value="fdavila@excelentia.com.mx">fdavila@excelentia.com.mx (Demo)</option>
-            <option value="cobranza@clubberimbau.com.mx">cobranza@clubberimbau.com.mx (Producción)</option>
-          </select>
-        </div>
         <button class="btn-av-save" onclick="guardarProg()">📅 Programar envío</button>
       </div>
       <div id="prueba-selector" style="display:none;margin-top:14px;background:#f0faf0;border:1px solid #bfe3bf;border-radius:10px;padding:12px 14px">
@@ -3952,7 +3945,7 @@ const URL_PROG_LISTAR    = 'https://n8n.excelentia.com.mx/webhook/berimbau-progr
 const URL_PROG_CANCELAR  = 'https://n8n.excelentia.com.mx/webhook/berimbau-programaciones-cancelar';
 
 let avisosConfig = {
-  global: false, dia: 6, remitente: 'fdavila@excelentia.com.mx',
+  global: false, dia: 6, remitente: 'asiscobranza@berimbau.mx',
   toggles: {s1:true,s2:true,s3:true,s4:true},
   plantillas: {s1:{asunto:'',cuerpo:''},s2:{asunto:'',cuerpo:''},s3:{asunto:'',cuerpo:''},s4:{asunto:'',cuerpo:''}}
 };
@@ -4039,7 +4032,7 @@ async function guardarToggle(seg,val){
 async function guardarProg(){
   avisosConfig.dia=parseInt(document.getElementById('av-dia-envio').value||6);
   avisosConfig.hora=document.getElementById('av-hora-envio').value||'09:00';
-  avisosConfig.remitente=document.getElementById('av-remitente').value;
+  avisosConfig.remitente='asiscobranza@berimbau.mx'; // s75: el campo se quito; el motor siempre manda desde el correo del Club
   calcNextSend();
 
   // Detectar segmento activo (primer segmento con toggle ON)
@@ -4379,7 +4372,7 @@ function previewManual(){
               .replace(/{{membresia}}/g,d.m);
   }
 
-  const remitente=document.getElementById('av-remitente')?.value||'fdavila@excelentia.com.mx';
+  const remitente='Club Berimbau &lt;asiscobranza@berimbau.mx&gt;';
 
   // Lista de todos los destinatarios (segmento + extras)
   const destHtml=listaTotal.map(d=>`
@@ -4614,7 +4607,7 @@ async function enviarManual(){
         // manual / cargo_fallido / anual, y sin modulo NO se agrega copia.
         // Los tres botones de prueba se dejan SIN modulo a proposito.
         modulo:'manual',
-        remitente:document.getElementById('av-remitente')?.value,
+        remitente:'asiscobranza@berimbau.mx',
         destinatarios:totalLista.map(d=>({membresia:d.m||d.membresia,nombre:d.n||d.nombre,correo:d.cor||d.correo,dias:d.dias!=null?d.dias:0,meses:d.dias!=null?d.dias:0}))
       })
     });
