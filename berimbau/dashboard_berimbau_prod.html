@@ -1055,7 +1055,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
     <div class="graf-grid-perfil">
 
       <div class="graf-card">
-        <div class="graf-card-title">🧍 Socios por tipo de usuario</div>
+        <div class="graf-card-title">🧍 Gráfica por tipo de usuario</div>
         <div class="graf-card-sub">Titulares, cónyuges, dependientes y demás categorías · se cuentan personas</div>
         <div class="graf-canvas-wrap"><canvas id="chart-tipo-usuario"></canvas></div>
         <div class="graf-legend" id="legend-tipo-usuario"></div>
@@ -4944,10 +4944,10 @@ function initGraficas(){
 }
 
 const RANGOS_EDAD=[
-  {lbl:'Menor (0-5)',        min:0,  max:5,   color:'#8ecae6'},
-  {lbl:'Infantil (6-11)',    min:6,  max:11,  color:'#3AAA35'},
-  {lbl:'Juvenil (12-20)',    min:12, max:20,  color:'#1a8a6e'},
-  {lbl:'Junior (21-25)',     min:21, max:25,  color:'#c8a84b'},
+  {lbl:'De 0 a 5 años',     min:0,  max:5,   color:'#8ecae6'},
+  {lbl:'De 6 a 11 años',    min:6,  max:11,  color:'#3AAA35'},
+  {lbl:'De 12 a 20 años',   min:12, max:20,  color:'#1a8a6e'},
+  {lbl:'De 21 a 25 años',   min:21, max:25,  color:'#c8a84b'},
   // 16-ago-2026 — se parte el bloque de Adultos para abrir el corte de 26 a 29.
   // 🔑 EL ROTULO NO DICE "Junior" A PROPOSITO. Medido ese dia: de las 60 personas de
   // 26 a 29, solo 10 son de perfil Junior (3 Junior y 7 Individual Junior); las otras
@@ -4957,10 +4957,10 @@ const RANGOS_EDAD=[
   // La edad y el perfil no se tapan: los Junior de hoy van de 20 a 26 anios y los
   // Individual Junior de 26 a 35. El corte por perfil ya vive en la grafica de tipo
   // de usuario; esta es, y se llama, un corte de EDAD.
-  {lbl:'26 a 29 (auxiliar)',  min:26, max:29,  color:'#f97316'},
-  {lbl:'Adultos (30-49)',    min:30, max:49,  color:'#EF4B1F'},
-  {lbl:'Agregado (50-64)',   min:50, max:64,  color:'#9b5de5'},
-  {lbl:'Ag. Mayor (65-100)', min:65, max:100, color:'#4a5068'}
+  {lbl:'De 26 a 29 años',   min:26, max:29,  color:'#f97316'},
+  {lbl:'De 30 a 49 años',   min:30, max:49,  color:'#EF4B1F'},
+  {lbl:'De 50 a 64 años',   min:50, max:64,  color:'#9b5de5'},
+  {lbl:'De 65 a 100 años',  min:65, max:100, color:'#4a5068'}
 ];
 function drawBarsEdades(canvasId, data, legendId, opts){
   // v57 — barras horizontales, una por rango de edad, con su valor y porcentaje
@@ -5460,7 +5460,9 @@ function drawBarsPerfil(canvasId, data, legendId, padLBase, opts){
   canvas._gdGeo=_geo;
   gdBind(canvas);
   const leg=document.getElementById(legendId);
-  if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">Total de socios: '+
+  // 21-sep-2026 — el rotulo del total lo decide cada grafica (usuarios, membresias); si no dice nada, queda 'socios'.
+  const _totLbl=(canvas._gdOpts && canvas._gdOpts.totalLbl) || 'Total de socios';
+  if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">'+_totLbl+': '+
                         '<strong style="color:#1a2035;margin-left:4px">'+total+'</strong>'+
                         '<span style="margin-left:8px;color:#4a9fd4;font-weight:700">· clic en una barra para ver el listado</span></div>';
 }
@@ -5486,7 +5488,7 @@ function renderTipoUsuario(){
   drawBarsPerfil('chart-tipo-usuario',
     agruparPorCampo(sociosPadron(),'tu','Sin tipo'),
     'legend-tipo-usuario', 160,
-    {titulo:'Socios por tipo de usuario', datoLabel:'Tipo de usuario', datoFn:d=>d.tu||'—'});
+    {titulo:'Gráfica por tipo de usuario', datoLabel:'Tipo de usuario', datoFn:d=>d.tu||'—', totalLbl:'Total de usuarios'});
 }
 
 // Rangos del Club, más el tramo de menos de un año que su catálogo no contempla
@@ -5507,14 +5509,14 @@ const RANGOS_ANTIGUEDAD=[
 // 14-ago-2026 (s48) — se parametrizo la lista y los ids para que el corte por socio y
 // el corte por membresia usen EXACTAMENTE el mismo calculo. Duplicar la funcion habria
 // dejado dos rangos que en tres meses dirian cosas distintas.
-function renderAntiguedadEn(lista, canvasId, legendId, titulo){
+function renderAntiguedadEn(lista, canvasId, legendId, titulo, totalLbl){
   const conDato=lista.filter(d=>d.perm!=null && d.perm!=='');
   const data=RANGOS_ANTIGUEDAD.map(g=>{
     const items=conDato.filter(d=>{ const p=Number(d.perm); return !isNaN(p) && p>=g.min && p<=g.max; });
     return {label:g.lbl, color:g.color, val:items.length, items:items};
   });
   drawBarsPerfil(canvasId, data, legendId, 130, {
-    titulo: titulo, datoLabel:'Antigüedad',
+    titulo: titulo, datoLabel:'Antigüedad', totalLbl: totalLbl,
     datoFn: d => (d.perm==null||d.perm===''?'—':d.perm+(Number(d.perm)===1?' año':' años'))
   });
   // Si la vista todavía no manda el campo, se avisa en vez de pintar una gráfica vacía y creíble
@@ -5524,7 +5526,7 @@ function renderAntiguedadEn(lista, canvasId, legendId, titulo){
 }
 
 function renderAntiguedad(){ renderAntiguedadEn(sociosPadron(),'chart-antiguedad','legend-antiguedad','Socios por antigüedad'); }
-function renderAntiguedadMemb(){ renderAntiguedadEn(membresiasPadron(),'chart-antiguedad-memb','legend-antiguedad-memb','Membresías por antigüedad'); }
+function renderAntiguedadMemb(){ renderAntiguedadEn(membresiasPadron(),'chart-antiguedad-memb','legend-antiguedad-memb','Membresías por antigüedad','Total de membresías'); }
 
 function renderConceptoPago(){
   drawBarsPerfil('chart-concepto-pago',
@@ -5537,7 +5539,7 @@ function renderConceptoMemb(){
   drawBarsPerfil('chart-concepto-memb',
     agruparPorCampo(membresiasPadron(),'cup','Sin concepto de pago'),
     'legend-concepto-memb', 175,
-    {titulo:'Membresías por concepto de último pago', datoLabel:'Concepto de último pago', datoFn:d=>d.cup||'Sin concepto de pago'});
+    {titulo:'Membresías por concepto de último pago', datoLabel:'Concepto de último pago', datoFn:d=>d.cup||'Sin concepto de pago', totalLbl:'Total de membresías'});
 }
 
 // Al girar el celular o cambiar el tamaño de la ventana, las tres se vuelven a medir
