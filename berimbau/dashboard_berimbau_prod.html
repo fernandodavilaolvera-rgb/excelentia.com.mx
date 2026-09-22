@@ -425,7 +425,7 @@ details.hist-dia .hd-count{margin-left:auto;background:#eef4fc;color:#1a3a6b;bor
 .bib-usar-box h3{font-family:'Montserrat',sans-serif;font-size:.9rem;font-weight:700;color:var(--negro);margin-bottom:8px}
 .bib-usar-box p{font-size:.78rem;color:var(--gray-text);margin-bottom:16px;line-height:1.5}
 
-/* Detalle de socio */
+/* Detalle de usuario */
 .det-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}
 .det-modal-box{background:#fff;border-radius:14px;max-width:480px;width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .det-modal-header{padding:16px 20px;border-bottom:1px solid var(--gray-mid);display:flex;align-items:center;justify-content:space-between}
@@ -702,7 +702,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
 <div id="brb-login">
   <div class="brb-card">
     <img src="https://excelentia.com.mx/logo_club_berimbau.png" alt="Club Berimbau" onerror="this.style.display='none'">
-    <h2 id="brb-titulo">Dashboard Inteligente de Socios</h2>
+    <h2 id="brb-titulo">Dashboard Inteligente de Usuarios</h2>
     <p class="brb-sub" id="brb-subtitulo">Entra con tu usuario del Club</p>
     <!-- Vista 1: entrar -->
     <div id="brb-vista-entrar">
@@ -743,7 +743,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
   <div class="header-left">
     <img src="https://excelentia.com.mx/logo_club_berimbau.png" alt="Club Berimbau" class="header-logo" onerror="this.style.display='none'">
     <div class="header-title">
-      <h1>Dashboard Inteligente de Socios</h1>
+      <h1>Dashboard Inteligente de Usuarios</h1>
       <p>Club Berimbau · Gestión de Cartera · Cobranza · Directorio</p>
     </div>
   </div>
@@ -769,7 +769,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
   <!-- ===== DIRECTORIO ===== -->
   <div id="panel-directorio" class="panel">
     <div class="filters">
-      <div class="filter-group"><label>Buscar socio</label><input type="text" id="buscar-dir" placeholder="Nombre, membresía, correo..." oninput="renderDir()"></div>
+      <div class="filter-group"><label>Buscar usuario</label><input type="text" id="buscar-dir" placeholder="Nombre, membresía, correo..." oninput="renderDir()"></div>
       <div class="filter-group"><label>Tipo de usuario</label>
         <select id="sel-tipo-dir" onchange="renderDir()">
           <option value="">Todos</option><option value="Titular">Titular</option><option value="Individual">Individual</option><option value="Individual Menor">Individual Menor</option>
@@ -838,7 +838,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
       </tr></thead><tbody id="acc-mes-body"></tbody></table></div>
     </div>
     <div class="filters">
-      <div class="filter-group"><label>Buscar socio</label><input type="text" id="buscar-acc" placeholder="Nombre o Membresía..." oninput="renderAcc()"></div>
+      <div class="filter-group"><label>Buscar usuario</label><input type="text" id="buscar-acc" placeholder="Nombre o Membresía..." oninput="renderAcc()"></div>
       <div class="filter-group"><label>Actividad <span class="rango-corto">Abr–Jun</span></label>
         <select id="sel-act" onchange="syncAccKpi();renderAcc()">
           <option value="">Todos</option><option value="alta">Alta (+60 visitas)</option>
@@ -908,7 +908,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
 
     <!-- Filtros -->
     <div class="filters">
-      <div class="filter-group"><label>Buscar socio</label><input type="text" id="buscar-cob" placeholder="Nombre o Membresía..." oninput="renderCob()"></div>
+      <div class="filter-group"><label>Buscar usuario</label><input type="text" id="buscar-cob" placeholder="Nombre o Membresía..." oninput="renderCob()"></div>
       <div class="filter-group"><label>Segmento</label>
         <select id="sel-seg" onchange="syncSegCards();renderCob()">
           <option value="">Todos en adeudo</option><option value="s1">0–30 días</option>
@@ -990,7 +990,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
       <!-- Donut distribución de cartera -->
       <div class="graf-card">
         <div class="graf-card-title">🍩 Distribución de cartera</div>
-        <div class="graf-card-sub">Socios por status de pago — total activos</div>
+        <div class="graf-card-sub">Cuenta <b>usuarios</b> del padrón completo: activos, en baja temporal e inactivos · sin membresías de prueba</div>
         <div class="graf-canvas-wrap">
           <canvas id="chart-donut" width="180" height="180"></canvas>
         </div>
@@ -999,8 +999,8 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
 
       <!-- Barras por segmento de morosidad -->
       <div class="graf-card">
-        <div class="graf-card-title">📊 Socios por segmento</div>
-        <div class="graf-card-sub">Con y sin correo registrado por segmento</div>
+        <div class="graf-card-title">📊 Usuarios por segmento</div>
+        <div class="graf-card-sub">Cuenta solo <b>usuarios en adeudo</b>, separados por si tienen correo registrado</div>
         <div class="graf-canvas-wrap" style="min-height:200px">
           <canvas id="chart-segs" width="300" height="200"></canvas>
         </div>
@@ -1009,7 +1009,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
       <!-- Top 10 morosos por antigüedad -->
       <div class="graf-card">
         <div class="graf-card-title">⚠️ Top 10 — Mayor antigüedad de adeudo</div>
-        <div class="graf-card-sub">Socios con más días sin pago</div>
+        <div class="graf-card-sub">Los diez <b>usuarios en adeudo</b> con más días sin pago</div>
         <div class="graf-top-list" id="graf-top-morosos"></div>
       </div>
 
@@ -1021,16 +1021,16 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
       <!-- Barras tipo de membresía en adeudo — OCULTA (campo tipomem no disponible en vista) -->
       <div class="graf-card" style="display:none">
         <div class="graf-card-title">👥 Adeudos por tipo de membresía</div>
-        <div class="graf-card-sub">Cuántos socios en mora por categoría</div>
+        <div class="graf-card-sub">Cuenta <b>usuarios en adeudo</b>, agrupados por categoría de membresía</div>
         <div class="graf-canvas-wrap" style="min-height:220px">
           <canvas id="chart-tipos" width="400" height="220"></canvas>
         </div>
       </div>
 
-      <!-- v56 — Pastel de edades de todos los socios activos -->
+      <!-- v56 — Pastel de edades de todos los usuarios activos -->
       <div class="graf-card">
-        <div class="graf-card-title">📊 Socios activos por rango de edad</div>
-        <div class="graf-card-sub">Distribución de la comunidad — solo socios con situación Activo</div>
+        <div class="graf-card-title">📊 Usuarios activos por rango de edad</div>
+        <div class="graf-card-sub">Cuenta solo <b>usuarios con situación Activo</b>: no incluye baja temporal ni inactivos</div>
         <div class="graf-canvas-wrap" style="min-height:250px">
           <canvas id="chart-pie-edades" width="420" height="250"></canvas>
         </div>
@@ -1039,10 +1039,10 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
              Las barras de arriba son cortes fijos; esto sirve para preguntarle a la
              grafica cualquier otro rango sin tocar codigo. No redibuja las barras a
              proposito: abre el MISMO panel del drill down de la s48, que ya trae
-             buscador, orden, detalle del socio y exportacion a Excel, y que recibe los
+             buscador, orden, detalle del usuario y exportacion a Excel, y que recibe los
              registros ya contados en vez de recalcularlos. -->
         <div class="edad-libre no-print">
-          <label for="edad-libre-min">Ver socios de</label>
+          <label for="edad-libre-min">Ver usuarios de</label>
           <input type="number" id="edad-libre-min" min="0" max="120" step="1" value="26"
                  inputmode="numeric" onkeydown="if(event.key==='Enter')edadesRangoLibre()">
           <label for="edad-libre-max">a</label>
@@ -1057,7 +1057,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
       <!-- Distribución por edad (grupos) — OCULTA -->
       <div class="graf-card" style="display:none">
         <div class="graf-card-title">🎂 Distribución de adeudos por edad</div>
-        <div class="graf-card-sub">Grupos etarios con mayor morosidad</div>
+        <div class="graf-card-sub">Cuenta <b>usuarios en adeudo</b>, agrupados por edad</div>
         <div class="graf-canvas-wrap" style="min-height:220px">
           <canvas id="chart-edades" width="400" height="220"></canvas>
         </div>
@@ -1067,31 +1067,31 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
 
     <!-- ===== PERFIL DEL PADRÓN — 5 gráficas en dos bloques =====
          14-ago-2026 (s48): el Club pidió ver antigüedad y concepto de pago POR MEMBRESÍA.
-         Se AGREGARON las dos, no se sustituyeron las de socio: los dos cortes contestan
+         Se AGREGARON las dos, no se sustituyeron las de usuario: los dos cortes contestan
          preguntas distintas y las tres originales ya se le habían mostrado al Club. -->
     <div class="graf-perfil-head">
       <h3>👥 Perfil del padrón</h3>
-      <p>Composición de toda la comunidad — no solo los socios en adeudo. Arriba, tipo de usuario y los dos cortes por membresía; abajo, esos mismos dos cortes contados persona por persona.</p>
+      <p>Composición de toda la comunidad — no solo los usuarios en adeudo. Arriba, tipo de usuario y los dos cortes por membresía; abajo, esos mismos dos cortes contados persona por persona.</p>
     </div>
     <div class="graf-grid-perfil">
 
       <div class="graf-card">
         <div class="graf-card-title">🧍 Gráfica por tipo de usuario</div>
-        <div class="graf-card-sub">Titulares, cónyuges, dependientes y demás categorías · se cuentan personas</div>
+        <div class="graf-card-sub">Cuenta <b>usuarios</b> del padrón completo — titulares, cónyuges, dependientes y demás categorías</div>
         <div class="graf-canvas-wrap"><canvas id="chart-tipo-usuario"></canvas></div>
         <div class="graf-legend" id="legend-tipo-usuario"></div>
       </div>
 
       <div class="graf-card">
         <div class="graf-card-title">🏠 Membresías por antigüedad</div>
-        <div class="graf-card-sub">Una sola cuenta por membresía, tomando la antigüedad de su cuota base</div>
+        <div class="graf-card-sub">Cuenta <b>membresías</b>, no personas: una sola por membresía, con la antigüedad de su cuota base</div>
         <div class="graf-canvas-wrap"><canvas id="chart-antiguedad-memb"></canvas></div>
         <div class="graf-legend" id="legend-antiguedad-memb"></div>
       </div>
 
       <div class="graf-card">
         <div class="graf-card-title">🏠 Membresías por concepto de último pago</div>
-        <div class="graf-card-sub">Cómo paga cada membresía · quien no ha hecho su primer pago sale sin concepto</div>
+        <div class="graf-card-sub">Cuenta <b>membresías</b>, no personas · quien no ha hecho su primer pago sale sin concepto</div>
         <div class="graf-canvas-wrap"><canvas id="chart-concepto-memb"></canvas></div>
         <div class="graf-legend" id="legend-concepto-memb"></div>
       </div>
@@ -1099,21 +1099,21 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
     </div>
 
     <div class="graf-perfil-head">
-      <h3>🧍 Los mismos dos cortes, contados por socio</h3>
-      <p>Aquí cada persona suma uno, así que los dependientes también cuentan; por eso los números son más altos que los de arriba.</p>
+      <h3>🧍 Los mismos dos cortes, contados por usuario</h3>
+      <p>Aquí cada persona suma uno, así que los dependientes también cuentan; por eso los números son más altos que los de arriba, que cuentan membresías.</p>
     </div>
     <div class="graf-grid-perfil">
 
       <div class="graf-card">
-        <div class="graf-card-title">📅 Socios por antigüedad</div>
-        <div class="graf-card-sub">Años cumplidos en el Club según el sistema</div>
+        <div class="graf-card-title">📅 Usuarios por antigüedad</div>
+        <div class="graf-card-sub">Cuenta <b>usuarios</b> del padrón completo, por años cumplidos en el Club</div>
         <div class="graf-canvas-wrap"><canvas id="chart-antiguedad"></canvas></div>
         <div class="graf-legend" id="legend-antiguedad"></div>
       </div>
 
       <div class="graf-card">
-        <div class="graf-card-title">💳 Socios por concepto de último pago</div>
-        <div class="graf-card-sub">Cómo paga hoy cada socio — mensual, anual, domiciliado…</div>
+        <div class="graf-card-title">💳 Usuarios por concepto de último pago</div>
+        <div class="graf-card-sub">Cuenta <b>usuarios</b> del padrón completo — mensual, anual, domiciliado…</div>
         <div class="graf-canvas-wrap"><canvas id="chart-concepto-pago"></canvas></div>
         <div class="graf-legend" id="legend-concepto-pago"></div>
       </div>
@@ -1123,7 +1123,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
     <!-- Semáforo cobranza -->
     <div style="background:var(--blanco);border:1px solid var(--gray-mid);border-radius:12px;padding:18px;margin-bottom:20px">
       <div class="graf-card-title">🚦 Semáforo de cobranza del mes</div>
-      <div class="graf-card-sub" style="margin-bottom:14px">Avance de recuperación estimado basado en segmentos activos</div>
+      <div class="graf-card-sub" style="margin-bottom:14px">Cuenta <b>usuarios</b> del padrón completo, repartidos por días de atraso</div>
       <div id="graf-semaforo" style="display:flex;gap:12px;flex-wrap:wrap"></div>
     </div>
 
@@ -1148,7 +1148,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
     </div>
     <div id="banner-modo-prueba" style="max-width:720px;margin:0 auto 18px;background:#f0faf0;border:1px solid #3AAA35;border-left:4px solid #3AAA35;border-radius:0 10px 10px 0;padding:11px 16px;display:flex;align-items:center;gap:10px;font-size:.78rem;color:#1a5c18;line-height:1.4">
       <span style="font-size:1.1rem">🛡️</span>
-      <span><strong>Modo prueba activo.</strong> Todos los envíos (correo, WhatsApp y programados) van <strong>solo al equipo de prueba</strong>: Nancy, Carlos, Gustavo y Fernando. Ningún socio real recibe nada.</span>
+      <span><strong>Modo prueba activo.</strong> Todos los envíos (correo, WhatsApp y programados) van <strong>solo al equipo de prueba</strong>: Nancy, Carlos, Gustavo y Fernando. Ningún usuario real recibe nada.</span>
     </div>
     <style>
       #toggle-modo-prueba:checked + span { background:#3AAA35 !important; }
@@ -1351,7 +1351,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
           <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center">
             <button class="btn-av-preview" id="btn-preview-manual" style="display:none" onclick="previewManual()">👁 Vista previa</button>
             <button class="btn-av-send" id="btn-send-manual" style="display:none" disabled onclick="confirmarEnvioManual()">
-              ✉️ Enviar a <span id="btn-send-count">0</span> socios
+              ✉️ Enviar a <span id="btn-send-count">0</span> usuarios
             </button>
             <!-- Toggle WhatsApp -->
             <label id="toggle-wa-wrapper" style="display:none;align-items:center;gap:7px;cursor:pointer;background:#f0faf0;border:1px solid #3AAA35;border-radius:20px;padding:6px 14px;font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:700;color:#1a5c18;user-select:none">
@@ -1396,7 +1396,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
         <div class="av-field-label" style="margin-top:10px">Mensaje (cuerpo del correo)</div>
         <textarea class="av-textarea" id="cuerpo-s1" rows="5" placeholder="Estimado/a {{nombre}},&#10;&#10;Te recordamos que tu membresía del mes de {{mes}} aún no ha sido registrada..."></textarea>
         <div class="av-card-footer" style="margin:14px -18px -18px">
-          <div class="av-vars">Variables: <span title="Nombre del socio">{{nombre}}</span><span title="Mes de adeudo">{{mes}}</span><span title="Días en adeudo">{{dias}}</span><span title="Número de membresía">{{membresia}}</span></div>
+          <div class="av-vars">Variables: <span title="Nombre del usuario">{{nombre}}</span><span title="Mes de adeudo">{{mes}}</span><span title="Días en adeudo">{{dias}}</span><span title="Número de membresía">{{membresia}}</span></div>
           <button class="btn-av-save" onclick="guardarPlantilla('s1')">💾 Guardar</button>
         </div>
       </div>
@@ -1429,7 +1429,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
         <div class="av-field-label" style="margin-top:10px">Mensaje (cuerpo del correo)</div>
         <textarea class="av-textarea" id="cuerpo-s2" rows="5" placeholder="Estimado/a {{nombre}},&#10;&#10;Notamos que tu cuenta lleva {{dias}} días sin registrar pago..."></textarea>
         <div class="av-card-footer" style="margin:14px -18px -18px">
-          <div class="av-vars">Variables: <span title="Nombre del socio">{{nombre}}</span><span title="Mes de adeudo">{{mes}}</span><span title="Días en adeudo">{{dias}}</span><span title="Número de membresía">{{membresia}}</span></div>
+          <div class="av-vars">Variables: <span title="Nombre del usuario">{{nombre}}</span><span title="Mes de adeudo">{{mes}}</span><span title="Días en adeudo">{{dias}}</span><span title="Número de membresía">{{membresia}}</span></div>
           <button class="btn-av-save" onclick="guardarPlantilla('s2')">💾 Guardar</button>
         </div>
       </div>
@@ -1462,7 +1462,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
         <div class="av-field-label" style="margin-top:10px">Mensaje (cuerpo del correo)</div>
         <textarea class="av-textarea" id="cuerpo-s3" rows="5" placeholder="Estimado/a {{nombre}},&#10;&#10;Tu membresía lleva {{dias}} días con saldo pendiente..."></textarea>
         <div class="av-card-footer" style="margin:14px -18px -18px">
-          <div class="av-vars">Variables: <span title="Nombre del socio">{{nombre}}</span><span title="Mes de adeudo">{{mes}}</span><span title="Días en adeudo">{{dias}}</span><span title="Número de membresía">{{membresia}}</span></div>
+          <div class="av-vars">Variables: <span title="Nombre del usuario">{{nombre}}</span><span title="Mes de adeudo">{{mes}}</span><span title="Días en adeudo">{{dias}}</span><span title="Número de membresía">{{membresia}}</span></div>
           <button class="btn-av-save" onclick="guardarPlantilla('s3')">💾 Guardar</button>
         </div>
       </div>
@@ -1495,7 +1495,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
         <div class="av-field-label" style="margin-top:10px">Mensaje (cuerpo del correo)</div>
         <textarea class="av-textarea" id="cuerpo-s4" rows="5" placeholder="Estimado/a {{nombre}},&#10;&#10;Han pasado más de {{dias}} días desde tu último pago..."></textarea>
         <div class="av-card-footer" style="margin:14px -18px -18px">
-          <div class="av-vars">Variables: <span title="Nombre del socio">{{nombre}}</span><span title="Mes de adeudo">{{mes}}</span><span title="Días en adeudo">{{dias}}</span><span title="Número de membresía">{{membresia}}</span></div>
+          <div class="av-vars">Variables: <span title="Nombre del usuario">{{nombre}}</span><span title="Mes de adeudo">{{mes}}</span><span title="Días en adeudo">{{dias}}</span><span title="Número de membresía">{{membresia}}</span></div>
           <button class="btn-av-save" onclick="guardarPlantilla('s4')">💾 Guardar</button>
         </div>
       </div>
@@ -1611,7 +1611,7 @@ Recuerda que aún es posible obtener beneficios por tu pago anual.
             una campaña de temporada, no cuatro avisos sueltos: se activa una vez y cubre el 1 de octubre,
             el 1 de noviembre, el 1 de diciembre y el 1 de enero.<br>
             <strong style="color:#1a2035">No se apaga solo.</strong> Si se apagara después del primer
-            disparo, el del mes siguiente no saldría y nadie se enteraría hasta que un socio lo reclamara.
+            disparo, el del mes siguiente no saldría y nadie se enteraría hasta que un usuario lo reclamara.
           </div>
         </div>
 
@@ -1711,7 +1711,7 @@ Te recordamos que durante los primeros días de {{mes}} se realizará el cargo a
 
 ¡Gracias por ser parte de la comunidad Berimbau! 🏅</textarea>
           <div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;padding:9px 12px;margin-top:8px;max-width:720px;font-size:.72rem;color:#4a5068;line-height:1.5">
-            <strong style="color:#1a2035">Variables que puedes usar aquí:</strong> <code>{{nombre}}</code>, <code>{{membresia}}</code> y <code>{{mes}}</code>. El sistema las cambia por los datos de cada socio al enviar. Si escribes cualquier otra, el botón Probar te avisa y no envía nada.
+            <strong style="color:#1a2035">Variables que puedes usar aquí:</strong> <code>{{nombre}}</code>, <code>{{membresia}}</code> y <code>{{mes}}</code>. El sistema las cambia por los datos de cada usuario al enviar. Si escribes cualquier otra, el botón Probar te avisa y no envía nada.
           </div>
         </div>
 
@@ -1769,12 +1769,12 @@ Por favor comunícate con nosotros a la brevedad para regularizar tu situación 
 
         <!-- ===== v68: LISTA REAL DE SOCIOS CON CARGO RECHAZADO ===== -->
         <div class="av-sub-section" id="cf-lista-section">
-          <div class="av-sub-title">🏦❌ Socios con cargo rechazado</div>
+          <div class="av-sub-title">🏦❌ Usuarios con cargo rechazado</div>
 
           <div class="av-info-box" style="max-width:720px;margin:0 auto 12px">
             La lista se consulta <strong>al servidor en el momento</strong>, no a lo que traiga cargado esta pantalla.
             El aviso lo arma el sistema con la <strong>plantilla aprobada por Meta</strong> (masculina o femenina según
-            el socio) y aplica solo el candado de becados e inactivos. Aquí únicamente eliges <strong>a quién</strong>.
+            el usuario) y aplica solo el candado de becados e inactivos. Aquí únicamente eliges <strong>a quién</strong>.
           </div>
 
           <!-- INTERRUPTOR PRUEBA / REAL -->
@@ -1785,15 +1785,15 @@ Por favor comunícate con nosotros a la brevedad para regularizar tu situación 
             <div style="display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
               <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
                 <input type="radio" name="cf-modo" value="prueba" checked onchange="cfSetModo(true)" style="accent-color:#3AAA35;width:15px;height:15px">
-                🧪 <strong>Prueba</strong> <span style="color:#8a90a0;font-size:.68rem">(socios de mentiras)</span>
+                🧪 <strong>Prueba</strong> <span style="color:#8a90a0;font-size:.68rem">(usuarios de mentiras)</span>
               </label>
               <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
                 <input type="radio" name="cf-modo" value="real" onchange="cfSetModo(false)" style="accent-color:#c0392b;width:15px;height:15px">
-                🔴 <strong>Envío real</strong> <span style="color:#8a90a0;font-size:.68rem">(socios del Club)</span>
+                🔴 <strong>Envío real</strong> <span style="color:#8a90a0;font-size:.68rem">(usuarios del Club)</span>
               </label>
             </div>
             <div id="cf-modo-aviso" style="display:none;margin-top:10px;padding:8px 10px;border-radius:8px;background:#fdeaea;border:1px solid #f5b7b1;font-size:.74rem;color:#922b21;font-weight:700">
-              ⚠️ Modo real activo. Los mensajes llegan a socios del Club.
+              ⚠️ Modo real activo. Los mensajes llegan a usuarios del Club.
             </div>
           </div>
 
@@ -1845,7 +1845,7 @@ Por favor comunícate con nosotros a la brevedad para regularizar tu situación 
 
         <div class="av-sub-section">
           <div class="av-sub-title">📤 Envío manual — Cargo fallido</div>
-          <div class="av-info-box" style="margin-bottom:10px">En <strong>modo prueba</strong>, el aviso se envía a los usuarios que marques abajo (nunca a socios reales). En producción se disparará automáticamente al detectar el cargo rechazado.</div>
+          <div class="av-info-box" style="margin-bottom:10px">En <strong>modo prueba</strong>, el aviso se envía a los usuarios que marques abajo (nunca a usuarios reales). En producción se disparará automáticamente al detectar el cargo rechazado.</div>
           <div style="background:#f0faf0;border:1px solid #bfe3bf;border-radius:10px;padding:12px 14px;margin-bottom:12px;max-width:720px">
             <div style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:800;color:#1a5c18;margin-bottom:8px">🔒 ¿A quién enviar la prueba? <span style="font-weight:600;color:#4a5068">(marca 1 o varios)</span></div>
             <div style="display:flex;flex-wrap:wrap;gap:8px 18px">
@@ -1960,7 +1960,7 @@ En nombre de todo el equipo de Club Berimbau, queremos desearte un día lleno de
             lo apague aquí: mientras esté activado felicita todos los días a quien cumpla años.<br>
             <strong style="color:#1a2035">Se envía únicamente por correo.</strong> La felicitación por
             WhatsApp está clasificada como mensaje promocional y WhatsApp no la entrega, así que aunque
-            el aviso esté activo el socio solo recibe el correo.
+            el aviso esté activo el usuario solo recibe el correo.
           </div>
         </div>
 
@@ -2012,7 +2012,7 @@ En nombre de todo el equipo de Club Berimbau, queremos desearte un día lleno de
         </div>
 
         <div class="av-info-box">
-          <strong>Regla del club:</strong> Los dependientes menores de 26 años forman parte de la membresía familiar. Al cumplir 26, Aspel los reclasifica como socio individual automáticamente. Este aviso alerta 30 días antes para que el club y la familia puedan gestionar la renovación.
+          <strong>Regla del club:</strong> Los dependientes menores de 26 años forman parte de la membresía familiar. Al cumplir 26, Aspel los reclasifica como usuario individual automáticamente. Este aviso alerta 30 días antes para que el club y la familia puedan gestionar la renovación.
         </div>
 
         <div class="av-sub-section">
@@ -2080,11 +2080,11 @@ Si deseas que continúe como socio activo, te invitamos a contactarnos para gest
             <div style="display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
               <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
                 <input type="radio" name="m26-modo" value="prueba" checked onchange="m26SetModo(true)" style="accent-color:#3AAA35;width:15px;height:15px">
-                🧪 <strong>Prueba</strong> <span style="color:#8a90a0;font-size:.68rem">(socios de mentiras)</span>
+                🧪 <strong>Prueba</strong> <span style="color:#8a90a0;font-size:.68rem">(usuarios de mentiras)</span>
               </label>
               <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer">
                 <input type="radio" name="m26-modo" value="real" onchange="m26SetModo(false)" style="accent-color:#c0392b;width:15px;height:15px">
-                🔴 <strong>Envío real</strong> <span style="color:#8a90a0;font-size:.68rem">(socios del Club)</span>
+                🔴 <strong>Envío real</strong> <span style="color:#8a90a0;font-size:.68rem">(usuarios del Club)</span>
               </label>
             </div>
             <div id="m26-modo-aviso" style="display:none;margin-top:10px;padding:8px 10px;border-radius:8px;background:#fdeaea;border:1px solid #f5b7b1;font-size:.74rem;color:#922b21;font-weight:700">
@@ -2220,7 +2220,7 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
           <h2 style="font-family:'Montserrat',sans-serif;font-size:1rem;color:var(--negro);margin:0">Notificaciones</h2>
           <p style="font-size:.76rem;color:var(--gray-text);margin:4px 0 0">Casos que requieren revisión humana. No son errores del sistema.</p>
         </div>
-        <button class="btn-exportar" onclick="exportarSocios()">⬇️ Exportar socios a Excel</button>
+        <button class="btn-exportar" onclick="exportarSocios()">⬇️ Exportar usuarios a Excel</button>
       </div>
       <div id="notif-lista" style="margin-top:16px"></div>
     </div>
@@ -2478,7 +2478,7 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
   window.brbVista = function(v, texto, ok){
     ['entrar','clave','olvide'].forEach(n => { const el = document.getElementById('brb-vista-' + n); if(el) el.style.display = (n === v) ? '' : 'none'; });
     const t = document.getElementById('brb-titulo'), st = document.getElementById('brb-subtitulo');
-    if(v === 'entrar'){ t.textContent = 'Dashboard Inteligente de Socios'; st.textContent = 'Entra con tu usuario del Club'; }
+    if(v === 'entrar'){ t.textContent = 'Dashboard Inteligente de Usuarios'; st.textContent = 'Entra con tu usuario del Club'; }
     if(v === 'olvide'){
       t.textContent = 'Olvidé mi contraseña'; st.textContent = 'Escribe tu correo y te mandamos una liga para elegir una nueva';
       const c = document.getElementById('brb-correo'), co = document.getElementById('brb-correo-olvide');
@@ -2856,7 +2856,7 @@ async function guardarModoPrueba(valor){
       body:JSON.stringify({modo_prueba:MODO_PRUEBA})});
     const res = await r.json().catch(()=>({}));
     if(res && typeof res.modo_prueba==='boolean'){ MODO_PRUEBA = res.modo_prueba; renderModoPruebaUI(); }
-    showToast(MODO_PRUEBA ? '🔒 Modo prueba ACTIVADO — los envíos solo van al equipo de prueba' : '⚠️ Modo prueba APAGADO — los envíos irán a socios reales');
+    showToast(MODO_PRUEBA ? '🔒 Modo prueba ACTIVADO — los envíos solo van al equipo de prueba' : '⚠️ Modo prueba APAGADO — los envíos irán a usuarios reales');
   }catch(e){ showToast('⚠️ No se pudo guardar el modo prueba — verifica n8n'); }
 }
 
@@ -3001,7 +3001,7 @@ function getObs(m){ return obsCache[String(m)]||''; }
 
 function setObs(m,v){ obsCache[String(m)]=v; }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
-// tipo_cuota = % que el socio PAGA (no es descuento).
+// tipo_cuota = % que el usuario PAGA (no es descuento).
 // La base redondea los decimales: el valor 63 corresponde en realidad a 62.5%.
 const CUOTA_DECIMALES = { 63: 62.5 };
 function cuotaPct(tc){
@@ -3182,7 +3182,7 @@ function dirTogglePill(which,btn){
 //    (este ultimo siempre va dentro de una membresia) -> bonificacion al 100%
 //    mientras dure una baja temporal vigente.
 // 13-ago-2026 (s47) — MATIZ IMPORTANTE QUE DIO EL CLUB: esa bonificacion NO es
-// automatica, se aplica solo si el socio PAGA su baja temporal. Mientras no la pague,
+// automatica, se aplica solo si el usuario PAGA su baja temporal. Mientras no la pague,
 // el cargo sale completo y es correcto. Ese pago no llega al Dashboard, asi que estos
 // casos se senalan como POR REVISAR, nunca como error del Sistema.
 // El Dashboard NO descuenta el adeudo: solo lo SENALA para que Cobranza lo
@@ -3232,7 +3232,7 @@ function etiquetaMembBaja(d){
   return '<span class="chip-memb-baja" title="Todos los integrantes de esta membresia tienen baja temporal vigente, no solo este dependiente.">Membresia en baja temporal</span>';
 }
 // 13-ago-2026 (s47) — TEXTO CORREGIDO. El Club aclaró que la bonificación de la baja
-// temporal NO es automática: se aplica solo si el socio paga su baja; mientras no la
+// temporal NO es automática: se aplica solo si el usuario paga su baja; mientras no la
 // pague, el cargo sale completo y es correcto. Antes esta pantalla afirmaba que "les
 // corresponde bonificación al 100%", que es un dato que el Dashboard no puede saber.
 // La detección se queda igual (el criterio es bueno); lo que cambia es que ahora se
@@ -3486,7 +3486,7 @@ function initAccesos(){
   const baja=TODOS.filter(d=>d.ac>=1&&d.ac<20).length, nula=TODOS.filter(d=>d.ac===0).length;
   const bt=TODOS.filter(d=>d.sit==='Baja Temporal'&&d.ac===0).length;   // v56 — no han venido y estan en baja temporal
   const defs=[
-    {id:'acc-all',val:total,label:'Socios en base',sub:'Registro completo',cls:'',f:''},
+    {id:'acc-all',val:total,label:'Usuarios en base',sub:'Registro completo',cls:'',f:''},
     {id:'acc-vino',val:conAcc,label:'Visitaron '+RANGO_CORTO,sub:'Al menos 1 visita',cls:'k-naranja',f:'vino'},
     {id:'acc-alta',val:alta,label:'Actividad Alta',sub:'60+ visitas',cls:'k-s1',f:'alta'},
     {id:'acc-media',val:media,label:'Actividad Media',sub:'20–59 visitas',cls:'k-s2',f:'media'},
@@ -3589,7 +3589,7 @@ function renderAcc(){
       <td>${d.es_cabeza?'<span class="pill pill-tit">★ '+esc(d.tu||'Titular')+'</span>':'<span class="pill pill-dep">'+esc(d.tu||'—')+'</span>'}</td>
       <td><strong>${d.ac}</strong></td>
       <td><span class="pill" style="${al.c}">${al.l}</span></td>
-      <td>${(d.sit==='Inactivo'&&!(d.dias>0))?`<span class="pill pill-gris" title="Socio inactivo — no genera cobro">⚪ No genera cobro</span>`:(d.dias>0?`<span class="pill pill-s4">${d.dias}d</span>`:`<span class="pill pill-ok">Al corriente</span>`)}</td>
+      <td>${(d.sit==='Inactivo'&&!(d.dias>0))?`<span class="pill pill-gris" title="Usuario inactivo — no genera cobro">⚪ No genera cobro</span>`:(d.dias>0?`<span class="pill pill-s4">${d.dias}d</span>`:`<span class="pill pill-ok">Al corriente</span>`)}</td>
     </tr>`;
   }).join(''):'<tr><td colspan="7" class="no-data">Sin resultados</td></tr>';
   updateSortIcons('accesos',accSort);
@@ -3724,7 +3724,7 @@ function renderCob(){
     const obs=getObs(d.m);
     return `<tr>
       <td><span class="memb-num">${d.m}</span></td>
-      <td><span class="nombre-link" onclick="abrirDetalleSocio(${d.m},${d.id})">${d.n}</span>${d.sit==='Baja Temporal'?'<span class="bt-chip" title="Socio en baja temporal — la baja no cancela el adeudo">BT</span>':''}${d._depOnly?'<span class="dep-chip" title="El adeudo no es del titular: corresponde a uno o más dependientes de esta membresía">Adeudo de dependiente</span>':''}${chipBecado(d)}</td>
+      <td><span class="nombre-link" onclick="abrirDetalleSocio(${d.m},${d.id})">${d.n}</span>${d.sit==='Baja Temporal'?'<span class="bt-chip" title="Usuario en baja temporal — la baja no cancela el adeudo">BT</span>':''}${d._depOnly?'<span class="dep-chip" title="El adeudo no es del titular: corresponde a uno o más dependientes de esta membresía">Adeudo de dependiente</span>':''}${chipBecado(d)}</td>
       <td><span class="pill pill-type">${d.tm}</span></td>
       <td style="font-size:.72rem">${d.pb}</td>
       <td><span class="pill ${sc.pillCls}">${d.dias} ${d.dias===1?'día':'días'}</span></td>
@@ -4523,12 +4523,12 @@ function confirmarEnvioManual(){
   ov.id = 'manual-modal';
   ov.innerHTML =
     '<div class="modal-box" style="max-width:520px;text-align:left">'
-    + '<h3 style="text-align:center">' + (real ? '🔴 Envío REAL a socios del Club' : '🧪 Envío de prueba') + '</h3>'
+    + '<h3 style="text-align:center">' + (real ? '🔴 Envío REAL a usuarios del Club' : '🧪 Envío de prueba') + '</h3>'
     + '<p style="text-align:center;margin-bottom:12px">'
       + (real
           ? 'Le va a llegar este correo a <strong>' + total + '</strong> '
             + (total === 1 ? 'persona real' : 'personas reales') + '.'
-          : 'Se enviará al equipo de prueba. Ningún socio del Club recibirá nada.')
+          : 'Se enviará al equipo de prueba. Ningún usuario del Club recibirá nada.')
     + '</p>'
     + '<div style="text-align:center;margin:-4px 0 12px;font-size:.76rem;font-weight:800;color:#1a3a6b;background:#f0f6ff;border:1px solid #c8d9f0;border-radius:8px;padding:7px 10px">'
       + (conWA
@@ -4583,7 +4583,7 @@ async function enviarManual(){
   if(!totalLista.length){showToast('⚠️ No hay destinatarios seleccionados');return;}
   // Modo prueba: en envío POR SEGMENTO redirige a TODO el equipo de prueba;
   // en SELECCIÓN MANUAL respeta a quien elegiste, pero por seguridad solo permite
-  // al equipo de prueba (así en Modo Prueba nunca se escapa un correo a un socio real).
+  // al equipo de prueba (así en Modo Prueba nunca se escapa un correo a un usuario real).
   if(MODO_PRUEBA){
     const modoSel=document.getElementById('av-seg-manual')?.value;
     if(modoSel==='manual'){
@@ -4653,7 +4653,7 @@ async function enviarManual(){
   }catch(e){
     showToast('⚠️ Error de conexión — verifica n8n');
   }
-  if(btn){btn.disabled=false;btn.innerHTML='✉️ Enviar a <span id="btn-send-count">'+totalLista.length+'</span> socios';}
+  if(btn){btn.disabled=false;btn.innerHTML='✉️ Enviar a <span id="btn-send-count">'+totalLista.length+'</span> usuarios';}
 }
 
 function agregarHistorial(count, conWA){
@@ -4741,7 +4741,7 @@ function moduloDeFila(h){
 }
 
 // v65 — Canal. "Ambos" NO se guarda en la base: se calcula al pintar, agrupando
-// las filas del mismo socio, mismo módulo y mismo día. Una fila por canal.
+// las filas del mismo usuario, mismo módulo y mismo día. Una fila por canal.
 const CANALES_HIST = {
   correo:   {icon:'📧', label:'Correo',   color:'#1a3a6b', bg:'#e8f0fb'},
   whatsapp: {icon:'💬', label:'WhatsApp', color:'#15803d', bg:'#dcfce7'},
@@ -4799,7 +4799,7 @@ function histFiltrado(){
   });
 }
 
-// v65 — Colapsa las filas del mismo socio + módulo + día en un solo renglón,
+// v65 — Colapsa las filas del mismo usuario + módulo + día en un solo renglón,
 // y de ahí sale la etiqueta "Ambos".
 function histAgrupar(filas){
   const mapa = new Map();
@@ -4810,7 +4810,7 @@ function histAgrupar(filas){
     // El nombre NO entra en la llave: el correo guarda el nombre completo
     // ('Fernando Davila Test') y el WhatsApp solo el primero ('Fernando'),
     // porque la plantilla de Meta se saluda con el nombre de pila. Si el nombre
-    // formara parte de la llave, un mismo socio se partiria en dos renglones y
+    // formara parte de la llave, un mismo usuario se partiria en dos renglones y
     // la etiqueta "Ambos" no aparecería nunca.
     const llave = dia+'|'+memb+'|'+mod;
     if(!mapa.has(llave)){
@@ -4918,13 +4918,13 @@ function renderHistorial(){
     const nEnv = grupos[k].length, nSoc = socios.length;
     const resumen = nSoc === nEnv
       ? `${nEnv} ${nEnv===1?'envío':'envíos'}`
-      : `${nSoc} ${nSoc===1?'socio':'socios'} · ${nEnv} envíos`;
+      : `${nSoc} ${nSoc===1?'usuario':'usuarios'} · ${nEnv} envíos`;
     return `<details class="hist-dia" ${i===0?'open':''}>
       <summary><span class="hd-arrow">▶</span> ${histLabel(k)} <span class="hd-count">${resumen}</span></summary>
       <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:.75rem;margin-top:6px;min-width:640px">
         <thead><tr style="background:#f0f4ff">
-          <th style="${TH}">Módulo</th><th style="${TH}">Socio</th><th style="${TH}">Membresía</th><th style="${TH};text-align:center">📧 Correo</th><th style="${TH};text-align:center">💬 WhatsApp</th><th style="${TH};text-align:center">Ambos</th><th style="${TH}">Hora</th><th style="${TH}">Estado</th>
+          <th style="${TH}">Módulo</th><th style="${TH}">Usuario</th><th style="${TH}">Membresía</th><th style="${TH};text-align:center">📧 Correo</th><th style="${TH};text-align:center">💬 WhatsApp</th><th style="${TH};text-align:center">Ambos</th><th style="${TH}">Hora</th><th style="${TH}">Estado</th>
         </tr></thead><tbody>${filas}</tbody></table>
       </div>
     </details>`;
@@ -4935,9 +4935,9 @@ function exportarHistorial(){
   if(!lista.length){ showToast('⚠️ No hay envíos en ese rango para exportar'); return; }
   const desde=document.getElementById('hist-desde')?.value||'', hasta=document.getElementById('hist-hasta')?.value||'';
   // prod (6-ago) — El Excel ahora sale AGRUPADO, igual que la pantalla: una fila por
-  // socio, módulo y día, con las tres columnas de canal por separado. Antes salía una
-  // fila por envío, así que un socio que recibió correo y WhatsApp aparecía dos veces
-  // y no se podía contar cuántos socios se contactaron sin depurar a mano.
+  // usuario, módulo y día, con las tres columnas de canal por separado. Antes salía una
+  // fila por envío, así que un usuario que recibió correo y WhatsApp aparecía dos veces
+  // y no se podía contar cuántos usuarios se contactaron sin depurar a mano.
   // Cada columna dice 'Sí' (salió bien), 'Error' (se intentó y falló) o queda vacía
   // (no se intentó por ese canal), para que se pueda filtrar y sumar en Excel.
   const grupos = histAgrupar(lista);
@@ -4952,7 +4952,7 @@ function exportarHistorial(){
     if(!env.length) return '';
     return env.some(e=>e.ok) ? 'Sí' : 'Error';
   };
-  const enc=['Fecha','Hora','Módulo','Socio','Membresía','Dirección de correo','Teléfono',
+  const enc=['Fecha','Hora','Módulo','Usuario','Membresía','Dirección de correo','Teléfono',
              'Correo','WhatsApp','Ambos','Estado','Detalle'];
   const filas = grupos.map(g=>{
     const est = histEstadoDe(g);
@@ -4978,7 +4978,7 @@ function exportarHistorial(){
   }));
   xlsxDescargar(`historial_envios_berimbau_${desde||'inicio'}_a_${hasta||'hoy'}`,
                 'Historial de envios', enc, filasXls);
-  showToast(`✅ ${grupos.length} socios exportados (${lista.length} envíos)`);
+  showToast(`✅ ${grupos.length} usuarios exportados (${lista.length} envíos)`);
 }
 // ===== GRÁFICAS =====
 let graficasIniciadas = false;
@@ -5041,11 +5041,11 @@ function drawBarsEdades(canvasId, data, legendId, opts){
   });
   gdBind(canvas);
   const leg=document.getElementById(legendId);
-  if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">Total de socios activos: <strong style="color:#1a2035;margin-left:4px">'+total+'</strong>'+
+  if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">Total de usuarios activos: <strong style="color:#1a2035;margin-left:4px">'+total+'</strong>'+
                         '<span style="margin-left:8px;color:#4a9fd4;font-weight:700">· clic en una barra para ver el listado</span></div>';
 }
 function renderPieEdades(){
-  // v56 — solo socios Activos, contando personas (no membresias)
+  // v56 — solo usuarios Activos, contando personas (no membresias)
   // 13-ago-2026 (s47) — se agrega el filtro m<990000. Esta grafica estaba sumando
   // a los 7 usuarios internos de prueba (990001-990006), asi que el total decia 2687
   // cuando los activos reales son 2680. Lo cazo el Club al comparar contra las tres
@@ -5057,7 +5057,7 @@ function renderPieEdades(){
     return {label:g.lbl, color:g.color, val:items.length, items:items};
   });
   drawBarsEdades('chart-pie-edades', data, 'legend-pie-edades', {
-    titulo:'Socios activos por rango de edad', datoLabel:'Edad',
+    titulo:'Usuarios activos por rango de edad', datoLabel:'Edad',
     datoFn: d => { const e=(d.ed!=null?d.ed:d.edad); return e==null?'—':e+(Number(e)===1?' año':' años'); }
   });
 }
@@ -5075,27 +5075,27 @@ function edadesRangoLibre(){
   if(isNaN(min)||isNaN(max)){ decir('Escribe las dos edades.'); return; }
   if(min<0||max<0||min>120||max>120){ decir('Las edades van de 0 a 120.'); return; }
   // Si vienen al reves se voltean en vez de devolver cero: escribir "de 29 a 26" es un
-  // dedazo, no una consulta vacia, y una lista vacia haria creer que no hay socios.
+  // dedazo, no una consulta vacia, y una lista vacia haria creer que no hay usuarios.
   if(min>max){ const t=min; min=max; max=t; elMin.value=min; elMax.value=max; }
   const activos=TODOS.filter(d=>d.sit==='Activo' && Number(d.m)<990000);
   const items=activos.filter(d=>{ const e=(d.ed!=null?d.ed:d.edad); return e!=null && e>=min && e<=max; });
-  if(!items.length){ decir('No hay socios activos de '+min+' a '+max+' años.'); return; }
+  if(!items.length){ decir('No hay usuarios activos de '+min+' a '+max+' años.'); return; }
   const pct=activos.length?Math.round(items.length/activos.length*100):0;
   decir(items.length+' de '+activos.length+' ('+pct+'%)');
   gdAbrir({label:'De '+min+' a '+max+' años', items:items}, {
-    titulo:'Socios activos por rango de edad', datoLabel:'Edad',
+    titulo:'Usuarios activos por rango de edad', datoLabel:'Edad',
     datoFn: d => { const e=(d.ed!=null?d.ed:d.edad); return e==null?'—':e+(Number(e)===1?' año':' años'); }
   });
 }
 /* ===== PERFIL DEL PADRÓN — 3 gráficas (tipo de usuario, antigüedad, concepto de pago) =====
    Los tres cortes se cuentan sobre lo que venga en los datos, sin listas fijas: si mañana
-   el Club da de alta un tipo de socio o un concepto de pago nuevo, aparece solo. */
+   el Club da de alta un tipo de usuario o un concepto de pago nuevo, aparece solo. */
 
 // Paleta rotativa para categorías dinámicas
 const PALETA_PERFIL = ['#1a3a6b','#3AAA35','#4a9fd4','#EF4B1F','#1a8a6e','#9b5de5',
                        '#c8a84b','#f97316','#8ecae6','#4a5068','#991b1b','#7a8194'];
 
-// Socios reales del directorio: fuera las membresías de servicio del equipo de prueba
+// Usuarios reales del directorio: fuera las membresías de servicio del equipo de prueba
 function sociosPadron(){ return TODOS.filter(d => Number(d.m) < 990000); }
 // 14-ago-2026 (s48) — UNIVERSO POR MEMBRESIA. Se toma la CABEZA de cada membresia
 // (es_cabeza de v_socios), que es el mismo criterio con el que Cobranza cuenta y con
@@ -5150,7 +5150,7 @@ function gdBind(canvas){
     const t=gdTipEl();
     if(!d){ t.style.display='none'; return; }
     const tot=canvas._gdData.reduce((a,x)=>a+x.val,0)||1;
-    const uni=(canvas._gdOpts&&/Membres/i.test(canvas._gdOpts.titulo||''))?'membresía':'socio';
+    const uni=(canvas._gdOpts&&/Membres/i.test(canvas._gdOpts.titulo||''))?'membresía':'usuario';
     t.innerHTML='<span class="gt-lbl">'+esc(d.label)+'</span>'+
       d.val+' '+uni+(d.val===1?'':'s')+' · '+Math.round(d.val/tot*100)+'% del total'+
       '<span class="gt-hint">clic para ver el listado</span>';
@@ -5183,7 +5183,7 @@ function gdAbrir(grupo, opts){
   ov=document.createElement('div');
   ov.id='gd-overlay'; ov.className='gd-overlay no-print';
   ov.onclick=function(e){ if(e.target===ov) gdCerrar(); };
-  const unidad=/Membres/i.test(opts.titulo||'')?'membresías':'socios';
+  const unidad=/Membres/i.test(opts.titulo||'')?'membresías':'usuarios';
   ov.innerHTML=
     '<div class="gd-box">'
     + '<div class="gd-head"><div>'
@@ -5443,7 +5443,7 @@ function gdExportar(){
                  .replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'').toLowerCase().slice(0,40);
   const hoy=new Date(), f=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getDate()).padStart(2,'0');
   const nom='berimbau_'+slug(GD_STATE.opts.titulo)+'_'+slug(GD_STATE.label)+'_'+f;
-  xlsxDescargar(nom, (GD_STATE.opts.titulo||'Socios'), cab, filas);
+  xlsxDescargar(nom, (GD_STATE.opts.titulo||'Usuarios'), cab, filas);
 }
 
 // Barras horizontales genéricas. El canvas se mide contra el ancho real de su tarjeta,
@@ -5506,8 +5506,8 @@ function drawBarsPerfil(canvasId, data, legendId, padLBase, opts){
   canvas._gdGeo=_geo;
   gdBind(canvas);
   const leg=document.getElementById(legendId);
-  // 21-sep-2026 — el rotulo del total lo decide cada grafica (usuarios, membresias); si no dice nada, queda 'socios'.
-  const _totLbl=(canvas._gdOpts && canvas._gdOpts.totalLbl) || 'Total de socios';
+  // 21-sep-2026 — el rotulo del total lo decide cada grafica (usuarios, membresias); si no dice nada, queda 'usuarios'.
+  const _totLbl=(canvas._gdOpts && canvas._gdOpts.totalLbl) || 'Total de usuarios';
   if(leg) leg.innerHTML='<div class="graf-legend-item" style="color:#8a90a0">'+_totLbl+': '+
                         '<strong style="color:#1a2035;margin-left:4px">'+total+'</strong>'+
                         '<span style="margin-left:8px;color:#4a9fd4;font-weight:700">· clic en una barra para ver el listado</span></div>';
@@ -5516,7 +5516,7 @@ function drawBarsPerfil(canvasId, data, legendId, padLBase, opts){
 // Agrupa por un campo y ordena de mayor a menor; los vacíos caen en la etiqueta que se indique
 function agruparPorCampo(lista, campo, etiquetaVacio){
   // 14-ago-2026 (s48) — ademas del conteo se guardan los REGISTROS de cada grupo, que son
-  // los que alimentan el panel del clic. Se guarda la referencia al socio, no una copia,
+  // los que alimentan el panel del clic. Se guarda la referencia al usuario, no una copia,
   // para que el panel abra el mismo detalle que el Directorio y no una version congelada.
   const mapa={};
   lista.forEach(d=>{
@@ -5552,7 +5552,7 @@ const RANGOS_ANTIGUEDAD=[
   {lbl:'40 años o más',  min:40, max:999,  color:'#991b1b'}
 ];
 
-// 14-ago-2026 (s48) — se parametrizo la lista y los ids para que el corte por socio y
+// 14-ago-2026 (s48) — se parametrizo la lista y los ids para que el corte por usuario y
 // el corte por membresia usen EXACTAMENTE el mismo calculo. Duplicar la funcion habria
 // dejado dos rangos que en tres meses dirian cosas distintas.
 function renderAntiguedadEn(lista, canvasId, legendId, titulo, totalLbl){
@@ -5571,14 +5571,14 @@ function renderAntiguedadEn(lista, canvasId, legendId, titulo, totalLbl){
     'El directorio no está mandando los años de permanencia.</div>';
 }
 
-function renderAntiguedad(){ renderAntiguedadEn(sociosPadron(),'chart-antiguedad','legend-antiguedad','Socios por antigüedad'); }
+function renderAntiguedad(){ renderAntiguedadEn(sociosPadron(),'chart-antiguedad','legend-antiguedad','Usuarios por antigüedad','Total de usuarios'); }
 function renderAntiguedadMemb(){ renderAntiguedadEn(membresiasPadron(),'chart-antiguedad-memb','legend-antiguedad-memb','Membresías por antigüedad','Total de membresías'); }
 
 function renderConceptoPago(){
   drawBarsPerfil('chart-concepto-pago',
     agruparPorCampo(sociosPadron(),'cup','Sin concepto de pago'),
     'legend-concepto-pago', 175,
-    {titulo:'Socios por concepto de último pago', datoLabel:'Concepto de último pago', datoFn:d=>d.cup||'Sin concepto de pago'});
+    {titulo:'Usuarios por concepto de último pago', datoLabel:'Concepto de último pago', datoFn:d=>d.cup||'Sin concepto de pago', totalLbl:'Total de usuarios'});
 }
 
 function renderConceptoMemb(){
@@ -5607,19 +5607,27 @@ function renderGraficas(){
   renderConceptoMemb();
   renderAntiguedad();
   renderConceptoPago();
-  const total = EN_ADEUDO.length;
-  const s1 = EN_ADEUDO.filter(d=>d.sg==='s1');
-  const s2 = EN_ADEUDO.filter(d=>d.sg==='s2');
-  const s3 = EN_ADEUDO.filter(d=>d.sg==='s3');
-  const s4 = EN_ADEUDO.filter(d=>d.sg==='s4');
+  /* 22-sep-2026 — LA CARTERA YA NO CUENTA LAS MEMBRESIAS DE PRUEBA.
+     Lo cacho el Club: la dona decia 2,766 y la grafica de tipo de usuario 2,757,
+     y la diferencia eran las 9 personas de las membresias 990000+. Aqui se usa el
+     MISMO universo que las graficas del perfil del padron (sociosPadron), para que
+     ninguna pantalla contradiga a otra. EN_ADEUDO NO se toca: de el cuelgan Cobranza
+     y los envios, y ahi el modo prueba si necesita ver las de prueba. */
+  const PADRON = sociosPadron();
+  const ADEUDO = EN_ADEUDO.filter(d=>Number(d.m)<990000);
+  const total = ADEUDO.length;
+  const s1 = ADEUDO.filter(d=>d.sg==='s1');
+  const s2 = ADEUDO.filter(d=>d.sg==='s2');
+  const s3 = ADEUDO.filter(d=>d.sg==='s3');
+  const s4 = ADEUDO.filter(d=>d.sg==='s4');
   const s23 = [...s2,...s3];
-  // Total socios: tamaño real del directorio cargado desde n8n
-  const totalSocios = TODOS.length || 1;
-  const corriente = totalSocios - total;
+  // Total de usuarios: el padron real, sin las membresias de servicio
+  const totalUsuarios = PADRON.length || 1;
+  const corriente = totalUsuarios - total;
 
   // KPIs
   setText('gk-corriente', corriente);
-  setText('gk-corriente-pct', Math.round(corriente/totalSocios*100)+'% del total');
+  setText('gk-corriente-pct', Math.round(corriente/totalUsuarios*100)+'% del total');
   setText('gk-s1', s1.length);
   setText('gk-s23', s23.length);
   setText('gk-s4', s4.length);
@@ -5642,7 +5650,7 @@ function renderGraficas(){
   ]);
 
   // Top 10 morosos
-  const top10 = [...EN_ADEUDO].sort((a,b)=>b.dias-a.dias).slice(0,10);
+  const top10 = [...ADEUDO].sort((a,b)=>b.dias-a.dias).slice(0,10);
   const maxDias = top10[0]?.dias||1;
   const segColors={'s1':'#f59e0b','s2':'#f97316','s3':'#ef4444','s4':'#991b1b'};
   const container = document.getElementById('graf-top-morosos');
@@ -5655,17 +5663,17 @@ function renderGraficas(){
 
   // Tipos de membresía
   const tiposMap={};
-  EN_ADEUDO.forEach(d=>{const t=d.tipo||'Sin tipo';tiposMap[t]=(tiposMap[t]||0)+1;});
+  ADEUDO.forEach(d=>{const t=d.tipo||'Sin tipo';tiposMap[t]=(tiposMap[t]||0)+1;});
   const tiposArr=Object.entries(tiposMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
   drawBarsH('chart-tipos', tiposArr.map(([k,v])=>({label:k,val:v})), '#4a9fd4');
 
   // Grupos de edad
   const grupos=[{lbl:'<18',min:0,max:17},{lbl:'18–25',min:18,max:25},{lbl:'26–35',min:26,max:35},{lbl:'36–45',min:36,max:45},{lbl:'46–55',min:46,max:55},{lbl:'56–65',min:56,max:65},{lbl:'>65',min:66,max:120}];
-  const edadesArr=grupos.map(g=>({label:g.lbl,val:EN_ADEUDO.filter(d=>{const e=(d.ed!=null?d.ed:d.edad);return e!=null&&e>=g.min&&e<=g.max;}).length}));
+  const edadesArr=grupos.map(g=>({label:g.lbl,val:ADEUDO.filter(d=>{const e=(d.ed!=null?d.ed:d.edad);return e!=null&&e>=g.min&&e<=g.max;}).length}));
   drawBarsH('chart-edades', edadesArr, '#EF4B1F');
 
   // Semáforo
-  renderSemaforo(corriente, totalSocios, s1.length, s23.length, s4.length);
+  renderSemaforo(corriente, totalUsuarios, s1.length, s23.length, s4.length);
 }
 
 function setText(id, val){const el=document.getElementById(id);if(el)el.textContent=val;}
@@ -5694,7 +5702,10 @@ function drawDonut(canvasId, data, legendId){
   ctx.fillText('en adeudo', cx, cy+10);
   // Legend
   const leg=document.getElementById(legendId);
-  if(leg) leg.innerHTML=data.map(d=>`<div class="graf-legend-item"><div class="graf-legend-dot" style="background:${d.color}"></div>${d.label}: <strong>${d.val}</strong></div>`).join('');
+  // 22-sep-2026 — la dona dice de cuantos usuarios sale el reparto, para que no haya
+  // que sumar los cinco colores a mano para saber sobre que base esta hecha.
+  if(leg) leg.innerHTML=data.map(d=>`<div class="graf-legend-item"><div class="graf-legend-dot" style="background:${d.color}"></div>${d.label}: <strong>${d.val}</strong></div>`).join('')
+    + `<div class="graf-legend-item" style="width:100%;color:#8a90a0;margin-top:6px">Total de usuarios contados: <strong style="color:#1a2035;margin-left:4px">${total}</strong></div>`;
 }
 
 function drawBarsSegs(canvasId, data){
@@ -5760,10 +5771,10 @@ function renderSemaforo(corriente, total, s1, s23, s4){
   const pctCorriente=Math.round(corriente/total*100);
   const pctRiesgo=Math.round((s23+s4)/total*100);
   const items=[
-    {icon:'🟢',label:'Socios al corriente',val:corriente+' socios',pct:pctCorriente+'%',color:'#dcfce7',border:'#3AAA35',txt:'#15803d'},
-    {icon:'🟡',label:'Adeudo reciente (0–30d)',val:s1+' socios',pct:Math.round(s1/total*100)+'%',color:'#fef9c3',border:'#ca8a04',txt:'#92400e'},
-    {icon:'🔴',label:'Riesgo medio-alto (31–90d)',val:s23+' socios',pct:Math.round(s23/total*100)+'%',color:'#fee2e2',border:'#ef4444',txt:'#dc2626'},
-    {icon:'⛔',label:'Posible abandono (+90d)',val:s4+' socios',pct:Math.round(s4/total*100)+'%',color:'#f3e8ff',border:'#9333ea',txt:'#7e22ce'},
+    {icon:'🟢',label:'Usuarios al corriente',val:corriente+' usuarios',pct:pctCorriente+'%',color:'#dcfce7',border:'#3AAA35',txt:'#15803d'},
+    {icon:'🟡',label:'Adeudo reciente (0–30d)',val:s1+' usuarios',pct:Math.round(s1/total*100)+'%',color:'#fef9c3',border:'#ca8a04',txt:'#92400e'},
+    {icon:'🔴',label:'Riesgo medio-alto (31–90d)',val:s23+' usuarios',pct:Math.round(s23/total*100)+'%',color:'#fee2e2',border:'#ef4444',txt:'#dc2626'},
+    {icon:'⛔',label:'Posible abandono (+90d)',val:s4+' usuarios',pct:Math.round(s4/total*100)+'%',color:'#f3e8ff',border:'#9333ea',txt:'#7e22ce'},
   ];
   sem.innerHTML=items.map(it=>`
     <div style="flex:1;min-width:180px;background:${it.color};border:1px solid ${it.border};border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px">
@@ -6215,7 +6226,7 @@ function getModRecipients(tipo){
 function _mesMX(){ return new Date().toLocaleDateString('es-MX',{month:'long'}); }
 // v64 / s58 — El aviso de domiciliados se manda el día 1 y el cargo cae los primeros
 // días de ESE MISMO mes. El cron ya no suma un mes; la prueba tampoco, para que el
-// texto que se revisa en la prueba sea el mismo que recibe el socio.
+// texto que se revisa en la prueba sea el mismo que recibe el usuario.
 // _mesSiguienteMX se conserva porque la usan otros modulos.
 function _mesSiguienteMX(){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()+1); return d.toLocaleDateString('es-MX',{month:'long'}); }
 function _fechaMasDias(n){ const d=new Date(); d.setDate(d.getDate()+n); return d.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}); }
@@ -6278,7 +6289,7 @@ function _buildAviso(tipo, mes){
 // A partir del v64 el botón:
 //   1. Lee el asunto y el cuerpo escritos en el módulo.
 //   2. Valida que no queden variables que el sistema no conoce (una variable
-//      inventada se enviaría en crudo al socio, tal cual está escrita).
+//      inventada se enviaría en crudo al usuario, tal cual está escrita).
 //   3. Elige la plantilla de WhatsApp masculina o femenina según cada persona.
 
 // Qué variables entiende cada módulo. Cualquier otra se considera un error.
@@ -6303,7 +6314,7 @@ function _camposVisibles(tipo){
 }
 
 // Sustituye solo las variables de contexto (el mes). {{nombre}} y {{membresia}}
-// se dejan tal cual: las personaliza el webhook, socio por socio.
+// se dejan tal cual: las personaliza el webhook, usuario por usuario.
 function _sustituirContexto(txt, mes){
   return String(txt||'').split('{{mes}}').join(mes);
 }
@@ -6324,7 +6335,7 @@ async function probarAviso(tipo){
   // 26-ago-2026 (s58) — El aviso de domiciliados ya habla del cargo del MES EN CURSO,
   // igual que el cron: sale el dia 1 y el banco cobra el dia 5 de ese mismo mes.
   // Antes usaba _mesSiguienteMX(); si no se cambia, la prueba que revisa Cobranza
-  // diria un mes y el socio recibiria otro.
+  // diria un mes y el usuario recibiria otro.
   const mes = _mesMX();
   const cfg=_buildAviso(tipo, mes);
   if(!cfg) return;
@@ -6573,7 +6584,7 @@ async function cargarModulos(){
 //   - Por eso NO se reusa enviarCargoFallido(), que le pega directo a los
 //     webhooks de correo y WhatsApp saltandose ese motor.
 //   - Interruptor PRUEBA/REAL, arranca SIEMPRE en prueba. En prueba el webhook
-//     lee la tabla socios_test: es fisicamente incapaz de tocar a un socio.
+//     lee la tabla socios_test: es fisicamente incapaz de tocar a un usuario.
 //   - En modo real la confirmacion obliga a escribir la palabra ENVIAR.
 // ============================================================================
 let CF_LISTA = [];
@@ -6582,7 +6593,7 @@ let CF_MODO_PRUEBA = true;
 // Viaja en el POST al webhook. Si vale 'ambos' el motor se porta como siempre.
 let CF_CANAL = 'ambos';
 
-// Un socio es alcanzable si tiene capturado el dato del canal elegido. Con
+// Un usuario es alcanzable si tiene capturado el dato del canal elegido. Con
 // 'Solo WhatsApp' alguien que solo tiene correo queda fuera, aunque SI tenga
 // un canal: por eso no basta con preguntar si tiene correo o whats.
 function cfTieneCanal(x){
@@ -6655,7 +6666,7 @@ function cfRender(){
   if(!cont) return;
   if(!CF_LISTA.length){
     cont.innerHTML = '<div style="padding:18px 14px;text-align:center;font-size:.8rem;color:#8a90a0;background:#fff">'
-                   + 'No hay socios con cargo rechazado en este momento.</div>';
+                   + 'No hay usuarios con cargo rechazado en este momento.</div>';
     cfActualizarContador();
     return;
   }
@@ -6810,11 +6821,11 @@ function confirmarEnvioCargoFallido(){
   ov.id = 'cf-modal';
   ov.innerHTML =
     '<div class="modal-box" style="max-width:520px;text-align:left">'
-    + '<h3 style="text-align:center">' + (real ? '🔴 Envío REAL a socios del Club' : '🧪 Envío de prueba') + '</h3>'
+    + '<h3 style="text-align:center">' + (real ? '🔴 Envío REAL a usuarios del Club' : '🧪 Envío de prueba') + '</h3>'
     + '<p style="text-align:center;margin-bottom:12px">'
       + (real
           ? 'Le va a llegar el aviso de cargo rechazado a estas <strong>' + sel.length + '</strong> membresías reales.'
-          : 'Se enviará a los socios de prueba. Ningún socio del Club recibirá nada.')
+          : 'Se enviará a los usuarios de prueba. Ningún usuario del Club recibirá nada.')
     + '</p>'
     // s37 - El canal elegido se repite aqui a proposito: es la ultima pantalla
     // antes de que salga el mensaje y el selector queda arriba, fuera de vista.
@@ -6957,7 +6968,7 @@ function cfPintarResultado(salida){
 //   cabeza de la membresia.
 //
 // ⚠️ EN MODO PRUEBA LA LISTA CAMBIA DE FUENTE, A PROPOSITO. Esta pantalla se
-//   alimenta de 'socios' (reales) y el webhook en prueba lee 'socios_test'. Si
+//   alimenta de 'usuarios' (reales) y el webhook en prueba lee 'socios_test'. Si
 //   se mostrara la lista real en modo prueba, la pantalla ofreceria un envio que
 //   el motor iba a rechazar — el mismo error del caso 6028. Por eso en prueba se
 //   muestra la familia de prueba y nada mas.
@@ -6967,7 +6978,7 @@ let M26_MODO_PRUEBA = true;
 
 // La familia de prueba (990005). Correo y WhatsApp caen los dos en Fernando, y
 // en modo prueba la copia de Cobranza tambien, asi que es imposible tocar a un
-// socio del Club. Verificado de punta a punta el 7-ago-2026.
+// usuario del Club. Verificado de punta a punta el 7-ago-2026.
 const M26_PRUEBA = [{
   membresia: 990005, id: 2,
   dependiente: 'Hijo (Prueba) Davila Test',
@@ -7133,11 +7144,11 @@ function confirmarEnvio26(){
   ov.id = 'm26-modal';
   ov.innerHTML =
     '<div class="modal-box" style="max-width:520px;text-align:left">'
-    + '<h3 style="text-align:center">' + (real ? '🔴 Envío REAL a socios del Club' : '🧪 Envío de prueba') + '</h3>'
+    + '<h3 style="text-align:center">' + (real ? '🔴 Envío REAL a usuarios del Club' : '🧪 Envío de prueba') + '</h3>'
     + '<p style="text-align:center;margin-bottom:12px">'
       + (real
           ? 'Le va a llegar el aviso de 26 años al titular de estas <strong>' + sel.length + '</strong> membresías reales.'
-          : 'Se enviará a la familia de prueba. Ningún socio del Club recibirá nada.')
+          : 'Se enviará a la familia de prueba. Ningún usuario del Club recibirá nada.')
     + '</p>'
     + '<div style="max-height:240px;overflow-y:auto;border:1px solid #dde1e9;border-radius:8px;padding:6px 10px;margin-bottom:14px;background:#f5f6f8">'
       + filas + '</div>'
@@ -7289,13 +7300,13 @@ function initModulesV10(){
      && !esBecado(d)
      && !esDependienteCuota(d));
   const elAnualCount = document.getElementById('mod-anual-count');
-  if(elAnualCount) elAnualCount.textContent = anuales.length + ' socios';
+  if(elAnualCount) elAnualCount.textContent = anuales.length + ' usuarios';
 
   // --- Domiciliados (v60) ---
   // 'Mensual Cargo Automático' solo existe en la tabla de pruebas; en la base
   // real el valor es 'Mensual Domiciliado'.
   // 3-ago-2026 (v66) — SE CUENTAN MEMBRESIAS, NO PERSONAS.
-  // Antes esta linea mostraba 957 socios mientras el cron mandaba 314 correos.
+  // Antes esta linea mostraba 957 usuarios mientras el cron mandaba 314 correos.
   // El cron le escribe UNA sola vez a cada membresia (a la cabeza), no a los 4
   // integrantes de una familia por el mismo cargo. Es el mismo desajuste que ya
   // teniamos entre Cobranza (membresias) y Avisos (personas).
@@ -7374,7 +7385,7 @@ function initModulesV10(){
   proximos30.sort((a,b)=>a.diasFalta-b.diasFalta);
 
   const elCumpleCount = document.getElementById('mod-cumple-count');
-  if(elCumpleCount) elCumpleCount.textContent = proximos30.length + ' socios';
+  if(elCumpleCount) elCumpleCount.textContent = proximos30.length + ' usuarios';
 
   const listaEl = document.getElementById('cumple-lista');
   if(listaEl){
@@ -7383,7 +7394,7 @@ function initModulesV10(){
     } else {
       listaEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.75rem">
         <thead><tr style="background:#f0f4ff">
-          <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--gray-text);text-transform:uppercase">Socio</th>
+          <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--gray-text);text-transform:uppercase">Usuario</th>
           <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--gray-text);text-transform:uppercase">Cumpleaños</th>
           <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--gray-text);text-transform:uppercase">Faltan</th>
           <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--gray-text);text-transform:uppercase">Cumple</th>
@@ -7407,7 +7418,7 @@ function initModulesV10(){
   // --- Próximos a 26 años ---
   // 7-ago-2026 (s37) — LO REPORTO EL CLUB: "el aviso ahorita agarra parejo".
   // Y tenia razon: esta lista recorria TODO el padron y mostraba a cualquiera
-  // con 25 anios, sin mirar que tipo de socio era. En los 90 dias siguientes
+  // con 25 anios, sin mirar que tipo de usuario era. En los 90 dias siguientes
   // salian 3 personas y solo 1 era correcta: una Conyuge (8900) y una Individual
   // Junior (8226) aparecian igual, y a esas cumplir 26 no les cambia nada porque
   // NO son dependientes cubiertos.
@@ -7468,7 +7479,7 @@ function initModulesV10(){
     } else {
       lista26El.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:.75rem">
         <thead><tr style="background:#fff4ee">
-          <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--naranja);text-transform:uppercase">Socio</th>
+          <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--naranja);text-transform:uppercase">Usuario</th>
           <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--naranja);text-transform:uppercase">Cumple 26</th>
           <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--naranja);text-transform:uppercase">Faltan</th>
           <th style="padding:6px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-size:.68rem;color:var(--naranja);text-transform:uppercase">Membresía</th>
@@ -7727,7 +7738,7 @@ function renderSwitchCumple(){
       + '<div style="font-size:.74rem;color:#4a5068;margin-top:4px;line-height:1.55">'
         + (CUMPLE_ACTIVO
             ? 'Todos los días a las <strong>10:05 de la mañana</strong> se manda la felicitación '
-              + 'por correo a los socios que cumplan años ese día. Sigue haciéndolo hasta que se apague aquí.'
+              + 'por correo a los usuarios que cumplan años ese día. Sigue haciéndolo hasta que se apague aquí.'
             : 'La felicitación <strong>no se está enviando</strong>. El sistema despierta cada mañana, '
               + 've el interruptor apagado y termina sin mandar nada.')
       + '</div>'
@@ -7753,7 +7764,7 @@ function cumplePedirCambio(prender){
     '<div class="modal-box" style="max-width:500px;text-align:left">'
     + '<h3 style="text-align:center">🟢 Activar las felicitaciones de cumpleaños</h3>'
     + '<p style="text-align:center;margin-bottom:14px">A partir de mañana, <strong>todos los días '
-      + 'a las 10:05</strong> se enviará la felicitación por correo a los socios que cumplan años ese día.</p>'
+      + 'a las 10:05</strong> se enviará la felicitación por correo a los usuarios que cumplan años ese día.</p>'
     + '<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;'
       + 'border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:.74rem;color:#1a3a6b;line-height:1.55">'
       + 'Este interruptor <strong>no se apaga solo</strong>: queda encendido hasta que alguien lo apague aquí.<br>'
@@ -8375,7 +8386,7 @@ async function exportarSocios(){
     const hoy = new Date().toISOString().slice(0,10);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'socios_berimbau_' + hoy + '.xlsx';
+    a.download = 'usuarios_berimbau_' + hoy + '.xlsx';
     document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
   }catch(e){
@@ -8393,7 +8404,7 @@ function calcNotificaciones(){
 
   const prog = reales.filter(d=>estadoBaja(d)==='programada');
   if(prog.length) out.push({tipo:'info', ico:'🗓',
-    tit:prog.length+' socio'+(prog.length>1?'s':'')+' con baja programada',
+    tit:prog.length+' usuario'+(prog.length>1?'s':'')+' con baja programada',
     txt:'Su periodo de baja aún no comienza. Siguen contando como activos hasta la fecha de inicio.',
     items:prog.map(d=>({m:d.m,id:d.id,n:d.n,extra:'inicia '+fmtFnac(d.fini_baja)}))});
 
@@ -8430,7 +8441,7 @@ function calcNotificaciones(){
   // Reusa listaBonificables() a proposito: el criterio vive en UN solo lugar.
   // 🔑 El Dashboard SIGUE SIN DESCONTAR el adeudo, solo lo senala: la correccion
   // se hace en el Sistema del Club, que es quien genera el cargo.
-  // 13-ago-2026 (s47) — TEXTO CORREGIDO: la bonificación depende de que el socio pague
+  // 13-ago-2026 (s47) — TEXTO CORREGIDO: la bonificación depende de que el usuario pague
   // su baja temporal (aclaración del Club). El Dashboard no ve ese pago, así que este
   // grupo pasa de "esto está mal en el Sistema" a "esto hay que revisarlo".
   const bonif = listaBonificables().filter(d=>d.m<990000);
