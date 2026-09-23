@@ -102,6 +102,23 @@ label{font-size:.8rem;font-weight:600;color:#4a5068}
 .item .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .notas-box{background:#eef4fc;border-left:4px solid #1a3a6b;border-radius:8px;padding:.65rem .85rem;font-size:.82rem;white-space:pre-wrap;margin-bottom:1rem}
 
+
+/* Historial */
+.hist-form{display:none;background:#f0f6ff;border:1px solid #c8d9f0;border-radius:10px;padding:.75rem;margin-bottom:.7rem}
+.hist-form.open{display:block}
+.hist-form .form-grid{gap:.55rem}
+.hist-item{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid #eef2f8;font-size:.82rem}
+.hist-item:last-child{border-bottom:none}
+.hist-ico{width:28px;height:28px;border-radius:50%;background:#dce8f7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.85rem}
+.hist-item.sis .hist-ico{background:#f3f4f6}
+.hist-item.sis .t{color:#4a5068;font-weight:600}
+.hist-main{flex:1;min-width:0}
+.hist-main .t{font-weight:700;word-break:break-word}
+.hist-main .dt{font-size:.78rem;color:#4a5068;white-space:pre-wrap;margin-top:.15rem}
+.hist-main .d{font-size:.72rem;color:#8a90a0;margin-top:.1rem}
+.hist-del{background:none;border:none;color:#8a90a0;cursor:pointer;font-size:.8rem;align-self:flex-start;padding:.1rem .3rem;border-radius:4px}
+.hist-del:hover{background:#fef2f2;color:#dc2626}
+
 /* Toast */
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.65rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;z-index:999;transition:.3s;opacity:0;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);pointer-events:none}
 
@@ -123,7 +140,8 @@ label{font-size:.8rem;font-weight:600;color:#4a5068}
   .no-print,.filters,.acc,#toast{display:none!important}
   .page{max-width:none;padding:0}
   .card,main,section,.table-wrap,.modal,.modal-body{break-inside:auto}
-  .kpi,.ficha-nums div,.item,tr,.alert-box,.notas-box{break-inside:avoid}
+  .kpi,.ficha-nums div,.item,.hist-item,tr,.alert-box,.notas-box{break-inside:avoid}
+  .hist-form,.hist-del{display:none!important}
   h1,h2,h3,h4,.card-head,.sec h4{break-after:avoid}
   p,li{orphans:3;widows:3}
   thead{display:table-header-group}
@@ -348,10 +366,32 @@ async function verFicha(id){
     </div>
     ${e.SitioWeb?`<div class="ficha-datos">🌐 <a href="${esc(e.SitioWeb)}" target="_blank">${esc(e.SitioWeb.replace(/^https?:\/\//,''))}</a></div>`:''}
     ${e.Notas?`<div class="notas-box">${esc(e.Notas)}</div>`:''}
+    <div class="sec"><h4 style="display:flex;justify-content:space-between;align-items:center">Historial <button class="btn btn-secondary btn-sm no-print" onclick="document.getElementById('hist-form').classList.toggle('open')">+ Registrar</button></h4>
+      <div class="hist-form" id="hist-form">
+        <div class="form-grid">
+          <div class="form-group"><label>Tipo</label><select id="h-tipo">${TIPOS_ACT.map(t=>`<option>${t}</option>`).join('')}</select></div>
+          <div class="form-group"><label>Fecha</label><input type="date" id="h-fecha" value="${hoyMX()}"></div>
+          <div class="form-group"><label>Proyecto</label><select id="h-proy" onchange="document.getElementById('h-sig-wrap').style.display=this.value?'grid':'none'"><option value="">— General de la empresa —</option>${j.proyectos.map(p=>`<option value="${p.ID}">${esc(p.Nombre)}</option>`).join('')}</select></div>
+          <div class="form-group"><label>Con quién</label><select id="h-cont"><option value="">—</option>${j.contactos.map(c=>`<option value="${c.ID}">${esc(c.Nombre)}</option>`).join('')}</select></div>
+          <div class="form-group full"><label>¿Qué pasó? *</label><input type="text" id="h-resumen" placeholder="Ej: Presentamos el demo; quedaron de revisarlo con dirección"></div>
+          <div class="form-group full"><label>Detalle</label><textarea id="h-detalle" placeholder="Acuerdos, cifras, dudas…"></textarea></div>
+        </div>
+        <div class="form-grid" id="h-sig-wrap" style="display:none;margin-top:.55rem">
+          <div class="form-group"><label>Próximo paso del proyecto</label><input type="text" id="h-sig" placeholder="Ej: Enviar propuesta"></div>
+          <div class="form-group"><label>Fecha</label><input type="date" id="h-fsig"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.6rem">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('hist-form').classList.remove('open')">Cancelar</button>
+          <button class="btn btn-primary btn-sm" id="h-guardar" onclick="guardarActividad()">Guardar</button>
+        </div>
+      </div>
+      <div id="hist-lista"><div class="loading"><span class="spinner"></span>Cargando historial…</div></div>
+    </div>
     <div class="sec"><h4>Proyectos</h4>${proy||'<div class="vacio">Sin proyectos ligados.</div>'}</div>
     <div class="sec"><h4>Contactos</h4>${cont||'<div class="vacio">Sin contactos. Al crear un contacto, elige esta empresa en el campo Empresa.</div>'}</div>
     <div class="sec"><h4>Tareas abiertas</h4>${tar||'<div class="vacio">Sin tareas pendientes.</div>'}</div>
     <div class="sec"><h4>Ingresos cobrados</h4>${ing||'<div class="vacio">Sin ingresos registrados.</div>'}</div>`;
+  cargarHistorial();
 }
 function imprimirFicha(){
   document.body.classList.add('imprimiendo-ficha');
@@ -399,6 +439,53 @@ async function borrar(){
   if(j && j.ok){ cerrar('m-form'); toast('Empresa borrada'); cargar(); }
   else toast(j?.error || 'No se pudo borrar', false);
 }
+
+// ── Historial de actividades ──
+const API_ACT = 'https://n8n.excelentia.com.mx/webhook/crm-actividades';
+const TIPOS_ACT = ['Llamada','Reunión','Correo','WhatsApp','Propuesta','Nota'];
+const ICO_ACT = {Llamada:'📞', 'Reunión':'🤝', Correo:'✉️', WhatsApp:'💬', Propuesta:'📄', Nota:'📝', Sistema:'⚙️'};
+const USUARIO = (()=>{ const u = new URLSearchParams(location.search).get('user'); return USERS[u] ? u : 'fernando'; })();
+const hoyMX = () => new Date().toLocaleDateString('en-CA',{timeZone:'America/Mexico_City'});
+async function apiAct(body){
+  try{ const r = await fetch(API_ACT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); return await r.json(); }
+  catch(e){ console.error(e); return null; }
+}
+async function cargarHistorial(){
+  const el = document.getElementById('hist-lista'); if(!el) return;
+  const j = await apiAct({accion:'list', EmpresaID:fichaId});
+  if(!j || !j.ok){ el.innerHTML = '<div class="vacio">No se pudo cargar el historial.</div>'; return; }
+  el.innerHTML = j.data.length ? j.data.map(a=>`
+    <div class="hist-item ${a.Tipo==='Sistema'?'sis':''}">
+      <div class="hist-ico">${ICO_ACT[a.Tipo]||'•'}</div>
+      <div class="hist-main"><div class="t">${esc(a.Resumen)}</div>${a.Detalle?`<div class="dt">${esc(a.Detalle)}</div>`:''}
+        <div class="d">${fecha(a.Fecha)}${a.Tipo!=='Sistema'?' · '+a.Tipo:''}${a.Proyecto?' · '+esc(a.Proyecto):''}${a.Contacto?' · con '+esc(a.Contacto):''}${USERS[a.Autor]?' · '+USERS[a.Autor].nombre:''}</div></div>
+      ${a.Tipo!=='Sistema'?`<button class="hist-del no-print" title="Borrar" onclick="borrarActividad('${a.ID}')">✕</button>`:''}
+    </div>`).join('') : '<div class="vacio">Aún no hay actividad registrada. Anota aquí cada llamada, junta o correo importante.</div>';
+}
+async function guardarActividad(){
+  const resumen = document.getElementById('h-resumen').value.trim();
+  if(resumen.length < 2){ toast('Escribe qué pasó', false); return; }
+  const btn = document.getElementById('h-guardar'); btn.disabled = true;
+  const proy = document.getElementById('h-proy').value;
+  const j = await apiAct({accion:'create', EmpresaID:fichaId, ProyectoID:proy, ContactoID:document.getElementById('h-cont').value,
+    Tipo:document.getElementById('h-tipo').value, Fecha:document.getElementById('h-fecha').value, Resumen:resumen,
+    Detalle:document.getElementById('h-detalle').value, Autor:USUARIO,
+    ProximoPaso: proy ? document.getElementById('h-sig').value : '', FechaProximo: proy ? document.getElementById('h-fsig').value : ''});
+  btn.disabled = false;
+  if(j && j.ok){
+    toast(j.proximo ? 'Registrado y próximo paso actualizado' : 'Actividad registrada');
+    if(j.proximo) verFicha(fichaId); else {
+      ['h-resumen','h-detalle','h-sig','h-fsig'].forEach(i=>document.getElementById(i).value='');
+      document.getElementById('hist-form').classList.remove('open'); cargarHistorial();
+    }
+  } else toast(j?.error || 'No se pudo registrar', false);
+}
+async function borrarActividad(id){
+  if(!confirm('¿Borrar esta actividad?')) return;
+  const j = await apiAct({accion:'delete', ID:id});
+  if(j && j.ok){ toast('Actividad borrada'); cargarHistorial(); } else toast(j?.error || 'No se pudo borrar', false);
+}
+
 document.addEventListener('keydown', ev=>{ if(ev.key==='Escape'){ cerrar('m-form'); cerrar('m-ficha'); } });
 document.addEventListener('DOMContentLoaded', cargar);
 </script>
