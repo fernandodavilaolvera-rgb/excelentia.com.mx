@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funnel · ExcelentIA Dashboard</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
+.top{max-width:720px;margin:0 auto;padding:1.1rem 1rem 0}
+
+/* Selector de tablero */
+.switch{display:flex;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.25rem;gap:.25rem;margin-bottom:.9rem}
+.switch button{flex:1;border:none;background:none;padding:.55rem;border-radius:9px;font-family:'Manrope',sans-serif;font-weight:700;font-size:.85rem;color:#4a5068;cursor:pointer}
+.switch button.on{background:#1a3a6b;color:#fff}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.8rem}
+.kpi{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.65rem .8rem}
+.kpi b{display:block;font-size:1.1rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.7rem;color:#8a90a0;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+
+.filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.6rem}
+.filters select{padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff;color:#1a2035}
+.filters label{font-size:.8rem;font-weight:600;color:#4a5068;display:flex;align-items:center;gap:.35rem;cursor:pointer}
+.filters .sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;font-family:'Manrope',sans-serif;transition:.2s}
+.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
+.btn-secondary{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#dce8f7}
+.btn-win{background:#059669;color:#fff}.btn-win:hover{background:#047857}
+.btn-lose{background:#fff;color:#dc2626;border:1px solid #fecaca}.btn-lose:hover{background:#fef2f2}
+.btn-sm{padding:.3rem .65rem;font-size:.78rem}
+.nota{font-size:.75rem;color:#8a90a0;margin-bottom:.6rem}
+
+/* Tablero */
+.board{display:flex;gap:.7rem;overflow-x:auto;padding:.3rem 1rem 1rem;scroll-snap-type:x proximity;justify-content:safe center}
+.col{flex:0 0 230px;background:#eef1f6;border:1px solid #dde1e9;border-radius:12px;display:flex;flex-direction:column;max-height:calc(100vh - 240px);scroll-snap-align:start}
+.col.over{background:#e8f0fb;border-color:#4a9fd4}
+.col-head{background:#dce8f7;border-radius:12px 12px 0 0;padding:.55rem .7rem;border-bottom:1px solid #c8d9f0}
+.col-head b{font-size:.82rem;display:flex;justify-content:space-between}
+.col-head b small{background:#fff;border-radius:10px;padding:0 .45rem;font-size:.7rem;color:#1a3a6b}
+.col-head span{font-size:.72rem;color:#4a5068;font-weight:600;font-variant-numeric:tabular-nums}
+.col-body{padding:.5rem;overflow-y:auto;display:flex;flex-direction:column;gap:.45rem;min-height:70px}
+.card{background:#fff;border:1px solid #dde1e9;border-left:4px solid #4a9fd4;border-radius:9px;padding:.55rem .6rem;cursor:grab;transition:.15s}
+.card:hover{background:#e8f0fb}
+.card.dragging{opacity:.4}
+.card.pausado{border-left-color:#8a90a0;opacity:.75}
+.card .n{font-weight:700;font-size:.82rem;line-height:1.25}
+.card .e{font-size:.72rem;color:#8a90a0;margin-top:.1rem}
+.card .v{display:flex;justify-content:space-between;align-items:center;margin-top:.4rem;font-size:.76rem;font-weight:700;font-variant-numeric:tabular-nums}
+.card .v .p{color:#8a90a0;font-weight:600}
+.card .a{font-size:.7rem;color:#4a5068;margin-top:.35rem;padding-top:.35rem;border-top:1px dashed #dde1e9}
+.card .a.vencida{color:#dc2626;font-weight:700}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.25rem;vertical-align:middle}
+.tag{display:inline-block;font-size:.65rem;font-weight:700;background:#f3f4f6;color:#6b7280;border-radius:10px;padding:0 .4rem;margin-left:.3rem}
+.vacia{font-size:.72rem;color:#8a90a0;text-align:center;padding:.8rem 0}
+
+/* Perdidos */
+.perdidos{max-width:720px;margin:0 auto 1.5rem;padding:0 1rem}
+.perdidos details{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden}
+.perdidos summary{background:#dce8f7;padding:.65rem 1rem;font-weight:700;font-size:.85rem;cursor:pointer}
+.perd-item{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.55rem 1rem;border-top:1px solid #eef2f8;font-size:.8rem}
+.perd-item .d{font-size:.72rem;color:#8a90a0}
+
+.estado{max-width:720px;margin:0 auto;padding:0 1rem}
+.alert-box{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.7rem .9rem;font-size:.82rem;margin-bottom:.75rem}
+.alert-err{background:#fef2f2;border-color:#fecaca;border-left-color:#dc2626}
+.loading{text-align:center;padding:1.5rem;color:#4a5068;font-size:.85rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Modal */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:520px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;gap:.75rem;border-radius:14px 14px 0 0;border-bottom:3px solid #4a9fd4}
+.modal-head h3{font-size:.98rem;font-weight:800}
+.modal-head .sub{font-size:.75rem;color:#a8c4e0;margin-top:.1rem}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;flex-shrink:0}
+.modal-body{padding:1.1rem 1.25rem}
+.modal-foot{padding:.8rem 1.25rem;border-top:1px solid #eef2f8;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.form-group{display:flex;flex-direction:column;gap:.3rem}
+.form-group.full{grid-column:1/-1}
+.modal label{font-size:.8rem;font-weight:600;color:#4a5068}
+.modal input,.modal select,.modal textarea{width:100%;padding:.5rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.83rem;color:#1a2035;background:#fff}
+.modal input:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+.lose-box{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:.7rem;margin-top:.8rem}
+.lose-box.open{display:block}
+
+
+.hist{margin-top:1rem;border-top:2px solid #dce8f7;padding-top:.7rem}
+.hist h4{font-size:.78rem;font-weight:800;color:#1a3a6b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.5rem}
+.hist-quick{display:flex;gap:.4rem;margin-bottom:.5rem}
+.hist-quick select{width:auto;flex:0 0 118px}
+.hist-quick input{flex:1}
+.hist-item{display:flex;gap:.5rem;padding:.35rem 0;border-bottom:1px solid #eef2f8;font-size:.78rem}
+.hist-item:last-child{border-bottom:none}
+.hist-item .i{flex-shrink:0}
+.hist-item .d{font-size:.7rem;color:#8a90a0}
+.hist-item.sis{color:#4a5068}
+
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.65rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;z-index:999;transition:.3s;opacity:0;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);pointer-events:none}
+
+@media(max-width:600px){
+  .top{padding:.8rem .7rem 0}
+  .kpis{grid-template-columns:1fr 1fr}
+  .board{padding:.3rem .7rem 1rem;justify-content:flex-start}
+  .col{flex-basis:78vw;max-height:none}
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+  .modal-backdrop{padding:.75rem .5rem}
+}
+
+@page{size:Letter landscape;margin:12mm}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff}
+  .no-print,.switch,.filters,#toast{display:none!important}
+  .top{max-width:none}
+  .board{overflow:visible;flex-wrap:wrap;justify-content:flex-start;padding:0}
+  .col{max-height:none;break-inside:auto;flex-basis:31%}
+  .col-body{overflow:visible}
+  .card,.kpi,.perd-item,.alert-box{break-inside:avoid}
+  .col-head,summary{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  details{display:block}
+  a[href]:after{content:none}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="switch no-print">
+    <button id="sw-venta" class="on" onclick="setVista('venta')">💼 Funnel de ventas</button>
+    <button id="sw-oper" onclick="setVista('oper')">⚙️ Operación</button>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="filters">
+    <select id="f-resp" onchange="render()">
+      <option value="">Responsable: todos</option>
+      <option value="fernando">Fernando</option><option value="juanjose">Juan José</option><option value="adolfo">Adolfo</option>
+    </select>
+    <label id="lbl-pausa"><input type="checkbox" id="f-pausa" checked onchange="render()"> Ver pausados</label>
+    <span class="sp"></span>
+    <button class="btn btn-secondary btn-sm no-print" onclick="window.print()">🖨️ PDF</button>
+    <button class="btn btn-secondary btn-sm no-print" onclick="cargar()">↻</button>
+  </div>
+  <div class="nota" id="nota"></div>
+</div>
+
+<div class="estado" id="estado"></div>
+<div class="board" id="board"></div>
+<div class="perdidos" id="perdidos"></div>
+
+<!-- Modal de tarjeta -->
+<div class="modal-backdrop" id="m-card" onclick="if(event.target===this)cerrar()">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3 id="mc-nombre"></h3><div class="sub" id="mc-sub"></div></div>
+      <button class="modal-close" onclick="cerrar()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Etapa</label><select id="mc-etapa"></select></div>
+        <div class="form-group"><label>Valor estimado (MXN)</label><input type="number" id="mc-valor" min="0" step="500"></div>
+        <div class="form-group"><label>Probabilidad (%)</label><input type="number" id="mc-prob" min="0" max="100"></div>
+        <div class="form-group full"><label>Próxima acción</label><input type="text" id="mc-accion" placeholder="Ej: Enviar propuesta formal"></div>
+        <div class="form-group"><label>Fecha próxima acción</label><input type="date" id="mc-faccion"></div>
+        <div class="form-group"><label>Cierre estimado</label><input type="date" id="mc-fcierre"></div>
+      </div>
+      <div class="hist">
+        <h4>Historial</h4>
+        <div class="hist-quick">
+          <select id="hq-tipo"><option>Llamada</option><option>Reunión</option><option>Correo</option><option>WhatsApp</option><option>Propuesta</option><option>Nota</option></select>
+          <input type="text" id="hq-resumen" placeholder="¿Qué pasó?" onkeydown="if(event.key==='Enter')registrarRapido()">
+          <button class="btn btn-secondary btn-sm" onclick="registrarRapido()">+</button>
+        </div>
+        <div id="hq-lista"></div>
+      </div>
+      <div class="lose-box" id="lose-box">
+        <label>¿Por qué se perdió? *</label>
+        <input type="text" id="mc-motivo" list="dl-motivos" placeholder="Precio, tiempos, eligió a otro proveedor…" style="margin:.35rem 0 .5rem">
+        <datalist id="dl-motivos"><option value="Precio"><option value="Eligió a otro proveedor"><option value="Sin presupuesto"><option value="Dejó de responder"><option value="No era el momento"></datalist>
+        <button class="btn btn-lose btn-sm" onclick="confirmarPerdida()">Confirmar pérdida</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-lose btn-sm" id="mc-perder" onclick="document.getElementById('lose-box').classList.toggle('open')" style="margin-right:auto">✕ Perdido</button>
+      <button class="btn btn-secondary btn-sm" id="mc-plan" onclick="irAPlan(abierto.ID)">💵 Plan de cobro</button>
+      <button class="btn btn-secondary btn-sm" id="mc-pausa" onclick="togglePausa()"></button>
+      <button class="btn btn-win btn-sm" id="mc-ganar" onclick="ganar()">🏆 Ganado</button>
+      <button class="btn btn-primary btn-sm" onclick="guardarCard()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://n8n.excelentia.com.mx/webhook/crm-embudo';
+const VENTA = ['Prospecto','Contacto','Presentación','Seguimiento','Propuesta','Cierre'];
+const OPER = ['Desarrollo','Entrega','Mantenimiento'];
+const USERS = {fernando:{nombre:'Fernando',color:'#1a3a6b'}, juanjose:{nombre:'Juan José',color:'#7c3aed'}, adolfo:{nombre:'Adolfo',color:'#059669'}};
+let DATA = [];
+let vista = new URLSearchParams(location.search).get('vista') === 'oper' ? 'oper' : 'venta';
+let abierto = null;
+
+async function api(body){
+  try{
+    const c = new AbortController(); const t = setTimeout(()=>c.abort(), 25000);
+    const r = await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:c.signal});
+    clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json();
+  }catch(e){ console.error(e); return null; }
+}
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const money = n => '$' + Number(n||0).toLocaleString('es-MX',{maximumFractionDigits:0});
+const hoy = () => new Date().toLocaleDateString('en-CA',{timeZone:'America/Mexico_City'});
+const fcorta = f => f ? new Date(f+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'}) : '';
+function toast(m, ok=true){ const t=document.getElementById('toast'); t.style.background=ok?'#059669':'#dc2626'; t.textContent=m; t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',2800); }
+
+async function cargar(){
+  document.getElementById('estado').innerHTML = DATA.length ? '' : '<div class="loading"><span class="spinner"></span>Cargando tablero…</div>';
+  const j = await api({accion:'list'});
+  if(!j || !j.ok){
+    document.getElementById('estado').innerHTML = '<div class="alert-box alert-err">⚠️ No se pudo cargar el tablero. <button class="btn btn-secondary btn-sm" onclick="cargar()">Reintentar</button></div>';
+    return;
+  }
+  DATA = j.data || [];
+  document.getElementById('estado').innerHTML = '';
+  render();
+}
+
+function setVista(v){
+  vista = v;
+  document.getElementById('sw-venta').classList.toggle('on', v==='venta');
+  document.getElementById('sw-oper').classList.toggle('on', v==='oper');
+  const u = new URL(location); u.searchParams.set('vista', v); history.replaceState({},'',u);
+  render();
+}
+
+const esInterna = p => p.EmpresaStatus === 'Interna';
+function visibles(){
+  const r = document.getElementById('f-resp').value;
+  const pausa = document.getElementById('f-pausa').checked;
+  return DATA.filter(p => (!r || p.Responsable === r) && (pausa || p.Status !== 'pausado'));
+}
+
+function render(){
+  const etapas = vista === 'venta' ? VENTA : OPER;
+  const base = visibles();
+  const enTablero = base.filter(p => etapas.includes(p.Etapa) && p.Status !== 'perdido' && !(vista==='venta' && esInterna(p)));
+  document.getElementById('lbl-pausa').style.display = vista === 'venta' ? 'flex' : 'none';
+
+  document.getElementById('board').innerHTML = etapas.map(et => {
+    const cards = enTablero.filter(p => p.Etapa === et);
+    const total = cards.reduce((a,p)=>a+Number(p.Valor||0),0);
+    return `<div class="col" data-etapa="${et}">
+      <div class="col-head"><b>${et}<small>${cards.length}</small></b><span>${total?money(total):'—'}</span></div>
+      <div class="col-body">${cards.length ? cards.map(tarjeta).join('') : '<div class="vacia">Arrastra aquí</div>'}</div>
+    </div>`;
+  }).join('');
+  activarDrag();
+  renderKpis(base);
+  renderPerdidos(base);
+
+  const internas = DATA.filter(p => esInterna(p) && VENTA.includes(p.Etapa) && p.Status !== 'perdido').length;
+  document.getElementById('nota').textContent = (vista === 'venta' && internas)
+    ? `${internas} proyecto${internas>1?'s':''} interno${internas>1?'s':''} de ExcelentIA no se cuenta${internas>1?'n':''} en el funnel.` : '';
+}
+
+function tarjeta(p){
+  const u = USERS[p.Responsable];
+  const vencida = p.FechaAccion && p.FechaAccion < hoy();
+  return `<div class="card ${p.Status==='pausado'?'pausado':''}" draggable="true" data-id="${p.ID}" onclick="abrir('${p.ID}')">
+    <div class="n">${esc(p.Nombre)}${p.Status==='pausado'?'<span class="tag">pausado</span>':''}</div>
+    <div class="e">${esc(p.Empresa||'Sin empresa')}</div>
+    <div class="v"><span>${p.Valor?money(p.Valor):'Sin valor'}</span><span class="p">${u?`<span class="dot" style="background:${u.color}"></span>`:''}${vista==='venta'?(p.Probabilidad||0)+'%':''}</span></div>
+    ${p.ProximaAccion?`<div class="a ${vencida?'vencida':''}">${vencida?'⚠️ ':'→ '}${esc(p.ProximaAccion)}${p.FechaAccion?' · '+fcorta(p.FechaAccion):''}</div>`:''}
+  </div>`;
+}
+
+function renderKpis(base){
+  const k = document.getElementById('kpis');
+  const anio = hoy().slice(0,4);
+  if(vista === 'venta'){
+    const abiertos = base.filter(p => VENTA.includes(p.Etapa) && p.Status === 'activo' && !esInterna(p));
+    const enJuego = abiertos.reduce((a,p)=>a+Number(p.Valor||0),0);
+    const pond = abiertos.reduce((a,p)=>a+Number(p.Valor||0)*Number(p.Probabilidad||0)/100,0);
+    const cerradosAnio = base.filter(p => p.FechaCierreReal && p.FechaCierreReal.startsWith(anio));
+    const gan = cerradosAnio.filter(p => p.Status !== 'perdido');
+    const per = cerradosAnio.filter(p => p.Status === 'perdido');
+    const tasa = (gan.length + per.length) ? Math.round(gan.length*100/(gan.length+per.length))+'%' : '—';
+    k.innerHTML = `
+      <div class="kpi"><b>${money(enJuego)}</b><span>En juego</span></div>
+      <div class="kpi"><b>${money(pond)}</b><span>Pronóstico</span></div>
+      <div class="kpi"><b>${money(gan.reduce((a,p)=>a+Number(p.Valor||0),0))}</b><span>Ganado ${anio}</span></div>
+      <div class="kpi"><b>${tasa}</b><span>Tasa de cierre</span></div>`;
+  }else{
+    const op = base.filter(p => OPER.includes(p.Etapa) && p.Status !== 'perdido');
+    const cuenta = et => op.filter(p=>p.Etapa===et).length;
+    k.innerHTML = `
+      <div class="kpi"><b>${op.length}</b><span>En operación</span></div>
+      <div class="kpi"><b>${cuenta('Desarrollo')}</b><span>Desarrollo</span></div>
+      <div class="kpi"><b>${cuenta('Mantenimiento')}</b><span>Mantenimiento</span></div>
+      <div class="kpi"><b>${money(op.reduce((a,p)=>a+Number(p.Valor||0),0))}</b><span>Valor</span></div>`;
+  }
+}
+
+function renderPerdidos(base){
+  const el = document.getElementById('perdidos');
+  const perd = base.filter(p => p.Status === 'perdido');
+  if(vista !== 'venta' || !perd.length){ el.innerHTML = ''; return; }
+  el.innerHTML = `<details><summary>✕ Perdidos (${perd.length})</summary>${perd.map(p=>`
+    <div class="perd-item"><div><b>${esc(p.Nombre)}</b> · ${esc(p.Empresa||'')}<div class="d">${esc(p.MotivoPerdida||'Sin motivo')} · ${fcorta(p.FechaCierreReal)}</div></div>
+    <button class="btn btn-secondary btn-sm no-print" onclick="accion('reactivar','${p.ID}','Proyecto reabierto')">Reabrir</button></div>`).join('')}</details>`;
+}
+
+// ── Arrastrar y soltar ──
+function activarDrag(){
+  document.querySelectorAll('.card').forEach(c=>{
+    c.addEventListener('dragstart', e=>{ c.classList.add('dragging'); e.dataTransfer.setData('text/plain', c.dataset.id); });
+    c.addEventListener('dragend', ()=>c.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.col').forEach(col=>{
+    col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('over'); });
+    col.addEventListener('dragleave', ()=>col.classList.remove('over'));
+    col.addEventListener('drop', e=>{
+      e.preventDefault(); col.classList.remove('over');
+      const id = e.dataTransfer.getData('text/plain'); const et = col.dataset.etapa;
+      const p = DATA.find(x=>x.ID===id);
+      if(p && p.Etapa !== et) mover(p, et);
+    });
+  });
+}
+async function mover(p, et){
+  const antes = p.Etapa; p.Etapa = et; render();
+  const j = await api({accion:'mover', ID:p.ID, Etapa:et});
+  if(j && j.ok){ toast(`${p.Nombre} → ${et}`); cargar(); }
+  else { p.Etapa = antes; render(); toast(j?.error || 'No se pudo mover', false); }
+}
+
+// ── Modal ──
+function abrir(id){
+  const p = DATA.find(x=>x.ID===id); if(!p) return;
+  abierto = p;
+  document.getElementById('mc-nombre').textContent = p.Nombre;
+  document.getElementById('mc-sub').textContent = [p.Empresa, p.Contacto, USERS[p.Responsable]?.nombre].filter(Boolean).join(' · ');
+  const venta = VENTA.includes(p.Etapa);
+  const lista = venta ? VENTA : OPER;
+  document.getElementById('mc-etapa').innerHTML = lista.map(e=>`<option ${e===p.Etapa?'selected':''}>${e}</option>`).join('');
+  document.getElementById('mc-valor').value = p.Valor || '';
+  document.getElementById('mc-prob').value = p.Probabilidad ?? '';
+  document.getElementById('mc-accion').value = p.ProximaAccion || '';
+  document.getElementById('mc-faccion').value = p.FechaAccion || '';
+  document.getElementById('mc-fcierre').value = p.FechaCierreEst || '';
+  document.getElementById('mc-motivo').value = '';
+  document.getElementById('lose-box').classList.remove('open');
+  document.getElementById('mc-ganar').style.display = venta ? '' : 'none';
+  document.getElementById('mc-perder').style.display = venta ? '' : 'none';
+  document.getElementById('mc-prob').closest('.form-group').style.display = venta ? '' : 'none';
+  document.getElementById('mc-plan').style.display = venta ? 'none' : '';
+  document.getElementById('mc-pausa').textContent = p.Status === 'pausado' ? '▶ Reactivar' : '⏸ Pausar';
+  document.getElementById('hq-resumen').value = '';
+  document.getElementById('m-card').classList.add('open');
+  cargarHistorialCard(p.ID);
+}
+function cerrar(){ document.getElementById('m-card').classList.remove('open'); abierto = null; }
+
+async function guardarCard(){
+  const p = abierto; if(!p) return;
+  const et = document.getElementById('mc-etapa').value;
+  const j = await api({accion:'editar', ID:p.ID,
+    Valor: document.getElementById('mc-valor').value,
+    Probabilidad: VENTA.includes(p.Etapa) ? document.getElementById('mc-prob').value : p.Probabilidad,
+    ProximaAccion: document.getElementById('mc-accion').value,
+    FechaAccion: document.getElementById('mc-faccion').value,
+    FechaCierreEst: document.getElementById('mc-fcierre').value});
+  if(!j || !j.ok){ toast(j?.error || 'No se pudo guardar', false); return; }
+  if(et !== p.Etapa){
+    const m = await api({accion:'mover', ID:p.ID, Etapa:et});
+    if(!m || !m.ok){ toast(m?.error || 'Se guardó, pero no se pudo cambiar la etapa', false); cargar(); return; }
+  }
+  cerrar(); toast('Guardado'); cargar();
+}
+async function accion(tipo, id, msg, extra={}){
+  const j = await api({accion:tipo, ID:id, ...extra});
+  if(j && j.ok){ cerrar(); toast(msg); cargar(); }
+  else toast(j?.error || 'No se pudo completar', false);
+}
+async function ganar(){
+  const p = abierto;
+  if(!p || !confirm(`¿Marcar "${p.Nombre}" como ganado? Pasará a Operación en Desarrollo.`)) return;
+  const j = await api({accion:'ganar', ID:p.ID});
+  if(!j || !j.ok){ toast(j?.error || 'No se pudo completar', false); return; }
+  cerrar(); toast('🏆 ¡Ganado! Ya está en Operación'); cargar();
+  if(confirm('¿Configuramos ahora su plan de cobro (contrato, exhibiciones y mensualidad)?')) irAPlan(p.ID);
+}
+function irAPlan(id){
+  try{
+    const P = window.parent;
+    if(P !== window && P.document.getElementById('wrap-facturacion')){
+      const f = P.document.querySelector('#wrap-facturacion iframe');
+      f.src = f.dataset.base + '?user=' + USUARIO + '&proyecto=' + encodeURIComponent(id);
+      P.showTab('facturacion'); return;
+    }
+  }catch(e){}
+  location.href = 'crm-facturacion.html?proyecto=' + encodeURIComponent(id) + '&user=' + USUARIO;
+}
+function confirmarPerdida(){
+  const m = document.getElementById('mc-motivo').value.trim();
+  if(m.length < 2){ toast('Escribe el motivo', false); return; }
+  accion('perder', abierto.ID, 'Marcado como perdido', {Motivo:m});
+}
+function togglePausa(){ if(abierto) accion(abierto.Status==='pausado'?'reactivar':'pausar', abierto.ID, abierto.Status==='pausado'?'Reactivado':'Pausado'); }
+
+
+// ── Historial del proyecto ──
+const API_ACT = 'https://n8n.excelentia.com.mx/webhook/crm-actividades';
+const ICO_ACT = {Llamada:'📞', 'Reunión':'🤝', Correo:'✉️', WhatsApp:'💬', Propuesta:'📄', Nota:'📝', Sistema:'⚙️'};
+const USUARIO = (()=>{ const u = new URLSearchParams(location.search).get('user'); return USERS[u] ? u : 'fernando'; })();
+async function apiAct(body){
+  try{ const r = await fetch(API_ACT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); return await r.json(); }
+  catch(e){ console.error(e); return null; }
+}
+async function cargarHistorialCard(id){
+  const el = document.getElementById('hq-lista');
+  el.innerHTML = '<div class="d" style="font-size:.75rem;color:#8a90a0">Cargando…</div>';
+  const j = await apiAct({accion:'list', ProyectoID:id, Limite:8});
+  if(!abierto || abierto.ID !== id) return;
+  if(!j || !j.ok){ el.innerHTML = '<div class="d">No se pudo cargar el historial.</div>'; return; }
+  el.innerHTML = j.data.length ? j.data.map(a=>`<div class="hist-item ${a.Tipo==='Sistema'?'sis':''}"><span class="i">${ICO_ACT[a.Tipo]||'•'}</span>
+    <div>${esc(a.Resumen)}<div class="d">${fcorta(a.Fecha)}${USERS[a.Autor]?' · '+USERS[a.Autor].nombre:''}</div></div></div>`).join('')
+    : '<div class="d" style="font-size:.75rem;color:#8a90a0">Sin actividad todavía.</div>';
+}
+async function registrarRapido(){
+  const p = abierto; if(!p) return;
+  const r = document.getElementById('hq-resumen').value.trim();
+  if(r.length < 2){ toast('Escribe qué pasó', false); return; }
+  const j = await apiAct({accion:'create', ProyectoID:p.ID, Tipo:document.getElementById('hq-tipo').value, Resumen:r, Autor:USUARIO});
+  if(j && j.ok){ document.getElementById('hq-resumen').value=''; toast('Actividad registrada'); cargarHistorialCard(p.ID); }
+  else toast(j?.error || 'No se pudo registrar', false);
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrar(); });
+document.addEventListener('DOMContentLoaded', ()=>{ setVista(vista); cargar(); });
+</script>
+</body>
+</html>
