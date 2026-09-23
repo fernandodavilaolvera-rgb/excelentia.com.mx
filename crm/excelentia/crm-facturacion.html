@@ -100,7 +100,37 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 #aj-para label{display:flex;align-items:center;gap:.45rem;font-size:.84rem;font-weight:600;color:#1a2035;cursor:pointer}
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.65rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;z-index:999;transition:.3s;opacity:0;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);pointer-events:none}
 
+.ia{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:.75rem .85rem;margin:.7rem 0 .2rem;display:none;font-size:.8rem}
+.ia.open{display:block}
+.ia.err{background:#fef2f2;border-color:#fecaca;border-left-color:#dc2626;color:#991b1b}
+.ia-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.45rem}
+.ia-top .t{font-weight:800;color:#1a3a6b}
+.ia-top .c{font-size:.73rem;color:#4a5068;margin-top:.1rem}
+.ia-top .c a{color:#1a3a6b}
+.ia-res{color:#1a2035;line-height:1.45;margin-bottom:.55rem}
+.ia-sec{font-size:.72rem;font-weight:800;color:#1a3a6b;margin:.55rem 0 .25rem}
+.ia-row{display:grid;grid-template-columns:22px 1fr auto 86px;gap:.5rem;align-items:start;padding:.4rem .5rem;background:#fff;border:1px solid #dde1e9;border-radius:8px;margin-bottom:.3rem}
+.ia-row input[type=checkbox]{width:16px;height:16px;padding:0;margin-top:.1rem;accent-color:#1a3a6b}
+.ia-row{font-weight:500;color:#1a2035;cursor:pointer}
+.ia-row.off{cursor:default}
+.ia-row .n{font-weight:700;line-height:1.25}
+.ia-row .d{font-size:.72rem;color:#4a5068;margin-top:.1rem;line-height:1.35}
+.ia-row .d.warn{color:#92400e}
+.ia-row .m{font-weight:700;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ia-row .fe{font-size:.74rem;font-weight:700;color:#4a5068;text-align:right;white-space:nowrap}
+.ia-row .fe.falta{color:#b45309}
+.ia-row.off{background:#f5f6f8}
+.ia-row.off .n,.ia-row.off .m{color:#8a90a0}
+.ia-avisos{margin-top:.5rem}
+.ia-avisos summary{cursor:pointer;font-size:.74rem;font-weight:700;color:#1a3a6b}
+.ia-avisos ul{margin:.35rem 0 0 1.1rem;color:#4a5068;font-size:.75rem;line-height:1.45}
+.ia-acc{display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;margin-top:.65rem}
+.ex-row.sin-fecha .ex-f{border-color:#f59e0b;background:#fffbeb}
+
 @media(max-width:600px){
+  .ia-row{grid-template-columns:22px 1fr;}
+  .ia-row .m,.ia-row .fe{grid-column:2;text-align:left}
+  .ia-top{flex-direction:column}
   .page{padding:.8rem .7rem 1.5rem}
   .kpis{grid-template-columns:1fr 1fr}
   .fila{grid-template-columns:52px 1fr auto;padding:.55rem .75rem}
@@ -166,12 +196,13 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
   <div class="modal">
     <div class="modal-head"><div><h3 id="pl-nombre">Plan de cobro</h3><div class="sub" id="pl-sub"></div></div><button class="modal-close" onclick="cerrar('m-plan')">✕</button></div>
     <div class="modal-body">
-      <h4>Contrato</h4>
+      <h4 style="display:flex;justify-content:space-between;align-items:center">Contrato <button class="btn btn-secondary btn-sm no-print" id="ia-btn" onclick="leerContrato()">🤖 Leer contrato</button></h4>
       <div class="form-grid">
         <div class="form-group"><label>Liga al contrato firmado</label><input type="url" id="pl-contrato" placeholder="https://drive.google.com/…"></div>
         <div class="form-group"><label>Fecha de firma</label><input type="date" id="pl-firma"></div>
       </div>
-      <div class="hint">Sube el PDF a la carpeta del proyecto en Drive y pega aquí la liga.</div>
+      <div class="hint">🤖 Leer contrato usa la liga de arriba; si está vacía, busca en el Drive del proyecto un archivo con "contrato" en el nombre. Para sustituir un contrato por otro, pega la liga del nuevo y vuelve a leer.</div>
+      <div class="ia no-print" id="ia"></div>
 
       <h4 style="display:flex;justify-content:space-between;align-items:center">Exhibiciones del desarrollo <button class="btn btn-secondary btn-sm" onclick="document.getElementById('gen').classList.toggle('open')">⚡ Generar por porcentajes</button></h4>
       <div class="gen" id="gen">
@@ -277,6 +308,8 @@ const ESTADOS = ['Programada','Solicitada','Emitida','Cobrada','Cancelada'];
 const MES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 let D = {proyectos:[], facturas:[], proyectadas:[], hoy:''};
 let vista = 'cal', planId = null, editId = null;
+const API_CONTRATO = 'https://n8n.excelentia.com.mx/webhook/crm-leer-contrato';
+let IA = null, iaPlan = null;
 
 async function api(body){
   try{
@@ -428,15 +461,16 @@ function abrirPlan(id){
   document.getElementById('g-total').value = p.Valor || '';
   document.getElementById('g-fecha').value = p.FechaFirma || hoyMX();
   document.getElementById('gen').classList.remove('open');
+  iaCerrar();
   totalEx();
   abrir('m-plan');
 }
 function agregarFila(f){
-  const div = document.createElement('div'); div.className = 'ex-row';
+  const div = document.createElement('div'); div.className = 'ex-row' + (f && f.__sinFecha ? ' sin-fecha' : '');
   div.innerHTML = `<input type="text" class="ex-c" placeholder="Ej: Anticipo 30%" value="${esc(f?.Concepto||'')}">
     <input type="number" class="ex-m" min="0" step="50" placeholder="Monto" value="${f?.Monto??''}" oninput="totalEx()">
     <select class="ex-mo" onchange="totalEx()"><option ${f?.Moneda!=='USD'?'selected':''}>MXN</option><option ${f?.Moneda==='USD'?'selected':''}>USD</option></select>
-    <input type="date" class="ex-f" value="${f?.Fecha||''}">
+    <input type="date" class="ex-f" value="${f?.Fecha||''}" oninput="this.parentElement.classList.remove('sin-fecha')">
     <button class="ico ex-del" title="Quitar" onclick="this.parentElement.remove();totalEx()">✕</button>`;
   document.getElementById('pl-ex').appendChild(div);
 }
@@ -483,6 +517,103 @@ async function guardarPlan(){
   btn.disabled = false; btn.textContent = 'Guardar plan';
   if(j && j.ok){ cerrar('m-plan'); toast('Plan de cobro guardado'); cargar(); }
   else toast(j?.error || 'No se pudo guardar', false);
+}
+
+// ── Agente que lee el contrato ──
+function iaCerrar(){ IA = null; const el = document.getElementById('ia'); el.className = 'ia no-print'; el.innerHTML = ''; }
+async function leerContrato(){
+  if(!planId) return;
+  const pid = planId, el = document.getElementById('ia'), btn = document.getElementById('ia-btn');
+  btn.disabled = true; btn.textContent = 'Leyendo…';
+  el.className = 'ia no-print open';
+  el.innerHTML = '<span class="spinner"></span>Leyendo el contrato; tarda entre 20 y 40 segundos…';
+  let j = null;
+  try{
+    const c = new AbortController(); const t = setTimeout(()=>c.abort(), 150000);
+    const r = await fetch(API_CONTRATO,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ProyectoID:pid, ContratoURL:document.getElementById('pl-contrato').value.trim()}),signal:c.signal});
+    clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); j = await r.json();
+  }catch(e){ console.error(e); }
+  btn.disabled = false; btn.textContent = '🤖 Leer contrato';
+  if(pid !== planId || !document.getElementById('m-plan').classList.contains('open')) return;
+  if(!j || !j.ok){
+    el.className = 'ia err no-print open';
+    el.innerHTML = '⚠️ ' + esc(j?.error || 'No se pudo leer el contrato. Revisa tu conexión y vuelve a intentar.') + ' <button class="btn btn-secondary btn-sm" onclick="iaCerrar()">Cerrar</button>';
+    return;
+  }
+  IA = j; iaPlan = pid; iaPintar();
+}
+function iaPintar(){
+  const d = IA.datos || {}, a = IA.archivo || {}, hoy = D.hoy || hoyMX();
+  const ex = d.Exhibiciones || [];
+  const filas = ex.map((x,i)=>{
+    let nota = x.Condicion ? esc(x.Condicion) : '', clase = 'd', marcado = true, bloqueado = false;
+    if(x.YaRegistrada){ marcado = false; bloqueado = true; nota = 'Ya registrada · ' + esc(String(x.YaRegistrada.Status||'').toLowerCase()) + (x.YaRegistrada.Fecha ? ' el ' + fcorta(x.YaRegistrada.Fecha) : '') + '; no se vuelve a cargar'; }
+    else if(x.Fecha && x.Fecha < hoy){ marcado = false; clase = 'd warn'; nota = 'La fecha ya pasó; márcala solo si falta facturarla' + (nota ? ' · ' + nota : ''); }
+    else if(!x.Fecha){ clase = 'd warn'; }
+    return `<label class="ia-row${bloqueado?' off':''}">
+      <input type="checkbox" class="ia-ex" data-i="${i}" ${marcado?'checked':''} ${bloqueado?'disabled':''}>
+      <div><div class="n">${esc(x.Concepto)}</div>${nota?`<div class="${clase}">${nota}</div>`:''}</div>
+      <div class="m">${x.Monto ? fmt(x.Monto, x.Moneda) : '—'}</div>
+      <div class="fe${x.Fecha?'':' falta'}">${x.Fecha ? fcorta(x.Fecha) + ' ' + x.Fecha.slice(0,4) : 'Sin fecha'}</div>
+    </label>`;
+  }).join('');
+  const m = d.Mensualidad;
+  const mens = m ? `<label class="ia-row">
+      <input type="checkbox" id="ia-mens" checked>
+      <div><div class="n">${esc(m.Concepto)}</div><div class="d">Día ${m.Dia} de cada mes${m.Inicio ? ' · desde ' + fcorta(m.Inicio) + ' ' + m.Inicio.slice(0,4) : ''}${m.Fin ? ' · hasta ' + fcorta(m.Fin) + ' ' + m.Fin.slice(0,4) : ''}</div>${m.Condicion ? `<div class="d${m.Inicio?'':' warn'}">${esc(m.Condicion)}</div>` : ''}</div>
+      <div class="m">${fmt(m.Monto, m.Moneda)}</div>
+      <div class="fe${m.Inicio?'':' falta'}">${m.Inicio ? 'Inicio listo' : 'Sin inicio'}</div>
+    </label>` : '<div class="d" style="color:#4a5068">El contrato no trae mensualidad.</div>';
+  const firma = d.FechaFirma ? `<label class="ia-row">
+      <input type="checkbox" id="ia-firma" ${document.getElementById('pl-firma').value && document.getElementById('pl-firma').value!==d.FechaFirma ? '' : 'checked'}>
+      <div><div class="n">Fecha de firma</div>${document.getElementById('pl-firma').value && document.getElementById('pl-firma').value!==d.FechaFirma ? `<div class="d warn">En el plan dice ${fcorta(document.getElementById('pl-firma').value)} ${document.getElementById('pl-firma').value.slice(0,4)}</div>` : ''}</div>
+      <div class="m"></div><div class="fe">${fcorta(d.FechaFirma)} ${d.FechaFirma.slice(0,4)}</div>
+    </label>` : '';
+  const avisos = (d.Avisos||[]).length ? `<details class="ia-avisos" open><summary>Para revisar (${d.Avisos.length})</summary><ul>${d.Avisos.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>` : '';
+  document.getElementById('ia').innerHTML = `
+    <div class="ia-top"><div><div class="t">Lo que dice el contrato</div>
+      <div class="c">${a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.nombre || 'Abrir contrato')}</a>` : esc(a.nombre||'')}${a.origen ? ' · ' + esc(a.origen) : ''}</div></div>
+      <button class="ico" title="Descartar" onclick="iaCerrar()">✕</button></div>
+    ${d.Resumen ? `<div class="ia-res">${esc(d.Resumen)}</div>` : ''}
+    ${firma}
+    <div class="ia-sec">Exhibiciones</div>${filas || '<div class="d" style="color:#4a5068">El contrato no trae exhibiciones.</div>'}
+    <div class="ia-sec">Mensualidad</div>${mens}
+    ${avisos}
+    <div class="hint">Al pasar al formulario, las exhibiciones programadas del plan se sustituyen por las marcadas; las que ya están en proceso no se tocan. Nada se guarda hasta que des Guardar plan.</div>
+    <div class="ia-acc"><button class="btn btn-secondary btn-sm" onclick="iaCerrar()">Descartar</button><button class="btn btn-primary btn-sm" onclick="iaAplicar()">Pasar al formulario</button></div>`;
+}
+function iaAplicar(){
+  if(!IA || iaPlan !== planId) return;
+  const d = IA.datos || {}, a = IA.archivo || {};
+  const cont = document.getElementById('pl-contrato');
+  if(!cont.value.trim() && a.url) cont.value = a.url;
+  const cf = document.getElementById('ia-firma');
+  if(cf && cf.checked && d.FechaFirma) document.getElementById('pl-firma').value = d.FechaFirma;
+  const marcadas = [...document.querySelectorAll('#ia .ia-ex:checked')].map(c=>(d.Exhibiciones||[])[Number(c.dataset.i)]).filter(Boolean);
+  document.getElementById('pl-ex').innerHTML = '';
+  marcadas.forEach(x=>agregarFila({Concepto:x.Concepto, Monto:x.Monto ?? '', Moneda:x.Moneda, Fecha:x.Fecha || '', __sinFecha:!x.Fecha}));
+  if(!marcadas.length && !document.querySelector('#pl-fijas').textContent) agregarFila();
+  const m = d.Mensualidad, cm = document.getElementById('ia-mens');
+  let sinInicio = false;
+  if(m && cm && cm.checked){
+    document.getElementById('pl-mmonto').value = m.Monto || '';
+    document.getElementById('pl-mmoneda').value = m.Moneda || 'MXN';
+    document.getElementById('pl-mdia').value = m.Dia || 1;
+    if(m.Inicio) document.getElementById('pl-minicio').value = m.Inicio;
+    if(m.Fin) document.getElementById('pl-mfin').value = m.Fin;
+    if(m.Concepto) document.getElementById('pl-mconcepto').value = m.Concepto;
+    sinInicio = !document.getElementById('pl-minicio').value;
+  }
+  totalEx();
+  const faltan = marcadas.filter(x=>!x.Fecha).length;
+  iaCerrar();
+  const avisos = [];
+  if(faltan) avisos.push(faltan===1 ? 'ponle fecha a la exhibición marcada en ámbar' : 'ponle fecha a las ' + faltan + ' exhibiciones en ámbar');
+  if(sinInicio) avisos.push('indica cuándo empieza la mensualidad');
+  toast(avisos.length ? 'Listo; antes de guardar ' + avisos.join(' y ') : 'Listo; revisa y da Guardar plan', !avisos.length);
+  const sf = document.querySelector('#pl-ex .sin-fecha .ex-f');
+  (sf || document.getElementById('pl-ex')).scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 // ── Factura suelta / edición ──
