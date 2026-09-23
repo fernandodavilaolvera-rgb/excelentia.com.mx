@@ -1220,6 +1220,19 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
         <div style="font-size:.68rem;color:#4a5068;margin-top:8px">Cada segmento usa el asunto y el mensaje que tenga guardados en su plantilla. Vienen marcados los que tengas encendidos, pero puedes cambiarlos aquí sin mover los interruptores.</div>
       </div>
 
+      <!-- 23-sep-2026 — CANAL DEL ENVÍO PROGRAMADO. El motor ya llama al de WhatsApp,
+           el mismo del envío manual. Por WhatsApp NO viaja este texto: sale la plantilla
+           aprobada por Meta que corresponde al segmento. -->
+      <div class="av-prog-canal" style="margin-bottom:14px;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:10px;padding:12px 14px">
+        <div style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:800;color:#1a3a6b;margin-bottom:8px">📨 ¿Por dónde sale?</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px 18px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="radio" name="prog-canal" value="correo" checked style="accent-color:#3AAA35;width:15px;height:15px"> 📧 Solo correo</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="radio" name="prog-canal" value="whatsapp" style="accent-color:#3AAA35;width:15px;height:15px"> 💬 Solo WhatsApp</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="radio" name="prog-canal" value="ambos" style="accent-color:#3AAA35;width:15px;height:15px"> 📧💬 Correo y WhatsApp</label>
+        </div>
+        <div style="font-size:.68rem;color:#4a5068;margin-top:8px">Por WhatsApp sale la <b>plantilla autorizada</b> del segmento, no el texto que escribes arriba, y solo le llega a quien tenga su número bien capturado; el correo le llega a todos los que tengan correo.</div>
+      </div>
+
       <div class="av-prog-body">
         <div class="av-prog-field">
           <label>Día de envío</label>
@@ -1241,6 +1254,13 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
         </div>
         <div style="font-size:.68rem;color:#4a5068;margin-top:8px">El mensaje que se envía es el del segmento que dejes activo arriba; aquí solo eliges quién lo recibe para revisarlo.</div>
       </div>
+      <!-- 23-sep-2026 — el texto se congela al programar (el Scheduler guarda asunto y cuerpo
+           en el momento del POST), y la programacion es solo correo: WhatsApp no se agenda. -->
+      <div style="margin-top:12px;background:#fff8e6;border:1px solid #f0d9a0;border-left:3px solid #ca8a04;border-radius:10px;padding:11px 13px;font-size:.72rem;color:#4a5068;line-height:1.5">
+        <strong style="color:#92400e">⚠️ El texto se congela al programar.</strong> El envío agendado sale con el asunto y el mensaje que tenía la plantilla al momento de programarlo; si después la editas, lo ya agendado <b>no cambia</b>. Para corregirlo, cancélalo abajo, guarda el texto nuevo y vuelve a programar.<br>
+        Eso aplica al correo. Por WhatsApp siempre sale la plantilla autorizada por Meta, que no se edita desde aquí.
+      </div>
+
       <div class="av-next-info" id="av-next-info" style="margin-top:12px">
         <span>📆</span> <span id="av-next-txt">Próximo envío: <strong id="av-next-date">—</strong></span>
       </div>
@@ -4072,6 +4092,11 @@ async function guardarProg(){
   const segsMarcados = Array.from(document.querySelectorAll('.chk-prog-seg:checked')).map(c=>c.value);
   if(!segsMarcados.length){ showToast('⚠️ Marca al menos un segmento para programar'); return; }
 
+  // 23-sep-2026 — canal elegido. Si por lo que sea no hay ninguno marcado, se manda
+  // correo, que es como trabajaba antes.
+  const canal = document.querySelector('input[name="prog-canal"]:checked')?.value || 'correo';
+  const CANAL_LBL = { correo:'📧 solo correo', whatsapp:'💬 solo WhatsApp', ambos:'📧💬 correo y WhatsApp' };
+
   let prueba_ids = [];
   if(MODO_PRUEBA){
     prueba_ids = Array.from(document.querySelectorAll('.chk-prueba:checked')).map(c=>c.value);
@@ -4084,7 +4109,8 @@ async function guardarProg(){
     ? '🔒 Modo prueba: llegan solo al equipo de prueba.'
     : '⚠️ Modo real: llegan a los usuarios del Club.';
   if(!confirm('Se van a programar '+segsMarcados.length+' envío'+(segsMarcados.length>1?'s':'')+':\n\n'
-      +resumen+'\n\nDía '+avisosConfig.dia+' de cada mes a las '+avisosConfig.hora+' hrs\n'+aviso+'\n\n¿Continuar?')) return;
+      +resumen+'\n\nDía '+avisosConfig.dia+' de cada mes a las '+avisosConfig.hora+' hrs\n'
+      +'Canal: '+(CANAL_LBL[canal]||canal)+'\n'+aviso+'\n\n¿Continuar?')) return;
 
   const btn = document.querySelector('.btn-av-save');
   const textoOriginal = btn ? btn.innerHTML : '';
@@ -4101,6 +4127,7 @@ async function guardarProg(){
       asunto,
       cuerpo,
       remitente: avisosConfig.remitente,
+      canal: canal,
       modo_prueba: MODO_PRUEBA
     };
     if(MODO_PRUEBA) payload.prueba_ids = prueba_ids;
@@ -4120,7 +4147,7 @@ async function guardarProg(){
   if(btn){ btn.innerHTML = textoOriginal; btn.disabled = false; }
 
   if(listos.length && !fallados.length){
-    showToast('✅ Programado a las '+avisosConfig.hora+' — '+listos.join(', '));
+    showToast('✅ Programado a las '+avisosConfig.hora+' ('+(CANAL_LBL[canal]||canal)+') — '+listos.join(', '));
   } else if(listos.length){
     showToast('⚠️ Se programó '+listos.join(', ')+'; falló '+fallados.join(', '));
   } else {
@@ -4161,13 +4188,17 @@ async function cargarProgramaciones(){
         ? '<span style="background:#eef7ee;color:#1a5c18;border:1px solid #bfe3bf;border-radius:20px;padding:2px 8px;font-size:.62rem;font-weight:700;white-space:nowrap">🔒 Prueba</span>'
         : '<span style="background:#fdecea;color:#c0392b;border:1px solid #f3c0b8;border-radius:20px;padding:2px 8px;font-size:.62rem;font-weight:700;white-space:nowrap">⚠️ Real</span>';
       const concepto = p.concepto ? '<span style="color:var(--gray-text);font-size:.68rem"> · '+p.concepto+'</span>' : '';
+      // 23-sep-2026 — el canal viene de la columna nueva de programaciones; las filas
+      // viejas no la traen y se muestran como correo, que es lo que eran.
+      const CANAL_TXT = { correo:'📧 Correo', whatsapp:'💬 WhatsApp', ambos:'📧💬 Correo y WhatsApp' };
+      const canalLbl = CANAL_TXT[p.canal || 'correo'] || '📧 Correo';
       const dest = (p.destinatarios!=null ? p.destinatarios : '?');
       const asunto = p.asunto ? '<div style="font-size:.68rem;color:#8a90a0;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">✉️ '+p.asunto+'</div>' : '';
       return '<div style="display:flex;align-items:center;gap:11px;padding:11px 4px;border-bottom:1px solid var(--gray-light)">'
         + '<span style="flex-shrink:0;width:10px;height:10px;border-radius:50%;background:'+segCol+'"></span>'
         + '<div style="flex:1;min-width:0">'
         +   '<div style="font-family:\'Montserrat\',sans-serif;font-weight:700;font-size:.8rem;color:var(--negro)">'+fmtFechaProg(p.fecha_iso, p.hora)+'</div>'
-        +   '<div style="font-size:.7rem;color:var(--gray-text);margin-top:2px">Segmento '+segLbl+concepto+' · '+dest+' destinatario'+(dest==1?'':'s')+'</div>'
+        +   '<div style="font-size:.7rem;color:var(--gray-text);margin-top:2px">Segmento '+segLbl+concepto+' · '+dest+' destinatario'+(dest==1?'':'s')+' · '+canalLbl+'</div>'
         +   asunto
         + '</div>'
         + prueba
