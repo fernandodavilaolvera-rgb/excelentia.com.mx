@@ -9,16 +9,17 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
-.page{padding:1.25rem 1rem;max-width:720px;margin:0 auto}
+.page{padding:1rem 1.2rem;max-width:none;margin:0}
 
 /* KPIs */
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
-.kpi{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.7rem .85rem}
-.kpi b{display:block;font-size:1.15rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums}
-.kpi span{font-size:.72rem;color:#8a90a0;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.kpis{display:flex;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:.5rem .4rem;margin-bottom:1rem;row-gap:.35rem}
+.kpi{display:flex;align-items:baseline;gap:.45rem;padding:0 1rem;border-right:1px solid #dde1e9;white-space:nowrap}
+.kpi:last-child{border-right:none}
+.kpi b{order:2;font-size:1rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums}
+.kpi span{order:1;font-size:.72rem;color:#8a90a0;font-weight:700;letter-spacing:.3px}
 
 /* Cards */
-.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:8px;overflow:hidden;margin-bottom:1rem}
 .card-head{background:#dce8f7;padding:.7rem 1rem;font-weight:700;font-size:.88rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
 .card-body{padding:1rem}
 
@@ -56,6 +57,8 @@ tr.fila:hover td{background:#e8f0fb}
 .st-Aliado{background:#ede9fe;color:#5b21b6}
 .st-Inactivo{background:#f3f4f6;color:#6b7280}
 .st-Interna{background:#fef3c7;color:#92400e}
+.etapa{font-weight:600;color:#4a5068;white-space:nowrap}
+.etapa .pausa{color:#8a90a0;font-weight:500}
 .quien{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;font-weight:600;color:#4a5068;white-space:nowrap}
 .quien i{width:8px;height:8px;border-radius:50%;display:inline-block}
 
@@ -124,7 +127,8 @@ label{font-size:.8rem;font-weight:600;color:#4a5068}
 
 @media(max-width:600px){
   .page{padding:.85rem .7rem}
-  .kpis,.ficha-nums{grid-template-columns:1fr 1fr}
+  .ficha-nums{grid-template-columns:1fr 1fr}
+  .kpi{border-right:none;width:48%;padding:.1rem .6rem}
   .form-grid{grid-template-columns:1fr}
   .form-group.full{grid-column:1}
   table{font-size:.76rem}
@@ -140,7 +144,7 @@ label{font-size:.8rem;font-weight:600;color:#4a5068}
   .no-print,.filters,.acc,#toast{display:none!important}
   .page{max-width:none;padding:0}
   .card,main,section,.table-wrap,.modal,.modal-body{break-inside:auto}
-  .kpi,.ficha-nums div,.item,.hist-item,tr,.alert-box,.notas-box{break-inside:avoid}
+  .ficha-nums div,.item,.hist-item,tr,.alert-box,.notas-box{break-inside:avoid}
   .hist-form,.hist-del{display:none!important}
   h1,h2,h3,h4,.card-head,.sec h4{break-after:avoid}
   p,li{orphans:3;widows:3}
@@ -169,11 +173,11 @@ label{font-size:.8rem;font-weight:600;color:#4a5068}
       <div class="filters">
         <input type="text" id="f-q" placeholder="Buscar empresa o giro…" oninput="render()">
         <select id="f-status" onchange="render()">
-          <option value="">Todos los estatus</option>
+          <option value="">Todos los tipos</option>
           <option>Cliente</option><option>Prospecto</option><option>Aliado</option><option>Inactivo</option><option>Interna</option>
         </select>
         <select id="f-quien" onchange="render()">
-          <option value="">Trajo: todos</option>
+          <option value="">Finder: todos</option>
           <option value="fernando">Fernando</option><option value="juanjose">Juan José</option><option value="adolfo">Adolfo</option>
         </select>
       </div>
@@ -182,10 +186,9 @@ label{font-size:.8rem;font-weight:600;color:#4a5068}
         <table>
           <thead><tr>
             <th data-col="Nombre">Empresa<span class="arr"></span></th>
-            <th data-col="TraidoPor" class="col-opt">Trajo<span class="arr"></span></th>
-            <th data-col="Proyectos" class="num">Proy.<span class="arr"></span></th>
-            <th data-col="Contactos" class="num col-opt">Cont.<span class="arr"></span></th>
-            <th data-col="Valor" class="num">En juego<span class="arr"></span></th>
+            <th data-col="EtapaOrden">Status<span class="arr"></span></th>
+            <th data-col="TraidoPor" class="col-opt">Finder<span class="arr"></span></th>
+            <th data-col="Contratado" class="num">Contratado<span class="arr"></span></th>
             <th data-col="Cobrado" class="num">Cobrado<span class="arr"></span></th>
             <th class="no-print"></th>
           </tr></thead>
@@ -281,7 +284,9 @@ async function cargar(){
   render();
 }
 
+const ETAPAS = ['Prospecto','Contacto','Presentación','Seguimiento','Propuesta','Cierre','Desarrollo','Entrega','Mantenimiento'];
 function render(){
+  EMPRESAS.forEach(e => { e.EtapaOrden = e.Etapa ? ETAPAS.indexOf(e.Etapa) + 1 : 0; });
   const q = document.getElementById('f-q').value.trim().toLowerCase();
   const st = document.getElementById('f-status').value;
   const qu = document.getElementById('f-quien').value;
@@ -299,25 +304,24 @@ function render(){
   });
   document.getElementById('tbody').innerHTML = lista.length ? lista.map(e=>`
     <tr class="fila" onclick="verFicha('${e.ID}')">
-      <td><div class="emp-nombre">${esc(e.Nombre)}</div><div class="emp-sub"><span class="badge st-${esc(e.Status)}">${esc(e.Status)}</span>${e.Giro?' · '+esc(e.Giro):''}</div></td>
+      <td><div class="emp-nombre">${esc(e.Nombre)}</div>${e.Giro?'<div class="emp-sub">'+esc(e.Giro)+'</div>':''}</td>
+      <td class="etapa">${e.Etapa?esc(e.Etapa)+(e.EtapaStatus==='pausado'?' <span class="pausa">· pausado</span>':''):'—'}</td>
       <td class="col-opt">${quien(e.TraidoPor)}</td>
-      <td class="num">${e.Activos}/${e.Proyectos}</td>
-      <td class="num col-opt">${e.Contactos}</td>
-      <td class="num">${e.Valor?money(e.Valor):'—'}</td>
+      <td class="num">${e.Contratado?money(e.Contratado):'—'}</td>
       <td class="num">${e.Cobrado?money(e.Cobrado):'—'}</td>
       <td class="no-print"><div class="acc"><button title="Editar" onclick="event.stopPropagation();abrirForm('${e.ID}')">✏️</button></div></td>
-    </tr>`).join('') : (EMPRESAS.length ? '<tr><td colspan="7" class="vacio">Ninguna empresa coincide con el filtro.</td></tr>' : '');
+    </tr>`).join('') : (EMPRESAS.length ? '<tr><td colspan="6" class="vacio">Ninguna empresa coincide con el filtro.</td></tr>' : '');
   renderKpis();
 }
 
 function renderKpis(){
   const n = s => EMPRESAS.filter(e=>e.Status===s).length;
-  const valor = EMPRESAS.reduce((a,e)=>a+Number(e.Valor||0),0);
+  const valor = EMPRESAS.reduce((a,e)=>a+Number(e.Contratado||0),0);
   const cobrado = EMPRESAS.reduce((a,e)=>a+Number(e.Cobrado||0),0);
   document.getElementById('kpis').innerHTML = `
     <div class="kpi"><b>${n('Cliente')}</b><span>Clientes</span></div>
     <div class="kpi"><b>${n('Prospecto')}</b><span>Prospectos</span></div>
-    <div class="kpi"><b>${money(valor)}</b><span>En juego</span></div>
+    <div class="kpi"><b>${money(valor)}</b><span>Contratado</span></div>
     <div class="kpi"><b>${money(cobrado)}</b><span>Cobrado</span></div>`;
 }
 
@@ -361,11 +365,12 @@ async function verFicha(id){
     <div class="ficha-nums">
       <div><b>${e.Activos}/${e.Proyectos}</b><span>Proyectos activos</span></div>
       <div><b>${e.Contactos}</b><span>Contactos</span></div>
-      <div><b>${money(e.Valor)}</b><span>En juego</span></div>
+      <div><b>${money(e.Contratado)}</b><span>Contratado</span></div>
       <div><b>${money(e.Cobrado)}</b><span>Cobrado</span></div>
     </div>
     ${e.SitioWeb?`<div class="ficha-datos">🌐 <a href="${esc(e.SitioWeb)}" target="_blank">${esc(e.SitioWeb.replace(/^https?:\/\//,''))}</a></div>`:''}
     ${e.Notas?`<div class="notas-box">${esc(e.Notas)}</div>`:''}
+    <div class="sec"><h4>Contactos</h4>${cont||'<div class="vacio">Sin contactos. Al crear un contacto, elige esta empresa en el campo Empresa.</div>'}</div>
     <div class="sec"><h4 style="display:flex;justify-content:space-between;align-items:center">Historial <button class="btn btn-secondary btn-sm no-print" onclick="document.getElementById('hist-form').classList.toggle('open')">+ Registrar</button></h4>
       <div class="hist-form" id="hist-form">
         <div class="form-grid">
@@ -388,7 +393,6 @@ async function verFicha(id){
       <div id="hist-lista"><div class="loading"><span class="spinner"></span>Cargando historial…</div></div>
     </div>
     <div class="sec"><h4>Proyectos</h4>${proy||'<div class="vacio">Sin proyectos ligados.</div>'}</div>
-    <div class="sec"><h4>Contactos</h4>${cont||'<div class="vacio">Sin contactos. Al crear un contacto, elige esta empresa en el campo Empresa.</div>'}</div>
     <div class="sec"><h4>Tareas abiertas</h4>${tar||'<div class="vacio">Sin tareas pendientes.</div>'}</div>
     <div class="sec"><h4>Ingresos cobrados</h4>${ing||'<div class="vacio">Sin ingresos registrados.</div>'}</div>`;
   cargarHistorial();
