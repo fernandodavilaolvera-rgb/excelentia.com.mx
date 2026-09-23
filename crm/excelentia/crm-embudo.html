@@ -89,6 +89,18 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .lose-box{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:.7rem;margin-top:.8rem}
 .lose-box.open{display:block}
 
+
+.hist{margin-top:1rem;border-top:2px solid #dce8f7;padding-top:.7rem}
+.hist h4{font-size:.78rem;font-weight:800;color:#1a3a6b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.5rem}
+.hist-quick{display:flex;gap:.4rem;margin-bottom:.5rem}
+.hist-quick select{width:auto;flex:0 0 118px}
+.hist-quick input{flex:1}
+.hist-item{display:flex;gap:.5rem;padding:.35rem 0;border-bottom:1px solid #eef2f8;font-size:.78rem}
+.hist-item:last-child{border-bottom:none}
+.hist-item .i{flex-shrink:0}
+.hist-item .d{font-size:.7rem;color:#8a90a0}
+.hist-item.sis{color:#4a5068}
+
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.65rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;z-index:999;transition:.3s;opacity:0;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);pointer-events:none}
 
 @media(max-width:600px){
@@ -158,6 +170,15 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
         <div class="form-group full"><label>Próxima acción</label><input type="text" id="mc-accion" placeholder="Ej: Enviar propuesta formal"></div>
         <div class="form-group"><label>Fecha próxima acción</label><input type="date" id="mc-faccion"></div>
         <div class="form-group"><label>Cierre estimado</label><input type="date" id="mc-fcierre"></div>
+      </div>
+      <div class="hist">
+        <h4>Historial</h4>
+        <div class="hist-quick">
+          <select id="hq-tipo"><option>Llamada</option><option>Reunión</option><option>Correo</option><option>WhatsApp</option><option>Propuesta</option><option>Nota</option></select>
+          <input type="text" id="hq-resumen" placeholder="¿Qué pasó?" onkeydown="if(event.key==='Enter')registrarRapido()">
+          <button class="btn btn-secondary btn-sm" onclick="registrarRapido()">+</button>
+        </div>
+        <div id="hq-lista"></div>
       </div>
       <div class="lose-box" id="lose-box">
         <label>¿Por qué se perdió? *</label>
@@ -340,7 +361,9 @@ function abrir(id){
   document.getElementById('mc-perder').style.display = venta ? '' : 'none';
   document.getElementById('mc-prob').closest('.form-group').style.display = venta ? '' : 'none';
   document.getElementById('mc-pausa').textContent = p.Status === 'pausado' ? '▶ Reactivar' : '⏸ Pausar';
+  document.getElementById('hq-resumen').value = '';
   document.getElementById('m-card').classList.add('open');
+  cargarHistorialCard(p.ID);
 }
 function cerrar(){ document.getElementById('m-card').classList.remove('open'); abierto = null; }
 
@@ -372,6 +395,34 @@ function confirmarPerdida(){
   accion('perder', abierto.ID, 'Marcado como perdido', {Motivo:m});
 }
 function togglePausa(){ if(abierto) accion(abierto.Status==='pausado'?'reactivar':'pausar', abierto.ID, abierto.Status==='pausado'?'Reactivado':'Pausado'); }
+
+
+// ── Historial del proyecto ──
+const API_ACT = 'https://n8n.excelentia.com.mx/webhook/crm-actividades';
+const ICO_ACT = {Llamada:'📞', 'Reunión':'🤝', Correo:'✉️', WhatsApp:'💬', Propuesta:'📄', Nota:'📝', Sistema:'⚙️'};
+const USUARIO = (()=>{ const u = new URLSearchParams(location.search).get('user'); return USERS[u] ? u : 'fernando'; })();
+async function apiAct(body){
+  try{ const r = await fetch(API_ACT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); return await r.json(); }
+  catch(e){ console.error(e); return null; }
+}
+async function cargarHistorialCard(id){
+  const el = document.getElementById('hq-lista');
+  el.innerHTML = '<div class="d" style="font-size:.75rem;color:#8a90a0">Cargando…</div>';
+  const j = await apiAct({accion:'list', ProyectoID:id, Limite:8});
+  if(!abierto || abierto.ID !== id) return;
+  if(!j || !j.ok){ el.innerHTML = '<div class="d">No se pudo cargar el historial.</div>'; return; }
+  el.innerHTML = j.data.length ? j.data.map(a=>`<div class="hist-item ${a.Tipo==='Sistema'?'sis':''}"><span class="i">${ICO_ACT[a.Tipo]||'•'}</span>
+    <div>${esc(a.Resumen)}<div class="d">${fcorta(a.Fecha)}${USERS[a.Autor]?' · '+USERS[a.Autor].nombre:''}</div></div></div>`).join('')
+    : '<div class="d" style="font-size:.75rem;color:#8a90a0">Sin actividad todavía.</div>';
+}
+async function registrarRapido(){
+  const p = abierto; if(!p) return;
+  const r = document.getElementById('hq-resumen').value.trim();
+  if(r.length < 2){ toast('Escribe qué pasó', false); return; }
+  const j = await apiAct({accion:'create', ProyectoID:p.ID, Tipo:document.getElementById('hq-tipo').value, Resumen:r, Autor:USUARIO});
+  if(j && j.ok){ document.getElementById('hq-resumen').value=''; toast('Actividad registrada'); cargarHistorialCard(p.ID); }
+  else toast(j?.error || 'No se pudo registrar', false);
+}
 
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrar(); });
 document.addEventListener('DOMContentLoaded', ()=>{ setVista(vista); cargar(); });
