@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facturación · ExcelentIA Dashboard</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
+.page{max-width:720px;margin:0 auto;padding:1.1rem 1rem 2rem}
+.switch{display:flex;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.25rem;gap:.25rem;margin-bottom:.9rem}
+.switch button{flex:1;border:none;background:none;padding:.55rem;border-radius:9px;font-family:'Manrope',sans-serif;font-weight:700;font-size:.85rem;color:#4a5068;cursor:pointer}
+.switch button.on{background:#1a3a6b;color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.9rem}
+.kpi{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.65rem .8rem}
+.kpi b{display:block;font-size:1.02rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums;line-height:1.25}
+.kpi small{display:block;font-size:.72rem;color:#4a5068;font-weight:700}
+.kpi span{font-size:.68rem;color:#8a90a0;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.kpi.alerta b{color:#dc2626}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.card-head{background:#dce8f7;padding:.65rem 1rem;font-weight:700;font-size:.86rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap}
+.card-head span{font-weight:600;font-size:.76rem;color:#4a5068;font-variant-numeric:tabular-nums}
+.card-head.vencidas{background:#fef2f2;color:#991b1b}
+.filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.8rem}
+.filters select{padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff;color:#1a2035}
+.filters .sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;font-family:'Manrope',sans-serif;transition:.2s}
+.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
+.btn-secondary{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#dce8f7}
+.btn-danger{background:#fff;color:#dc2626;border:1px solid #fecaca}.btn-danger:hover{background:#fef2f2}
+.btn-sm{padding:.3rem .65rem;font-size:.78rem}
+
+.fila{display:grid;grid-template-columns:62px 1fr auto auto;gap:.6rem;align-items:center;padding:.55rem 1rem;border-top:1px solid #eef2f8;font-size:.82rem}
+.fila:first-of-type{border-top:none}
+.fila:hover{background:#e8f0fb}
+.fila .f{font-weight:700;color:#4a5068;font-size:.78rem}
+.fila .f.venc{color:#dc2626}
+.fila .t{font-weight:700;line-height:1.25}
+.fila .c{font-size:.74rem;color:#8a90a0}
+.fila .m{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fila.proy .t,.fila.proy .m{color:#4a5068}
+.fila .acc{display:flex;gap:.25rem;align-items:center}
+.st{border:none;border-radius:20px;padding:.2rem .5rem;font-size:.7rem;font-weight:700;font-family:'Manrope',sans-serif;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:center}
+.st-Programada{background:#dce8f7;color:#1a3a6b}
+.st-Solicitada{background:#fef3c7;color:#92400e}
+.st-Emitida{background:#ede9fe;color:#5b21b6}
+.st-Cobrada{background:#d1fae5;color:#065f46}
+.st-Cancelada{background:#f3f4f6;color:#6b7280;text-decoration:line-through}
+.ico{background:none;border:none;cursor:pointer;color:#8a90a0;font-size:.8rem;padding:.15rem .3rem;border-radius:4px}
+.ico:hover{background:#f0f4ff;color:#1a3a6b}
+.vacio{font-size:.8rem;color:#8a90a0;padding:1rem;text-align:center}
+
+.plan{padding:.8rem 1rem;border-top:1px solid #eef2f8;display:flex;justify-content:space-between;align-items:center;gap:.7rem}
+.plan:first-of-type{border-top:none}
+.plan .t{font-weight:700;font-size:.86rem}
+.plan .c{font-size:.74rem;color:#8a90a0}
+.chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem}
+.chip{font-size:.68rem;font-weight:700;border-radius:10px;padding:.1rem .45rem;background:#f3f4f6;color:#6b7280}
+.chip.ok{background:#d1fae5;color:#065f46}
+.chip.falta{background:#fef2f2;color:#991b1b}
+.chip a{color:inherit}
+
+.alert-box{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.9rem}
+.alert-err{background:#fef2f2;border-color:#fecaca;border-left-color:#dc2626}
+.loading{text-align:center;padding:1.5rem;color:#4a5068;font-size:.85rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:720px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal.sm{max-width:480px}
+.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;gap:.75rem;border-radius:14px 14px 0 0;border-bottom:3px solid #4a9fd4}
+.modal-head h3{font-size:.98rem;font-weight:800}
+.modal-head .sub{font-size:.75rem;color:#a8c4e0;margin-top:.1rem}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;flex-shrink:0}
+.modal-body{padding:1.1rem 1.25rem}
+.modal-foot{padding:.8rem 1.25rem;border-top:1px solid #eef2f8;display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap}
+.modal h4{font-size:.78rem;font-weight:800;color:#1a3a6b;text-transform:uppercase;letter-spacing:.4px;margin:1rem 0 .5rem;padding-bottom:.3rem;border-bottom:2px solid #dce8f7}
+.modal h4:first-child{margin-top:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.form-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:.3rem}
+.form-group.full{grid-column:1/-1}
+.modal label{font-size:.78rem;font-weight:600;color:#4a5068}
+.modal input,.modal select,.modal textarea{width:100%;padding:.48rem .65rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;color:#1a2035;background:#fff}
+.modal input:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+.hint{font-size:.72rem;color:#8a90a0;margin-top:.25rem}
+.ex-row{display:grid;grid-template-columns:1.6fr 1fr 74px 1fr 30px;gap:.4rem;margin-bottom:.4rem;align-items:center}
+.ex-head{font-size:.7rem;font-weight:700;color:#8a90a0}
+.gen{background:#f0f6ff;border:1px solid #c8d9f0;border-radius:10px;padding:.7rem;margin-bottom:.7rem;display:none}
+.gen.open{display:block}
+.fijas{font-size:.76rem;color:#4a5068;background:#f5f6f8;border-radius:8px;padding:.5rem .7rem;margin-bottom:.6rem}
+.total-ex{text-align:right;font-size:.78rem;font-weight:700;color:#1a3a6b;margin-top:.2rem}
+
+.dias label{display:flex;align-items:center;gap:.3rem;background:#f0f4ff;border:1px solid #c8d9f0;border-radius:20px;padding:.25rem .6rem;font-size:.78rem;cursor:pointer}
+.dias input,#aj-para input{width:auto}
+#aj-para label{display:flex;align-items:center;gap:.45rem;font-size:.84rem;font-weight:600;color:#1a2035;cursor:pointer}
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.65rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;z-index:999;transition:.3s;opacity:0;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);pointer-events:none}
+
+@media(max-width:600px){
+  .page{padding:.8rem .7rem 1.5rem}
+  .kpis{grid-template-columns:1fr 1fr}
+  .fila{grid-template-columns:52px 1fr auto;padding:.55rem .75rem}
+  .fila .m{grid-column:2;text-align:left}
+  .fila .acc{grid-column:3;grid-row:1/3}
+  .form-grid,.form-grid.g3{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+  .ex-row{grid-template-columns:1fr 1fr;}
+  .ex-row .ex-del{justify-self:end}
+  .ex-head{display:none}
+  .plan{flex-direction:column;align-items:flex-start}
+  .modal-backdrop{padding:.75rem .5rem}
+}
+
+@page{size:Letter;margin:12mm}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff}
+  .no-print,.switch,.filters,#toast,.acc .ico{display:none!important}
+  .page{max-width:none;padding:0}
+  .card,section,main{break-inside:auto}
+  .kpi,.fila,.plan,.alert-box{break-inside:avoid}
+  h1,h2,h3,h4,.card-head{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  thead{display:table-header-group}
+  a[href]:after{content:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="switch no-print">
+    <button id="sw-cal" class="on" onclick="setVista('cal')">📅 Calendario</button>
+    <button id="sw-plan" onclick="setVista('plan')">📑 Planes de cobro</button>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div id="estado"></div>
+
+  <div id="v-cal">
+    <div class="filters">
+      <select id="f-ver" onchange="renderCal()">
+        <option value="pend">Pendientes</option>
+        <option value="todas">Todas</option>
+        <option value="cobradas">Cobradas</option>
+      </select>
+      <select id="f-proy" onchange="renderCal()"><option value="">Todos los proyectos</option></select>
+      <span class="sp"></span>
+      <button class="btn btn-secondary btn-sm no-print" onclick="abrirAjustes()" title="Recordatorio por correo">⚙️ Recordatorio</button>
+      <button class="btn btn-secondary btn-sm no-print" onclick="window.print()">🖨️ PDF</button>
+      <button class="btn btn-primary btn-sm no-print" onclick="abrirNueva()">+ Factura</button>
+    </div>
+    <div id="cal"></div>
+  </div>
+
+  <div id="v-plan" style="display:none">
+    <div class="alert-box">Aquí se define, por proyecto, cuándo se factura: las exhibiciones del desarrollo y la mensualidad. Con eso el calendario se arma solo y el recordatorio llega por correo cada mañana a las 10:30.</div>
+    <div class="card"><div class="card-head">📑 Proyectos en operación <span id="plan-count"></span></div><div id="planes"></div></div>
+  </div>
+</div>
+
+<!-- Plan de cobro -->
+<div class="modal-backdrop" id="m-plan" onclick="if(event.target===this)cerrar('m-plan')">
+  <div class="modal">
+    <div class="modal-head"><div><h3 id="pl-nombre">Plan de cobro</h3><div class="sub" id="pl-sub"></div></div><button class="modal-close" onclick="cerrar('m-plan')">✕</button></div>
+    <div class="modal-body">
+      <h4>Contrato</h4>
+      <div class="form-grid">
+        <div class="form-group"><label>Liga al contrato firmado</label><input type="url" id="pl-contrato" placeholder="https://drive.google.com/…"></div>
+        <div class="form-group"><label>Fecha de firma</label><input type="date" id="pl-firma"></div>
+      </div>
+      <div class="hint">Sube el PDF a la carpeta del proyecto en Drive y pega aquí la liga.</div>
+
+      <h4 style="display:flex;justify-content:space-between;align-items:center">Exhibiciones del desarrollo <button class="btn btn-secondary btn-sm" onclick="document.getElementById('gen').classList.toggle('open')">⚡ Generar por porcentajes</button></h4>
+      <div class="gen" id="gen">
+        <div class="form-grid g3">
+          <div class="form-group"><label>Total antes de IVA</label><input type="number" id="g-total" min="0" step="100"></div>
+          <div class="form-group"><label>Moneda</label><select id="g-moneda"><option>MXN</option><option>USD</option></select></div>
+          <div class="form-group"><label>Primera fecha</label><input type="date" id="g-fecha"></div>
+          <div class="form-group full"><label>Esquema de pagos (%)</label><input type="text" id="g-esquema" value="30,10,10,10,10,15,15" placeholder="Ej: 50,50  ·  30,10,10,10,10,15,15"></div>
+        </div>
+        <div class="hint">Una exhibición por mes a partir de la primera fecha. Después puedes ajustar cada fecha a mano.</div>
+        <div style="text-align:right;margin-top:.5rem"><button class="btn btn-primary btn-sm" onclick="generar()">Generar</button></div>
+      </div>
+      <div class="fijas" id="pl-fijas" style="display:none"></div>
+      <div class="ex-row ex-head"><span>Concepto</span><span>Monto</span><span>Moneda</span><span>Fecha de factura</span><span></span></div>
+      <div id="pl-ex"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <button class="btn btn-secondary btn-sm" onclick="agregarFila()">+ Exhibición</button>
+        <div class="total-ex" id="pl-total"></div>
+      </div>
+
+      <h4>Mensualidad (iguala)</h4>
+      <div class="form-grid g3">
+        <div class="form-group"><label>Monto antes de IVA</label><input type="number" id="pl-mmonto" min="0" step="50" placeholder="0 = sin mensualidad"></div>
+        <div class="form-group"><label>Moneda</label><select id="pl-mmoneda"><option>MXN</option><option>USD</option></select></div>
+        <div class="form-group"><label>Día de factura</label><input type="number" id="pl-mdia" min="1" max="28" value="1"></div>
+        <div class="form-group"><label>Empieza</label><input type="date" id="pl-minicio"></div>
+        <div class="form-group"><label>Termina (opcional)</label><input type="date" id="pl-mfin"></div>
+        <div class="form-group"><label>Concepto</label><input type="text" id="pl-mconcepto" placeholder="Mensualidad de operación"></div>
+      </div>
+      <div class="hint">Deja el periodo de gracia fuera poniendo como inicio el primer mes que sí se factura.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="cerrar('m-plan')">Cancelar</button>
+      <button class="btn btn-primary" id="pl-guardar" onclick="guardarPlan()">Guardar plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Factura suelta / edición -->
+<div class="modal-backdrop" id="m-fac" onclick="if(event.target===this)cerrar('m-fac')">
+  <div class="modal sm">
+    <div class="modal-head"><h3 id="fa-titulo">Factura</h3><button class="modal-close" onclick="cerrar('m-fac')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full" id="fa-proy-wrap"><label>Proyecto</label><select id="fa-proy"></select></div>
+        <div class="form-group full"><label>Concepto *</label><input type="text" id="fa-concepto"></div>
+        <div class="form-group"><label>Monto antes de IVA</label><input type="number" id="fa-monto" min="0" step="50"></div>
+        <div class="form-group"><label>Moneda</label><select id="fa-moneda"><option>MXN</option><option>USD</option></select></div>
+        <div class="form-group full"><label>Fecha de factura *</label><input type="date" id="fa-fecha"></div>
+        <div class="form-group full"><label>Notas</label><textarea id="fa-notas" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger btn-sm" id="fa-borrar" style="margin-right:auto" onclick="borrarFactura()">🗑️ Borrar</button>
+      <button class="btn btn-secondary" onclick="cerrar('m-fac')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarFactura()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Ajustes del recordatorio -->
+<div class="modal-backdrop" id="m-aj" onclick="if(event.target===this)cerrar('m-aj')">
+  <div class="modal sm">
+    <div class="modal-head"><div><h3>Recordatorio por correo</h3><div class="sub">Se revisa cada mañana a las 10:30; solo llega si hay algo pendiente</div></div><button class="modal-close" onclick="cerrar('m-aj')">✕</button></div>
+    <div class="modal-body">
+      <h4>¿Qué días?</h4>
+      <div class="form-group"><select id="aj-frec" onchange="document.getElementById('aj-dias').style.display=this.value==='custom'?'flex':'none'">
+        <option value="1,2,3,4,5,6,7">Todos los días</option>
+        <option value="1,2,3,4,5">Lunes a viernes</option>
+        <option value="1,3,5">Lunes, miércoles y viernes</option>
+        <option value="1,4">Lunes y jueves</option>
+        <option value="1">Solo los lunes</option>
+        <option value="custom">Elegir días…</option>
+        <option value="">Pausado, no mandar correos</option>
+      </select></div>
+      <div id="aj-dias" class="dias" style="display:none;flex-wrap:wrap;gap:.35rem;margin-top:.5rem"></div>
+      <h4>¿Con cuánta anticipación?</h4>
+      <div class="form-group"><select id="aj-ant">
+        <option value="0">El mismo día de la factura</option><option value="1">1 día antes</option><option value="2">2 días antes</option>
+        <option value="3">3 días antes</option><option value="5">5 días antes</option><option value="7">Una semana antes</option>
+      </select></div>
+      <div class="hint">Las vencidas siguen apareciendo hasta que las marquen como Solicitadas.</div>
+      <h4>Facturas por cobrar</h4>
+      <div class="form-group"><select id="aj-cob">
+        <option value="lunes">Incluirlas solo los lunes</option><option value="siempre">Incluirlas en cada correo</option><option value="nunca">No incluirlas</option>
+      </select></div>
+      <h4>¿Quién lo recibe?</h4>
+      <div id="aj-para" style="display:flex;flex-direction:column;gap:.4rem"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="cerrar('m-aj')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarAjustes()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://n8n.excelentia.com.mx/webhook/crm-facturacion';
+const ESTADOS = ['Programada','Solicitada','Emitida','Cobrada','Cancelada'];
+const MES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+let D = {proyectos:[], facturas:[], proyectadas:[], hoy:''};
+let vista = 'cal', planId = null, editId = null;
+
+async function api(body){
+  try{
+    const c = new AbortController(); const t = setTimeout(()=>c.abort(), 25000);
+    const r = await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:c.signal});
+    clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json();
+  }catch(e){ console.error(e); return null; }
+}
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmt = (n, m) => (m==='USD'?'US$':'$') + Number(n||0).toLocaleString('es-MX',{maximumFractionDigits:0});
+const fcorta = f => { if(!f) return ''; const [y,m,d] = f.split('-').map(Number); return d + ' ' + MES[m-1].slice(0,3); };
+const hoyMX = () => new Date().toLocaleDateString('en-CA',{timeZone:'America/Mexico_City'});
+function sumas(list){
+  const mxn = list.filter(x=>x.Moneda!=='USD').reduce((a,x)=>a+Number(x.Monto||0),0);
+  const usd = list.filter(x=>x.Moneda==='USD').reduce((a,x)=>a+Number(x.Monto||0),0);
+  if(!mxn && !usd) return '$0';
+  return [mxn?fmt(mxn,'MXN'):'', usd?fmt(usd,'USD'):''].filter(Boolean).join(' · ');
+}
+function toast(m, ok=true){ const t=document.getElementById('toast'); t.style.background=ok?'#059669':'#dc2626'; t.textContent=m; t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',2800); }
+function abrir(id){ document.getElementById(id).classList.add('open'); }
+function cerrar(id){ document.getElementById(id).classList.remove('open'); }
+
+async function cargar(){
+  if(!D.proyectos.length) document.getElementById('estado').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando facturación…</div>';
+  const j = await api({accion:'list'});
+  if(!j || !j.ok){ document.getElementById('estado').innerHTML = '<div class="alert-box alert-err">⚠️ No se pudo cargar. <button class="btn btn-secondary btn-sm" onclick="cargar()">Reintentar</button></div>'; return; }
+  D = j; document.getElementById('estado').innerHTML = '';
+  const sel = document.getElementById('f-proy'); const v = sel.value;
+  sel.innerHTML = '<option value="">Todos los proyectos</option>' + D.proyectos.map(p=>`<option value="${p.ID}">${esc(p.Nombre)}</option>`).join('');
+  sel.value = v;
+  render();
+  const pid = new URLSearchParams(location.search).get('proyecto');
+  if(pid && !window.__abierto){ window.__abierto = true; setVista('plan'); abrirPlan(pid); }
+}
+function setVista(v){
+  vista = v;
+  document.getElementById('sw-cal').classList.toggle('on', v==='cal');
+  document.getElementById('sw-plan').classList.toggle('on', v==='plan');
+  document.getElementById('v-cal').style.display = v==='cal' ? '' : 'none';
+  document.getElementById('v-plan').style.display = v==='plan' ? '' : 'none';
+}
+function todas(){ return [...D.facturas, ...D.proyectadas]; }
+function render(){ renderKpis(); renderCal(); renderPlanes(); }
+
+function renderKpis(){
+  const hoy = D.hoy || hoyMX(); const mes = hoy.slice(0,7);
+  const all = todas();
+  const porEmitirMes = all.filter(x=>x.Status==='Programada' && x.Fecha.slice(0,7)===mes);
+  const vencidas = all.filter(x=>x.Status==='Programada' && x.Fecha < hoy);
+  const porCobrar = all.filter(x=>['Solicitada','Emitida'].includes(x.Status));
+  const cobradoMes = all.filter(x=>x.Status==='Cobrada' && (x.FechaCobro||'').slice(0,7)===mes);
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><b>${sumas(porEmitirMes)}</b><small>${porEmitirMes.length} factura${porEmitirMes.length===1?'':'s'}</small><span>Por emitir este mes</span></div>
+    <div class="kpi ${vencidas.length?'alerta':''}"><b>${vencidas.length}</b><small>${vencidas.length?sumas(vencidas):'Al corriente'}</small><span>Vencidas</span></div>
+    <div class="kpi"><b>${sumas(porCobrar)}</b><small>${porCobrar.length} pendiente${porCobrar.length===1?'':'s'}</small><span>Por cobrar</span></div>
+    <div class="kpi"><b>${sumas(cobradoMes)}</b><small>${cobradoMes.length} cobro${cobradoMes.length===1?'':'s'}</small><span>Cobrado este mes</span></div>`;
+}
+
+function renderCal(){
+  const hoy = D.hoy || hoyMX();
+  const ver = document.getElementById('f-ver').value;
+  const pr = document.getElementById('f-proy').value;
+  let list = todas().filter(x => !pr || x.ProyectoID === pr);
+  if(ver==='pend') list = list.filter(x => ['Programada','Solicitada','Emitida'].includes(x.Status));
+  if(ver==='cobradas') list = list.filter(x => x.Status==='Cobrada');
+  list.sort((a,b)=> a.Fecha.localeCompare(b.Fecha) || String(a.Empresa).localeCompare(String(b.Empresa)));
+  const el = document.getElementById('cal');
+  if(!list.length){
+    el.innerHTML = `<div class="card"><div class="vacio">${D.proyectos.length ? 'No hay facturas en esta vista. Define los planes de cobro en la pestaña <b>📑 Planes de cobro</b>.' : 'Aún no hay proyectos en operación.'}</div></div>`;
+    return;
+  }
+  const grupos = {};
+  list.forEach(x=>{
+    const k = (x.Status==='Programada' && x.Fecha < hoy) ? '0-vencidas' : x.Fecha.slice(0,7);
+    (grupos[k] = grupos[k] || []).push(x);
+  });
+  el.innerHTML = Object.keys(grupos).sort().map(k=>{
+    const items = grupos[k];
+    const titulo = k==='0-vencidas' ? '⚠️ Vencidas, sin solicitar' : (MES[Number(k.slice(5,7))-1].replace(/^./,c=>c.toUpperCase()) + ' ' + k.slice(0,4));
+    return `<div class="card"><div class="card-head ${k==='0-vencidas'?'vencidas':''}">${titulo}<span>${sumas(items)}</span></div>${items.map(x=>fila(x,hoy)).join('')}</div>`;
+  }).join('');
+}
+function fila(x, hoy){
+  const venc = x.Status==='Programada' && x.Fecha < hoy;
+  const key = x.ID ? `id:${x.ID}` : `p:${x.ProyectoID}:${x.Periodo}`;
+  return `<div class="fila ${x.Proyectada?'proy':''}">
+    <div class="f ${venc?'venc':''}">${fcorta(x.Fecha)}</div>
+    <div><div class="t">${esc(x.Empresa||x.Proyecto)}</div><div class="c">${esc(x.Concepto)}${x.Proyectada?' · proyectada':''}${x.Notas?' · '+esc(x.Notas):''}</div></div>
+    <div class="m">${fmt(x.Monto, x.Moneda)}</div>
+    <div class="acc">
+      <select class="st st-${x.Status}" onchange="cambiarEstado('${key}', this.value)" title="Cambiar estatus">
+        ${ESTADOS.map(s=>`<option ${s===x.Status?'selected':''}>${s}</option>`).join('')}
+      </select>
+      ${x.ID?`<button class="ico no-print" title="Editar" onclick="abrirFactura('${x.ID}')">✏️</button>`:''}
+    </div>
+  </div>`;
+}
+async function cambiarEstado(key, status){
+  const body = {accion:'estado', Status:status};
+  if(key.startsWith('id:')) body.ID = key.slice(3);
+  else { const [, pid, per] = key.split(':'); body.ProyectoID = pid; body.Periodo = per; }
+  const j = await api(body);
+  if(j && j.ok){ toast(status==='Cobrada' ? '💰 Registrado como cobrado' : 'Estatus: ' + status); cargar(); }
+  else { toast(j?.error || 'No se pudo cambiar', false); render(); }
+}
+
+// ── Planes ──
+function renderPlanes(){
+  const ps = D.proyectos;
+  document.getElementById('plan-count').textContent = ps.length ? ps.length + ' proyecto' + (ps.length===1?'':'s') : '';
+  document.getElementById('planes').innerHTML = ps.length ? ps.map(p=>{
+    const mens = Number(p.MensMonto||0) > 0;
+    const listo = p.ContratoURL && (p.Exhibiciones > 0 || mens);
+    return `<div class="plan">
+      <div><div class="t">${esc(p.Nombre)}</div><div class="c">${esc(p.Empresa)} · ${esc(p.Etapa||'')}</div>
+        <div class="chips">
+          <span class="chip ${p.ContratoURL?'ok':'falta'}">${p.ContratoURL?`<a href="${esc(p.ContratoURL)}" target="_blank">📎 Contrato</a>`:'Sin contrato'}</span>
+          ${p.FechaFirma?`<span class="chip">Firmado ${fcorta(p.FechaFirma)}</span>`:''}
+          <span class="chip ${p.Exhibiciones>0?'ok':''}">${p.Exhibiciones} exhibicion${p.Exhibiciones==1?'':'es'}</span>
+          <span class="chip ${mens?'ok':''}">${mens?`${fmt(p.MensMonto,p.MensMoneda)} al mes, día ${p.MensDia}`:'Sin mensualidad'}</span>
+        </div></div>
+      <button class="btn ${listo?'btn-secondary':'btn-primary'} btn-sm no-print" onclick="abrirPlan('${p.ID}')">${listo?'Editar plan':'Configurar plan'}</button>
+    </div>`;
+  }).join('') : '<div class="vacio">Cuando ganes un proyecto en el Embudo, aparecerá aquí para definir su plan de cobro.</div>';
+}
+function abrirPlan(id){
+  const p = D.proyectos.find(x=>x.ID===id);
+  if(!p){ toast('Ese proyecto no está en operación', false); return; }
+  planId = id;
+  document.getElementById('pl-nombre').textContent = 'Plan de cobro · ' + p.Nombre;
+  document.getElementById('pl-sub').textContent = [p.Empresa, p.Valor ? 'Valor ' + fmt(p.Valor,'MXN') : ''].filter(Boolean).join(' · ');
+  document.getElementById('pl-contrato').value = p.ContratoURL || '';
+  document.getElementById('pl-firma').value = p.FechaFirma || '';
+  document.getElementById('pl-mmonto').value = p.MensMonto || '';
+  document.getElementById('pl-mmoneda').value = p.MensMoneda || 'MXN';
+  document.getElementById('pl-mdia').value = p.MensDia || 1;
+  document.getElementById('pl-minicio').value = p.MensInicio || '';
+  document.getElementById('pl-mfin').value = p.MensFin || '';
+  document.getElementById('pl-mconcepto').value = p.MensConcepto || '';
+  const ex = D.facturas.filter(f=>f.ProyectoID===id && f.Tipo==='Exhibición');
+  const fijas = ex.filter(f=>f.Status!=='Programada');
+  const prog = ex.filter(f=>f.Status==='Programada');
+  const fj = document.getElementById('pl-fijas');
+  fj.style.display = fijas.length ? '' : 'none';
+  fj.innerHTML = fijas.length ? '<b>Ya en proceso (no se modifican aquí):</b> ' + fijas.map(f=>`${esc(f.Concepto)} ${fmt(f.Monto,f.Moneda)} · ${f.Status.toLowerCase()}`).join('; ') : '';
+  document.getElementById('pl-ex').innerHTML = '';
+  prog.forEach(f=>agregarFila(f));
+  if(!prog.length && !fijas.length) agregarFila();
+  document.getElementById('g-total').value = p.Valor || '';
+  document.getElementById('g-fecha').value = p.FechaFirma || hoyMX();
+  document.getElementById('gen').classList.remove('open');
+  totalEx();
+  abrir('m-plan');
+}
+function agregarFila(f){
+  const div = document.createElement('div'); div.className = 'ex-row';
+  div.innerHTML = `<input type="text" class="ex-c" placeholder="Ej: Anticipo 30%" value="${esc(f?.Concepto||'')}">
+    <input type="number" class="ex-m" min="0" step="50" placeholder="Monto" value="${f?.Monto??''}" oninput="totalEx()">
+    <select class="ex-mo" onchange="totalEx()"><option ${f?.Moneda!=='USD'?'selected':''}>MXN</option><option ${f?.Moneda==='USD'?'selected':''}>USD</option></select>
+    <input type="date" class="ex-f" value="${f?.Fecha||''}">
+    <button class="ico ex-del" title="Quitar" onclick="this.parentElement.remove();totalEx()">✕</button>`;
+  document.getElementById('pl-ex').appendChild(div);
+}
+function filasEx(){
+  return [...document.querySelectorAll('#pl-ex .ex-row')].map(r=>({
+    Concepto:r.querySelector('.ex-c').value.trim(), Monto:r.querySelector('.ex-m').value,
+    Moneda:r.querySelector('.ex-mo').value, Fecha:r.querySelector('.ex-f').value}));
+}
+function totalEx(){
+  const f = filasEx().filter(x=>x.Monto!=='');
+  document.getElementById('pl-total').textContent = f.length ? 'Total: ' + sumas(f.map(x=>({Monto:x.Monto,Moneda:x.Moneda}))) : '';
+}
+function generar(){
+  const total = Number(document.getElementById('g-total').value||0);
+  const mon = document.getElementById('g-moneda').value;
+  const f0 = document.getElementById('g-fecha').value;
+  const pcts = document.getElementById('g-esquema').value.split(/[,\s]+/).map(Number).filter(n=>n>0);
+  const suma = pcts.reduce((a,b)=>a+b,0);
+  if(!total || !f0 || !pcts.length){ toast('Llena total, primera fecha y esquema', false); return; }
+  if(Math.abs(suma-100) > 0.01){ toast(`El esquema suma ${suma}%; debe sumar 100%`, false); return; }
+  document.getElementById('pl-ex').innerHTML = '';
+  const [y,m,d] = f0.split('-').map(Number);
+  pcts.forEach((pc,i)=>{
+    const dt = new Date(Date.UTC(y, m-1+i, 1));
+    const ult = new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth()+1, 0)).getUTCDate();
+    dt.setUTCDate(Math.min(d, ult));
+    agregarFila({Concepto: (i===0?'Anticipo':'Pago '+(i+1)) + ' (' + pc + '%)', Monto: Math.round(total*pc)/100, Moneda: mon, Fecha: dt.toISOString().slice(0,10)});
+  });
+  document.getElementById('gen').classList.remove('open');
+  totalEx();
+}
+async function guardarPlan(){
+  const ex = filasEx().filter(x=>x.Concepto || x.Monto || x.Fecha);
+  const mal = ex.find(x=>!x.Concepto || !x.Fecha);
+  if(mal){ toast('Cada exhibición necesita concepto y fecha', false); return; }
+  const mm = Number(document.getElementById('pl-mmonto').value||0);
+  if(mm > 0 && !document.getElementById('pl-minicio').value){ toast('Indica desde cuándo empieza la mensualidad', false); return; }
+  const btn = document.getElementById('pl-guardar'); btn.disabled = true; btn.textContent = 'Guardando…';
+  const j = await api({accion:'plan', ProyectoID:planId,
+    ContratoURL:document.getElementById('pl-contrato').value, FechaFirma:document.getElementById('pl-firma').value,
+    Exhibiciones: ex,
+    Mensualidad:{Monto: mm || '', Moneda:document.getElementById('pl-mmoneda').value, Dia:document.getElementById('pl-mdia').value,
+      Inicio:document.getElementById('pl-minicio').value, Fin:document.getElementById('pl-mfin').value, Concepto:document.getElementById('pl-mconcepto').value}});
+  btn.disabled = false; btn.textContent = 'Guardar plan';
+  if(j && j.ok){ cerrar('m-plan'); toast('Plan de cobro guardado'); cargar(); }
+  else toast(j?.error || 'No se pudo guardar', false);
+}
+
+// ── Factura suelta / edición ──
+function abrirNueva(){
+  if(!D.proyectos.length){ toast('Primero necesitas un proyecto en operación', false); return; }
+  editId = null;
+  document.getElementById('fa-titulo').textContent = 'Nueva factura';
+  document.getElementById('fa-proy-wrap').style.display = '';
+  document.getElementById('fa-proy').innerHTML = D.proyectos.map(p=>`<option value="${p.ID}">${esc(p.Nombre)}</option>`).join('');
+  const pr = document.getElementById('f-proy').value; if(pr) document.getElementById('fa-proy').value = pr;
+  ['fa-concepto','fa-monto','fa-notas'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('fa-moneda').value = 'MXN';
+  document.getElementById('fa-fecha').value = hoyMX();
+  document.getElementById('fa-borrar').style.display = 'none';
+  abrir('m-fac');
+}
+function abrirFactura(id){
+  const f = D.facturas.find(x=>x.ID===id); if(!f) return;
+  editId = id;
+  document.getElementById('fa-titulo').textContent = f.Empresa + ' · ' + f.Tipo;
+  document.getElementById('fa-proy-wrap').style.display = 'none';
+  document.getElementById('fa-concepto').value = f.Concepto;
+  document.getElementById('fa-monto').value = f.Monto;
+  document.getElementById('fa-moneda').value = f.Moneda;
+  document.getElementById('fa-fecha').value = f.Fecha;
+  document.getElementById('fa-notas').value = f.Notas || '';
+  document.getElementById('fa-borrar').style.display = f.Status==='Programada' ? '' : 'none';
+  abrir('m-fac');
+}
+async function guardarFactura(){
+  const body = {Concepto:document.getElementById('fa-concepto').value, Monto:document.getElementById('fa-monto').value,
+    Moneda:document.getElementById('fa-moneda').value, Fecha:document.getElementById('fa-fecha').value, Notas:document.getElementById('fa-notas').value};
+  const j = await api(editId ? {accion:'editar', ID:editId, ...body} : {accion:'agregar', ProyectoID:document.getElementById('fa-proy').value, ...body});
+  if(j && j.ok){ cerrar('m-fac'); toast(editId ? 'Factura actualizada' : 'Factura agregada'); cargar(); }
+  else toast(j?.error || 'No se pudo guardar', false);
+}
+async function borrarFactura(){
+  if(!editId || !confirm('¿Borrar esta factura programada?')) return;
+  const j = await api({accion:'borrar', ID:editId});
+  if(j && j.ok){ cerrar('m-fac'); toast('Factura borrada'); cargar(); } else toast(j?.error || 'No se pudo borrar', false);
+}
+
+
+// ── Ajustes del recordatorio ──
+const DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const EQUIPO = {fernando:'Fernando', juanjose:'Juan José', adolfo:'Adolfo'};
+function abrirAjustes(){
+  const a = D.ajustes || {dias:[1,2,3,4,5,6,7], anticipacion:3, cobranza:'lunes', para:Object.keys(EQUIPO)};
+  const dias = (a.dias||[]).map(Number).sort().join(',');
+  const sel = document.getElementById('aj-frec');
+  const preset = [...sel.options].some(o=>o.value===dias && o.value!=='custom');
+  sel.value = preset ? dias : 'custom';
+  const cont = document.getElementById('aj-dias');
+  cont.innerHTML = DIAS.map((d,i)=>`<label><input type="checkbox" value="${i+1}" ${(a.dias||[]).map(Number).includes(i+1)?'checked':''}> ${d}</label>`).join('');
+  cont.style.display = preset ? 'none' : 'flex';
+  document.getElementById('aj-ant').value = String(a.anticipacion ?? 3);
+  if(!document.getElementById('aj-ant').value) document.getElementById('aj-ant').value = '3';
+  document.getElementById('aj-cob').value = a.cobranza || 'lunes';
+  const para = a.para || Object.keys(EQUIPO);
+  document.getElementById('aj-para').innerHTML = Object.entries(EQUIPO).map(([k,n])=>`<label><input type="checkbox" value="${k}" ${para.includes(k)?'checked':''}> ${n}</label>`).join('');
+  abrir('m-aj');
+}
+async function guardarAjustes(){
+  const f = document.getElementById('aj-frec').value;
+  const dias = f==='custom' ? [...document.querySelectorAll('#aj-dias input:checked')].map(x=>Number(x.value)) : (f ? f.split(',').map(Number) : []);
+  const para = [...document.querySelectorAll('#aj-para input:checked')].map(x=>x.value);
+  if(f==='custom' && !dias.length){ toast('Elige al menos un día, o usa “Pausado”', false); return; }
+  const j = await api({accion:'ajustes', Ajustes:{dias, anticipacion:document.getElementById('aj-ant').value, cobranza:document.getElementById('aj-cob').value, para}});
+  if(j && j.ok){ cerrar('m-aj'); toast(dias.length ? 'Recordatorio actualizado' : 'Recordatorio pausado'); cargar(); }
+  else toast(j?.error || 'No se pudo guardar', false);
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ cerrar('m-plan'); cerrar('m-fac'); cerrar('m-aj'); } });
+document.addEventListener('DOMContentLoaded', cargar);
+</script>
+</body>
+</html>
