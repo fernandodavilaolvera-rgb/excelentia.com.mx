@@ -24,7 +24,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 .toolbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
 .toolbar h2{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:.4rem}
-.resumen-pill{background:#fff;border:1px solid #dde1e9;border-radius:20px;padding:.35rem .9rem;font-size:.8rem;color:#4a5068;display:flex;align-items:center;gap:.4rem}
+.resumen-pill{background:#fff;border:1px solid #dde1e9;border-radius:6px;padding:.35rem .9rem;font-size:.8rem;color:#4a5068;display:flex;align-items:center;gap:.4rem}
 .resumen-pill strong{color:#1a3a6b}
 .resumen-pill .v{color:#059669}
 
@@ -62,12 +62,13 @@ tr:last-child td{border-bottom:none}
 .vencido .celda-accion-txt,.vencido .celda-accion-fecha{color:#dc2626;font-weight:600}
 
 /* ── BADGES ── */
-.badge{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap}
-.badge-etapa{color:#fff}
-.badge-blue{background:#dce8f7;color:#1a3a6b}
-.badge-green{background:#d1fae5;color:#065f46}
-.badge-red{background:#fee2e2;color:#991b1b}
-.badge-gray{background:#f3f4f6;color:#374151}
+.badge{display:inline;padding:0;font-size:.8rem;font-weight:600;white-space:nowrap}
+.badge-etapa{display:inline-flex;align-items:center;gap:.35rem;color:#1a2035}
+.badge-etapa i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.badge-blue{color:#1a3a6b}
+.badge-green{color:#065f46}
+.badge-red{color:#991b1b}
+.badge-gray{color:#6b7280}
 .resp-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.75rem;font-weight:700}
 .resp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
@@ -206,7 +207,6 @@ textarea{resize:vertical;min-height:70px}
             <th onclick="toggleSort('empresa')" data-col="empresa">Empresa <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('etapa')" data-col="etapa">Etapa <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('valor')" data-col="valor">Valor <span class="arrow">⇕</span></th>
-            <th onclick="toggleSort('prob')" data-col="prob">Prob. <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('responsable')" data-col="responsable">Responsable <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('accionfecha')" data-col="accionfecha">Próx. Acción <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('status')" data-col="status">Status <span class="arrow">⇕</span></th>
@@ -215,7 +215,7 @@ textarea{resize:vertical;min-height:70px}
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="10"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>
+          <tr><td colspan="9"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -263,7 +263,7 @@ textarea{resize:vertical;min-height:70px}
         </div>
         <div class="form-group full nc-sugerencia" id="ncSugerencia"></div>
         <div class="form-group"><label>Etapa</label>
-          <select id="p-etapa"><option>Prospecto</option><option>Contacto</option><option>Presentación</option><option>Seguimiento</option><option>Propuesta</option><option>Cierre</option><option>Desarrollo</option><option>Entrega</option><option>Mantenimiento</option></select>
+          <select id="p-etapa"><option>Prospecto</option><option>Presentación</option><option>Seguimiento</option><option>Propuesta</option><option>Negociación</option><option>Cierre</option><option>Desarrollo</option><option>Entrega</option><option>Mantenimiento</option></select>
         </div>
         <div class="form-group"><label>Status</label>
           <select id="p-status"><option value="activo">Activo</option><option value="ganado">Ganado</option><option value="perdido">Perdido</option><option value="pausado">Pausado</option></select>
@@ -676,7 +676,7 @@ async function logHistorial(accionTexto, proyecto, campo='', anterior='', nuevo=
 // ═══════════════════════════════════════
 async function cargarProyectos(){
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '<tr><td colspan="10"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>';
+  tbody.innerHTML = '<tr><td colspan="9"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>';
   const res = await apiCall('get');
   ITEMS = (Array.isArray(res) ? res : []).map(normalizeItem);
   render();
@@ -783,7 +783,7 @@ function renderResumen(){
 function renderTabla(lista){
   const tbody = document.getElementById('tbody');
   if(!lista.length){
-    tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><span>📋</span>Sin proyectos que coincidan</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><span>📋</span>Sin proyectos que coincidan</div></td></tr>';
     return;
   }
   tbody.innerHTML = lista.map(p => {
@@ -795,13 +795,12 @@ function renderTabla(lista){
 
     return `<tr>
       <td>
-        <div class="celda-proyecto">${escHtml(p.Nombre)}</div>
+        <div class="celda-proyecto" style="white-space:nowrap">${escHtml(p.Nombre)}</div>
         ${tags.length ? `<div class="celda-tags">${tags.map(t=>`<span class="tag-chip">${escHtml(t)}</span>`).join('')}</div>` : ''}
       </td>
       <td class="celda-empresa">${escHtml(p.Empresa) || '—'}</td>
-      <td><span class="badge badge-etapa" style="background:${colorEtapa}">${escHtml(p.Etapa)}</span></td>
+      <td><span class="badge badge-etapa"><i style="background:${colorEtapa}"></i>${escHtml(p.Etapa)}</span></td>
       <td class="celda-valor">${fmt$(p.ValorEstimado)}</td>
-      <td class="celda-prob">${p.Probabilidad ? toNum(p.Probabilidad)+'%' : '—'}</td>
       <td><span class="resp-badge"><span class="resp-dot" style="background:${resp.color}"></span>${escHtml(resp.nombre)}</span></td>
       <td class="${vencido?'vencido':''}">
         ${p.ProximaAccion ? `<span class="celda-accion-txt">${vencido?'⚠️ ':''}${escHtml(p.ProximaAccion)}</span>` : '<span class="celda-accion-txt">—</span>'}
