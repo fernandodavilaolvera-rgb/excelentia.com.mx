@@ -148,6 +148,15 @@ textarea{resize:vertical;min-height:70px}
   .modal{max-width:100%;border-radius:14px 14px 0 0;align-self:flex-end;max-height:95vh}
   .modal-backdrop{align-items:flex-end;padding:0}
 }
+.reparto-box{display:none;margin-top:.5rem;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:0;padding:.6rem .75rem}
+.reparto-box.open{display:block}
+.reparto-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.reparto-grid label{font-size:.76rem;font-weight:700;color:#4a5068;display:flex;flex-direction:column;gap:.25rem}
+.reparto-grid label span{display:flex;align-items:center;gap:.3rem;font-weight:600}
+.reparto-grid input{width:100%;text-align:right}
+.reparto-suma{margin-top:.45rem;font-size:.76rem;font-weight:700;color:#b45309}
+.reparto-suma.ok{color:#059669}
+@media(max-width:600px){.reparto-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -269,6 +278,21 @@ textarea{resize:vertical;min-height:70px}
         <div class="form-group full"><label>Próxima acción</label><input type="text" id="p-prox-accion" placeholder="Ej: Enviar propuesta formal"></div>
         <div class="form-group"><label>Fecha próxima acción</label><input type="date" id="p-fecha-accion"></div>
         <div class="form-group"><label>Tags (separados por coma)</label><input type="text" id="p-tags" placeholder="Ej: automatización,whatsapp"></div>
+        <div class="form-group full"><label>Esquema de reparto</label>
+          <select id="p-esquema" onchange="toggleReparto()">
+            <option value="30_30_40">30 / 30 / 40 · quien trae, desarrollo y socios</option>
+            <option value="tres_iguales">Tres partes iguales</option>
+            <option value="personalizado">Personalizado</option>
+          </select>
+          <div class="reparto-box" id="reparto-box">
+            <div class="reparto-grid">
+              <label>Fernando<span><input type="number" id="rp-fernando" min="0" max="100" step="0.01" oninput="sumaReparto()">%</span></label>
+              <label>Juan José<span><input type="number" id="rp-juanjose" min="0" max="100" step="0.01" oninput="sumaReparto()">%</span></label>
+              <label>Adolfo<span><input type="number" id="rp-adolfo" min="0" max="100" step="0.01" oninput="sumaReparto()">%</span></label>
+            </div>
+            <div class="reparto-suma" id="reparto-suma">Suma: 0% · debe dar 100%</div>
+          </div>
+        </div>
         <div class="form-group full"><label>Link carpeta Drive</label><input type="url" id="p-drive" placeholder="https://drive.google.com/..."></div>
         <div class="form-group full"><label>Notas</label><textarea id="p-notas" placeholder="Contexto adicional del proyecto..."></textarea></div>
       </div>
@@ -579,7 +603,9 @@ function normalizeItem(p){
     FechaAccion: toStr(p.FechaAccion),
     Tags: toStr(p.Tags),
     DriveFolder: toStr(p.DriveFolder),
-    Notas: toStr(p.Notas)
+    Notas: toStr(p.Notas),
+    EsquemaReparto: toStr(p.EsquemaReparto) || '30_30_40',
+    RepartoDetalle: (p.RepartoDetalle && typeof p.RepartoDetalle === 'object') ? p.RepartoDetalle : null
   };
 }
 
@@ -838,8 +864,25 @@ function abrirModal(id = null){
   document.getElementById('p-tags').value = p?.Tags || '';
   document.getElementById('p-drive').value = p?.DriveFolder || '';
   document.getElementById('p-notas').value = p?.Notas || '';
+  document.getElementById('p-esquema').value = p?.EsquemaReparto || '30_30_40';
+  const rd = p?.RepartoDetalle || {};
+  ['fernando','juanjose','adolfo'].forEach(k => { document.getElementById('rp-'+k).value = rd[k] ?? ''; });
+  toggleReparto();
 
   document.getElementById('modal-proyecto').classList.add('open');
+}
+function toggleReparto(){
+  const box = document.getElementById('reparto-box');
+  box.classList.toggle('open', document.getElementById('p-esquema').value === 'personalizado');
+  sumaReparto();
+}
+function sumaReparto(){
+  const suma = ['fernando','juanjose','adolfo'].reduce((a,k)=>a+(parseFloat(document.getElementById('rp-'+k).value)||0),0);
+  const el = document.getElementById('reparto-suma');
+  const r = Math.round(suma*100)/100;
+  const ok = Math.abs(r-100) <= 0.01;
+  el.textContent = ok ? 'Suma: 100% ✓' : `Suma: ${r}% · debe dar 100%`;
+  el.classList.toggle('ok', ok);
 }
 function cerrarModal(){
   document.getElementById('modal-proyecto').classList.remove('open');
@@ -849,6 +892,14 @@ function cerrarModal(){
 async function guardarProyecto(){
   const nombre = document.getElementById('p-nombre').value.trim();
   if(!nombre){ showToast('El nombre del proyecto es obligatorio', 'err'); return; }
+  const esquema = document.getElementById('p-esquema').value;
+  let repartoDetalle = null;
+  if(esquema === 'personalizado'){
+    repartoDetalle = {};
+    ['fernando','juanjose','adolfo'].forEach(k => { repartoDetalle[k] = parseFloat(document.getElementById('rp-'+k).value) || 0; });
+    const suma = Object.values(repartoDetalle).reduce((a,b)=>a+b,0);
+    if(Math.abs(suma - 100) > 0.01){ showToast('El reparto personalizado debe sumar 100%', 'err'); return; }
+  }
 
   const payload = {
     ID: editId || genId(),
@@ -867,7 +918,9 @@ async function guardarProyecto(){
     FechaAccion: document.getElementById('p-fecha-accion').value,
     Tags: document.getElementById('p-tags').value.trim(),
     DriveFolder: document.getElementById('p-drive').value.trim(),
-    Notas: document.getElementById('p-notas').value.trim()
+    Notas: document.getElementById('p-notas').value.trim(),
+    EsquemaReparto: esquema,
+    RepartoDetalle: repartoDetalle
   };
 
   const esEdicion = !!editId;
