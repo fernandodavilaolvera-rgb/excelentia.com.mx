@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desarrollo · ExcelentIA Dashboard</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
+.page{padding:1rem 1.2rem}
+
+
+/* Fila de filtros */
+.filtros{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.8rem}
+.filtros .info{font-size:.78rem;color:#4a5068;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46ch}
+.filtros .info b{color:#1a2035}
+.filtros .sp{flex:1}
+select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-radius:6px;font-family:'Manrope',sans-serif;font-size:.8rem;background:#fff;color:#1a2035}
+
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .8rem;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;border:none;font-family:'Manrope',sans-serif;transition:.15s;white-space:nowrap}
+.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
+.btn-secondary{background:#fff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#e8f0fb}
+.btn-danger{background:#fff;color:#dc2626;border:1px solid #fecaca}.btn-danger:hover{background:#fef2f2}
+.btn-sm{padding:.28rem .6rem;font-size:.76rem}
+.btn:disabled{opacity:.55;cursor:default}
+.btn:focus-visible,.ico:focus-visible{outline:2px solid #4a9fd4;outline-offset:2px}
+
+/* Tablero */
+.tablero{display:flex;gap:.7rem;overflow-x:auto;padding-bottom:.6rem;align-items:flex-start}
+.col{flex:1 0 240px;max-width:320px;background:#eef1f6;border:1px solid #dde1e9;border-radius:8px;display:flex;flex-direction:column;min-height:520px}
+.col.drop{background:#e8f0fb;border-color:#4a9fd4}
+.col-head{display:flex;align-items:center;gap:.35rem;padding:.5rem .6rem;border-bottom:1px solid #dde1e9}
+.col-head .nom{font-weight:800;font-size:.8rem;color:#1a3a6b;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.col-head .cnt{font-size:.72rem;font-weight:700;color:#8a90a0;font-variant-numeric:tabular-nums}
+.col-acc{display:flex;gap:.05rem;opacity:.35;transition:.15s}
+.col:hover .col-acc,.col-acc:focus-within{opacity:1}
+.ico{background:none;border:none;cursor:pointer;color:#8a90a0;font-size:.78rem;padding:.12rem .28rem;border-radius:4px;font-family:'Manrope',sans-serif}
+.ico:hover{background:#fff;color:#1a3a6b}
+.cards{flex:1;padding:.5rem;display:flex;flex-direction:column;gap:.45rem;min-height:60px}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:6px;padding:.5rem .55rem;cursor:grab;display:grid;grid-template-columns:18px 1fr;gap:.4rem;align-items:start}
+.card:hover{border-color:#4a9fd4}
+.card.arrastrando{opacity:.4}
+.card input[type=checkbox]{width:15px;height:15px;margin-top:.12rem;accent-color:#059669;cursor:pointer}
+.card .t{font-size:.82rem;font-weight:700;line-height:1.3;word-break:break-word}
+.card.hecha .t{color:#8a90a0;text-decoration:line-through}
+.card .m{display:flex;flex-wrap:wrap;gap:.2rem .6rem;margin-top:.25rem;font-size:.7rem;color:#4a5068}
+.card .m span{display:inline-flex;align-items:center;gap:.25rem}
+.card .m .venc{color:#dc2626;font-weight:700}
+.card .e{font-size:.72rem;color:#4a5068;margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .libre{font-size:.68rem;color:#8a90a0;font-style:italic}
+.cuad{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
+.col-nueva{flex:0 0 200px;border:1px dashed #c8d9f0;border-radius:8px;padding:.6rem;min-height:80px}
+.col-nueva input{width:100%;padding:.4rem .55rem;border:1px solid #dde1e9;border-radius:6px;font-family:'Manrope',sans-serif;font-size:.78rem}
+.col-nueva .hint{margin-top:.35rem}
+
+/* Franja de resumen (hasta abajo) */
+.kpis{display:flex;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:.5rem .4rem;margin-top:.6rem;row-gap:.35rem}
+.kpi{display:flex;align-items:baseline;gap:.45rem;padding:0 1rem;border-right:1px solid #dde1e9;white-space:nowrap}
+.kpi:last-child{border-right:none}
+.kpi span{font-size:.72rem;color:#8a90a0;font-weight:700}
+.kpi b{font-size:.98rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums}
+.kpi.rojo b{color:#dc2626}
+.kpi small{font-size:.72rem;color:#8a90a0;font-weight:600}
+
+/* Vacíos y avisos */
+.vacio{background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:2rem 1rem;text-align:center;color:#4a5068;font-size:.86rem;max-width:720px;margin:1.5rem auto}
+.vacio b{display:block;color:#1a2035;font-size:.98rem;margin-bottom:.35rem}
+.vacio .btn{margin-top:.8rem}
+.loading{text-align:center;padding:1.5rem;color:#4a5068;font-size:.85rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hint{font-size:.72rem;color:#8a90a0}
+.alert-err{background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:6px;padding:.7rem .9rem;font-size:.8rem;max-width:720px;margin:1rem auto}
+
+/* Modales */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:10px;width:100%;max-width:560px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:.85rem 1.15rem;display:flex;justify-content:space-between;align-items:center;gap:.75rem;border-radius:10px 10px 0 0;border-bottom:3px solid #4a9fd4}
+.modal-head h3{font-size:.95rem;font-weight:800}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;flex-shrink:0}
+.modal-body{padding:1rem 1.15rem;display:flex;flex-direction:column;gap:.7rem}
+.modal-foot{padding:.75rem 1.15rem;border-top:1px solid #eef2f8;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.modal-foot .sp{flex:1}
+.fg{display:flex;flex-direction:column;gap:.28rem}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.modal label{font-size:.76rem;font-weight:700;color:#4a5068}
+.modal input[type=text],.modal input[type=date],.modal select,.modal textarea{width:100%;padding:.45rem .6rem;border:1px solid #dde1e9;border-radius:6px;font-family:'Manrope',sans-serif;font-size:.82rem;color:#1a2035;background:#fff}
+.modal textarea{resize:vertical;min-height:80px;line-height:1.45}
+.modal input:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+.chk{display:flex;align-items:center;gap:.45rem;font-size:.82rem!important;color:#1a2035!important;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:#1a3a6b}
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.6rem 1rem;border-radius:6px;font-size:.82rem;font-weight:600;z-index:999;transition:.3s;opacity:0;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);pointer-events:none;max-width:90vw}
+
+@media(max-width:600px){
+  .page{padding:.75rem .6rem}
+  .filtros .info{max-width:100%;flex-basis:100%}
+  .tablero{scroll-snap-type:x mandatory}
+  .col{flex:0 0 84vw;max-width:none;min-height:360px;scroll-snap-align:start}
+  .col-acc{opacity:1}
+  .fg2{grid-template-columns:1fr}
+  .kpi{border-right:none;width:48%;padding:.1rem .6rem}
+  .modal-backdrop{padding:.75rem .5rem}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+
+@page{size:Letter landscape;margin:12mm}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff}
+  .no-print,.col-nueva,.col-acc,#toast,.modal-backdrop{display:none!important}
+  .page{padding:0}
+  .tablero{flex-wrap:wrap;overflow:visible}
+  .col{min-height:0;flex:1 0 200px;break-inside:auto}
+  .card,.kpi{break-inside:avoid}
+  h1,h2,h3,h4,.col-head{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  thead{display:table-header-group}
+  a[href]:after{content:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="filtros">
+    <button class="btn btn-primary btn-sm no-print" onclick="abrirAlta()">+ Proyecto</button>
+    <select id="f-resp" class="no-print" onchange="pintar()" aria-label="Responsable">
+      <option value="">Todos los responsables</option>
+      <option value="adolfo">Adolfo</option>
+      <option value="fernando">Fernando</option>
+      <option value="juanjose">Juan José</option>
+      <option value="-">Sin responsable</option>
+    </select>
+    <label class="no-print" style="font-size:.78rem;color:#4a5068;display:flex;align-items:center;gap:.3rem;cursor:pointer"><input type="checkbox" id="f-hechas" checked onchange="pintar()" style="accent-color:#1a3a6b"> Mostrar terminados</label>
+    <span class="sp"></span>
+    <button class="btn btn-secondary btn-sm no-print" onclick="window.print()">🖨️ PDF</button>
+  </div>
+
+  <div id="estado"></div>
+  <div class="tablero" id="tablero"></div>
+  <div class="kpis" id="kpis" style="display:none"></div>
+</div>
+
+<!-- Proyecto (tarjeta) -->
+<div class="modal-backdrop" id="m-card" onclick="if(event.target===this)cerrar('m-card')">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mc-titulo">
+    <div class="modal-head"><h3 id="mc-titulo">Proyecto</h3><button class="modal-close" onclick="cerrar('m-card')" aria-label="Cerrar">✕</button></div>
+    <div class="modal-body">
+      <div class="fg"><label for="c-proy">Proyecto del CRM</label><select id="c-proy" onchange="proyElegido()"></select><div class="hint">Si no está en el CRM, elige "Otro" y escribe el nombre.</div></div>
+      <div class="fg" id="c-titulo-wrap"><label for="c-titulo">Nombre</label><input type="text" id="c-titulo" maxlength="200"></div>
+      <div class="fg2">
+        <div class="fg"><label for="c-col">Columna</label><select id="c-col"></select></div>
+        <div class="fg"><label for="c-resp">Responsable</label><select id="c-resp"><option value="">Sin responsable</option><option value="adolfo">Adolfo</option><option value="fernando">Fernando</option><option value="juanjose">Juan José</option></select></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label for="c-fecha">Fecha de entrega</label><input type="date" id="c-fecha"></div>
+        <div class="fg" style="justify-content:flex-end"><label class="chk"><input type="checkbox" id="c-hecha"> Terminado</label></div>
+      </div>
+      <div class="fg"><label for="c-notas">Notas</label><textarea id="c-notas" maxlength="4000"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger btn-sm" id="c-borrar" onclick="borrarTarjeta()">Quitar del tablero</button>
+      <span class="sp"></span>
+      <button class="btn btn-secondary" onclick="cerrar('m-card')">Cancelar</button>
+      <button class="btn btn-primary" id="c-guardar" onclick="guardarTarjeta()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nombre de columna -->
+<div class="modal-backdrop" id="m-col" onclick="if(event.target===this)cerrar('m-col')">
+  <div class="modal" style="max-width:420px" role="dialog" aria-modal="true" aria-labelledby="mcol-titulo">
+    <div class="modal-head"><h3 id="mcol-titulo">Renombrar columna</h3><button class="modal-close" onclick="cerrar('m-col')" aria-label="Cerrar">✕</button></div>
+    <div class="modal-body"><div class="fg"><label for="col-nombre">Nombre</label><input type="text" id="col-nombre" maxlength="80" onkeydown="if(event.key==='Enter')guardarNombreCol()"></div></div>
+    <div class="modal-foot"><span class="sp"></span>
+      <button class="btn btn-secondary" onclick="cerrar('m-col')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNombreCol()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://n8n.excelentia.com.mx/webhook/crm-desarrollo';
+const USERS = { fernando:{nombre:'Fernando',color:'#1a3a6b'}, juanjose:{nombre:'Juan José',color:'#7c3aed'}, adolfo:{nombre:'Adolfo',color:'#059669'} };
+const YO = (()=>{ const u = new URLSearchParams(location.search).get('user'); return USERS[u] ? u : ''; })();
+const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const OTRO = '__otro__';
+let TAB = null, COLS = [], CARDS = [], PROYS = [];
+let editCard = null, editCol = null, arrastre = null;
+
+async function api(body){
+  try{
+    const c = new AbortController(); const t = setTimeout(()=>c.abort(), 25000);
+    const r = await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:c.signal});
+    clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json();
+  }catch(e){ console.error(e); return null; }
+}
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const hoyMX = () => new Date().toLocaleDateString('en-CA',{timeZone:'America/Mexico_City'});
+const f10 = f => f ? String(f).slice(0,10) : '';
+const fcorta = f => { if(!f) return ''; const [y,m,d] = f10(f).split('-').map(Number); return d + ' ' + MES[m-1]; };
+function toast(m, ok=true){ const t=document.getElementById('toast'); t.style.background=ok?'#059669':'#dc2626'; t.textContent=m; t.style.opacity='1'; clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.opacity='0',2800); }
+function abrir(id){ document.getElementById(id).classList.add('open'); }
+function cerrar(id){ document.getElementById(id).classList.remove('open'); }
+
+// ── Carga ──
+async function cargar(silencioso){
+  if(!silencioso && !TAB) document.getElementById('estado').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando el tablero…</div>';
+  const j = await api({accion:'tablero'});
+  if(!j || !j.ok || !j.tablero){
+    if(!silencioso) document.getElementById('estado').innerHTML = '<div class="alert-err">⚠️ No se pudo cargar el tablero. <button class="btn btn-secondary btn-sm" onclick="cargar()">Reintentar</button></div>';
+    return;
+  }
+  TAB = j.tablero; COLS = j.columnas; CARDS = j.tarjetas; PROYS = j.proyectos || [];
+  document.getElementById('estado').innerHTML = '';
+  pintar();
+}
+function refrescarProyectos(){ api({accion:'tablero'}).then(j=>{ if(j && j.ok) PROYS = j.proyectos || []; }); }
+
+// ── Dibujo ──
+function pintar(){
+  if(!TAB) return;
+  const hoy = hoyMX();
+  const fr = document.getElementById('f-resp').value, verHechas = document.getElementById('f-hechas').checked;
+  const visible = c => (!fr || (fr==='-' ? !c.Responsable : c.Responsable===fr)) && (verHechas || !c.Hecha);
+  const vacio = !CARDS.length;
+  document.getElementById('estado').innerHTML = vacio ? `<div class="vacio"><b>El tablero está vacío</b>Da de alta cada proyecto que esté en desarrollo y muévelo de columna conforme avance.<br><button class="btn btn-primary" onclick="abrirAlta()">+ Proyecto</button></div>` : '';
+  document.getElementById('tablero').innerHTML = COLS.map((col,i)=>{
+    const cs = CARDS.filter(c=>c.ColumnaID===col.ID).sort((a,b)=>a.Orden-b.Orden);
+    const vis = cs.filter(visible);
+    return `<section class="col" data-col="${col.ID}" ondragover="sobre(event,this)" ondragleave="salir(this)" ondrop="soltar(event,this)" aria-label="${esc(col.Nombre)}">
+      <div class="col-head">
+        <span class="nom" onclick="renombrarCol('${col.ID}')" title="Renombrar">${esc(col.Nombre)}</span>
+        <span class="cnt">${cs.length}</span>
+        <span class="col-acc no-print">
+          <button class="ico" title="Agregar proyecto en esta columna" onclick="abrirAlta('${col.ID}')">+</button>
+          <button class="ico" title="Mover a la izquierda" onclick="moverCol('${col.ID}',-1)" ${i===0?'disabled':''}>←</button>
+          <button class="ico" title="Mover a la derecha" onclick="moverCol('${col.ID}',1)" ${i===COLS.length-1?'disabled':''}>→</button>
+          <button class="ico" title="Quitar columna" onclick="borrarCol('${col.ID}')">✕</button>
+        </span>
+      </div>
+      <div class="cards">${vis.map(c=>tarjetaHTML(c, hoy)).join('')}</div>
+    </section>`;
+  }).join('') + `<div class="col-nueva no-print"><input type="text" id="nueva-col" placeholder="+ Columna" maxlength="80" onkeydown="if(event.key==='Enter')crearCol()"><div class="hint">Escribe el nombre y da Enter</div></div>`;
+  pintarKpis();
+}
+function tarjetaHTML(c, hoy){
+  const u = USERS[c.Responsable];
+  const venc = c.FechaLimite && !c.Hecha && f10(c.FechaLimite) < hoy;
+  const sub = c.ProyectoID ? [c.Empresa && c.Empresa !== c.Titulo ? c.Empresa : '', c.Etapa ? 'CRM: ' + c.Etapa : ''].filter(Boolean).join(' · ') : '';
+  return `<div class="card${c.Hecha?' hecha':''}" draggable="true" data-id="${c.ID}" ondragstart="inicio(event,'${c.ID}')" ondragend="fin(event)" onclick="abrirTarjeta('${c.ID}')">
+    <input type="checkbox" ${c.Hecha?'checked':''} title="Terminado" onclick="event.stopPropagation();marcarHecha('${c.ID}',this.checked)" aria-label="Terminado">
+    <div><div class="t">${esc(c.Titulo)}</div>
+      ${sub ? `<div class="e">${esc(sub)}</div>` : (!c.ProyectoID ? '<div class="libre">Fuera del CRM</div>' : '')}
+      <div class="m">${u?`<span><i class="cuad" style="background:${u.color}"></i>${u.nombre}</span>`:''}${c.FechaLimite?`<span class="${venc?'venc':''}">${venc?'Vencido · ':'Entrega '}${fcorta(c.FechaLimite)}</span>`:''}${c.Notas?'<span title="Tiene notas">📝</span>':''}</div>
+    </div></div>`;
+}
+function pintarKpis(){
+  const hoy = hoyMX();
+  const total = CARDS.length, hechas = CARDS.filter(c=>c.Hecha).length;
+  const venc = CARDS.filter(c=>!c.Hecha && c.FechaLimite && f10(c.FechaLimite) < hoy).length;
+  const k = document.getElementById('kpis');
+  k.style.display = total ? '' : 'none';
+  const porCol = COLS.map(col=>`<div class="kpi"><span>${esc(col.Nombre)}</span><b>${CARDS.filter(c=>c.ColumnaID===col.ID && !c.Hecha).length}</b></div>`).join('');
+  k.innerHTML = `<div class="kpi"><span>Proyectos</span><b>${total}</b></div>
+    <div class="kpi"><span>Terminados</span><b>${hechas}</b></div>
+    <div class="kpi${venc?' rojo':''}"><span>Entrega vencida</span><b>${venc}</b></div>` + porCol;
+}
+
+// ── Arrastrar y soltar ──
+function inicio(e,id){ arrastre = id; e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('text/plain', id); }catch(x){} setTimeout(()=>{ const el=document.querySelector(`.card[data-id="${id}"]`); if(el) el.classList.add('arrastrando'); },0); }
+function fin(){ document.querySelectorAll('.card.arrastrando').forEach(x=>x.classList.remove('arrastrando')); document.querySelectorAll('.col.drop').forEach(x=>x.classList.remove('drop')); }
+function sobre(e,col){ if(!arrastre) return; e.preventDefault(); col.classList.add('drop'); }
+function salir(col){ col.classList.remove('drop'); }
+async function soltar(e,colEl){
+  e.preventDefault(); colEl.classList.remove('drop');
+  const id = arrastre; arrastre = null; if(!id) return;
+  const cards = [...colEl.querySelectorAll('.card')].filter(x=>x.dataset.id!==id);
+  let antes = null;
+  for(const el of cards){ const r = el.getBoundingClientRect(); if(e.clientY < r.top + r.height/2){ antes = el.dataset.id; break; } }
+  await moverTarjeta(id, colEl.dataset.col, antes);
+}
+async function moverTarjeta(id, colId, antesDe){
+  const card = CARDS.find(c=>c.ID===id); if(!card) return;
+  const destino = CARDS.filter(c=>c.ColumnaID===colId && c.ID!==id).sort((a,b)=>a.Orden-b.Orden).map(c=>c.ID);
+  const pos = antesDe ? destino.indexOf(antesDe) : -1;
+  if(pos >= 0) destino.splice(pos, 0, id); else destino.push(id);
+  const previo = {col: card.ColumnaID, orden: CARDS.map(c=>[c.ID,c.Orden])};
+  card.ColumnaID = colId; destino.forEach((cid,i)=>{ const c = CARDS.find(x=>x.ID===cid); if(c) c.Orden = i+1; });
+  pintar();
+  const j = await api({accion:'tarjeta_mover', ID:id, ColumnaID:colId, Orden:destino});
+  if(!j || !j.ok){
+    card.ColumnaID = previo.col; previo.orden.forEach(([cid,o])=>{ const c = CARDS.find(x=>x.ID===cid); if(c) c.Orden = o; });
+    pintar(); toast(j?.error || 'No se pudo mover el proyecto', false);
+  }
+}
+
+// ── Alta y edición de proyectos ──
+function opcionesProyecto(actual){
+  const orden = {'Desarrollo':0,'Entrega':1,'Mantenimiento':2};
+  const lista = PROYS.filter(p=>!p.EnTablero || p.ID===actual)
+    .sort((a,b)=>((orden[a.Etapa]??9)-(orden[b.Etapa]??9)) || a.Nombre.localeCompare(b.Nombre,'es'));
+  return '<option value="">Elige un proyecto…</option>' + lista.map(p=>`<option value="${p.ID}">${esc(p.Nombre)}${p.Etapa?' · '+esc(p.Etapa):''}</option>`).join('') + `<option value="${OTRO}">Otro (escribir nombre)</option>`;
+}
+function llenarModal(c, colId){
+  editCard = c ? c.ID : null;
+  document.getElementById('mc-titulo').textContent = c ? 'Proyecto' : 'Agregar proyecto';
+  document.getElementById('c-guardar').textContent = c ? 'Guardar' : 'Agregar al tablero';
+  document.getElementById('c-borrar').style.display = c ? '' : 'none';
+  document.getElementById('c-proy').innerHTML = opcionesProyecto(c && c.ProyectoID);
+  document.getElementById('c-proy').value = c ? (c.ProyectoID || OTRO) : '';
+  document.getElementById('c-titulo').value = c ? (c.Titulo || '') : '';
+  document.getElementById('c-col').innerHTML = COLS.map(col=>`<option value="${col.ID}">${esc(col.Nombre)}</option>`).join('');
+  document.getElementById('c-col').value = c ? c.ColumnaID : (colId || (COLS[0] && COLS[0].ID) || '');
+  document.getElementById('c-resp').value = c ? (c.Responsable || '') : '';
+  document.getElementById('c-fecha').value = c ? f10(c.FechaLimite) : '';
+  document.getElementById('c-hecha').checked = c ? !!c.Hecha : false;
+  document.getElementById('c-notas').value = c ? (c.Notas || '') : '';
+  mostrarNombre();
+  abrir('m-card');
+}
+function mostrarNombre(){
+  const v = document.getElementById('c-proy').value;
+  document.getElementById('c-titulo-wrap').style.display = (v === OTRO || (editCard && v)) ? '' : 'none';
+}
+function abrirAlta(colId){
+  if(!COLS.length){ toast('Primero crea una columna', false); return; }
+  llenarModal(null, colId); setTimeout(()=>document.getElementById('c-proy').focus(), 50);
+}
+function abrirTarjeta(id){ const c = CARDS.find(x=>x.ID===id); if(c) llenarModal(c); }
+function proyElegido(){
+  const v = document.getElementById('c-proy').value, p = PROYS.find(x=>x.ID===v);
+  if(p){
+    const t = document.getElementById('c-titulo');
+    if(!editCard || !t.value.trim() || PROYS.some(x=>x.Nombre===t.value.trim())) t.value = p.Nombre;
+    if(p.Responsable && USERS[p.Responsable] && !document.getElementById('c-resp').value) document.getElementById('c-resp').value = p.Responsable;
+  } else if(v === OTRO && !editCard){ document.getElementById('c-titulo').value = ''; }
+  mostrarNombre();
+  if(v === OTRO) setTimeout(()=>document.getElementById('c-titulo').focus(), 30);
+}
+async function guardarTarjeta(){
+  const v = document.getElementById('c-proy').value;
+  const proyectoID = (v && v !== OTRO) ? v : '';
+  let titulo = document.getElementById('c-titulo').value.trim();
+  if(!proyectoID && v !== OTRO){ toast('Elige un proyecto del CRM o "Otro"', false); return; }
+  if(!proyectoID && !titulo){ toast('Escribe el nombre del proyecto', false); return; }
+  if(proyectoID && !titulo){ const p = PROYS.find(x=>x.ID===proyectoID); titulo = p ? p.Nombre : ''; }
+  const datos = {ProyectoID:proyectoID, Titulo:titulo, Notas:document.getElementById('c-notas').value.trim(), Responsable:document.getElementById('c-resp').value, FechaLimite:document.getElementById('c-fecha').value, Hecha:document.getElementById('c-hecha').checked};
+  const colNueva = document.getElementById('c-col').value;
+  const btn = document.getElementById('c-guardar'), txt = btn.textContent; btn.disabled = true; btn.textContent = 'Guardando…';
+  const j = editCard ? await api({accion:'tarjeta_guardar', ID:editCard, ...datos}) : await api({accion:'tarjeta_guardar', ColumnaID:colNueva, Usuario:YO, ...datos});
+  btn.disabled = false; btn.textContent = txt;
+  if(!j || !j.ok){ toast(j?.error || 'No se pudo guardar', false); return; }
+  cerrar('m-card');
+  if(editCard){
+    const c = CARDS.find(x=>x.ID===editCard);
+    if(c && colNueva !== c.ColumnaID){ await moverTarjeta(c.ID, colNueva, null); }
+    toast('Proyecto guardado');
+  } else toast('Proyecto agregado');
+  await cargar(true);
+}
+async function marcarHecha(id, v){
+  const c = CARDS.find(x=>x.ID===id); if(!c) return;
+  c.Hecha = v; pintar();
+  const j = await api({accion:'tarjeta_hecha', ID:id, Hecha:v});
+  if(!j || !j.ok){ c.Hecha = !v; pintar(); toast(j?.error || 'No se pudo actualizar', false); }
+}
+async function borrarTarjeta(){
+  const c = CARDS.find(x=>x.ID===editCard); if(!c) return;
+  if(!confirm('¿Quitar "' + c.Titulo + '" del tablero? El proyecto sigue en el CRM; solo sale de Desarrollo.')) return;
+  const j = await api({accion:'tarjeta_borrar', ID:c.ID});
+  if(!j || !j.ok){ toast(j?.error || 'No se pudo quitar', false); return; }
+  CARDS = CARDS.filter(x=>x.ID!==c.ID); cerrar('m-card'); pintar(); refrescarProyectos(); toast('Proyecto quitado del tablero');
+}
+
+// ── Columnas ──
+async function crearCol(){
+  const inp = document.getElementById('nueva-col'); const n = inp.value.trim(); if(!n || !TAB) return;
+  inp.disabled = true;
+  const j = await api({accion:'col_crear', TableroID:TAB.ID, Nombre:n});
+  if(!j || !j.ok){ inp.disabled = false; toast(j?.error || 'No se pudo crear la columna', false); return; }
+  COLS.push({ID:j.id, Nombre:n, Orden:COLS.length+1}); pintar();
+  const nv = document.getElementById('nueva-col'); if(nv) nv.focus();
+}
+function renombrarCol(id){
+  const col = COLS.find(c=>c.ID===id); if(!col) return;
+  editCol = id; document.getElementById('col-nombre').value = col.Nombre;
+  abrir('m-col'); setTimeout(()=>{ const i=document.getElementById('col-nombre'); i.focus(); i.select(); }, 50);
+}
+async function guardarNombreCol(){
+  const col = COLS.find(c=>c.ID===editCol); if(!col) return;
+  const n = document.getElementById('col-nombre').value.trim(); if(!n){ toast('Ponle nombre a la columna', false); return; }
+  const j = await api({accion:'col_renombrar', ID:col.ID, Nombre:n});
+  if(!j || !j.ok){ toast(j?.error || 'No se pudo renombrar', false); return; }
+  col.Nombre = n; cerrar('m-col'); pintar();
+}
+async function moverCol(id, dir){
+  const i = COLS.findIndex(c=>c.ID===id), k = i + dir; if(i<0 || k<0 || k>=COLS.length) return;
+  const previo = COLS.slice();
+  [COLS[i], COLS[k]] = [COLS[k], COLS[i]]; COLS.forEach((c,n)=>c.Orden = n+1); pintar();
+  const j = await api({accion:'col_orden', TableroID:TAB.ID, Orden:COLS.map(c=>c.ID)});
+  if(!j || !j.ok){ COLS = previo; COLS.forEach((c,n)=>c.Orden = n+1); pintar(); toast(j?.error || 'No se pudo reordenar', false); }
+}
+async function borrarCol(id){
+  const col = COLS.find(c=>c.ID===id); if(!col) return;
+  if(CARDS.some(c=>c.ColumnaID===id)){ toast('La columna tiene proyectos; muévelos antes de quitarla', false); return; }
+  if(!confirm('¿Quitar la columna "' + col.Nombre + '"?')) return;
+  const j = await api({accion:'col_borrar', ID:id});
+  if(!j || !j.ok){ toast(j?.error || 'No se pudo quitar', false); return; }
+  COLS = COLS.filter(c=>c.ID!==id); pintar();
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ ['m-card','m-col'].forEach(cerrar); } });
+document.addEventListener('DOMContentLoaded', ()=>cargar());
+</script>
+</body>
+</html>
