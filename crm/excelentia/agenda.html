@@ -264,6 +264,18 @@ function leerToken(){
 
 function borrarToken(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} }
 
+// Correo recordado aparte del token: sobrevive a que el pase venza, para no volver a escoger cuenta
+const LS_EMAIL = 'agenda_email';
+function recordarCorreo(em){ try{ if(em) localStorage.setItem(LS_EMAIL, em); }catch(e){} }
+function correoRecordado(){ try{ return localStorage.getItem(LS_EMAIL) || ''; }catch(e){ return ''; } }
+function olvidarCorreo(){ try{ localStorage.removeItem(LS_EMAIL); }catch(e){} }
+function opcionesGoogle(prompt){
+  const o = { prompt: prompt };
+  const em = userEmail || correoRecordado();
+  if(em) o.login_hint = em;
+  return o;
+}
+
 // Guarda el correo en la sesión ya almacenada, sin tocar la fecha de expiración
 function guardarEmailEnSesion(){
   try{
@@ -278,7 +290,7 @@ function renovarSilencioso(){
   if(promesaRenov) return promesaRenov;
   promesaRenov = new Promise((resolve) => {
     resolverRenov = resolve;
-    try{ tokenClient.requestAccessToken({ prompt: 'none' }); }
+    try{ tokenClient.requestAccessToken(opcionesGoogle('none')); }
     catch(e){ cerrarRenovacion(false); }
     setTimeout(() => cerrarRenovacion(false), 12000);   // por si Google nunca contesta
   });
@@ -342,7 +354,7 @@ async function arrancarSesion(){
 // Este SÍ puede abrir ventana: solo se llama con clic del usuario
 function conectarGoogle(){
   if(!tokenClient){ toast('Cargando Google, intenta de nuevo','err'); return; }
-  tokenClient.requestAccessToken({ prompt: '' });
+  tokenClient.requestAccessToken(opcionesGoogle(''));
 }
 
 function desconectar(){
@@ -351,6 +363,7 @@ function desconectar(){
   }
   if(timerRenov) clearTimeout(timerRenov);
   borrarToken();
+  olvidarCorreo();
   accessToken = null; userEmail = null; conectado = false;
   showDesconectado();
 }
@@ -411,6 +424,7 @@ async function fetchUserEmail(_reintento){
     }
     const j = await r.json();
     userEmail = j.email || null;
+    recordarCorreo(userEmail);
   }catch(e){ userEmail = null; }
 }
 
