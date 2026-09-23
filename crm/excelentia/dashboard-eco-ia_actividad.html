@@ -71,33 +71,31 @@
     .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
 
     /* STATS */
-    .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1.75rem; }
-    .stat-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: .3rem;
-      position: relative; overflow: hidden;
-    }
-    .stat-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:var(--accent); }
-    .stat-card.ok::before  { background: var(--success); }
-    .stat-card.err::before { background: var(--error); }
-    .stat-card.dr::before  { background: #9b59b6; }
-    .stat-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-gray); }
-    .stat-value { font-size:1.9rem; font-weight:800; color:var(--text-main); line-height:1; }
-    .stat-sub   { font-size:.75rem; color:var(--text-gray); margin-top:.1rem; }
+    .stats-row { display:flex; flex-wrap:wrap; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:.5rem .4rem; margin-bottom:1rem; row-gap:.35rem; }
+    .st { display:flex; align-items:baseline; gap:.4rem; padding:0 1rem; border-right:1px solid var(--border); white-space:nowrap; }
+    .st:last-child { border-right:none; }
+    .stat-label { font-size:.7rem; font-weight:700; letter-spacing:.03em; color:var(--text-gray); }
+    .stat-value { font-size:1rem; font-weight:800; color:var(--text-main); line-height:1.2; }
+    .st.ok .stat-value { color:var(--success); }
+    .st.err .stat-value { color:var(--error); }
+    .stat-sub { font-size:.72rem; color:var(--text-gray); }
 
     /* FILTROS */
     .filtros-row {
-      display: flex; align-items: center; gap: .75rem;
-      margin-bottom: 1.25rem; flex-wrap: wrap;
+      display: flex; align-items: center; gap: .5rem;
+      margin-bottom: .9rem; flex-wrap: nowrap;
     }
     .filtros-row label { font-size:.78rem; font-weight:700; color:var(--text-sec); }
     .select-filtro, .search-input {
       font-family: 'Manrope', sans-serif; font-size:.85rem; color:var(--text-main);
       background:#fff; border:1.5px solid var(--border); border-radius:8px;
-      padding:.5rem .9rem; outline:none; transition:border-color .2s;
+      padding:.38rem .65rem; outline:none; transition:border-color .2s; font-size:.8rem; border-radius:6px; min-width:0;
     }
     .select-filtro:focus, .search-input:focus { border-color:var(--accent); }
-    .search-input { width: 220px; }
+    .search-input { width: 180px; }
+    #filtro-fecha { width: 140px; }
+    .btn-filtrar { background:none; border:none; font-family:'Manrope',sans-serif; font-size:.78rem; font-weight:700; color:var(--text-sec); cursor:pointer; padding:.2rem 0; white-space:nowrap; border-bottom:1px dashed transparent; }
+    .btn-filtrar:hover { color:#1a3a6b; border-bottom-color:#1a3a6b; }
     .btn-limpiar {
       font-family:'Manrope',sans-serif; font-size:.78rem; font-weight:700;
       color:var(--text-gray); background:#fff; border:1.5px solid var(--border);
@@ -108,19 +106,19 @@
     /* CARD TABLA */
     .card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:1.5rem; }
     .card-head {
-      background:var(--card-head); padding:.875rem 1.5rem;
+      background:var(--card-head); padding:.55rem 1.2rem;
       display:flex; align-items:center; justify-content:space-between;
       border-bottom:1px solid var(--border); gap:1rem; flex-wrap:wrap;
     }
     .card-head-left { display:flex; align-items:center; gap:.6rem; }
     .card-head h2 { font-size:.95rem; font-weight:700; color:#1a3a6b; }
-    .card-count { background:var(--accent); color:#fff; font-size:.72rem; font-weight:700; padding:.2rem .6rem; border-radius:20px; min-width:24px; text-align:center; }
+    .card-count { background:var(--accent); color:#fff; font-size:.72rem; font-weight:700; padding:.1rem .5rem; border-radius:5px; min-width:24px; text-align:center; }
 
     /* TABLA */
     .table-wrap { overflow-x: auto; }
     table { width:100%; border-collapse:collapse; font-size:.84rem; }
     thead tr { background:#f8fafd; border-bottom:2px solid var(--border); }
-    th { padding:.75rem 1rem; text-align:left; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-gray); white-space:nowrap; }
+    th { padding:.5rem 1rem; text-align:left; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-gray); white-space:nowrap; }
     tbody tr { border-bottom:1px solid #f0f2f5; transition:background .15s; }
     tbody tr:last-child { border-bottom:none; }
     tbody tr:hover { background:var(--alert-bg); }
@@ -128,37 +126,19 @@
     th.sortable:hover { color: #1a3a6b; }
     .sort-arrow { font-size: .65rem; margin-left: .3rem; opacity: .35; display: inline-block; }
     .sort-arrow.active { opacity: 1; color: var(--accent); }
-    td { padding:.8rem 1rem; color:var(--text-sec); vertical-align:middle; }
+    td { padding:.32rem 1rem; color:var(--text-sec); vertical-align:middle; }
     td.fecha  { color:var(--text-gray); font-size:.78rem; white-space:nowrap; }
     td.nombre { font-weight:700; color:var(--text-main); }
     td.imgs   { font-weight:600; text-align:center; }
 
-    .pill-doctor {
-      display:inline-block;
-      background:var(--alert-bg); color:#1a3a6b;
-      font-size:.72rem; font-weight:700;
-      padding:.2rem .65rem; border-radius:20px;
-      border:1px solid var(--alert-border);
-      white-space:nowrap;
-    }
-    .badge-ok {
-      display:inline-flex; align-items:center; gap:.3rem;
-      background:var(--success-bg); color:var(--success);
-      font-size:.73rem; font-weight:700;
-      padding:.22rem .6rem; border-radius:20px; border:1px solid #b7e5c9;
-    }
-    .badge-err {
-      display:inline-flex; align-items:center; gap:.3rem;
-      background:var(--error-bg); color:var(--error);
-      font-size:.73rem; font-weight:700;
-      padding:.22rem .6rem; border-radius:20px; border:1px solid #f5c6c2;
-      cursor:help;
-    }
+    .pill-doctor { font-weight:600; color:var(--text-sec); white-space:nowrap; }
+    .badge-ok { color:var(--success); font-weight:700; white-space:nowrap; }
+    .badge-err { color:var(--error); font-weight:700; white-space:nowrap; cursor:help; }
     .btn-ver {
       display:inline-flex; align-items:center; gap:.3rem;
       background:var(--alert-bg); color:#1a3a6b;
-      border:1px solid var(--alert-border); border-radius:7px;
-      padding:.32rem .7rem;
+      border:1px solid var(--alert-border); border-radius:6px;
+      padding:.18rem .6rem;
       font-family:'Manrope',sans-serif; font-size:.76rem; font-weight:700;
       text-decoration:none; transition:all .2s; white-space:nowrap;
     }
@@ -185,14 +165,12 @@
     }
 
     /* RESPONSIVE */
-    @media (max-width:1000px) { .stats-row { grid-template-columns:repeat(3,1fr); } }
-    @media (max-width:700px)  { .stats-row { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:1000px) { .filtros-row { flex-wrap:wrap; } }
     @media (max-width:600px) {
       .header { padding:1rem; flex-wrap:wrap; }
       .header-right { display:none; }
       .container { padding:1.25rem 1rem; }
-      .stats-row { grid-template-columns:1fr 1fr; gap:.75rem; }
-      .stat-value { font-size:1.6rem; }
+      .st { border-right:none; padding:.1rem .6rem; width:100%; }
       .filtros-row { flex-direction:column; align-items:flex-start; }
       .search-input { width:100%; }
     }
@@ -204,36 +182,16 @@
 
   <!-- STATS -->
   <div class="stats-row">
-    <div class="stat-card">
-      <span class="stat-label">Total reportes</span>
-      <span class="stat-value" id="stat-total">—</span>
-      <span class="stat-sub" id="stat-sub-total">Cargando...</span>
-    </div>
-    <div class="stat-card ok">
-      <span class="stat-label">Exitosos</span>
-      <span class="stat-value" id="stat-ok">—</span>
-      <span class="stat-sub" id="stat-sub-ok">&nbsp;</span>
-    </div>
-    <div class="stat-card err">
-      <span class="stat-label">Con error</span>
-      <span class="stat-value" id="stat-err">—</span>
-      <span class="stat-sub" id="stat-sub-err">&nbsp;</span>
-    </div>
-    <div class="stat-card dr">
-      <span class="stat-label">Doctores activos</span>
-      <span class="stat-value" id="stat-drs">—</span>
-      <span class="stat-sub" id="stat-sub-drs">&nbsp;</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Último reporte</span>
-      <span class="stat-value" id="stat-ultimo" style="font-size:1rem;padding-top:.3rem;">—</span>
-      <span class="stat-sub" id="stat-sub-ultimo">—</span>
-    </div>
+    <div class="st"><span class="stat-label">Reportes</span><span class="stat-value" id="stat-total">—</span><span class="stat-sub" id="stat-sub-total">Cargando...</span></div>
+    <div class="st ok"><span class="stat-label">Exitosos</span><span class="stat-value" id="stat-ok">—</span><span class="stat-sub" id="stat-sub-ok"></span></div>
+    <div class="st err"><span class="stat-label">Con error</span><span class="stat-value" id="stat-err">—</span><span class="stat-sub" id="stat-sub-err"></span></div>
+    <div class="st"><span class="stat-label">Doctores activos</span><span class="stat-value" id="stat-drs">—</span><span class="stat-sub" id="stat-sub-drs"></span></div>
+    <div class="st"><span class="stat-label">Último reporte</span><span class="stat-value" id="stat-ultimo">—</span><span class="stat-sub" id="stat-sub-ultimo">—</span></div>
   </div>
 
   <!-- FILTROS -->
   <div class="filtros-row">
-    <label>Filtrar por:</label>
+    <button class="btn-filtrar" onclick="limpiarFiltros()" title="Clic para limpiar los filtros">Filtrar por:</button>
     <select class="select-filtro" id="filtro-estado" onchange="aplicarFiltros()">
       <option value="">Todos los estados</option>
       <option value="exito">✓ Exitosos</option>
@@ -248,11 +206,10 @@
            oninput="aplicarFiltros()">
     <input class="search-input" id="filtro-fecha" type="date"
            onchange="aplicarFiltros()" title="Filtrar por fecha del estudio">
-    <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;font-weight:700;color:var(--text-sec);cursor:pointer;user-select:none;">
+    <label style="display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:700;color:var(--text-sec);cursor:pointer;user-select:none;white-space:nowrap;">
       <input type="checkbox" id="chk-ocultar-pruebas" onchange="onToggleOcultarPruebas()">
-      Ocultar cuentas de prueba
+      Ocultar pruebas
     </label>
-    <button class="btn-limpiar" onclick="limpiarFiltros()">✕ Limpiar</button>
   </div>
 
   <!-- TABLA -->
