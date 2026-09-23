@@ -190,6 +190,12 @@ textarea{resize:vertical;min-height:70px}
         <div class="form-group full hora-field"><label>Hora inicio</label><input type="time" id="e-hini" value="09:00" onchange="autoHoraFin()"></div>
         <div class="form-group full hora-field"><label>Hora fin</label><input type="time" id="e-hfin" value="10:00"></div>
         <div class="form-group full" id="grp-hora-fin" style="display:none"><label>Fecha fin (opcional)</label><input type="date" id="e-fecha-fin"></div>
+        <div class="form-group full" id="grp-meet">
+          <div class="check-row">
+            <input type="checkbox" id="e-meet">
+            <label for="e-meet" style="cursor:pointer">📹 Generar liga de Google Meet</label>
+          </div>
+        </div>
         <div class="form-group full"><label>Ubicación</label><input type="text" id="e-ubic" placeholder="Google Meet, oficina, etc."></div>
         <div class="form-group full"><label>Invitados <span style="font-weight:400;color:#8a90a0">(correos separados por coma)</span></label><input type="text" id="e-invitados" placeholder="correo1@ejemplo.com, correo2@ejemplo.com"></div>
         <div class="form-group full"><label>Descripción</label><textarea id="e-desc" placeholder="Notas de la cita..."></textarea></div>
@@ -614,8 +620,10 @@ function abrirNuevo(){
   document.getElementById('e-fecha-fin').value = '';
   document.getElementById('e-hini').value = '09:00';
   document.getElementById('e-hfin').value = '10:00';
-  document.getElementById('e-ubic').value = TEAMS_URL;
+  document.getElementById('e-ubic').value = '';
   pintarReunion('');
+  document.getElementById('e-meet').checked = true;
+  document.getElementById('grp-meet').style.display = '';
   document.getElementById('e-invitados').value = '';
   document.getElementById('e-desc').value = '';
   document.getElementById('e-allday').checked = false;
@@ -640,6 +648,8 @@ function abrirEditar(ev){
   }
   document.getElementById('e-ubic').value = ev.ubicacion || '';
   pintarReunion(ev.reunion || '');
+  document.getElementById('e-meet').checked = false;
+  document.getElementById('grp-meet').style.display = ev.reunion ? 'none' : '';
   document.getElementById('e-invitados').value = ev.invitados || '';
   document.getElementById('e-desc').value = ev.descripcion || '';
   toggleAllDay();
@@ -722,14 +732,19 @@ async function guardarEvento(){
   const btn = document.getElementById('btn-guardar');
   btn.disabled = true; btn.textContent = 'Guardando...';
   const enviaInvites = inv.length ? 'all' : 'none';
+  const pideMeet = document.getElementById('e-meet').checked && !reunionActual;
+  if(pideMeet){
+    body.conferenceData = { createRequest: { requestId: 'fr-' + Date.now() + '-' + Math.random().toString(36).slice(2,8), conferenceSolutionKey: { type: 'hangoutsMeet' } } };
+  }
+  const extra = pideMeet ? '&conferenceDataVersion=1' : '';
 
   try{
     if(editandoId){
-      await calFetch(`${CAL_API}/${encodeURIComponent(editandoId)}?sendUpdates=${enviaInvites}`, { method:'PATCH', body: JSON.stringify(body) });
+      await calFetch(`${CAL_API}/${encodeURIComponent(editandoId)}?sendUpdates=${enviaInvites}${extra}`, { method:'PATCH', body: JSON.stringify(body) });
       toast('✅ Cita actualizada');
     }else{
-      await calFetch(`${CAL_API}?sendUpdates=${enviaInvites}`, { method:'POST', body: JSON.stringify(body) });
-      toast('✅ Cita creada');
+      await calFetch(`${CAL_API}?sendUpdates=${enviaInvites}${extra}`, { method:'POST', body: JSON.stringify(body) });
+      toast(pideMeet ? '✅ Cita creada con liga de Meet' : '✅ Cita creada');
     }
     cerrarModal();
     await cargarEventos(true);
