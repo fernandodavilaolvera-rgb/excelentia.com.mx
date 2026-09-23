@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Empresas · ExcelentIA Dashboard</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
+.page{padding:1.25rem 1rem;max-width:720px;margin:0 auto}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.kpi{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.7rem .85rem}
+.kpi b{display:block;font-size:1.15rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.72rem;color:#8a90a0;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+
+/* Cards */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.card-head{background:#dce8f7;padding:.7rem 1rem;font-weight:700;font-size:.88rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.card-body{padding:1rem}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Manrope',sans-serif}
+.btn-primary{background:#1a3a6b;color:#fff}.btn-primary:hover{background:#0d1b3e}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-secondary{background:#f0f4ff;color:#1a3a6b;border:1px solid #c8d9f0}.btn-secondary:hover{background:#dce8f7}
+.btn-sm{padding:.3rem .65rem;font-size:.78rem}
+
+/* Filtros */
+.filters{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.85rem}
+.filters input,.filters select{padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff;color:#1a2035}
+.filters input{flex:1;min-width:180px}
+
+/* Tabla */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:#dce8f7;padding:.4rem .6rem;text-align:left;font-weight:700;border-bottom:2px solid #c8d9f0;white-space:nowrap;cursor:pointer;user-select:none}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+th .arr{font-size:.68rem;color:#8a90a0;margin-left:.2rem}
+td{padding:.45rem .6rem;border-bottom:1px solid #eef2f8;vertical-align:middle}
+tr.fila{cursor:pointer}
+tr.fila:hover td{background:#e8f0fb}
+.emp-nombre{font-weight:700;color:#1a2035}
+.emp-sub{font-size:.72rem;color:#8a90a0}
+.acc{display:flex;gap:.15rem;justify-content:flex-end}
+.acc button{background:none;border:none;cursor:pointer;font-size:.8rem;color:#8a90a0;padding:.2rem .35rem;border-radius:4px}
+.acc button:hover{background:#f0f4ff;color:#1a3a6b}
+
+/* Badges */
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap}
+.st-Cliente{background:#d1fae5;color:#065f46}
+.st-Prospecto{background:#dce8f7;color:#1a3a6b}
+.st-Aliado{background:#ede9fe;color:#5b21b6}
+.st-Inactivo{background:#f3f4f6;color:#6b7280}
+.st-Interna{background:#fef3c7;color:#92400e}
+.quien{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;font-weight:600;color:#4a5068;white-space:nowrap}
+.quien i{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* Alertas / estados */
+.alert-box{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.7rem .9rem;font-size:.82rem;margin-bottom:.75rem}
+.alert-err{background:#fef2f2;border-color:#fecaca;border-left-color:#dc2626}
+.loading{text-align:center;padding:1.5rem;color:#4a5068;font-size:.85rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid #dde1e9;border-top-color:#4a9fd4;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.vacio{color:#8a90a0;font-size:.8rem;padding:.4rem 0}
+
+/* Modales */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:720px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal.sm{max-width:520px}
+.modal-head{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;border-radius:14px 14px 0 0;border-bottom:3px solid #4a9fd4}
+.modal-head h3{font-size:1rem;font-weight:800}
+.modal-head .sub{font-size:.75rem;color:#a8c4e0;margin-top:.15rem}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:1rem;flex-shrink:0}
+.modal-body{padding:1.25rem}
+.modal-foot{padding:.85rem 1.25rem;border-top:1px solid #eef2f8;display:flex;gap:.6rem;justify-content:flex-end;flex-wrap:wrap}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-group{display:flex;flex-direction:column;gap:.3rem}
+.form-group.full{grid-column:1/-1}
+label{font-size:.8rem;font-weight:600;color:#4a5068}
+.modal input,.modal select,.modal textarea{width:100%;padding:.5rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.83rem;color:#1a2035;background:#fff}
+.modal input:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:#4a9fd4;box-shadow:0 0 0 3px rgba(74,159,212,.12)}
+.modal textarea{resize:vertical;min-height:70px}
+
+/* Ficha */
+.ficha-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.ficha-nums div{background:#f5f6f8;border:1px solid #dde1e9;border-radius:10px;padding:.55rem .7rem}
+.ficha-nums b{display:block;font-size:1rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums}
+.ficha-nums span{font-size:.7rem;color:#8a90a0;font-weight:600}
+.ficha-datos{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.8rem;color:#4a5068;margin-bottom:1rem}
+.ficha-datos a{color:#1a3a6b;font-weight:600}
+.sec{margin-bottom:1rem}
+.sec h4{font-size:.8rem;font-weight:800;color:#1a3a6b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem;padding-bottom:.3rem;border-bottom:2px solid #dce8f7}
+.item{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.4rem 0;border-bottom:1px solid #eef2f8;font-size:.82rem}
+.item:last-child{border-bottom:none}
+.item .t{font-weight:600}
+.item .d{font-size:.73rem;color:#8a90a0}
+.item .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.notas-box{background:#eef4fc;border-left:4px solid #1a3a6b;border-radius:8px;padding:.65rem .85rem;font-size:.82rem;white-space:pre-wrap;margin-bottom:1rem}
+
+/* Toast */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.65rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;z-index:999;transition:.3s;opacity:0;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);pointer-events:none}
+
+@media(max-width:600px){
+  .page{padding:.85rem .7rem}
+  .kpis,.ficha-nums{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+  table{font-size:.76rem}
+  th,td{padding:.4rem .45rem}
+  .col-opt{display:none}
+  .modal-backdrop{padding:.75rem .5rem}
+}
+
+@page{size:Letter;margin:12mm}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff}
+  .no-print,.filters,.acc,#toast{display:none!important}
+  .page{max-width:none;padding:0}
+  .card,main,section,.table-wrap,.modal,.modal-body{break-inside:auto}
+  .kpi,.ficha-nums div,.item,tr,.alert-box,.notas-box{break-inside:avoid}
+  h1,h2,h3,h4,.card-head,.sec h4{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  thead{display:table-header-group}
+  a[href]:after{content:none}
+  body.imprimiendo-ficha .page{display:none}
+  body.imprimiendo-ficha #m-ficha{position:static;display:block;background:none;padding:0}
+  body.imprimiendo-ficha #m-ficha .modal{box-shadow:none;max-width:none}
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card">
+    <div class="card-head">
+      🏢 Empresas
+      <span class="no-print" style="display:flex;gap:.4rem">
+        <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ PDF</button>
+        <button class="btn btn-primary btn-sm" onclick="abrirForm(null)">+ Nueva empresa</button>
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="filters">
+        <input type="text" id="f-q" placeholder="Buscar empresa o giro…" oninput="render()">
+        <select id="f-status" onchange="render()">
+          <option value="">Todos los estatus</option>
+          <option>Cliente</option><option>Prospecto</option><option>Aliado</option><option>Inactivo</option><option>Interna</option>
+        </select>
+        <select id="f-quien" onchange="render()">
+          <option value="">Trajo: todos</option>
+          <option value="fernando">Fernando</option><option value="juanjose">Juan José</option><option value="adolfo">Adolfo</option>
+        </select>
+      </div>
+      <div id="estado"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th data-col="Nombre">Empresa<span class="arr"></span></th>
+            <th data-col="TraidoPor" class="col-opt">Trajo<span class="arr"></span></th>
+            <th data-col="Proyectos" class="num">Proy.<span class="arr"></span></th>
+            <th data-col="Contactos" class="num col-opt">Cont.<span class="arr"></span></th>
+            <th data-col="Valor" class="num">En juego<span class="arr"></span></th>
+            <th data-col="Cobrado" class="num">Cobrado<span class="arr"></span></th>
+            <th class="no-print"></th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ficha de empresa -->
+<div class="modal-backdrop" id="m-ficha" onclick="if(event.target===this)cerrar('m-ficha')">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3 id="fi-nombre">Empresa</h3><div class="sub" id="fi-sub"></div></div>
+      <button class="modal-close no-print" onclick="cerrar('m-ficha')">✕</button>
+    </div>
+    <div class="modal-body" id="fi-body"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+    <div class="modal-foot no-print">
+      <button class="btn btn-secondary" onclick="imprimirFicha()">🖨️ PDF</button>
+      <button class="btn btn-primary" id="fi-editar">✏️ Editar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Alta / edición -->
+<div class="modal-backdrop" id="m-form" onclick="if(event.target===this)cerrar('m-form')">
+  <div class="modal sm">
+    <div class="modal-head"><h3 id="fm-titulo">Nueva empresa</h3><button class="modal-close" onclick="cerrar('m-form')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Nombre *</label><input type="text" id="e-nombre" placeholder="Nombre comercial o razón social"></div>
+        <div class="form-group"><label>Estatus</label>
+          <select id="e-status"><option>Prospecto</option><option>Cliente</option><option>Aliado</option><option>Inactivo</option><option>Interna</option></select>
+        </div>
+        <div class="form-group"><label>¿Quién la trajo?</label>
+          <select id="e-quien"><option value="">— Sin asignar —</option><option value="fernando">Fernando</option><option value="juanjose">Juan José</option><option value="adolfo">Adolfo</option></select>
+        </div>
+        <div class="form-group"><label>Giro</label><input type="text" id="e-giro" placeholder="Salud, logística, club deportivo…"></div>
+        <div class="form-group"><label>Sitio web</label><input type="url" id="e-web" placeholder="https://…"></div>
+        <div class="form-group full"><label>Notas</label><textarea id="e-notas" placeholder="Contexto de la cuenta…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger" id="fm-borrar" style="margin-right:auto;display:none" onclick="borrar()">🗑️ Borrar</button>
+      <button class="btn btn-secondary" onclick="cerrar('m-form')">Cancelar</button>
+      <button class="btn btn-primary" id="fm-guardar" onclick="guardar()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://n8n.excelentia.com.mx/webhook/crm-empresas';
+const USERS = {
+  fernando:{nombre:'Fernando', color:'#1a3a6b'},
+  juanjose:{nombre:'Juan José', color:'#7c3aed'},
+  adolfo:{nombre:'Adolfo', color:'#059669'}
+};
+let EMPRESAS = [];
+let editId = null;
+let fichaId = null;
+let sortCol = 'Nombre', sortDir = 'asc';
+
+async function api(body){
+  try{
+    const ctrl = new AbortController();
+    const to = setTimeout(()=>ctrl.abort(), 25000);
+    const r = await fetch(API, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), signal:ctrl.signal});
+    clearTimeout(to);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return await r.json();
+  }catch(e){ console.error(e); return null; }
+}
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const money = n => '$' + Number(n||0).toLocaleString('es-MX',{maximumFractionDigits:0});
+const fecha = f => f ? new Date(f+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}) : '';
+function quien(id){ const u = USERS[id]; return u ? `<span class="quien"><i style="background:${u.color}"></i>${u.nombre}</span>` : '<span class="quien" style="color:#8a90a0">—</span>'; }
+function toast(m, ok=true){ const t=document.getElementById('toast'); t.style.background=ok?'#059669':'#dc2626'; t.textContent=m; t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',2800); }
+function abrir(id){ document.getElementById(id).classList.add('open'); }
+function cerrar(id){ document.getElementById(id).classList.remove('open'); }
+
+async function cargar(){
+  document.getElementById('estado').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando empresas…</div>';
+  const j = await api({accion:'list'});
+  if(!j || !j.ok){
+    document.getElementById('estado').innerHTML = `<div class="alert-box alert-err">⚠️ No se pudo cargar. <button class="btn btn-secondary btn-sm" onclick="cargar()">Reintentar</button></div>`;
+    return;
+  }
+  EMPRESAS = j.data || [];
+  document.getElementById('estado').innerHTML = EMPRESAS.length ? '' : '<div class="alert-box">💡 Aún no hay empresas. Crea la primera con <b>+ Nueva empresa</b>.</div>';
+  render();
+}
+
+function render(){
+  const q = document.getElementById('f-q').value.trim().toLowerCase();
+  const st = document.getElementById('f-status').value;
+  const qu = document.getElementById('f-quien').value;
+  let lista = EMPRESAS.filter(e =>
+    (!q || (e.Nombre||'').toLowerCase().includes(q) || (e.Giro||'').toLowerCase().includes(q)) &&
+    (!st || e.Status === st) && (!qu || e.TraidoPor === qu));
+  lista.sort((a,b)=>{
+    let x=a[sortCol], y=b[sortCol];
+    if(typeof x === 'number' || typeof y === 'number'){ x=Number(x||0); y=Number(y||0); return sortDir==='asc'?x-y:y-x; }
+    x=String(x||'').toLowerCase(); y=String(y||'').toLowerCase();
+    return sortDir==='asc' ? x.localeCompare(y,'es') : y.localeCompare(x,'es');
+  });
+  document.querySelectorAll('th[data-col]').forEach(th=>{
+    th.querySelector('.arr').textContent = th.dataset.col===sortCol ? (sortDir==='asc'?'▲':'▼') : '';
+  });
+  document.getElementById('tbody').innerHTML = lista.length ? lista.map(e=>`
+    <tr class="fila" onclick="verFicha('${e.ID}')">
+      <td><div class="emp-nombre">${esc(e.Nombre)}</div><div class="emp-sub"><span class="badge st-${esc(e.Status)}">${esc(e.Status)}</span>${e.Giro?' · '+esc(e.Giro):''}</div></td>
+      <td class="col-opt">${quien(e.TraidoPor)}</td>
+      <td class="num">${e.Activos}/${e.Proyectos}</td>
+      <td class="num col-opt">${e.Contactos}</td>
+      <td class="num">${e.Valor?money(e.Valor):'—'}</td>
+      <td class="num">${e.Cobrado?money(e.Cobrado):'—'}</td>
+      <td class="no-print"><div class="acc"><button title="Editar" onclick="event.stopPropagation();abrirForm('${e.ID}')">✏️</button></div></td>
+    </tr>`).join('') : (EMPRESAS.length ? '<tr><td colspan="7" class="vacio">Ninguna empresa coincide con el filtro.</td></tr>' : '');
+  renderKpis();
+}
+
+function renderKpis(){
+  const n = s => EMPRESAS.filter(e=>e.Status===s).length;
+  const valor = EMPRESAS.reduce((a,e)=>a+Number(e.Valor||0),0);
+  const cobrado = EMPRESAS.reduce((a,e)=>a+Number(e.Cobrado||0),0);
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><b>${n('Cliente')}</b><span>Clientes</span></div>
+    <div class="kpi"><b>${n('Prospecto')}</b><span>Prospectos</span></div>
+    <div class="kpi"><b>${money(valor)}</b><span>En juego</span></div>
+    <div class="kpi"><b>${money(cobrado)}</b><span>Cobrado</span></div>`;
+}
+
+document.querySelectorAll('th[data-col]').forEach(th=>th.addEventListener('click',()=>{
+  const c = th.dataset.col;
+  if(sortCol===c) sortDir = sortDir==='asc'?'desc':'asc';
+  else { sortCol=c; sortDir = ['Nombre','TraidoPor'].includes(c)?'asc':'desc'; }
+  render();
+}));
+
+// ── Ficha ──
+async function verFicha(id){
+  fichaId = id;
+  const e0 = EMPRESAS.find(x=>x.ID===id) || {};
+  document.getElementById('fi-nombre').textContent = e0.Nombre || 'Empresa';
+  document.getElementById('fi-sub').textContent = '';
+  document.getElementById('fi-body').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando ficha…</div>';
+  document.getElementById('fi-editar').onclick = ()=>{ cerrar('m-ficha'); abrirForm(id); };
+  abrir('m-ficha');
+  const j = await api({accion:'detalle', ID:id});
+  if(!j || !j.ok || !j.empresa){
+    document.getElementById('fi-body').innerHTML = '<div class="alert-box alert-err">⚠️ No se pudo cargar la ficha.</div>';
+    return;
+  }
+  const e = j.empresa;
+  document.getElementById('fi-nombre').textContent = e.Nombre;
+  document.getElementById('fi-sub').textContent = [e.Status, e.Giro, USERS[e.TraidoPor] ? 'la trajo ' + USERS[e.TraidoPor].nombre : ''].filter(Boolean).join(' · ');
+  const proy = j.proyectos.map(p=>`
+    <div class="item"><div><div class="t">${esc(p.Nombre)}</div><div class="d">${esc(p.Etapa||'')} · ${esc(p.Status||'')}${p.ProximaAccion?' · Próximo: '+esc(p.ProximaAccion)+(p.FechaAccion?' ('+fecha(p.FechaAccion)+')':''):''}</div></div>
+    <div class="r">${p.Valor?money(p.Valor):''}${p.Probabilidad!=null&&p.Valor?'<div class="d">'+p.Probabilidad+'%</div>':''}</div></div>`).join('');
+  const cont = j.contactos.map(c=>`
+    <div class="item"><div><div class="t">${esc(c.Nombre)}</div><div class="d">${esc(c.Cargo||'')}${c.Email?' · '+esc(c.Email):''}</div></div>
+    <div class="r">${c.WhatsApp?`<a class="d" href="https://wa.me/${String(c.WhatsApp).replace(/\D/g,'')}" target="_blank" style="color:#059669;font-weight:700">WhatsApp</a>`:''}</div></div>`).join('');
+  const tar = j.tareas.map(t=>`
+    <div class="item"><div><div class="t">${esc(t.Titulo)}</div><div class="d">${esc(t.Proyecto||'')}${USERS[t.Asignado]?' · '+USERS[t.Asignado].nombre:''}</div></div>
+    <div class="r d">${fecha(t.Fecha)}</div></div>`).join('');
+  const ing = j.ingresos.map(i=>`
+    <div class="item"><div><div class="t">${esc(i.Concepto||'Ingreso')}</div><div class="d">${esc(i.Proyecto||'')} · ${fecha(i.Fecha)}</div></div>
+    <div class="r">${money(i.MontoMXN)}</div></div>`).join('');
+  document.getElementById('fi-body').innerHTML = `
+    <div class="ficha-nums">
+      <div><b>${e.Activos}/${e.Proyectos}</b><span>Proyectos activos</span></div>
+      <div><b>${e.Contactos}</b><span>Contactos</span></div>
+      <div><b>${money(e.Valor)}</b><span>En juego</span></div>
+      <div><b>${money(e.Cobrado)}</b><span>Cobrado</span></div>
+    </div>
+    ${e.SitioWeb?`<div class="ficha-datos">🌐 <a href="${esc(e.SitioWeb)}" target="_blank">${esc(e.SitioWeb.replace(/^https?:\/\//,''))}</a></div>`:''}
+    ${e.Notas?`<div class="notas-box">${esc(e.Notas)}</div>`:''}
+    <div class="sec"><h4>Proyectos</h4>${proy||'<div class="vacio">Sin proyectos ligados.</div>'}</div>
+    <div class="sec"><h4>Contactos</h4>${cont||'<div class="vacio">Sin contactos. Al crear un contacto, elige esta empresa en el campo Empresa.</div>'}</div>
+    <div class="sec"><h4>Tareas abiertas</h4>${tar||'<div class="vacio">Sin tareas pendientes.</div>'}</div>
+    <div class="sec"><h4>Ingresos cobrados</h4>${ing||'<div class="vacio">Sin ingresos registrados.</div>'}</div>`;
+}
+function imprimirFicha(){
+  document.body.classList.add('imprimiendo-ficha');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('imprimiendo-ficha'), 500);
+}
+
+// ── Alta / edición ──
+function abrirForm(id){
+  editId = id;
+  const e = id ? EMPRESAS.find(x=>x.ID===id) : null;
+  document.getElementById('fm-titulo').textContent = e ? 'Editar empresa' : 'Nueva empresa';
+  document.getElementById('e-nombre').value = e?.Nombre || '';
+  document.getElementById('e-status').value = e?.Status || 'Prospecto';
+  document.getElementById('e-quien').value = e?.TraidoPor || '';
+  document.getElementById('e-giro').value = e?.Giro || '';
+  document.getElementById('e-web').value = e?.SitioWeb || '';
+  document.getElementById('e-notas').value = e?.Notas || '';
+  document.getElementById('fm-borrar').style.display = e ? 'inline-flex' : 'none';
+  abrir('m-form');
+  setTimeout(()=>document.getElementById('e-nombre').focus(), 50);
+}
+async function guardar(){
+  const nombre = document.getElementById('e-nombre').value.trim();
+  if(nombre.length < 2){ toast('Escribe el nombre de la empresa', false); return; }
+  const btn = document.getElementById('fm-guardar');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const j = await api({
+    accion: editId ? 'update' : 'create', ID: editId || undefined,
+    Nombre: nombre,
+    Status: document.getElementById('e-status').value,
+    TraidoPor: document.getElementById('e-quien').value,
+    Giro: document.getElementById('e-giro').value,
+    SitioWeb: document.getElementById('e-web').value,
+    Notas: document.getElementById('e-notas').value
+  });
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if(j && j.ok){ cerrar('m-form'); toast(editId ? 'Empresa actualizada' : 'Empresa creada'); cargar(); }
+  else toast(j?.error || 'No se pudo guardar; revisa la conexión', false);
+}
+async function borrar(){
+  const e = EMPRESAS.find(x=>x.ID===editId);
+  if(!e || !confirm(`¿Borrar "${e.Nombre}"?`)) return;
+  const j = await api({accion:'delete', ID:editId});
+  if(j && j.ok){ cerrar('m-form'); toast('Empresa borrada'); cargar(); }
+  else toast(j?.error || 'No se pudo borrar', false);
+}
+document.addEventListener('keydown', ev=>{ if(ev.key==='Escape'){ cerrar('m-form'); cerrar('m-ficha'); } });
+document.addEventListener('DOMContentLoaded', cargar);
+</script>
+</body>
+</html>
