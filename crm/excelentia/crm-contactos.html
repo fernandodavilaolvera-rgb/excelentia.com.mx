@@ -170,7 +170,7 @@ tr:last-child td{border-bottom:none}
           </div>
         </div>
         <div class="form-group full"><label>Nombre *</label><input type="text" id="co-nombre" placeholder="Nombre completo o razón social"></div>
-        <div class="form-group"><label>Empresa</label><input type="text" id="co-empresa" placeholder="Empresa donde trabaja"></div>
+        <div class="form-group"><label>Empresa</label><input type="text" id="co-empresa" list="dl-empresas" placeholder="Elige de la lista o escribe" autocomplete="off" oninput="revisarEmpresaCampo()"><datalist id="dl-empresas"></datalist><small id="emp-hint" style="display:none;color:#1a3a6b;font-size:.74rem;font-weight:600">✨ Se creará como empresa nueva en el catálogo</small></div>
         <div class="form-group"><label>Cargo</label><input type="text" id="co-cargo" placeholder="Director, Gerente, etc."></div>
         <div class="form-group"><label>WhatsApp</label><input type="tel" id="co-whatsapp" placeholder="+52 55 1234 5678"></div>
         <div class="form-group"><label>Email</label><input type="email" id="co-email" placeholder="correo@empresa.com"></div>
@@ -441,6 +441,7 @@ function openContactoModal(idToEdit){
 
   document.getElementById('co-nombre').value = item ? item.Nombre : '';
   document.getElementById('co-empresa').value = item ? item.Empresa : '';
+  revisarEmpresaCampo();
   document.getElementById('co-cargo').value = item ? item.Cargo : '';
   document.getElementById('co-whatsapp').value = item ? item.WhatsApp : '';
   document.getElementById('co-email').value = item ? item.Email : '';
@@ -518,6 +519,32 @@ document.querySelectorAll('.modal-backdrop').forEach(m => {
 // INIT
 // ═══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', loadContactos);
+
+// ═══════════════════════════════════════
+// EMPRESAS · catálogo para el campo Empresa (se liga sola en la base)
+// ═══════════════════════════════════════
+let EMPRESAS_LISTA = [];
+async function cargarEmpresasLista(){
+  try{
+    const r = await fetch('https://n8n.excelentia.com.mx/webhook/crm-empresas', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({accion:'list'})
+    });
+    const j = await r.json();
+    EMPRESAS_LISTA = (j && j.ok && Array.isArray(j.data)) ? j.data : [];
+    const dl = document.getElementById('dl-empresas');
+    if(dl) dl.innerHTML = EMPRESAS_LISTA.map(e => `<option value="${String(e.Nombre).replace(/"/g,'&quot;')}"></option>`).join('');
+    revisarEmpresaCampo();
+  }catch(e){ console.warn('No se pudo cargar el catálogo de empresas', e); }
+}
+function revisarEmpresaCampo(){
+  const inp = document.getElementById('co-empresa');
+  const hint = document.getElementById('emp-hint');
+  if(!inp || !hint) return;
+  const v = inp.value.trim().toLowerCase();
+  const existe = EMPRESAS_LISTA.some(e => String(e.Nombre).toLowerCase() === v);
+  hint.style.display = (v && !existe && EMPRESAS_LISTA.length) ? 'block' : 'none';
+}
+document.addEventListener('DOMContentLoaded', cargarEmpresasLista);
 </script>
 </body>
 </html>
