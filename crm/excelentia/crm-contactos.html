@@ -21,7 +21,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 .page{padding:1.25rem 1.5rem;max-width:1500px;margin:0 auto}
 
 /* ── CARDS ── */
-.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:8px;overflow:hidden;margin-bottom:1rem}
 .card-head{background:#dce8f7;padding:.7rem 1rem;font-weight:700;font-size:.88rem;color:#1a2035;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
 .card-body{padding:1rem}
 
@@ -62,11 +62,11 @@ textarea{resize:vertical;min-height:70px}
 .radio-row label{display:flex;align-items:center;gap:.3rem;cursor:pointer;font-weight:500;color:#1a2035}
 
 /* ── BADGES ── */
-.badge{display:inline-block;padding:.2rem .55rem;border-radius:20px;font-size:.73rem;font-weight:700}
-.badge-blue{background:#dce8f7;color:#1a3a6b}
-.badge-green{background:#d1fae5;color:#065f46}
-.badge-gray{background:#f3f4f6;color:#374151}
-.badge-purple{background:#ede9fe;color:#5b21b6}
+.badge{display:inline;padding:0;font-size:.82rem;font-weight:600;white-space:nowrap}
+.badge-blue{color:#1a3a6b}
+.badge-green{color:#065f46}
+.badge-gray{color:#4a5068}
+.badge-purple{color:#4a5068;font-weight:500}
 
 /* ── EMPTY / LOADING ── */
 .empty-state{text-align:center;padding:2.5rem 1rem;color:#8a90a0}
@@ -117,10 +117,6 @@ tr:last-child td{border-bottom:none}
 <div class="page">
 
   <div class="card">
-    <div class="card-head">
-      👤 Directorio de Contactos
-      <button class="btn btn-primary btn-sm" onclick="openContactoModal(null)">+ Nuevo contacto</button>
-    </div>
     <div class="card-body">
 
       <div class="alert-box" id="empty-alert" style="display:none">
@@ -145,6 +141,7 @@ tr:last-child td{border-bottom:none}
           <option>Inactivo</option>
         </select>
         <div id="loadingTag" class="loading" style="display:none;padding:0"><span class="spinner"></span>Cargando...</div>
+        <button class="btn btn-primary btn-sm no-print" style="margin-left:auto" onclick="openContactoModal(null)">+ Nuevo contacto</button>
       </div>
 
       <div class="table-wrap">
@@ -399,7 +396,7 @@ function renderContactos(){
       : `<span class="notas-btn vacia" title="Sin nota"></span>`;
 
     return `<tr>
-      <td><strong>${escHtml(c.Nombre)}</strong></td>
+      <td style="white-space:nowrap"><strong>${escHtml(c.Nombre)}</strong></td>
       <td><span class="badge badge-purple">${escHtml(c.Tipo)}</span></td>
       <td>${escHtml(c.Empresa) || '-'}</td>
       <td>${escHtml(c.Cargo) || '-'}</td>
