@@ -189,6 +189,7 @@ const USERS = {
   adolfo:   { nombre: 'Adolfo',   color: '#34d399' }
 };
 let currentUser = 'fernando';
+const USER_KEY = 'crm_usuario';
 const NAV_KEY = 'ferrock_nav_mini';
 
 function cargarFrame(tab){
@@ -229,8 +230,16 @@ function cerrarMenuMovil(){
   document.getElementById('navVeil').classList.remove('abierto');
 }
 
+function pintarUsuario(uid){
+  const u = USERS[uid];
+  document.getElementById('userDot').style.background = u.color;
+  document.getElementById('userChipName').textContent = u.nombre;
+}
 function setUser(uid){
+  if(!USERS[uid]) return;
   currentUser = uid;
+  try{ localStorage.setItem(USER_KEY, uid); }catch(e){}
+  const url = new URL(window.location); url.searchParams.set('u', uid); window.history.replaceState({}, '', url);
   const u = USERS[uid];
   document.getElementById('userDot').style.background = u.color;
   document.getElementById('userChipName').textContent = u.nombre;
@@ -259,6 +268,12 @@ function autoSize(iframe){
 
 document.addEventListener('DOMContentLoaded', ()=>{
   try{ if(localStorage.getItem(NAV_KEY) === '1') document.getElementById('sideNav').classList.add('mini'); }catch(e){}
+  // Usuario: la liga personal (?u=) manda; si no, el último que se eligió en este navegador
+  const uParam = (new URLSearchParams(window.location.search).get('u') || '').toLowerCase();
+  let uGuardado = ''; try{ uGuardado = localStorage.getItem(USER_KEY) || ''; }catch(e){}
+  const uInicial = USERS[uParam] ? uParam : (USERS[uGuardado] ? uGuardado : 'fernando');
+  currentUser = uInicial; pintarUsuario(uInicial);
+  if(USERS[uParam]){ try{ localStorage.setItem(USER_KEY, uParam); }catch(e){} }
   const tabParam = new URLSearchParams(window.location.search).get('tab');
   if(tabParam && document.getElementById('wrap-'+tabParam) && document.querySelector(`.nav-item[data-tab="${tabParam}"]`)) showTab(tabParam);
   else showTab('ferrock');
