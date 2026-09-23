@@ -9,17 +9,20 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
-.top{max-width:720px;margin:0 auto;padding:1.1rem 1rem 0}
+.top{padding:.6rem 1rem 0}
 
 /* Selector de tablero */
-.switch{display:flex;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.25rem;gap:.25rem;margin-bottom:.9rem}
-.switch button{flex:1;border:none;background:none;padding:.55rem;border-radius:9px;font-family:'Manrope',sans-serif;font-weight:700;font-size:.85rem;color:#4a5068;cursor:pointer}
-.switch button.on{background:#1a3a6b;color:#fff}
+.switch{display:flex;align-items:flex-end;gap:1.4rem;border-bottom:1px solid #dde1e9;margin-bottom:.6rem}
+.switch button{border:none;background:none;padding:.5rem 0;margin-bottom:-1px;border-bottom:2px solid transparent;font-family:'Manrope',sans-serif;font-weight:600;font-size:.85rem;color:#8a90a0;cursor:pointer}
+.switch button:hover{color:#1a3a6b}
+.switch button.on{color:#1a3a6b;font-weight:700;border-bottom-color:#1a3a6b}
+.switch select{margin-left:auto;margin-bottom:.35rem;padding:.35rem .6rem;border:1px solid #dde1e9;border-radius:6px;font-family:'Manrope',sans-serif;font-size:.8rem;background:#fff;color:#1a2035}
 
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.8rem}
-.kpi{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.65rem .8rem}
-.kpi b{display:block;font-size:1.1rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums}
-.kpi span{font-size:.7rem;color:#8a90a0;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.kpis{display:flex;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:.5rem .4rem;margin:.4rem 1rem 1rem;row-gap:.35rem}
+.kpi{display:flex;align-items:baseline;gap:.45rem;padding:0 1rem;border-right:1px solid #dde1e9;white-space:nowrap}
+.kpi:last-child{border-right:none}
+.kpi b{order:2;font-size:1rem;font-weight:800;color:#1a3a6b;font-variant-numeric:tabular-nums}
+.kpi span{order:1;font-size:.72rem;color:#8a90a0;font-weight:700;letter-spacing:.3px}
 
 .filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.6rem}
 .filters select{padding:.42rem .7rem;border:1px solid #dde1e9;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.82rem;background:#fff;color:#1a2035}
@@ -35,9 +38,9 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 /* Tablero */
 .board{display:flex;gap:.7rem;overflow-x:auto;padding:.3rem 1rem 1rem;scroll-snap-type:x proximity;justify-content:safe center}
-.col{flex:0 0 230px;background:#eef1f6;border:1px solid #dde1e9;border-radius:12px;display:flex;flex-direction:column;max-height:calc(100vh - 240px);scroll-snap-align:start}
+.col{flex:1 0 200px;background:#eef1f6;border:1px solid #dde1e9;border-radius:8px;display:flex;flex-direction:column;min-height:560px;max-height:calc(100vh - 70px);scroll-snap-align:start}
 .col.over{background:#e8f0fb;border-color:#4a9fd4}
-.col-head{background:#dce8f7;border-radius:12px 12px 0 0;padding:.55rem .7rem;border-bottom:1px solid #c8d9f0}
+.col-head{background:#dce8f7;border-radius:8px 8px 0 0;padding:.55rem .7rem;border-bottom:1px solid #c8d9f0}
 .col-head b{font-size:.82rem;display:flex;justify-content:space-between}
 .col-head b small{background:#fff;border-radius:10px;padding:0 .45rem;font-size:.7rem;color:#1a3a6b}
 .col-head span{font-size:.72rem;color:#4a5068;font-weight:600;font-variant-numeric:tabular-nums}
@@ -105,7 +108,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 @media(max-width:600px){
   .top{padding:.8rem .7rem 0}
-  .kpis{grid-template-columns:1fr 1fr}
+  .kpi{border-right:none;width:48%;padding:.1rem .6rem}
   .board{padding:.3rem .7rem 1rem;justify-content:flex-start}
   .col{flex-basis:78vw;max-height:none}
   .form-grid{grid-template-columns:1fr}
@@ -122,7 +125,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
   .board{overflow:visible;flex-wrap:wrap;justify-content:flex-start;padding:0}
   .col{max-height:none;break-inside:auto;flex-basis:31%}
   .col-body{overflow:visible}
-  .card,.kpi,.perd-item,.alert-box{break-inside:avoid}
+  .card,.perd-item,.alert-box{break-inside:avoid}
   .col-head,summary{break-after:avoid}
   p,li{orphans:3;widows:3}
   details{display:block}
@@ -134,26 +137,19 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 <div class="top">
   <div class="switch no-print">
-    <button id="sw-venta" class="on" onclick="setVista('venta')">💼 Funnel de ventas</button>
-    <button id="sw-oper" onclick="setVista('oper')">⚙️ Operación</button>
-  </div>
-  <div class="kpis" id="kpis"></div>
-  <div class="filters">
-    <select id="f-resp" onchange="render()">
+    <button id="sw-venta" class="on" onclick="setVista('venta')">Funnel de ventas</button>
+    <button id="sw-oper" onclick="setVista('oper')">Operación</button>
+    <select id="f-resp" onchange="render()" title="Responsable">
       <option value="">Responsable: todos</option>
-      <option value="fernando">Fernando</option><option value="juanjose">Juan José</option><option value="adolfo">Adolfo</option>
+      <option value="adolfo">Adolfo</option><option value="fernando">Fernando</option><option value="juanjose">Juan José</option>
     </select>
-    <label id="lbl-pausa"><input type="checkbox" id="f-pausa" checked onchange="render()"> Ver pausados</label>
-    <span class="sp"></span>
-    <button class="btn btn-secondary btn-sm no-print" onclick="window.print()">🖨️ PDF</button>
-    <button class="btn btn-secondary btn-sm no-print" onclick="cargar()">↻</button>
   </div>
-  <div class="nota" id="nota"></div>
 </div>
 
 <div class="estado" id="estado"></div>
 <div class="board" id="board"></div>
 <div class="perdidos" id="perdidos"></div>
+<div class="kpis" id="kpis"></div>
 
 <!-- Modal de tarjeta -->
 <div class="modal-backdrop" id="m-card" onclick="if(event.target===this)cerrar()">
@@ -201,7 +197,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 <script>
 const API = 'https://n8n.excelentia.com.mx/webhook/crm-embudo';
-const VENTA = ['Prospecto','Contacto','Presentación','Seguimiento','Propuesta','Cierre'];
+const VENTA = ['Prospecto','Presentación','Seguimiento','Propuesta','Negociación','Cierre'];
 const OPER = ['Desarrollo','Entrega','Mantenimiento'];
 const USERS = {fernando:{nombre:'Fernando',color:'#1a3a6b'}, juanjose:{nombre:'Juan José',color:'#7c3aed'}, adolfo:{nombre:'Adolfo',color:'#059669'}};
 let DATA = [];
@@ -244,15 +240,13 @@ function setVista(v){
 const esInterna = p => p.EmpresaStatus === 'Interna';
 function visibles(){
   const r = document.getElementById('f-resp').value;
-  const pausa = document.getElementById('f-pausa').checked;
-  return DATA.filter(p => (!r || p.Responsable === r) && (pausa || p.Status !== 'pausado'));
+  return DATA.filter(p => (!r || p.Responsable === r));
 }
 
 function render(){
   const etapas = vista === 'venta' ? VENTA : OPER;
   const base = visibles();
   const enTablero = base.filter(p => etapas.includes(p.Etapa) && p.Status !== 'perdido' && !(vista==='venta' && esInterna(p)));
-  document.getElementById('lbl-pausa').style.display = vista === 'venta' ? 'flex' : 'none';
 
   document.getElementById('board').innerHTML = etapas.map(et => {
     const cards = enTablero.filter(p => p.Etapa === et);
@@ -266,9 +260,6 @@ function render(){
   renderKpis(base);
   renderPerdidos(base);
 
-  const internas = DATA.filter(p => esInterna(p) && VENTA.includes(p.Etapa) && p.Status !== 'perdido').length;
-  document.getElementById('nota').textContent = (vista === 'venta' && internas)
-    ? `${internas} proyecto${internas>1?'s':''} interno${internas>1?'s':''} de ExcelentIA no se cuenta${internas>1?'n':''} en el funnel.` : '';
 }
 
 function tarjeta(p){
