@@ -1194,7 +1194,7 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
       <div class="av-prog-header">
         <div>
           <div class="av-prog-title">📅 Programación Automática Mensual</div>
-          <div class="av-prog-desc">El día configurado de cada mes se envían correos automáticamente a cada segmento con su plantilla asignada.</div>
+          <div class="av-prog-desc">Marca los segmentos que quieres agendar; cada uno se programa por separado con su propia plantilla, el mismo día y a la misma hora.</div>
         </div>
         <div class="toggle-wrap">
           <label class="toggle-switch">
@@ -1204,6 +1204,22 @@ body.brb-lector .toggle-switch,body.brb-lector label:has(#toggle-modo-prueba),bo
           <span class="toggle-label" id="toggle-global-label" style="color:#ccc">Envíos automáticos: OFF</span>
         </div>
       </div>
+      <!-- 23-sep-2026 — SEGMENTOS A PROGRAMAR.
+           Antes la programación tomaba el primer segmento que tuviera el switch encendido,
+           así que 0–30 siempre le ganaba a los demás y no se podían agendar dos. Ahora se
+           eligen aquí y el Dashboard manda una programación por cada uno; el motor de n8n
+           ya guardaba una fila por llamada, así que no hubo que tocarlo. -->
+      <div class="av-prog-segs" style="margin-bottom:14px;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:10px;padding:12px 14px">
+        <div style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:800;color:#1a3a6b;margin-bottom:8px">📌 Segmentos a programar</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px 18px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-prog-seg" value="s1" onchange="progSegsTocado=true" style="accent-color:#3AAA35;width:15px;height:15px"> 🟡 0–30 días</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-prog-seg" value="s2" onchange="progSegsTocado=true" style="accent-color:#3AAA35;width:15px;height:15px"> 🟠 31–60 días</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-prog-seg" value="s3" onchange="progSegsTocado=true" style="accent-color:#3AAA35;width:15px;height:15px"> 🔴 61–90 días</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#1a2035;cursor:pointer"><input type="checkbox" class="chk-prog-seg" value="s4" onchange="progSegsTocado=true" style="accent-color:#3AAA35;width:15px;height:15px"> ⛔ +90 días</label>
+        </div>
+        <div style="font-size:.68rem;color:#4a5068;margin-top:8px">Cada segmento usa el asunto y el mensaje que tenga guardados en su plantilla. Vienen marcados los que tengas encendidos, pero puedes cambiarlos aquí sin mover los interruptores.</div>
+      </div>
+
       <div class="av-prog-body">
         <div class="av-prog-field">
           <label>Día de envío</label>
@@ -4007,6 +4023,7 @@ function renderStatusBar(){
     const on=avisosConfig.global&&avisosConfig.toggles[s];
     return `<div class="av-status-item"><div class="${on?'av-dot-on':'av-dot-off'}"></div><span>${labels[s]}: ${on?'<strong style="color:var(--verde)">Activo</strong>':'<span style="color:#aaa">Inactivo</span>'}</span></div>`;
   }).join('');
+  if(typeof sincProgSegs === 'function') sincProgSegs();
 }
 
 // Persiste el estado completo de un segmento (asunto + cuerpo + activo) en el backend (Avisos_Config)
@@ -4031,59 +4048,85 @@ async function guardarToggle(seg,val){
   }catch(e){ showToast('⚠️ Sin conexión — cambio no guardado'); }
 }
 
+// 23-sep-2026 — las casillas de "Segmentos a programar" llegan marcadas igual que los
+// interruptores, pero en cuanto el usuario toca una, manda su elección y ya no se repintan.
+let progSegsTocado = false;
+function sincProgSegs(){
+  if(progSegsTocado) return;
+  document.querySelectorAll('.chk-prog-seg').forEach(function(c){
+    c.checked = !!(avisosConfig && avisosConfig.toggles && avisosConfig.toggles[c.value]);
+  });
+}
+
+const PROG_LBL = { s1:'0–30 días', s2:'31–60 días', s3:'61–90 días', s4:'+90 días' };
+
 async function guardarProg(){
   avisosConfig.dia=parseInt(document.getElementById('av-dia-envio').value||6);
   avisosConfig.hora=document.getElementById('av-hora-envio').value||'09:00';
   avisosConfig.remitente='asiscobranza@berimbau.mx'; // s75: el campo se quito; el motor siempre manda desde el correo del Club
   calcNextSend();
 
-  // Detectar segmento activo (primer segmento con toggle ON)
-  const segmentos = ['s1','s2','s3','s4'];
-  let segmentoActivo = 's2';
-  for(const seg of segmentos){
-    const toggle = document.getElementById('toggle-'+seg);
-    if(toggle && toggle.checked){ segmentoActivo = seg; break; }
-  }
+  // 23-sep-2026 — los segmentos se eligen en las casillas de arriba, ya no se deduce
+  // del primer interruptor encendido. Se manda una programación por cada segmento
+  // marcado; cada llamada crea su propia fila en la lista de envíos pendientes.
+  const segsMarcados = Array.from(document.querySelectorAll('.chk-prog-seg:checked')).map(c=>c.value);
+  if(!segsMarcados.length){ showToast('⚠️ Marca al menos un segmento para programar'); return; }
 
-  // Leer asunto y cuerpo del segmento activo
-  const asunto = document.getElementById('asunto-'+segmentoActivo)?.value || 'Aviso Club Berimbau';
-  const cuerpo = document.getElementById('cuerpo-'+segmentoActivo)?.value || 'Hola {{nombre}}, te contactamos por tu membresía {{membresia}}.';
-
-  const payload = {
-    dia: avisosConfig.dia,
-    hora: avisosConfig.hora,
-    segmento: segmentoActivo,
-    asunto,
-    cuerpo,
-    remitente: avisosConfig.remitente,
-    modo_prueba: MODO_PRUEBA
-  };
+  let prueba_ids = [];
   if(MODO_PRUEBA){
-    payload.prueba_ids = Array.from(document.querySelectorAll('.chk-prueba:checked')).map(c=>c.value);
-    if(!payload.prueba_ids.length){ showToast('⚠️ Elige al menos una persona de prueba'); return; }
+    prueba_ids = Array.from(document.querySelectorAll('.chk-prueba:checked')).map(c=>c.value);
+    if(!prueba_ids.length){ showToast('⚠️ Elige al menos una persona de prueba'); return; }
   }
+
+  // Antes de agendar nada, se le enseña al usuario exactamente qué va a salir y a quién.
+  const resumen = segsMarcados.map(sg=>'· '+(PROG_LBL[sg]||sg)).join('\n');
+  const aviso = MODO_PRUEBA
+    ? '🔒 Modo prueba: llegan solo al equipo de prueba.'
+    : '⚠️ Modo real: llegan a los usuarios del Club.';
+  if(!confirm('Se van a programar '+segsMarcados.length+' envío'+(segsMarcados.length>1?'s':'')+':\n\n'
+      +resumen+'\n\nDía '+avisosConfig.dia+' de cada mes a las '+avisosConfig.hora+' hrs\n'+aviso+'\n\n¿Continuar?')) return;
 
   const btn = document.querySelector('.btn-av-save');
   const textoOriginal = btn ? btn.innerHTML : '';
   if(btn){ btn.innerHTML = '⏳ Programando...'; btn.disabled = true; }
 
-  try {
-    const resp = await fetch('https://n8n.excelentia.com.mx/webhook/berimbau-programar-envio', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if(resp.ok){
-      showToast('✅ Envío programado para las ' + avisosConfig.hora + ' — segmento ' + segmentoActivo.toUpperCase());
-      setTimeout(cargarProgramaciones, 1800);
-    } else {
-      showToast('⚠️ Error al programar: ' + resp.status);
+  const listos = [], fallados = [];
+  for(const seg of segsMarcados){
+    const asunto = document.getElementById('asunto-'+seg)?.value || 'Aviso Club Berimbau';
+    const cuerpo = document.getElementById('cuerpo-'+seg)?.value || 'Hola {{nombre}}, te contactamos por tu membresía {{membresia}}.';
+    const payload = {
+      dia: avisosConfig.dia,
+      hora: avisosConfig.hora,
+      segmento: seg,
+      asunto,
+      cuerpo,
+      remitente: avisosConfig.remitente,
+      modo_prueba: MODO_PRUEBA
+    };
+    if(MODO_PRUEBA) payload.prueba_ids = prueba_ids;
+    try {
+      const resp = await fetch('https://n8n.excelentia.com.mx/webhook/berimbau-programar-envio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if(resp.ok) listos.push(PROG_LBL[seg]||seg);
+      else fallados.push((PROG_LBL[seg]||seg)+' ('+resp.status+')');
+    } catch(e) {
+      fallados.push((PROG_LBL[seg]||seg)+' (sin conexión)');
     }
-  } catch(e) {
-    showToast('❌ No se pudo conectar con n8n');
-  } finally {
-    if(btn){ btn.innerHTML = textoOriginal; btn.disabled = false; }
   }
+
+  if(btn){ btn.innerHTML = textoOriginal; btn.disabled = false; }
+
+  if(listos.length && !fallados.length){
+    showToast('✅ Programado a las '+avisosConfig.hora+' — '+listos.join(', '));
+  } else if(listos.length){
+    showToast('⚠️ Se programó '+listos.join(', ')+'; falló '+fallados.join(', '));
+  } else {
+    showToast('❌ No se pudo programar: '+fallados.join(', '));
+  }
+  setTimeout(cargarProgramaciones, 1800);
 }
 
 // ===== ENVÍOS PROGRAMADOS PENDIENTES (v38) =====
