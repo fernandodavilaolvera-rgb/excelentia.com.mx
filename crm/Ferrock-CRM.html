@@ -7,202 +7,226 @@
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Manrope',sans-serif;background:#f5f6f8;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+html,body{height:100%}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;display:flex;flex-direction:column;overflow:hidden;color:#1a2035}
 
-/* ── HEADER ── */
-.crm-header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:relative;flex-shrink:0}
-.logo-box{background:#fff;border-radius:10px;padding:.35rem .7rem;display:flex;align-items:center;justify-content:center;min-width:70px;min-height:44px;flex-shrink:0}
-.logo-box img{height:38px;width:auto;display:block}
-.logo-fallback{font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;color:#1a3a6b;display:none}
-.logo-slogan{font-size:12px;font-weight:500;color:#fff;white-space:nowrap}
-.logo-wrap{display:flex;align-items:center;gap:.7rem;flex-shrink:0}
-.crm-title{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:.4rem;color:#fff;font-weight:800;font-size:1rem;white-space:nowrap}
-.user-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:.3rem .8rem;color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:.35rem;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0}
-.user-chip:hover{background:rgba(255,255,255,.2)}
+.crm-header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.45rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-shrink:0}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem;min-width:0}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px;white-space:nowrap}
+.hdr-right{display:flex;align-items:center;gap:1rem;flex-shrink:0}
+.crm-title{color:#fff;font-weight:700;font-size:.92rem;letter-spacing:.2px;white-space:nowrap}
+.user-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:.3rem .7rem;color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:.4rem;cursor:pointer;transition:.15s;white-space:nowrap;font-family:'Manrope',sans-serif}
+.user-chip:hover{background:rgba(255,255,255,.16)}
 .user-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.user-menu{display:none;position:fixed;top:58px;right:1.5rem;background:#fff;border:1px solid #dde1e9;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:300;min-width:150px;overflow:hidden}
+.user-menu{display:none;position:fixed;top:66px;right:1.1rem;background:#fff;border:1px solid #dde1e9;border-radius:6px;box-shadow:0 8px 24px rgba(13,27,62,.15);z-index:300;min-width:160px;overflow:hidden}
 .user-menu.open{display:block}
-.user-menu-item{padding:.5rem .9rem;cursor:pointer;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
-.user-menu-item:hover{background:#f0f4ff}
+.user-menu-item{padding:.55rem .9rem;cursor:pointer;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:.5rem;color:#1a2035}
+.user-menu-item:hover{background:#e8f0fb}
+.btn-hamb{display:none;background:none;border:1px solid rgba(255,255,255,.3);border-radius:6px;color:#fff;font-size:1.2rem;width:36px;height:34px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
 
-/* ── NAV PILLS (centrados) ── */
-.nav-bar{background:#fff;border-bottom:1px solid #dde1e9;padding:.6rem 1rem;display:flex;flex-direction:column;gap:.45rem;flex-shrink:0}
-.nav-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}
-.nav-pill{padding:.4rem .9rem;border-radius:20px;font-size:.82rem;font-weight:700;color:#4a5068;background:#f0f4ff;border:1px solid #dde1e9;cursor:pointer;white-space:nowrap;transition:.15s;display:flex;align-items:center;gap:.35rem;font-family:'Manrope',sans-serif}
-.nav-pill:hover{background:#dce8f7;color:#1a3a6b}
-.nav-pill.active{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
+.shell{flex:1;min-height:0;display:flex}
+.side-nav{width:212px;flex-shrink:0;background:#fff;border-right:1px solid #dde1e9;overflow-y:auto;padding:.4rem 0 1rem;transition:width .18s}
+.nav-toggle{display:flex;align-items:center;gap:.7rem;width:100%;background:none;border:none;padding:.55rem 1rem;font-family:'Manrope',sans-serif;font-size:.76rem;font-weight:600;color:#8a90a0;cursor:pointer;text-align:left}
+.nav-toggle i{font-size:18px}
+.nav-toggle:hover{color:#1a3a6b}
+.nav-group{font-size:.68rem;font-weight:700;color:#8a90a0;letter-spacing:.06em;padding:.95rem 1rem .3rem;white-space:nowrap}
+.nav-item{display:flex;align-items:center;gap:.7rem;width:100%;background:none;border:none;border-left:3px solid transparent;padding:.5rem 1rem .5rem calc(1rem - 3px);font-family:'Manrope',sans-serif;font-size:.83rem;font-weight:600;color:#4a5068;cursor:pointer;text-align:left;white-space:nowrap;transition:background .12s,color .12s}
+.nav-item i{font-size:18px;color:#8a90a0;flex-shrink:0;transition:color .12s}
+.nav-item:hover{background:#f5f6f8;color:#1a3a6b}
+.nav-item:hover i{color:#1a3a6b}
+.nav-item.active{background:#e8f0fb;color:#1a3a6b;border-left-color:#1a3a6b;font-weight:700}
+.nav-item.active i{color:#1a3a6b}
+.side-nav.mini{width:58px}
+.side-nav.mini .nav-label,.side-nav.mini .nav-group span{display:none}
+.side-nav.mini .nav-group{padding:.7rem 0 .2rem;text-align:center}
+.side-nav.mini .nav-group::after{content:'';display:block;height:1px;background:#dde1e9;margin:0 .9rem}
+.side-nav.mini .nav-item,.side-nav.mini .nav-toggle{justify-content:center;padding-left:0;padding-right:0}
 
-/* ── CONTENIDO ── */
-.tab-frame-wrap{display:none;flex:1;min-height:0}
+.main-area{flex:1;min-width:0;display:flex;flex-direction:column}
+.crumb{flex-shrink:0;background:#fff;border-bottom:1px solid #dde1e9;padding:.5rem 1.2rem;font-size:.76rem;color:#8a90a0;display:flex;align-items:center;gap:.35rem}
+.crumb i{font-size:13px}
+.crumb b{color:#1a2035;font-weight:700}
+.frames{flex:1;min-height:0;position:relative}
+.tab-frame-wrap{display:none;height:100%}
 .tab-frame-wrap.active{display:block}
 .tab-frame-wrap iframe{width:100%;height:100%;border:none;display:block}
 
-/* ── CONTACTOS: Contactos + Equipo apilados ── */
 .personas-wrap{height:100%;overflow-y:auto;background:#f5f6f8}
 .personas-iframe-co{width:100%;border:none;display:block;height:640px}
 .personas-divider{display:flex;align-items:center;gap:.6rem;padding:1rem 1.5rem .4rem;background:#f5f6f8}
 .personas-divider-line{flex:1;height:2px;background:linear-gradient(to right,#4a9fd4,transparent)}
-.personas-divider-label{font-size:.78rem;font-weight:800;color:#4a5068;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.personas-divider-label{font-size:.78rem;font-weight:800;color:#4a5068;letter-spacing:.04em;white-space:nowrap}
 .personas-iframe-eq{width:100%;border:none;display:block;height:560px}
+.nav-veil{display:none}
 
 @media(max-width:600px){
-  .crm-header{padding:.5rem .8rem;flex-wrap:wrap;gap:.4rem}
-  .logo-slogan{display:none}
-  .crm-title{position:static;transform:none;font-size:.85rem;order:3;width:100%;justify-content:center;margin-top:.3rem}
-  .nav-bar{padding:.5rem .6rem;gap:.35rem}
-  .nav-row{gap:.35rem}
-  .nav-pill{padding:.35rem .7rem;font-size:.76rem}
+  .crm-header{padding:.45rem .7rem;gap:.5rem}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .logo-slogan{font-size:11px}
+  .logo-box{min-height:44px;padding:.3rem .6rem}
+  .logo-box img{height:38px}
+  .crm-title{display:none}
+  .btn-hamb{display:flex}
+  .side-nav{position:fixed;top:0;bottom:0;left:0;z-index:400;width:240px;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 20px rgba(13,27,62,.18)}
+  .side-nav.mini{width:240px}
+  .side-nav.mini .nav-label,.side-nav.mini .nav-group span{display:inline}
+  .side-nav.mini .nav-group{text-align:left;padding:.95rem 1rem .3rem}
+  .side-nav.mini .nav-group::after{display:none}
+  .side-nav.mini .nav-item{justify-content:flex-start;padding:.5rem 1rem .5rem calc(1rem - 3px)}
+  .side-nav.abierto{transform:translateX(0)}
+  .nav-toggle{display:none}
+  .nav-veil.abierto{display:block;position:fixed;inset:0;background:rgba(13,27,62,.35);z-index:350}
+  .crumb{padding:.45rem .8rem}
+}
+
+@media print{
+  @page{size:Letter;margin:12mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{height:auto;overflow:visible}
+  .no-print,.side-nav,.nav-veil,.user-menu{display:none!important}
+  .shell,.main-area,.frames{display:block;height:auto}
+  .tab-frame-wrap{break-inside:auto}
+  .tab-frame-wrap.active iframe{height:auto;min-height:900px}
+  h1,h2,h3,h4{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  a[href]:after{content:none}
 }
 </style>
 </head>
 <body>
 
 <header class="crm-header">
-  <div class="logo-wrap">
-    <div class="logo-box">
-      <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+  <div style="display:flex;align-items:center;gap:.6rem;min-width:0">
+    <button class="btn-hamb no-print" onclick="abrirMenuMovil()" aria-label="Abrir menú"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
     </div>
-    <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
   </div>
-  <div class="crm-title">⚡ Ferrock CRM</div>
-  <div class="user-chip" onclick="toggleUserMenu()">
-    <span class="user-dot" id="userDot" style="background:#fff"></span>
-    <span id="userChipName">Fernando</span>
-    <span>▾</span>
+  <div class="hdr-right">
+    <span class="crm-title">Ferrock CRM</span>
+    <button class="user-chip no-print" onclick="toggleUserMenu()">
+      <span class="user-dot" id="userDot" style="background:#4a9fd4"></span>
+      <span id="userChipName">Fernando</span>
+      <i class="ti ti-chevron-down" aria-hidden="true"></i>
+    </button>
   </div>
 </header>
 
-<div class="user-menu" id="userMenu">
+<div class="user-menu no-print" id="userMenu">
   <div class="user-menu-item" onclick="setUser('fernando')"><span style="width:9px;height:9px;border-radius:50%;background:#1a3a6b;display:inline-block"></span>Fernando</div>
   <div class="user-menu-item" onclick="setUser('juanjose')"><span style="width:9px;height:9px;border-radius:50%;background:#7c3aed;display:inline-block"></span>Juan José</div>
   <div class="user-menu-item" onclick="setUser('adolfo')"><span style="width:9px;height:9px;border-radius:50%;background:#059669;display:inline-block"></span>Adolfo</div>
 </div>
 
-<nav class="nav-bar">
-  <div class="nav-row">
-    <button class="nav-pill" data-tab="drive" onclick="showTab('drive')">📂 Drive</button>
-    <button class="nav-pill" data-tab="empresas" onclick="showTab('empresas')">🏢 Empresas</button>
-    <button class="nav-pill" data-tab="funnel" onclick="showTab('funnel')">🎯 Funnel</button>
-    <button class="nav-pill" data-tab="facturacion" onclick="showTab('facturacion')">🧾 Facturación</button>
-    <button class="nav-pill" data-tab="contactos" onclick="showTab('contactos')">👥 Contactos</button>
-    <button class="nav-pill" data-tab="proyectos" onclick="showTab('proyectos')">📋 Proyectos</button>
-    <button class="nav-pill" data-tab="plats" onclick="showTab('plats')">📧 Plat´s Info</button>
-    <button class="nav-pill" data-tab="finanzas" onclick="showTab('finanzas')">💰 Finanzas</button>
-  </div>
-  <div class="nav-row">
-    <button class="nav-pill active" data-tab="ferrock" onclick="showTab('ferrock')">🗂️ Ferrock</button>
-    <button class="nav-pill" data-tab="agenda" onclick="showTab('agenda')">📅 Agenda</button>
-    <button class="nav-pill" data-tab="timeline" onclick="showTab('timeline')">📅 Timeline</button>
-    <button class="nav-pill" data-tab="pendientes" onclick="showTab('pendientes')">☑️ Pendientes</button>
-    <button class="nav-pill" data-tab="ecoia" onclick="showTab('ecoia')">🫀 Eco IA</button>
-  </div>
-</nav>
+<div class="nav-veil no-print" id="navVeil" onclick="cerrarMenuMovil()"></div>
 
-<!-- FERROCK (default) -->
-<div class="tab-frame-wrap active" id="wrap-ferrock">
-  <iframe data-base="excelentia/Ferrock_Index.html" title="Ferrock"></iframe>
-</div>
+<div class="shell">
+  <nav class="side-nav no-print" id="sideNav">
+    <button class="nav-toggle" onclick="toggleMini()" title="Contraer o expandir el menú"><i class="ti ti-menu-2" aria-hidden="true"></i><span class="nav-label">Contraer menú</span></button>
+    <div class="nav-group"><span>HERRAMIENTAS</span></div>
+    <button class="nav-item" data-tab="ferrock" data-grupo="Herramientas" onclick="showTab('ferrock')" title="Ferrock Index"><i class="ti ti-layout-grid" aria-hidden="true"></i><span class="nav-label">Ferrock Index</span></button>
+    <button class="nav-item" data-tab="plats" data-grupo="Herramientas" onclick="showTab('plats')" title="Plat´s Info"><i class="ti ti-mail" aria-hidden="true"></i><span class="nav-label">Plat´s Info</span></button>
+    <button class="nav-item" data-tab="ecoia" data-grupo="Herramientas" onclick="showTab('ecoia')" title="Eco IA"><i class="ti ti-heartbeat" aria-hidden="true"></i><span class="nav-label">Eco IA</span></button>
+    <div class="nav-group"><span>OPERACIÓN</span></div>
+    <button class="nav-item" data-tab="timeline" data-grupo="Operación" onclick="showTab('timeline')" title="Timeline"><i class="ti ti-timeline" aria-hidden="true"></i><span class="nav-label">Timeline</span></button>
+    <button class="nav-item" data-tab="pendientes" data-grupo="Operación" onclick="showTab('pendientes')" title="Pendientes"><i class="ti ti-checklist" aria-hidden="true"></i><span class="nav-label">Pendientes</span></button>
+    <button class="nav-item" data-tab="agenda" data-grupo="Operación" onclick="showTab('agenda')" title="Agenda"><i class="ti ti-calendar" aria-hidden="true"></i><span class="nav-label">Agenda</span></button>
+    <button class="nav-item" data-tab="drive" data-grupo="Operación" onclick="showTab('drive')" title="Drive"><i class="ti ti-folder" aria-hidden="true"></i><span class="nav-label">Drive</span></button>
+    <div class="nav-group"><span>COMERCIAL</span></div>
+    <button class="nav-item" data-tab="empresas" data-grupo="Comercial" onclick="showTab('empresas')" title="Empresas"><i class="ti ti-building" aria-hidden="true"></i><span class="nav-label">Empresas</span></button>
+    <button class="nav-item" data-tab="contactos" data-grupo="Comercial" onclick="showTab('contactos')" title="Contactos"><i class="ti ti-users" aria-hidden="true"></i><span class="nav-label">Contactos</span></button>
+    <button class="nav-item" data-tab="funnel" data-grupo="Comercial" onclick="showTab('funnel')" title="Funnel"><i class="ti ti-filter" aria-hidden="true"></i><span class="nav-label">Funnel</span></button>
+    <button class="nav-item" data-tab="proyectos" data-grupo="Comercial" onclick="showTab('proyectos')" title="Proyectos"><i class="ti ti-briefcase" aria-hidden="true"></i><span class="nav-label">Proyectos</span></button>
+    <div class="nav-group"><span>ADMINISTRACIÓN</span></div>
+    <button class="nav-item" data-tab="facturacion" data-grupo="Administración" onclick="showTab('facturacion')" title="Facturación"><i class="ti ti-file-invoice" aria-hidden="true"></i><span class="nav-label">Facturación</span></button>
+    <button class="nav-item" data-tab="finanzas" data-grupo="Administración" onclick="showTab('finanzas')" title="Finanzas"><i class="ti ti-coin" aria-hidden="true"></i><span class="nav-label">Finanzas</span></button>
+  </nav>
 
-<!-- AGENDA -->
-<div class="tab-frame-wrap" id="wrap-agenda">
-  <iframe data-base="excelentia/agenda.html" title="Agenda"></iframe>
-</div>
-
-<!-- CONTACTOS (Contactos + Equipo apilados) -->
-<div class="tab-frame-wrap" id="wrap-contactos">
-  <div class="personas-wrap">
-    <iframe class="personas-iframe-co" data-base="excelentia/crm-contactos.html" title="Contactos" onload="autoSize(this)"></iframe>
-    <div class="personas-divider">
-      <div class="personas-divider-line"></div>
-      <span class="personas-divider-label">👥 Equipo ExcelentIA</span>
-      <div class="personas-divider-line" style="background:linear-gradient(to left,#4a9fd4,transparent)"></div>
+  <main class="main-area">
+    <div class="crumb"><span id="crumbGrupo"></span><i class="ti ti-chevron-right" aria-hidden="true"></i><b id="crumbModulo"></b></div>
+    <div class="frames">
+    <div class="tab-frame-wrap" id="wrap-ferrock"><iframe data-base="excelentia/Ferrock_Index.html" title="Ferrock Index"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-plats"><iframe data-base="excelentia/correos-plataformas.html" title="Plat´s Info"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-ecoia"><iframe data-base="excelentia/dashboard-eco-ia_actividad.html" title="Eco IA"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-timeline"><iframe data-base="excelentia/timeline.html" title="Timeline"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-pendientes"><iframe data-base="excelentia/crm-tareas.html" title="Pendientes"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-agenda"><iframe data-base="excelentia/agenda.html" title="Agenda"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-drive"><iframe data-base="excelentia/drive.html" title="Drive"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-empresas"><iframe data-base="excelentia/crm-empresas.html" title="Empresas"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-contactos">
+      <div class="personas-wrap">
+        <iframe class="personas-iframe-co" data-base="excelentia/crm-contactos.html" title="Contactos" onload="autoSize(this)"></iframe>
+        <div class="personas-divider">
+          <div class="personas-divider-line"></div>
+          <span class="personas-divider-label">Equipo ExcelentIA</span>
+          <div class="personas-divider-line" style="background:linear-gradient(to left,#4a9fd4,transparent)"></div>
+        </div>
+        <iframe class="personas-iframe-eq" data-base="excelentia/crm-equipo.html" title="Equipo" onload="autoSize(this)"></iframe>
+      </div>
     </div>
-    <iframe class="personas-iframe-eq" data-base="excelentia/crm-equipo.html" title="Equipo" onload="autoSize(this)"></iframe>
-  </div>
-</div>
-
-<!-- EMPRESAS -->
-<div class="tab-frame-wrap" id="wrap-empresas">
-  <iframe data-base="excelentia/crm-empresas.html" title="Empresas"></iframe>
-</div>
-
-<!-- FUNNEL (ventas + operación) -->
-<div class="tab-frame-wrap" id="wrap-funnel">
-  <iframe data-base="excelentia/crm-funnel.html" title="Funnel"></iframe>
-</div>
-
-<!-- FACTURACIÓN Y COBRANZA -->
-<div class="tab-frame-wrap" id="wrap-facturacion">
-  <iframe data-base="excelentia/crm-facturacion.html" title="Facturación"></iframe>
-</div>
-
-<!-- PROYECTOS -->
-<div class="tab-frame-wrap" id="wrap-proyectos">
-  <iframe data-base="excelentia/crm-proyectos.html" title="Proyectos"></iframe>
-</div>
-
-<!-- LISTA DE PENDIENTES -->
-<div class="tab-frame-wrap" id="wrap-pendientes">
-  <iframe data-base="excelentia/crm-tareas.html" title="Lista de Pendientes"></iframe>
-</div>
-
-<!-- TIMELINE -->
-<div class="tab-frame-wrap" id="wrap-timeline">
-  <iframe data-base="excelentia/timeline.html" title="Timeline"></iframe>
-</div>
-
-<!-- DRIVE -->
-<div class="tab-frame-wrap" id="wrap-drive">
-  <iframe data-base="excelentia/drive.html" title="Drive"></iframe>
-</div>
-
-<!-- FINANZAS (editable) -->
-<div class="tab-frame-wrap" id="wrap-finanzas">
-  <iframe data-base="excelentia/finanzas.html" title="Finanzas"></iframe>
-</div>
-
-<!-- PLAT´S INFO (resumen de correos de plataformas) -->
-<div class="tab-frame-wrap" id="wrap-plats">
-  <iframe data-base="excelentia/correos-plataformas.html" title="Plat´s Info"></iframe>
-</div>
-
-<!-- ECO-IA ACTIVIDAD -->
-<div class="tab-frame-wrap" id="wrap-ecoia">
-  <iframe data-base="excelentia/dashboard-eco-ia_actividad.html" title="Eco-IA Actividad"></iframe>
+    <div class="tab-frame-wrap" id="wrap-funnel"><iframe data-base="excelentia/crm-funnel.html" title="Funnel"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-proyectos"><iframe data-base="excelentia/crm-proyectos.html" title="Proyectos"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-facturacion"><iframe data-base="excelentia/crm-facturacion.html" title="Facturación"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-finanzas"><iframe data-base="excelentia/finanzas.html" title="Finanzas"></iframe></div>
+    </div>
+  </main>
 </div>
 
 <script>
 const USERS = {
-  fernando: { nombre: 'Fernando', color: '#1a3a6b' },
-  juanjose: { nombre: 'Juan José', color: '#7c3aed' },
-  adolfo:   { nombre: 'Adolfo',   color: '#059669' }
+  fernando: { nombre: 'Fernando', color: '#4a9fd4' },
+  juanjose: { nombre: 'Juan José', color: '#a78bfa' },
+  adolfo:   { nombre: 'Adolfo',   color: '#34d399' }
 };
 let currentUser = 'fernando';
+const NAV_KEY = 'ferrock_nav_mini';
 
-// ── CARGA DIFERIDA: un iframe solo se carga la primera vez que abres su pestaña
 function cargarFrame(tab){
   const wrap = document.getElementById('wrap-'+tab);
   if(!wrap) return;
   wrap.querySelectorAll('iframe[data-base]').forEach(f=>{
-    if(!f.getAttribute('src')){
-      f.src = f.dataset.base + '?user=' + currentUser;
-    }
+    if(!f.getAttribute('src')) f.src = f.dataset.base + '?user=' + currentUser;
   });
 }
 
 function showTab(tab){
-  document.querySelectorAll('.nav-pill').forEach(p=>p.classList.remove('active'));
+  const item = document.querySelector(`.nav-item[data-tab="${tab}"]`);
+  if(!item || !document.getElementById('wrap-'+tab)) return;
+  document.querySelectorAll('.nav-item').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-frame-wrap').forEach(w=>w.classList.remove('active'));
-  document.querySelector(`.nav-pill[data-tab="${tab}"]`)?.classList.add('active');
-  document.getElementById('wrap-'+tab)?.classList.add('active');
+  item.classList.add('active');
+  document.getElementById('wrap-'+tab).classList.add('active');
+  document.getElementById('crumbGrupo').textContent = item.dataset.grupo;
+  document.getElementById('crumbModulo').textContent = item.querySelector('.nav-label').textContent;
   cargarFrame(tab);
+  cerrarMenuMovil();
   const url = new URL(window.location);
   url.searchParams.set('tab', tab);
   window.history.replaceState({}, '', url);
+}
+
+function toggleMini(){
+  const nav = document.getElementById('sideNav');
+  nav.classList.toggle('mini');
+  try{ localStorage.setItem(NAV_KEY, nav.classList.contains('mini') ? '1' : '0'); }catch(e){}
+}
+function abrirMenuMovil(){
+  document.getElementById('sideNav').classList.add('abierto');
+  document.getElementById('navVeil').classList.add('abierto');
+}
+function cerrarMenuMovil(){
+  document.getElementById('sideNav').classList.remove('abierto');
+  document.getElementById('navVeil').classList.remove('abierto');
 }
 
 function setUser(uid){
@@ -211,17 +235,13 @@ function setUser(uid){
   document.getElementById('userDot').style.background = u.color;
   document.getElementById('userChipName').textContent = u.nombre;
   document.getElementById('userMenu').classList.remove('open');
-  // Propaga ?user=xxx solo a los módulos YA cargados; los demás lo reciben al abrirse
   document.querySelectorAll('iframe[data-base]').forEach(f=>{
     if(f.getAttribute('src')) f.src = f.dataset.base + '?user=' + uid;
   });
-  const activa = document.querySelector('.nav-pill.active')?.dataset.tab;
+  const activa = document.querySelector('.nav-item.active')?.dataset.tab;
   if(activa) cargarFrame(activa);
 }
-
-function toggleUserMenu(){
-  document.getElementById('userMenu').classList.toggle('open');
-}
+function toggleUserMenu(){ document.getElementById('userMenu').classList.toggle('open'); }
 document.addEventListener('click', e=>{
   if(!e.target.closest('.user-chip') && !e.target.closest('#userMenu')){
     document.getElementById('userMenu').classList.remove('open');
@@ -231,27 +251,17 @@ document.addEventListener('click', e=>{
 function autoSize(iframe){
   try{
     const doc = iframe.contentWindow.document;
-    const resize = () => {
-      const h = doc.documentElement.scrollHeight;
-      if(h > 100) iframe.style.height = h + 'px';
-    };
-    resize();
-    setTimeout(resize, 1200);
-    setTimeout(resize, 3000);
+    const resize = () => { const h = doc.documentElement.scrollHeight; if(h > 100) iframe.style.height = h + 'px'; };
+    resize(); setTimeout(resize, 1200); setTimeout(resize, 3000);
     new MutationObserver(resize).observe(doc.body, { childList:true, subtree:true });
-  }catch(e){ /* same-origin, no debería fallar */ }
+  }catch(e){}
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  const params = new URLSearchParams(window.location.search);
-  const tabParam = params.get('tab');
-  if(tabParam && document.getElementById('wrap-'+tabParam)){
-    showTab(tabParam);
-  }else{
-    // Carga solo la pestaña que abre por default
-    const activa = document.querySelector('.nav-pill.active')?.dataset.tab;
-    if(activa) cargarFrame(activa);
-  }
+  try{ if(localStorage.getItem(NAV_KEY) === '1') document.getElementById('sideNav').classList.add('mini'); }catch(e){}
+  const tabParam = new URLSearchParams(window.location.search).get('tab');
+  if(tabParam && document.getElementById('wrap-'+tabParam) && document.querySelector(`.nav-item[data-tab="${tabParam}"]`)) showTab(tabParam);
+  else showTab('ferrock');
 });
 </script>
 </body>
