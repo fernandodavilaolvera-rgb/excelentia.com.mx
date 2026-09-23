@@ -11,7 +11,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 .wrap{max-width:720px;margin:0 auto}
 
 /* ── BARRA SUPERIOR ── */
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
+.topbar{display:flex;align-items:center;justify-content:flex-end;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
 .topbar h1{font-size:1.05rem;font-weight:800;color:#1a2035;display:flex;align-items:center;gap:.4rem}
 .topbar .sub{font-size:.78rem;color:#8a90a0;font-weight:500;margin-top:.1rem}
 .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .95rem;border-radius:8px;font-size:.83rem;font-weight:700;cursor:pointer;border:none;font-family:'Manrope',sans-serif;transition:.2s}
@@ -21,17 +21,17 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 .btn-sm{padding:.32rem .6rem;font-size:.78rem}
 
 /* ── NAVEGADOR DE DÍA ── */
-.daynav{display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.6rem .8rem;margin-bottom:1rem}
-.daynav .arrow{width:36px;height:36px;border-radius:8px;border:1px solid #c8d9f0;background:#f0f4ff;color:#1a3a6b;font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.daynav{display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:.4rem .6rem;margin-bottom:1rem}
+.daynav .arrow{width:32px;height:32px;border-radius:8px;border:1px solid #c8d9f0;background:#f0f4ff;color:#1a3a6b;font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
 .daynav .arrow:hover:not(:disabled){background:#dce8f7}
 .daynav .arrow:disabled{opacity:.35;cursor:not-allowed}
-.daynav .day-center{flex:1;text-align:center;min-width:0}
+.daynav .day-center{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:.7rem;flex-wrap:wrap}
 .daynav .day-label{font-size:.92rem;font-weight:800;color:#1a3a6b}
-.daynav .day-meta{font-size:.74rem;color:#8a90a0;margin-top:.1rem}
+.daynav .day-meta{font-size:.74rem;color:#8a90a0}
 
 /* ── CONTADORES SEMÁFORO ── */
-.tally{display:flex;gap:.4rem;justify-content:center;margin-top:.35rem;flex-wrap:wrap}
-.tally span{font-size:.72rem;font-weight:800;padding:.1rem .45rem;border-radius:20px;background:#f0f4ff;color:#4a5068;border:1px solid #dde1e9}
+.tally{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap}
+.tally span{font-size:.72rem;font-weight:800;padding:.1rem .45rem;border-radius:5px;background:#f0f4ff;color:#4a5068;border:1px solid #dde1e9}
 
 /* ── CARD ── */
 .card{background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
@@ -215,10 +215,6 @@ input.campo-mal{border-color:#f59e0b !important;box-shadow:0 0 0 3px rgba(245,15
 <div class="wrap">
 
   <div class="topbar">
-    <div>
-      <h1>📧 Correos de Plataformas</h1>
-      <div class="sub" id="subPlat">Digest cada 3 días · cargando plataformas…</div>
-    </div>
     <div class="topbar-actions">
       <select class="sel-dias" id="selDias" title="Cuántos días hacia atrás revisar">
         <option value="3" selected>Últimos 3 días</option>
@@ -594,7 +590,7 @@ function render(){
     + '<div class="card-head">📅 '+fmtFecha(dia.fecha)
     + '<button class="btn btn-ghost btn-sm" onclick="eliminarDia(\''+esc(dia.id)+'\')">🗑️ Borrar todo el día</button></div>'
     + '<div class="card-body">'
-    + chips + secAcciones + secMensajes
+    + secAcciones + secMensajes
     + '</div></div>'
     + recientes();
 }
