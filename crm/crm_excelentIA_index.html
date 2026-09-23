@@ -134,7 +134,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;display:flex;flex-direc
   <nav class="side-nav no-print" id="sideNav">
     <button class="nav-toggle" onclick="toggleMini()" title="Contraer o expandir el menú"><i class="ti ti-menu-2" aria-hidden="true"></i><span class="nav-label">Contraer menú</span></button>
     <div class="nav-group"><span>OPERACIÓN</span></div>
-    <button class="nav-item" data-tab="timeline" data-grupo="Operación" onclick="showTab('timeline')" title="Timeline"><i class="ti ti-timeline" aria-hidden="true"></i><span class="nav-label">Timeline</span></button>
+    <button class="nav-item" data-tab="desarrollo" data-grupo="Operación" onclick="showTab('desarrollo')" title="Desarrollo"><i class="ti ti-layout-kanban" aria-hidden="true"></i><span class="nav-label">Desarrollo</span></button>
     <button class="nav-item" data-tab="pendientes" data-grupo="Operación" onclick="showTab('pendientes')" title="Pendientes"><i class="ti ti-checklist" aria-hidden="true"></i><span class="nav-label">Pendientes</span></button>
     <button class="nav-item" data-tab="agenda" data-grupo="Operación" onclick="showTab('agenda')" title="Agenda"><i class="ti ti-calendar" aria-hidden="true"></i><span class="nav-label">Agenda</span></button>
     <button class="nav-item" data-tab="drive" data-grupo="Operación" onclick="showTab('drive')" title="Drive"><i class="ti ti-folder" aria-hidden="true"></i><span class="nav-label">Drive</span></button>
@@ -151,7 +151,7 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;display:flex;flex-direc
   <main class="main-area">
     <div class="crumb"><span id="crumbGrupo"></span><i class="ti ti-chevron-right" aria-hidden="true"></i><b id="crumbModulo"></b></div>
     <div class="frames">
-    <div class="tab-frame-wrap" id="wrap-timeline"><iframe data-base="excelentia/timeline.html" title="Timeline"></iframe></div>
+    <div class="tab-frame-wrap" id="wrap-desarrollo"><iframe data-base="excelentia/crm-desarrollo.html" title="Desarrollo"></iframe></div>
     <div class="tab-frame-wrap" id="wrap-pendientes"><iframe data-base="excelentia/crm-tareas.html" title="Pendientes"></iframe></div>
     <div class="tab-frame-wrap" id="wrap-agenda"><iframe data-base="excelentia/agenda.html" title="Agenda"></iframe></div>
     <div class="tab-frame-wrap" id="wrap-drive"><iframe data-base="excelentia/drive.html" title="Drive"></iframe></div>
@@ -267,7 +267,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const uInicial = USERS[uParam] ? uParam : (USERS[uGuardado] ? uGuardado : 'fernando');
   currentUser = uInicial; pintarUsuario(uInicial);
   if(USERS[uParam]){ try{ localStorage.setItem(USER_KEY, uParam); }catch(e){} }
-  const tabParam = new URLSearchParams(window.location.search).get('tab');
+  let tabParam = new URLSearchParams(window.location.search).get('tab');
+  if(tabParam === 'timeline') tabParam = 'desarrollo';
   if(tabParam && document.getElementById('wrap-'+tabParam) && document.querySelector(`.nav-item[data-tab="${tabParam}"]`)) showTab(tabParam);
   else showTab('pendientes');
 });
