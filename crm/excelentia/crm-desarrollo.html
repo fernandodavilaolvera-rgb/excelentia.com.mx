@@ -53,6 +53,9 @@ select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-
 .card .m .venc{color:#dc2626;font-weight:700}
 .card .e{font-size:.72rem;color:#4a5068;margin-top:.1rem;line-height:1.35;overflow-wrap:break-word}
 .card .libre{font-size:.68rem;color:#8a90a0;font-style:italic}
+.card .nota{margin-top:.35rem;padding:.3rem .45rem;background:#f5f6f8;border-left:2px solid #c8d9f0;border-radius:4px;font-size:.72rem;line-height:1.4;color:#4a5068}
+.card .nota span{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line;overflow-wrap:break-word}
+.card.hecha .nota{opacity:.7}
 .cuad{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
 .tablero.ajustar .col{flex:1 1 0;min-width:110px}
 .tablero.ajustar .col-nueva{flex:0 0 110px}
@@ -120,6 +123,7 @@ select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-
   .tablero{flex-wrap:wrap;overflow:visible}
   .col{min-height:0;flex:1 0 200px;break-inside:auto}
   .card,.kpi{break-inside:avoid}
+  .card .nota span{-webkit-line-clamp:unset;display:block}
   h1,h2,h3,h4,.col-head{break-after:avoid}
   p,li{orphans:3;widows:3}
   thead{display:table-header-group}
@@ -270,7 +274,8 @@ function tarjetaHTML(c, hoy){
     <input type="checkbox" ${c.Hecha?'checked':''} title="Terminado" onclick="event.stopPropagation();marcarHecha('${c.ID}',this.checked)" aria-label="Terminado">
     <div><div class="t">${esc(c.Titulo)}</div>
       ${sub ? `<div class="e">${esc(sub)}</div>` : (!c.ProyectoID ? '<div class="libre">Fuera del CRM</div>' : '')}
-      <div class="m">${u?`<span><i class="cuad" style="background:${u.color}"></i>${u.nombre}</span>`:''}${c.FechaLimite?`<span class="${venc?'venc':''}">${venc?'Vencido · ':'Entrega '}${fcorta(c.FechaLimite)}</span>`:''}${c.Notas?'<span title="Tiene notas">📝</span>':''}</div>
+      <div class="m">${u?`<span><i class="cuad" style="background:${u.color}"></i>${u.nombre}</span>`:''}${c.FechaLimite?`<span class="${venc?'venc':''}">${venc?'Vencido · ':'Entrega '}${fcorta(c.FechaLimite)}</span>`:''}</div>
+      ${c.Notas?`<div class="nota" title="${esc(c.Notas)}"><span>${esc(c.Notas)}</span></div>`:''}
     </div></div>`;
 }
 function pintarKpis(){
