@@ -31,9 +31,10 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 /* ── CONTENIDO ── */
 .page{padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
 
-/* ── RESUMEN PILLS ── */
-.summary-bar{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
-.pill{background:#fff;border:1px solid #dde1e9;border-radius:20px;padding:.35rem .9rem;font-size:.8rem;font-weight:700;color:#4a5068;display:flex;align-items:center;gap:.35rem}
+/* ── RESUMEN (franja de un renglón) ── */
+.summary-bar{display:flex;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:.45rem .3rem;margin-bottom:1rem;row-gap:.3rem}
+.pill{padding:0 .95rem;border-right:1px solid #dde1e9;font-size:.78rem;font-weight:700;color:#8a90a0;display:flex;align-items:baseline;gap:.4rem;white-space:nowrap}
+.pill:last-child{border-right:none}
 .pill-val{font-size:.92rem;font-weight:800}
 .pill-blue .pill-val{color:#1a3a6b}
 .pill-yellow .pill-val{color:#b45309}
@@ -66,13 +67,13 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:#f8faff}
 
 /* ── BADGES ── */
-.badge{display:inline-block;padding:.2rem .55rem;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap}
-.b-red{background:#fee2e2;color:#991b1b}
-.b-yellow{background:#fef9c3;color:#713f12}
-.b-blue{background:#dce8f7;color:#1a3a6b}
-.b-green{background:#d1fae5;color:#065f46}
-.b-gray{background:#f3f4f6;color:#374151}
-.b-purple{background:#ede9fe;color:#5b21b6}
+.badge{display:inline;font-size:.78rem;font-weight:700;white-space:nowrap}
+.b-red{color:#dc2626}
+.b-yellow{color:#b45309}
+.b-blue{color:#1a3a6b}
+.b-green{color:#059669}
+.b-gray{color:#8a90a0}
+.b-purple{color:#7c3aed}
 
 /* ── BOTONES ── */
 .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Manrope',sans-serif;text-decoration:none}
@@ -732,7 +733,7 @@ function badgeStatus(s) {
 
 function badgeAsignado(uid) {
   const u = USERS[uid] || { nombre: uid || '—', color: '#8a90a0' };
-  return `<span class="badge" style="background:${u.color}18;color:${u.color}">${u.nombre}</span>`;
+  return `<span class="badge" style="color:${u.color}">${u.nombre}</span>`;
 }
 
 function toast(msg, tipo = 'ok') {
