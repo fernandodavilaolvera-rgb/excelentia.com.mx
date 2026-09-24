@@ -10,7 +10,11 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-height:100vh;font-size:15px}
 .page{max-width:720px;margin:0 auto;padding:1.1rem 1rem 2rem}
+.top-row{display:flex;gap:.6rem;align-items:stretch;margin-bottom:.9rem}
+.top-row .switch{flex:1;margin-bottom:0}
+.ia-top-btn{padding:.55rem 1rem;font-size:.85rem}
 .switch{display:flex;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.25rem;gap:.25rem;margin-bottom:.9rem}
+@media(max-width:600px){.top-row{flex-direction:column}}
 .switch button{flex:1;border:none;background:none;padding:.55rem;border-radius:9px;font-family:'Manrope',sans-serif;font-weight:700;font-size:.85rem;color:#4a5068;cursor:pointer}
 .switch button.on{background:#1a3a6b;color:#fff}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.9rem}
@@ -162,9 +166,12 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 </head>
 <body>
 <div class="page">
-  <div class="switch no-print">
-    <button id="sw-cal" class="on" onclick="setVista('cal')">📅 Calendario</button>
-    <button id="sw-plan" onclick="setVista('plan')">📑 Planes de cobro</button>
+  <div class="top-row no-print">
+    <div class="switch">
+      <button id="sw-cal" class="on" onclick="setVista('cal')">📅 Calendario</button>
+      <button id="sw-plan" onclick="setVista('plan')">📑 Planes de cobro</button>
+    </div>
+    <button class="btn btn-primary ia-top-btn" onclick="abrirSubir()">🤖 Subir contrato</button>
   </div>
   <div class="kpis" id="kpis"></div>
   <div id="estado"></div>
@@ -196,12 +203,12 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
   <div class="modal">
     <div class="modal-head"><div><h3 id="pl-nombre">Plan de cobro</h3><div class="sub" id="pl-sub"></div></div><button class="modal-close" onclick="cerrar('m-plan')">✕</button></div>
     <div class="modal-body">
-      <h4 style="display:flex;justify-content:space-between;align-items:center">Contrato <button class="btn btn-secondary btn-sm no-print" id="ia-btn" onclick="leerContrato()">🤖 Leer contrato</button></h4>
+      <h4 style="display:flex;justify-content:space-between;align-items:center">Contrato <span class="no-print" style="display:flex;gap:.35rem"><button class="btn btn-secondary btn-sm" id="ia-sub" onclick="document.getElementById('ia-file').click()">📎 Subir archivo</button><button class="btn btn-secondary btn-sm" id="ia-btn" onclick="leerContrato()">🤖 Leer de Drive</button></span><input type="file" id="ia-file" accept=".pdf,.html,.htm,.txt,application/pdf,text/html,text/plain" style="display:none" onchange="if(this.files[0]){leerContrato(this.files[0]);this.value='';}"></h4>
       <div class="form-grid">
         <div class="form-group"><label>Liga al contrato firmado</label><input type="url" id="pl-contrato" placeholder="https://drive.google.com/…"></div>
         <div class="form-group"><label>Fecha de firma</label><input type="date" id="pl-firma"></div>
       </div>
-      <div class="hint">🤖 Leer contrato usa la liga de arriba; si está vacía, busca en el Drive del proyecto un archivo con "contrato" en el nombre. Para sustituir un contrato por otro, pega la liga del nuevo y vuelve a leer.</div>
+      <div class="hint">📎 Subir archivo lee un PDF o HTML de tu computadora. 🤖 Leer de Drive usa la liga de arriba o, si está vacía, el archivo del Drive del proyecto que diga "contrato" en el nombre. Para sustituir un contrato por otro, sube o liga el nuevo y vuelve a leer.</div>
       <div class="ia no-print" id="ia"></div>
 
       <h4 style="display:flex;justify-content:space-between;align-items:center">Exhibiciones del desarrollo <button class="btn btn-secondary btn-sm" onclick="document.getElementById('gen').classList.toggle('open')">⚡ Generar por porcentajes</button></h4>
@@ -302,6 +309,18 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;min-heigh
 
 <div id="toast"></div>
 
+<div class="modal-backdrop" id="m-subir" onclick="if(event.target===this)cerrar('m-subir')">
+  <div class="modal" style="max-width:520px" role="dialog" aria-modal="true" aria-labelledby="su-titulo">
+    <div class="modal-head"><h3 id="su-titulo">🤖 Subir contrato</h3><button class="modal-close" onclick="cerrar('m-subir')" aria-label="Cerrar">✕</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:.7rem">La IA lee el contrato y te propone el plan de cobro (exhibiciones y mensualidad) para que lo revises antes de guardar; con eso se programan los recordatorios de facturación.</p>
+      <div class="form-group" style="margin-bottom:.7rem"><label for="su-proy">Proyecto</label><select id="su-proy"></select></div>
+      <div class="form-group"><label for="su-file">Contrato (PDF o HTML)</label><input type="file" id="su-file" accept=".pdf,.html,.htm,.txt,application/pdf,text/html,text/plain">
+      <div class="hint">Si no subes archivo, se usa la liga de Drive del plan o el archivo del Drive del proyecto que diga "contrato" en el nombre.</div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="cerrar('m-subir')">Cancelar</button><button class="btn btn-primary" onclick="leerDesdeSubir()">Leer contrato</button></div>
+  </div>
+</div>
 <script>
 const API = 'https://n8n.excelentia.com.mx/webhook/crm-facturacion';
 const ESTADOS = ['Programada','Solicitada','Emitida','Cobrada','Cancelada'];
@@ -521,20 +540,29 @@ async function guardarPlan(){
 
 // ── Agente que lee el contrato ──
 function iaCerrar(){ IA = null; const el = document.getElementById('ia'); el.className = 'ia no-print'; el.innerHTML = ''; }
-async function leerContrato(){
+function archivoABase64(f){
+  return new Promise((res, rej)=>{ const r = new FileReader(); r.onload = ()=>res(String(r.result).split(',')[1] || ''); r.onerror = ()=>rej(new Error('No se pudo leer el archivo')); r.readAsDataURL(f); });
+}
+async function leerContrato(archivo){
   if(!planId) return;
-  const pid = planId, el = document.getElementById('ia'), btn = document.getElementById('ia-btn');
-  btn.disabled = true; btn.textContent = 'Leyendo…';
+  const pid = planId, el = document.getElementById('ia'), btn = document.getElementById('ia-btn'), sub = document.getElementById('ia-sub');
+  if(archivo){
+    const ext = (archivo.name.split('.').pop() || '').toLowerCase();
+    if(!['pdf','html','htm','txt'].includes(ext)){ toast('Sube el contrato en PDF o HTML', false); return; }
+    if(archivo.size > 12*1024*1024){ toast('El archivo pesa más de 12 MB', false); return; }
+  }
+  btn.disabled = true; sub.disabled = true; (archivo ? sub : btn).textContent = 'Leyendo…';
   el.className = 'ia no-print open';
   el.innerHTML = '<span class="spinner"></span>Leyendo el contrato; tarda entre 20 y 40 segundos…';
   let j = null;
   try{
+    const body = {ProyectoID:pid, ContratoURL:document.getElementById('pl-contrato').value.trim()};
+    if(archivo){ body.ContratoURL = ''; body.ArchivoBase64 = await archivoABase64(archivo); body.ArchivoNombre = archivo.name; body.ArchivoTipo = archivo.type || ''; }
     const c = new AbortController(); const t = setTimeout(()=>c.abort(), 150000);
-    const r = await fetch(API_CONTRATO,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ProyectoID:pid, ContratoURL:document.getElementById('pl-contrato').value.trim()}),signal:c.signal});
+    const r = await fetch(API_CONTRATO,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:c.signal});
     clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); j = await r.json();
   }catch(e){ console.error(e); }
-  btn.disabled = false; btn.textContent = '🤖 Leer contrato';
+  btn.disabled = false; sub.disabled = false; btn.textContent = '🤖 Leer de Drive'; sub.textContent = '📎 Subir archivo';
   if(pid !== planId || !document.getElementById('m-plan').classList.contains('open')) return;
   if(!j || !j.ok){
     el.className = 'ia err no-print open';
@@ -614,6 +642,21 @@ function iaAplicar(){
   toast(avisos.length ? 'Listo; antes de guardar ' + avisos.join(' y ') : 'Listo; revisa y da Guardar plan', !avisos.length);
   const sf = document.querySelector('#pl-ex .sin-fecha .ex-f');
   (sf || document.getElementById('pl-ex')).scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+// ── Botón de arriba: elegir proyecto y archivo ──
+function abrirSubir(){
+  if(!D.proyectos.length){ toast('Primero necesitas un proyecto en operación', false); return; }
+  document.getElementById('su-proy').innerHTML = '<option value="">Elige el proyecto…</option>' + D.proyectos.map(p=>`<option value="${p.ID}">${esc(p.Nombre)}${p.Empresa && p.Empresa!==p.Nombre ? ' · '+esc(p.Empresa) : ''}</option>`).join('');
+  document.getElementById('su-file').value = '';
+  abrir('m-subir');
+}
+function leerDesdeSubir(){
+  const pid = document.getElementById('su-proy').value, f = document.getElementById('su-file').files[0];
+  if(!pid){ toast('Elige el proyecto', false); return; }
+  cerrar('m-subir');
+  setVista('plan'); abrirPlan(pid);
+  setTimeout(()=>leerContrato(f || null), 60);
 }
 
 // ── Factura suelta / edición ──
