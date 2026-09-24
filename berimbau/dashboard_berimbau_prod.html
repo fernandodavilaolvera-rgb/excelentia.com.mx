@@ -2273,6 +2273,12 @@ Te invitamos a regularizar su situación para que puedan seguir disfrutando de t
         <div class="filter-group"><label>Desde</label><input type="date" id="hist-desde" onchange="renderHistorial()"></div>
         <div class="filter-group"><label>Hasta</label><input type="date" id="hist-hasta" onchange="renderHistorial()"></div>
         <button class="btn-limpiar" onclick="document.getElementById('buscar-historial').value='';resetRangoHist();renderHistorial()">Limpiar</button>
+        <!-- 24-sep-2026 — VER PRUEBAS. El historial trae los envíos de prueba marcados
+             desde el motor; aquí se esconden por default para que el Club vea solo
+             cobranza real, y se muestran cuando alguien necesita comprobar su prueba. -->
+        <label class="filter-group" style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:.78rem;color:var(--texto-2);white-space:nowrap">
+          <input type="checkbox" id="hist-ver-pruebas" onchange="renderHistorial()" style="accent-color:#3AAA35;width:15px;height:15px"> 🧪 Ver envíos de prueba
+        </label>
         <button class="btn-av-probar" onclick="exportarHistorial()">⬇️ Exportar a Excel</button>
         <div class="filter-info">Mostrando <span id="historial-count">0</span> envíos</div>
       </div>
@@ -4857,11 +4863,22 @@ function resetRangoHist(){
   if(de) de.value='2026-07-24';   // arranque de las pruebas con el Club
   if(ha) ha.value=hoy;
 }
+// 24-sep-2026 — una fila es de prueba si el motor la marcó así, o si la membresía
+// está en el rango 990000+. Lo segundo cubre a quien tenga el Dashboard viejo en
+// pantalla mientras no recarga.
+function histEsPrueba(h){
+  if(h && h.es_prueba === true) return true;
+  const m = String(h && (h.membresia||h.Membresia) || '').replace(/\D/g,'');
+  return m !== '' && Number(m) >= 990000;
+}
+
 function histFiltrado(){
+  const verPruebas = document.getElementById('hist-ver-pruebas')?.checked || false;
   const q = norm(document.getElementById('buscar-historial')?.value||'');
   const desde=document.getElementById('hist-desde')?.value||'';
   const hasta=document.getElementById('hist-hasta')?.value||'';
   return HISTORIAL_DATA.filter(h=>{
+    if(!verPruebas && histEsPrueba(h)) return false;
     const k=histKey(h);
     if(desde && k && k<desde) return false;
     if(hasta && k && k>hasta) return false;
@@ -4891,6 +4908,7 @@ function histAgrupar(filas){
       mapa.set(llave, {
         dia, membresia: memb, mod: moduloDeFila(h),
         nombre: h.nombre||h.Nombre||'', correo:'', telefono:'',
+        esPrueba: histEsPrueba(h),
         canales: {}, envios: [], hora: histHora(h)
       });
     }
@@ -4981,7 +4999,7 @@ function renderHistorial(){
       return `<tr style="border-bottom:1px solid #f5f6f8">
         <td style="padding:8px 10px;white-space:nowrap"><span style="color:${g.mod.color};font-weight:700" title="${esc(g.mod.label)}">${g.mod.icon} ${g.mod.corto||g.mod.label}</span></td>
         <td style="padding:8px 10px"><strong style="display:block;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(g.nombre||contacto||'—')}">${esc(g.nombre||contacto||'—')}</strong><span style="display:block;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.68rem;color:var(--gray-text)" title="${esc(contacto)}">${esc(contacto)}</span></td>
-        <td style="padding:8px 10px;white-space:nowrap">${g.membresia?'#'+esc(g.membresia):'—'}</td>
+        <td style="padding:8px 10px;white-space:nowrap">${g.membresia?'#'+esc(g.membresia):'—'}${g.esPrueba?' <span style=\"background:#fff8e6;color:#92400e;border:1px solid #f0d9a0;border-radius:8px;padding:1px 6px;font-size:.62rem;font-weight:700;white-space:nowrap\" title=\"Envio de prueba al equipo interno, no es cobranza real\">🧪 Prueba</span>':''}</td>
         <td style="padding:8px 10px;text-align:center">${histPunto(g,'correo')}</td>
         <td style="padding:8px 10px;text-align:center">${histPunto(g,'whatsapp')}</td>
         <td style="padding:8px 10px;text-align:center">${histPunto(g,'ambos')}</td>
