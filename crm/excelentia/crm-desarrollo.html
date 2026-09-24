@@ -267,14 +267,12 @@ function pintar(){
   pintarKpis();
 }
 function tarjetaHTML(c, hoy){
-  const u = USERS[c.Responsable];
   const venc = c.FechaLimite && !c.Hecha && f10(c.FechaLimite) < hoy;
-  const sub = c.ProyectoID ? [c.Empresa && c.Empresa !== c.Titulo ? c.Empresa : '', c.Etapa ? 'CRM: ' + c.Etapa : ''].filter(Boolean).join(' · ') : '';
   return `<div class="card${c.Hecha?' hecha':''}" draggable="true" data-id="${c.ID}" ondragstart="inicio(event,'${c.ID}')" ondragend="fin(event)" onclick="abrirTarjeta('${c.ID}')">
     <input type="checkbox" ${c.Hecha?'checked':''} title="Terminado" onclick="event.stopPropagation();marcarHecha('${c.ID}',this.checked)" aria-label="Terminado">
     <div><div class="t">${esc(c.Titulo)}</div>
-      ${sub ? `<div class="e">${esc(sub)}</div>` : (!c.ProyectoID ? '<div class="libre">Fuera del CRM</div>' : '')}
-      <div class="m">${u?`<span><i class="cuad" style="background:${u.color}"></i>${u.nombre}</span>`:''}${c.FechaLimite?`<span class="${venc?'venc':''}">${venc?'Vencido · ':'Entrega '}${fcorta(c.FechaLimite)}</span>`:''}</div>
+      ${!c.ProyectoID ? '<div class="libre">Fuera del CRM</div>' : ''}
+      ${c.FechaLimite?`<div class="m"><span class="${venc?'venc':''}">${venc?'Vencido · ':'Entrega '}${fcorta(c.FechaLimite)}</span></div>`:''}
       ${c.Notas?`<div class="nota" title="${esc(c.Notas)}"><span>${esc(c.Notas)}</span></div>`:''}
     </div></div>`;
 }
