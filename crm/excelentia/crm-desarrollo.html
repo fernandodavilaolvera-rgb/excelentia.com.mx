@@ -29,7 +29,7 @@ select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-
 
 /* Tablero */
 .tablero{display:flex;gap:.7rem;overflow-x:auto;padding-bottom:.6rem;align-items:flex-start}
-.col{flex:1 0 240px;max-width:320px;background:#eef1f6;border:1px solid #dde1e9;border-radius:8px;display:flex;flex-direction:column;min-height:520px}
+.col{flex:0 0 var(--colw,240px);background:#eef1f6;border:1px solid #dde1e9;border-radius:8px;display:flex;flex-direction:column;min-height:520px}
 .col.drop{background:#e8f0fb;border-color:#4a9fd4}
 .col-head{display:flex;align-items:center;gap:.35rem;padding:.5rem .6rem;border-bottom:1px solid #dde1e9}
 .col-head .nom{font-weight:800;font-size:.8rem;color:#1a3a6b;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
@@ -51,6 +51,8 @@ select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-
 .card .e{font-size:.72rem;color:#4a5068;margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card .libre{font-size:.68rem;color:#8a90a0;font-style:italic}
 .cuad{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
+.tablero.ajustar .col{flex:1 1 0;min-width:130px}
+.tablero.ajustar .col-nueva{flex:0 0 110px}
 .col-nueva{flex:0 0 200px;border:1px dashed #c8d9f0;border-radius:8px;padding:.6rem;min-height:80px}
 .col-nueva input{width:100%;padding:.4rem .55rem;border:1px solid #dde1e9;border-radius:6px;font-family:'Manrope',sans-serif;font-size:.78rem}
 .col-nueva .hint{margin-top:.35rem}
@@ -98,7 +100,7 @@ select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-
   .page{padding:.75rem .6rem}
   .filtros .info{max-width:100%;flex-basis:100%}
   .tablero{scroll-snap-type:x mandatory}
-  .col{flex:0 0 84vw;max-width:none;min-height:360px;scroll-snap-align:start}
+  .col,.tablero.ajustar .col{flex:0 0 84vw;max-width:none;min-height:360px;scroll-snap-align:start}
   .col-acc{opacity:1}
   .fg2{grid-template-columns:1fr}
   .kpi{border-right:none;width:48%;padding:.1rem .6rem}
@@ -135,6 +137,12 @@ select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-
     </select>
     <label class="no-print" style="font-size:.78rem;color:#4a5068;display:flex;align-items:center;gap:.3rem;cursor:pointer"><input type="checkbox" id="f-hechas" checked onchange="pintar()" style="accent-color:#1a3a6b"> Mostrar terminados</label>
     <span class="sp"></span>
+    <select id="f-ancho" class="no-print" onchange="cambiarAncho()" aria-label="Ancho de columnas">
+      <option value="ajustar">Columnas: ajustar a la pantalla</option>
+      <option value="180">Columnas: angostas</option>
+      <option value="240">Columnas: normales</option>
+      <option value="300">Columnas: anchas</option>
+    </select>
     <button class="btn btn-secondary btn-sm no-print" onclick="window.print()">🖨️ PDF</button>
   </div>
 
@@ -415,7 +423,23 @@ async function borrarCol(id){
 }
 
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ ['m-card','m-col'].forEach(cerrar); } });
-document.addEventListener('DOMContentLoaded', ()=>cargar());
+const ANCHO_KEY = 'dev_ancho';
+function aplicarAncho(v){
+  const t = document.getElementById('tablero');
+  if(v === 'ajustar'){ t.classList.add('ajustar'); t.style.removeProperty('--colw'); }
+  else { t.classList.remove('ajustar'); t.style.setProperty('--colw', v + 'px'); }
+}
+function cambiarAncho(){
+  const v = document.getElementById('f-ancho').value;
+  try{ localStorage.setItem(ANCHO_KEY, v); }catch(e){}
+  aplicarAncho(v);
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  let v = 'ajustar'; try{ v = localStorage.getItem(ANCHO_KEY) || 'ajustar'; }catch(e){}
+  if(!['ajustar','180','240','300'].includes(v)) v = 'ajustar';
+  document.getElementById('f-ancho').value = v; aplicarAncho(v);
+  cargar();
+});
 </script>
 </body>
 </html>
