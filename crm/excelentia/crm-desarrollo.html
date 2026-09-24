@@ -31,27 +31,30 @@ select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-
 .tablero{display:flex;gap:.7rem;overflow-x:auto;padding-bottom:.6rem;align-items:flex-start}
 .col{flex:0 0 var(--colw,240px);background:#eef1f6;border:1px solid #dde1e9;border-radius:8px;display:flex;flex-direction:column;min-height:520px}
 .col.drop{background:#e8f0fb;border-color:#4a9fd4}
-.col-head{display:flex;align-items:center;gap:.35rem;padding:.5rem .6rem;border-bottom:1px solid #dde1e9}
-.col-head .nom{font-weight:800;font-size:.8rem;color:#1a3a6b;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-.col-head .cnt{font-size:.72rem;font-weight:700;color:#8a90a0;font-variant-numeric:tabular-nums}
-.col-acc{display:flex;gap:.05rem;opacity:.35;transition:.15s}
+.col{min-width:0}
+.col-head{display:flex;flex-direction:column;gap:.15rem;padding:.45rem .55rem .35rem;border-bottom:1px solid #dde1e9}
+.col-head .nom{font-weight:800;font-size:.8rem;color:#1a3a6b;line-height:1.25;min-height:2.5em;overflow-wrap:break-word;cursor:pointer}
+.col-sub{display:flex;align-items:center;justify-content:space-between;gap:.3rem;flex-wrap:wrap}
+.col-head .cnt{font-size:.72rem;font-weight:700;color:#8a90a0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.col-acc{display:flex;gap:0;opacity:.45;transition:.15s}
 .col:hover .col-acc,.col-acc:focus-within{opacity:1}
-.ico{background:none;border:none;cursor:pointer;color:#8a90a0;font-size:.78rem;padding:.12rem .28rem;border-radius:4px;font-family:'Manrope',sans-serif}
+.ico{background:none;border:none;cursor:pointer;color:#8a90a0;font-size:.78rem;padding:.1rem .22rem;border-radius:4px;font-family:'Manrope',sans-serif}
 .ico:hover{background:#fff;color:#1a3a6b}
 .cards{flex:1;padding:.5rem;display:flex;flex-direction:column;gap:.45rem;min-height:60px}
-.card{background:#fff;border:1px solid #dde1e9;border-radius:6px;padding:.5rem .55rem;cursor:grab;display:grid;grid-template-columns:18px 1fr;gap:.4rem;align-items:start}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:6px;padding:.5rem .5rem;cursor:grab;display:grid;grid-template-columns:16px minmax(0,1fr);gap:.35rem;align-items:start;min-width:0;overflow:hidden}
+.card > div{min-width:0}
 .card:hover{border-color:#4a9fd4}
 .card.arrastrando{opacity:.4}
 .card input[type=checkbox]{width:15px;height:15px;margin-top:.12rem;accent-color:#059669;cursor:pointer}
-.card .t{font-size:.82rem;font-weight:700;line-height:1.3;word-break:break-word}
+.card .t{font-size:.82rem;font-weight:700;line-height:1.3;overflow-wrap:break-word}
 .card.hecha .t{color:#8a90a0;text-decoration:line-through}
 .card .m{display:flex;flex-wrap:wrap;gap:.2rem .6rem;margin-top:.25rem;font-size:.7rem;color:#4a5068}
 .card .m span{display:inline-flex;align-items:center;gap:.25rem}
 .card .m .venc{color:#dc2626;font-weight:700}
-.card .e{font-size:.72rem;color:#4a5068;margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .e{font-size:.72rem;color:#4a5068;margin-top:.1rem;line-height:1.35;overflow-wrap:break-word}
 .card .libre{font-size:.68rem;color:#8a90a0;font-style:italic}
 .cuad{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
-.tablero.ajustar .col{flex:1 1 0;min-width:130px}
+.tablero.ajustar .col{flex:1 1 0;min-width:110px}
 .tablero.ajustar .col-nueva{flex:0 0 110px}
 .col-nueva{flex:0 0 200px;border:1px dashed #c8d9f0;border-radius:8px;padding:.6rem;min-height:80px}
 .col-nueva input{width:100%;padding:.4rem .55rem;border:1px solid #dde1e9;border-radius:6px;font-family:'Manrope',sans-serif;font-size:.78rem}
@@ -128,6 +131,7 @@ select.sel,.filtros select{padding:.38rem .6rem;border:1px solid #dde1e9;border-
 <div class="page">
   <div class="filtros">
     <button class="btn btn-primary btn-sm no-print" onclick="abrirAlta()">+ Proyecto</button>
+    <button class="btn btn-secondary btn-sm no-print" onclick="nuevaColumna()">+ Columna</button>
     <select id="f-resp" class="no-print" onchange="pintar()" aria-label="Responsable">
       <option value="">Todos los responsables</option>
       <option value="adolfo">Adolfo</option>
@@ -242,18 +246,20 @@ function pintar(){
     const vis = cs.filter(visible);
     return `<section class="col" data-col="${col.ID}" ondragover="sobre(event,this)" ondragleave="salir(this)" ondrop="soltar(event,this)" aria-label="${esc(col.Nombre)}">
       <div class="col-head">
-        <span class="nom" onclick="renombrarCol('${col.ID}')" title="Renombrar">${esc(col.Nombre)}</span>
-        <span class="cnt">${cs.length}</span>
+        <div class="nom" onclick="renombrarCol('${col.ID}')" title="Renombrar">${esc(col.Nombre)}</div>
+        <div class="col-sub">
+        <span class="cnt">${cs.length} ${cs.length===1?'proyecto':'proyectos'}</span>
         <span class="col-acc no-print">
           <button class="ico" title="Agregar proyecto en esta columna" onclick="abrirAlta('${col.ID}')">+</button>
           <button class="ico" title="Mover a la izquierda" onclick="moverCol('${col.ID}',-1)" ${i===0?'disabled':''}>←</button>
           <button class="ico" title="Mover a la derecha" onclick="moverCol('${col.ID}',1)" ${i===COLS.length-1?'disabled':''}>→</button>
           <button class="ico" title="Quitar columna" onclick="borrarCol('${col.ID}')">✕</button>
         </span>
+        </div>
       </div>
       <div class="cards">${vis.map(c=>tarjetaHTML(c, hoy)).join('')}</div>
     </section>`;
-  }).join('') + `<div class="col-nueva no-print"><input type="text" id="nueva-col" placeholder="+ Columna" maxlength="80" onkeydown="if(event.key==='Enter')crearCol()"><div class="hint">Escribe el nombre y da Enter</div></div>`;
+  }).join('');
   pintarKpis();
 }
 function tarjetaHTML(c, hoy){
@@ -386,22 +392,27 @@ async function borrarTarjeta(){
 }
 
 // ── Columnas ──
-async function crearCol(){
-  const inp = document.getElementById('nueva-col'); const n = inp.value.trim(); if(!n || !TAB) return;
-  inp.disabled = true;
-  const j = await api({accion:'col_crear', TableroID:TAB.ID, Nombre:n});
-  if(!j || !j.ok){ inp.disabled = false; toast(j?.error || 'No se pudo crear la columna', false); return; }
-  COLS.push({ID:j.id, Nombre:n, Orden:COLS.length+1}); pintar();
-  const nv = document.getElementById('nueva-col'); if(nv) nv.focus();
+function nuevaColumna(){
+  if(!TAB) return;
+  editCol = null; document.getElementById('mcol-titulo').textContent = 'Nueva columna';
+  document.getElementById('col-nombre').value = '';
+  abrir('m-col'); setTimeout(()=>document.getElementById('col-nombre').focus(), 50);
 }
 function renombrarCol(id){
   const col = COLS.find(c=>c.ID===id); if(!col) return;
-  editCol = id; document.getElementById('col-nombre').value = col.Nombre;
+  editCol = id; document.getElementById('mcol-titulo').textContent = 'Renombrar columna';
+  document.getElementById('col-nombre').value = col.Nombre;
   abrir('m-col'); setTimeout(()=>{ const i=document.getElementById('col-nombre'); i.focus(); i.select(); }, 50);
 }
 async function guardarNombreCol(){
-  const col = COLS.find(c=>c.ID===editCol); if(!col) return;
   const n = document.getElementById('col-nombre').value.trim(); if(!n){ toast('Ponle nombre a la columna', false); return; }
+  if(!editCol){
+    const j = await api({accion:'col_crear', TableroID:TAB.ID, Nombre:n});
+    if(!j || !j.ok){ toast(j?.error || 'No se pudo crear la columna', false); return; }
+    COLS.push({ID:j.id, Nombre:n, Orden:COLS.length+1}); cerrar('m-col'); pintar(); toast('Columna agregada');
+    return;
+  }
+  const col = COLS.find(c=>c.ID===editCol); if(!col) return;
   const j = await api({accion:'col_renombrar', ID:col.ID, Nombre:n});
   if(!j || !j.ok){ toast(j?.error || 'No se pudo renombrar', false); return; }
   col.Nombre = n; cerrar('m-col'); pintar();
