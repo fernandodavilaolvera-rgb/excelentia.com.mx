@@ -360,25 +360,13 @@ function renderContactos(){
     return;
   }
 
-  // Nombre..Status son ordenables y van primero; WhatsApp/Correo son de acción (no ordenan);
-  // Tags va al final, después de Correo, y sí ordena.
-  const cols = [
-    { key:'Nombre', label:'Nombre' },
-    { key:'Tipo', label:'Tipo' },
-    { key:'Empresa', label:'Empresa' },
-    { key:'Cargo', label:'Cargo' },
-    { key:'Status', label:'Status' }
-  ];
-  let theadHtml = '<thead><tr>';
-  cols.forEach(c => {
-    const activa = sortCol === c.key ? 'sort-active' : '';
-    theadHtml += `<th class="sortable ${activa}" onclick="toggleSort('${c.key}')">${c.label} <span class="sort-arrow">${sortArrow(c.key)}</span></th>`;
-  });
-  theadHtml += '<th>WhatsApp</th><th>Correo</th>';
-  theadHtml += '<th>Notas</th>';
-  const tagsActiva = sortCol === 'Tags' ? 'sort-active' : '';
-  theadHtml += `<th class="sortable ${tagsActiva}" onclick="toggleSort('Tags')">Tags <span class="sort-arrow">${sortArrow('Tags')}</span></th>`;
-  theadHtml += '<th></th></tr></thead>';
+  // Orden pedido por Fernando: Nombre, Empresa, WhatsApp, Correo, Cargo, Status, Tipo, Notas, Tags.
+  const TH = (key, label) => {
+    const activa = sortCol === key ? 'sort-active' : '';
+    return `<th class="sortable ${activa}" onclick="toggleSort('${key}')">${label} <span class="sort-arrow">${sortArrow(key)}</span></th>`;
+  };
+  let theadHtml = '<thead><tr>' + TH('Nombre','Nombre') + TH('Empresa','Empresa') + '<th>WhatsApp</th><th>Correo</th>'
+    + TH('Cargo','Cargo') + TH('Status','Status') + TH('Tipo','Tipo') + '<th>Notas</th>' + TH('Tags','Tags') + '<th></th></tr></thead>';
 
   if(!lista.length){
     tabla.innerHTML = theadHtml + `<tbody><tr><td colspan="10"><div class="empty-state"><span>🔍</span>Nadie coincide con ese filtro</div></td></tr></tbody>`;
@@ -388,8 +376,8 @@ function renderContactos(){
   const filas = lista.map(c => {
     const badgeClass = BADGE_STATUS[c.Status] || 'badge-gray';
     const waCell = c.WhatsApp
-      ? `<div style="display:flex;align-items:center;gap:.45rem"><a href="https://wa.me/${c.WhatsApp.replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" class="wa-btn" title="Abrir WhatsApp"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a><span>${escHtml(c.WhatsApp)}</span></div>`
-      : (c.Telefono ? escHtml(c.Telefono) : '-');
+      ? `<div style="display:flex;align-items:center;gap:.45rem"><a href="https://wa.me/${c.WhatsApp.replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" class="wa-btn" title="Abrir WhatsApp"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a><span style="white-space:nowrap">${escHtml(c.WhatsApp)}</span></div>`
+      : (c.Telefono ? `<span style="white-space:nowrap">${escHtml(c.Telefono)}</span>` : '-');
     const correoCell = c.Email ? `<a href="mailto:${escHtml(c.Email)}" class="email-link">${escHtml(c.Email)}</a>` : '-';
     const notasCell = c.Notas
       ? `<button class="notas-btn tiene" title="Ver nota" onclick="verNota('${c.ID}')"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H6l-2 2V4zm2 2v9.17L6.83 14H18V6H6z"/></svg></button>`
@@ -397,12 +385,12 @@ function renderContactos(){
 
     return `<tr>
       <td style="white-space:nowrap"><strong>${escHtml(c.Nombre)}</strong></td>
-      <td><span class="badge badge-purple">${escHtml(c.Tipo)}</span></td>
       <td>${escHtml(c.Empresa) || '-'}</td>
+      <td style="white-space:nowrap">${waCell}</td>
+      <td style="white-space:nowrap">${correoCell}</td>
       <td>${escHtml(c.Cargo) || '-'}</td>
       <td><span class="badge ${badgeClass}">${escHtml(c.Status)}</span></td>
-      <td>${waCell}</td>
-      <td>${correoCell}</td>
+      <td><span class="badge badge-purple">${escHtml(c.Tipo)}</span></td>
       <td>${notasCell}</td>
       <td>${escHtml(c.Tags) || '-'}</td>
       <td><div class="row-actions">
