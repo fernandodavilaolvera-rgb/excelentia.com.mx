@@ -188,10 +188,6 @@ label{font-size:.8rem;font-weight:600;color:#4a5068}
             <th data-col="Nombre">Empresa<span class="arr"></span></th>
             <th data-col="EtapaOrden">Status<span class="arr"></span></th>
             <th data-col="TraidoPor" class="col-opt">Finder<span class="arr"></span></th>
-            <th data-col="Contratado" class="num">Contratado<span class="arr"></span></th>
-            <th data-col="Onboarding" class="num col-opt" title="Costo del desarrollo inicial">Onboarding<span class="arr"></span></th>
-            <th data-col="Anualizado" class="num" title="Onboarding más 12 meses de fee mensual">Anualizado<span class="arr"></span></th>
-            <th data-col="Cobrado" class="num">Cobrado<span class="arr"></span></th>
             <th class="no-print"></th>
           </tr></thead>
           <tbody id="tbody"></tbody>
@@ -309,26 +305,17 @@ function render(){
       <td><div class="emp-nombre">${esc(e.Nombre)}</div>${e.Giro?'<div class="emp-sub">'+esc(e.Giro)+'</div>':''}</td>
       <td class="etapa">${e.Etapa?esc(e.Etapa)+(e.EtapaStatus==='pausado'?' <span class="pausa">· pausado</span>':''):'—'}</td>
       <td class="col-opt">${quien(e.TraidoPor)}</td>
-      <td class="num">${e.Contratado?money(e.Contratado):'—'}</td>
-      <td class="num col-opt">${e.Onboarding?money(e.Onboarding):'—'}</td>
-      <td class="num" title="${e.Mensual?'Fee mensual '+money(e.Mensual):'Sin fee mensual'}">${e.Anualizado?money(e.Anualizado):'—'}</td>
-      <td class="num">${e.Cobrado?money(e.Cobrado):'—'}</td>
       <td class="no-print"><div class="acc"><button title="Editar" onclick="event.stopPropagation();abrirForm('${e.ID}')">✏️</button></div></td>
-    </tr>`).join('') : (EMPRESAS.length ? '<tr><td colspan="8" class="vacio">Ninguna empresa coincide con el filtro.</td></tr>' : '');
+    </tr>`).join('') : (EMPRESAS.length ? '<tr><td colspan="4" class="vacio">Ninguna empresa coincide con el filtro.</td></tr>' : '');
   renderKpis();
 }
 
 function renderKpis(){
   const n = s => EMPRESAS.filter(e=>e.Status===s).length;
-  const valor = EMPRESAS.reduce((a,e)=>a+Number(e.Contratado||0),0);
-  const cobrado = EMPRESAS.reduce((a,e)=>a+Number(e.Cobrado||0),0);
-  const anual = EMPRESAS.reduce((a,e)=>a+Number(e.Anualizado||0),0);
   document.getElementById('kpis').innerHTML = `
     <div class="kpi"><b>${n('Cliente')}</b><span>Clientes</span></div>
     <div class="kpi"><b>${n('Prospecto')}</b><span>Prospectos</span></div>
-    <div class="kpi"><b>${money(valor)}</b><span>Contratado</span></div>
-    <div class="kpi"><b>${money(anual)}</b><span>Anualizado</span></div>
-    <div class="kpi"><b>${money(cobrado)}</b><span>Cobrado</span></div>`;
+    <div class="kpi"><b>${n('Aliado')}</b><span>Aliados</span></div>`;
 }
 
 document.querySelectorAll('th[data-col]').forEach(th=>th.addEventListener('click',()=>{
