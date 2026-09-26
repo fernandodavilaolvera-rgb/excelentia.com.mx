@@ -56,6 +56,8 @@ tr:last-child td{border-bottom:none}
 .tag-chip{background:#f3f4f6;color:#4a5068;font-size:.68rem;padding:.1rem .4rem;border-radius:6px;font-weight:600}
 .celda-empresa{color:#4a5068}
 .celda-valor{font-weight:700;color:#059669;white-space:nowrap}
+.celda-num{white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums;color:#1a2035}
+th.th-num{text-align:right}
 .celda-prob{color:#4a5068}
 .celda-accion-txt{font-size:.78rem;color:#4a5068;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .celda-accion-fecha{font-size:.71rem;color:#8a90a0;margin-top:.1rem}
@@ -206,7 +208,10 @@ textarea{resize:vertical;min-height:70px}
             <th onclick="toggleSort('nombre')" data-col="nombre">Proyecto <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('empresa')" data-col="empresa">Empresa <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('etapa')" data-col="etapa">Etapa <span class="arrow">⇕</span></th>
-            <th onclick="toggleSort('valor')" data-col="valor">Valor <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('contratado')" data-col="contratado" class="th-num">Contratado <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('onboarding')" data-col="onboarding" class="th-num" title="Costo del desarrollo inicial">Onboarding <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('anualizado')" data-col="anualizado" class="th-num" title="Onboarding más los meses de fee mensual">Anualizado <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('cobrado')" data-col="cobrado" class="th-num">Cobrado <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('responsable')" data-col="responsable">Responsable <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('accionfecha')" data-col="accionfecha">Próx. Acción <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('status')" data-col="status">Status <span class="arrow">⇕</span></th>
@@ -215,7 +220,7 @@ textarea{resize:vertical;min-height:70px}
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="9"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>
+          <tr><td colspan="12"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -605,7 +610,12 @@ function normalizeItem(p){
     DriveFolder: toStr(p.DriveFolder),
     Notas: toStr(p.Notas),
     EsquemaReparto: toStr(p.EsquemaReparto) || '30_30_40',
-    RepartoDetalle: (p.RepartoDetalle && typeof p.RepartoDetalle === 'object') ? p.RepartoDetalle : null
+    RepartoDetalle: (p.RepartoDetalle && typeof p.RepartoDetalle === 'object') ? p.RepartoDetalle : null,
+    Contratado: toNum(p.Contratado),
+    Onboarding: toNum(p.Onboarding),
+    Mensual: toNum(p.Mensual),
+    Anualizado: toNum(p.Anualizado),
+    Cobrado: toNum(p.Cobrado)
   };
 }
 
@@ -676,7 +686,7 @@ async function logHistorial(accionTexto, proyecto, campo='', anterior='', nuevo=
 // ═══════════════════════════════════════
 async function cargarProyectos(){
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '<tr><td colspan="9"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>';
+  tbody.innerHTML = '<tr><td colspan="12"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>';
   const res = await apiCall('get');
   ITEMS = (Array.isArray(res) ? res : []).map(normalizeItem);
   render();
@@ -736,6 +746,10 @@ function aplicarOrden(lista){
     let va, vb;
     switch(sortCol){
       case 'valor':        va = toNum(a.ValorEstimado); vb = toNum(b.ValorEstimado); break;
+      case 'contratado':   va = a.Contratado; vb = b.Contratado; break;
+      case 'onboarding':   va = a.Onboarding; vb = b.Onboarding; break;
+      case 'anualizado':   va = a.Anualizado; vb = b.Anualizado; break;
+      case 'cobrado':      va = a.Cobrado;    vb = b.Cobrado;    break;
       case 'prob':         va = toNum(a.Probabilidad);  vb = toNum(b.Probabilidad);  break;
       case 'etapa':        va = ETAPAS.indexOf(a.Etapa); vb = ETAPAS.indexOf(b.Etapa); break;
       case 'accionfecha':  va = a.FechaAccion || '9999-99-99'; vb = b.FechaAccion || '9999-99-99'; break;
@@ -783,7 +797,7 @@ function renderResumen(){
 function renderTabla(lista){
   const tbody = document.getElementById('tbody');
   if(!lista.length){
-    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><span>📋</span>Sin proyectos que coincidan</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state"><span>📋</span>Sin proyectos que coincidan</div></td></tr>';
     return;
   }
   tbody.innerHTML = lista.map(p => {
@@ -800,7 +814,10 @@ function renderTabla(lista){
       </td>
       <td class="celda-empresa">${escHtml(p.Empresa) || '—'}</td>
       <td><span class="badge badge-etapa"><i style="background:${colorEtapa}"></i>${escHtml(p.Etapa)}</span></td>
-      <td class="celda-valor">${fmt$(p.ValorEstimado)}</td>
+      <td class="celda-num">${p.Contratado ? fmt$(p.Contratado) : '—'}</td>
+      <td class="celda-num">${p.Onboarding ? fmt$(p.Onboarding) : '—'}</td>
+      <td class="celda-num" title="${p.Mensual ? 'Fee mensual ' + fmt$(p.Mensual) : 'Sin fee mensual'}">${p.Anualizado ? fmt$(p.Anualizado) : '—'}</td>
+      <td class="celda-num">${p.Cobrado ? fmt$(p.Cobrado) : '—'}</td>
       <td><span class="resp-badge"><span class="resp-dot" style="background:${resp.color}"></span>${escHtml(resp.nombre)}</span></td>
       <td class="${vencido?'vencido':''}">
         ${p.ProximaAccion ? `<span class="celda-accion-txt">${vencido?'⚠️ ':''}${escHtml(p.ProximaAccion)}</span>` : '<span class="celda-accion-txt">—</span>'}
@@ -928,7 +945,10 @@ async function guardarProyecto(){
   if(res){
     if(esEdicion){
       const idx = ITEMS.findIndex(x => x.ID === editId);
-      if(idx > -1) ITEMS[idx] = normalizeItem(payload);
+      if(idx > -1){
+        const prev = ITEMS[idx];
+        ITEMS[idx] = Object.assign(normalizeItem(payload), {Contratado:prev.Contratado, Onboarding:prev.Onboarding, Mensual:prev.Mensual, Anualizado:prev.Anualizado, Cobrado:prev.Cobrado});
+      }
       showToast('✅ Proyecto actualizado');
       logHistorial('Actualizó proyecto', nombre);
     } else {
