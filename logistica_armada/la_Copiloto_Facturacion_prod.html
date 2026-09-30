@@ -402,7 +402,7 @@ footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 14 (30-sep-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 15 (30-sep-2026)</footer>
 </div>
 
 <script>
@@ -541,6 +541,7 @@ function recalcular(o) {
   const ord = { g: 0, a: 1, r: 2 };
   let peor = Math.max(ord[o.sC], ord[o.sV], ord[o.sM]);
   if (o.margen <= 0 && (o.totalVenta || o.totalCosto)) peor = 2;
+  if (o.citaSig && peor < 1) peor = 1;
   o.sem = ['g', 'a', 'r'][peor];
   o.atencion = o.sem !== 'g';
 }
@@ -560,18 +561,26 @@ function centavos(costo) {
 }
 
 function procesarBase(lista) {
-  return lista.map(b => {
+  const out = lista.map(b => {
     const dest = norm(b.destino), uni = norm(b.unidad);
     const t = M.tarifario[dest + '||' + uni];
-    const cz = num(b.costoZona), pz = num(b.precioZona);
-    const zonaTxt = b.zonaNombre ? b.zonaNombre : ('zona ' + (parseInt(b.zona, 10) || '?'));
+    // v15: viajes que no salen de 4PL; si llegan a 4PL (recolección) se cobra por la zona del origen
+    const org = norm(b.origen), otroOrigen = !!org && org.indexOf('4PL ALMACEN') < 0;
+    const recol = otroOrigen && dest.indexOf('4PL ALMACEN') >= 0 && num(b.costoZonaOrigen) != null;
+    const cz = recol ? num(b.costoZonaOrigen) : num(b.costoZona), pz = recol ? num(b.precioZonaOrigen) : num(b.precioZona);
+    const zonaTxt = recol ? (b.zonaOrigenNombre || 'zona del origen') + ' (origen)' : (b.zonaNombre ? b.zonaNombre : ('zona ' + (parseInt(b.zona, 10) || '?')));
+    const firme = t && (t.f === 'facturado' || t.nv === 1 || t.p >= 0.7);
+    const hist = t ? (t.f === 'facturado' ? 'lo facturado' + (t.um ? ' hasta ' + mesLabel(t.um) : '') : 'histórico de mayo-junio') + ' · ' + t.n + (t.n === 1 ? ' viaje' : ' viajes') : '';
     const flags = [];
     let costo = null, venta = null, sC = 'g', srcC = '', srcV = '', fijo = false;
 
     if (cz != null) {
-      if (t && t.n >= 2 && (t.nv === 1 || t.p >= 0.7) && Math.abs(t.m - cz) / Math.max(cz, 1) > 0.10) { // v14: solo con histórico firme
-        costo = t.m; sC = 'a'; srcC = 'histórico de la ruta · la zona no cuadra';
-        flags.push({ c: 'a', t: 'zona en duda', d: 'La plataforma tiene esta dirección en ' + zonaTxt + ' (' + mny0(cz) + '), pero la ruta se ha cobrado a ' + mny0(t.m) + '. Se usó el histórico; conviene corregir la zona de la dirección en la plataforma.' });
+      if (t && (t.n >= 2 || t.f === 'facturado') && firme && Math.abs(t.m - cz) / Math.max(cz, 1) > 0.10) { // v15: solo con histórico firme
+        costo = t.m;
+        if (otroOrigen) { srcC = hist + ' · no sale de 4PL';
+          flags.push({ c: 'b', auto: 1, t: 'no sale de 4PL', d: 'Sale de ' + b.origen + '. Se cobró como las veces anteriores (' + mny0(t.m) + '); la zona de la plataforma daría ' + mny0(cz) + '.' });
+        } else { sC = 'a'; srcC = hist + ' · la zona no cuadra';
+          flags.push({ c: 'a', t: 'zona en duda', d: 'La plataforma tiene esta dirección en ' + zonaTxt + ' (' + mny0(cz) + '), pero la ruta se ha cobrado a ' + mny0(t.m) + ' (' + hist + '). Se usó eso; conviene corregir la zona de la dirección en la plataforma.' }); }
       } else {
         const c = centavos(cz);
         if (c) { costo = c.costo; venta = c.venta; srcV = 'tabulador de la plataforma'; fijo = true; }
@@ -579,7 +588,7 @@ function procesarBase(lista) {
         srcC = 'tabulador · ' + zonaTxt;
       }
     } else if (t) {
-      costo = t.m; sC = 'a'; srcC = 'histórico de la ruta · sin tarifa en la zona';
+      costo = t.m; sC = 'a'; srcC = hist + ' · sin tarifa en la zona';
       flags.push({ c: 'a', t: 'sin tarifa en la zona', d: zonaTxt + ' no tiene tarifa cargada para esta unidad; se usó el histórico de la ruta. Conviene cargarla en el tabulador.' });
     } else {
       sC = 'r'; srcC = 'sin tarifa en la zona ni antecedente';
@@ -587,15 +596,16 @@ function procesarBase(lista) {
     }
 
     let man = null, sM = 'g', srcM = '';
-    if (esSi(b.manBase) || b.manBase === 1 || b.manBase === '1') {
-      man = MAN_COSTO[uni] != null ? MAN_COSTO[uni] : (t && t.man) || null; srcM = 'la plataforma marca maniobra';
+    const manRep = b.manRep === 1 || b.manRep === '1' || esSi(b.manRep);
+    if (esSi(b.manBase) || b.manBase === 1 || b.manBase === '1' || manRep) {
+      man = MAN_COSTO[uni] != null ? MAN_COSTO[uni] : (t && t.man) || null; srcM = manRep && !(b.manBase == 1 || esSi(b.manBase)) ? 'maniobra de reparto en la plataforma' : 'la plataforma marca maniobra';
       if (man == null) { sM = 'a'; srcM = 'la plataforma marca maniobra; captura el monto'; }
     } else if (t && t.pman >= 0.5 && t.man) {
       man = t.man; sM = 'a'; srcM = 'probable, no está capturada en la plataforma';
       flags.push({ c: 'a', t: 'maniobra faltante', d: 'El ' + Math.round(t.pman * 100) + '% de los viajes a este destino llevó maniobra de ' + mny0(t.man) + ' y la plataforma no la marca.' });
     }
 
-    if (esSi(b.esReparto)) flags.push({ c: 'b', auto: 1, t: 'viaje hijo', d: 'Es reparto del viaje ' + (parseInt(b.padre, 10) || 'padre') + (b.facturarReparto ? ' · facturar: ' + b.facturarReparto : '') + '.' });
+    if (esSi(b.esReparto)) flags.push({ c: 'b', auto: 1, t: 'viaje hijo', l: 'hijo de ' + (parseInt(b.padre, 10) || '?'), d: 'Es reparto del viaje ' + (parseInt(b.padre, 10) || 'padre') + (b.facturarReparto ? ' · facturar: ' + b.facturarReparto : '') + '.' });
     if (esSi(b.tieneRepartos)) flags.push({ c: 'b', auto: 1, t: 'viaje padre', d: 'Este viaje tiene repartos registrados en la plataforma.' });
     if (esSi(b.edicion)) flags.push({ c: 'a', t: 'tarifa editada', d: 'La tarifa se editó en la plataforma' + (b.edMotivo ? ': ' + b.edMotivo : '') + (b.edQuien ? ' · ' + b.edQuien : '') + (b.edFecha ? ' · ' + String(b.edFecha).slice(0, 10) : '') + '.' });
     const ext = num(b.extCosto);
@@ -607,10 +617,23 @@ function procesarBase(lista) {
       id: String(parseInt(b.id, 10)), folio: b.folio || '', origen: b.origen || '', cliente: b.cliente || '', pedido: b.pedido || '',
       destino: b.destino || '', fecha, mes: fecha.slice(0, 7), hora: b.hora || '', unidad: b.unidad || '', status: b.status || '',
       dest, uni, costoPlat: null, costo, sC, srcC, man, sM, srcM, est, flags, editC: false, editM: false,
-      zona: b.zona, zonaNombre: zonaTxt, ventaFija: fijo ? venta : null, srcVFija: srcV
+      zona: b.zona, zonaNombre: zonaTxt, ventaFija: fijo ? venta : null, srcVFija: srcV,
+      otroOrigen, padre: esSi(b.esReparto) ? String(parseInt(b.padre, 10) || '') : ''
     };
-    recalcular(o); return o;
+    return o;
   });
+  // v15: el padre dice cuáles son sus hijos
+  const hijos = {};
+  out.forEach(o => { if (o.padre) (hijos[o.padre] = hijos[o.padre] || []).push(o.id); });
+  out.forEach(o => { const f = o.flags.find(x => x.t === 'viaje padre');
+    if (f && hijos[o.id]) { f.l = 'padre de ' + hijos[o.id].join(', '); f.d = 'Sus repartos en esta carga: ' + hijos[o.id].join(', ') + '.'; } });
+  // v15: citas de un mes posterior al que domina la carga
+  const cuenta = {}; out.forEach(o => { if (o.mes) cuenta[o.mes] = (cuenta[o.mes] || 0) + 1; });
+  const mesP = Object.keys(cuenta).sort((a, b) => cuenta[b] - cuenta[a] || (a < b ? -1 : 1))[0];
+  out.forEach(o => { if (mesP && o.mes > mesP) { o.citaSig = true;
+    o.flags.push({ c: 'a', t: 'cita del mes siguiente', l: 'cita en ' + mesLabel(o.mes).split(' ')[0], d: 'La cita es el ' + o.fecha + '. Decide si se cobra en este corte o en el siguiente; si lo cobras ahora, cualquier costo que aparezca después ya no entraría.' }); }
+    recalcular(o); });
+  return out;
 }
 
 /* ---------- estado ---------- */
@@ -778,7 +801,7 @@ function renderTabla() {
     <tr class="st-${o.sem}" data-id="${o.id}">
       <td><span class="sem ${o.sem}"></span></td>
       <td><b>${o.id}</b></td>
-      <td class="dest" title="${o.destino}">${o.destino}</td>
+      <td class="dest" title="${o.destino}">${o.destino}${o.otroOrigen ? `<span class="src">sale de ${o.origen}</span>` : ''}</td>
       <td style="white-space:nowrap">${o.unidad}</td>
       <td style="white-space:nowrap">${o.fecha}</td>
       <td class="num${hi === 'man' ? ' hi' : ''}"><input class="inp ${o.editM ? 'edited' : ''}" data-k="man" value="${o.man == null ? '' : o.man}"></td>
@@ -786,7 +809,7 @@ function renderTabla() {
       <td class="num${hi === 'costo' ? ' hi' : ''}"><input class="inp ${o.editC ? 'edited' : ''}" data-k="costo" value="${o.costo == null ? '' : o.costo}"><span class="src">${o.srcC}</span></td>
       <td class="num">${mny(o.venta)}<span class="src">${o.srcV}</span></td>
       <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
-      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.t}</span>`).join('')}</td>
+      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}</td>
     </tr>`).join('') : '<tr><td colspan="11" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
   <tfoot><tr>
     <td colspan="5">Subtotales (${v.length} viajes)</td>
@@ -1005,7 +1028,19 @@ const CLIENTES = {
   lyc: { n: 'LYC', re: /\bLYC\b/i, corte: EMPRESA + ' LYC' },
   otros: { n: 'otros clientes', re: null, corte: EMPRESA + ' OTROS' }
 };
-let CLIENTE = 'playmobil', FUERA = {};
+let CLIENTE = 'playmobil', FUERA = {}, YA_FACT = 0;
+// v15: deja fuera los viajes que ya están en Viajes Facturados (llegan con la memoria del servidor)
+function quitarFacturados(rows) {
+  YA_FACT = 0;
+  const F = new Set((MEM_FUENTE === 'servidor' && M.facturados) || []);
+  const ya = rows.filter(r => F.has(idNum(r)));
+  if (!ya.length) return rows;
+  const ids = ya.map(idNum).sort((a, b) => a - b);
+  if (ya.length === rows.length) return confirm('Los ' + rows.length + ' viajes ya están en lo facturado (del ' + ids[0] + ' al ' + ids[ids.length - 1] + '). ¿Los cargo de todas formas para revisarlos?') ? rows : null;
+  if (!confirm(ya.length + ' de estos viajes ya están en lo facturado (' + (ids.length > 6 ? ids.slice(0, 6).join(', ') + '…' : ids.join(', ')) + '). ¿Los dejo fuera para no cobrarlos dos veces?')) return rows;
+  YA_FACT = ya.length;
+  return rows.filter(r => !F.has(idNum(r)));
+}
 const empresaCorte = () => CLIENTES[CLIENTE].corte;
 const lsCorte = () => CLIENTE === 'playmobil' ? LS_CORTE : LS_CORTE + '_' + CLIENTE;
 function clienteDe(r) {
@@ -1196,7 +1231,10 @@ async function traerDeBase() {
     if (!d.viajes || !d.viajes.length) { msgBase(MODO_BASE === 'corte' ? 'No hay viajes nuevos después del corte.' : 'No hay viajes en ese rango de fechas.', true); return; }
     const fx = filtrarCliente(d.viajes);
     if (!fx.rows.length) { msgBase('Llegaron ' + d.viajes.length + ' viajes, pero ninguno es de ' + CLIENTES[CLIENTE].n + '.', true); return; }
-    FUENTE = 'base'; DEMO = false; ROWS = fx.rows; FUERA = fx.fuera; AVANCE_DESC = null;
+    await pedirMemoria();
+    const sinFact = quitarFacturados(fx.rows);
+    if (!sinFact) { msgBase('No se cargó nada.', true); return; }
+    FUENTE = 'base'; DEMO = false; ROWS = sinFact; FUERA = fx.fuera; AVANCE_DESC = null;
     if (MODO_BASE === 'fechas') {
       const u = leerCorte();
       if (u) { const nuevos = ROWS.filter(r => idNum(r) > u).length; if (nuevos && nuevos < ROWS.length) { preguntarCorte(u, ROWS.length, nuevos); return; } }
@@ -1428,8 +1466,10 @@ async function cargar(rows) {
   const fx = filtrarCliente(rows);
   if (!fx.rows.length) { alert('Ninguno de los viajes del archivo es de ' + CLIENTES[CLIENTE].n + '.'); return; }
   rows = fx.rows; FUERA = fx.fuera; AVANCE_DESC = null;
-  ROWS = rows;
   await pedirMemoria();
+  rows = quitarFacturados(rows);
+  if (!rows) return;
+  ROWS = rows;
   await sincronizarCorte();
   const u = leerCorte();
   if (u) {
@@ -1445,7 +1485,8 @@ function arrancar(rows, desde) {
   const fs = VIAJES.map(v => v.fecha).filter(Boolean).sort();
   const nf = Object.values(FUERA).reduce((a, b) => a + b, 0);
   $('#periodo').innerHTML = '· ' + CLIENTES[CLIENTE].n + (fs.length ? ' · ' + fs[0] + ' a ' + fs[fs.length - 1] : '') +
-    (nf ? ' <span class="fuera-nota">· se dejaron fuera ' + nf + ' viajes de otros clientes (' + Object.entries(FUERA).map(([k, v]) => k + ': ' + v).join(', ') + ')</span>' : '');
+    (nf ? ' <span class="fuera-nota">· se dejaron fuera ' + nf + ' viajes de otros clientes (' + Object.entries(FUERA).map(([k, v]) => k + ': ' + v).join(', ') + ')</span>' : '') +
+    (YA_FACT ? ' <span class="fuera-nota">· se dejaron fuera ' + YA_FACT + ' ya facturados</span>' : '');
   $('#cardLoad').classList.add('hidden'); $('#results').classList.remove('hidden');
   redraw(); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
