@@ -7681,7 +7681,88 @@ function renderSwitchDomiciliados(){
           ? 'background:#f5f6f8;color:#4a5068;border:1px solid #dde1e9">⏸ Apagar el aviso'
           : 'background:#c0392b;color:#fff;border:none">🔴 Activar el aviso del día 1')
     + '</button>'
-    + '</div>';
+    + '</div>'
+    // 1-oct-2026 — ENVIAR AHORA. El día 1 el aviso sale solo a las 10:05, pero si el
+    // interruptor se enciende después de esa hora el mes se perdía: el sistema ya
+    // había pasado. Este botón dispara el mismo envío a mano, con el mismo filtro,
+    // y solo aparece cuando el interruptor está encendido.
+    + (DOMI_ACTIVO
+        ? '<div style="margin-top:13px;padding-top:13px;border-top:1px solid #f5b7b1">'
+          + '<div style="font-size:.72rem;color:#4a5068;line-height:1.55;margin-bottom:9px">'
+            + '¿No quieres esperar al día 1, o ya pasaron las 10:05 de hoy? Puedes mandarlo en este momento; '
+            + 'te decimos a cuántos les va a llegar antes de soltarlo, y al terminar el interruptor se apaga solo.'
+          + '</div>'
+          + '<button id="btn-domi-ahora" onclick="domiEnviarAhora()" '
+            + 'style="padding:9px 18px;border-radius:20px;cursor:pointer;border:none;background:#1a3a6b;color:#fff;'
+            + 'font-family:\'Montserrat\',sans-serif;font-size:.75rem;font-weight:800">🚀 Enviar ahora</button>'
+          + '</div>'
+        : '');
+}
+
+// 1-oct-2026 — DISPARO MANUAL DEL AVISO PREVIO.
+// Son dos llamadas al mismo motor: la primera solo cuenta y no manda nada, y con
+// ese número se arma la confirmación; la segunda es la que suelta el envío. El
+// motor responde apenas arranca y sigue enviando atrás, por eso no se espera a que
+// termine. El interruptor del mes manda igual: si está apagado, no sale nada.
+const URL_DOMI_DISPARAR = 'https://n8n.excelentia.com.mx/webhook/berimbau-domiprev-disparar';
+
+async function domiEnviarAhora(){
+  const btn = document.getElementById('btn-domi-ahora');
+  const txt = btn ? btn.innerHTML : '';
+  const bloquear = v => { if(btn){ btn.disabled = v; btn.innerHTML = v ? '⏳ Un momento...' : txt; } };
+
+  bloquear(true);
+  let info;
+  try {
+    const r = await fetch(URL_DOMI_DISPARAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ solo_contar:true })
+    });
+    info = await r.json();
+    if(!r.ok || !info || info.ok !== true){
+      bloquear(false);
+      showToast('⚠️ ' + ((info && info.mensaje) || 'No se pudo consultar a cuántos les toca'));
+      return;
+    }
+  } catch(e){
+    bloquear(false);
+    showToast('❌ No se pudo conectar con el sistema de avisos');
+    return;
+  }
+  bloquear(false);
+
+  const total = Number(info.total||0);
+  if(!total){
+    showToast('⚠️ Ahora mismo no hay nadie a quien enviarle este aviso');
+    return;
+  }
+
+  const aviso = info.modo_prueba
+    ? '🔒 Modo prueba: llega solo al equipo de prueba.'
+    : '⚠️ Llega de verdad a los usuarios del Club.';
+  if(!confirm('Aviso previo de cargo domiciliado\n\n'
+      + 'Le va a llegar a ' + total.toLocaleString('es-MX') + ' usuario' + (total===1?'':'s') + ':\n'
+      + '· ' + Number(info.con_correo||0).toLocaleString('es-MX') + ' por correo\n'
+      + '· ' + Number(info.con_whatsapp||0).toLocaleString('es-MX') + ' por WhatsApp\n\n'
+      + aviso + '\n\n¿Lo mando ahora?')) return;
+
+  bloquear(true);
+  try {
+    const r = await fetch(URL_DOMI_DISPARAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({})
+    });
+    const d = await r.json();
+    if(r.ok && d && d.ok === true){
+      showToast('✅ Aviso lanzado a ' + Number(d.total||total).toLocaleString('es-MX') + ' usuarios. Tarda unos minutos; el acuse llega por correo.');
+      setTimeout(cargarSwitchDomiciliados, 20000);
+    } else {
+      showToast('⚠️ ' + ((d && d.mensaje) || 'No se pudo lanzar el aviso'));
+    }
+  } catch(e){
+    showToast('❌ No se pudo conectar con el sistema de avisos');
+  }
+  bloquear(false);
 }
 
 // Apagar es directo. Prender abre la confirmacion con la palabra ACTIVAR.
