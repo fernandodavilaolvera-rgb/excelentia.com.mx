@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rentabilidad v1 · Logística Armada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',-apple-system,sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.42;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1rem 3rem}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.7rem 0;margin-bottom:1.1rem}
+.hd{max-width:1180px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.7rem}
+.logo-box{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback{font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:11px;font-weight:500;color:#fff;letter-spacing:.2px}
+.hd-title{display:flex;align-items:center;gap:.75rem;text-align:right}
+.hd-title h1{font-size:14px;font-weight:800;color:#fff}
+.hd-title p{font-size:10.5px;color:#b9d3ec;font-weight:500}
+.logo-box-4pl{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;flex-shrink:0}
+.logo-box-4pl img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback-4pl{font-size:14px;font-weight:800;color:#1a3a6b;display:none;white-space:nowrap}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:1.1rem}
+.card h2{font-size:15px;font-weight:800;color:#1a2035;margin-bottom:.15rem}
+.card .sub{font-size:12.5px;color:#4a5068;margin-bottom:.9rem;max-width:720px}
+
+/* BARRA DE EMPRESA */
+.empresas{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.emp{font-size:12.5px;font-weight:700;padding:.42rem .85rem;border-radius:20px;border:1px solid #dde1e9;background:#fff;color:#4a5068;cursor:pointer;transition:.15s}
+.emp:hover{background:#e8f0fb;border-color:#4a9fd4}
+.emp.on{background:#1a3a6b;border-color:#1a3a6b;color:#fff}
+.emp-add{border-style:dashed;color:#8a90a0}
+.emp-lbl{font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#8a90a0;margin-right:.2rem}
+
+/* FORM */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.85rem;max-width:960px}
+.f{display:flex;flex-direction:column;gap:.22rem}
+.f label{font-size:11.5px;font-weight:700;color:#4a5068}
+.f .hint{font-size:10.5px;color:#8a90a0;font-weight:500}
+input,select{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a2035;border:1px solid #dde1e9;border-radius:8px;padding:.48rem .6rem;background:#fff;width:100%;max-width:320px}
+input:focus,select:focus{outline:2px solid #4a9fd4;outline-offset:-1px;border-color:#4a9fd4}
+input.wide{max-width:100%}
+.f.full{grid-column:1/-1}
+.f.full input{max-width:100%}
+
+/* AUTOCOMPLETADO */
+.ac{position:relative;max-width:320px}
+.ac input{width:100%}
+.ac-list{position:absolute;z-index:40;top:100%;left:0;right:0;background:#fff;border:1px solid #dde1e9;
+  border-radius:8px;margin-top:.2rem;max-height:250px;overflow-y:auto;box-shadow:0 6px 18px rgba(13,27,62,.13)}
+.ac-op{padding:.42rem .6rem;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
+.ac-op:hover,.ac-op.sel{background:#e8f0fb}
+.ac-op .est{font-size:11px;color:#8a90a0;font-weight:500}
+.ac-op.rec{background:#f5faff}
+.ac-op.rec:hover,.ac-op.rec.sel{background:#e8f0fb}
+.ac-sep{padding:.3rem .6rem;font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:#8a90a0;background:#f5f6f8;border-top:1px solid #eef0f4;border-bottom:1px solid #eef0f4}
+.ac-nueva{padding:.42rem .6rem;font-size:12.5px;color:#4a5068;cursor:pointer;border-top:1px solid #eef0f4}
+.ac-nueva:hover,.ac-nueva.sel{background:#e8f0fb}
+
+/* CAMPO CON AGENTE */
+.dual{display:flex;gap:.4rem;align-items:center;max-width:320px}
+.dual input{flex:1;min-width:0}
+.dual .auto{font-size:12.5px;font-weight:700;color:#2e7d5b;background:#e8f5ee;border:1px solid #bfe0cd;
+  border-radius:7px;padding:.42rem .55rem;white-space:nowrap;cursor:pointer}
+.dual .auto:hover{background:#d8eee2}
+.dual .auto.off{color:#8a90a0;background:#f5f6f8;border-color:#dde1e9}
+.agente{font-size:10.5px;color:#2e7d5b;font-weight:600}
+.agente.off{color:#8a90a0}
+.agente.buscando{color:#4a9fd4}
+
+/* BOTONES */
+.btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:.5rem .95rem;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;transition:.15s}
+.btn:hover{background:#1e5096}
+.btn.ghost{background:#fff;color:#1a3a6b}
+.btn.ghost:hover{background:#e8f0fb}
+.btn.green{background:#2e9e5b;border-color:#2e9e5b}
+.btn.green:hover{background:#268a4e}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
+.link{font-size:11.5px;color:#8a90a0;background:none;border:none;font-family:inherit;cursor:pointer;text-decoration:underline;padding:.2rem 0}
+.link:hover{color:#1a3a6b}
+
+/* RESULTADO */
+.precios{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;margin-bottom:1rem}
+.pbox{border:1px solid #dde1e9;border-radius:10px;padding:.85rem .95rem;background:#fff}
+.pbox .lb{font-size:11px;font-weight:700;color:#8a90a0;letter-spacing:.5px;margin-bottom:.15rem}
+.pbox .vl{font-size:22px;font-weight:800;color:#1a2035;line-height:1.15}
+.pbox .hint{font-size:11.5px;color:#4a5068;margin-top:.15rem}
+.pbox.piso{background:#fdf6e3;border-color:#ecdcae}
+.pbox.piso .vl{color:#b8860b}
+.pbox.meta{background:#e8f5ee;border-color:#bfe0cd}
+.pbox.meta .vl{color:#2e7d5b}
+.pbox.costo{background:#f5f6f8}
+
+/* DESGLOSE */
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:460px}
+thead th{background:#dce8f7;color:#1a3a6b;font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;text-align:left;padding:.5rem .7rem;border:1px solid #dde1e9;white-space:nowrap}
+tbody td{padding:.48rem .7rem;border:1px solid #dde1e9;color:#4a5068}
+tbody td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr.sum td{background:#eef4fc;font-weight:800;color:#1a2035}
+tbody tr.total td{background:#dce8f7;font-weight:800;color:#0d1b3e;font-size:14.5px}
+tbody td b{color:#1a2035}
+.dim{color:#8a90a0;font-size:11.5px}
+
+/* AVISOS */
+.aviso{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.8rem .95rem;margin:.9rem 0;max-width:720px}
+.aviso .t{font-size:12.5px;font-weight:800;color:#1a3a6b;margin-bottom:.25rem}
+.aviso p{font-size:12.5px;color:#4a5068}
+.aviso.duda{background:#fdf6e3;border-color:#ecdcae;border-left-color:#b8860b}
+.aviso.duda .t{color:#8a6d0b}
+.aviso ul{margin:.4rem 0 0 1.1rem}
+.aviso li{font-size:12.5px;color:#4a5068;margin-bottom:.2rem}
+
+.porconf{display:inline-block;font-size:10px;font-weight:800;color:#8a6d0b;background:#fdf6e3;border:1px solid #ecdcae;border-radius:10px;padding:.03rem .38rem;margin-left:.3rem;vertical-align:middle}
+
+/* COMPARADOR */
+.rutas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem;max-width:960px}
+.ruta{border:1px solid #dde1e9;border-radius:10px;padding:.85rem;background:#fff}
+.ruta h4{font-size:13px;font-weight:800;margin-bottom:.5rem;color:#1a2035}
+.ruta .res{margin-top:.6rem;padding-top:.6rem;border-top:1px solid #dde1e9;font-size:12.5px;color:#4a5068}
+.ruta .res b{display:block;font-size:18px;font-weight:800;color:#1a2035}
+.ruta.gana{border-color:#2e9e5b;background:#f4fbf7}
+.ruta.gana .res b{color:#2e7d5b}
+
+footer{text-align:center;padding:1.2rem 1rem;color:#8a90a0;font-size:11.5px;border-top:1px solid #dde1e9;margin-top:1rem}
+
+.hidden{display:none!important}
+.acc{border:1px solid #dde1e9;border-radius:10px;margin-bottom:.7rem;background:#fff}
+.acc>summary{padding:.7rem .95rem;font-size:13px;font-weight:800;color:#1a3a6b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary::after{content:'▾';color:#8a90a0;font-size:12px}
+.acc[open]>summary::after{content:'▴'}
+.acc>summary:hover{background:#e8f0fb}
+.acc .bd{padding:.3rem .95rem 1rem}
+
+/* MOVIL */
+@media (max-width:600px){
+  .wrap{padding:0 .7rem 2.5rem}
+  header{padding:.6rem 0}
+  .hd{flex-direction:column;align-items:flex-start;gap:.7rem}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .hd-title{text-align:left;flex-direction:column;align-items:flex-start;gap:.5rem}
+  .card{padding:.9rem;border-radius:10px}
+  .grid{grid-template-columns:1fr}
+  input,select{max-width:100%}
+  .precios{grid-template-columns:1fr}
+  .rutas{grid-template-columns:1fr}
+  table{font-size:12.5px}
+  thead th,tbody td{padding:.4rem .5rem}
+}
+
+/* IMPRESION */
+@page{size:Letter;margin:13mm 13mm 15mm}
+@media print{
+  body{background:#fff;font-size:10pt;line-height:1.38}
+  .wrap{max-width:none;padding:0}
+  .no-print{display:none!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  header{padding:.6rem 0;margin-bottom:.7rem;break-inside:avoid;break-after:avoid}
+  .logo-box img,.logo-box-4pl img{height:36px}
+  .card{break-inside:auto;border-radius:0;border:none;border-bottom:1px solid #dde1e9;padding:.5rem 0;margin-bottom:.5rem}
+  .card h2{break-after:avoid;font-size:11.5pt}
+  .pbox,.aviso,.ruta{break-inside:avoid}
+  .precios{break-inside:avoid;grid-template-columns:repeat(3,1fr)}
+  .tblwrap{overflow:visible;break-inside:auto}
+  table{min-width:0;font-size:9.4pt}
+  thead{display:table-header-group}
+  tbody tr{break-inside:avoid}
+  p,li{orphans:3;widows:3}
+  .acc{break-inside:avoid;border:none}
+  .acc .bd{padding:.2rem 0}
+  footer{break-inside:avoid;font-size:8.5pt}
+  a[href]:after{content:none}
+}
+
+/* ============ PESTAÑAS Y MARGEN POR RUTA (v3) ============ */
+.vistas{display:flex;gap:.4rem;margin-bottom:1rem;border-bottom:1px solid #dde1e9}
+.vista{font-family:inherit;font-size:13.5px;font-weight:700;color:#4a5068;background:none;border:none;border-bottom:3px solid transparent;padding:.55rem .9rem;cursor:pointer;margin-bottom:-1px}
+.vista:hover{color:#1a3a6b;background:#e8f0fb}
+.vista.on{color:#1a3a6b;border-bottom-color:#4a9fd4}
+.mr-foto{font-size:11.5px;color:#8a90a0;font-weight:600}
+.mr-pills{margin:.3rem 0 .9rem}
+.mr-u{display:none}
+.mr-u.on{display:block}
+.mr-uni{font-size:15px;color:#1a3a6b;margin-bottom:.6rem}
+.mr-h3{font-size:13.5px;font-weight:800;color:#1a2035;margin:1.1rem 0 .1rem}
+.mr-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:960px}
+.mr-kpi{background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:8px;padding:.55rem .7rem}
+.mr-kpi b{display:block;font-size:17px;font-weight:800;color:#1a3a6b}
+.mr-kpi span{font-size:11.5px;color:#4a5068}
+table.mr-t{min-width:1060px;font-size:12.5px}
+.mr-neg{color:#b42318}
+table.mr-t thead th{text-align:left;vertical-align:bottom;line-height:1.25}
+table.mr-t thead th.num{text-align:right}
+table.mr-t thead th.mr-ref{background:#eef0f4;color:#4a5068}
+table.mr-t tbody td{vertical-align:top}
+table.mr-t tbody tr:hover td{background:#e8f0fb}
+.mr-dest{font-weight:700;color:#1a2035!important;white-space:nowrap}
+.mr-sep{border-left:3px solid #c8d9f0!important}
+.mr-g{color:#b0b5c0!important}
+.mr-n{display:block;font-size:10.5px;color:#8a90a0;font-weight:500}
+.mr-lec{min-width:150px}
+.mr-b{display:inline-block;font-size:10.5px;font-weight:700;border-radius:10px;padding:.08rem .45rem;margin:0 .15rem .15rem 0;white-space:nowrap}
+.mr-b.rojo{background:#fde8e8;color:#b42318}
+.mr-b.ambar{background:#fff4dc;color:#9a5b00}
+.mr-b.gris{background:#eef0f4;color:#4a5068}
+.mr-ley{display:flex;flex-wrap:wrap;gap:.3rem .9rem;font-size:12px;color:#4a5068;margin-top:.7rem}
+.mr-sup{list-style:none;max-width:720px}
+.mr-sup li{padding:.35rem 0;border-bottom:1px solid #eef0f4;font-size:12.5px;color:#4a5068}
+.mr-sup li:last-child{border-bottom:none}
+.mr-sup b{color:#1a2035}
+#vMargen .aviso{max-width:720px}
+@media (max-width:600px){
+  .vistas{overflow-x:auto}
+  .vista{white-space:nowrap;padding:.5rem .7rem}
+  .mr-kpis{grid-template-columns:1fr 1fr}
+}
+@media print{
+  .mr-u{display:block!important;break-before:page}
+  .mr-u:first-of-type{break-before:auto}
+  .mr-kpi,.mr-b{break-inside:avoid}
+  .mr-uni,.mr-h3{break-after:avoid}
+  table.mr-t{min-width:0;font-size:8.6pt}
+  #vMargen .acc{break-inside:auto}
+}
+
+/* ---------- v7 ---------- */
+.mk{margin:.2rem 0 1rem;border-top:1px solid #dde1e9;padding-top:.8rem}
+.mk-hd{display:flex;flex-wrap:wrap;gap:.45rem .9rem;align-items:center;margin:0 0 .65rem}
+.mk-hd h3{font-size:14px;font-weight:800;color:#1a3a6b;margin:0;break-after:avoid}
+.mk-hd select{max-width:240px}
+.pbox.merc{background:#e8f0fb;border-color:#c8d9f0}
+.pbox.merc .vl{color:#1a3a6b}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:.05rem .45rem;margin-left:.35rem;white-space:nowrap;vertical-align:1px}
+.tag.barato{background:#e8f5ee;color:#2e7d5b}
+.tag.usado{background:#dce8f7;color:#1a3a6b}
+.tag.sin{background:#f5f6f8;color:#8a90a0;border:1px solid #dde1e9}
+tr.alt td{background:#f0f6ff}
+.pv-list{margin:.2rem 0 .4rem 1.1rem;padding:0;max-width:720px}
+.pv-list li{margin:.3rem 0;font-size:13px;orphans:3;widows:3}
+.pv-list .link{font-size:13px;padding:0}
+@media print{
+  .pbox,.tag,tr.alt td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pbox,.pv-list li,tr{break-inside:avoid}
+  .mk-hd h3{break-after:avoid}
+}
+
+/* v8 · clave de acceso, ficha y estado de los datos */
+.gate{position:fixed;inset:0;background:rgba(13,27,62,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
+.gate.hidden{display:none}
+.gate-box{background:#fff;border:1px solid #dde1e9;border-radius:14px;max-width:420px;width:100%;padding:1.3rem 1.3rem 1rem;box-shadow:0 12px 40px rgba(13,27,62,.25)}
+.gate-box h2{font-size:17px;color:#1a3a6b;margin:0 0 .4rem}
+.gate-box input{width:100%;box-sizing:border-box;font-family:'Manrope',sans-serif;font-size:15px;padding:.6rem .7rem;border:1px solid #dde1e9;border-radius:8px;margin:.5rem 0}
+.gate-msg{font-size:12.5px;color:#1a3a6b;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:6px;padding:.4rem .6rem;margin:.2rem 0 .4rem}
+.ficha-t{max-width:720px}
+.ficha-t td:first-child{color:#4a5068;width:38%;font-weight:600}
+.ficha-t td{border-bottom:1px solid #eef1f6;padding:.38rem .5rem;font-size:13px}
+#estadoDatos{font-size:12px}
+@media print{.ficha-t tr{break-inside:avoid}.gate{display:none!important}}
+
+/* Rentabilidad v1 */
+.rt{width:100%;border-collapse:collapse;font-size:12.5px}
+.rt th{background:#dce8f7;color:#1a3a6b;font-weight:700;text-align:left;padding:.45rem .55rem;white-space:nowrap}
+.rt th.num,.rt td.num{text-align:right}
+.rt th.ord{cursor:pointer}.rt th.ord:hover{background:#c9dbf2}.rt th.on{background:#c9dbf2}
+.rt td{border-bottom:1px solid #eef1f6;padding:.42rem .55rem;vertical-align:top}
+.rt tr:hover td{background:#e8f0fb}
+.rt .mr-n{display:block;font-size:11px;color:#8a90a0;font-weight:500}
+.rt .motivo{max-width:340px;color:#4a5068}.rt .motivo div{margin-bottom:.15rem}
+.neg{color:#c0392b}
+.pbox.malbox{background:#fdecea;border-color:#f3c3bd}.pbox.malbox .vl{color:#c0392b}
+.gm{width:100%;max-width:720px;height:auto;display:block}
+.gm .bc{fill:#1e5096}.gm .bp{fill:#9fc2e7}.gm .tm{font-size:12px;fill:#4a5068;font-family:Manrope,sans-serif}
+.gm .tv{font-size:11.5px;font-weight:700;fill:#1a2035;font-family:Manrope,sans-serif}
+.gm .mb{cursor:pointer}.gm .mb:hover rect,.gm .mb.sel rect{opacity:.8;stroke:#0d1b3e;stroke-width:1}
+.leyenda{font-size:11.5px;color:#4a5068;margin-top:.3rem}
+.sq{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 .2rem 0 .5rem;vertical-align:-1px}.sq.bc{background:#1e5096}.sq.bp{background:#9fc2e7}
+.chk{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:12.5px;margin:.2rem 0}
+.chk label{display:flex;align-items:center;gap:.3rem;font-weight:500;color:#1a2035}
+#estadoDatos{margin-top:.5rem}
+@media(max-width:600px){.rt{font-size:11.5px}.rt .motivo{max-width:220px}}
+@media print{
+  .vw.hidden{display:block!important}
+  .vw{break-before:page}.vw:first-of-type{break-before:auto}
+  .rt thead{display:table-header-group}.rt tr{break-inside:avoid}
+  .rt th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pbox{break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .gm{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="hd-title">
+      <div>
+        <h1>Rentabilidad · Logística Armada</h1>
+        <p>v1 · Por cliente, ruta y transportista contra lo pagado</p>
+      </div>
+      <div class="logo-box-4pl">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback-4pl">Logística Armada</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="gate" class="gate hidden no-print" role="dialog" aria-modal="true" aria-labelledby="gateT">
+  <div class="gate-box">
+    <h2 id="gateT">Clave de acceso</h2>
+    <p class="sub">Rentabilidad cruza lo que facturaste con lo que les pagaste a tus transportistas; por eso pide la misma clave del Copiloto de Facturación. Se pide una vez en este equipo.</p>
+    <input id="gateClave" type="password" autocomplete="current-password" placeholder="escribe la clave">
+    <p class="gate-msg" id="gateMsg" style="display:none"></p>
+    <div class="btnrow"><button class="btn green" id="gateEntrar">Entrar</button></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="vistas no-print" id="vistas">
+    <button class="vista on" data-v="resumen">Resumen</button>
+    <button class="vista" data-v="cliente">Por cliente</button>
+    <button class="vista" data-v="ruta">Por ruta</button>
+    <button class="vista" data-v="trans">Por transportista</button>
+    <button class="vista" data-v="mal">Salieron mal</button>
+    <button class="vista" data-v="ediciones">Ediciones de tarifa</button>
+  </div>
+
+  <section class="card no-print">
+    <h2>Qué se mide</h2>
+    <p class="sub">Cada viaje facturado contra lo que se le pagó al transportista en tu plataforma. Un viaje padre se cuenta junto con sus repartos, como un solo servicio.</p>
+    <div class="empresas" id="fMes"></div>
+    <div class="grid">
+      <div class="f"><label>Medir con</label>
+        <select id="fBase"><option value="flete">Solo el flete</option><option value="todo">Todo lo cobrado</option></select>
+        <span class="hint" id="hBase"></span></div>
+      <div class="f"><label>Salió mal si deja menos de</label>
+        <input id="fUmbral" type="number" step="0.5"><span class="hint">porcentaje de margen; también cuenta la pérdida</span></div>
+    </div>
+    <div id="fComision"></div>
+    <div id="estadoDatos" class="hint"></div>
+  </section>
+
+  <div class="vw" id="vResumen">
+    <section class="card"><h2>El periodo en números</h2><div class="precios" id="rKpis"></div><div id="rMes"></div></section>
+    <section class="card"><h2>Lo que salió</h2><div id="rSalio"></div></section>
+  </div>
+  <div class="vw hidden" id="vCliente"><section class="card"><h2>Por cliente</h2><p class="sub">Toca el encabezado de una columna para ordenar.</p><div id="tCliente"></div></section></div>
+  <div class="vw hidden" id="vRuta"><section class="card"><h2>Por ruta</h2>
+    <p class="sub">Destino y unidad. Toca el encabezado de una columna para ordenar; por omisión van primero las que más dejan.</p>
+    <div class="grid no-print"><div class="f"><label>Buscar destino</label><input id="fBuscaRuta" placeholder="escribe parte del nombre"></div></div>
+    <div id="tRuta"></div></section></div>
+  <div class="vw hidden" id="vTrans"><section class="card"><h2>Por transportista</h2><p class="sub">Aquí cada viaje se cuenta con el transportista que lo hizo, aunque sea reparto de otro.</p><div id="tTrans"></div></section></div>
+  <div class="vw hidden" id="vMal"><section class="card"><h2>Servicios que salieron mal</h2><p class="sub" id="malSub"></p><div id="tMal"></div></section></div>
+  <div class="vw hidden" id="vEdiciones"><section class="card"><h2>Ediciones de tarifa</h2>
+    <p class="sub">Cada vez que se cambió lo que se le paga al transportista después de crear el viaje: de cuánto a cuánto, por qué y cuándo.</p><div id="tEdiciones"></div></section></div>
+
+  <details class="acc">
+    <summary>De dónde sale cada número</summary>
+    <div class="bd"><ul class="mr-sup">
+      <li><b>Cobrado:</b> tus reportes de facturación ya cargados (flete, maniobra y estadía, sin IVA).</li>
+      <li><b>Pagado:</b> lo que tu plataforma tiene registrado para el transportista en ese viaje: flete (o lo pagado por rechazo), maniobras, estadías, custodia y costos extra.</li>
+      <li><b>Solo el flete:</b> flete cobrado contra flete pagado. Se recomienda mientras muchas maniobras se paguen por fuera de la plataforma, porque contarlas cobradas y sin su pago infla el margen.</li>
+      <li><b>Servicio:</b> un viaje padre con sus repartos se suma como uno solo; la ruta es la del padre.</li>
+      <li><b>Pagado a tu propia empresa:</b> cuando el transportista registrado es Logística Armada, lo pagado no es un costo con un tercero y el margen real queda dentro; se marca aparte.</li>
+    </ul></div>
+  </details>
+
+  <footer>ExcelentIA · Rentabilidad · Logística Armada · v1 · versión para revisión</footer>
+</div>
+
+<script>
+/* ============ Rentabilidad · v1 ============ */
+const $ = s => document.querySelector(s);
+const mny0 = n => n == null || isNaN(n) ? '—' : (n < 0 ? '−$' : '$') + Math.round(Math.abs(n)).toLocaleString('es-MX');
+const pct = n => n == null || isNaN(n) ? '—' : (n < 0 ? '−' : '') + (Math.abs(n) * 100).toFixed(1) + '%';
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const VIAJES_URL = 'https://n8n.excelentia.com.mx/webhook/4pl-viajes';
+const LS_CLAVE = 'la_clave_viajes', LS_CFG = 'la_rentabilidad_cfg';
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const fechaTxt = s => { const x = String(s || '').split('-').map(Number); return x.length === 3 ? x[2] + ' de ' + MESES[x[1] - 1] : ''; };
+const mesTxt = m => MESES[Number(String(m).split('-')[1]) - 1] || m;
+const ZONAS = {1:'CDMX / Edo. de México',2:'Chalco',3:'Ajusco',4:'Toluca',5:'Guadalajara',6:'Monterrey',7:'Culiacán',8:'Villahermosa',9:'Chihuahua',10:'Mérida',11:'Puebla',12:'Querétaro',13:'Veracruz',14:'Silao',15:'Mexicali',16:'Tepeji',17:'Jilotepec',18:'Morelos',19:'Guanajuato',20:'Jalisco',21:'Michoacán',22:'CDMX +30KM',23:'Pachuca, Hgo.',24:'Cuernavaca',25:'Aguascalientes',27:'Coahuila',28:'Tijuana',30:'Campeche',31:'San Luis Potosí',32:'Zacatecas',33:'Sonora',34:'Tlaxcala',35:'Chiapas',36:'Oaxaca',37:'Guerrero'};
+const PROVN = {"27":"Trasportes Pérez","28":"TYR","29":"Alfa Trasportes","30":"MEL Logistics","31":"Trasportes Bautista","32":"Trasportes García","33":"Trasportes Mendiola","34":"Logística Armada","35":"Transguca","36":"Transporte S.O.R.","37":"Transporte Rodbar","38":"Transporte González","39":"Transportes 4PL","40":"Transportes MAS"};
+const bonito = s => String(s || '').toLowerCase().replace(/(^|\s|\.)([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
+const cliTxt = s => String(s || 'Sin cliente').replace(/^4pl-\s*/i, '').trim();
+const provTxt = id => id ? (PROVN[id] || 'Transportista ' + id) : 'Sin transportista';
+
+let CFG = { umbral: 3, base: 'flete', comision: [] };
+try { CFG = Object.assign(CFG, JSON.parse(localStorage.getItem(LS_CFG) || '{}')); } catch (e) { }
+const guardarCfg = () => { try { localStorage.setItem(LS_CFG, JSON.stringify(CFG)); } catch (e) { } };
+let SRV = null, MES = 'todos', VISTA = 'resumen';
+const ORDEN = { cliente: ['m', -1], ruta: ['m', -1], trans: ['m', -1] };
+
+/* ---------- clave y datos ---------- */
+function claveGuardada() { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } }
+function pedirClave(msg) {
+  $('#gate').classList.remove('hidden');
+  $('#gateMsg').textContent = msg || ''; $('#gateMsg').style.display = msg ? 'block' : 'none';
+  $('#gateClave').value = ''; setTimeout(() => $('#gateClave').focus(), 50);
+}
+async function cargar(clave, desdeGate) {
+  estado('Trayendo los datos de tu plataforma…');
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 30000);
+  try {
+    const r = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clave: clave, modo: 'rentabilidad' }), signal: ctl.signal });
+    const j = await r.json(); clearTimeout(t);
+    if (!j || !j.ok) {
+      if (j && j.error === 'clave') { try { localStorage.removeItem(LS_CLAVE); } catch (e) { } estado(''); pedirClave('La clave no es correcta. Vuelve a escribirla.'); return; }
+      throw new Error((j && j.error) || 'sin respuesta');
+    }
+    try { localStorage.setItem(LS_CLAVE, clave); } catch (e) { }
+    $('#gate').classList.add('hidden');
+    usar(j);
+  } catch (e) {
+    clearTimeout(t);
+    estado('No hubo respuesta de tu plataforma. <button class="link" id="btnRe">Reintentar</button>');
+    const b = $('#btnRe'); if (b) b.onclick = () => { const c = claveGuardada(); c ? cargar(c) : pedirClave(''); };
+    if (desdeGate) pedirClave('No hubo respuesta de tu plataforma. Revisa tu conexión e intenta de nuevo.');
+  }
+}
+function estado(h) { $('#estadoDatos').innerHTML = h; }
+
+/* ---------- servicios: un padre con sus repartos cuenta como uno ---------- */
+function armar() {
+  const vs = SRV.viajes.filter(v => MES === 'todos' || v[1] === MES);
+  const ids = new Set(vs.map(v => v[0]));
+  const S = {};
+  for (const v of vs) {
+    const k = (v[22] && v[21] && ids.has(v[21])) ? v[21] : v[0];
+    const s = S[k] || (S[k] = { id: k, viajes: [], ff: 0, fm: 0, fe: 0, pf: 0, pm: 0, pe: 0, px: 0 });
+    s.viajes.push(v);
+    s.ff += v[7]; s.fm += v[8]; s.fe += v[9]; s.pf += v[10]; s.pm += v[11]; s.pe += v[12]; s.px += v[13];
+  }
+  const lista = Object.values(S).map(s => {
+    const p = s.viajes.find(v => v[0] === s.id) || s.viajes[0];
+    s.padre = p; s.cli = cliTxt(p[2]); s.des = p[3]; s.uni = p[26]; s.z = p[4]; s.pr = p[6]; s.mes = p[1];
+    s.propia = !!p[24];
+    s.hijos = s.viajes.length - 1;
+    medir(s);
+    return s;
+  });
+  return { vs, lista };
+}
+function medir(o) {
+  o.cob = CFG.base === 'flete' ? o.ff : o.ff + o.fm + o.fe;
+  o.pag = CFG.base === 'flete' ? o.pf : o.pf + o.pm + o.pe + o.px;
+  o.mar = o.cob - o.pag;
+  o.pct = o.cob ? o.mar / o.cob : null;
+}
+const umbral = () => (Number(CFG.umbral) || 0) / 100;
+const conComision = s => CFG.comision.indexOf(s.cli) >= 0;
+const salioMal = s => !s.propia && !conComision(s) && s.cob > 0 && s.pct != null && s.pct < umbral();
+
+function motivos(s) {
+  const m = [], todo = CFG.base === 'todo';
+  if (s.propia) m.push('pagado a tu propia empresa; el margen real queda dentro');
+  if (s.pf > s.ff) m.push('el flete cobrado (' + mny0(s.ff) + ') no cubre lo pagado al transportista (' + mny0(s.pf) + ')');
+  s.viajes.forEach(v => { if (v[15]) m.push('tarifa del viaje ' + v[0] + ' editada de ' + mny0(v[16]) + ' a ' + mny0(v[10]) + (v[17] ? ': ' + esc(v[17]) : '')); });
+  s.viajes.forEach(v => { if (v[20] > 0 && v[10] > v[20] * 1.01) m.push('el viaje ' + v[0] + ' se pagó a ' + mny0(v[10]) + ', arriba de la tarifa cargada del transportista (' + mny0(v[20]) + ')'); });
+  if (s.hijos) {
+    const h = s.viajes.filter(v => v[0] !== s.id);
+    m.push(s.hijos + (s.hijos > 1 ? ' repartos' : ' reparto') + ' cobrados en ' + mny0(h.reduce((a, v) => a + v[7], 0)) + ' y pagados en ' + mny0(h.reduce((a, v) => a + v[10], 0)));
+  }
+  if (todo) {
+    if (s.pm > 0 && s.fm === 0) m.push('se pagó maniobra por ' + mny0(s.pm) + ' y no se cobró');
+    if (s.pe > 0 && s.fe === 0) m.push('se pagó estadía por ' + mny0(s.pe) + ' y no se cobró');
+    if (s.px > 0) m.push('costos extra por ' + mny0(s.px) + (s.viajes.some(v => v[14]) ? ' (' + esc(s.viajes.map(v => v[14]).filter(Boolean).join(' / ')) + ')' : ''));
+  }
+  if (!m.length || (m.length === 1 && s.propia)) m.push('margen delgado: se cobró ' + mny0(s.cob) + ' y se pagó ' + mny0(s.pag));
+  return m;
+}
+
+/* ---------- agrupar y pintar tablas ---------- */
+function agrupar(items, llave, nombre) {
+  const G = {};
+  items.forEach(o => {
+    const k = llave(o); const g = G[k] || (G[k] = { k, nom: nombre(o), n: 0, ff: 0, fm: 0, fe: 0, pf: 0, pm: 0, pe: 0, px: 0, mal: 0, malPes: 0, prop: 0 });
+    g.n++; ['ff', 'fm', 'fe', 'pf', 'pm', 'pe', 'px'].forEach(c => g[c] += o[c]);
+    if (o.esMal) { g.mal++; g.malPes += Math.min(o.mar, 0); }
+    if (o.propia) g.prop++;
+  });
+  return Object.values(G).map(g => { medir(g); return g; });
+}
+function tabla(cont, filas, vista, colNom, extra) {
+  const [c, dir] = ORDEN[vista];
+  filas.sort((a, b) => ((a[c] == null ? -1e12 : a[c]) > (b[c] == null ? -1e12 : b[c]) ? 1 : -1) * dir);
+  const cols = [['nom', colNom], ['n', 'Servicios'], ['cob', 'Cobrado'], ['pag', 'Pagado'], ['mar', 'Margen'], ['pct', 'Margen %'], ['mal', 'Salieron mal']];
+  const th = cols.map(x => `<th class="${x[0] === 'nom' ? '' : 'num'} ord${x[0] === c ? ' on' : ''}" data-o="${x[0]}">${x[1]}${x[0] === c ? (dir < 0 ? ' ↓' : ' ↑') : ''}</th>`).join('');
+  const tb = filas.map(g => `<tr><td>${esc(g.nom)}${g.prop ? '<span class="mr-n">' + g.prop + ' pagado' + (g.prop > 1 ? 's' : '') + ' a tu empresa</span>' : ''}</td>
+    <td class="num">${g.n}</td><td class="num">${mny0(g.cob)}</td><td class="num">${mny0(g.pag)}</td>
+    <td class="num ${g.mar < 0 ? 'neg' : ''}">${mny0(g.mar)}</td>
+    <td class="num">${g.pct != null ? '<b class="' + (g.pct < umbral() ? 'neg' : '') + '">' + pct(g.pct) + '</b>' : '—'}</td>
+    <td class="num">${g.mal ? g.mal + '<span class="mr-n">' + mny0(g.malPes) + '</span>' : '<span class="dim">—</span>'}</td></tr>`).join('');
+  cont.innerHTML = (extra || '') + `<div class="tblwrap"><table class="rt"><thead><tr>${th}</tr></thead><tbody>${tb || '<tr><td colspan="7" class="dim">Sin servicios en este periodo.</td></tr>'}</tbody></table></div>`;
+  cont.querySelectorAll('th[data-o]').forEach(h => h.onclick = () => {
+    const o = h.dataset.o; ORDEN[vista] = [o, ORDEN[vista][0] === o ? -ORDEN[vista][1] : (o === 'nom' ? 1 : -1)]; pintar();
+  });
+}
+
+function pintar() {
+  if (!SRV) return;
+  const { vs, lista } = armar();
+  lista.forEach(s => s.esMal = salioMal(s));
+  const T = agrupar(lista, () => 't', () => 'Total')[0] || { cob: 0, pag: 0, mar: 0, pct: null, n: 0 };
+  const malos = lista.filter(s => s.esMal).sort((a, b) => a.mar - b.mar);
+  const perdida = malos.reduce((a, s) => a + Math.min(s.mar, 0), 0);
+  const fmSin = vs.reduce((a, v) => a + (v[8] > 0 && v[11] === 0 ? v[8] : 0), 0);
+  const per = MES === 'todos' ? 'de ' + mesTxt(SRV.meses[0]) + ' a ' + mesTxt(SRV.meses[SRV.meses.length - 1]) : 'de ' + mesTxt(MES);
+  $('#hBase').textContent = CFG.base === 'flete' ? 'recomendado mientras las maniobras se paguen por fuera' : 'flete, maniobras, estadías y extras';
+
+  // resumen
+  $('#rKpis').innerHTML = `
+    <div class="pbox"><div class="lb">Cobrado</div><div class="vl">${mny0(T.cob)}</div><div class="hint">${lista.length} servicios ${per}</div></div>
+    <div class="pbox costo"><div class="lb">Pagado a transportistas</div><div class="vl">${mny0(T.pag)}</div><div class="hint">${CFG.base === 'flete' ? 'solo flete' : 'todo lo registrado'}</div></div>
+    <div class="pbox meta"><div class="lb">Margen</div><div class="vl">${mny0(T.mar)}</div><div class="hint">${pct(T.pct)} de lo cobrado</div></div>
+    <div class="pbox malbox"><div class="lb">Salieron mal</div><div class="vl">${malos.length}</div><div class="hint">menos de ${CFG.umbral}% o pérdida · ${mny0(perdida)} perdidos</div></div>`;
+  pintarMeses(lista);
+  const av = [];
+  const rutas = agrupar(lista, s => s.des + '|' + s.uni, s => s.des + ' · ' + s.uni);
+  const peores = rutas.filter(r => r.mal).sort((a, b) => a.malPes - b.malPes).slice(0, 3);
+  if (peores.length) av.push(['Las rutas donde más se perdió', peores.map(r => esc(r.nom) + ': ' + r.mal + ' servicio' + (r.mal > 1 ? 's' : '') + ', ' + mny0(r.malPes)).join('; ') + '.']);
+  const mejores = rutas.filter(r => r.n >= 3 && r.prop < r.n / 2).sort((a, b) => b.mar - a.mar).slice(0, 3);
+  if (mejores.length) av.push(['Las que más dejan', mejores.map(r => esc(r.nom) + ': ' + mny0(r.mar) + ' en ' + r.n + ' servicios (' + pct(r.pct) + ')').join('; ') + '.']);
+  const trans = agrupar(vs.map(v => { const o = { pr: v[6], ff: v[7], fm: v[8], fe: v[9], pf: v[10], pm: v[11], pe: v[12], px: v[13], propia: !!v[24] }; medir(o); return o; }), o => o.pr, o => provTxt(o.pr)).filter(t => t.n >= 5 && !t.prop);
+  if (trans.length > 1) { const b = trans.slice().sort((a, b) => a.pct - b.pct)[0]; av.push(['El transportista con margen más bajo', esc(b.nom) + ': ' + pct(b.pct) + ' en ' + b.n + ' viajes. Ojo: el margen depende también de qué rutas le das.']); }
+  if (fmSin > 0) av.push(['Maniobras cobradas sin pago registrado', 'Se cobraron ' + mny0(fmSin) + ' de maniobras en viajes donde la plataforma no tiene ningún pago de maniobra. Si se pagan por fuera, el margen con todo lo cobrado sale más alto de lo real; por eso conviene medir con solo el flete hasta que se capturen.']);
+  const prop = lista.filter(s => s.propia).length;
+  if (prop) av.push(['Servicios pagados a tu propia empresa', prop + ' servicios tienen como transportista a Logística Armada. Su margen no es contra un tercero, así que no cuentan como "salió mal".']);
+  const cl = [...new Set(SRV.viajes.map(v => cliTxt(v[2])))];
+  av.push(['Clientes con facturación cargada', cl.join(', ') + '. Los demás clientes aparecen en cuanto se carguen sus reportes de facturación.']);
+  $('#rSalio').innerHTML = av.map(a => `<div class="aviso"><div class="t">${a[0]}</div><p>${a[1]}</p></div>`).join('');
+
+  tabla($('#tCliente'), agrupar(lista, s => s.cli, s => s.cli), 'cliente', 'Cliente');
+  const q = ($('#fBuscaRuta').value || '').trim().toLowerCase();
+  tabla($('#tRuta'), rutas.filter(r => !q || r.nom.toLowerCase().indexOf(q) >= 0), 'ruta', 'Destino · unidad');
+  tabla($('#tTrans'), agrupar(vs.map(v => { const o = { pr: v[6], ff: v[7], fm: v[8], fe: v[9], pf: v[10], pm: v[11], pe: v[12], px: v[13], propia: !!v[24] }; medir(o); o.esMal = !o.propia && o.cob > 0 && o.pct < umbral(); return o; }), o => o.pr, o => provTxt(o.pr)), 'trans', 'Transportista');
+
+  $('#malSub').textContent = malos.length + ' servicios ' + per + ' dejaron menos de ' + CFG.umbral + '% o perdieron, ' + (CFG.base === 'flete' ? 'midiendo solo el flete' : 'con todo lo cobrado') + '; del peor al menos malo, con el motivo que se detecta en tus datos.';
+  $('#tMal').innerHTML = malos.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Viaje</th><th>Destino · unidad</th><th>Transportista</th><th class="num">Cobrado</th><th class="num">Pagado</th><th class="num">Margen</th><th>Por qué</th></tr></thead><tbody>${malos.map(s => `<tr>
+    <td>${s.id}${s.hijos ? '<span class="mr-n">+ ' + s.viajes.filter(v => v[0] !== s.id).map(v => v[0]).join(', ') + '</span>' : ''}<span class="mr-n">${fechaTxt(s.padre[25])}</span></td>
+    <td>${esc(s.des)}<span class="mr-n">${esc(s.uni)} · ${esc(s.cli)}</span></td><td>${esc(provTxt(s.pr))}</td>
+    <td class="num">${mny0(s.cob)}</td><td class="num">${mny0(s.pag)}</td><td class="num"><b class="neg">${mny0(s.mar)}</b><span class="mr-n">${pct(s.pct)}</span></td>
+    <td class="motivo">${motivos(s).map(x => '<div>' + x + '</div>').join('')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="sub">Ningún servicio salió mal con este criterio.</p>';
+
+  const ed = SRV.ediciones.slice().sort((a, b) => b[0] - a[0]);
+  $('#tEdiciones').innerHTML = ed.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Viaje</th><th>Destino</th><th>Transportista</th><th class="num">Antes</th><th class="num">Después</th><th class="num">Cambio</th><th>Motivo</th></tr></thead><tbody>${ed.map(e => `<tr>
+    <td>${e[0]}<span class="mr-n">cita ${fechaTxt(e[1])}</span></td><td>${esc(e[3])}<span class="mr-n">${esc(cliTxt(e[2]))}</span></td><td>${esc(provTxt(e[5]))}</td>
+    <td class="num">${mny0(e[6])}</td><td class="num">${mny0(e[7])}</td><td class="num ${e[7] > e[6] ? 'neg' : ''}">${(e[7] >= e[6] ? '+' : '') + mny0(e[7] - e[6])}</td>
+    <td class="motivo">${esc(e[8] || 'sin motivo capturado')}${e[10] ? '<span class="mr-n">editado el ' + fechaTxt(e[10]) + '</span>' : ''}</td></tr>`).join('')}</tbody></table></div>
+    <p class="sub">${ed.length} ediciones desde el 1 de junio; suman ${mny0(ed.reduce((a, e) => a + e[7] - e[6], 0))} más de lo que se iba a pagar.</p>` : '<p class="sub">No hay ediciones de tarifa desde el 1 de junio.</p>';
+}
+
+function pintarMeses(listaPeriodo) {
+  // la gráfica siempre muestra todos los meses, para comparar
+  const S = {}; const todos = SRV.viajes;
+  const ids = {}; todos.forEach(v => ids[v[0]] = v);
+  todos.forEach(v => {
+    const o = S[v[1]] || (S[v[1]] = { ff: 0, fm: 0, fe: 0, pf: 0, pm: 0, pe: 0, px: 0 });
+    ['ff', 'fm', 'fe', 'pf', 'pm', 'pe', 'px'].forEach((c, i) => o[c] += v[7 + i]);
+  });
+  const ms = SRV.meses.filter(m => S[m]);
+  ms.forEach(m => medir(S[m]));
+  const max = Math.max(...ms.map(m => S[m].cob), 1);
+  const W = 640, H = 210, bw = Math.min(90, (W - 60) / ms.length / 1.6);
+  const barras = ms.map((m, i) => {
+    const o = S[m]; const x = 40 + i * ((W - 60) / ms.length) + 10;
+    const hc = o.cob / max * (H - 60), hp = o.pag / max * (H - 60);
+    const sel = MES === m ? ' sel' : '';
+    return `<g class="mb${sel}" data-mes="${m}"><title>${mesTxt(m)}: cobrado ${mny0(o.cob)}, pagado ${mny0(o.pag)}, margen ${mny0(o.mar)} (${pct(o.pct)})</title>
+      <rect x="${x}" y="${H - 30 - hc}" width="${bw / 2}" height="${hc}" class="bc"></rect>
+      <rect x="${x + bw / 2 + 3}" y="${H - 30 - hp}" width="${bw / 2}" height="${hp}" class="bp"></rect>
+      <text x="${x + bw / 2}" y="${H - 12}" text-anchor="middle" class="tm">${mesTxt(m)}</text>
+      <text x="${x + bw / 2}" y="${H - 36 - hc}" text-anchor="middle" class="tv">${pct(o.pct)}</text></g>`;
+  }).join('');
+  $('#rMes').innerHTML = `<h3 class="mr-h3">Mes por mes</h3><div class="tblwrap"><svg class="gm" viewBox="0 0 ${W} ${H}" role="img" aria-label="Cobrado y pagado por mes">${barras}</svg></div>
+    <p class="leyenda"><span class="sq bc"></span> cobrado <span class="sq bp"></span> pagado · el porcentaje es el margen del mes · toca un mes para verlo solo</p>`;
+  document.querySelectorAll('.mb').forEach(g => g.onclick = () => { MES = MES === g.dataset.mes ? 'todos' : g.dataset.mes; pintarFiltros(); pintar(); });
+}
+
+function pintarFiltros() {
+  const ms = ['todos'].concat(SRV.meses);
+  $('#fMes').innerHTML = ms.map(m => `<button class="emp ${m === MES ? 'on' : ''}" data-m="${m}">${m === 'todos' ? 'Todos los meses' : mesTxt(m)}</button>`).join('');
+  $('#fMes').querySelectorAll('[data-m]').forEach(b => b.onclick = () => { MES = b.dataset.m; pintarFiltros(); pintar(); });
+  const cl = [...new Set(SRV.viajes.map(v => cliTxt(v[2])))];
+  $('#fComision').innerHTML = `<div class="f"><label>Clientes con comisión por manejo de cuenta</label><div class="chk">${cl.map(c => `<label><input type="checkbox" data-c="${esc(c)}" ${CFG.comision.indexOf(c) >= 0 ? 'checked' : ''}> ${esc(c)}</label>`).join('')}</div>
+    <span class="hint">sus servicios no cuentan como "salió mal" aunque dejen poco</span></div>`;
+  $('#fComision').querySelectorAll('[data-c]').forEach(x => x.onchange = () => {
+    CFG.comision = [...$('#fComision').querySelectorAll('[data-c]:checked')].map(i => i.dataset.c); guardarCfg(); pintar();
+  });
+}
+
+function usar(j) {
+  SRV = j;
+  Object.keys(j.provn || {}).forEach(id => { if (!PROVN[id]) PROVN[id] = bonito(j.provn[id]); });
+  SRV.meses = [...new Set(j.viajes.map(v => v[1]))].sort();
+  if (MES !== 'todos' && SRV.meses.indexOf(MES) < 0) MES = 'todos';
+  estado('Datos de tu plataforma al ' + fechaTxt(j.hasta) + ' · ' + j.viajes.length + ' viajes facturados' + (j.faltan && j.faltan.length ? ' · ' + j.faltan.length + ' facturados no se encontraron en la plataforma' : ''));
+  pintarFiltros(); pintar();
+}
+
+/* ---------- arranque ---------- */
+$('#fBase').value = CFG.base; $('#fUmbral').value = CFG.umbral;
+$('#fBase').onchange = e => { CFG.base = e.target.value; guardarCfg(); pintar(); };
+$('#fUmbral').onchange = e => { CFG.umbral = Number(e.target.value) || 0; guardarCfg(); pintar(); };
+$('#fBuscaRuta').oninput = () => pintar();
+document.querySelectorAll('.vista').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.vista').forEach(x => x.classList.remove('on')); b.classList.add('on');
+  VISTA = b.dataset.v;
+  document.querySelectorAll('.vw').forEach(v => v.classList.add('hidden'));
+  $('#v' + VISTA.charAt(0).toUpperCase() + VISTA.slice(1)).classList.remove('hidden');
+});
+$('#gateEntrar').onclick = () => {
+  const c = $('#gateClave').value.trim();
+  if (!c) { pedirClave('Escribe la clave de acceso.'); return; }
+  $('#gateMsg').style.display = 'block'; $('#gateMsg').textContent = 'Revisando…';
+  cargar(c, true);
+};
+$('#gateClave').onkeydown = e => { if (e.key === 'Enter') $('#gateEntrar').click(); };
+(function () { const c = claveGuardada(); if (!c) pedirClave(''); else cargar(c); })();
+
+</script>
+</body>
+</html>
