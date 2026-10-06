@@ -77,6 +77,13 @@ header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);bo
 .btn:hover{background:#1e5096}
 .btn.ghost{background:#fff;color:#1a3a6b}
 .btn.ghost:hover{background:#e8f0fb}
+.mini{font-family:inherit;font-size:10.5px;font-weight:700;border:1px solid #c8d9f0;background:#fff;color:#1a3a6b;border-radius:6px;padding:.12rem .4rem;margin:.15rem .2rem 0 0;cursor:pointer;white-space:nowrap}
+.mini:hover{background:#e8f0fb}
+.acciones{display:block}
+.pospbox{max-width:720px;margin:1rem auto 0;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:.8rem 1rem;font-size:12.5px;color:#1a2035}
+.pospbox h4{margin:0 0 .2rem;font-size:13.5px;color:#1a3a6b}.pospbox p{margin:0 0 .5rem;color:#4a5068}
+.posp-row{padding:.3rem 0;border-top:1px solid #dde1e9}
+@media print{.acciones,.mini{display:none!important}}
 .btn.green{background:#2e9e5b;border-color:#2e9e5b}
 .btn.green:hover{background:#268a4e}
 .btnrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
@@ -345,6 +352,7 @@ footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
         <div class="toolbar" id="toolbar"></div>
         <div class="tblwrap"><table id="tbl"></table></div>
         <p class="memline" style="text-align:left" id="tblFoot"></p>
+      <div class="pospbox hidden no-print" id="pospBox"></div>
       </div>
     </div>
 
@@ -402,7 +410,7 @@ footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 15 (30-sep-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 16 (6-oct-2026)</footer>
 </div>
 
 <script>
@@ -595,6 +603,14 @@ function procesarBase(lista) {
       flags.push({ c: 'r', t: 'destino nuevo', d: zonaTxt + ' no tiene tarifa para esta unidad y no hay antecedente de la ruta. Captura el flete o carga la tarifa en el tabulador.' });
     }
 
+    // v16: el hijo de un reparto lleva tarifa de ruteo: 800 local, 1,100 foráneo; Luis la confirma
+    if (esSi(b.esReparto) && !esSi(b.edicion)) {
+      const loc = parseInt(b.zona, 10) === 1, r = loc ? 800 : 1100;
+      for (let i = flags.length - 1; i >= 0; i--) if (['sin tarifa en la zona', 'destino nuevo', 'zona en duda', 'no sale de 4PL'].indexOf(flags[i].t) >= 0) flags.splice(i, 1);
+      costo = r; venta = null; fijo = false; sC = 'a'; srcC = 'tarifa de ruteo · ' + (loc ? 'local' : 'foráneo');
+      flags.push({ c: 'a', t: 'tarifa de ruteo', d: 'Es reparto del viaje ' + (parseInt(b.padre, 10) || 'padre') + ': se puso la tarifa de ruteo ' + (loc ? 'local' : 'foránea') + ' (' + mny0(r) + '). Si el reparto queda lejos del padre, pon la tarifa completa.' });
+    }
+
     let man = null, sM = 'g', srcM = '';
     const manRep = b.manRep === 1 || b.manRep === '1' || esSi(b.manRep);
     if (esSi(b.manBase) || b.manBase === 1 || b.manBase === '1' || manRep) {
@@ -630,7 +646,12 @@ function procesarBase(lista) {
   // v15: citas de un mes posterior al que domina la carga
   const cuenta = {}; out.forEach(o => { if (o.mes) cuenta[o.mes] = (cuenta[o.mes] || 0) + 1; });
   const mesP = Object.keys(cuenta).sort((a, b) => cuenta[b] - cuenta[a] || (a < b ? -1 : 1))[0];
-  out.forEach(o => { if (mesP && o.mes > mesP) { o.citaSig = true;
+  MES_P = mesP || '';
+  const POSP = {}; (M.pospuestos || []).forEach(x => { POSP[String(x[0])] = x[1]; });
+  out.forEach(o => { const pm = POSP[o.id]; if (!pm) return;
+    if (pm === mesP) o.pospuesto = true;
+    else o.flags.push({ c: 'b', auto: 1, t: 'pospuesto', l: 'pospuesto de ' + mesLabel(pm).split(' ')[0], d: 'Se pasó desde el corte de ' + mesLabel(pm) + '; va en este reporte.' }); });
+  out.forEach(o => { if (mesP && o.mes > mesP && !o.flags.some(f => f.t === 'pospuesto')) { o.citaSig = true;
     o.flags.push({ c: 'a', t: 'cita del mes siguiente', l: 'cita en ' + mesLabel(o.mes).split(' ')[0], d: 'La cita es el ' + o.fecha + '. Decide si se cobra en este corte o en el siguiente; si lo cobras ahora, cualquier costo que aparezca después ya no entraría.' }); }
     recalcular(o); });
   return out;
@@ -639,7 +660,7 @@ function procesarBase(lista) {
 /* ---------- estado ---------- */
 let VIAJES = [], FMES = 'todos', FEST = 'todos', FSIG = null, FD1 = '', FD2 = '', SORT = { k: 'id', dir: 1 };
 // base = filtro de mes + estado (alimenta KPIs, tarjetas y gráficas)
-const base = () => VIAJES.filter(v =>
+const base = () => VIAJES.filter(v => !v.pospuesto &&
   (!FD1 || (v.fecha && v.fecha >= FD1)) &&
   (!FD2 || (v.fecha && v.fecha <= FD2)) &&
   (FEST === 'todos' || (FEST === 'atencion' ? v.atencion : !v.atencion)));
@@ -762,7 +783,7 @@ function renderToolbar() {
   document.querySelectorAll('#toolbar [data-e]').forEach(c => c.onclick = () => { FEST = c.dataset.e; redraw(); });
   const cs = $('#chipSig'); if (cs) cs.onclick = () => { FSIG = null; redraw(); };
   const cc = $('#chipCorte'); if (cc) cc.onclick = () => arrancar(ROWS, null);
-  $('#btnXlsx').onclick = () => exportar(vistos());
+  $('#btnXlsx').onclick = () => exportar(vistos().filter(o => !o.pospuesto));
   $('#btnReset').onclick = reset;
 }
 
@@ -809,7 +830,7 @@ function renderTabla() {
       <td class="num${hi === 'costo' ? ' hi' : ''}"><input class="inp ${o.editC ? 'edited' : ''}" data-k="costo" value="${o.costo == null ? '' : o.costo}"><span class="src">${o.srcC}</span></td>
       <td class="num">${mny(o.venta)}<span class="src">${o.srcV}</span></td>
       <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
-      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}</td>
+      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
     </tr>`).join('') : '<tr><td colspan="11" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
   <tfoot><tr>
     <td colspan="5">Subtotales (${v.length} viajes)</td>
@@ -820,6 +841,11 @@ function renderTabla() {
     const k = th.dataset.k;
     SORT = { k, dir: SORT.k === k ? -SORT.dir : 1 };
     renderTabla();
+  });
+  document.querySelectorAll('#tbl .mini').forEach(bt => bt.onclick = e => {
+    const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
+    if (e.target.dataset.acc === 'ahora') { o.citaSig = false; o.flags = o.flags.filter(f => f.t !== 'cita del mes siguiente'); recalcular(o); redraw(); }
+    else posponer(o, true);
   });
   document.querySelectorAll('#tbl .inp').forEach(inp => inp.addEventListener('change', e => {
     const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
@@ -945,7 +971,7 @@ async function exportar(lista) {
 
   // se registra el último viaje descargado para que el siguiente corte arranque de ahí
   if (DEMO) { alert('El Excel se descargó bien.\n\nComo son datos de respaldo, el corte compartido no se movió.'); return; }
-  const maxId = lista.reduce((m, o) => Math.max(m, parseInt(String(o.id).replace(/\D/g, ''), 10) || 0), 0);
+  const maxId = lista.concat(VIAJES.filter(o => o.pospuesto)).reduce((m, o) => Math.max(m, parseInt(String(o.id).replace(/\D/g, ''), 10) || 0), 0);
   if (!maxId) return;
   if (!USUARIO) {
     const q = prompt('¿Quién está facturando? Se guarda junto con el corte para saber quién lo movió.', '');
@@ -1198,6 +1224,7 @@ function pintarHintBase() {
     ? (u ? 'Trae los viajes de ' + CLIENTES[CLIENTE].n + ' posteriores al ' + u + ', el último facturado. ' + quienCorte() : 'Todavía no hay corte registrado para ' + CLIENTES[CLIENTE].n + '; para la primera carga usa el rango de fechas.')
     : 'Trae los viajes de ' + CLIENTES[CLIENTE].n + ' cuya fecha de cita cae dentro del rango.';
 }
+let CORTE_U = 0;
 async function traerDeBase() {
   if (!confirmarReemplazo()) return;
   const clave = pedirClave(false);
@@ -1208,8 +1235,10 @@ async function traerDeBase() {
     await sincronizarCorte();
     const u = leerCorte();
     if (!u) { msgBase('No hay corte registrado todavía. Elige un rango de fechas.', true); return; }
-    cuerpo.desdeId = u;
-  } else {
+    cuerpo.desdeId = u; CORTE_U = u;
+    const pids = (M.pospuestos || []).map(x => Number(x[0])).filter(n => n > 0 && n <= u);
+    if (pids.length) cuerpo.desdeId = Math.min(u, Math.min.apply(null, pids) - 1);
+  } else { CORTE_U = 0;
     const d1 = $('#bd1').value, d2 = $('#bd2').value;
     if (!d1 || !d2 || d1 > d2) { msgBase('Elige las dos fechas del rango.', true); return; }
     cuerpo.desde = d1; cuerpo.hasta = d2;
@@ -1229,6 +1258,8 @@ async function traerDeBase() {
       return;
     }
     if (!d.viajes || !d.viajes.length) { msgBase(MODO_BASE === 'corte' ? 'No hay viajes nuevos después del corte.' : 'No hay viajes en ese rango de fechas.', true); return; }
+    if (MODO_BASE === 'corte' && CORTE_U) { const P = new Set((M.pospuestos || []).map(x => Number(x[0]))); d.viajes = d.viajes.filter(r => idNum(r) > CORTE_U || P.has(idNum(r))); }
+    if (!d.viajes.length) { msgBase('No hay viajes nuevos después del corte.', true); return; }
     const fx = filtrarCliente(d.viajes);
     if (!fx.rows.length) { msgBase('Llegaron ' + d.viajes.length + ' viajes, pero ninguno es de ' + CLIENTES[CLIENTE].n + '.', true); return; }
     await pedirMemoria();
@@ -1239,7 +1270,7 @@ async function traerDeBase() {
       const u = leerCorte();
       if (u) { const nuevos = ROWS.filter(r => idNum(r) > u).length; if (nuevos && nuevos < ROWS.length) { preguntarCorte(u, ROWS.length, nuevos); return; } }
       arrancar(ROWS, null);
-    } else arrancar(ROWS, cuerpo.desdeId);
+    } else arrancar(ROWS, CORTE_U || cuerpo.desdeId);
   } catch (e) {
     clearTimeout(reloj);
     msgBase('La plataforma no respondió a tiempo. Intenta de nuevo o carga el CSV de respaldo.', true);
@@ -1397,7 +1428,40 @@ function renderJulio() {
 }
 
 /* ---------- flujo ---------- */
-function redraw() { renderKpis(); renderAlerts(); renderToolbar(); renderTabla(); renderCharts(); pintarJulio(); guardarAvance(); }
+function redraw() { renderKpis(); renderAlerts(); renderToolbar(); renderTabla(); renderPospuestos(); renderCharts(); pintarJulio(); guardarAvance(); }
+
+/* ---------- v16: viajes pasados al mes siguiente (se guardan en el servidor) ---------- */
+let MES_P = '';
+function renderPospuestos() {
+  const box = $('#pospBox'); if (!box) return;
+  const v = VIAJES.filter(o => o.pospuesto);
+  if (!v.length) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  box.innerHTML = `<h4>Pasados al mes siguiente (${v.length})</h4>
+    <p>No entran en este reporte ni en los totales; aparecen solos en el siguiente corte.</p>
+    ${v.map(o => `<div class="posp-row" data-id="${o.id}"><b>${o.id}</b> · ${o.destino} · ${o.unidad} · cita ${o.fecha} · ${mny(o.totalVenta)}
+      <button class="mini" data-acc="regresar">regresar a este reporte</button></div>`).join('')}`;
+  box.classList.remove('hidden');
+  box.querySelectorAll('.mini').forEach(bt => bt.onclick = e => {
+    const o = VIAJES.find(x => x.id === e.target.closest('.posp-row').dataset.id); if (o) posponer(o, false);
+  });
+}
+async function posponer(o, si) {
+  const mes = MES_P || o.mes || '';
+  o.pospuesto = si;
+  M.pospuestos = (M.pospuestos || []).filter(x => String(x[0]) !== o.id);
+  if (si) M.pospuestos.push([Number(o.id), mes]);
+  redraw();
+  if (DEMO) return;
+  let ok = false;
+  try {
+    const clave = localStorage.getItem(LS_CLAVE) || '';
+    const cuerpo = si ? { clave, modo: 'memoria', mes, posponer: [Number(o.id)] } : { clave, modo: 'memoria', quitar: [Number(o.id)] };
+    const res = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
+    const d = res.ok ? await res.json() : null; ok = !!(d && d.ok);
+  } catch (e) { }
+  if (!ok) alert('El viaje ' + o.id + (si ? ' salió de este reporte' : ' regresó a este reporte') + ', pero no se pudo avisar al servidor; ' +
+    (si ? 'el mes siguiente no aparecería solo. Revisa tu conexión y vuelve a marcarlo.' : 'podría volver a salir como pospuesto. Revisa tu conexión y vuelve a intentarlo.'));
+}
 
 /* ---------- v13: el avance se guarda solo en este equipo, uno por cliente ---------- */
 let AVANCE_DESC = null, RESTAURANDO = false;
