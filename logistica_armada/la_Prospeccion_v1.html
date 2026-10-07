@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prospección de Clientes v1 · Logística Armada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',-apple-system,sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.42;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1rem 3rem}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.7rem 0;margin-bottom:1.1rem}
+.hd{max-width:1180px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.7rem}
+.logo-box{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback{font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:11px;font-weight:500;color:#fff;letter-spacing:.2px}
+.hd-title{display:flex;align-items:center;gap:.75rem;text-align:right}
+.hd-title h1{font-size:14px;font-weight:800;color:#fff}
+.hd-title p{font-size:10.5px;color:#b9d3ec;font-weight:500}
+.logo-box-4pl{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;flex-shrink:0}
+.logo-box-4pl img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback-4pl{font-size:14px;font-weight:800;color:#1a3a6b;display:none;white-space:nowrap}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:1.1rem}
+.card h2{font-size:15px;font-weight:800;color:#1a2035;margin-bottom:.15rem}
+.card .sub{font-size:12.5px;color:#4a5068;margin-bottom:.9rem;max-width:720px}
+
+/* BARRA DE EMPRESA */
+.empresas{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.emp{font-size:12.5px;font-weight:700;padding:.42rem .85rem;border-radius:20px;border:1px solid #dde1e9;background:#fff;color:#4a5068;cursor:pointer;transition:.15s}
+.emp:hover{background:#e8f0fb;border-color:#4a9fd4}
+.emp.on{background:#1a3a6b;border-color:#1a3a6b;color:#fff}
+.emp-add{border-style:dashed;color:#8a90a0}
+.emp-lbl{font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#8a90a0;margin-right:.2rem}
+
+/* FORM */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.85rem;max-width:960px}
+.f{display:flex;flex-direction:column;gap:.22rem}
+.f label{font-size:11.5px;font-weight:700;color:#4a5068}
+.f .hint{font-size:10.5px;color:#8a90a0;font-weight:500}
+input,select{font-family:inherit;font-size:13.5px;font-weight:600;color:#1a2035;border:1px solid #dde1e9;border-radius:8px;padding:.48rem .6rem;background:#fff;width:100%;max-width:320px}
+input:focus,select:focus{outline:2px solid #4a9fd4;outline-offset:-1px;border-color:#4a9fd4}
+input.wide{max-width:100%}
+.f.full{grid-column:1/-1}
+.f.full input{max-width:100%}
+
+/* AUTOCOMPLETADO */
+.ac{position:relative;max-width:320px}
+.ac input{width:100%}
+.ac-list{position:absolute;z-index:40;top:100%;left:0;right:0;background:#fff;border:1px solid #dde1e9;
+  border-radius:8px;margin-top:.2rem;max-height:250px;overflow-y:auto;box-shadow:0 6px 18px rgba(13,27,62,.13)}
+.ac-op{padding:.42rem .6rem;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
+.ac-op:hover,.ac-op.sel{background:#e8f0fb}
+.ac-op .est{font-size:11px;color:#8a90a0;font-weight:500}
+.ac-op.rec{background:#f5faff}
+.ac-op.rec:hover,.ac-op.rec.sel{background:#e8f0fb}
+.ac-sep{padding:.3rem .6rem;font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:#8a90a0;background:#f5f6f8;border-top:1px solid #eef0f4;border-bottom:1px solid #eef0f4}
+.ac-nueva{padding:.42rem .6rem;font-size:12.5px;color:#4a5068;cursor:pointer;border-top:1px solid #eef0f4}
+.ac-nueva:hover,.ac-nueva.sel{background:#e8f0fb}
+
+/* CAMPO CON AGENTE */
+.dual{display:flex;gap:.4rem;align-items:center;max-width:320px}
+.dual input{flex:1;min-width:0}
+.dual .auto{font-size:12.5px;font-weight:700;color:#2e7d5b;background:#e8f5ee;border:1px solid #bfe0cd;
+  border-radius:7px;padding:.42rem .55rem;white-space:nowrap;cursor:pointer}
+.dual .auto:hover{background:#d8eee2}
+.dual .auto.off{color:#8a90a0;background:#f5f6f8;border-color:#dde1e9}
+.agente{font-size:10.5px;color:#2e7d5b;font-weight:600}
+.agente.off{color:#8a90a0}
+.agente.buscando{color:#4a9fd4}
+
+/* BOTONES */
+.btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:.5rem .95rem;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;transition:.15s}
+.btn:hover{background:#1e5096}
+.btn.ghost{background:#fff;color:#1a3a6b}
+.btn.ghost:hover{background:#e8f0fb}
+.btn.green{background:#2e9e5b;border-color:#2e9e5b}
+.btn.green:hover{background:#268a4e}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
+.link{font-size:11.5px;color:#8a90a0;background:none;border:none;font-family:inherit;cursor:pointer;text-decoration:underline;padding:.2rem 0}
+.link:hover{color:#1a3a6b}
+
+/* RESULTADO */
+.precios{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;margin-bottom:1rem}
+.pbox{border:1px solid #dde1e9;border-radius:10px;padding:.85rem .95rem;background:#fff}
+.pbox .lb{font-size:11px;font-weight:700;color:#8a90a0;letter-spacing:.5px;margin-bottom:.15rem}
+.pbox .vl{font-size:22px;font-weight:800;color:#1a2035;line-height:1.15}
+.pbox .hint{font-size:11.5px;color:#4a5068;margin-top:.15rem}
+.pbox.piso{background:#fdf6e3;border-color:#ecdcae}
+.pbox.piso .vl{color:#b8860b}
+.pbox.meta{background:#e8f5ee;border-color:#bfe0cd}
+.pbox.meta .vl{color:#2e7d5b}
+.pbox.costo{background:#f5f6f8}
+
+/* DESGLOSE */
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:460px}
+thead th{background:#dce8f7;color:#1a3a6b;font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;text-align:left;padding:.5rem .7rem;border:1px solid #dde1e9;white-space:nowrap}
+tbody td{padding:.48rem .7rem;border:1px solid #dde1e9;color:#4a5068}
+tbody td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr.sum td{background:#eef4fc;font-weight:800;color:#1a2035}
+tbody tr.total td{background:#dce8f7;font-weight:800;color:#0d1b3e;font-size:14.5px}
+tbody td b{color:#1a2035}
+.dim{color:#8a90a0;font-size:11.5px}
+
+/* AVISOS */
+.aviso{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.8rem .95rem;margin:.9rem 0;max-width:720px}
+.aviso .t{font-size:12.5px;font-weight:800;color:#1a3a6b;margin-bottom:.25rem}
+.aviso p{font-size:12.5px;color:#4a5068}
+.aviso.duda{background:#fdf6e3;border-color:#ecdcae;border-left-color:#b8860b}
+.aviso.duda .t{color:#8a6d0b}
+.aviso ul{margin:.4rem 0 0 1.1rem}
+.aviso li{font-size:12.5px;color:#4a5068;margin-bottom:.2rem}
+
+.porconf{display:inline-block;font-size:10px;font-weight:800;color:#8a6d0b;background:#fdf6e3;border:1px solid #ecdcae;border-radius:10px;padding:.03rem .38rem;margin-left:.3rem;vertical-align:middle}
+
+/* COMPARADOR */
+.rutas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem;max-width:960px}
+.ruta{border:1px solid #dde1e9;border-radius:10px;padding:.85rem;background:#fff}
+.ruta h4{font-size:13px;font-weight:800;margin-bottom:.5rem;color:#1a2035}
+.ruta .res{margin-top:.6rem;padding-top:.6rem;border-top:1px solid #dde1e9;font-size:12.5px;color:#4a5068}
+.ruta .res b{display:block;font-size:18px;font-weight:800;color:#1a2035}
+.ruta.gana{border-color:#2e9e5b;background:#f4fbf7}
+.ruta.gana .res b{color:#2e7d5b}
+
+footer{text-align:center;padding:1.2rem 1rem;color:#8a90a0;font-size:11.5px;border-top:1px solid #dde1e9;margin-top:1rem}
+
+.hidden{display:none!important}
+.acc{border:1px solid #dde1e9;border-radius:10px;margin-bottom:.7rem;background:#fff}
+.acc>summary{padding:.7rem .95rem;font-size:13px;font-weight:800;color:#1a3a6b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary::after{content:'▾';color:#8a90a0;font-size:12px}
+.acc[open]>summary::after{content:'▴'}
+.acc>summary:hover{background:#e8f0fb}
+.acc .bd{padding:.3rem .95rem 1rem}
+
+/* MOVIL */
+@media (max-width:600px){
+  .wrap{padding:0 .7rem 2.5rem}
+  header{padding:.6rem 0}
+  .hd{flex-direction:column;align-items:flex-start;gap:.7rem}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .hd-title{text-align:left;flex-direction:column;align-items:flex-start;gap:.5rem}
+  .card{padding:.9rem;border-radius:10px}
+  .grid{grid-template-columns:1fr}
+  input,select{max-width:100%}
+  .precios{grid-template-columns:1fr}
+  .rutas{grid-template-columns:1fr}
+  table{font-size:12.5px}
+  thead th,tbody td{padding:.4rem .5rem}
+}
+
+/* IMPRESION */
+@page{size:Letter;margin:13mm 13mm 15mm}
+@media print{
+  body{background:#fff;font-size:10pt;line-height:1.38}
+  .wrap{max-width:none;padding:0}
+  .no-print{display:none!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  header{padding:.6rem 0;margin-bottom:.7rem;break-inside:avoid;break-after:avoid}
+  .logo-box img,.logo-box-4pl img{height:36px}
+  .card{break-inside:auto;border-radius:0;border:none;border-bottom:1px solid #dde1e9;padding:.5rem 0;margin-bottom:.5rem}
+  .card h2{break-after:avoid;font-size:11.5pt}
+  .pbox,.aviso,.ruta{break-inside:avoid}
+  .precios{break-inside:avoid;grid-template-columns:repeat(3,1fr)}
+  .tblwrap{overflow:visible;break-inside:auto}
+  table{min-width:0;font-size:9.4pt}
+  thead{display:table-header-group}
+  tbody tr{break-inside:avoid}
+  p,li{orphans:3;widows:3}
+  .acc{break-inside:avoid;border:none}
+  .acc .bd{padding:.2rem 0}
+  footer{break-inside:avoid;font-size:8.5pt}
+  a[href]:after{content:none}
+}
+
+/* ============ PESTAÑAS Y MARGEN POR RUTA (v3) ============ */
+.vistas{display:flex;gap:.4rem;margin-bottom:1rem;border-bottom:1px solid #dde1e9}
+.vista{font-family:inherit;font-size:13.5px;font-weight:700;color:#4a5068;background:none;border:none;border-bottom:3px solid transparent;padding:.55rem .9rem;cursor:pointer;margin-bottom:-1px}
+.vista:hover{color:#1a3a6b;background:#e8f0fb}
+.vista.on{color:#1a3a6b;border-bottom-color:#4a9fd4}
+.mr-foto{font-size:11.5px;color:#8a90a0;font-weight:600}
+.mr-pills{margin:.3rem 0 .9rem}
+.mr-u{display:none}
+.mr-u.on{display:block}
+.mr-uni{font-size:15px;color:#1a3a6b;margin-bottom:.6rem}
+.mr-h3{font-size:13.5px;font-weight:800;color:#1a2035;margin:1.1rem 0 .1rem}
+.mr-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:960px}
+.mr-kpi{background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:8px;padding:.55rem .7rem}
+.mr-kpi b{display:block;font-size:17px;font-weight:800;color:#1a3a6b}
+.mr-kpi span{font-size:11.5px;color:#4a5068}
+table.mr-t{min-width:1060px;font-size:12.5px}
+.mr-neg{color:#b42318}
+table.mr-t thead th{text-align:left;vertical-align:bottom;line-height:1.25}
+table.mr-t thead th.num{text-align:right}
+table.mr-t thead th.mr-ref{background:#eef0f4;color:#4a5068}
+table.mr-t tbody td{vertical-align:top}
+table.mr-t tbody tr:hover td{background:#e8f0fb}
+.mr-dest{font-weight:700;color:#1a2035!important;white-space:nowrap}
+.mr-sep{border-left:3px solid #c8d9f0!important}
+.mr-g{color:#b0b5c0!important}
+.mr-n{display:block;font-size:10.5px;color:#8a90a0;font-weight:500}
+.mr-lec{min-width:150px}
+.mr-b{display:inline-block;font-size:10.5px;font-weight:700;border-radius:10px;padding:.08rem .45rem;margin:0 .15rem .15rem 0;white-space:nowrap}
+.mr-b.rojo{background:#fde8e8;color:#b42318}
+.mr-b.ambar{background:#fff4dc;color:#9a5b00}
+.mr-b.gris{background:#eef0f4;color:#4a5068}
+.mr-ley{display:flex;flex-wrap:wrap;gap:.3rem .9rem;font-size:12px;color:#4a5068;margin-top:.7rem}
+.mr-sup{list-style:none;max-width:720px}
+.mr-sup li{padding:.35rem 0;border-bottom:1px solid #eef0f4;font-size:12.5px;color:#4a5068}
+.mr-sup li:last-child{border-bottom:none}
+.mr-sup b{color:#1a2035}
+#vMargen .aviso{max-width:720px}
+@media (max-width:600px){
+  .vistas{overflow-x:auto}
+  .vista{white-space:nowrap;padding:.5rem .7rem}
+  .mr-kpis{grid-template-columns:1fr 1fr}
+}
+@media print{
+  .mr-u{display:block!important;break-before:page}
+  .mr-u:first-of-type{break-before:auto}
+  .mr-kpi,.mr-b{break-inside:avoid}
+  .mr-uni,.mr-h3{break-after:avoid}
+  table.mr-t{min-width:0;font-size:8.6pt}
+  #vMargen .acc{break-inside:auto}
+}
+
+/* ---------- v7 ---------- */
+.mk{margin:.2rem 0 1rem;border-top:1px solid #dde1e9;padding-top:.8rem}
+.mk-hd{display:flex;flex-wrap:wrap;gap:.45rem .9rem;align-items:center;margin:0 0 .65rem}
+.mk-hd h3{font-size:14px;font-weight:800;color:#1a3a6b;margin:0;break-after:avoid}
+.mk-hd select{max-width:240px}
+.pbox.merc{background:#e8f0fb;border-color:#c8d9f0}
+.pbox.merc .vl{color:#1a3a6b}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:.05rem .45rem;margin-left:.35rem;white-space:nowrap;vertical-align:1px}
+.tag.barato{background:#e8f5ee;color:#2e7d5b}
+.tag.usado{background:#dce8f7;color:#1a3a6b}
+.tag.sin{background:#f5f6f8;color:#8a90a0;border:1px solid #dde1e9}
+tr.alt td{background:#f0f6ff}
+.pv-list{margin:.2rem 0 .4rem 1.1rem;padding:0;max-width:720px}
+.pv-list li{margin:.3rem 0;font-size:13px;orphans:3;widows:3}
+.pv-list .link{font-size:13px;padding:0}
+@media print{
+  .pbox,.tag,tr.alt td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pbox,.pv-list li,tr{break-inside:avoid}
+  .mk-hd h3{break-after:avoid}
+}
+
+/* v8 · clave de acceso, ficha y estado de los datos */
+.gate{position:fixed;inset:0;background:rgba(13,27,62,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
+.gate.hidden{display:none}
+.gate-box{background:#fff;border:1px solid #dde1e9;border-radius:14px;max-width:420px;width:100%;padding:1.3rem 1.3rem 1rem;box-shadow:0 12px 40px rgba(13,27,62,.25)}
+.gate-box h2{font-size:17px;color:#1a3a6b;margin:0 0 .4rem}
+.gate-box input{width:100%;box-sizing:border-box;font-family:'Manrope',sans-serif;font-size:15px;padding:.6rem .7rem;border:1px solid #dde1e9;border-radius:8px;margin:.5rem 0}
+.gate-msg{font-size:12.5px;color:#1a3a6b;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:6px;padding:.4rem .6rem;margin:.2rem 0 .4rem}
+.ficha-t{max-width:720px}
+.ficha-t td:first-child{color:#4a5068;width:38%;font-weight:600}
+.ficha-t td{border-bottom:1px solid #eef1f6;padding:.38rem .5rem;font-size:13px}
+#estadoDatos{font-size:12px}
+@media print{.ficha-t tr{break-inside:avoid}.gate{display:none!important}}
+
+/* Rentabilidad v1 */
+.rt{width:100%;border-collapse:collapse;font-size:12.5px}
+.rt th{background:#dce8f7;color:#1a3a6b;font-weight:700;text-align:left;padding:.45rem .55rem;white-space:nowrap}
+.rt th.num,.rt td.num{text-align:right}
+.rt th.ord{cursor:pointer}.rt th.ord:hover{background:#c9dbf2}.rt th.on{background:#c9dbf2}
+.rt td{border-bottom:1px solid #eef1f6;padding:.42rem .55rem;vertical-align:top}
+.rt tr:hover td{background:#e8f0fb}
+.rt .mr-n{display:block;font-size:11px;color:#8a90a0;font-weight:500}
+.rt .motivo{max-width:340px;color:#4a5068}.rt .motivo div{margin-bottom:.15rem}
+.neg{color:#c0392b}
+.pbox.malbox{background:#fdecea;border-color:#f3c3bd}.pbox.malbox .vl{color:#c0392b}
+.gm{width:100%;max-width:720px;height:auto;display:block}
+.gm .bc{fill:#1e5096}.gm .bp{fill:#9fc2e7}.gm .tm{font-size:12px;fill:#4a5068;font-family:Manrope,sans-serif}
+.gm .tv{font-size:11.5px;font-weight:700;fill:#1a2035;font-family:Manrope,sans-serif}
+.gm .mb{cursor:pointer}.gm .mb:hover rect,.gm .mb.sel rect{opacity:.8;stroke:#0d1b3e;stroke-width:1}
+.leyenda{font-size:11.5px;color:#4a5068;margin-top:.3rem}
+.sq{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 .2rem 0 .5rem;vertical-align:-1px}.sq.bc{background:#1e5096}.sq.bp{background:#9fc2e7}
+.chk{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:12.5px;margin:.2rem 0}
+.chk label{display:flex;align-items:center;gap:.3rem;font-weight:500;color:#1a2035}
+#estadoDatos{margin-top:.5rem}
+@media(max-width:600px){.rt{font-size:11.5px}.rt .motivo{max-width:220px}}
+@media print{
+  .vw.hidden{display:block!important}
+  .vw{break-before:page}.vw:first-of-type{break-before:auto}
+  .rt thead{display:table-header-group}.rt tr{break-inside:avoid}
+  .rt th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pbox{break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .gm{break-inside:avoid}
+}
+
+/* Conciliación v1 */
+.rt tr.clic{cursor:pointer}
+.ec-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}
+@media print{
+  body.solo-ec .wrap>*:not(#vTrans){display:none!important}
+  body.solo-ec #vTrans>section:not(#cEcuenta){display:none!important}
+  body.solo-ec #vTrans{display:block!important;break-before:auto}
+}
+
+/* Prospección v1 */
+.pc{border:1px solid #dde1e9;border-left:4px solid #4a9fd4;border-radius:10px;padding:.85rem 1rem;margin:0 0 .8rem;max-width:720px;background:#fff}
+.pc.est-interesado{border-left-color:#2e9e5b}.pc.est-contactado{border-left-color:#1a3a6b}.pc.est-descartado{border-left-color:#8a90a0;opacity:.75}
+.pc-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem}
+.pc-hd h3{font-size:15px;color:#1a2035;margin:0}
+.pc-hd select{font-family:inherit;font-size:12.5px;padding:.3rem .45rem;border:1px solid #dde1e9;border-radius:7px;background:#fff}
+.pc-giro{font-size:12px;color:#8a90a0;margin:.1rem 0 0}
+.pc-pq{font-size:13px;color:#1a2035;margin:.5rem 0}
+.pc-dl{display:grid;grid-template-columns:140px 1fr;gap:.25rem .7rem;font-size:12.5px;margin:.4rem 0}
+.pc-dl dt{color:#4a5068;font-weight:700}.pc-dl dd{margin:0;color:#1a2035;word-break:break-word}
+.pc-mail{margin:.5rem 0;border-top:1px solid #eef1f6;padding-top:.45rem}
+.pc-mail summary{cursor:pointer;font-size:12.5px;font-weight:700;color:#1a3a6b}
+.pc-cuerpo{font-size:12.5px;color:#1a2035;background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:6px;padding:.6rem .75rem;margin:.45rem 0;line-height:1.5}
+.pc-notas label{font-size:11.5px;font-weight:700;color:#4a5068}
+.pc-notas textarea{width:100%;box-sizing:border-box;font-family:inherit;font-size:12.5px;border:1px solid #dde1e9;border-radius:7px;padding:.4rem .5rem;margin-top:.2rem}
+.solo-print{display:none}
+a.btn{text-decoration:none;display:inline-block}
+@media(max-width:600px){.pc-dl{grid-template-columns:1fr}.pc-hd{flex-direction:column}}
+@media print{.pc{break-inside:avoid}.solo-print{display:block}.pc-mail{display:block}.pc-mail .pc-cuerpo{display:block}.pc-mail:not([open]) .pc-cuerpo{display:block}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="hd-title">
+      <div>
+        <h1>Prospección de Clientes · Logística Armada</h1>
+        <p>v1 · Prospectos con su porqué, contacto y correo listo</p>
+      </div>
+      <div class="logo-box-4pl">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback-4pl">Logística Armada</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="gate" class="gate hidden no-print" role="dialog" aria-modal="true" aria-labelledby="gateT">
+  <div class="gate-box">
+    <h2 id="gateT">Clave de acceso</h2>
+    <p class="sub">Prospección usa la misma clave del Copiloto de Facturación. Se pide una vez en este equipo.</p>
+    <input id="gateClave" type="password" autocomplete="current-password" placeholder="escribe la clave">
+    <p class="gate-msg" id="gateMsg" style="display:none"></p>
+    <div class="btnrow"><button class="btn green" id="gateEntrar">Entrar</button></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="card no-print">
+    <h2>Buscar prospectos nuevos</h2>
+    <p class="sub">Un agente de IA busca en internet empresas que encajan con tu perfil: retail, intercedis, principales ciudades y sureste, trato directo con el fabricante y sin materiales peligrosos. Para cada una deja el porqué, sus canales de contacto corporativos y un correo de primer contacto listo para mandar.</p>
+    <div class="grid">
+      <div class="f"><label>Qué buscar</label><select id="bSeg">
+        <option value="retail">Marcas que surten a autoservicio y departamentales</option>
+        <option value="intercedis">Empresas con movimientos entre sus CEDIS</option>
+        <option value="sureste">Operación fuerte en el sureste</option>
+        <option value="regreso">Carga de regreso desde las principales ciudades</option></select></div>
+      <div class="f"><label>Dar prioridad a</label><input id="bZona" placeholder="opcional · un giro o una ciudad"></div>
+      <div class="f"><label>Cuántas</label><select id="bCant"><option>5</option><option selected>10</option><option>15</option></select></div>
+    </div>
+    <div class="btnrow"><button class="btn green" id="btnBuscar">Buscar prospectos</button><span class="hint" id="hBuscar"></span></div>
+  </section>
+
+  <section class="card">
+    <div class="ec-hd"><div><h2>Tus prospectos</h2><p class="sub" id="pSub">Trayendo la lista…</p></div>
+      <div class="btnrow no-print"><button class="btn ghost" id="btnImp">Imprimir lista</button></div></div>
+    <div class="empresas no-print" id="fEst"></div>
+    <div class="grid no-print"><div class="f"><label>Buscar en la lista</label><input id="fTxt" placeholder="empresa, giro o ciudad"></div>
+      <div class="f"><label>Segmento</label><select id="fSeg"><option value="">Todos</option><option value="retail">Autoservicio y departamentales</option><option value="intercedis">Intercedis</option><option value="sureste">Sureste</option><option value="regreso">Carga de regreso</option></select></div></div>
+    <div id="lista"></div>
+    <div id="estadoDatos" class="hint"></div>
+  </section>
+
+  <details class="acc">
+    <summary>Cómo se arma cada prospecto</summary>
+    <div class="bd"><ul class="mr-sup">
+      <li><b>De dónde sale:</b> el agente busca en internet información pública de la empresa y deja la liga donde vio el dato principal; conviene abrirla antes de escribir.</li>
+      <li><b>Contacto:</b> solo canales corporativos publicados (sitio, conmutador, correo general o de proveedores) y el puesto al que conviene dirigirse. No se guardan datos personales.</li>
+      <li><b>Correo:</b> es un borrador de primer contacto; revísalo y ajústalo antes de mandarlo.</li>
+      <li><b>Estatus y notas:</b> se guardan en el servidor, así que se ven igual desde cualquier equipo.</li>
+    </ul></div>
+  </details>
+
+  <footer>ExcelentIA · Prospección de Clientes · Logística Armada · v1 · versión para revisión</footer>
+</div>
+
+<script>
+/* ============ Prospección · v1 ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const URL_F = 'https://n8n.excelentia.com.mx/webhook/4pl-viajes';
+const LS_CLAVE = 'la_clave_viajes';
+const EST = { nuevo: 'Nuevo', contactado: 'Contactado', interesado: 'Interesado', descartado: 'Descartado' };
+const SEGT = { retail: 'Autoservicio y departamentales', intercedis: 'Intercedis', sureste: 'Sureste', regreso: 'Carga de regreso' };
+let LISTA = [], FEST = 'activos', ABIERTO = {};
+function claveGuardada() { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } }
+function pedirClave(msg) { $('#gate').classList.remove('hidden'); $('#gateMsg').textContent = msg || ''; $('#gateMsg').style.display = msg ? 'block' : 'none'; $('#gateClave').value = ''; setTimeout(() => $('#gateClave').focus(), 50); }
+function estado(h) { $('#estadoDatos').innerHTML = h; }
+const ligaOk = u => /^https?:\/\//i.test(String(u || '').trim()) ? String(u).trim() : (u && /\./.test(u) ? 'https://' + String(u).trim() : '');
+
+async function llamar(cuerpo, ms, desdeGate) {
+  const clave = cuerpo.clave || claveGuardada();
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms || 30000);
+  try {
+    const r = await fetch(URL_F, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ modo: 'prospeccion' }, cuerpo, { clave })), signal: ctl.signal });
+    const j = await r.json(); clearTimeout(t);
+    if (j && j.error === 'clave') { try { localStorage.removeItem(LS_CLAVE); } catch (e) { } pedirClave('La clave no es correcta. Vuelve a escribirla.'); return null; }
+    if (j && j.ok) { try { localStorage.setItem(LS_CLAVE, clave); } catch (e) { } $('#gate').classList.add('hidden'); }
+    return j;
+  } catch (e) {
+    clearTimeout(t);
+    if (desdeGate) pedirClave('No hubo respuesta. Revisa tu conexión e intenta de nuevo.');
+    return { ok: false, error: e.name === 'AbortError' ? 'Se acabó el tiempo de espera.' : 'No hubo respuesta del servidor.' };
+  }
+}
+async function cargar(clave, desdeGate) {
+  estado('');
+  const j = await llamar({ accion: 'listar', clave }, 30000, desdeGate);
+  if (!j) return;
+  if (!j.ok) { $('#pSub').textContent = ''; estado(esc(j.error) + ' <button class="link" id="btnRe">Reintentar</button>'); $('#btnRe').onclick = () => cargar(claveGuardada()); return; }
+  LISTA = j.lista || []; pintar();
+}
+
+function pintar() {
+  const cuenta = k => LISTA.filter(p => k === 'activos' ? p.estatus !== 'descartado' : k === 'todos' ? true : p.estatus === k).length;
+  const fs = [['activos', 'Activos'], ['nuevo', 'Nuevos'], ['contactado', 'Contactados'], ['interesado', 'Interesados'], ['descartado', 'Descartados'], ['todos', 'Todos']];
+  $('#fEst').innerHTML = fs.map(f => `<button class="emp ${FEST === f[0] ? 'on' : ''}" data-f="${f[0]}">${f[1]} · ${cuenta(f[0])}</button>`).join('');
+  $('#fEst').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { FEST = b.dataset.f; pintar(); });
+  const q = ($('#fTxt').value || '').toLowerCase().trim(), sg = $('#fSeg').value;
+  const ver = LISTA.filter(p => (FEST === 'activos' ? p.estatus !== 'descartado' : FEST === 'todos' || p.estatus === FEST)
+    && (!sg || p.segmento === sg) && (!q || [p.empresa, p.giro, p.ciudades].join(' ').toLowerCase().indexOf(q) >= 0));
+  $('#pSub').textContent = LISTA.length + ' prospectos guardados · ' + cuenta('interesado') + ' interesados · ' + cuenta('contactado') + ' contactados';
+  $('#lista').innerHTML = ver.length ? ver.map(tarjeta).join('') : '<p class="sub">No hay prospectos con este filtro.' + (LISTA.length ? '' : ' Usa “Buscar prospectos” para traer los primeros.') + '</p>';
+  ver.forEach(enlazar);
+}
+function tarjeta(p) {
+  const sitio = ligaOk(p.sitio), fuente = ligaOk(p.fuente);
+  const mail = p.correo_contacto && /@/.test(p.correo_contacto) ? 'mailto:' + encodeURIComponent(p.correo_contacto) + '?subject=' + encodeURIComponent(p.asunto || '') + '&body=' + encodeURIComponent(p.correo || '') : '';
+  return `<article class="pc est-${esc(p.estatus)}" id="p${p.id}">
+    <div class="pc-hd"><div><h3>${esc(p.empresa)}</h3><p class="pc-giro">${esc(p.giro || '')}${p.segmento ? ' · ' + esc(SEGT[p.segmento] || p.segmento) : ''}</p></div>
+      <select class="no-print" data-est="${p.id}" aria-label="Estatus">${Object.keys(EST).map(k => `<option value="${k}" ${p.estatus === k ? 'selected' : ''}>${EST[k]}</option>`).join('')}</select>
+      <span class="solo-print pc-est">${EST[p.estatus] || ''}</span></div>
+    ${p.por_que ? `<p class="pc-pq">${esc(p.por_que)}</p>` : ''}
+    <dl class="pc-dl">
+      ${p.ciudades ? `<dt>Plantas y CEDIS</dt><dd>${esc(p.ciudades)}</dd>` : ''}
+      ${p.area_objetivo ? `<dt>A quién dirigirse</dt><dd>${esc(p.area_objetivo)}</dd>` : ''}
+      <dt>Contacto</dt><dd>${[sitio ? `<a href="${esc(sitio)}" target="_blank" rel="noopener">${esc(p.sitio)}</a>` : '', p.telefono ? esc(p.telefono) : '', p.correo_contacto ? esc(p.correo_contacto) : ''].filter(Boolean).join(' · ') || '<span class="dim">sin canal publicado; buscar en su sitio</span>'}</dd>
+      ${fuente ? `<dt>Fuente</dt><dd><a href="${esc(fuente)}" target="_blank" rel="noopener">ver de dónde salió</a></dd>` : ''}
+    </dl>
+    <details class="pc-mail" ${ABIERTO[p.id] ? 'open' : ''} data-det="${p.id}"><summary>Correo listo${p.asunto ? ': ' + esc(p.asunto) : ''}</summary>
+      <div class="pc-cuerpo">${esc(p.correo || '').replace(/\n/g, '<br>')}</div>
+      <div class="btnrow no-print"><button class="btn ghost" data-copiar="${p.id}">Copiar correo</button>${mail ? `<a class="btn ghost" href="${mail}">Abrir en mi correo</a>` : ''}<span class="hint" data-hc="${p.id}"></span></div>
+    </details>
+    <div class="pc-notas no-print"><label>Notas</label><textarea data-notas="${p.id}" rows="2" placeholder="qué pasó al contactarlos">${esc(p.notas || '')}</textarea>
+      <div class="btnrow"><button class="btn ghost" data-guardar="${p.id}">Guardar notas</button><span class="hint" data-hg="${p.id}"></span></div></div>
+    ${p.notas ? `<p class="solo-print"><b>Notas:</b> ${esc(p.notas)}</p>` : ''}
+  </article>`;
+}
+function enlazar(p) {
+  const el = $('#p' + p.id); if (!el) return;
+  el.querySelector('[data-det]').ontoggle = e => { ABIERTO[p.id] = e.target.open; };
+  el.querySelector('[data-est]').onchange = e => guardar(p, e.target.value, el.querySelector('[data-notas]').value);
+  el.querySelector('[data-guardar]').onclick = () => guardar(p, el.querySelector('[data-est]').value, el.querySelector('[data-notas]').value);
+  el.querySelector('[data-copiar]').onclick = () => {
+    const txt = (p.asunto ? 'Asunto: ' + p.asunto + '\n\n' : '') + (p.correo || '');
+    const ok = () => { el.querySelector('[data-hc]').textContent = 'copiado'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, () => viejo(txt, ok)); else viejo(txt, ok);
+  };
+}
+function viejo(txt, ok) { const t = document.createElement('textarea'); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); ok(); } catch (e) { } t.remove(); }
+async function guardar(p, est, notas) {
+  const h = document.querySelector('[data-hg="' + p.id + '"]'); if (h) h.textContent = 'guardando…';
+  const j = await llamar({ accion: 'actualizar', id: p.id, estatus: est, notas: notas });
+  if (j && j.ok && Number(j.cambios) > 0) {
+    p.estatus = est; p.notas = notas;
+    const h2 = document.querySelector('[data-hg="' + p.id + '"]'); if (h2) h2.textContent = 'guardado';
+    if (FEST !== 'todos' && FEST !== 'activos' && FEST !== est) pintar(); else { const el = $('#p' + p.id); if (el) el.className = 'pc est-' + est; actualizarConteos(); }
+  } else if (h) h.textContent = 'no se guardó · ' + ((j && j.error) || 'intenta de nuevo');
+}
+function actualizarConteos() {
+  const cuenta = k => LISTA.filter(p => k === 'activos' ? p.estatus !== 'descartado' : k === 'todos' ? true : p.estatus === k).length;
+  $('#fEst').querySelectorAll('[data-f]').forEach(b => b.textContent = b.textContent.replace(/ · \d+$/, ' · ' + cuenta(b.dataset.f)));
+  $('#pSub').textContent = LISTA.length + ' prospectos guardados · ' + cuenta('interesado') + ' interesados · ' + cuenta('contactado') + ' contactados';
+}
+
+$('#btnBuscar').onclick = async () => {
+  const b = $('#btnBuscar'); b.disabled = true;
+  $('#hBuscar').textContent = 'Buscando en internet; puede tardar hasta 4 minutos. No cierres la página.';
+  const j = await llamar({ accion: 'buscar', segmento: $('#bSeg').value, zona: $('#bZona').value, cantidad: Number($('#bCant').value) }, 300000);
+  b.disabled = false;
+  if (!j) { $('#hBuscar').textContent = ''; return; }
+  if (!j.ok) { $('#hBuscar').textContent = j.error || 'No se pudo buscar.'; return; }
+  LISTA = j.lista || [];
+  $('#hBuscar').textContent = j.nuevos ? j.nuevos + ' prospectos nuevos agregados' + (j.propuestos > j.nuevos ? (j.propuestos - j.nuevos === 1 ? ' (otra ya estaba en tu lista)' : ' (' + (j.propuestos - j.nuevos) + ' más ya estaban en tu lista)') : '') + '.' : 'Todas las empresas que encontró ya estaban en tu lista; prueba otro segmento o una prioridad distinta.';
+  FEST = 'nuevo'; pintar();
+};
+$('#btnImp').onclick = () => window.print();
+$('#fTxt').oninput = pintar; $('#fSeg').onchange = pintar;
+$('#gateEntrar').onclick = () => { const c = $('#gateClave').value.trim(); if (!c) { pedirClave('Escribe la clave de acceso.'); return; } $('#gateMsg').style.display = 'block'; $('#gateMsg').textContent = 'Revisando…'; cargar(c, true); };
+$('#gateClave').onkeydown = e => { if (e.key === 'Enter') $('#gateEntrar').click(); };
+(function () { const c = claveGuardada(); if (!c) { $('#pSub').textContent = ''; pedirClave(''); } else cargar(c); })();
+
+</script>
+</body>
+</html>
