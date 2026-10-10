@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conciliación de Pagos v1 · Logística Armada</title>
+<title>Conciliación de Pagos v2 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -322,7 +322,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Conciliación de Pagos · Logística Armada</h1>
-        <p>v1 · Viajes contra facturas de transportistas</p>
+        <p>v2 · Viajes contra facturas de transportistas</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -388,24 +388,26 @@ tr.alt td{background:#f0f6ff}
     </ul></div>
   </details>
 
-  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · v1 · versión para revisión</footer>
+  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · v2 · versión para revisión</footer>
 </div>
 
 <script>
-/* ============ Conciliación de Pagos · v1 ============ */
+/* ============ Conciliación de Pagos · v2 ============ */
 const $ = s => document.querySelector(s);
 const mny0 = n => n == null || isNaN(n) ? '—' : (n < 0 ? '−$' : '$') + Math.round(Math.abs(n)).toLocaleString('es-MX');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const VIAJES_URL = 'https://n8n.excelentia.com.mx/webhook/4pl-viajes';
 const LS_CLAVE = 'la_clave_viajes', LS_CFG = 'la_conciliacion_cfg';
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const fechaTxt = s => { const x = String(s || '').split('-').map(Number); return x.length === 3 && x[1] ? x[2] + ' ' + MESES[x[1] - 1].slice(0, 3) + (x[0] !== new Date().getFullYear() ? ' ' + x[0] : '') : '—'; };
+const fechaOk = s => { const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(s == null ? '' : s).trim()); if (!m) return ''; const y = +m[1], mo = +m[2], d = +m[3]; if (y < 1900 || mo < 1 || mo > 12 || d < 1) return ''; const t = new Date(Date.UTC(y, mo - 1, d)); return t.getUTCFullYear() === y && t.getUTCMonth() === mo - 1 && t.getUTCDate() === d ? m[1] + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0') : ''; };
+const fechaTxt = s => { const f = fechaOk(s); if (!f) return '—'; const x = f.split('-').map(Number); return x[2] + ' ' + MESES[x[1] - 1].slice(0, 3) + (x[0] !== new Date().getFullYear() ? ' ' + x[0] : ''); };
 const PROVN = {"27":"Trasportes Pérez","28":"TYR","29":"Alfa Trasportes","30":"MEL Logistics","31":"Trasportes Bautista","32":"Trasportes García","33":"Trasportes Mendiola","34":"Logística Armada","35":"Transguca","36":"Transporte S.O.R.","37":"Transporte Rodbar","38":"Transporte González","39":"Transportes 4PL","40":"Transportes MAS"};
 const bonito = s => String(s || '').toLowerCase().replace(/(^|\s|\.)([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
 const provTxt = id => id ? (PROVN[id] || 'Transportista ' + id) : 'Sin transportista';
 const cliTxt = s => String(s || '').replace(/^4pl-\s*/i, '').trim();
-const dias = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
-const sumar = (dIso, n) => { const d = new Date(dIso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const dias = (a, b) => { const x = fechaOk(a), y = fechaOk(b); if (!x || !y) return null; const n = Math.round((Date.parse(y) - Date.parse(x)) / 864e5); return isNaN(n) ? null : n; };
+const sumar = (dIso, n) => { const f = fechaOk(dIso); if (!f) return ''; const d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + (Number(n) || 0)); return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10); };
+const filaMala = (n, dato, e) => { console.error('Renglón que no se pudo mostrar', dato, e); return '<tr><td colspan="' + n + '" class="dim">Un renglón trae datos que no se pudieron mostrar; avísanos y lo revisamos.</td></tr>'; };
 
 let CFG = { desde: '2026-01-01', tol: 1, cred: 30, prov: '' };
 try { CFG = Object.assign(CFG, JSON.parse(localStorage.getItem(LS_CFG) || '{}')); } catch (e) { }
@@ -423,21 +425,27 @@ function estado(h) { $('#estadoDatos').innerHTML = h; }
 async function cargar(clave, desdeGate) {
   estado('Trayendo los datos de tu plataforma…');
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 30000);
+  let j;
   try {
     const r = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clave: clave, modo: 'conciliacion', desde: CFG.desde }), signal: ctl.signal });
-    const j = await r.json(); clearTimeout(t);
+    j = await r.json(); clearTimeout(t);
     if (!j || !j.ok) {
       if (j && j.error === 'clave') { try { localStorage.removeItem(LS_CLAVE); } catch (e) { } estado(''); pedirClave('La clave no es correcta. Vuelve a escribirla.'); return; }
       throw new Error((j && j.error) || 'sin respuesta');
     }
-    try { localStorage.setItem(LS_CLAVE, clave); } catch (e) { }
-    $('#gate').classList.add('hidden');
-    usar(j);
   } catch (e) {
     clearTimeout(t);
     estado('No hubo respuesta de tu plataforma. <button class="link" id="btnRe">Reintentar</button>');
     const b = $('#btnRe'); if (b) b.onclick = () => { const c = claveGuardada(); c ? cargar(c) : pedirClave(''); };
     if (desdeGate) pedirClave('No hubo respuesta de tu plataforma. Revisa tu conexión e intenta de nuevo.');
+    return;
+  }
+  try { localStorage.setItem(LS_CLAVE, clave); } catch (e) { }
+  $('#gate').classList.add('hidden');
+  try { usar(j); } catch (e) {
+    // los datos sí llegaron: el problema es al dibujarlos, no de la plataforma ni de la clave
+    console.error('Conciliación: error al mostrar los datos', e);
+    estado('Llegaron tus datos pero hubo un problema al mostrarlos; avísanos y lo revisamos.');
   }
 }
 
@@ -445,15 +453,15 @@ async function cargar(clave, desdeGate) {
 function cruzar() {
   const hoy = SRV.hasta, tol = Number(CFG.tol) || 0, cred = Number(CFG.cred) || 0;
   const F = {}, sinViaje = [];
-  SRV.facturas.forEach(a => {
-    const f = { idf: a[0], v: a[1], pr: a[2], folio: a[3], fecha: a[4] || a[5], sub: a[6], tot: a[7], pagada: !!a[8], fPago: a[9], cuadra: a[10], activa: !!a[11], comp: a[12], mp: a[13] };
+  SRV.facturas.forEach(a => { try {
+    const f = { idf: a[0], v: a[1], pr: a[2], folio: a[3], fecha: fechaOk(a[4]) || fechaOk(a[5]) || '', sub: a[6], tot: a[7], pagada: !!a[8], fPago: a[9], cuadra: a[10], activa: !!a[11], comp: a[12], mp: a[13] };
     f.vence = f.fecha ? sumar(f.fecha, cred) : '';
     f.vencida = !f.pagada && f.activa && f.vence && f.vence < hoy;
     f.diasV = f.vence ? dias(hoy, f.vence) : null;
     if (!f.v) { if (f.activa) sinViaje.push(f); return; }
     (F[f.v] = F[f.v] || []).push(f);
-  });
-  const viajes = SRV.viajes.map(a => {
+  } catch (e) { console.error('Factura que no se pudo leer', a, e); } });
+  const viajes = SRV.viajes.map(a => { try {
     const v = { id: a[0], fecha: a[1], cli: cliTxt(a[2]), des: a[3], uni: a[4], pr: a[5], debe: a[6] + a[7], flete: a[6], otros: a[7], st: a[8], hijo: !!a[9], padre: a[10], propia: !!a[11] };
     v.todas = F[v.id] || [];
     v.fac = v.todas.filter(f => f.activa);
@@ -474,7 +482,7 @@ function cruzar() {
       }
     }
     return v;
-  });
+  } catch (e) { console.error('Viaje que no se pudo leer', a, e); return null; } }).filter(Boolean);
   return { viajes, sinViaje, hoy };
 }
 const filtroProv = x => !CFG.prov || String(x.pr) === String(CFG.prov);
@@ -511,23 +519,23 @@ function pintar() {
   $('#rSalio').innerHTML = av.map(a => `<div class="aviso"><div class="t">${a[0]}</div><p>${a[1]}</p></div>`).join('') || '<p class="sub">Todo cuadra en este periodo.</p>';
 
   pintarTrans();
-  const ord = (a, b) => b.fecha.localeCompare(a.fecha);
+  const ord = (a, b) => String(b.fecha || '').localeCompare(String(a.fecha || ''));
   $('#ncSub').textContent = nNo.length + ' viajes donde lo facturado no coincide con lo registrado, por más de ' + mny0(CFG.tol) + '.';
   $('#tNc').innerHTML = tablaViajes(nNo.sort((a, b) => Math.abs(b.dif) - Math.abs(a.dif)), ['viaje', 'trans', 'debe', 'fact', 'dif', 'motivo']);
   const edades = [['todos', 'Todos'], ['0-30', 'Hasta 30 días'], ['31-60', '31 a 60'], ['61+', 'Más de 60']];
   $('#fEdad').innerHTML = edades.map(e => `<button class="emp ${EDAD === e[0] ? 'on' : ''}" data-e="${e[0]}">${e[1]}</button>`).join('');
   $('#fEdad').querySelectorAll('[data-e]').forEach(b => b.onclick = () => { EDAD = b.dataset.e; pintar(); });
-  const enEdad = v => EDAD === 'todos' || (EDAD === '0-30' ? v.edad <= 30 : EDAD === '31-60' ? v.edad > 30 && v.edad <= 60 : v.edad > 60);
+  const enEdad = v => EDAD === 'todos' || v.edad != null && (EDAD === '0-30' ? v.edad <= 30 : EDAD === '31-60' ? v.edad > 30 && v.edad <= 60 : v.edad > 60);
   const sf = nSin.filter(enEdad).sort((a, b) => b.edad - a.edad);
   $('#sfSub').textContent = sf.length + ' viajes con algo que pagarle al transportista y sin factura activa, por ' + mny0(S(sf.map(v => v.debe))) + '; del más viejo al más reciente.';
   $('#tSf').innerHTML = tablaViajes(sf, ['viaje', 'trans', 'debe', 'edad', 'estatus']);
   const pp = pend.slice().sort((a, b) => (a.vence || '').localeCompare(b.vence || ''));
   $('#ppSub').textContent = pp.length + ' facturas pendientes de pago por ' + mny0(S(pp.map(f => f.sub))) + ' (sin IVA); ' + venc.length + ' ya vencidas. La que vence primero va arriba.';
-  $('#tPp').innerHTML = pp.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Factura</th><th>Transportista</th><th>Viaje</th><th class="num">Subtotal</th><th class="num">Total</th><th>Vence</th><th>Cuadra</th></tr></thead><tbody>${pp.map(f => `<tr>
+  $('#tPp').innerHTML = pp.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Factura</th><th>Transportista</th><th>Viaje</th><th class="num">Subtotal</th><th class="num">Total</th><th>Vence</th><th>Cuadra</th></tr></thead><tbody>${pp.map(f => { try { return `<tr>
     <td>${esc(f.folio || 'sin folio')}<span class="mr-n">${fechaTxt(f.fecha)}${/si/i.test(f.comp) ? ' · complemento' : ''}</span></td><td>${esc(provTxt(f.pr))}</td>
     <td>${f.v || '<span class="dim">sin viaje</span>'}</td><td class="num">${mny0(f.sub)}</td><td class="num">${mny0(f.tot)}</td>
     <td class="${f.vencida ? 'neg' : ''}">${fechaTxt(f.vence)}<span class="mr-n">${f.diasV == null ? '' : f.diasV < 0 ? 'vencida hace ' + (-f.diasV) + ' días' : 'en ' + f.diasV + ' días'}</span></td>
-    <td>${f.cuadra === 'Si' ? 'sí' : f.cuadra === 'No' ? '<span class="neg">no</span>' : '<span class="dim">—</span>'}</td></tr>`).join('')}</tbody></table></div>` : '<p class="sub">No hay facturas pendientes de pago.</p>';
+    <td>${f.cuadra === 'Si' ? 'sí' : f.cuadra === 'No' ? '<span class="neg">no</span>' : '<span class="dim">—</span>'}</td></tr>`; } catch (e) { return filaMala(7, f, e); } }).join('')}</tbody></table></div>` : '<p class="sub">No hay facturas pendientes de pago.</p>';
   if (EC) estadoCuenta(EC);
 }
 
@@ -540,11 +548,11 @@ function tablaViajes(lista, cols) {
     trans: v => esc(provTxt(v.pr)) + (v.propia ? '<span class="mr-n">tu propia empresa</span>' : ''),
     debe: v => mny0(v.debe), fact: v => mny0(v.facturado) + '<span class="mr-n">' + v.fac.length + ' factura' + (v.fac.length > 1 ? 's' : '') + (v.elim ? ' · ' + v.elim + ' eliminada' + (v.elim > 1 ? 's' : '') : '') + '</span>',
     dif: v => `<b class="${v.dif > 0 ? 'neg' : ''}">${(v.dif > 0 ? '+' : '') + mny0(v.dif)}</b>`,
-    motivo: v => esc(v.motivo || ''), edad: v => `<span class="${v.edad > 60 ? 'neg' : ''}">${v.edad}</span>`, estatus: v => esc(v.st || '—'),
+    motivo: v => esc(v.motivo || ''), edad: v => v.edad == null ? '<span class="dim">—</span>' : `<span class="${v.edad > 60 ? 'neg' : ''}">${v.edad}</span>`, estatus: v => esc(v.st || '—'),
     pagado: v => mny0(v.pagado),
     estado: v => ({ cuadra: 'cuadra', nocuadra: '<span class="neg">no cuadra</span>', sin: 'sin factura', nada: '<span class="dim">sin cobro</span>' }[v.estado]) + (v.fac.length ? '<span class="mr-n">' + (v.pend ? 'por pagar ' + mny0(v.pend) : 'pagada') + '</span>' : '')
   };
-  return `<div class="tblwrap"><table class="rt"><thead><tr>${cols.map(c => `<th class="${num[c] ? 'num' : ''}">${H[c]}</th>`).join('')}</tr></thead><tbody>${lista.map(v => `<tr>${cols.map(c => `<td class="${num[c] ? 'num' : c === 'motivo' ? 'motivo' : ''}">${C[c](v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  return `<div class="tblwrap"><table class="rt"><thead><tr>${cols.map(c => `<th class="${num[c] ? 'num' : ''}">${H[c]}</th>`).join('')}</tr></thead><tbody>${lista.map(v => { try { return `<tr>${cols.map(c => `<td class="${num[c] ? 'num' : c === 'motivo' ? 'motivo' : ''}">${C[c](v)}</td>`).join('')}</tr>`; } catch (e) { return filaMala(cols.length, v, e); } }).join('')}</tbody></table></div>`;
 }
 
 function pintarTrans() {
@@ -564,7 +572,7 @@ function pintarTrans() {
 }
 
 function estadoCuenta(pr) {
-  const vs = R.viajes.filter(v => String(v.pr) === String(pr) && v.estado !== 'nada').sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const vs = R.viajes.filter(v => String(v.pr) === String(pr) && v.estado !== 'nada').sort((a, b) => String(a.fecha || '').localeCompare(String(b.fecha || '')));
   const sv = R.sinViaje.filter(f => String(f.pr) === String(pr));
   const S = a => a.reduce((s, x) => s + x, 0);
   const pend = vs.flatMap(v => v.fac).concat(sv).filter(f => !f.pagada);
@@ -586,7 +594,7 @@ function estadoCuenta(pr) {
 function usar(j) {
   SRV = j;
   Object.keys(j.provn || {}).forEach(id => { if (!PROVN[id]) PROVN[id] = bonito(j.provn[id]); });
-  const ps = [...new Set(j.viajes.map(v => v[5]).concat(j.facturas.map(f => f[2])))].filter(Boolean).sort((a, b) => provTxt(a).localeCompare(provTxt(b)));
+  const ps = [...new Set(j.viajes.map(v => (v || [])[5]).concat(j.facturas.map(f => (f || [])[2])))].filter(Boolean).sort((a, b) => provTxt(a).localeCompare(provTxt(b)));
   $('#fProv').innerHTML = '<option value="">Todos</option>' + ps.map(p => `<option value="${p}" ${String(p) === String(CFG.prov) ? 'selected' : ''}>${esc(provTxt(p))}</option>`).join('');
   estado('Datos de tu plataforma al ' + fechaTxt(j.hasta) + ' · ' + j.viajes.length + ' viajes y ' + j.facturas.length + ' facturas de transportistas');
   pintar();
