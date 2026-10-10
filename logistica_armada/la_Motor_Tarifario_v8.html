@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Motor Tarifario v8 · Logística Armada</title>
+<title>Motor Tarifario v9 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -283,7 +283,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Motor Tarifario · Logística Armada</h1>
-        <p>v8 · Cotizador, Proveedores y Margen por ruta</p>
+        <p>v9 · Cotizador, Proveedores y Margen por ruta</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -387,7 +387,8 @@ tr.alt td{background:#f0f6ff}
       <li>El rendimiento real de cada unidad. Sabemos el del tractocamión; el de rabón, 3.5 y 1.5 toneladas está calculado hacia atrás desde una tarifa conocida.</li>
       <li>La comisión del operador de cada ruta, que es solo de ida. Ya se captura como monto y queda guardada; mientras no esté, se estima como porcentaje del flete de ida.</li>
       <li>Los rangos de utilidad reales: cuál es el piso más apretado que se acepta y cuál el techo.</li>
-      <li>El costo real de casetas por ruta. El agente propone y cada vez que se reporta lo que de verdad se pagó, esa ruta queda corregida para siempre.</li>
+      <li>El costo real de casetas por ruta. El agente propone a tarifa de automóvil, el Motor la pasa a camión con el factor de cada unidad, y cada vez que se reporta lo que de verdad se pagó, esa ruta queda corregida para siempre.</li>
+      <li>El costo fijo por viaje: sueldo, viáticos y el mínimo por viaje. Mientras esté en cero, los foráneos salen abajo de tu tabulador.</li>
     </ul>
   </div>
 
@@ -451,25 +452,26 @@ tr.alt td{background:#f0f6ff}
         <li><b>Pagado real:</b> mediana de lo que se le pagó al transportista en viajes activos con cita <span class="periodo">del 1 de junio a la fecha</span>, sin contar viajes padre ni repartos, que traen el flete repartido. <span id="mrCobertura"></span></li>
         <li><b>Lo que facturaste:</b> mediana del flete que cobraste en <span class="fact-meses">los meses cargados</span>, por destino y unidad, sin viajes padre ni repartos; sale de tus reportes de facturación.</li>
         <li><b>Tarifario de proveedores:</b> mediana de las tarifas cargadas para ese destino y unidad; se usa solo donde no hubo viajes, y la mediana evita que pesen capturas atípicas, como un tráiler a Monterrey en $1,200.</li>
-        <li><b>Kilómetros y casetas:</b> los trajo el agente de Google desde Tultepec, con casetas a tarifa de automóvil ajustadas 22% por cada eje arriba de dos. A Culiacán y Mexicali Google no devolvió casetas y se estimaron por kilómetro.</li>
-        <li><b>Motor:</b> vuelta completa con regreso vacío, con el diésel, la comisión del operador, el mantenimiento y los rendimientos que tengas en Datos de la empresa del Cotizador; precio al 15% de utilidad.</li>
+        <li><b>Kilómetros y casetas:</b> los trajo el agente de Google desde Tultepec, con casetas a tarifa de automóvil pasadas a tarifa de camión con el factor de cada unidad (Datos de la empresa · Casetas ×). A Culiacán y Mexicali Google no devolvió casetas y se estimaron por kilómetro.</li>
+        <li><b>Motor:</b> vuelta completa con regreso vacío, con el diésel, la comisión del operador, el costo fijo por viaje, el mantenimiento y los rendimientos que tengas en Datos de la empresa del Cotizador; precio al 15% de utilidad.</li>
         <li><b>Diferencia %</b> sobre el precio del Motor. <b>Utilidad unidad propia:</b> lo que dejaría tu precio operando con camión propio, con la comisión calculada sobre tu precio.</li>
       </ul>
     </div>
   </details>
   </div>
 
-  <footer>ExcelentIA · Motor Tarifario Logística Armada · v8 · versión para revisión</footer>
+  <footer>ExcelentIA · Motor Tarifario Logística Armada · versión 9 · 10-oct-2026 · versión para revisión</footer>
 </div>
 
 <script>
-/* ============ Motor Tarifario · v8 ============ */
+/* ============ Motor Tarifario · v9 ============ */
 const $ = s => document.querySelector(s);
 const LS = '4pl_tarifario_v0';
 
 const mny = n => n == null || isNaN(n) ? '—' : '$' + Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const mny0 = n => n == null || isNaN(n) ? '—' : '$' + Math.round(n).toLocaleString('es-MX');
 const pct = n => (n * 100).toFixed(1) + '%';
+const uniId = n => /1\.5/.test(n) ? 3 : /3\.5/.test(n) ? 4 : /rab|torton/i.test(n) ? 5 : /tr[aá]iler/i.test(n) ? 1 : null;
 const num = v => { const n = parseFloat(String(v).replace(/[$,\s]/g, '')); return isNaN(n) ? 0 : n; };
 
 /* ---------- perfil base ----------
@@ -488,15 +490,31 @@ function perfilBase(nombre) {
     mantenimiento: 30,
     casetaPorKm: 1.10,
     utilidad: { directo: 25, logistica: 15, piso: 10 },
+    costoFijo: 0,   // v9: sueldo, viaticos y minimo por viaje · por confirmar
     unidades: [
-      { nombre: '1.5 toneladas',  rend: 9.5, ejes: 2, conf: false },
-      { nombre: '3.5 toneladas',  rend: 7.0, ejes: 2, conf: false },
-      { nombre: 'Torton / rabón', rend: 5.4, ejes: 2, conf: false },
-      { nombre: 'Tráiler',        rend: 2.7, ejes: 5, conf: true  },
-      { nombre: 'Tráiler nuevo',  rend: 3.3, ejes: 5, conf: true  }
+      { nombre: '1.5 toneladas',  rend: 9.5, ejes: 2, conf: false, casFactor: 1.0  },
+      { nombre: '3.5 toneladas',  rend: 7.0, ejes: 2, conf: false, casFactor: 1.5  },
+      { nombre: 'Torton / rabón', rend: 5.4, ejes: 2, conf: false, casFactor: 1.51 },
+      { nombre: 'Tráiler',        rend: 2.7, ejes: 5, conf: true,  casFactor: 3.1  },
+      { nombre: 'Tráiler nuevo',  rend: 3.3, ejes: 5, conf: true,  casFactor: 3.1  }
     ]
   };
 }
+
+/* v9 · casetas a tarifa de camion
+   Google y el agente dan casetas a tarifa de AUTOMOVIL. Se pasan a camion con
+   un factor por unidad, calibrado con casetas reales del cliente (Monterrey,
+   879 km: rabon pago $1,495.50 de ida contra $991 de Google = x1.51; trailer
+   $3,072 = x3.1). Solo se aplica a casetas estimadas, nunca a las liquidadas
+   ni a las capturadas a mano. */
+const CAS_DEF = { 3: 1.0, 4: 1.5, 5: 1.51, 1: 3.1 };   // por tipo de unidad (uniId)
+const CAS_CAL = { 5: true, 1: true };                   // calibrados con casetas reales
+const factorEjesBase = ejes => 1 + ((Number(ejes) || 2) - 2) * 0.22;   // el que aplica la base a lo de Google
+function casFactorDefecto(u) {
+  const id = uniId(u.nombre || '');
+  return CAS_DEF[id] != null ? CAS_DEF[id] : Math.round(factorEjesBase(u.ejes) * 100) / 100;
+}
+function factorCamion(u) { const f = Number(u && u.casFactor); return f > 0 ? f : casFactorDefecto(u || {}); }
 
 let DATOS = { activa: 'Logística Armada', empresas: {} };
 try {
@@ -520,13 +538,24 @@ if (DATOS.empresas && !DATOS.ejesRabon2) {
   DATOS.ejesRabon2 = true;
   try { localStorage.setItem(LS, JSON.stringify(DATOS)); } catch (e) { }
 }
+// v9: factor de casetas de camion por unidad y costo fijo por viaje; lo demas se conserva
+if (DATOS.empresas && !DATOS.casetasCamion9) {
+  Object.keys(DATOS.empresas).forEach(function (k) {
+    var pe = DATOS.empresas[k] || {};
+    if (pe.costoFijo == null || isNaN(Number(pe.costoFijo))) pe.costoFijo = 0;
+    (pe.unidades || []).forEach(function (u) { if (!(Number(u.casFactor) > 0)) u.casFactor = casFactorDefecto(u); });
+  });
+  DATOS.casetasCamion9 = true;
+  try { localStorage.setItem(LS, JSON.stringify(DATOS)); } catch (e) { }
+}
 if (!DATOS.empresas || !Object.keys(DATOS.empresas).length) {
   DATOS = {
     activa: 'Logística Armada',
     empresas: {
       'Logística Armada': perfilBase('Logística Armada'),
       'Transporte propio': perfilBase('Transporte propio')
-    }
+    },
+    ejesRabon2: true, casetasCamion9: true
   };
 }
 function guardar() { try { localStorage.setItem(LS, JSON.stringify(DATOS)); } catch (e) { } }
@@ -568,7 +597,7 @@ const LS_REC = '4pl_ciudades_recientes';
 let CIUDADES = [];        // catalogo que trae el agente
 let RECIENTES = [];       // ultimas cotizadas, se guardan en el equipo
 let AG_VIVO = null;       // null = sin probar, true/false = resultado
-let RUTA_BASE = { enBase: false, km: null, casetas: null, casetasFuente: '', casetasConfirmadas: false };  // que trajo la base en la ultima busqueda
+let RUTA_BASE = { enBase: false, km: null, casetas: null, casetasFuente: '', casetasConfirmadas: false, ejes: 2 };  // que trajo la base en la ultima busqueda
 try { RECIENTES = JSON.parse(localStorage.getItem(LS_REC) || '[]'); } catch (e) { RECIENTES = []; }
 
 const CIUDADES_BASE = ['CDMX / Zona metropolitana','Acapulco','Ajusco','Aguascalientes','Atlacomulco','Campeche',
@@ -750,15 +779,20 @@ function leerViaje() {
 }
 
 /* de donde salieron las casetas que se estan usando en este calculo */
-function origenCasetas(v, ejes) {
-  if (v.casetas <= 0) return { texto: 'estimadas por kilómetros y ' + ejes + ' ejes', firme: false };
-  if (RUTA_BASE.casetas !== null && Math.round(v.casetas) === RUTA_BASE.casetas) {
-    if (RUTA_BASE.casetasConfirmadas) return { texto: RUTA_BASE.casetasFuente, firme: true };
-    const f = RUTA_BASE.casetasFuente.toLowerCase();
-    if (f.indexOf('google') >= 0) return { texto: 'las trajo el agente de Google · por confirmar', firme: false };
-    return { texto: 'estimadas por el agente · por confirmar', firme: false };
+// v9: devuelve tambien el tipo (km, agente, real, mano) para saber si lleva factor de camion
+const fx = f => '×' + Number(f).toLocaleString('es-MX', { maximumFractionDigits: 2 });
+function origenCasetas(v, ejes, factor) {
+  const tc = factor ? ' con tarifa de camión (' + fx(factor) + ')' : '';
+  if (v.casetasAuto > 0) return { texto: 'agente de Google a tarifa de automóvil; estimadas' + tc + ' · por confirmar', firme: false, tipo: 'auto' };
+  if (v.casetas <= 0) return { texto: 'estimadas por kilómetros' + tc + ' · por confirmar', firme: false, tipo: 'km' };
+  if (RUTA_BASE.casetas != null && Math.round(v.casetas) === RUTA_BASE.casetas) {
+    const f = String(RUTA_BASE.casetasFuente || '').toLowerCase();
+    // las liquidadas son lo que se pago de verdad: nunca llevan factor
+    if (RUTA_BASE.casetasConfirmadas || f.indexOf('liquidad') >= 0) return { texto: RUTA_BASE.casetasFuente || 'confirmadas', firme: true, tipo: 'real' };
+    if (f.indexOf('google') >= 0) return { texto: 'las trajo el agente de Google a tarifa de automóvil; estimadas' + tc + ' · por confirmar', firme: false, tipo: 'agente' };
+    return { texto: 'estimadas por el agente' + tc + ' · por confirmar', firme: false, tipo: 'agente' };
   }
-  return { texto: 'capturadas a mano', firme: true };
+  return { texto: 'capturadas a mano', firme: true, tipo: 'mano' };
 }
 
 /* ---------- el calculo ---------- */
@@ -771,15 +805,25 @@ function calcular(v, p) {
   const litros = uni.rend > 0 ? kmTotal / uni.rend : 0;
   const combustible = litros * p.diesel;
 
-  // casetas: si no se capturan, se estiman por km y ejes
-  const factorEjes = 1 + (uni.ejes - 2) * 0.22;
-  const casetasIda = v.casetas > 0 ? v.casetas : kmIda * p.casetaPorKm * factorEjes;
+  // casetas (v9): las estimadas se pasan de tarifa de automovil a tarifa de camion
+  // con el factor de la unidad; las liquidadas y las capturadas a mano van tal cual
+  const fCam = factorCamion(uni);
+  const oc0 = origenCasetas(v, uni.ejes);
+  let casetasIda, casFactor = 0;
+  if (oc0.tipo === 'auto') { casetasIda = v.casetasAuto * fCam; casFactor = fCam; }
+  else if (oc0.tipo === 'km') { casetasIda = kmIda * p.casetaPorKm * fCam; casFactor = fCam; }
+  else if (oc0.tipo === 'agente') { casetasIda = v.casetas / factorEjesBase(RUTA_BASE.ejes || uni.ejes) * fCam; casFactor = fCam; }
+  else casetasIda = v.casetas;
+  const casInfo = casFactor ? origenCasetas(v, uni.ejes, casFactor) : oc0;
   const casetasVuelta = kmVuelta > 0 ? casetasIda * (v.km / Math.max(kmIda, 1)) : 0;
   const casetas = casetasIda + casetasVuelta;
-  const casetasEstimadas = v.casetas <= 0;
+  const casetasEstimadas = oc0.tipo === 'km';
+
+  // v9: costo fijo por viaje (sueldo, viaticos, minimo); entra antes del mantenimiento
+  const costoFijo = Math.max(Number(p.costoFijo) || 0, 0);
 
   // costos que no dependen del precio
-  const costoDirecto = combustible + casetas;
+  const costoDirecto = combustible + casetas + costoFijo;
 
   // la comision del operador es un porcentaje del flete, asi que el
   // precio se despeja: precio = (costoDirecto * (1+mant)) / (1 - com*(1+mant) - utilidad)
@@ -810,7 +854,8 @@ function calcular(v, p) {
   return {
     uni: uni, kmIda: kmIda, kmVuelta: kmVuelta, kmTotal: kmTotal,
     litros: litros, combustible: combustible,
-    casetas: casetas, casetasEstimadas: casetasEstimadas,
+    casetas: casetas, casetasEstimadas: casetasEstimadas, casInfo: casInfo, casFactor: casFactor,
+    costoFijo: costoFijo,
     costoDirecto: costoDirecto,
     objetivo: objetivo, piso: piso, techo: techo,
     detalle: objetivo ? costoDe(objetivo) : null,
@@ -852,7 +897,9 @@ function renderResultado(r, v, p) {
       <tr><td>Combustible</td><td class="num">${mny(r.combustible)}</td>
         <td class="dim">${Math.round(r.litros)} litros a ${mny(p.diesel)}${p.dieselManual ? ' · capturado a mano' : (p.dieselAgente ? ' · lo trajo el agente' + (p.dieselFecha ? ' al ' + p.dieselFecha : '') : '')} · rendimiento ${r.uni.rend} km/l</td></tr>
       <tr><td>Casetas</td><td class="num">${mny(r.casetas)}</td>
-        <td class="dim">${origenCasetas(v, r.uni.ejes).texto}</td></tr>
+        <td class="dim">${r.casInfo.texto}</td></tr>
+      <tr><td>Costo fijo por viaje</td><td class="num">${mny(r.costoFijo)}</td>
+        <td class="dim">${r.costoFijo ? 'sueldo, viáticos y mínimo por viaje' : 'sin capturar'} · por confirmar</td></tr>
       <tr><td>Comisión del operador</td><td class="num">${mny(d ? d.comision : null)}</td>
         <td class="dim">${r.comMonto ? 'monto de la ruta: ' + mny0(r.comIda) + ', solo de ida' : p.comisionOperador + '% sobre el flete de ida · por confirmar'}</td></tr>
       <tr class="sum"><td>Suma de gastos del viaje</td><td class="num">${mny(d ? d.subtotal : null)}</td><td></td></tr>
@@ -886,10 +933,11 @@ function renderResultado(r, v, p) {
   } else { $('#calibra').innerHTML = ''; }
 
   const notas = [];
-  const oc = origenCasetas(v, r.uni.ejes);
+  const oc = r.casInfo;
   if (!oc.firme) notas.push(r.casetasEstimadas
-    ? 'Las casetas están estimadas por kilómetros y número de ejes, no consultadas. Si conoces el importe real de esta ruta, captúralo y el cálculo se ajusta.'
-    : 'Las casetas son una estimación del agente, ajustada al número de ejes. Cuando sepas lo que se pagó, captúralo y esta ruta queda corregida para todos.');
+    ? 'Las casetas están estimadas por kilómetros con tarifa de camión (' + fx(r.casFactor) + ' para ' + r.uni.nombre.toLowerCase() + '), no consultadas. Si conoces el importe real de esta ruta, captúralo y el cálculo se ajusta.'
+    : 'Las casetas del agente vienen a tarifa de automóvil; el Motor las pasa a tarifa de camión con ' + fx(r.casFactor) + ' para ' + r.uni.nombre.toLowerCase() + '. Cuando sepas lo que se pagó, captúralo y esta ruta queda corregida para todos.');
+  if (!r.costoFijo) notas.push('El costo fijo por viaje (sueldo, viáticos y mínimo por viaje) está en cero. Captúralo en los datos de la empresa y todas las rutas lo incluyen.');
   if (v.regreso === 'vacio') notas.push('El regreso vacío está cargado al costo de este viaje. Si se consigue carga de regreso, la utilidad real sube.');
   if (v.regreso === 'mismo') notas.push('El regreso al 50% aplica cuando la carga de vuelta es del mismo cliente. A un cliente nuevo no se le cobra el precio de ida completo.');
   if (v.regreso === 'no') notas.push('No se consideró regreso, así que el costo corresponde solo al trayecto de ida.');
@@ -996,7 +1044,9 @@ function renderConfig() {
     <div class="f"><label>Mantenimiento y estructura</label>
       <input id="cMant" type="number" step="0.5" value="${p.mantenimiento}"><span class="hint">incluye seguros, GPS y administración</span></div>
     <div class="f"><label>Caseta por kilómetro <span class="porconf">por confirmar</span></label>
-      <input id="cCaseta" type="number" step="0.05" value="${p.casetaPorKm}"><span class="hint">base para 2 ejes; sube según los ejes</span></div>
+      <input id="cCaseta" type="number" step="0.05" value="${p.casetaPorKm}"><span class="hint">tarifa de automóvil; se multiplica por el factor de casetas de cada unidad</span></div>
+    <div class="f"><label>Costo fijo por viaje <span class="porconf">por confirmar</span></label>
+      <input id="cFijo" type="number" step="50" value="${p.costoFijo || 0}"><span class="hint">pesos por viaje · por confirmar: sueldo, viáticos y mínimo por viaje</span></div>
     <div class="f"><label>Local hasta <span class="porconf">por confirmar</span></label>
       <input id="cLocal" type="number" value="${p.distLocal || 60}"><span class="hint">kilómetros de ida</span></div>
     <div class="f"><label>Local largo hasta <span class="porconf">por confirmar</span></label>
@@ -1008,11 +1058,12 @@ function renderConfig() {
     <div class="f"><label>Piso · lo mínimo aceptable <span class="porconf">por confirmar</span></label><input id="uPiso" type="number" step="0.5" value="${p.utilidad.piso}"><span class="hint">por debajo de esto no conviene tomar el viaje</span></div>`;
 
   $('#tblUnidades').innerHTML = `
-    <thead><tr><th>Unidad</th><th>Rendimiento km/l</th><th>Ejes</th><th></th></tr></thead>
+    <thead><tr><th>Unidad</th><th>Rendimiento km/l</th><th>Ejes</th><th>Casetas ×</th><th></th></tr></thead>
     <tbody>${p.unidades.map((u, i) => `<tr>
       <td><input data-u="${i}" data-k="nombre" value="${u.nombre}"></td>
       <td><input data-u="${i}" data-k="rend" type="number" step="0.1" value="${u.rend}" style="max-width:120px">${u.conf ? '' : '<span class="porconf">por confirmar</span>'}</td>
       <td><input data-u="${i}" data-k="ejes" type="number" value="${u.ejes}" style="max-width:90px"></td>
+      <td><input data-u="${i}" data-k="casFactor" type="number" step="0.01" value="${factorCamion(u)}" style="max-width:90px">${notaFactor(u)}</td>
       <td><button class="link" data-del="${i}">quitar</button></td></tr>`).join('')}</tbody>`;
 
   document.querySelectorAll('#accConfig input').forEach(el => el.addEventListener('change', leerConfig));
@@ -1023,6 +1074,12 @@ function renderConfig() {
     p.unidades.splice(Number(b.dataset.del), 1); guardar(); redibujar();
   });
 }
+function notaFactor(u) {
+  if (u.casConf) return '';
+  const id = uniId(u.nombre || '');
+  if (CAS_CAL[id] && Math.abs(factorCamion(u) - CAS_DEF[id]) < 0.001) return '<span class="hint" style="display:block">calibrado con tus casetas de Monterrey</span>';
+  return '<span class="porconf">por confirmar</span>';
+}
 function leerConfig() {
   const p = P();
   p.diesel = num($('#cDiesel').value);
@@ -1032,6 +1089,7 @@ function leerConfig() {
   p.comisionOperador = num($('#cCom').value);
   p.mantenimiento = num($('#cMant').value);
   p.casetaPorKm = num($('#cCaseta').value);
+  p.costoFijo = Math.max(num(($('#cFijo') || {}).value), 0);
   p.distLocal = num($('#cLocal').value) || 60;
   p.distLargo = Math.max(num($('#cLargo').value) || 250, p.distLocal + 1);
   p.utilidad.directo = num($('#uDir').value);
@@ -1040,8 +1098,10 @@ function leerConfig() {
   document.querySelectorAll('#tblUnidades [data-u]').forEach(el => {
     const u = p.unidades[Number(el.dataset.u)], k = el.dataset.k;
     if (!u) return;
-    if (k === 'nombre') u.nombre = el.value;
-    else { u[k] = num(el.value); u.conf = true; }
+    if (k === 'nombre') { u.nombre = el.value; return; }
+    const nv = num(el.value);
+    if (k === 'casFactor') { if (Math.abs(nv - factorCamion(u)) > 1e-9) { u.casFactor = nv > 0 ? nv : casFactorDefecto(u); u.casConf = true; } return; }
+    if (Number(u[k]) !== nv) { u[k] = nv; if (k === 'rend') u.conf = true; }
   });
   guardar();
   const sel = $('#vUnidad'); const previa = sel ? sel.value : V.unidad;
@@ -1079,7 +1139,8 @@ async function buscarRuta() {
       km: r.km ? Math.round(Number(r.km)) : null,
       casetas: r.casetas ? Math.round(Number(r.casetas)) : null,
       casetasFuente: String(r.casetas_fuente || ''),
-      casetasConfirmadas: !!r.casetas_confirmadas
+      casetasConfirmadas: !!r.casetas_confirmadas || /liquidad/i.test(String(r.casetas_fuente || '')),
+      ejes: uni.ejes
     };
     if (r.km) { $('#vKm').value = Math.round(Number(r.km)); V.kmFuente = 'ruta conocida'; }
     if (r.casetas) { $('#vCasetas').value = Math.round(Number(r.casetas)); }
@@ -1090,13 +1151,13 @@ async function buscarRuta() {
     else { $('#hKm').textContent = 'ruta ya registrada'; }
     $('#hKm').className = 'hint agente' + ((r.km && esGoogle) ? ' off' : '');
     V.kmFuente = fk || V.kmFuente;
-    $('#hCas').textContent = r.casetas_confirmadas
+    $('#hCas').textContent = RUTA_BASE.casetasConfirmadas
       ? String(r.casetas_fuente)
-      : 'estimado · confírmalo con el importe real';
-    $('#hCas').className = 'hint agente' + (r.casetas_confirmadas ? '' : ' off');
+      : 'estimado a tarifa de automóvil · el cálculo lo pasa a camión; confírmalo con el importe real';
+    $('#hCas').className = 'hint agente' + (RUTA_BASE.casetasConfirmadas ? '' : ' off');
     V.casetasFuente = $('#hCas').textContent;
   } else {
-    RUTA_BASE = { enBase: false, km: null, casetas: null, casetasFuente: '', casetasConfirmadas: false };
+    RUTA_BASE = { enBase: false, km: null, casetas: null, casetasFuente: '', casetasConfirmadas: false, ejes: uni.ejes };
     $('#hKm').textContent = AG_VIVO === false
       ? 'sin conexión · captura los kilómetros'
       : 'ruta nueva · captura los kilómetros y se guardan';
@@ -1128,7 +1189,8 @@ async function registrarRuta() {
     kmFuente: RUTA_BASE.enBase ? 'corregido en el tarifador' : 'capturado en el tarifador'
   }, 6000);
 
-  RUTA_BASE = { enBase: true, km: Number(V.km) };
+  // v9: se conserva lo que se sabe de las casetas; antes se perdia y se tomaban como capturadas a mano
+  RUTA_BASE = Object.assign({}, RUTA_BASE, { enBase: true, km: Number(V.km) });
 }
 
 async function traerDiesel() {
@@ -1174,7 +1236,6 @@ const ZONAS = {1:'CDMX / Edo. de México',2:'Chalco',3:'Ajusco',4:'Toluca',5:'Gu
 let TAB4PL = {}; // v8: lo trae el flujo con clave
 const UNI_TXT = {3:'1.5 toneladas',4:'3.5 toneladas',5:'Torton / rabón',1:'Tráiler'};
 const METRO = [1, 2, 3, 22];
-const uniId = n => /1\.5/.test(n) ? 3 : /3\.5/.test(n) ? 4 : /rab|torton/i.test(n) ? 5 : /tr[aá]iler/i.test(n) ? 1 : null;
 const normz = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
 const CIUDAD_ZONA = {'CDMX ZONA METROPOLITANA':1,'CIUDAD DE MEXICO':1,'CUAUTITLAN':1,'ECATEPEC':1,'TLALNEPANTLA':1,'TULTEPEC':1,
   'CHALCO':2,'AJUSCO':3,'TOLUCA':4,'METEPEC':4,'GUADALAJARA':5,'ZAPOPAN':5,'EL SALTO':5,'MONTERREY':6,'CULIACAN':7,'VILLAHERMOSA':8,
@@ -1231,6 +1292,34 @@ function datosMercado(z, u, km) {
   return { m: m, merc: merc, fuente: fuente, firme: firme, regla: regla, piso: piso, pisoTxt: pisoTxt, tuyo: (TAB4PL[z] || {})[u] || 0 };
 }
 
+/* v9 · cuando la zona no tiene tarifa en el tabulador: interpolacion por km
+   entre los destinos del tabulador con km conocidos (REF_RUTA), misma unidad */
+function refTabKm(u, km, zExcluir) {
+  if (!u || !(km > 0)) return null;
+  const pts = Object.keys(TAB4PL).map(Number)
+    .filter(z => z !== zExcluir && REF_RUTA[z] && Number((TAB4PL[z] || {})[u]) > 0)
+    .map(z => ({ z: z, km: REF_RUTA[z][0], precio: Number(TAB4PL[z][u]) }));
+  if (!pts.length) return null;
+  const abajo = pts.filter(x => x.km <= km).sort((a, b) => b.km - a.km)[0];
+  const arriba = pts.filter(x => x.km > km).sort((a, b) => a.km - b.km)[0];
+  let precio, usados, modo;
+  if (abajo && arriba) {
+    precio = abajo.km === arriba.km ? abajo.precio : abajo.precio + (arriba.precio - abajo.precio) * (km - abajo.km) / (arriba.km - abajo.km);
+    usados = [abajo, arriba]; modo = 'interpolado';
+  } else {
+    const uno = abajo || arriba;   // fuera del rango: proporcional por km al mas cercano
+    precio = uno.precio * km / uno.km; usados = [uno]; modo = 'proporcional';
+  }
+  return { km: km, precio: Math.round(precio), usados: usados, modo: modo };
+}
+function textoRefTab(rt) {
+  const d = x => (ZONAS[x.z] || 'Zona ' + x.z) + ' (' + Math.round(x.km).toLocaleString('es-MX') + ' km, ' + mny0(x.precio) + ')';
+  return 'referencia por distancia · ' + (rt.modo === 'interpolado'
+    ? 'entre ' + d(rt.usados[0]) + ' y ' + d(rt.usados[1])
+    : 'proporcional a ' + d(rt.usados[0]));
+}
+function esForaneo(km) { const t = tipoDistancia(km); return !!(t && t.k === 'foraneo'); }
+
 function renderReparto(r, v, p) {
   const box = $('#reparto');
   if (!box) return;
@@ -1276,9 +1365,19 @@ function renderMercado(r, v) {
   let dF = null;
   if (!SRV) cuerpo = '<p class="sub">' + textoSinDatos() + '</p>';
   else if (!u) cuerpo = '<p class="sub">Esta unidad no está en tu plataforma; el precio de mercado sale para tráiler, rabón, 3.5 y 1.5 toneladas.</p>';
-  else if (!z) cuerpo = '<p class="sub">No identifiqué la zona de tu tabulador para este destino. Elígela arriba y aparece lo que te cobran tus transportistas.</p>';
+  else if (!z) {
+    cuerpo = '<p class="sub">No identifiqué la zona de tu tabulador para este destino. Elígela arriba y aparece lo que te cobran tus transportistas.</p>';
+    const rt = esForaneo(v.km) ? refTabKm(u, v.km, null) : null;
+    if (rt) {
+      dF = { merc: 0, tuyo: 0, refTab: rt };
+      cuerpo += `<div class="precios"><div class="pbox"><div class="lb">Tu tabulador para una ruta de ~${Math.round(rt.km).toLocaleString('es-MX')} km</div>
+        <div class="vl">${mny0(rt.precio)}</div><div class="hint">${textoRefTab(rt)}</div></div></div>`;
+    }
+  }
   else {
     const d = datosMercado(z, u, v.km); dF = d;
+    if (!d.tuyo && esForaneo(v.km)) d.refTab = refTabKm(u, v.km, z);
+    const rt = d.refTab;
     const propio = r.detalle ? r.detalle.total : 0;
     const dif = (d.tuyo && d.merc) ? d.tuyo - d.merc : null;
     cuerpo = `<div class="precios">
@@ -1286,14 +1385,14 @@ function renderMercado(r, v) {
         <div class="hint">${d.fuente || 'sin viajes ni tarifas cargadas para esta ruta'}</div></div>
       <div class="pbox piso"><div class="lb">Piso para negociar</div><div class="vl">${d.piso ? mny0(d.piso) : '—'}</div>
         <div class="hint">abajo de aquí pierdes aunque lo subcontrates · ${d.pisoTxt || 'sin dato'}</div></div>
-      <div class="pbox"><div class="lb">Tu precio en el tabulador</div><div class="vl">${d.tuyo ? mny0(d.tuyo) : '—'}</div>
-        <div class="hint">${d.tuyo ? (dif !== null ? (dif >= 0 ? '+' : '−') + mny0(Math.abs(dif)) + ' contra lo que te cobran' : 'solo flete') : 'esta zona no tiene tarifa en tu tabulador'}${d.m.fn ? ' · facturaste ' + mny0(d.m.fm) + ' de mediana en ' + d.m.fn + ' viaje' + (d.m.fn > 1 ? 's' : '') + ' de ' + FACT_TXT : ''}</div></div>
+      <div class="pbox"><div class="lb">${!d.tuyo && rt ? 'Tu tabulador para una ruta de ~' + Math.round(rt.km).toLocaleString('es-MX') + ' km' : 'Tu precio en el tabulador'}</div><div class="vl">${d.tuyo ? mny0(d.tuyo) : (rt ? mny0(rt.precio) : '—')}</div>
+        <div class="hint">${d.tuyo ? (dif !== null ? (dif >= 0 ? '+' : '−') + mny0(Math.abs(dif)) + ' contra lo que te cobran' : 'solo flete') : (rt ? 'esta zona no tiene tarifa en tu tabulador; ' + textoRefTab(rt) : 'esta zona no tiene tarifa en tu tabulador')}${d.m.fn ? ' · facturaste ' + mny0(d.m.fm) + ' de mediana en ' + d.m.fn + ' viaje' + (d.m.fn > 1 ? 's' : '') + ' de ' + FACT_TXT : ''}</div></div>
       <div class="pbox costo"><div class="lb">Con camión propio · Motor</div><div class="vl">${propio ? mny0(propio) : '—'}</div>
         <div class="hint">costo de operarlo tú, con los supuestos por confirmar</div></div>
     </div>`;
     const lineas = [];
     if (propio && d.merc) lineas.push('Subcontratarlo te cuesta <b>' + mny0(d.merc) + '</b>; operarlo con camión propio, <b>' + mny0(propio) + '</b> según el Motor. ' +
-      (propio > d.merc ? 'Con los supuestos de hoy conviene subcontratar.' : 'Con los supuestos de hoy el Motor lo calcula más barato con camión propio, pero todavía le faltan los costos fijos por viaje.'));
+      (propio > d.merc ? 'Con los supuestos de hoy conviene subcontratar.' : 'Con los supuestos de hoy el Motor lo calcula más barato con camión propio' + (r.costoFijo ? ', con el costo fijo por viaje que capturaste.' : ', pero el costo fijo por viaje sigue en cero.')));
     if (d.regla && d.m.n >= 2) lineas.push('La regla de 1.5 toneladas daría ' + mny0(d.regla) + ' para esta distancia.');
     if (d.m.p.length) lineas.push(d.m.p.filter(x => x[1] > 0).length + ' transportistas tienen tarifa cargada para esta ruta y ' + d.m.p.filter(x => x[2] > 0).length + ' la trabajaron en el periodo.');
     lineas.push('Si hay rechazo de mercancía, en tu plataforma el transportista cobra la mitad del flete en rechazo parcial y el flete completo en rechazo total.');
@@ -1407,7 +1506,16 @@ const LS_CLAVE = 'la_clave_viajes';          // la misma clave y la misma llave 
 const DESDE_PAGADO = '2026-06-01';
 let SRV = null, SRV_ESTADO = 'cargando', PERIODO = 'del 1 de junio a la fecha', FACT_TXT = '', ULTIMO = null;
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const fechaTxt = s => { const x = String(s || '').split('-').map(Number); return x.length === 3 ? x[2] + ' de ' + MESES[x[1] - 1] : ''; };
+// v9: nunca lanza; una fecha vacia o invalida da texto vacio
+const fechaTxt = s => {
+  try {
+    const x = String(s == null ? '' : s).slice(0, 10).split('-').map(Number);
+    if (x.length !== 3 || !(x[1] >= 1 && x[1] <= 12) || !(x[2] >= 1 && x[2] <= 31)) return '';
+    return x[2] + ' de ' + MESES[x[1] - 1];
+  } catch (e) { return ''; }
+};
+const mesTxt = m => { try { const k = Number(String(m == null ? '' : m).split('-')[1]); return k >= 1 && k <= 12 ? MESES[k - 1] : ''; } catch (e) { return ''; } };
+const anioTxt = s => { const a = String(s == null ? '' : s).slice(0, 4); return /^\d{4}$/.test(a) ? a : ''; };
 const bonito = s => String(s || '').toLowerCase().replace(/(^|\s|\.)([a-záéíóúñ])/g, (m, a, b) => a + b.toUpperCase());
 function claveGuardada() { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } }
 
@@ -1423,26 +1531,39 @@ function ocultarGate() { const g = $('#gate'); if (g) g.classList.add('hidden');
 async function cargarPlataforma(clave, desdeGate) {
   SRV_ESTADO = 'cargando'; pintarEstadoDatos();
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 30000);
+  const sinRespuesta = () => {
+    SRV_ESTADO = 'sin'; pintarEstadoDatos(); pintarSinDatos();
+    if (desdeGate) pedirClave('No hubo respuesta de tu plataforma. Revisa tu conexión e intenta de nuevo.');
+    return false;
+  };
+  // v9: 1) traer los datos. Solo red, tiempo o JSON cuentan como "no hubo respuesta"
+  let j;
   try {
     const r = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ clave: clave, modo: 'motor', desde: DESDE_PAGADO }), signal: ctl.signal });
-    const j = await r.json(); clearTimeout(t);
-    if (!j || !j.ok) {
-      if (j && j.error === 'clave') {
-        try { localStorage.removeItem(LS_CLAVE); } catch (e) { }
-        SRV_ESTADO = 'clave'; pintarEstadoDatos();
-        pedirClave('La clave no es correcta. Vuelve a escribirla.');
-        return false;
-      }
-      throw new Error((j && j.error) || 'sin respuesta');
+    j = await r.json(); clearTimeout(t);
+  } catch (e) { clearTimeout(t); return sinRespuesta(); }
+  if (!j || !j.ok) {
+    if (j && j.error === 'clave') {
+      try { localStorage.removeItem(LS_CLAVE); } catch (e) { }
+      SRV_ESTADO = 'clave'; pintarEstadoDatos();
+      pedirClave('La clave no es correcta. Vuelve a escribirla.');
+      return false;
     }
-    try { localStorage.setItem(LS_CLAVE, clave); } catch (e) { }
-    usarPlataforma(j); ocultarGate();
+    return sinRespuesta();
+  }
+  // la clave es buena: se guarda y se cierra la puerta aunque luego falle el dibujo
+  try { localStorage.setItem(LS_CLAVE, clave); } catch (e) { }
+  ocultarGate();
+  // 2) dibujar. Un error aqui es nuestro, no de la conexion: no se vuelve a pedir la clave
+  try {
+    usarPlataforma(j);
     return true;
   } catch (e) {
-    clearTimeout(t);
-    SRV_ESTADO = 'sin'; pintarEstadoDatos(); pintarSinDatos();
-    if (desdeGate) pedirClave('No hubo respuesta de tu plataforma. Revisa tu conexión e intenta de nuevo.');
+    console.error('Motor Tarifario v9 · error al mostrar los datos de la plataforma:', e);
+    SRV = null; MERC = {}; TAB4PL = {};
+    SRV_ESTADO = 'error'; pintarEstadoDatos(); pintarSinDatos();
+    try { if (ULTIMO && !$('#cardRes').classList.contains('hidden')) renderMercado(ULTIMO.r, ULTIMO.v); } catch (e2) { console.error(e2); }
     return false;
   }
 }
@@ -1452,8 +1573,8 @@ function usarPlataforma(j) {
   MERC = j.merc || {};
   TAB4PL = j.tab4pl || {};
   Object.keys(j.provn || {}).forEach(id => { if (!PROVN[id]) PROVN[id] = bonito(j.provn[id]); });
-  PERIODO = 'del ' + fechaTxt(j.desde) + ' al ' + fechaTxt(j.hasta);
-  const ms = (j.meses || []).map(m => MESES[Number(String(m).split('-')[1]) - 1]);
+  PERIODO = (fechaTxt(j.desde) && fechaTxt(j.hasta)) ? 'del ' + fechaTxt(j.desde) + ' al ' + fechaTxt(j.hasta) : 'del 1 de junio a la fecha';
+  const ms = (Array.isArray(j.meses) ? j.meses : []).map(mesTxt).filter(Boolean);
   FACT_TXT = ms.length ? (ms.length === 1 ? ms[0] : ms[0] + ' a ' + ms[ms.length - 1]) : '';
   SRV_ESTADO = 'ok';
   document.querySelectorAll('.periodo').forEach(el => el.textContent = PERIODO);
@@ -1465,6 +1586,7 @@ function usarPlataforma(j) {
 }
 
 function textoSinDatos() {
+  if (SRV_ESTADO === 'error') return 'Hubo un problema al mostrar tus datos; avísanos. El Cotizador sigue calculando con tus valores.';
   return SRV_ESTADO === 'cargando' ? 'Trayendo los datos de tu plataforma…'
     : 'No hubo respuesta de tu plataforma; lo pagado, el tabulador y los proveedores aparecen en cuanto se conecte.';
 }
@@ -1485,9 +1607,10 @@ function enlazarReintentar() {
 function pintarEstadoDatos() {
   const el = $('#estadoDatos'); if (!el) return;
   if (SRV_ESTADO === 'ok' && SRV) {
-    el.innerHTML = '<span class="agente">Datos de tu plataforma al ' + fechaTxt(SRV.hasta) + ' · ' + SRV.viajesPagados + ' viajes pagados ' + PERIODO +
+    el.innerHTML = '<span class="agente">Datos de tu plataforma' + (fechaTxt(SRV.hasta) ? ' al ' + fechaTxt(SRV.hasta) : '') + ' · ' + SRV.viajesPagados + ' viajes pagados ' + PERIODO +
       (SRV.viajesFacturados ? ' · ' + SRV.viajesFacturados + ' viajes facturados de ' + FACT_TXT : '') + '</span>';
-  } else if (SRV_ESTADO === 'cargando') el.innerHTML = '<span class="agente off">Trayendo los datos de tu plataforma…</span>';
+  } else if (SRV_ESTADO === 'error') el.innerHTML = '<span class="agente off">Hubo un problema al mostrar tus datos; avísanos. El Cotizador sigue calculando con tus valores.</span>';
+  else if (SRV_ESTADO === 'cargando') el.innerHTML = '<span class="agente off">Trayendo los datos de tu plataforma…</span>';
   else if (SRV_ESTADO === 'sin') { el.innerHTML = '<span class="agente off">Sin respuesta de tu plataforma: el Cotizador calcula, pero el precio de mercado y tu tabulador no se ven.</span> <button class="link" data-reintentar>Reintentar</button>'; enlazarReintentar(); }
   else el.innerHTML = '';
 }
@@ -1511,6 +1634,7 @@ function renderFicha(r, v, d) {
   if (d && d.merc) { costo = d.merc; costoF = 'lo que te cobran tus transportistas'; }
   else { costo = r.detalle ? r.detalle.total : 0; costoF = 'costo con camión propio según el Motor'; }
   if (d && d.tuyo) { precio = d.tuyo; precioF = 'tu tabulador'; }
+  else if (d && d.refTab) { precio = d.refTab.precio; precioF = 'tu tabulador por distancia (~' + Math.round(d.refTab.km).toLocaleString('es-MX') + ' km); la zona no tiene tarifa propia · ' + textoRefTab(d.refTab); }
   else { precio = r.objetivo; precioF = 'precio recomendado del Motor; la zona no tiene tarifa en tu tabulador'; }
   const total = precio + (v.maniobra || 0) + (v.extras || 0);
   const margen = precio ? (precio - costo) / precio : 0;
@@ -1553,8 +1677,8 @@ function motorRef(z, u, precio) {
   const uni = P().unidades.find(x => uniId(x.nombre) === u);
   const ref = REF_RUTA[z];
   if (!uni || !ref) return null;
-  const fe = 1 + (uni.ejes - 2) * 0.22;
-  const v = { unidad: uni.nombre, km: ref[0], kmPatio: 0, regreso: 'vacio', casetas: ref[2] ? 0 : ref[1] * fe,
+  // v9: casetas de Google a 2 ejes (tarifa de automovil) por el factor de camion de la unidad
+  const v = { unidad: uni.nombre, km: ref[0], kmPatio: 0, regreso: 'vacio', casetas: 0, casetasAuto: ref[2] ? 0 : ref[1],
     cliente: '_mr', comIda: 0, maniobra: 0, extras: 0, retorno: 0 };
   const base = P();
   const p = Object.assign({}, base, { utilidad: Object.assign({}, base.utilidad, { _mr: 15 }) });
@@ -1640,7 +1764,7 @@ function renderMargen() {
   box.innerHTML = html;
   const zonasTab = Object.keys(TAB4PL).filter(z => REF_RUTA[z]).length;
   const cub = todas.filter(f => f.m.n > 0).length;
-  if ($('#mrFoto')) $('#mrFoto').textContent = 'Datos de tu plataforma al ' + fechaTxt(SRV.hasta) + ' de ' + SRV.hasta.slice(0, 4) + ' · ' + zonasTab + ' destinos con tarifa cargada · 4 unidades';
+  if ($('#mrFoto')) $('#mrFoto').textContent = 'Datos de tu plataforma' + (fechaTxt(SRV.hasta) ? ' al ' + fechaTxt(SRV.hasta) + (anioTxt(SRV.hasta) ? ' de ' + anioTxt(SRV.hasta) : '') : '') + ' · ' + zonasTab + ' destinos con tarifa cargada · 4 unidades';
   if ($('#mrCobertura')) $('#mrCobertura').textContent = 'Son ' + SRV.viajesPagados + ' viajes y cubren ' + cub + ' de las ' + todas.length + ' combinaciones.';
   salioMargen(todas);
 }
@@ -1673,7 +1797,7 @@ function salioMargen(todas) {
   const piso = todas.filter(f => !f.metro && f.ref && f.ref.prop != null && f.ref.prop < 0.10);
   if (piso.length) av.push(['', 'Abajo del piso del Motor con unidad propia', piso.map(f => nom(f) + ' (' + pct(f.ref.prop) + ')').join('; ') + ': con tu precio se gana si se subcontrata, pero con camión propio dejaría menos del 10% según el Motor.']);
   const porU = MR_UNI.map(u => { const v = todas.filter(f => f.u === u && !f.metro && f.ref && f.ref.motor).map(f => f.precio / f.ref.motor - 1); return v.length ? [u, mediana(v)] : null; }).filter(Boolean);
-  if (porU.length) av.push(['duda', 'Lo que el Motor todavía no sabe', 'Tu precio contra el Motor, mediana de foráneos: ' + porU.map(x => (x[1] >= 0 ? '+' : '−') + pct(Math.abs(x[1])) + ' en ' + UNI_TXT[x[0]].toLowerCase()).join(', ') + '. No significa que la tarifa esté alta; el Motor aún no incluye costos que no dependen del kilómetro, como sueldo, viáticos y el mínimo por viaje, ni el rendimiento real de las unidades chicas.']);
+  if (porU.length) av.push(['duda', 'Lo que el Motor todavía no sabe', 'Tu precio contra el Motor, mediana de foráneos: ' + porU.map(x => (x[1] >= 0 ? '+' : '−') + pct(Math.abs(x[1])) + ' en ' + UNI_TXT[x[0]].toLowerCase()).join(', ') + '. No significa que la tarifa esté alta; ' + (Number(P().costoFijo) > 0 ? 'el costo fijo por viaje y ' : 'el Motor todavía no tiene capturado el costo fijo por viaje (sueldo, viáticos y mínimo por viaje), y ') + 'el rendimiento real de las unidades chicas y los factores de casetas de 1.5 y 3.5 toneladas siguen por confirmar.']);
   el.innerHTML = av.map(a => `<div class="aviso ${a[0]}"><div class="t">${a[1]}</div><p>${a[2]}</p></div>`).join('');
 }
 
@@ -1722,7 +1846,7 @@ $('#btnLimpiar').onclick = () => {
 $('#btnImprimir').onclick = () => window.print();
 $('#btnComparar').onclick = comparar;
 $('#btnAddUnidad').onclick = () => {
-  P().unidades.push({ nombre: 'Unidad nueva', rend: 4.0, ejes: 2, conf: true });
+  P().unidades.push({ nombre: 'Unidad nueva', rend: 4.0, ejes: 2, conf: true, casFactor: 1.0 });
   guardar(); redibujar(); $('#accConfig').open = true;
 };
 $('#btnRestaurar').onclick = () => {
