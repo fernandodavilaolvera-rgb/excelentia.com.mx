@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Motor Tarifario v9 · Logística Armada</title>
+<title>Motor Tarifario v10 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -240,6 +240,12 @@ table.mr-t tbody tr:hover td{background:#e8f0fb}
 .mk-hd select{max-width:240px}
 .pbox.merc{background:#e8f0fb;border-color:#c8d9f0}
 .pbox.merc .vl{color:#1a3a6b}
+.pbox.pmerc{background:#eef4fc;border-color:#c8d9f0;border-left:4px solid #1a3a6b;max-width:720px}
+.pbox.pmerc .vl{color:#1a3a6b}
+.pm-t{font-size:12px;font-weight:600;color:#4a5068}
+.pm-wrap{grid-template-columns:1fr;margin-bottom:.4rem}
+.pm-av{margin-top:0}
+.pm-nota{margin:.2rem 0 .7rem}
 .tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:.05rem .45rem;margin-left:.35rem;white-space:nowrap;vertical-align:1px}
 .tag.barato{background:#e8f5ee;color:#2e7d5b}
 .tag.usado{background:#dce8f7;color:#1a3a6b}
@@ -283,7 +289,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Motor Tarifario · Logística Armada</h1>
-        <p>v9 · Cotizador, Proveedores y Margen por ruta</p>
+        <p>v10 · Cotizador, Proveedores y Margen por ruta</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -454,17 +460,18 @@ tr.alt td{background:#f0f6ff}
         <li><b>Tarifario de proveedores:</b> mediana de las tarifas cargadas para ese destino y unidad; se usa solo donde no hubo viajes, y la mediana evita que pesen capturas atípicas, como un tráiler a Monterrey en $1,200.</li>
         <li><b>Kilómetros y casetas:</b> los trajo el agente de Google desde Tultepec, con casetas a tarifa de automóvil pasadas a tarifa de camión con el factor de cada unidad (Datos de la empresa · Casetas ×). A Culiacán y Mexicali Google no devolvió casetas y se estimaron por kilómetro.</li>
         <li><b>Motor:</b> vuelta completa con regreso vacío, con el diésel, la comisión del operador, el costo fijo por viaje, el mantenimiento y los rendimientos que tengas en Datos de la empresa del Cotizador; precio al 15% de utilidad.</li>
+        <li><b>Piso de mercado:</b> tarifario de referencia de un transportista a un cliente grande, vigente a diciembre de 2026, para 23 destinos desde el Estado de México; incluye casetas y combustible, sin IVA ni maniobras. Torton y rabón se comparan con su renglón Thorton de 8 a 12 t. Sale en el Cotizador, en Precio de mercado y en la ficha.</li>
         <li><b>Diferencia %</b> sobre el precio del Motor. <b>Utilidad unidad propia:</b> lo que dejaría tu precio operando con camión propio, con la comisión calculada sobre tu precio.</li>
       </ul>
     </div>
   </details>
   </div>
 
-  <footer>ExcelentIA · Motor Tarifario Logística Armada · versión 9 · 10-oct-2026 · versión para revisión</footer>
+  <footer>ExcelentIA · Motor Tarifario Logística Armada · versión 10 · 10-oct-2026 · versión para revisión</footer>
 </div>
 
 <script>
-/* ============ Motor Tarifario · v9 ============ */
+/* ============ Motor Tarifario · v10 ============ */
 const $ = s => document.querySelector(s);
 const LS = '4pl_tarifario_v0';
 
@@ -1399,6 +1406,7 @@ function renderMercado(r, v) {
     cuerpo += `<div class="aviso">${lineas.map(x => '<p>' + x + '</p>').join('')}
       <div class="btnrow no-print" style="margin-top:.5rem"><button class="btn ghost" id="btnVerProv">Ver los transportistas de esta ruta</button></div></div>`;
   }
+  cuerpo = htmlPiso(r, v, dF && dF.tuyo ? dF.tuyo : 0) + cuerpo;
   box.innerHTML = `<div class="mk"><div class="mk-hd"><h3>Precio de mercado</h3>
     <div class="f" style="margin:0"><select id="mkZona" aria-label="Zona de tu tabulador">${opts}</select></div>
     <span class="hint">${z ? (zonaDe(v.destino) === z ? 'zona detectada por el destino' : 'zona elegida a mano') : ''}</span></div>${cuerpo}</div>`;
@@ -1636,6 +1644,8 @@ function renderFicha(r, v, d) {
   if (d && d.tuyo) { precio = d.tuyo; precioF = 'tu tabulador'; }
   else if (d && d.refTab) { precio = d.refTab.precio; precioF = 'tu tabulador por distancia (~' + Math.round(d.refTab.km).toLocaleString('es-MX') + ' km); la zona no tiene tarifa propia · ' + textoRefTab(d.refTab); }
   else { precio = r.objetivo; precioF = 'precio recomendado del Motor; la zona no tiene tarifa en tu tabulador'; }
+  const pm0 = pisoMercado(v.destino, uniId(r.uni.nombre));
+  const pmF = pm0 && pm0.sencillo ? pm0 : null;
   const total = precio + (v.maniobra || 0) + (v.extras || 0);
   const margen = precio ? (precio - costo) / precio : 0;
   const filas = [
@@ -1645,6 +1655,7 @@ function renderFicha(r, v, d) {
     ['Tipo de viaje', td ? td.txt + ' · ' + Math.round(v.km).toLocaleString('es-MX') + ' km de ida' : '—'],
     ['Tarifa al transportista', mny0(costo) + ' · ' + costoF],
     ['Precio de flete al cliente', mny0(precio) + ' · ' + precioF],
+    ['Piso de mercado', pmF ? mny0(refPiso(pmF, v)) + ' · ' + (v.regreso === 'mismo' ? 'redondo' : 'sencillo') + ', ' + pmF.ciudad + (pmF.thorton ? ' (Thorton de 8 a 12 t)' : '') + ' · ' + difPiso(precio, refPiso(pmF, v)) : 'sin dato en el tarifario de referencia'],
     ['Maniobra', v.maniobra ? mny0(v.maniobra) : 'sin maniobra'],
     ['Otros cargos', v.extras ? mny0(v.extras) : 'sin otros cargos'],
     ['Total al cliente', mny0(total)],
@@ -1654,6 +1665,7 @@ function renderFicha(r, v, d) {
       <span class="hint">para capturarla al crear el viaje en tu plataforma</span></div>
     <div class="tblwrap"><table class="ficha-t"><tbody>${filas.map(f => `<tr><td>${f[0]}</td><td>${f[1]}</td></tr>`).join('')}</tbody></table></div>
     ${margen < 0.10 && costo ? '<p class="sub">El margen del flete queda abajo del 10%; revisa la tarifa antes de capturarla.</p>' : ''}
+    ${pmF && precio < refPiso(pmF, v) ? '<p class="sub">Tu precio de flete queda abajo del piso de mercado; es menos de lo que cobra la tarifa más baja de referencia.</p>' : ''}
     <div class="btnrow no-print"><button class="btn" id="btnCopiarFicha">Copiar la ficha</button><span class="hint" id="hFicha"></span></div></div>`;
   $('#btnCopiarFicha').onclick = () => {
     const txt = filas.map(f => f[0] + ': ' + f[1]).join('\n');
@@ -1672,6 +1684,69 @@ function copiarViejo(txt, ok) {
 const REF_RUTA = {12:[187,379],11:[174,786],14:[322,687],13:[436,1315],5:[521,1413],6:[879,991],8:[789,1867],7:[1203,0,1],
   10:[1350,2254],9:[1362,1671],15:[2569,0,1],1:[46,181],3:[62,327],2:[80,446],4:[92,385],17:[69,266],16:[45,266]};
 const MR_METRO = [1, 3, 2, 4, 17, 16];
+/* v10 · piso de mercado: tarifario de referencia que compartio Luis el 10-oct-2026
+   (Trucks & Roads a Geodis, anexo 3.1 del 20-nov-2025, vigente a dic-2026).
+   Por unidad (uniId): [sencillo, redondo, reparto adicional, maniobra adicional por persona].
+   Incluye casetas y combustible; sin IVA ni retencion; libre de maniobras; origen Edo. de Mexico.
+   Torton y rabon se comparan contra el renglon Thorton de 8 a 12 t. */
+const PISO_MERC = [
+  ["Santa Fe, CDMX",["SANTA FE"],{"3": [2171, 2322, 1237, 465], "4": [2554, 2733, 1628, 465], "5": [3334, 3566, 2046, 465], "1": [5175, 5537, 3234, 465]}],
+  ["Ciudad de México",["CIUDAD DE MEXICO", "CDMX", "MEXICO CITY", "DISTRITO FEDERAL"],{"3": [1929, 2450, 1237, 465], "4": [2312, 2473, 1628, 465], "5": [2777, 2971, 2046, 465], "1": [4255, 4553, 3234, 465]}],
+  ["Guadalajara",["GUADALAJARA", "ZAPOPAN", "TLAQUEPAQUE", "SAN PEDRO TLAQUEPAQUE", "TONALA", "TLAJOMULCO"],{"3": [8215, 8814, 1237, 465], "4": [12177, 13053, 1628, 465], "5": [14814, 17500, 2065, 469], "1": [23157, 24802, 3234, 465]}],
+  ["Puerto Vallarta",["PUERTO VALLARTA"],{"3": [12499, 13374, 1237, 465], "4": [19196, 20539, 1628, 465], "5": [21403, 26000, 2065, 469], "1": [36985, 39475, 3234, 465]}],
+  ["Querétaro (Plaza Antea)",["QUERETARO"],{"3": [2731, 2922, 1237, 465], "4": [4183, 4475, 1628, 465], "5": [4755, 6000, 2065, 469], "1": [8895, 9517, 3234, 465]}],
+  ["Monterrey",["MONTERREY", "APODACA", "SAN NICOLAS DE LOS GARZA", "SAN PEDRO GARZA GARCIA", "ESCOBEDO", "GENERAL ESCOBEDO", "SANTA CATARINA"],{"3": [9046, 9679, 1237, 465], "4": [14374, 15380, 1628, 465], "5": [15984, 20000, 2065, 469], "1": [28688, 30695, 3234, 465]}],
+  ["León",["LEON"],{"3": [4599, 4921, 1237, 465], "4": [6968, 7455, 1628, 465], "5": [7835, 8382, 2046, 465], "1": [13466, 14407, 3234, 465]}],
+  ["Irapuato",["IRAPUATO"],{"3": [4843, 5182, 1237, 465], "4": [7333, 7847, 1628, 465], "5": [8241, 8817, 2046, 465], "1": [13602, 14554, 3234, 465]}],
+  ["Morelia",["MORELIA"],{"3": [5367, 5766, 1237, 465], "4": [7798, 8369, 1628, 465], "5": [9207, 9876, 2046, 465], "1": [14800, 15860, 3234, 465]}],
+  ["Cancún",["CANCUN"],{"3": [18669, 19975, 1237, 465], "4": [31426, 33625, 1628, 465], "5": [34445, 52000, 2065, 469], "1": [61211, 65495, 3234, 465]}],
+  ["Playa del Carmen",["PLAYA DEL CARMEN"],{"3": [18389, 19676, 1237, 465], "4": [30954, 33121, 1628, 465], "5": [33928, 52000, 2065, 469], "1": [60292, 64511, 3234, 465]}],
+  ["Puebla",["PUEBLA"],{"3": [3594, 3846, 1237, 465], "4": [5085, 5440, 1628, 465], "5": [5768, 6172, 2046, 465], "1": [9608, 10280, 3234, 465]}],
+  ["Toluca",["TOLUCA", "METEPEC"],{"3": [2371, 2536, 1237, 465], "4": [3708, 3968, 1628, 465], "5": [4257, 5000, 2065, 469], "1": [6859, 7340, 3234, 465]}],
+  ["Veracruz",["VERACRUZ", "BOCA DEL RIO"],{"3": [6508, 6964, 1237, 465], "4": [10044, 10747, 1628, 465], "5": [11198, 11982, 2046, 465], "1": [19179, 20521, 3234, 465]}],
+  ["Pachuca",["PACHUCA", "MINERAL DE LA REFORMA"],{"3": [2269, 2612, 1237, 465], "4": [3476, 4002, 1628, 465], "5": [3915, 4508, 2046, 465], "1": [7392, 8510, 3234, 465]}],
+  ["Mérida",["MERIDA"],{"3": [15880, 16992, 1237, 465], "4": [26732, 28603, 1628, 465], "1": [52069, 55713, 3234, 465]}],
+  ["Cuernavaca",["CUERNAVACA", "JIUTEPEC", "TEMIXCO"],{"3": [2955, 3562, 1237, 465], "4": [4180, 5036, 1628, 465], "5": [6359, 8500, 2065, 469], "1": [7900, 9518, 3234, 465]}],
+  ["Tuxtla Gutiérrez",["TUXTLA GUTIERREZ", "TUXTLA"],{"3": [9718, 11708, 1237, 465], "4": [16358, 19708, 1628, 465], "5": [20887, 25165, 2046, 465], "1": [31862, 38388, 3234, 465]}],
+  ["Saltillo",["SALTILLO", "RAMOS ARIZPE"],{"3": [8809, 10614, 1237, 465], "4": [14829, 17867, 1628, 465], "5": [18935, 22814, 2046, 465], "1": [28885, 34801, 3234, 465]}],
+  ["Torreón",["TORREON", "GOMEZ PALACIO"],{"3": [12394, 14932, 1237, 465], "4": [17769, 21408, 1628, 465], "5": [33435, 40283, 2046, 465], "1": [44580, 51997, 3234, 465]}],
+  ["Aguascalientes",["AGUASCALIENTES"],{"4": [11289, 12418, 1628, 465], "5": [14111, 15805, 2046, 465], "1": [19191, 21449, 3234, 465]}],
+  ["Chihuahua",["CHIHUAHUA"],{"4": [26529, 28787, 1628, 465], "5": [31609, 34996, 2046, 465], "1": [37254, 41205, 3234, 465]}],
+  ["Culiacán",["CULIACAN"],{"4": [27094, 35222, 1629, 465], "5": [35560, 46228, 2047, 465]}]
+];
+const PISO_FUENTE = 'tarifario de referencia de transportista, vigente a dic-2026';
+function pisoMercado(dest, u) {
+  const seg = normz(String(dest || '').split(',')[0]);
+  if (!seg || !u) return null;
+  const tiene = a => new RegExp('(^| )' + a + '( |$)').test(seg);
+  const f = PISO_MERC.find(x => x[1].some(a => tiene(a) && !(a === 'LEON' && / NUEVO LEON|^NUEVO LEON/.test(seg))));
+  if (!f) return { sinDestino: true };
+  const t = f[2][u];
+  if (!t) return { ciudad: f[0], sinUnidad: true };
+  return { ciudad: f[0], sencillo: t[0], redondo: t[1], reparto: t[2], maniobra: t[3], thorton: u === 5 };
+}
+function refPiso(pm, v) { return v.regreso === 'mismo' ? pm.redondo : pm.sencillo; }
+function difPiso(precio, piso) {
+  const d = (precio - piso) / piso;
+  return Math.abs(d) < 0.005 ? 'igual al piso' : (d > 0 ? Math.round(d * 100) + '% arriba del piso' : Math.round(-d * 100) + '% abajo del piso');
+}
+function htmlPiso(r, v, tuyo) {
+  const u = uniId(r.uni.nombre);
+  if (!u) return '';
+  const pm = pisoMercado(v.destino, u);
+  if (!pm) return '';
+  if (pm.sinDestino) return '<p class="sub pm-nota">Piso de mercado: este destino no está en el tarifario de referencia (23 destinos).</p>';
+  if (pm.sinUnidad) return '<p class="sub pm-nota">Piso de mercado: el tarifario de referencia no trae esta unidad para ' + pm.ciudad + '.</p>';
+  const ref = refPiso(pm, v), red = v.regreso === 'mismo';
+  const lineas = [];
+  if (r.objetivo) lineas.push('El precio del Motor (' + mny0(r.objetivo) + ') queda <b>' + difPiso(r.objetivo, ref) + '</b>.');
+  if (tuyo) lineas.push('Tu tabulador (' + mny0(tuyo) + ') queda <b>' + difPiso(tuyo, ref) + '</b>' + (tuyo < ref ? '; cobras menos que la tarifa más baja de referencia.' : '.'));
+  return `<div class="precios pm-wrap"><div class="pbox pmerc"><div class="lb">Piso de mercado · ${pm.ciudad}${pm.thorton ? ' · Thorton de 8 a 12 t' : ''}</div>
+      <div class="vl">${mny0(ref)} <span class="pm-t">${red ? 'viaje redondo' : 'sencillo'}</span></div>
+      <div class="hint">${red ? 'sencillo ' + mny0(pm.sencillo) : 'redondo ' + mny0(pm.redondo)} · reparto adicional ${mny0(pm.reparto)} · maniobra adicional ${mny0(pm.maniobra)} por persona · incluye casetas y combustible, sin IVA ni maniobras · ${PISO_FUENTE}</div></div></div>
+    ${lineas.length ? '<div class="aviso pm-av">' + lineas.map(x => '<p>' + x + '</p>').join('') + '</div>' : ''}`;
+}
+
 const MR_UNI = [3, 4, 5, 1];
 function motorRef(z, u, precio) {
   const uni = P().unidades.find(x => uniId(x.nombre) === u);
