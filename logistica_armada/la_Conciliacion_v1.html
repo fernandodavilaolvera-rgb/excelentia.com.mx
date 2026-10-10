@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conciliación de Pagos v2 · Logística Armada</title>
+<title>Conciliación de Pagos v4 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -322,7 +322,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Conciliación de Pagos · Logística Armada</h1>
-        <p>v2 · Viajes contra facturas de transportistas</p>
+        <p>v4 · Viajes contra facturas de transportistas</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -348,7 +348,7 @@ tr.alt td{background:#f0f6ff}
     <button class="vista on" data-v="resumen">Resumen</button>
     <button class="vista" data-v="trans">Por transportista</button>
     <button class="vista" data-v="nocuadra">No cuadran</button>
-    <button class="vista" data-v="sinfac">Sin factura</button>
+    <button class="vista" data-v="sinfac">Sin factura del transportista</button>
     <button class="vista" data-v="porpagar">Por pagar</button>
   </div>
 
@@ -359,6 +359,7 @@ tr.alt td{background:#f0f6ff}
       <div class="f"><label>Viajes desde</label><input id="fDesde" type="date"><span class="hint">fecha de cita</span></div>
       <div class="f"><label>Diferencia que se tolera</label><input id="fTol" type="number" step="1"><span class="hint">en pesos <span class="porconf">por confirmar</span></span></div>
       <div class="f"><label>Días de crédito</label><input id="fCred" type="number" step="1"><span class="hint">desde la fecha de la factura</span></div>
+      <div class="f"><label>Cliente</label><select id="fCli"><option value="pm">Playmobil</option><option value="lyc">LYC</option><option value="otros">Otros clientes</option><option value="todos">Todos</option></select></div>
       <div class="f"><label>Transportista</label><select id="fProv"></select></div>
     </div>
     <div id="estadoDatos" class="hint"></div>
@@ -373,7 +374,7 @@ tr.alt td{background:#f0f6ff}
     <section class="card hidden" id="cEcuenta"></section>
   </div>
   <div class="vw hidden" id="vNocuadra"><section class="card"><h2>Facturas que no cuadran</h2><p class="sub" id="ncSub"></p><div id="tNc"></div></section></div>
-  <div class="vw hidden" id="vSinfac"><section class="card"><h2>Viajes sin factura</h2><p class="sub" id="sfSub"></p>
+  <div class="vw hidden" id="vSinfac"><section class="card"><h2>Viajes sin factura del transportista</h2><p class="sub" id="sfSub"></p>
     <div class="empresas no-print" id="fEdad"></div><div id="tSf"></div></section></div>
   <div class="vw hidden" id="vPorpagar"><section class="card"><h2>Facturas por pagar</h2><p class="sub" id="ppSub"></p><div id="tPp"></div></section></div>
 
@@ -388,7 +389,7 @@ tr.alt td{background:#f0f6ff}
     </ul></div>
   </details>
 
-  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · v2 · versión para revisión</footer>
+  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · v4 · versión para revisión</footer>
 </div>
 
 <script>
@@ -409,7 +410,7 @@ const dias = (a, b) => { const x = fechaOk(a), y = fechaOk(b); if (!x || !y) ret
 const sumar = (dIso, n) => { const f = fechaOk(dIso); if (!f) return ''; const d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + (Number(n) || 0)); return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10); };
 const filaMala = (n, dato, e) => { console.error('Renglón que no se pudo mostrar', dato, e); return '<tr><td colspan="' + n + '" class="dim">Un renglón trae datos que no se pudieron mostrar; avísanos y lo revisamos.</td></tr>'; };
 
-let CFG = { desde: '2026-01-01', tol: 1, cred: 30, prov: '' };
+let CFG = { desde: '2026-01-01', tol: 1, cred: 30, prov: '', cli: 'pm' };
 try { CFG = Object.assign(CFG, JSON.parse(localStorage.getItem(LS_CFG) || '{}')); } catch (e) { }
 const guardarCfg = () => { try { localStorage.setItem(LS_CFG, JSON.stringify(CFG)); } catch (e) { } };
 let SRV = null, R = null, EDAD = 'todos', EC = null;
@@ -471,7 +472,7 @@ function cruzar() {
     v.pagado = v.fac.filter(f => f.pagada).reduce((s, f) => s + f.sub, 0);
     v.pend = v.fac.filter(f => !f.pagada).reduce((s, f) => s + f.sub, 0);
     v.edad = dias(v.fecha, hoy);
-    if (!v.fac.length) v.estado = v.debe > 0 ? 'sin' : 'nada';
+    if (!v.fac.length) v.estado = v.debe > 0 ? (TERMINADO.test(v.st) ? 'sin' : 'proceso') : 'nada';
     else {
       v.dif = v.facturado - v.debe;
       v.estado = Math.abs(v.dif) <= tol ? 'cuadra' : 'nocuadra';
@@ -483,9 +484,26 @@ function cruzar() {
     }
     return v;
   } catch (e) { console.error('Viaje que no se pudo leer', a, e); return null; } }).filter(Boolean);
-  return { viajes, sinViaje, hoy };
+  // v4: los repartos los factura el transportista dentro del viaje padre (cargo de reparto + maniobra de reparto)
+  const porId = {}; viajes.forEach(v => porId[v.id] = v);
+  viajes.forEach(v => { const p = v.hijo && v.padre ? porId[v.padre] : null;
+    if (!p || p === v || v.fac.length) return;
+    p.debe += v.debe; p.otros += v.debe; p.repartos = (p.repartos || []).concat(v.id);
+    v.enPadre = p.id; v.debePropio = v.debe; v.debe = 0; v.estado = 'enpadre'; });
+  viajes.forEach(v => { if (!v.repartos || !v.fac.length) return;
+    v.dif = v.facturado - v.debe; v.estado = Math.abs(v.dif) <= tol ? 'cuadra' : 'nocuadra'; v.motivo = '';
+    if (v.estado === 'nocuadra') {
+      if (v.comp && Math.abs(v.facturado - v.comp - v.debe) <= tol) v.motivo = 'complemento aparte: se facturaron ' + mny0(v.comp) + ' de complemento que no están capturados en el viaje';
+      else if (v.dif > 0) v.motivo = 'facturó ' + mny0(v.dif) + ' más de lo registrado en el viaje y sus repartos';
+      else v.motivo = 'facturó ' + mny0(-v.dif) + ' menos de lo registrado en el viaje y sus repartos';
+    } });
+  const viajesCli = viajes.filter(filtroCli);
+  return { viajes: viajesCli, sinViaje: CFG.cli === 'todos' ? sinViaje : [], hoy, todos: viajes };
 }
 const filtroProv = x => !CFG.prov || String(x.pr) === String(CFG.prov);
+const TERMINADO = /complet|finaliz|entreg/i;
+const grupoCli = s => /PLAYMO/i.test(s || '') ? 'pm' : /\bLYC\b/i.test(s || '') ? 'lyc' : 'otros';
+const filtroCli = v => !CFG.cli || CFG.cli === 'todos' || grupoCli(v.cli) === CFG.cli;
 
 function pintar() {
   if (!SRV) return;
@@ -498,10 +516,12 @@ function pintar() {
   const pagMes = facs.filter(f => f.pagada && (f.fPago || '').slice(0, 7) === mesHoy);
   const S = a => a.reduce((s, x) => s + x, 0);
   const comp = nNo.filter(v => /^complemento/.test(v.motivo || ''));
+  // v3: los viajes de tu propia empresa no llevan factura de transportista; se cuentan aparte
+  const nSinT = nSin.filter(v => !v.propia), nSinP = nSin.filter(v => v.propia);
   $('#rKpis').innerHTML = `
     <div class="pbox meta"><div class="lb">Cuadran</div><div class="vl">${nCu.length}</div><div class="hint">viajes con factura igual a lo registrado</div></div>
     <div class="pbox malbox"><div class="lb">No cuadran</div><div class="vl">${nNo.length}</div><div class="hint">${mny0(S(nNo.map(v => v.dif)))} de diferencia neta · ${comp.length} por complemento aparte</div></div>
-    <div class="pbox"><div class="lb">Sin factura</div><div class="vl">${nSin.length}</div><div class="hint">${mny0(S(nSin.map(v => v.debe)))} que todavía no facturan · ${nSin.filter(v => v.edad > 30).length} con más de 30 días</div></div>
+    <div class="pbox"><div class="lb">Sin factura del transportista</div><div class="vl">${nSinT.length}</div><div class="hint">${mny0(S(nSinT.map(v => v.debe)))} que el transportista todavía no factura en la plataforma · ${nSinT.filter(v => v.edad > 60).length} con más de 60 días${nSinP.length ? ' · aparte, ' + nSinP.length + ' de tu propia empresa' : ''}</div></div>
     <div class="pbox costo"><div class="lb">Por pagar</div><div class="vl">${mny0(S(pend.map(f => f.sub)))}</div><div class="hint">${pend.length} facturas · ${venc.length} vencidas por ${mny0(S(venc.map(f => f.sub)))}</div></div>
     <div class="pbox"><div class="lb">Pagado este mes</div><div class="vl">${mny0(S(pagMes.map(f => f.sub)))}</div><div class="hint">${pagMes.length} facturas marcadas como pagadas</div></div>`;
   const av = [];
@@ -510,10 +530,10 @@ function pintar() {
   if (otros.length) av.push(['Diferencias que hay que revisar', otros.length + ' viajes tienen una factura que no coincide con lo registrado y no se explica por un complemento; ' + otros.filter(v => v.dif > 0).length + ' facturaron de más y ' + otros.filter(v => v.dif < 0).length + ' de menos.']);
   const pagNo = facs.filter(f => f.pagada && f.cuadra === 'No');
   if (pagNo.length) av.push(['Pagadas aunque la plataforma marca que no cuadran', pagNo.length + ' factura' + (pagNo.length > 1 ? 's' : '') + ' por ' + mny0(S(pagNo.map(f => f.sub))) + '.']);
-  const viejos = nSin.filter(v => v.edad > 60);
-  if (viejos.length) av.push(['Viajes viejos sin factura', viejos.length + ' viajes tienen más de 60 días sin factura, por ' + mny0(S(viejos.map(v => v.debe))) + '. Conviene confirmar si el transportista ya no la va a mandar o si se pagó por fuera de la plataforma.']);
-  const prop = nSin.filter(v => v.propia).length;
-  if (prop) av.push(['Viajes de tu propia empresa sin factura', prop + ' de los viajes sin factura tienen como transportista a Logística Armada; puede que no lleven factura.']);
+  const viejos = nSinT.filter(v => v.edad > 60);
+  if (viejos.length) av.push(['Viajes viejos sin factura del transportista', viejos.length + ' viajes tienen más de 60 días sin que el transportista suba su factura a la plataforma, por ' + mny0(S(viejos.map(v => v.debe))) + '. Conviene confirmar si el transportista ya no la va a mandar o si se pagó por fuera de la plataforma.']);
+  const prop = nSinP.length;
+  if (prop) av.push(['Viajes de tu propia empresa', prop + ' viajes los hizo tu propia empresa, por ' + mny0(S(nSinP.map(v => v.debe))) + '; no llevan factura de transportista, así que se muestran aparte y no cuentan como pendientes. Están en la pestaña Sin factura del transportista, botón Tu propia empresa.']);
   if (venc.length) { const P = {}; venc.forEach(f => P[f.pr] = (P[f.pr] || 0) + f.sub); const top = Object.entries(P).sort((a, b) => b[1] - a[1]).slice(0, 3); av.push(['Vencidas, por transportista', top.map(x => provTxt(x[0]) + ' ' + mny0(x[1])).join('; ') + '.']); }
   if (R.sinViaje.length) av.push(['Facturas sin viaje', R.sinViaje.length === 1 ? 'Una factura activa no está ligada a un viaje (servicios); aparece en Por pagar.' : R.sinViaje.length + ' facturas activas no están ligadas a un viaje (servicios); aparecen en Por pagar.']);
   $('#rSalio').innerHTML = av.map(a => `<div class="aviso"><div class="t">${a[0]}</div><p>${a[1]}</p></div>`).join('') || '<p class="sub">Todo cuadra en este periodo.</p>';
@@ -522,12 +542,12 @@ function pintar() {
   const ord = (a, b) => String(b.fecha || '').localeCompare(String(a.fecha || ''));
   $('#ncSub').textContent = nNo.length + ' viajes donde lo facturado no coincide con lo registrado, por más de ' + mny0(CFG.tol) + '.';
   $('#tNc').innerHTML = tablaViajes(nNo.sort((a, b) => Math.abs(b.dif) - Math.abs(a.dif)), ['viaje', 'trans', 'debe', 'fact', 'dif', 'motivo']);
-  const edades = [['todos', 'Todos'], ['0-30', 'Hasta 30 días'], ['31-60', '31 a 60'], ['61+', 'Más de 60']];
+  const edades = [['todos', 'Todos'], ['0-30', 'Hasta 30 días'], ['31-60', '31 a 60'], ['61+', 'Más de 60'], ['propia', 'Tu propia empresa']];
   $('#fEdad').innerHTML = edades.map(e => `<button class="emp ${EDAD === e[0] ? 'on' : ''}" data-e="${e[0]}">${e[1]}</button>`).join('');
   $('#fEdad').querySelectorAll('[data-e]').forEach(b => b.onclick = () => { EDAD = b.dataset.e; pintar(); });
-  const enEdad = v => EDAD === 'todos' || v.edad != null && (EDAD === '0-30' ? v.edad <= 30 : EDAD === '31-60' ? v.edad > 30 && v.edad <= 60 : v.edad > 60);
+  const enEdad = v => EDAD === 'propia' ? v.propia : !v.propia && (EDAD === 'todos' || v.edad != null && (EDAD === '0-30' ? v.edad <= 30 : EDAD === '31-60' ? v.edad > 30 && v.edad <= 60 : v.edad > 60));
   const sf = nSin.filter(enEdad).sort((a, b) => b.edad - a.edad);
-  $('#sfSub').textContent = sf.length + ' viajes con algo que pagarle al transportista y sin factura activa, por ' + mny0(S(sf.map(v => v.debe))) + '; del más viejo al más reciente.';
+  $('#sfSub').textContent = EDAD === 'propia' ? sf.length + (sf.length === 1 ? ' viaje hecho' : ' viajes hechos') + ' por tu propia empresa, por ' + mny0(S(sf.map(v => v.debe))) + '; no llevan factura de transportista.' : sf.length + (sf.length === 1 ? ' viaje' : ' viajes') + ' donde el transportista todavía no sube su factura a la plataforma, por ' + mny0(S(sf.map(v => v.debe))) + '; del más viejo al más reciente. No son viajes sin cobrarle a tu cliente.';
   $('#tSf').innerHTML = tablaViajes(sf, ['viaje', 'trans', 'debe', 'edad', 'estatus']);
   const pp = pend.slice().sort((a, b) => (a.vence || '').localeCompare(b.vence || ''));
   $('#ppSub').textContent = pp.length + ' facturas pendientes de pago por ' + mny0(S(pp.map(f => f.sub))) + ' (sin IVA); ' + venc.length + ' ya vencidas. La que vence primero va arriba.';
@@ -545,12 +565,12 @@ function tablaViajes(lista, cols) {
   const num = { debe: 1, fact: 1, dif: 1, edad: 1, pagado: 1 };
   const C = {
     viaje: v => `${v.id}<span class="mr-n">${fechaTxt(v.fecha)} · ${esc(v.des)} · ${esc(v.uni)}${v.hijo ? ' · reparto de ' + v.padre : ''}</span>`,
-    trans: v => esc(provTxt(v.pr)) + (v.propia ? '<span class="mr-n">tu propia empresa</span>' : ''),
+    trans: v => esc(provTxt(v.pr)) + (v.propia ? '<span class="mr-n">tu propia empresa</span>' : '') + (v.repartos ? '<span class="mr-n">incluye ' + v.repartos.length + (v.repartos.length === 1 ? ' reparto' : ' repartos') + ': ' + v.repartos.join(', ') + '</span>' : ''),
     debe: v => mny0(v.debe), fact: v => mny0(v.facturado) + '<span class="mr-n">' + v.fac.length + ' factura' + (v.fac.length > 1 ? 's' : '') + (v.elim ? ' · ' + v.elim + ' eliminada' + (v.elim > 1 ? 's' : '') : '') + '</span>',
     dif: v => `<b class="${v.dif > 0 ? 'neg' : ''}">${(v.dif > 0 ? '+' : '') + mny0(v.dif)}</b>`,
     motivo: v => esc(v.motivo || ''), edad: v => v.edad == null ? '<span class="dim">—</span>' : `<span class="${v.edad > 60 ? 'neg' : ''}">${v.edad}</span>`, estatus: v => esc(v.st || '—'),
     pagado: v => mny0(v.pagado),
-    estado: v => ({ cuadra: 'cuadra', nocuadra: '<span class="neg">no cuadra</span>', sin: 'sin factura', nada: '<span class="dim">sin cobro</span>' }[v.estado]) + (v.fac.length ? '<span class="mr-n">' + (v.pend ? 'por pagar ' + mny0(v.pend) : 'pagada') + '</span>' : '')
+    estado: v => ({ cuadra: 'cuadra', nocuadra: '<span class="neg">no cuadra</span>', sin: 'sin factura', nada: '<span class="dim">sin cobro</span>', proceso: '<span class="dim">en proceso, todavía no se factura</span>', enpadre: '<span class="dim">facturado dentro del viaje ' + v.enPadre + '</span>' }[v.estado] || '') + (v.fac.length ? '<span class="mr-n">' + (v.pend ? 'por pagar ' + mny0(v.pend) : 'pagada') + '</span>' : '')
   };
   return `<div class="tblwrap"><table class="rt"><thead><tr>${cols.map(c => `<th class="${num[c] ? 'num' : ''}">${H[c]}</th>`).join('')}</tr></thead><tbody>${lista.map(v => { try { return `<tr>${cols.map(c => `<td class="${num[c] ? 'num' : c === 'motivo' ? 'motivo' : ''}">${C[c](v)}</td>`).join('')}</tr>`; } catch (e) { return filaMala(cols.length, v, e); } }).join('')}</tbody></table></div>`;
 }
@@ -572,7 +592,7 @@ function pintarTrans() {
 }
 
 function estadoCuenta(pr) {
-  const vs = R.viajes.filter(v => String(v.pr) === String(pr) && v.estado !== 'nada').sort((a, b) => String(a.fecha || '').localeCompare(String(b.fecha || '')));
+  const vs = R.viajes.filter(v => String(v.pr) === String(pr) && v.estado !== 'nada' && v.estado !== 'enpadre').sort((a, b) => String(a.fecha || '').localeCompare(String(b.fecha || '')));
   const sv = R.sinViaje.filter(f => String(f.pr) === String(pr));
   const S = a => a.reduce((s, x) => s + x, 0);
   const pend = vs.flatMap(v => v.fac).concat(sv).filter(f => !f.pagada);
@@ -606,6 +626,8 @@ $('#fDesde').onchange = e => { if (!/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) 
 $('#fTol').onchange = e => { CFG.tol = Math.max(0, Number(e.target.value) || 0); guardarCfg(); pintar(); };
 $('#fCred').onchange = e => { CFG.cred = Math.max(0, Number(e.target.value) || 0); guardarCfg(); pintar(); };
 $('#fProv').onchange = e => { CFG.prov = e.target.value; guardarCfg(); pintar(); };
+$('#fCli').value = CFG.cli || 'pm';
+$('#fCli').onchange = e => { CFG.cli = e.target.value; guardarCfg(); pintar(); };
 document.querySelectorAll('.vista').forEach(b => b.onclick = () => {
   document.querySelectorAll('.vista').forEach(x => x.classList.remove('on')); b.classList.add('on');
   const v = b.dataset.v; document.querySelectorAll('.vw').forEach(x => x.classList.add('hidden'));
