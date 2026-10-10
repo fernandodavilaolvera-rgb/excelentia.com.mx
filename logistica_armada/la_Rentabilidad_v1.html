@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rentabilidad v1 · Logística Armada</title>
+<title>Rentabilidad v2 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -313,7 +313,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Rentabilidad · Logística Armada</h1>
-        <p>v1 · Por cliente, ruta y transportista contra lo pagado</p>
+        <p>v2 · Por cliente, ruta y transportista contra lo pagado</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -384,11 +384,11 @@ tr.alt td{background:#f0f6ff}
     </ul></div>
   </details>
 
-  <footer>ExcelentIA · Rentabilidad · Logística Armada · v1 · versión para revisión</footer>
+  <footer>ExcelentIA · Rentabilidad · Logística Armada · v2 · versión para revisión</footer>
 </div>
 
 <script>
-/* ============ Rentabilidad · v1 ============ */
+/* ============ Rentabilidad · v2 ============ */
 const $ = s => document.querySelector(s);
 const mny0 = n => n == null || isNaN(n) ? '—' : (n < 0 ? '−$' : '$') + Math.round(Math.abs(n)).toLocaleString('es-MX');
 const pct = n => n == null || isNaN(n) ? '—' : (n < 0 ? '−' : '') + (Math.abs(n) * 100).toFixed(1) + '%';
@@ -396,7 +396,9 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 const VIAJES_URL = 'https://n8n.excelentia.com.mx/webhook/4pl-viajes';
 const LS_CLAVE = 'la_clave_viajes', LS_CFG = 'la_rentabilidad_cfg';
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const fechaTxt = s => { const x = String(s || '').split('-').map(Number); return x.length === 3 ? x[2] + ' de ' + MESES[x[1] - 1] : ''; };
+const fechaOk = s => { const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(s == null ? '' : s).trim()); if (!m) return ''; const y = +m[1], mo = +m[2], d = +m[3]; if (y < 1900 || mo < 1 || mo > 12 || d < 1) return ''; const t = new Date(Date.UTC(y, mo - 1, d)); return t.getUTCFullYear() === y && t.getUTCMonth() === mo - 1 && t.getUTCDate() === d ? m[1] + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0') : ''; };
+const fechaTxt = s => { const f = fechaOk(s); if (!f) return ''; const x = f.split('-').map(Number); return x[2] + ' de ' + MESES[x[1] - 1]; };
+const filaMala = (n, dato, e) => { console.error('Renglón que no se pudo mostrar', dato, e); return '<tr><td colspan="' + n + '" class="dim">Un renglón trae datos que no se pudieron mostrar; avísanos y lo revisamos.</td></tr>'; };
 const mesTxt = m => MESES[Number(String(m).split('-')[1]) - 1] || m;
 const ZONAS = {1:'CDMX / Edo. de México',2:'Chalco',3:'Ajusco',4:'Toluca',5:'Guadalajara',6:'Monterrey',7:'Culiacán',8:'Villahermosa',9:'Chihuahua',10:'Mérida',11:'Puebla',12:'Querétaro',13:'Veracruz',14:'Silao',15:'Mexicali',16:'Tepeji',17:'Jilotepec',18:'Morelos',19:'Guanajuato',20:'Jalisco',21:'Michoacán',22:'CDMX +30KM',23:'Pachuca, Hgo.',24:'Cuernavaca',25:'Aguascalientes',27:'Coahuila',28:'Tijuana',30:'Campeche',31:'San Luis Potosí',32:'Zacatecas',33:'Sonora',34:'Tlaxcala',35:'Chiapas',36:'Oaxaca',37:'Guerrero'};
 const PROVN = {"27":"Trasportes Pérez","28":"TYR","29":"Alfa Trasportes","30":"MEL Logistics","31":"Trasportes Bautista","32":"Trasportes García","33":"Trasportes Mendiola","34":"Logística Armada","35":"Transguca","36":"Transporte S.O.R.","37":"Transporte Rodbar","38":"Transporte González","39":"Transportes 4PL","40":"Transportes MAS"};
@@ -420,21 +422,27 @@ function pedirClave(msg) {
 async function cargar(clave, desdeGate) {
   estado('Trayendo los datos de tu plataforma…');
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 30000);
+  let j;
   try {
     const r = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clave: clave, modo: 'rentabilidad' }), signal: ctl.signal });
-    const j = await r.json(); clearTimeout(t);
+    j = await r.json(); clearTimeout(t);
     if (!j || !j.ok) {
       if (j && j.error === 'clave') { try { localStorage.removeItem(LS_CLAVE); } catch (e) { } estado(''); pedirClave('La clave no es correcta. Vuelve a escribirla.'); return; }
       throw new Error((j && j.error) || 'sin respuesta');
     }
-    try { localStorage.setItem(LS_CLAVE, clave); } catch (e) { }
-    $('#gate').classList.add('hidden');
-    usar(j);
   } catch (e) {
     clearTimeout(t);
     estado('No hubo respuesta de tu plataforma. <button class="link" id="btnRe">Reintentar</button>');
     const b = $('#btnRe'); if (b) b.onclick = () => { const c = claveGuardada(); c ? cargar(c) : pedirClave(''); };
     if (desdeGate) pedirClave('No hubo respuesta de tu plataforma. Revisa tu conexión e intenta de nuevo.');
+    return;
+  }
+  try { localStorage.setItem(LS_CLAVE, clave); } catch (e) { }
+  $('#gate').classList.add('hidden');
+  try { usar(j); } catch (e) {
+    // los datos sí llegaron: el problema es al dibujarlos, no de la plataforma ni de la clave
+    console.error('Rentabilidad: error al mostrar los datos', e);
+    estado('Llegaron tus datos pero hubo un problema al mostrarlos; avísanos y lo revisamos.');
   }
 }
 function estado(h) { $('#estadoDatos').innerHTML = h; }
@@ -555,17 +563,17 @@ function pintar() {
   tabla($('#tTrans'), agrupar(vs.map(v => { const o = { pr: v[6], ff: v[7], fm: v[8], fe: v[9], pf: v[10], pm: v[11], pe: v[12], px: v[13], propia: !!v[24] }; medir(o); o.esMal = !o.propia && o.cob > 0 && o.pct < umbral(); return o; }), o => o.pr, o => provTxt(o.pr)), 'trans', 'Transportista');
 
   $('#malSub').textContent = malos.length + ' servicios ' + per + ' dejaron menos de ' + CFG.umbral + '% o perdieron, ' + (CFG.base === 'flete' ? 'midiendo solo el flete' : 'con todo lo cobrado') + '; del peor al menos malo, con el motivo que se detecta en tus datos.';
-  $('#tMal').innerHTML = malos.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Viaje</th><th>Destino · unidad</th><th>Transportista</th><th class="num">Cobrado</th><th class="num">Pagado</th><th class="num">Margen</th><th>Por qué</th></tr></thead><tbody>${malos.map(s => `<tr>
+  $('#tMal').innerHTML = malos.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Viaje</th><th>Destino · unidad</th><th>Transportista</th><th class="num">Cobrado</th><th class="num">Pagado</th><th class="num">Margen</th><th>Por qué</th></tr></thead><tbody>${malos.map(s => { try { return `<tr>
     <td>${s.id}${s.hijos ? '<span class="mr-n">+ ' + s.viajes.filter(v => v[0] !== s.id).map(v => v[0]).join(', ') + '</span>' : ''}<span class="mr-n">${fechaTxt(s.padre[25])}</span></td>
     <td>${esc(s.des)}<span class="mr-n">${esc(s.uni)} · ${esc(s.cli)}</span></td><td>${esc(provTxt(s.pr))}</td>
     <td class="num">${mny0(s.cob)}</td><td class="num">${mny0(s.pag)}</td><td class="num"><b class="neg">${mny0(s.mar)}</b><span class="mr-n">${pct(s.pct)}</span></td>
-    <td class="motivo">${motivos(s).map(x => '<div>' + x + '</div>').join('')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="sub">Ningún servicio salió mal con este criterio.</p>';
+    <td class="motivo">${motivos(s).map(x => '<div>' + x + '</div>').join('')}</td></tr>`; } catch (e) { return filaMala(7, s, e); } }).join('')}</tbody></table></div>` : '<p class="sub">Ningún servicio salió mal con este criterio.</p>';
 
   const ed = SRV.ediciones.slice().sort((a, b) => b[0] - a[0]);
-  $('#tEdiciones').innerHTML = ed.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Viaje</th><th>Destino</th><th>Transportista</th><th class="num">Antes</th><th class="num">Después</th><th class="num">Cambio</th><th>Motivo</th></tr></thead><tbody>${ed.map(e => `<tr>
+  $('#tEdiciones').innerHTML = ed.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Viaje</th><th>Destino</th><th>Transportista</th><th class="num">Antes</th><th class="num">Después</th><th class="num">Cambio</th><th>Motivo</th></tr></thead><tbody>${ed.map(e => { try { return `<tr>
     <td>${e[0]}<span class="mr-n">cita ${fechaTxt(e[1])}</span></td><td>${esc(e[3])}<span class="mr-n">${esc(cliTxt(e[2]))}</span></td><td>${esc(provTxt(e[5]))}</td>
     <td class="num">${mny0(e[6])}</td><td class="num">${mny0(e[7])}</td><td class="num ${e[7] > e[6] ? 'neg' : ''}">${(e[7] >= e[6] ? '+' : '') + mny0(e[7] - e[6])}</td>
-    <td class="motivo">${esc(e[8] || 'sin motivo capturado')}${e[10] ? '<span class="mr-n">editado el ' + fechaTxt(e[10]) + '</span>' : ''}</td></tr>`).join('')}</tbody></table></div>
+    <td class="motivo">${esc(e[8] || 'sin motivo capturado')}${e[10] ? '<span class="mr-n">editado el ' + fechaTxt(e[10]) + '</span>' : ''}</td></tr>`; } catch (x) { return filaMala(7, e, x); } }).join('')}</tbody></table></div>
     <p class="sub">${ed.length} ediciones desde el 1 de junio; suman ${mny0(ed.reduce((a, e) => a + e[7] - e[6], 0))} más de lo que se iba a pagar.</p>` : '<p class="sub">No hay ediciones de tarifa desde el 1 de junio.</p>';
 }
 
