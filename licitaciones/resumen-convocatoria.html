@@ -32,8 +32,8 @@
   .card-cab .paso{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--azul);color:#fff;font-size:.8rem;margin-right:.5rem}
   .card-body{padding:1.1rem}
   label.lbl{display:block;font-weight:600;color:var(--texto2);font-size:.85rem;margin-bottom:.35rem}
-  input[type=text]{width:100%;font-family:inherit;font-size:.95rem;padding:.65rem .8rem;border:1px solid var(--borde);border-radius:9px;color:var(--texto);background:#fff}
-  input[type=text]:focus{outline:none;border-color:var(--acento);box-shadow:0 0 0 3px rgba(74,159,212,.18)}
+  input[type=text],input[type=password]{width:100%;font-family:inherit;font-size:.95rem;padding:.65rem .8rem;border:1px solid var(--borde);border-radius:9px;color:var(--texto);background:#fff}
+  input[type=text]:focus,input[type=password]:focus{outline:none;border-color:var(--acento);box-shadow:0 0 0 3px rgba(74,159,212,.18)}
 
   .drop{border:2px dashed var(--alerta-borde);background:var(--alerta-bg);border-radius:12px;padding:1.6rem 1rem;text-align:center;cursor:pointer;transition:.15s;margin-top:1rem}
   .drop:hover,.drop.sobre{background:var(--hover);border-color:var(--acento)}
@@ -133,8 +133,21 @@
 </header>
 
 <main>
+  <!-- Acceso -->
+  <section class="card no-print" id="secClave">
+    <div class="card-cab"><span>Acceso</span></div>
+    <div class="card-body">
+      <label class="lbl" for="clave">Clave de acceso</label>
+      <input type="password" id="clave" placeholder="Escribe la clave que te compartió ExcelentIA" autocomplete="current-password">
+      <div class="error oculto" id="errClave" style="margin-top:.6rem"></div>
+      <div class="acciones">
+        <button class="btn btn-pri" id="btnEntrar">Entrar</button>
+      </div>
+    </div>
+  </section>
+
   <!-- Paso 1: archivos -->
-  <section class="card no-print" id="secCarga">
+  <section class="card no-print oculto" id="secCarga">
     <div class="card-cab"><span><span class="paso">1</span>Sube las bases de la licitación</span></div>
     <div class="card-body">
       <label class="lbl" for="nombre">Nombre de referencia (opcional)</label>
@@ -204,12 +217,16 @@ const $ = id => document.getElementById(id);
 let archivos = [];
 let resultado = null;
 let timer = null;
+let clave = '';
+const LS_CLAVE = 'licit_resumen_clave';
+const guardarClave = v => { try { v ? localStorage.setItem(LS_CLAVE, v) : localStorage.removeItem(LS_CLAVE); } catch (e) {} };
+const leerClave = () => { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } };
 
 const fmtTam = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
 const esValido = f => /\.(pdf|docx)$/i.test(f.name);
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2200); };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const mostrar = id => ['secCarga', 'secProgreso', 'secError', 'secResultado'].forEach(s => $(s).classList.toggle('oculto', !id.includes(s)));
+const mostrar = id => ['secClave', 'secCarga', 'secProgreso', 'secError', 'secResultado'].forEach(s => $(s).classList.toggle('oculto', !id.includes(s)));
 
 function pintarLista() {
   $('lista').innerHTML = archivos.map((f, i) => `
@@ -234,8 +251,9 @@ $('drop').addEventListener('drop', e => agregar(e.dataTransfer.files));
 $('lista').onclick = e => { const b = e.target.closest('.quitar'); if (b) { archivos.splice(+b.dataset.i, 1); pintarLista(); } };
 
 async function llamar(accion, datos) {
-  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, ...datos }) });
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, clave, ...datos }) });
   const j = await r.json().catch(() => ({ ok: false, error: 'Respuesta no válida del servidor' }));
+  if (r.status === 401) { const e = new Error(j.error || 'Clave de acceso incorrecta.'); e.sinClave = true; throw e; }
   if (!r.ok || j.ok === false && accion !== 'estado') throw new Error(j.error || 'Error de conexión');
   return j;
 }
@@ -293,6 +311,7 @@ async function generar() {
     pintarResultado(Math.round((Date.now() - t0) / 1000));
   } catch (err) {
     clearInterval(timer);
+    if (err.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
     $('txtError').textContent = err.message;
     mostrar(['secError']);
   }
@@ -387,6 +406,32 @@ $('btnWord').onclick = async () => {
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   } catch (e) { toast(e.message); } finally { $('btnWord').disabled = false; }
 };
+
+function pedirClave(msg) {
+  clave = ''; guardarClave('');
+  $('clave').value = '';
+  $('errClave').textContent = msg || '';
+  $('errClave').classList.toggle('oculto', !msg);
+  mostrar(['secClave']);
+  setTimeout(() => $('clave').focus(), 50);
+}
+async function entrar(valor, silencioso) {
+  const v = String(valor || '').trim();
+  if (!v) { if (!silencioso) pedirClave('Escribe la clave de acceso.'); else pedirClave(); return; }
+  $('btnEntrar').disabled = true;
+  clave = v;
+  try {
+    await llamar('verificar', {});
+    guardarClave(v);
+    $('errClave').classList.add('oculto');
+    mostrar(['secCarga']);
+  } catch (e) {
+    pedirClave(e.sinClave ? (silencioso ? '' : 'Clave incorrecta, revísala.') : 'No se pudo validar la clave: ' + e.message);
+  } finally { $('btnEntrar').disabled = false; }
+}
+$('btnEntrar').onclick = () => entrar($('clave').value);
+$('clave').addEventListener('keydown', e => { if (e.key === 'Enter') entrar($('clave').value); });
+entrar(leerClave(), true);
 
 $('btnGenerar').onclick = generar;
 $('btnReintentar').onclick = () => mostrar(['secCarga']);
