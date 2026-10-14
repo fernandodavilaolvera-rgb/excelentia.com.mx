@@ -43,6 +43,7 @@
   .lista li{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border:1px solid var(--borde);border-radius:9px;margin-bottom:.45rem;font-size:.88rem}
   .lista .ico{font-size:.72rem;font-weight:800;color:#fff;background:var(--azul-med);border-radius:5px;padding:.15rem .35rem;flex-shrink:0}
   .lista .ico.word{background:#2b579a}
+  .lista .ico.excel{background:#217346}
   .lista .nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lista .tam{color:var(--gris);font-size:.78rem;flex-shrink:0}
   .lista .quitar{border:none;background:none;color:var(--gris);font-size:1.1rem;cursor:pointer;line-height:1;padding:0 .2rem}
@@ -155,12 +156,12 @@
 
       <div class="drop" id="drop" tabindex="0" role="button" aria-label="Elegir archivos">
         <strong>Arrastra aquí los archivos o da clic para elegirlos</strong>
-        <span>PDF o Word (.docx): convocatoria, anexo técnico, términos y condiciones, actas y avisos</span>
+        <span>PDF, Word (.docx) o Excel (.xlsx): convocatoria, anexo técnico, términos y condiciones, anexos, actas y avisos</span>
       </div>
-      <input type="file" id="archivos" multiple accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="oculto">
+      <input type="file" id="archivos" multiple accept=".pdf,.docx,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="oculto">
       <ul class="lista" id="lista"></ul>
 
-      <div class="nota">El agente lee todos los documentos completos, incluidos los escaneados, y si hay actas o avisos de suspensión toma de ellos las fechas vigentes. Cuando un PDF y un Word son el mismo documento, basta con el Word.</div>
+      <div class="nota">El agente lee todos los documentos completos, incluidos los escaneados y los anexos en Excel, y si hay actas, avisos o diferimientos toma de ellos las fechas vigentes; súbelos junto con las bases para que el calendario salga actualizado. Cuando un PDF y un Word son el mismo documento, basta con el Word.</div>
 
       <div class="acciones">
         <button class="btn btn-pri" id="btnGenerar" disabled>Generar resumen</button>
@@ -223,14 +224,16 @@ const guardarClave = v => { try { v ? localStorage.setItem(LS_CLAVE, v) : localS
 const leerClave = () => { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } };
 
 const fmtTam = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
-const esValido = f => /\.(pdf|docx)$/i.test(f.name);
+const esValido = f => /\.(pdf|docx|xlsx)$/i.test(f.name);
+const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' : 'pdf';
+const MIME = { pdf: 'application/pdf', word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2200); };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const mostrar = id => ['secClave', 'secCarga', 'secProgreso', 'secError', 'secResultado'].forEach(s => $(s).classList.toggle('oculto', !id.includes(s)));
 
 function pintarLista() {
   $('lista').innerHTML = archivos.map((f, i) => `
-    <li id="f${i}"><span class="ico ${/docx$/i.test(f.name) ? 'word' : ''}">${/docx$/i.test(f.name) ? 'DOCX' : 'PDF'}</span>
+    <li id="f${i}"><span class="ico ${tipoArchivo(f.name) === 'pdf' ? '' : tipoArchivo(f.name)}">${({ pdf: 'PDF', word: 'DOCX', excel: 'XLSX' })[tipoArchivo(f.name)]}</span>
     <span class="nom" title="${esc(f.name)}">${esc(f.name)}</span><span class="tam">${fmtTam(f.size)}</span>
     <button class="quitar" data-i="${i}" aria-label="Quitar">×</button></li>`).join('');
   $('btnGenerar').disabled = !archivos.length;
@@ -239,7 +242,7 @@ function agregar(lista) {
   const nuevos = [...lista];
   const malos = nuevos.filter(f => !esValido(f));
   nuevos.filter(esValido).forEach(f => { if (!archivos.some(a => a.name === f.name && a.size === f.size)) archivos.push(f); });
-  if (malos.length) toast('Solo se aceptan PDF y Word (.docx)');
+  if (malos.length) toast('Solo se aceptan PDF, Word (.docx) y Excel (.xlsx)');
   pintarLista();
 }
 $('drop').onclick = () => $('archivos').click();
@@ -285,7 +288,7 @@ async function generar() {
     for (let i = 0; i < archivos.length; i++) {
       const f = archivos[i];
       $('etapa').textContent = `Subiendo ${i + 1} de ${archivos.length}: ${f.name}`;
-      const tipo = f.type || (/docx$/i.test(f.name) ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf');
+      const tipo = f.type || MIME[tipoArchivo(f.name)];
       const s = await llamar('sesion', { nombre: f.name, tamano: f.size, tipo, origen: location.origin });
       if (!s.uploadUrl) throw new Error('No se pudo abrir la subida a Drive');
       const base = subido;
