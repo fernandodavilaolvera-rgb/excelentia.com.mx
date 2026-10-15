@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Motor Tarifario v10 · Logística Armada</title>
+<title>Motor Tarifario v11 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -289,7 +289,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Motor Tarifario · Logística Armada</h1>
-        <p>v10 · Cotizador, Proveedores y Margen por ruta</p>
+        <p>v11 · Cotizador, Proveedores y Margen por ruta</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -408,6 +408,7 @@ tr.alt td{background:#f0f6ff}
     <div class="grid no-print">
       <div class="f"><label>Destino · zona de tu tabulador</label><select id="pZona"></select></div>
       <div class="f"><label>Unidad</label><select id="pUni"></select></div>
+      <div class="f"><label>Transportista</label><select id="pProv"></select></div>
     </div>
     <div id="pRes"></div>
   </section>
@@ -458,7 +459,7 @@ tr.alt td{background:#f0f6ff}
         <li><b>Pagado real:</b> mediana de lo que se le pagó al transportista en viajes activos con cita <span class="periodo">del 1 de junio a la fecha</span>, sin contar viajes padre ni repartos, que traen el flete repartido. <span id="mrCobertura"></span></li>
         <li><b>Lo que facturaste:</b> mediana del flete que cobraste en <span class="fact-meses">los meses cargados</span>, por destino y unidad, sin viajes padre ni repartos; sale de tus reportes de facturación.</li>
         <li><b>Tarifario de proveedores:</b> mediana de las tarifas cargadas para ese destino y unidad; se usa solo donde no hubo viajes, y la mediana evita que pesen capturas atípicas, como un tráiler a Monterrey en $1,200.</li>
-        <li><b>Kilómetros y casetas:</b> los trajo el agente de Google desde Tultepec, con casetas a tarifa de automóvil pasadas a tarifa de camión con el factor de cada unidad (Datos de la empresa · Casetas ×). A Culiacán y Mexicali Google no devolvió casetas y se estimaron por kilómetro.</li>
+        <li><b>Kilómetros y casetas:</b> los trajo el agente de Google desde Tultepec, con casetas a tarifa de automóvil pasadas a tarifa de camión con el factor de cada unidad (Datos de la empresa · Casetas ×). En Monterrey, Culiacán y Mexicali se usan las casetas que de verdad pagaste en rabón al liquidar ($1,495.50, $3,904 y $4,071 de ida), pasadas a cada unidad con el mismo factor; en la tabla dicen «pagadas».</li>
         <li><b>Motor:</b> vuelta completa con regreso vacío, con el diésel, la comisión del operador, el costo fijo por viaje, el mantenimiento y los rendimientos que tengas en Datos de la empresa del Cotizador; precio al 15% de utilidad.</li>
         <li><b>Piso de mercado:</b> tarifario de referencia de un transportista a un cliente grande, vigente a diciembre de 2026, para 23 destinos desde el Estado de México; incluye casetas y combustible, sin IVA ni maniobras. Torton y rabón se comparan con su renglón Thorton de 8 a 12 t. Sale en el Cotizador, en Precio de mercado y en la ficha.</li>
         <li><b>Diferencia %</b> sobre el precio del Motor. <b>Utilidad unidad propia:</b> lo que dejaría tu precio operando con camión propio, con la comisión calculada sobre tu precio.</li>
@@ -467,11 +468,11 @@ tr.alt td{background:#f0f6ff}
   </details>
   </div>
 
-  <footer>ExcelentIA · Motor Tarifario Logística Armada · versión 10 · 10-oct-2026 · versión para revisión</footer>
+  <footer>ExcelentIA · Motor Tarifario Logística Armada · versión 11 · 15-oct-2026 · versión para revisión</footer>
 </div>
 
 <script>
-/* ============ Motor Tarifario · v10 ============ */
+/* ============ Motor Tarifario · v11 ============ */
 const $ = s => document.querySelector(s);
 const LS = '4pl_tarifario_v0';
 
@@ -1427,6 +1428,10 @@ function ahorroRuta(m) {
   return dif > 0 ? { mejor: mejor, dif: dif } : null;
 }
 function renderProv() {
+  const pv = $('#pProv') ? $('#pProv').value : '';
+  $('#pZona').closest('.f').classList.toggle('hidden', !!pv);
+  $('#pUni').closest('.f').classList.toggle('hidden', !!pv);
+  if (pv) { renderTransportista(pv); return; }
   const z = +$('#pZona').value, u = +$('#pUni').value;
   const m = MERC[z + '|' + u];
   if (!m || !m.p.length) { $('#pRes').innerHTML = '<p class="sub">No hay tarifas cargadas ni viajes para ' + ZONAS[z] + ' en ' + UNI_TXT[u] + '.</p>'; return; }
@@ -1453,6 +1458,47 @@ function renderProv() {
     <thead><tr><th>Transportista</th><th style="text-align:right">Tarifa cargada</th><th style="text-align:right">Viajes</th><th style="text-align:right">Lo que le pagaste</th><th>Contra el que ya la trabajó más barato</th></tr></thead>
     <tbody>${filas}</tbody></table></div>
     <div class="aviso">${frases.map(f => '<p>' + f + '</p>').join('')}</div>`;
+}
+function renderTransportista(pv) {
+  const filas = [];
+  Object.keys(MERC).forEach(k => {
+    const m = MERC[k], x = m.p.find(y => String(y[0]) === String(pv));
+    if (!x) return;
+    const [z, u] = k.split('|').map(Number);
+    const cargadas = m.p.filter(y => y[1] > 0);
+    const minT = cargadas.length ? Math.min(...cargadas.map(y => y[1])) : 0;
+    const usados = m.p.filter(y => y[2] > 0);
+    const minP = usados.length ? Math.min(...usados.map(y => y[3])) : 0;
+    filas.push({ k, z, u, t: x[1], n: x[2], pag: x[3], minT, minP, nCarg: cargadas.length, nUs: usados.length });
+  });
+  const nom = PROVN[pv] || 'Sin proveedor';
+  if (!filas.length) { $('#pRes').innerHTML = '<p class="sub">' + nom + ' no tiene tarifas cargadas ni viajes en el periodo.</p>'; return; }
+  filas.sort((a, b) => b.n - a.n || (ZONAS[a.z] || '').localeCompare(ZONAS[b.z] || '') || a.u - b.u);
+  const viajes = filas.reduce((a, f) => a + f.n, 0);
+  const conViajes = filas.filter(f => f.n > 0).length;
+  const conTarifa = filas.filter(f => f.t > 0).length;
+  const masBaja = filas.filter(f => f.t > 0 && f.nCarg > 1 && f.t === f.minT).length;
+  const sinTarifa = filas.filter(f => f.n > 0 && !f.t);
+  const rows = filas.map(f => {
+    let contra = '';
+    if (f.t > 0 && f.nCarg > 1) contra = f.t === f.minT ? '<span class="tag barato">tarifa más baja</span>' : '+' + mny0(f.t - f.minT) + ' sobre la más baja cargada';
+    else if (f.t > 0) contra = 'única tarifa cargada';
+    if (f.n > 0 && f.nUs > 1 && f.pag > f.minP) contra += (contra ? ' · ' : '') + 'pagado +' + mny0(f.pag - f.minP) + ' sobre el más barato que la trabajó';
+    return `<tr style="${f.n ? '' : 'opacity:.6'}"><td><button class="link" data-pr="${f.k}">${ZONAS[f.z] || 'Zona ' + f.z}</button></td><td>${UNI_TXT[f.u]}</td>
+      <td class="num">${f.t ? mny0(f.t) : 'sin tarifa'}</td><td class="num">${f.n || '—'}</td>
+      <td class="num">${f.n ? mny0(f.pag) : '—'}</td><td class="dim">${contra}</td></tr>`;
+  }).join('');
+  const frases = [];
+  if (viajes) frases.push(`${nom} hizo <b>${viajes} viaje${viajes === 1 ? '' : 's'}</b> ${PERIODO} en ${conViajes} ruta${conViajes === 1 ? '' : 's'}; tiene tarifa cargada en ${conTarifa}.`);
+  else frases.push(`${nom} <b>no hizo viajes</b> ${PERIODO}; tiene tarifa cargada en ${conTarifa} ruta${conTarifa === 1 ? '' : 's'}, así que vale la pena preguntar si siguen vigentes o si tiene unidades disponibles.`);
+  if (masBaja) frases.push(`En ${masBaja} de las rutas donde hay más de una tarifa cargada, la suya es la más baja.`);
+  if (sinTarifa.length) frases.push(`Hizo viajes en ${sinTarifa.length} ruta${sinTarifa.length === 1 ? '' : 's'} donde no tiene tarifa cargada: ${sinTarifa.map(f => ZONAS[f.z] + ' en ' + UNI_TXT[f.u].toLowerCase()).join(', ')}.`);
+  frases.push('Toca un destino para ver a todos los transportistas de esa ruta.');
+  $('#pRes').innerHTML = `<div class="tblwrap"><table>
+    <thead><tr><th>Destino</th><th>Unidad</th><th style="text-align:right">Tarifa cargada</th><th style="text-align:right">Viajes</th><th style="text-align:right">Lo que le pagaste</th><th>Contra los demás</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    <div class="aviso">${frases.map(f => '<p>' + f + '</p>').join('')}</div>`;
+  document.querySelectorAll('[data-pr]').forEach(b => b.onclick = () => { const [z, u] = b.dataset.pr.split('|'); $('#pProv').value = ''; $('#pZona').value = z; $('#pUni').value = u; renderProv(); });
 }
 function hallazgosProveedores() {
   let total = 0; const rutas = [];
@@ -1487,10 +1533,14 @@ function iniciarProveedores() {
   $('#pZona').innerHTML = zonas.map(z => `<option value="${z}">${ZONAS[z] || 'Zona ' + z}</option>`).join('');
   $('#pUni').innerHTML = [3, 4, 5, 1].map(u => `<option value="${u}">${UNI_TXT[u]}</option>`).join('');
   $('#pZona').value = '1'; $('#pUni').value = '3';
-  $('#pZona').onchange = renderProv; $('#pUni').onchange = renderProv;
+  const provs = [...new Set(Object.keys(MERC).flatMap(k => MERC[k].p.map(x => String(x[0]))))].filter(id => PROVN[id]);
+  provs.sort((a, b) => PROVN[a].localeCompare(PROVN[b]));
+  $('#pProv').innerHTML = '<option value="">Todos · ver por ruta</option>' + provs.map(id => `<option value="${id}">${PROVN[id]}</option>`).join('');
+  $('#pZona').onchange = renderProv; $('#pUni').onchange = renderProv; $('#pProv').onchange = renderProv;
   renderProv(); hallazgosProveedores();
 }
 function abrirProveedores(z, u) {
+  if ($('#pProv')) $('#pProv').value = '';
   if (z && MERC[z + '|' + (u || 3)]) { $('#pZona').value = String(z); $('#pUni').value = String(u || 3); }
   renderProv();
   const b = document.querySelector('.vista[data-v="prov"]');
@@ -1684,6 +1734,8 @@ function copiarViejo(txt, ok) {
 const REF_RUTA = {12:[187,379],11:[174,786],14:[322,687],13:[436,1315],5:[521,1413],6:[879,991],8:[789,1867],7:[1203,0,1],
   10:[1350,2254],9:[1362,1671],15:[2569,0,1],1:[46,181],3:[62,327],2:[80,446],4:[92,385],17:[69,266],16:[45,266]};
 const MR_METRO = [1, 3, 2, 4, 17, 16];
+/* v11: casetas de ida que de verdad se pagaron en rabon (casetas_reales, liquidadas) */
+const CAS_REAL_RABON = { 6: 1495.5, 7: 3904, 15: 4071 };
 /* v10 · piso de mercado: tarifario de referencia que compartio Luis el 10-oct-2026
    (Trucks & Roads a Geodis, anexo 3.1 del 20-nov-2025, vigente a dic-2026).
    Por unidad (uniId): [sencillo, redondo, reparto adicional, maniobra adicional por persona].
@@ -1753,13 +1805,17 @@ function motorRef(z, u, precio) {
   const ref = REF_RUTA[z];
   if (!uni || !ref) return null;
   // v9: casetas de Google a 2 ejes (tarifa de automovil) por el factor de camion de la unidad
-  const v = { unidad: uni.nombre, km: ref[0], kmPatio: 0, regreso: 'vacio', casetas: 0, casetasAuto: ref[2] ? 0 : ref[1],
+  // v11: donde ya hay casetas liquidadas (rabon, de ida) se usan esas; se pasan a tarifa de automovil
+  // con el factor del rabon para que cada unidad reciba su propio factor de camion
+  const real = CAS_REAL_RABON[z], rab = P().unidades.find(x => uniId(x.nombre) === 5);
+  const casAuto = real && rab ? real / factorCamion(rab) : (ref[2] ? 0 : ref[1]);
+  const v = { unidad: uni.nombre, km: ref[0], kmPatio: 0, regreso: 'vacio', casetas: 0, casetasAuto: casAuto,
     cliente: '_mr', comIda: 0, maniobra: 0, extras: 0, retorno: 0 };
   const base = P();
   const p = Object.assign({}, base, { utilidad: Object.assign({}, base.utilidad, { _mr: 15 }) });
   const r = calcular(v, p);
   const prop = precio ? (precio - r.costoDe(precio).total) / precio : null;
-  return { km: ref[0], cas: r.casetas, est: !!ref[2], motor: r.objetivo, prop: prop, uni: uni };
+  return { km: ref[0], cas: r.casetas, est: !!ref[2] && !(real && rab), liq: !!(real && rab), motor: r.objetivo, prop: prop, uni: uni };
 }
 function filaMargen(z, u) {
   const precio = (TAB4PL[z] || {})[u] || 0;
@@ -1800,7 +1856,7 @@ function tablaMargen(filas, gris) {
         <td class="num">${f.margen != null ? '<b class="' + (f.margen < 0 ? 'neg' : '') + '">' + pct(f.margen) + '</b><span class="mr-n">' + f.base + '</span>' : '<span class="dim">—</span>'}</td>
         <td class="mr-lec">${lecturaMargen(f)}</td>
         <td class="num mr-sep${g}">${r ? Math.round(r.km).toLocaleString('es-MX') : '—'}</td>
-        <td class="num${g}">${r ? mny0(r.cas) + (r.est ? '<span class="mr-n">estimadas</span>' : '') : '—'}</td>
+        <td class="num${g}">${r ? mny0(r.cas) + (r.est ? '<span class="mr-n">estimadas</span>' : (r.liq ? '<span class="mr-n">pagadas</span>' : '')) : '—'}</td>
         <td class="num${g}">${r ? mny0(r.motor) : '—'}</td>
         <td class="num${g}">${dif != null ? (dif >= 0 ? '+' : '−') + mny0(Math.abs(dif)) : '—'}</td>
         <td class="num${g}">${dif != null ? (dif >= 0 ? '+' : '−') + pct(Math.abs(dif / r.motor)) : '—'}</td>
