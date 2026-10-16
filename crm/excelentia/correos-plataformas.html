@@ -147,53 +147,90 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size
 .filtro-aviso .btn-fix:hover{background:#d97706}
 input.campo-mal{border-color:#f59e0b !important;box-shadow:0 0 0 3px rgba(245,158,11,.12) !important}
 
-/* ── Consumo IA ── */
-.ci-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem}
-.ci-head h2{font-size:1rem;color:#1a2035;font-weight:800}
-.ci-periodos{display:flex;gap:.35rem;flex-wrap:wrap}
-.ci-per{padding:.32rem .7rem;border-radius:20px;font-size:.78rem;font-weight:700;color:#4a5068;background:#f0f4ff;border:1px solid #dde1e9;cursor:pointer;transition:.15s;font-family:'Manrope',sans-serif}
-.ci-per:hover{background:#dce8f7}
+/* ── Consumo IA (tabla compacta) ── */
+.ci-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.ci-head h2{font-size:.92rem;color:#1a2035;font-weight:800}
+.ci-ctrl{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;margin-bottom:.5rem}
+.ci-per{padding:.24rem .55rem;border-radius:5px;font-size:.74rem;font-weight:700;color:#4a5068;background:#fff;border:1px solid #dde1e9;cursor:pointer;font-family:'Manrope',sans-serif}
+.ci-per:hover{background:#e8f0fb}
 .ci-per.active{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
-.ci-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
-.ci-stat{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.75rem .6rem;text-align:center}
-.ci-stat .n{font-size:1.35rem;font-weight:800;color:#1a3a6b;line-height:1.1}
-.ci-stat .l{font-size:.7rem;color:#8a90a0;font-weight:600;margin-top:.2rem}
-.ci-total-cost{background:#eef4fc;border:1px solid #c8d9f0;border-radius:12px;padding:.6rem .85rem;text-align:center;margin-bottom:1rem;font-size:.82rem;color:#1a2035;font-weight:600}
-.ci-total-cost b{color:#1a3a6b;font-size:1.05rem}
-.ci-card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.75rem .85rem;margin-bottom:.55rem;display:flex;align-items:center;gap:.7rem}
-.ci-card .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.ci-card .info{flex:1;min-width:0}
-.ci-card .nom{font-size:.86rem;font-weight:700;color:#1a2035;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ci-card .meta{font-size:.72rem;color:#8a90a0;font-weight:500;margin-top:.15rem}
-.ci-card .ejec{text-align:right;flex-shrink:0}
-.ci-card .ejec .big{font-size:1.15rem;font-weight:800;color:#1a3a6b;line-height:1}
-.ci-card .ejec .cost{font-size:.72rem;color:#4a5068;font-weight:600;margin-top:.15rem}
-.ci-badge{display:inline-block;font-size:.66rem;font-weight:700;padding:.1rem .4rem;border-radius:6px;background:#eef4fc;color:#1a3a6b;margin-left:.35rem}
-.ci-off{opacity:.5}
+.ci-sep{width:1px;height:20px;background:#dde1e9;margin:0 .15rem}
+.ci-in{font-family:'Manrope',sans-serif;font-size:.76rem;color:#1a2035;border:1px solid #dde1e9;border-radius:5px;padding:.22rem .4rem;background:#fff}
+.ci-in:focus{outline:none;border-color:#4a9fd4}
+.ci-in.rango-on{border-color:#1a3a6b;background:#e8f0fb}
+.ci-busca{width:200px}
+.ci-lbl{font-size:.72rem;font-weight:700;color:#8a90a0}
+.ci-franja{display:flex;flex-wrap:wrap;align-items:baseline;background:#fff;border:1px solid #dde1e9;border-radius:6px;padding:.38rem .2rem;margin-bottom:.5rem;row-gap:.25rem}
+.ci-st{display:flex;align-items:baseline;gap:.35rem;padding:0 .75rem;border-right:1px solid #dde1e9;white-space:nowrap}
+.ci-st:last-child{border-right:none}
+.ci-st .l{font-size:.68rem;font-weight:700;color:#8a90a0}
+.ci-st .n{font-size:.9rem;font-weight:800;color:#1a2035}
+.ci-st .s{font-size:.7rem;color:#8a90a0;font-weight:600}
+.ci-tabla-wrap{background:#fff;border:1px solid #dde1e9;border-radius:6px;overflow-x:auto;display:inline-block;max-width:100%}
+.ci-tabla{border-collapse:collapse;font-size:.8rem;width:auto}
+.ci-tabla th{text-align:left;font-size:.66rem;font-weight:800;color:#8a90a0;letter-spacing:.04em;text-transform:uppercase;padding:.42rem .9rem .38rem;background:#f8fafd;border-bottom:1px solid #dde1e9;white-space:nowrap;cursor:pointer;user-select:none}
+.ci-tabla th:hover{color:#1a3a6b}
+.ci-tabla th .ar{font-size:.6rem;margin-left:.2rem;opacity:.35}
+.ci-tabla th.on{color:#1a3a6b}
+.ci-tabla th.on .ar{opacity:1;color:#4a9fd4}
+.ci-tabla td{text-align:left;padding:.34rem .9rem;border-top:1px solid #f0f2f5;white-space:nowrap;vertical-align:middle;color:#4a5068}
+.ci-tabla tbody tr:first-child td{border-top:none}
+.ci-p{cursor:pointer}
+.ci-p:hover td{background:#f5f8fd}
+.ci-p td.nom{font-weight:800;color:#1a2035;min-width:170px}
+.ci-caret{display:inline-block;width:.85rem;font-size:.62rem;color:#8a90a0}
+.ci-cero td{color:#a7acb8}
+.ci-cero td.nom{color:#a7acb8;font-weight:700;cursor:default}
+.ci-cero{cursor:default}
+.ci-num{font-variant-numeric:tabular-nums}
+.ci-costo b{font-weight:800;color:#1a2035}
+.ci-costo small{color:#8a90a0;font-size:.68rem;font-weight:600;margin-left:.35rem}
+.ci-a td{background:#fbfcfe;font-size:.74rem;padding-top:.24rem;padding-bottom:.24rem}
+.ci-a td.nom{padding-left:2rem;white-space:normal;max-width:260px}
+.ci-a .an{font-weight:700;color:#1a2035}
+.ci-a .am{font-size:.67rem;color:#8a90a0}
+.ci-a .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:.35rem;vertical-align:1px}
+.ci-sin td{background:#fbfcfe;font-size:.67rem;color:#8a90a0;padding:.2rem .9rem .3rem 2rem}
+.ci-tot td{border-top:2px solid #dde1e9;background:#f8fafd;font-weight:800;color:#1a2035}
+.ci-badge{display:inline-block;font-size:.6rem;font-weight:700;padding:0 .3rem;border-radius:3px;background:#eef1f6;color:#4a5068;margin-left:.3rem;vertical-align:1px}
 .ci-err{color:#dc2626;font-weight:700}
-.ci-nota{background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;padding:.65rem .8rem;font-size:.74rem;color:#4a5068;margin-top:.9rem;line-height:1.5}
-.ci-grupo{margin-bottom:.7rem}
-.ci-grupo-head{display:flex;align-items:center;gap:.5rem;background:#dce8f7;border:1px solid #c8d9f0;border-radius:10px;padding:.55rem .75rem;cursor:pointer;user-select:none;transition:.15s}
-.ci-grupo-head:hover{background:#cfe0f4}
-.ci-caret{font-size:.8rem;color:#1a3a6b;width:1rem;flex-shrink:0}
-.ci-grupo-tit{font-size:.84rem;font-weight:800;color:#1a2035;flex:1}
-.ci-grupo-cont{font-size:.72rem;font-weight:700;color:#1a3a6b;background:#fff;border:1px solid #c8d9f0;border-radius:20px;padding:.05rem .5rem;flex-shrink:0}
-.ci-grupo-body{padding-top:.55rem}
-.ci-grupo{margin-bottom:.7rem}
-.ci-grupo-head{display:flex;align-items:center;gap:.5rem;background:#dce8f7;border:1px solid #c8d9f0;border-radius:10px;padding:.6rem .8rem;cursor:pointer;user-select:none;transition:.15s}
-.ci-grupo-head:hover{background:#cfe0f4}
-.ci-grupo-head .tit{flex:1;font-size:.82rem;font-weight:800;color:#1a3a6b}
-.ci-grupo-head .cnt{font-size:.72rem;font-weight:700;color:#4a5068;background:#fff;border:1px solid #c8d9f0;border-radius:20px;padding:.1rem .5rem}
-.ci-grupo-head .arrow{font-size:.7rem;color:#4a5068;transition:transform .2s}
-.ci-grupo.open .ci-grupo-head .arrow{transform:rotate(90deg)}
-.ci-grupo-body{display:none;padding-top:.55rem}
-.ci-grupo.open .ci-grupo-body{display:block}
-.ci-grupo-vacio{font-size:.76rem;color:#8a90a0;padding:.5rem .2rem;font-style:italic}
+.ci-medido{color:#059669;font-weight:700}
+.ci-nota{background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:5px;padding:.5rem .7rem;font-size:.72rem;color:#4a5068;margin-top:.6rem;line-height:1.5}
+/* ── COMPACTO (oct-2026): menos altura y esquinas menos redondas ── */
+.topbar{margin-bottom:.7rem}
+.btn{padding:.38rem .75rem;border-radius:6px;font-size:.8rem}
+.btn-sm{padding:.26rem .5rem;font-size:.75rem}
+.sel-dias{padding:.38rem .5rem;border-radius:6px}
+.daynav{border-radius:6px;padding:.3rem .5rem;margin-bottom:.7rem}
+.daynav .arrow{width:28px;height:28px;border-radius:5px}
+.card{border-radius:6px;margin-bottom:.7rem}
+.card-head{padding:.5rem .8rem}
+.card-body{padding:.7rem .8rem}
+.chip{border-radius:5px;padding:.16rem .5rem}
+.sec{margin-bottom:.8rem}
+.msg{border-radius:5px;padding:.42rem .6rem;margin-bottom:.32rem;gap:.45rem}
+.msg-rojo,.msg-amarillo,.msg-verde{border-left-width:3px}
+.msg-text{font-size:.82rem;line-height:1.42}
+.msg-plat{margin-bottom:.1rem}
+.tool{width:24px;height:24px;border-radius:5px}
+.plat-head{margin:.6rem 0 .35rem}
+.plat-ic{width:24px;height:24px;border-radius:5px;font-size:.85rem}
+.rchip{border-radius:5px;padding:.24rem .55rem}
+.alert,.none-box{border-radius:5px;padding:.5rem .75rem}
+.modal{border-radius:8px}
+.modal-head{border-radius:8px 8px 0 0}
+.prow{border-radius:5px;padding:.4rem .5rem;margin-bottom:.35rem}
+.prow-ic{border-radius:5px;width:26px;height:26px}
+.addbox{border-radius:6px}
 
 @media(max-width:600px){
   body{padding:.75rem}
   .topbar h1{font-size:.98rem}
-  .ci-stats{grid-template-columns:repeat(2,1fr)}
+  .ci-st{border-right:none;padding:.05rem .6rem;width:100%}
+  .ci-busca{width:100%}
+  .ci-tabla-wrap{display:block}
+  .ci-tabla td,.ci-tabla th{padding-left:.55rem;padding-right:.55rem}
+  .ci-p td.nom{min-width:120px}
   .daynav .day-label{font-size:.85rem}
   .msg{padding:.6rem .55rem;gap:.45rem}
   .msg-tools{flex-direction:row}
@@ -983,7 +1020,7 @@ function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</
 // ═══════════════════════════════════════
 const CONSUMO_URL = 'https://n8n.excelentia.com.mx/webhook/dashboard-uso-ia';
 let consumoVisible = false;
-let consumoDias = 7;
+let consumoDias = 30;
 let consumoData = null;
 
 // Color del punto según el proveedor del modelo
@@ -1013,8 +1050,18 @@ function toggleConsumo(){
   }
 }
 
+let ciRango = null;   // {desde, hasta} en AAAA-MM-DD
+let ciBusca = '';
+let ciOrden = { col: 'costo', dir: -1 };
 function setConsumoDias(d){
-  consumoDias = d;
+  consumoDias = d; ciRango = null;
+  cargarConsumo();
+}
+function aplicarRango(){
+  const de = document.getElementById('ci-desde').value, ha = document.getElementById('ci-hasta').value;
+  if (!de || !ha) { toast('Elige las dos fechas', false); return; }
+  if (de > ha) { toast('La fecha inicial va antes que la final', false); return; }
+  ciRango = { desde: de, hasta: ha };
   cargarConsumo();
 }
 
@@ -1022,7 +1069,8 @@ async function cargarConsumo(){
   const panel = document.getElementById('consumo');
   panel.innerHTML = '<div class="loading"><span class="spinner"></span>Analizando tus workflows…</div>';
   try {
-    const res = await fetch(CONSUMO_URL + '?dias=' + consumoDias, { method:'GET' });
+    const qs = ciRango ? ('?desde=' + ciRango.desde + '&hasta=' + ciRango.hasta) : ('?dias=' + consumoDias);
+    const res = await fetch(CONSUMO_URL + qs, { method:'GET' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     consumoData = await res.json();
     renderConsumo();
@@ -1031,92 +1079,142 @@ async function cargarConsumo(){
   }
 }
 
-function toggleGrupo(id){
-  const b = document.getElementById('body-'+id);
-  const c = document.getElementById('car-'+id);
-  if(!b) return;
-  const abierto = b.style.display !== 'none';
-  b.style.display = abierto ? 'none' : 'block';
-  if(c) c.textContent = abierto ? '▸' : '▾';
+const ciAbiertos = new Set();
+function toggleProy(nombre){
+  if (ciAbiertos.has(nombre)) ciAbiertos.delete(nombre); else ciAbiertos.add(nombre);
+  renderConsumo();
+}
+function ordenarCI(col){
+  if (ciOrden.col === col) ciOrden.dir = -ciOrden.dir;
+  else ciOrden = { col: col, dir: col === 'proyecto' ? 1 : -1 };
+  renderConsumo();
+}
+function buscarCI(v){
+  ciBusca = v;
+  renderConsumo();
+  const el = document.getElementById('ci-busca');
+  if (el) { el.focus(); el.setSelectionRange(v.length, v.length); }
+}
+const ciMXN = n => '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const ciUSD = n => '$' + Number(n || 0).toFixed(2) + ' USD';
+const ciNorm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function hoyISO(offsetDias){
+  const d = new Date(Date.now() - (offsetDias || 0) * 864e5);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 }
 
-function tarjetaWF(w){
-  const off = w.activo ? '' : ' ci-off';
+function filaAgente(w, tc){
   const badge = w.activo ? '' : '<span class="ci-badge">apagado</span>';
-  const err = (w.errores>0) ? ' · <span class="ci-err">'+w.errores+(w.errores===1?' error':' errores')+'</span>' : '';
-  return ''
-    + '<div class="ci-card'+off+'">'
-    +   '<span class="dot" style="background:'+modeloColor(w.modeloKey)+'"></span>'
-    +   '<div class="info">'
-    +     '<div class="nom">'+esc(w.nombre)+badge+'</div>'
-    +     '<div class="meta">'+esc(w.modelo)+err+'</div>'
-    +   '</div>'
-    +   '<div class="ejec">'
-    +     '<div class="big">'+w.ejecuciones+'</div>'
-    +     '<div class="cost">$'+(w.costoUSD!=null?w.costoUSD.toFixed(2):'0.00')+'</div>'
-    +   '</div>'
-    + '</div>';
-}
-
-function grupoAcordeon(id, titulo, lista, abierto){
-  if(lista.length === 0) return '';
-  const flecha = abierto ? '▾' : '▸';
-  const disp = abierto ? 'block' : 'none';
-  return ''
-    + '<div class="ci-grupo">'
-    +   '<div class="ci-grupo-head" onclick="toggleGrupo(\''+id+'\')">'
-    +     '<span class="ci-caret" id="car-'+id+'">'+flecha+'</span>'
-    +     '<span class="ci-grupo-tit">'+titulo+'</span>'
-    +     '<span class="ci-grupo-cont">'+lista.length+'</span>'
-    +   '</div>'
-    +   '<div class="ci-grupo-body" id="body-'+id+'" style="display:'+disp+'">'
-    +     lista.map(tarjetaWF).join('')
-    +   '</div>'
-    + '</div>';
+  const err = (w.errores > 0) ? ' · <span class="ci-err">' + w.errores + (w.errores === 1 ? ' error' : ' errores') + '</span>' : '';
+  const porEjec = w.costoEjecUSD != null ? ciMXN(w.costoEjecUSD * tc) + ' c/u' : '';
+  const fuente = w.fuenteTokens === 'medido' ? ' · <span class="ci-medido" title="' + esc(w.nota || '') + '">medido</span>' : '';
+  return '<tr class="ci-a">'
+    + '<td class="nom"><span class="dot" style="background:' + modeloColor(w.modeloKey) + '"></span><span class="an">' + esc(w.nombre) + '</span>' + badge
+    + '<div class="am">' + esc(w.modelo) + ' · ' + porEjec + fuente + err + '</div></td>'
+    + '<td></td>'
+    + '<td class="ci-num">' + w.ejecuciones + '</td>'
+    + '<td class="ci-num">' + ciMXN(w.costoUSD * tc) + '</td>'
+    + '</tr>';
 }
 
 function renderConsumo(){
   const panel = document.getElementById('consumo');
   const d = consumoData || {};
   const t = d.totales || {};
+  const tc = d.tipoCambio || 17;
   const wfs = Array.isArray(d.workflows) ? d.workflows : [];
+  let proyectos = Array.isArray(d.proyectos) ? d.proyectos.slice() : [];
 
-  // Clasificar en 3 grupos
-  const porNombre = function(a,b){ return (a.nombre||'').localeCompare(b.nombre||'', 'es'); };
-  const activosCon = wfs.filter(function(w){ return w.activo && w.ejecuciones > 0; })
-                        .sort(function(a,b){ return b.ejecuciones - a.ejecuciones; });
-  const activosCero = wfs.filter(function(w){ return w.activo && w.ejecuciones === 0; }).sort(porNombre);
-  const inactivos   = wfs.filter(function(w){ return !w.activo; }).sort(porNombre);
-
-  const periodos = [7,15,30].map(function(p){
-    return '<button class="ci-per'+(p===consumoDias?' active':'')+'" onclick="setConsumoDias('+p+')">'+p+' días</button>';
-  }).join('');
-
-  let html = ''
-    + '<div class="ci-head">'
-    +   '<h2>🤖 Consumo de IA</h2>'
-    +   '<div class="ci-periodos">'+periodos+'</div>'
-    + '</div>'
-    + '<div class="ci-stats">'
-    +   '<div class="ci-stat"><div class="n">'+(t.workflowsConIA||0)+'</div><div class="l">Agentes con IA</div></div>'
-    +   '<div class="ci-stat"><div class="n">'+(t.ejecuciones||0)+'</div><div class="l">Ejecuciones</div></div>'
-    +   '<div class="ci-stat"><div class="n'+((t.errores||0)>0?' ci-err':'')+'">'+(t.errores||0)+'</div><div class="l">Errores</div></div>'
-    +   '<div class="ci-stat"><div class="n">'+(t.workflowsTotales||0)+'</div><div class="l">WF totales</div></div>'
-    + '</div>'
-    + '<div class="ci-total-cost">Costo estimado del periodo: <b>$'+(t.costoUSDEstimado!=null?t.costoUSDEstimado.toFixed(2):'0.00')+' USD</b></div>';
-
-  if(wfs.length === 0){
-    html += '<div class="alert">No se encontraron workflows con IA.</div>';
-  } else {
-    html += grupoAcordeon('activos', '🟢 Activos con ejecuciones', activosCon, true);
-    html += grupoAcordeon('cero', '⚪ Activos sin actividad', activosCero, false);
-    html += grupoAcordeon('inactivos', '⏸️ Inactivos (apagados)', inactivos, false);
+  // Buscador: por nombre de proyecto o de agente
+  const q = ciNorm(ciBusca.trim());
+  const coincideAgente = {};
+  if (q) {
+    proyectos = proyectos.filter(function(p){
+      const porAgente = wfs.some(function(w){ return w.proyecto === p.proyecto && ciNorm(w.nombre).includes(q); });
+      if (porAgente && !ciNorm(p.proyecto).includes(q)) coincideAgente[p.proyecto] = true;
+      return ciNorm(p.proyecto).includes(q) || porAgente;
+    });
   }
 
-  const sup = d.supuestos || {};
-  html += '<div class="ci-nota">💡 <strong>Costo estimado</strong>, no es tu factura real: se calcula como ejecuciones × '
-    + (sup.tokensInPorEjec||1500) + '/' + (sup.tokensOutPorEjec||500)
-    + ' tokens promedio × precio del modelo. El historial de n8n se limpia solo cada cierto tiempo, así que el conteo refleja lo que sigue guardado. Para el gasto exacto revisa los paneles de OpenAI y Anthropic.</div>';
+  // Orden
+  const val = function(p){
+    if (ciOrden.col === 'proyecto') return ciNorm(p.proyecto);
+    if (ciOrden.col === 'agentes') return p.workflows || 0;
+    if (ciOrden.col === 'ejec') return p.ejecuciones || 0;
+    return p.costoUSD || 0;
+  };
+  proyectos.sort(function(a, b){
+    const va = val(a), vb = val(b);
+    if (va < vb) return -1 * ciOrden.dir;
+    if (va > vb) return 1 * ciOrden.dir;
+    return ciNorm(a.proyecto) < ciNorm(b.proyecto) ? -1 : 1;
+  });
+
+  const periodos = [7, 15, 30].map(function(p){
+    return '<button class="ci-per' + (!ciRango && p === consumoDias ? ' active' : '') + '" onclick="setConsumoDias(' + p + ')">' + p + ' días</button>';
+  }).join('');
+  const de = ciRango ? ciRango.desde : hoyISO(consumoDias);
+  const ha = ciRango ? ciRango.hasta : hoyISO(0);
+  const minF = hoyISO(90), maxF = hoyISO(0);
+  const th = function(col, txt){
+    const on = ciOrden.col === col;
+    return '<th class="' + (on ? 'on' : '') + '" onclick="ordenarCI(\'' + col + '\')">' + txt + '<span class="ar">' + (on ? (ciOrden.dir === 1 ? '▲' : '▼') : '⇅') + '</span></th>';
+  };
+
+  let html = ''
+    + '<div class="ci-head"><h2>🤖 Consumo de IA por proyecto</h2></div>'
+    + '<div class="ci-ctrl">'
+    +   periodos
+    +   '<span class="ci-sep"></span>'
+    +   '<span class="ci-lbl">Del</span><input type="date" id="ci-desde" class="ci-in' + (ciRango ? ' rango-on' : '') + '" value="' + de + '" min="' + minF + '" max="' + maxF + '">'
+    +   '<span class="ci-lbl">al</span><input type="date" id="ci-hasta" class="ci-in' + (ciRango ? ' rango-on' : '') + '" value="' + ha + '" min="' + minF + '" max="' + maxF + '">'
+    +   '<button class="ci-per' + (ciRango ? ' active' : '') + '" onclick="aplicarRango()">Aplicar</button>'
+    + '</div>'
+    + '<div class="ci-ctrl"><input type="search" id="ci-busca" class="ci-in ci-busca" placeholder="🔍 Buscar proyecto o agente…" value="' + esc(ciBusca) + '" oninput="buscarCI(this.value)" autocomplete="off"></div>'
+    + '<div class="ci-franja">'
+    +   '<div class="ci-st"><span class="l">Costo estimado</span><span class="n">' + ciMXN(t.costoMXNEstimado) + '</span><span class="s">' + ciUSD(t.costoUSDEstimado) + '</span></div>'
+    +   '<div class="ci-st"><span class="l">Ejecuciones</span><span class="n">' + (t.ejecuciones || 0) + '</span></div>'
+    +   '<div class="ci-st"><span class="l">Errores</span><span class="n' + ((t.errores || 0) > 0 ? ' ci-err' : '') + '">' + (t.errores || 0) + '</span></div>'
+    +   '<div class="ci-st"><span class="l">Agentes con IA</span><span class="n">' + (t.workflowsConIA || 0) + '</span></div>'
+    + '</div>';
+
+  html += '<div class="ci-tabla-wrap"><table class="ci-tabla"><thead><tr>'
+    + th('proyecto', 'Proyecto') + th('agentes', 'Agentes') + th('ejec', 'Ejecuciones') + th('costo', 'Costo')
+    + '</tr></thead><tbody>';
+
+  if (!proyectos.length) {
+    html += '<tr><td colspan="4" style="padding:1rem .9rem;color:#8a90a0">' + (q ? 'Ningún proyecto coincide con la búsqueda.' : 'No se encontraron agentes con IA.') + '</td></tr>';
+  }
+  let sumA = 0, sumE = 0, sumUSD = 0;
+  proyectos.forEach(function(p){
+    const propios = wfs.filter(function(w){ return w.proyecto === p.proyecto; });
+    let activos = propios.filter(function(w){ return w.ejecuciones > 0; }).sort(function(a, b){ return b.costoUSD - a.costoUSD; });
+    const quietos = propios.filter(function(w){ return w.ejecuciones === 0; });
+    if (coincideAgente[p.proyecto]) activos = activos.filter(function(w){ return ciNorm(w.nombre).includes(q); });
+    const cero = !propios.some(function(w){ return w.ejecuciones > 0; });
+    const abierto = !cero && (ciAbiertos.has(p.proyecto) || !!coincideAgente[p.proyecto]);
+    sumA += p.workflows || 0; sumE += p.ejecuciones || 0; sumUSD += p.costoUSD || 0;
+    html += '<tr class="ci-p' + (cero ? ' ci-cero' : '') + '"' + (cero ? '' : ' onclick="toggleProy(\'' + esc(p.proyecto) + '\')"') + '>'
+      + '<td class="nom"><span class="ci-caret">' + (cero ? '' : (abierto ? '▾' : '▸')) + '</span>' + esc(p.proyecto) + '</td>'
+      + '<td class="ci-num">' + (p.workflows || '—') + '</td>'
+      + '<td class="ci-num">' + (p.ejecuciones || '—') + (p.errores ? ' <span class="ci-err" title="Ejecuciones con error">· ' + p.errores + '✗</span>' : '') + '</td>'
+      + '<td class="ci-num ci-costo">' + (cero ? '—' : '<b>' + ciMXN(p.costoMXN) + '</b><small>' + ciUSD(p.costoUSD) + '</small>') + '</td>'
+      + '</tr>';
+    if (abierto) {
+      html += activos.map(function(w){ return filaAgente(w, tc); }).join('');
+      if (quietos.length && !coincideAgente[p.proyecto]) {
+        html += '<tr class="ci-sin"><td colspan="4" title="' + esc(quietos.map(function(w){ return w.nombre; }).join(' · ')) + '">+ ' + quietos.length + (quietos.length === 1 ? ' agente sin actividad' : ' agentes sin actividad') + ' en el periodo</td></tr>';
+      }
+    }
+  });
+  if (proyectos.length) {
+    html += '<tr class="ci-tot"><td>Total' + (q ? ' (filtrado)' : '') + '</td><td class="ci-num">' + sumA + '</td><td class="ci-num">' + sumE + '</td>'
+      + '<td class="ci-num ci-costo"><b>' + ciMXN(sumUSD * tc) + '</b><small>' + ciUSD(sumUSD) + '</small></td></tr>';
+  }
+  html += '</tbody></table></div>';
+
+  const periodoTxt = d.rango ? ('del ' + d.rango.desde.split('-').reverse().join('/') + ' al ' + d.rango.hasta.split('-').reverse().join('/')) : ('de los últimos ' + (d.periodoDias || consumoDias) + ' días');
+  html += '<div class="ci-nota">💡 <strong>Costo estimado ' + periodoTxt + '</strong>, no es la factura: ejecuciones × costo por ejecución. Eco IA y el resumen de convocatoria usan un costo <span class="ci-medido">medido</span>; el resto, un promedio de tokens por agente. Tipo de cambio ' + ciMXN(tc) + ', el del CRM. El rango llega hasta 90 días atrás y n8n limpia su historial cada cierto tiempo, así que lo más antiguo puede no aparecer completo. Clic en un proyecto para ver sus agentes.</div>';
 
   panel.innerHTML = html;
 }
