@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resumen de Convocatoria v2 · ExcelentIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fondo:#f5f6f8; --card:#ffffff; --borde:#dde1e9; --hover:#e8f0fb; --cab:#dce8f7;
+    --azul-osc:#0d1b3e; --azul:#1a3a6b; --azul-med:#1e5096; --acento:#4a9fd4;
+    --texto:#1a2035; --texto2:#4a5068; --gris:#8a90a0;
+    --alerta-bg:#f0f6ff; --alerta-borde:#c8d9f0; --nota-bg:#eef4fc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Manrope',sans-serif;background:var(--fondo);color:var(--texto);font-size:15px;line-height:1.5}
+  header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid var(--acento);color:#fff}
+  .header-in{max-width:960px;margin:0 auto;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  .logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+  .logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+  .logo-box img{height:48px;width:auto;display:block}
+  .logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+  .logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+  .header-tit{text-align:right}
+  .header-tit h1{margin:0;font-size:1.15rem;font-weight:800}
+  .header-tit p{margin:.15rem 0 0;font-size:.82rem;opacity:.85}
+
+  main{max-width:720px;margin:1.5rem auto 2.5rem;padding:0 16px}
+  .card{background:var(--card);border:1px solid var(--borde);border-radius:14px;margin:0 auto 1.25rem;overflow:hidden;max-width:720px}
+  .card-cab{background:var(--cab);padding:.8rem 1.1rem;font-weight:700;color:var(--azul);display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+  .card-cab .paso{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--azul);color:#fff;font-size:.8rem;margin-right:.5rem}
+  .card-body{padding:1.1rem}
+  label.lbl{display:block;font-weight:600;color:var(--texto2);font-size:.85rem;margin-bottom:.35rem}
+  input[type=text],input[type=password]{width:100%;font-family:inherit;font-size:.95rem;padding:.65rem .8rem;border:1px solid var(--borde);border-radius:9px;color:var(--texto);background:#fff}
+  input[type=text]:focus,input[type=password]:focus{outline:none;border-color:var(--acento);box-shadow:0 0 0 3px rgba(74,159,212,.18)}
+
+  .drop{border:2px dashed var(--alerta-borde);background:var(--alerta-bg);border-radius:12px;padding:1.6rem 1rem;text-align:center;cursor:pointer;transition:.15s;margin-top:1rem}
+  .drop:hover,.drop.sobre{background:var(--hover);border-color:var(--acento)}
+  .drop strong{color:var(--azul);display:block;font-size:1rem}
+  .drop span{color:var(--gris);font-size:.82rem}
+  .lista{list-style:none;margin:.9rem 0 0;padding:0}
+  .lista li{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border:1px solid var(--borde);border-radius:9px;margin-bottom:.45rem;font-size:.88rem}
+  .lista .ico{font-size:.72rem;font-weight:800;color:#fff;background:var(--azul-med);border-radius:5px;padding:.15rem .35rem;flex-shrink:0}
+  .lista .ico.word{background:#2b579a}
+  .lista .ico.excel{background:#217346}
+  .lista .nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lista .tam{color:var(--gris);font-size:.78rem;flex-shrink:0}
+  .lista .quitar{border:none;background:none;color:var(--gris);font-size:1.1rem;cursor:pointer;line-height:1;padding:0 .2rem}
+  .lista .quitar:hover{color:#b23b3b}
+  .barra{height:5px;background:#e7ebf2;border-radius:3px;overflow:hidden;margin-top:.35rem}
+  .barra i{display:block;height:100%;width:0;background:var(--acento);transition:width .2s}
+  .lista li.subiendo{flex-wrap:wrap}
+  .lista li.subiendo .barra{flex-basis:100%}
+  .nota{background:var(--nota-bg);border-left:4px solid var(--azul);border-radius:8px;padding:.7rem .9rem;font-size:.84rem;color:var(--texto2);margin-top:1rem}
+
+  .btn{font-family:inherit;font-weight:700;font-size:.92rem;border-radius:10px;padding:.7rem 1.1rem;cursor:pointer;border:1px solid transparent;display:inline-flex;align-items:center;gap:.45rem;transition:.15s}
+  .btn-pri{background:var(--azul);color:#fff}
+  .btn-pri:hover{background:var(--azul-med)}
+  .btn-sec{background:#fff;color:var(--azul);border-color:var(--borde)}
+  .btn-sec:hover{background:var(--hover);border-color:var(--acento)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .acciones{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.1rem}
+  .acciones.centro{justify-content:center}
+
+  .progreso{text-align:center;padding:1.6rem 1rem}
+  .reloj{font-size:2rem;font-weight:800;color:var(--azul);letter-spacing:1px}
+  .etapa{color:var(--texto2);font-size:.92rem;margin-top:.3rem}
+  .spinner{width:38px;height:38px;border:4px solid var(--cab);border-top-color:var(--acento);border-radius:50%;margin:0 auto 1rem;animation:gira 1s linear infinite}
+  @keyframes gira{to{transform:rotate(360deg)}}
+
+  .asunto{background:var(--alerta-bg);border:1px solid var(--alerta-borde);border-left:4px solid var(--acento);border-radius:9px;padding:.7rem .9rem;font-weight:700;font-size:.9rem;color:var(--azul-osc);word-break:break-word}
+  .asunto small{display:block;font-weight:600;color:var(--gris);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem}
+  .correo{margin-top:1rem;font-size:.9rem;line-height:1.55;color:var(--texto)}
+  .correo p{margin:0 0 .7rem}
+  .correo h4{margin:1rem 0 .35rem;font-size:.92rem;color:var(--azul)}
+  .correo ul{margin:0 0 .6rem;padding-left:1.25rem}
+  .correo li{margin-bottom:.2rem}
+  .liga{background:#fff3c4;padding:0 .25rem;border-radius:3px;font-weight:700}
+  .alertas{background:var(--alerta-bg);border:1px solid var(--alerta-borde);border-left:4px solid var(--acento);border-radius:9px;padding:.8rem 1rem;margin-top:1rem}
+  .alertas h4{margin:0 0 .4rem;font-size:.9rem;color:var(--azul)}
+  .alertas ul{margin:0;padding-left:1.15rem;font-size:.85rem;color:var(--texto2)}
+  .alertas li{margin-bottom:.3rem}
+  .meta{font-size:.8rem;color:var(--gris);margin-top:.8rem}
+  .error{background:#fdf1f1;border:1px solid #f0caca;border-left:4px solid #c25454;border-radius:9px;padding:.8rem 1rem;color:#7a2a2a;font-size:.88rem}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--azul-osc);color:#fff;padding:.6rem 1.1rem;border-radius:10px;font-size:.88rem;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:10}
+  .toast.ver{opacity:1;transform:translateX(-50%) translateY(0)}
+  footer{text-align:center;color:var(--gris);font-size:.78rem;padding:0 16px 2rem}
+  .oculto{display:none!important}
+
+  @media (max-width:600px){
+    .header-in{flex-direction:column;align-items:flex-start}
+    .header-tit{text-align:left}
+    .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+    .logo-slogan{font-size:11px}
+    main{margin-top:1rem}
+    .card-body{padding:.9rem}
+    .acciones .btn{flex:1 1 100%;justify-content:center}
+    .reloj{font-size:1.6rem}
+  }
+
+  @page{size:Letter;margin:13mm}
+  @media print{
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{background:#fff;font-size:11pt}
+    .no-print{display:none!important}
+    main{margin:0;max-width:none;padding:0}
+    section,.card,main,div{break-inside:auto}
+    .card{border:1px solid var(--borde)}
+    .asunto,.alertas,.lista li,img{break-inside:avoid}
+    h1,h2,h3,h4,.card-cab{break-after:avoid}
+    p,li{orphans:3;widows:3}
+    thead{display:table-header-group}
+    a[href]:after{content:none}
+  }
+  /* v2: vista por temas, chat con fuentes y agregar documentos */
+  .temas-bar{display:flex;justify-content:flex-end;gap:.5rem;margin:.9rem 0 .3rem}
+  .lnk{background:none;border:none;color:var(--azul-med);font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;padding:.2rem .3rem}
+  .lnk:hover{text-decoration:underline}
+  details.tema{border:1px solid var(--borde);border-radius:10px;margin-bottom:.55rem;background:#fff;overflow:hidden}
+  details.tema>summary{list-style:none;cursor:pointer;padding:.6rem .9rem;font-weight:700;color:var(--azul);background:#f7f9fd;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+  details.tema>summary::-webkit-details-marker{display:none}
+  details.tema>summary::after{content:'▾';color:var(--gris);font-size:.85rem;transition:transform .15s}
+  details.tema:not([open])>summary::after{transform:rotate(-90deg)}
+  details.tema>summary:hover{background:var(--hover)}
+  .tema-body{padding:.6rem .95rem .3rem;font-size:.9rem;line-height:1.55}
+  .tema-body p{margin:0 0 .6rem}
+  .tema-body ul{margin:0 0 .6rem;padding-left:1.25rem}
+  .tema-body li{margin-bottom:.25rem}
+  .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.9rem 0 .2rem}
+  .chip{border:1px solid var(--alerta-borde);background:var(--alerta-bg);color:var(--azul);border-radius:999px;padding:.35rem .75rem;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer}
+  .chip:hover{background:var(--hover);border-color:var(--acento)}
+  .chat{display:flex;flex-direction:column;gap:.6rem;margin-top:.9rem;max-height:520px;overflow-y:auto}
+  .chat:empty{display:none}
+  .msg{max-width:92%;padding:.65rem .85rem;border-radius:12px;font-size:.88rem;line-height:1.5;word-break:break-word}
+  .msg.u{align-self:flex-end;background:var(--azul);color:#fff;border-bottom-right-radius:4px}
+  .msg.a{align-self:flex-start;background:#fff;border:1px solid var(--borde);border-bottom-left-radius:4px;color:var(--texto)}
+  .msg.a.pensando{color:var(--gris);font-style:italic}
+  .msg.a.err{background:#fdf1f1;border-color:#f0caca;color:#7a2a2a}
+  .fuentes{margin-top:.55rem;display:flex;flex-direction:column;gap:.4rem}
+  .fuente{background:var(--alerta-bg);border-left:3px solid var(--acento);border-radius:6px;padding:.45rem .6rem;font-size:.8rem;color:var(--texto2)}
+  .fuente b{color:var(--azul-osc)}
+  .fuente i{display:block;margin-top:.2rem;color:var(--texto)}
+  .costo{margin-top:.35rem;font-size:.72rem;color:var(--gris)}
+  .chat-in{display:flex;gap:.5rem;margin-top:.9rem;align-items:flex-end}
+  .chat-in textarea{flex:1;font-family:inherit;font-size:.92rem;padding:.6rem .75rem;border:1px solid var(--borde);border-radius:9px;resize:vertical;min-height:46px;color:var(--texto)}
+  .chat-in textarea:focus{outline:none;border-color:var(--acento);box-shadow:0 0 0 3px rgba(74,159,212,.18)}
+  .docs-cargados{margin-top:.9rem;font-size:.8rem;color:var(--texto2)}
+  .docs-cargados b{color:var(--azul)}
+  .docs-cargados ul{margin:.3rem 0 0;padding-left:1.15rem}
+  .nuevo{display:inline-block;background:#e6f4ea;color:#1e6b34;border-radius:6px;padding:.1rem .45rem;font-size:.72rem;font-weight:700;margin-left:.4rem}
+  @media (max-width:600px){
+    .chat-in{flex-direction:column;align-items:stretch}
+    .msg{max-width:100%}
+  }
+  @media print{
+    details.tema{border:none;margin:0}
+    details.tema>summary{background:none;padding:.4rem 0 .2rem;break-after:avoid}
+    details.tema>summary::after{content:none}
+    .tema-body{padding:0 0 .3rem}
+  }
+  select.campo{width:100%;font-family:inherit;font-size:.95rem;padding:.6rem .7rem;border:1px solid var(--borde);border-radius:9px;color:var(--texto);background:#fff}
+  .perfil-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem .9rem;margin-top:.9rem}
+  .checks{display:flex;flex-wrap:wrap;gap:.45rem .9rem;margin-top:.2rem}
+  .checks label{display:flex;align-items:center;gap:.35rem;font-size:.86rem;color:var(--texto2);cursor:pointer}
+  .checks input{accent-color:var(--azul)}
+  .usuario-chip{display:inline-block;margin-top:.35rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:.15rem .7rem;font-size:.75rem;font-weight:600;cursor:pointer}
+  .riesgo{display:flex;gap:.7rem;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--borde)}
+  .riesgo:last-child{border-bottom:none}
+  .nivel{flex-shrink:0;font-size:.7rem;font-weight:800;border-radius:6px;padding:.15rem .5rem;margin-top:.1rem;min-width:52px;text-align:center}
+  .nivel.alto{background:#fdecec;color:#a33a3a}
+  .nivel.medio{background:#fff4e0;color:#99620c}
+  .nivel.bajo{background:#e8f4ec;color:#2b6b3f}
+  .riesgo b{color:var(--texto);display:block;font-size:.88rem}
+  .riesgo span{color:var(--texto2);font-size:.84rem}
+  .sug{display:flex;gap:.6rem;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--borde);cursor:pointer}
+  .sug:last-child{border-bottom:none}
+  .sug input{margin-top:.25rem;accent-color:var(--azul)}
+  .sug b{color:var(--texto);font-size:.88rem}
+  .sug span{color:var(--texto2);font-size:.84rem}
+  .sug small{display:block;color:var(--gris);font-size:.74rem;margin-top:.1rem}
+  .ejecutivo{margin-top:1rem;background:#fff;border:1px solid var(--borde);border-left:4px solid var(--azul);border-radius:9px;padding:.8rem 1rem;font-size:.88rem;line-height:1.55;color:var(--texto)}
+  .ejecutivo h5{margin:.5rem 0 .2rem;font-size:.88rem;color:var(--azul)}
+  .ejecutivo h5:first-child{margin-top:0}
+  .ejecutivo p{margin:0 0 .25rem}
+  @media (max-width:600px){ .perfil-grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-in">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="header-tit">
+      <h1>Resumen de convocatoria</h1>
+      <p>Agente de licitaciones · Pharmacur</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Acceso -->
+  <section class="card no-print" id="secClave">
+    <div class="card-cab"><span>Acceso</span></div>
+    <div class="card-body">
+      <label class="lbl" for="clave">Clave de acceso</label>
+      <input type="password" id="clave" placeholder="Escribe la clave que te compartió ExcelentIA" autocomplete="current-password">
+      <div class="error oculto" id="errClave" style="margin-top:.6rem"></div>
+      <div class="acciones">
+        <button class="btn btn-pri" id="btnEntrar">Entrar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Usuario -->
+  <section class="card no-print oculto" id="secPerfil">
+    <div class="card-cab"><span>¿Quién usa la página?</span></div>
+    <div class="card-body">
+      <label class="lbl" for="selPerfil">Usuario</label>
+      <select id="selPerfil" class="campo"></select>
+      <div id="formPerfil" class="perfil-grid">
+        <div><label class="lbl" for="pfNombre">Nombre</label><input type="text" id="pfNombre" placeholder="Ej. Emmanuel Estévez"></div>
+        <div><label class="lbl" for="pfSaludo">Saludo del correo</label><input type="text" id="pfSaludo" placeholder="Buena tarde"></div>
+        <div><label class="lbl" for="pfDest">A quién pide la confirmación</label><input type="text" id="pfDest" placeholder="Belem | Héctor"></div>
+        <div><label class="lbl" for="pfFirma">Firma</label><input type="text" id="pfFirma" placeholder="Emmanuel Estévez."></div>
+        <div><label class="lbl" for="pfPara">Para (correos, opcional)</label><input type="text" id="pfPara" placeholder="belem@…; hector@…"></div>
+        <div><label class="lbl" for="pfCc">Con copia (opcional)</label><input type="text" id="pfCc" placeholder="jonathan@…"></div>
+      </div>
+      <label class="lbl" style="margin-top:.8rem">Temas de su resumen ejecutivo para Dirección</label>
+      <div class="checks" id="pfTemas"></div>
+      <div class="error oculto" id="errPerfil" style="margin-top:.6rem"></div>
+      <div class="acciones"><button class="btn btn-pri" id="btnPerfil">Continuar</button></div>
+    </div>
+  </section>
+
+  <!-- Paso 1: archivos -->
+  <section class="card no-print oculto" id="secCarga">
+    <div class="card-cab"><span><span class="paso">1</span>Sube las bases de la licitación</span></div>
+    <div class="card-body">
+      <label class="lbl" for="nombre">Nombre de referencia (opcional)</label>
+      <input type="text" id="nombre" placeholder="Ej. IMSS T-6 laboratorio clínico">
+      <div class="drop" id="drop1" tabindex="0" role="button" aria-label="Elegir archivos">
+        <strong>Arrastra aquí los archivos o da clic para elegirlos</strong>
+        <span>PDF, Word (.docx) o Excel (.xlsx): convocatoria, anexo técnico, términos y condiciones, anexos, actas y avisos</span>
+      </div>
+      <input type="file" id="archivos1" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <ul class="lista" id="lista1"></ul>
+      <div class="nota">El agente lee todos los documentos completos, incluidos los escaneados y los anexos en Excel, y si hay actas, avisos o diferimientos toma de ellos las fechas vigentes. Después del resumen puedes hacerle preguntas y agregar documentos nuevos.</div>
+      <div class="acciones">
+        <button class="btn btn-pri" id="btnGenerar" disabled>Generar resumen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Paso 2: progreso -->
+  <section class="card no-print oculto" id="secProgreso">
+    <div class="card-cab"><span><span class="paso">2</span><span id="titProgreso">Trabajando en el resumen</span></span></div>
+    <div class="progreso">
+      <div class="spinner"></div>
+      <div class="reloj" id="reloj">00:00</div>
+      <div class="etapa" id="etapa">Preparando…</div>
+    </div>
+  </section>
+
+  <!-- Error -->
+  <section class="card no-print oculto" id="secError">
+    <div class="card-cab"><span>No se pudo terminar</span></div>
+    <div class="card-body">
+      <div class="error" id="txtError"></div>
+      <div class="acciones"><button class="btn btn-sec" id="btnReintentar">Volver a intentar</button></div>
+    </div>
+  </section>
+
+  <!-- Paso 3: resultado -->
+  <section class="card oculto" id="secResultado">
+    <div class="card-cab"><span><span class="paso no-print">3</span>Resumen listo para enviar</span><span class="nuevo oculto no-print" id="marcaAct">Actualizado</span></div>
+    <div class="card-body">
+      <div class="asunto"><small>Asunto</small><span id="txtAsunto"></span></div>
+      <div class="temas-bar no-print"><button class="lnk" id="btnExpandir">Expandir todo</button><button class="lnk" id="btnContraer">Contraer todo</button></div>
+      <div id="txtCorreo"></div>
+      <div class="alertas oculto" id="boxAlertas"><h4>Para revisión antes de enviar</h4><ul id="lstAlertas"></ul></div>
+      <div class="meta" id="txtMeta"></div>
+      <div class="acciones no-print">
+        <button class="btn btn-pri" id="btnCopiar">Copiar correo</button>
+        <button class="btn btn-sec" id="btnCopiarAsunto">Copiar asunto</button>
+        <button class="btn btn-sec" id="btnWord">Guardar en Word</button>
+        <button class="btn btn-sec" disabled title="Próximamente">Enviar por correo (próximamente)</button>
+      </div>
+      <div class="acciones no-print">
+        <button class="btn btn-sec" id="btnNuevo">Nuevo resumen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Riesgos -->
+  <section class="card oculto" id="secRiesgos">
+    <div class="card-cab"><span>Riesgos para decidir si participar</span></div>
+    <div class="card-body"><div id="lstRiesgos"></div><div class="meta">Identificados por el agente con base en los documentos; la decisión es del equipo.</div></div>
+  </section>
+
+  <!-- Sugerencias -->
+  <section class="card no-print oculto" id="secSugerencias">
+    <div class="card-cab"><span>Sugerencias del agente</span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0">Datos que no forman parte del formato y que pueden servirle al Área Comercial; marca los que quieras sumar al correo.</div>
+      <div id="lstSugerencias"></div>
+    </div>
+  </section>
+
+  <!-- Resumen ejecutivo -->
+  <section class="card no-print oculto" id="secEjecutivo">
+    <div class="card-cab"><span>Resumen ejecutivo para Dirección</span></div>
+    <div class="card-body">
+      <label class="lbl">Temas a incluir</label>
+      <div class="checks" id="ejTemas"></div>
+      <div class="acciones"><button class="btn btn-pri" id="btnEjecutivo">Generar resumen ejecutivo</button></div>
+      <div class="ejecutivo oculto" id="txtEjecutivo"></div>
+      <div class="acciones oculto" id="accEjecutivo"><button class="btn btn-sec" id="btnCopiarEj">Copiar resumen ejecutivo</button></div>
+    </div>
+  </section>
+
+  <!-- Chat con fuentes -->
+  <section class="card no-print oculto" id="secChat">
+    <div class="card-cab"><span>Pregúntale al agente</span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0">Pregunta de dónde sale un dato o pide información que no está en el resumen; cada respuesta trae el documento, la página y el texto de donde sale.</div>
+      <div class="chips" id="chips"></div>
+      <div class="chat" id="chat"></div>
+      <div class="chat-in">
+        <textarea id="pregunta" rows="2" placeholder="Ej. ¿De dónde sale la fecha del fallo?"></textarea>
+        <button class="btn btn-pri" id="btnPreguntar">Preguntar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agregar documentos -->
+  <section class="card no-print oculto" id="secAgregar">
+    <div class="card-cab"><span>Agregar documentos a este resumen</span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0">Sube actas, avisos, diferimientos o anexos nuevos; el agente los suma a los documentos que ya leyó y actualiza el resumen, el calendario y las alertas.</div>
+      <div class="drop" id="drop2" tabindex="0" role="button" aria-label="Elegir archivos para agregar">
+        <strong>Arrastra aquí los documentos nuevos</strong>
+        <span>PDF, Word (.docx) o Excel (.xlsx)</span>
+      </div>
+      <input type="file" id="archivos2" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <ul class="lista" id="lista2"></ul>
+      <div class="docs-cargados" id="docsCargados"></div>
+      <div class="acciones">
+        <button class="btn btn-pri" id="btnActualizar" disabled>Actualizar resumen</button>
+      </div>
+    </div>
+  </section>
+  <!-- Comparativo -->
+  <section class="card no-print oculto" id="secComparar">
+    <div class="card-cab"><span>Comparar con una licitación o contrato anterior</span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0">Sube las bases de la licitación anterior del mismo servicio, o el contrato vigente, y el agente te dice qué cambió.</div>
+      <div class="drop" id="drop3" tabindex="0" role="button" aria-label="Elegir archivos de la licitación anterior">
+        <strong>Arrastra aquí los documentos anteriores</strong>
+        <span>PDF, Word (.docx) o Excel (.xlsx)</span>
+      </div>
+      <input type="file" id="archivos3" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <ul class="lista" id="lista3"></ul>
+      <div class="acciones"><button class="btn btn-pri" id="btnComparar" disabled>Comparar</button></div>
+      <div class="etapa oculto" id="estComparar" style="text-align:left;margin-top:.8rem"></div>
+      <div class="ejecutivo oculto" id="txtComparar"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="no-print">ExcelentIA · Agente de resumen de convocatoria · versión 2 en desarrollo</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://rcotlydvsubvdapubnkx.supabase.co/functions/v1/licit-resumen-dev';
+const $ = id => document.getElementById(id);
+const archivos1 = [];
+const archivos2 = [];
+let resultado = null;
+let timer = null;
+let clave = '';
+let trabajoActual = '';
+let docsCargados = [];
+let historial = [];
+const LS_CLAVE = 'licit_resumen_clave';
+const guardarClave = v => { try { v ? localStorage.setItem(LS_CLAVE, v) : localStorage.removeItem(LS_CLAVE); } catch (e) {} };
+const leerClave = () => { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } };
+
+const fmtTam = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+const esValido = f => /\.(pdf|docx|xlsx)$/i.test(f.name);
+const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' : 'pdf';
+const MIME = { pdf: 'application/pdf', word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2400); };
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const SECCIONES = ['secClave', 'secPerfil', 'secCarga', 'secProgreso', 'secError', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+const mostrar = ids => SECCIONES.forEach(s => $(s).classList.toggle('oculto', !ids.includes(s) || $(s).dataset.vacio === '1'));
+const VISTA_RESULTADO = ['secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+
+// Zonas para soltar archivos (la inicial y la de agregar documentos)
+function zona(n, arr, btn) {
+  const pintar = () => {
+    $('lista' + n).innerHTML = arr.map((f, i) => {
+      const t = tipoArchivo(f.name);
+      return `<li><span class="ico ${t === 'pdf' ? '' : t}">${({ pdf: 'PDF', word: 'DOCX', excel: 'XLSX' })[t]}</span>
+      <span class="nom" title="${esc(f.name)}">${esc(f.name)}</span><span class="tam">${fmtTam(f.size)}</span>
+      <button class="quitar" data-i="${i}" aria-label="Quitar">×</button></li>`;
+    }).join('');
+    $(btn).disabled = !arr.length;
+  };
+  const agregar = lista => {
+    const nuevos = [...lista];
+    if (nuevos.some(f => !esValido(f))) toast('Solo se aceptan PDF, Word (.docx) y Excel (.xlsx)');
+    nuevos.filter(esValido).forEach(f => { if (!arr.some(a => a.name === f.name && a.size === f.size)) arr.push(f); });
+    pintar();
+  };
+  const d = $('drop' + n), inp = $('archivos' + n);
+  d.onclick = () => inp.click();
+  d.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); } };
+  inp.onchange = e => { agregar(e.target.files); e.target.value = ''; };
+  ['dragenter', 'dragover'].forEach(ev => d.addEventListener(ev, e => { e.preventDefault(); d.classList.add('sobre'); }));
+  ['dragleave', 'drop'].forEach(ev => d.addEventListener(ev, e => { e.preventDefault(); d.classList.remove('sobre'); }));
+  d.addEventListener('drop', e => agregar(e.dataTransfer.files));
+  $('lista' + n).onclick = e => { const b = e.target.closest('.quitar'); if (b) { arr.splice(+b.dataset.i, 1); pintar(); } };
+  return pintar;
+}
+const pintar1 = zona(1, archivos1, 'btnGenerar');
+const pintar2 = zona(2, archivos2, 'btnActualizar');
+
+async function llamar(accion, datos) {
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, clave, ...datos }) });
+  const j = await r.json().catch(() => ({ ok: false, error: 'Respuesta no válida del servidor' }));
+  if (r.status === 401) { const e = new Error(j.error || 'Clave de acceso incorrecta.'); e.sinClave = true; throw e; }
+  if (!r.ok || j.ok === false && accion !== 'estado') throw new Error(j.error || 'Error de conexión');
+  return j;
+}
+function subir(url, archivo, alAvance) {
+  return new Promise((ok, mal) => {
+    const x = new XMLHttpRequest();
+    x.open('PUT', url);
+    x.upload.onprogress = e => e.lengthComputable && alAvance(e.loaded / e.total);
+    x.onload = () => { if (x.status >= 200 && x.status < 300) { try { ok(JSON.parse(x.responseText).id); } catch { mal(new Error('Drive no devolvió el archivo')); } } else mal(new Error('Drive rechazó ' + archivo.name + ' (' + x.status + ')')); };
+    x.onerror = () => mal(new Error('Se cortó la subida de ' + archivo.name));
+    x.send(archivo);
+  });
+}
+function iniciarReloj() {
+  const t0 = Date.now();
+  clearInterval(timer);
+  timer = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $('reloj').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }, 500);
+  return t0;
+}
+
+// Sube los archivos, lanza el agente y espera el resultado; base = trabajo anterior cuando se agregan documentos
+async function procesar(lista, base) {
+  if (!lista.length) return;
+  $('titProgreso').textContent = base ? 'Actualizando el resumen con los documentos nuevos' : 'Trabajando en el resumen';
+  mostrar(['secProgreso']);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const t0 = iniciarReloj();
+  const total = lista.reduce((a, f) => a + f.size, 0);
+  let subido = 0;
+  try {
+    const ids = [];
+    for (let i = 0; i < lista.length; i++) {
+      const f = lista[i];
+      $('etapa').textContent = `Subiendo ${i + 1} de ${lista.length}: ${f.name}`;
+      const s = await llamar('sesion', { nombre: f.name, tamano: f.size, tipo: f.type || MIME[tipoArchivo(f.name)], origen: location.origin });
+      if (!s.uploadUrl) throw new Error('No se pudo abrir la subida a Drive');
+      const b0 = subido;
+      ids.push(await subir(s.uploadUrl, f, p => { $('etapa').textContent = `Subiendo ${i + 1} de ${lista.length}: ${f.name} · ${Math.round((b0 + p * f.size) / total * 100)}%`; }));
+      subido += f.size;
+    }
+    $('etapa').textContent = 'Leyendo los documentos…';
+    const nombre = $('nombre').value.trim() || (resultado && resultado.nombre) || lista[0].name;
+    const a = await llamar('analizar', { fileIds: ids, nombre, trabajoBase: base || '' });
+    if (!a.trabajo) throw new Error('El agente no recibió el trabajo');
+    const etapas = base
+      ? ['Leyendo los documentos nuevos…', 'Juntándolos con los que ya había leído…', 'Analizando de nuevo con IA…', 'Armando el resumen actualizado…']
+      : ['Leyendo los documentos…', 'Leyendo escaneos y actas si los hay…', 'Analizando las bases con IA…', 'Armando el resumen con el formato del área…'];
+    let k = 0;
+    const limite = Date.now() + 9 * 60 * 1000;
+    let e;
+    while (true) {
+      await new Promise(r => setTimeout(r, 4000));
+      if (k < etapas.length - 1 && (Date.now() - t0) > (k + 1) * 25000) $('etapa').textContent = etapas[++k];
+      e = await llamar('estado', { trabajo: a.trabajo });
+      if (e.estado === 'listo') break;
+      if (e.estado === 'error') throw new Error('El análisis no pudo completarse: ' + (e.error || 'error desconocido'));
+      if (Date.now() > limite) throw new Error('El análisis está tardando más de lo normal; vuelve a consultar en unos minutos.');
+    }
+    clearInterval(timer);
+    resultado = { ...e, nombre };
+    try { extras = JSON.parse(e.extras || '{}') || {}; } catch (er) { extras = {}; }
+    extras.sugerencias = extras.sugerencias || []; extras.riesgos = extras.riesgos || [];
+    aceptadas.clear();
+    $('txtEjecutivo').classList.add('oculto'); $('accEjecutivo').classList.add('oculto'); $('txtComparar').classList.add('oculto'); $('estComparar').classList.add('oculto');
+    trabajoActual = a.trabajo;
+    docsCargados = (base ? docsCargados : []).concat(lista.map(f => f.name).filter(n => !docsCargados.includes(n) || !base));
+    lista.splice(0, lista.length);
+    pintar1(); pintar2();
+    if (!base) { historial = []; $('chat').innerHTML = ''; }
+    else agregarMsg('a', '<b>Resumen actualizado</b> con los documentos nuevos; las siguientes respuestas ya los consideran.');
+    pintarResultado(Math.round((Date.now() - t0) / 1000), !!base);
+  } catch (err) {
+    clearInterval(timer);
+    if (err.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    $('txtError').textContent = err.message;
+    mostrar(['secError']);
+  }
+}
+
+// Convierte el texto del agente en bloques con formato (encabezados, viñetas, etiquetas en negritas)
+const ENCABEZADOS = /^(Generales|Calendario y\/o tiempo de entrega:?|Calendario de eventos|Observaciones Generales:?|Datos adicionales:?)$/i;
+function bloques(texto) {
+  const out = []; let lista = null;
+  texto.split('\n').forEach(l => {
+    const t = l.trim();
+    if (!t) { lista = null; return; }
+    if (ENCABEZADOS.test(t)) { out.push({ tipo: 'h', texto: t.replace(/:$/, '') }); lista = null; return; }
+    if (t.startsWith('•')) { if (!lista) { lista = { tipo: 'ul', items: [] }; out.push(lista); } lista.items.push(t.replace(/^•\s*/, '')); return; }
+    out.push({ tipo: 'p', texto: t }); lista = null;
+  });
+  return out;
+}
+function partir(t) {
+  const m = t.match(/^([^:]{2,70}):\s(.*)$/);
+  if (m && !/^https?$/i.test(m[1])) return [m[1] + ':', ' ' + m[2]];
+  if (/^Estimados /.test(t)) { const i = t.indexOf(' me ayudan'); if (i > 0) return [t.slice(0, i), t.slice(i)]; }
+  return [null, t];
+}
+const conLiga = h => h.replace(/\[PEGAR LIGA\]/g, '<span class="liga">[PEGAR LIGA]</span>');
+function bloqueHTML(b) {
+  if (b.tipo === 'h') return `<h4>${esc(b.texto)}</h4>`;
+  if (b.tipo === 'ul') return '<ul>' + b.items.map(it => { const [e, r] = partir(it); return `<li>${e ? `<strong>${esc(e)}</strong>` : ''}${conLiga(esc(r))}</li>`; }).join('') + '</ul>';
+  const [e, r] = partir(b.texto);
+  return `<p>${e ? `<strong>${esc(e)}</strong>` : ''}${conLiga(esc(r))}</p>`;
+}
+const aHTML = bs => bs.map(bloqueHTML).join('');
+// Vista por temas: el correo en secciones desplegables (al copiar o guardar en Word sale completo)
+function aTemas(bs) {
+  const secciones = []; let actual = { titulo: 'Saludo y nota', abierto: false, items: [] };
+  const nueva = (titulo, abierto) => { if (actual.items.length) secciones.push(actual); actual = { titulo, abierto, items: [] }; };
+  bs.forEach(b => {
+    if (b.tipo === 'h') { nueva(b.texto.replace(/^Calendario y\/o tiempo de entrega$/i, 'Calendario y tiempo de entrega'), true); return; }
+    if (b.tipo === 'p' && /^Tiempo máximo de recepción/i.test(b.texto)) nueva('Recepción de comentarios', true);
+    if (b.tipo === 'p' && /^Estimados /.test(b.texto)) nueva('Petición al Área Comercial', true);
+    if (b.tipo === 'p' && /^Quedo a sus órdenes/i.test(b.texto)) nueva('Cierre', false);
+    actual.items.push(b);
+  });
+  if (actual.items.length) secciones.push(actual);
+  return secciones.map(s => `<details class="tema"${s.abierto ? ' open' : ''}><summary>${esc(s.titulo)}</summary><div class="tema-body">${aHTML(s.items)}</div></details>`).join('');
+}
+let ultimosSegs = 0;
+function pintarResultado(segs, actualizado) {
+  if (segs === null) segs = ultimosSegs; else ultimosSegs = segs;
+  const bs = bloques(textoFinal());
+  pintarExtras();
+  checks('ejTemas', perfil && Array.isArray(perfil.temas_ejecutivo) ? perfil.temas_ejecutivo : TEMAS_EJ.filter(x => x !== 'Sugerencias del agente'));
+  $('txtAsunto').textContent = resultado.asunto || '';
+  $('txtCorreo').innerHTML = aTemas(bs);
+  let al = [];
+  try { al = JSON.parse(resultado.alertas || '[]'); } catch { al = []; }
+  $('boxAlertas').classList.toggle('oculto', !al.length);
+  $('lstAlertas').innerHTML = al.map(a => `<li>${esc(a)}</li>`).join('');
+  $('txtMeta').textContent = `Generado en ${Math.floor(segs / 60)} min ${segs % 60} s · ${docsCargados.length} documento${docsCargados.length === 1 ? '' : 's'} · Revisar y pegar la liga de descarga antes de enviar.`;
+  $('marcaAct').classList.toggle('oculto', !actualizado);
+  $('docsCargados').innerHTML = docsCargados.length ? `<b>Documentos que ya leyó el agente:</b><ul>${docsCargados.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '';
+  pintarChips();
+  mostrar(VISTA_RESULTADO);
+}
+$('btnExpandir').onclick = () => document.querySelectorAll('details.tema').forEach(d => d.open = true);
+$('btnContraer').onclick = () => document.querySelectorAll('details.tema').forEach(d => d.open = false);
+window.addEventListener('beforeprint', () => document.querySelectorAll('details.tema').forEach(d => d.open = true));
+
+// Copiar con formato (para Outlook) y como texto plano
+async function copiar(html, texto, msg) {
+  try {
+    if (window.ClipboardItem && navigator.clipboard.write) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([texto], { type: 'text/plain' }) })]);
+    } else await navigator.clipboard.writeText(texto);
+    toast(msg);
+  } catch {
+    const ta = document.createElement('textarea'); ta.value = texto; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast(msg);
+  }
+}
+const htmlCorreo = () => `<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a2035">${aHTML(bloques(textoFinal())).replace(/<span class="liga">/g, '<span style="background:#fff3c4">')}</div>`;
+$('btnCopiar').onclick = () => copiar(htmlCorreo(), textoFinal(), 'Correo copiado, listo para pegar en Outlook');
+$('btnCopiarAsunto').onclick = () => copiar(esc(resultado.asunto || ''), resultado.asunto || '', 'Asunto copiado');
+
+// Word (.docx) generado en el navegador
+function cargarDocx() {
+  return window.docx ? Promise.resolve() : new Promise((ok, mal) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js';
+    s.onload = ok; s.onerror = () => mal(new Error('No se pudo cargar el generador de Word'));
+    document.head.appendChild(s);
+  });
+}
+$('btnWord').onclick = async () => {
+  try {
+    $('btnWord').disabled = true;
+    await cargarDocx();
+    const { Document, Packer, Paragraph, TextRun } = window.docx;
+    const run = (t, extra = {}) => new TextRun({ text: t, font: 'Calibri', size: 21, color: '1A2035', ...extra });
+    const linea = (e, r, opts = {}) => new Paragraph({ spacing: { after: 80 }, ...opts, children: [...(e ? [run(e, { bold: true })] : []), run(r)] });
+    const hijos = [new Paragraph({ spacing: { after: 200 }, children: [run('Asunto: ', { bold: true, color: '1A3A6B' }), run(resultado.asunto || '', { bold: true })] })];
+    bloques(textoFinal()).forEach(b => {
+      if (b.tipo === 'h') hijos.push(new Paragraph({ spacing: { before: 160, after: 80 }, keepNext: true, children: [run(b.texto, { bold: true, color: '1A3A6B' })] }));
+      else if (b.tipo === 'ul') b.items.forEach(it => { const [e, r] = partir(it); hijos.push(linea(e, r, { bullet: { level: 0 } })); });
+      else { const [e, r] = partir(b.texto); hijos.push(linea(e, r, { spacing: { after: 140 } })); }
+    });
+    const doc = new Document({ sections: [{ properties: { page: { margin: { top: 1000, bottom: 1000, left: 1100, right: 1100 } } }, children: hijos }] });
+    const blob = await Packer.toBlob(doc);
+    const a = document.createElement('a');
+    const base = (resultado.asunto || 'resumen').split('|')[0].replace(/RESUMEN DE LICITACIÓN NO\.\s*/i, '').trim().replace(/[^\w\-]+/g, '_');
+    a.href = URL.createObjectURL(blob); a.download = `Resumen_${base || 'licitacion'}.docx`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  } catch (e) { toast(e.message); } finally { $('btnWord').disabled = false; }
+};
+
+// Chat con fuentes
+const SUGERENCIAS = ['¿De dónde sale la fecha del fallo?', '¿Qué garantía de cumplimiento piden?', '¿Hay penas convencionales o deductivas?', '¿Qué documentos piden del fabricante?'];
+function pintarChips() {
+  $('chips').innerHTML = SUGERENCIAS.map(s => `<button class="chip">${esc(s)}</button>`).join('');
+}
+$('chips').onclick = e => { const c = e.target.closest('.chip'); if (c) { $('pregunta').value = c.textContent; preguntar(); } };
+function agregarMsg(tipo, html, extra = '') {
+  const d = document.createElement('div');
+  d.className = 'msg ' + tipo + (extra ? ' ' + extra : '');
+  d.innerHTML = html;
+  $('chat').appendChild(d);
+  $('chat').scrollTop = $('chat').scrollHeight;
+  return d;
+}
+function htmlRespuesta(j) {
+  const fuentes = (j.fuentes || []).map(f => `<div class="fuente"><b>${esc(f.documento || 'Documento')}</b>${f.pagina ? ` · ${/^\d+$/.test(f.pagina) ? 'página ' + esc(f.pagina) : esc(f.pagina)}` : ''}${f.cita ? `<i>“${esc(f.cita)}”</i>` : ''}</div>`).join('');
+  return `${esc(j.respuesta || '').replace(/\n/g, '<br>')}${fuentes ? `<div class="fuentes">${fuentes}</div>` : ''}`;
+}
+async function preguntar() {
+  const q = $('pregunta').value.trim();
+  if (!q || !trabajoActual) return;
+  $('pregunta').value = '';
+  $('btnPreguntar').disabled = true;
+  agregarMsg('u', esc(q));
+  const espera = agregarMsg('a', 'Buscando en los documentos…', 'pensando');
+  try {
+    const j = await llamar('preguntar', { trabajo: trabajoActual, pregunta: q, historial });
+    espera.classList.remove('pensando');
+    espera.innerHTML = htmlRespuesta(j);
+    historial.push({ rol: 'usuario', texto: q }, { rol: 'agente', texto: j.respuesta || '' });
+    historial = historial.slice(-8);
+  } catch (err) {
+    if (err.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    espera.classList.remove('pensando'); espera.classList.add('err');
+    espera.textContent = err.message || 'No se pudo obtener la respuesta, intenta de nuevo.';
+  } finally { $('btnPreguntar').disabled = false; $('pregunta').focus(); }
+}
+$('btnPreguntar').onclick = preguntar;
+$('pregunta').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); preguntar(); } });
+
+
+// ===== Perfiles de usuario =====
+const TEMAS_EJ = ['Datos generales', 'Fechas clave', 'Riesgos', 'Requisitos relevantes', 'Sugerencias del agente', 'Recomendación'];
+const LS_PERFIL = 'licit_resumen_perfil';
+let perfiles = [];
+let perfil = null;
+const leerLS = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+const guardarLS = (k, v) => { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} };
+function checks(cont, marcados) {
+  $(cont).innerHTML = TEMAS_EJ.map(t => `<label><input type="checkbox" value="${esc(t)}" ${marcados.includes(t) ? 'checked' : ''}>${esc(t)}</label>`).join('');
+}
+const marcadosDe = cont => [...$(cont).querySelectorAll('input:checked')].map(i => i.value);
+function llenarForm(p) {
+  $('pfNombre').value = p ? p.nombre : '';
+  $('pfSaludo').value = p ? p.saludo : 'Buena tarde';
+  $('pfDest').value = p ? p.destinatarios : 'Belem | Héctor';
+  $('pfFirma').value = p ? p.firma : '';
+  $('pfPara').value = p ? (p.correo_para || '') : '';
+  $('pfCc').value = p ? (p.correo_cc || '') : '';
+  checks('pfTemas', p && Array.isArray(p.temas_ejecutivo) ? p.temas_ejecutivo : TEMAS_EJ.filter(t => t !== 'Sugerencias del agente'));
+}
+async function cargarPerfiles() {
+  const j = await llamar('perfiles', {});
+  perfiles = j.perfiles || [];
+  $('selPerfil').innerHTML = perfiles.map(p => `<option value="${esc(p.nombre)}">${esc(p.nombre)}</option>`).join('') + '<option value="__nuevo">+ Nuevo usuario</option>';
+  const previo = leerLS(LS_PERFIL);
+  const p = perfiles.find(x => x.nombre === previo);
+  return p || null;
+}
+function verPerfil(p) {
+  $('selPerfil').value = p ? p.nombre : (perfiles[0] ? perfiles[0].nombre : '__nuevo');
+  llenarForm(p || perfiles[0] || null);
+  $('errPerfil').classList.add('oculto');
+  mostrar(['secPerfil']);
+}
+$('selPerfil').onchange = () => llenarForm(perfiles.find(x => x.nombre === $('selPerfil').value) || null);
+$('btnPerfil').onclick = async () => {
+  const datos = { nombre: $('pfNombre').value.trim(), saludo: $('pfSaludo').value.trim(), destinatarios: $('pfDest').value.trim(), firma: $('pfFirma').value.trim(), correo_para: $('pfPara').value.trim(), correo_cc: $('pfCc').value.trim(), temas_ejecutivo: marcadosDe('pfTemas') };
+  if (!datos.nombre) { $('errPerfil').textContent = 'Escribe el nombre del usuario.'; $('errPerfil').classList.remove('oculto'); return; }
+  if (!datos.firma) datos.firma = datos.nombre + '.';
+  $('btnPerfil').disabled = true;
+  try {
+    const j = await llamar('guardarPerfil', { perfil: datos });
+    perfil = j.perfil || datos;
+    const i = perfiles.findIndex(x => x.nombre === perfil.nombre);
+    if (i >= 0) perfiles[i] = perfil; else perfiles.push(perfil);
+    guardarLS(LS_PERFIL, perfil.nombre);
+    pintarUsuario();
+    if (resultado) pintarResultado(null, false); else mostrar(['secCarga']);
+  } catch (e) {
+    if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    $('errPerfil').textContent = e.message; $('errPerfil').classList.remove('oculto');
+  } finally { $('btnPerfil').disabled = false; }
+};
+function pintarUsuario() {
+  const h = document.querySelector('.header-tit');
+  let c = $('chipUsuario');
+  if (!c) { c = document.createElement('div'); c.id = 'chipUsuario'; c.className = 'usuario-chip no-print'; c.title = 'Cambiar de usuario o editar su formato'; c.onclick = () => verPerfil(perfil); h.appendChild(c); }
+  c.textContent = perfil ? perfil.nombre : '';
+  c.classList.toggle('oculto', !perfil);
+}
+
+// ===== Correo final: formato del usuario + sugerencias aceptadas =====
+let extras = { sugerencias: [], riesgos: [] };
+const aceptadas = new Set();
+function textoFinal() {
+  let t = String((resultado && resultado.resumen) || '');
+  if (perfil) {
+    if (perfil.saludo) t = t.replace(/^Buena tarde,/, perfil.saludo.replace(/[,.]\s*$/, '') + ',');
+    if (perfil.destinatarios) t = t.replace(/Estimados Belem \| Héctor/, 'Estimados ' + perfil.destinatarios);
+    if (perfil.firma) t = t.replace(/Emmanuel Estévez\.\s*$/, perfil.firma);
+  }
+  const sel = (extras.sugerencias || []).filter((s, i) => aceptadas.has(i));
+  if (sel.length) {
+    const bloque = '\n\nDatos adicionales:\n' + sel.map(s => `• ${s.tema}: ${s.texto}`).join('\n');
+    t = t.replace(/\n\nQuedo a sus órdenes\./, bloque + '\n\nQuedo a sus órdenes.');
+  }
+  return t;
+}
+const ENC_EXTRA = /^Datos adicionales:?$/i;
+function pintarExtras() {
+  const r = extras.riesgos || [];
+  $('secRiesgos').dataset.vacio = r.length ? '' : '1';
+  $('lstRiesgos').innerHTML = r.map(x => { const n = String(x.nivel || '').toLowerCase(); return `<div class="riesgo"><span class="nivel ${['alto', 'medio', 'bajo'].includes(n) ? n : 'medio'}">${esc(x.nivel || '')}</span><div><b>${esc(x.riesgo || '')}</b><span>${esc(x.detalle || '')}</span></div></div>`; }).join('');
+  const s = extras.sugerencias || [];
+  $('secSugerencias').dataset.vacio = s.length ? '' : '1';
+  $('lstSugerencias').innerHTML = s.map((x, i) => `<label class="sug"><input type="checkbox" data-i="${i}" ${aceptadas.has(i) ? 'checked' : ''}><div><b>${esc(x.tema || '')}:</b> <span>${esc(x.texto || '')}</span>${x.fuente ? `<small>${esc(x.fuente)}</small>` : ''}</div></label>`).join('');
+}
+$('lstSugerencias').onchange = e => {
+  const c = e.target.closest('input[data-i]'); if (!c) return;
+  const i = +c.dataset.i; c.checked ? aceptadas.add(i) : aceptadas.delete(i);
+  $('txtCorreo').innerHTML = aTemas(bloques(textoFinal()));
+  toast(c.checked ? 'Agregado al correo' : 'Quitado del correo');
+};
+
+// ===== Resumen ejecutivo =====
+function textoAHtml(t) {
+  return String(t || '').split('\n').map(l => l.trim()).filter(Boolean).map(l => /:$/.test(l) && !l.startsWith('•') ? `<h5>${esc(l.replace(/:$/, ''))}</h5>` : `<p>${esc(l)}</p>`).join('');
+}
+let ejecutivoTxt = '';
+$('btnEjecutivo').onclick = async () => {
+  const temas = marcadosDe('ejTemas');
+  if (!temas.length) { toast('Elige al menos un tema'); return; }
+  $('btnEjecutivo').disabled = true;
+  $('txtEjecutivo').classList.remove('oculto'); $('txtEjecutivo').innerHTML = '<p>Redactando el resumen ejecutivo…</p>';
+  try {
+    const j = await llamar('preguntar', { trabajo: trabajoActual, modo: 'ejecutivo', temas });
+    ejecutivoTxt = j.respuesta || '';
+    $('txtEjecutivo').innerHTML = textoAHtml(ejecutivoTxt);
+    $('accEjecutivo').classList.remove('oculto');
+  } catch (e) {
+    if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    $('txtEjecutivo').innerHTML = `<p>${esc(e.message)}</p>`;
+  } finally { $('btnEjecutivo').disabled = false; }
+};
+$('btnCopiarEj').onclick = () => copiar(`<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt">${textoAHtml(ejecutivoTxt).replace(/<h5>/g, '<p><b>').replace(/<\/h5>/g, '</b></p>')}</div>`, `Resumen ejecutivo · ${resultado.asunto || ''}\n\n${ejecutivoTxt}`, 'Resumen ejecutivo copiado');
+
+// ===== Comparativo con licitación anterior =====
+const archivos3 = [];
+const pintar3 = zona(3, archivos3, 'btnComparar');
+$('btnComparar').onclick = async () => {
+  if (!archivos3.length || !trabajoActual) return;
+  const est = $('estComparar');
+  $('btnComparar').disabled = true; est.classList.remove('oculto'); $('txtComparar').classList.add('oculto');
+  const t0 = Date.now();
+  const reloj = setInterval(() => { est.dataset.s = Math.floor((Date.now() - t0) / 1000); }, 1000);
+  try {
+    const ids = [];
+    for (let i = 0; i < archivos3.length; i++) {
+      const f = archivos3[i];
+      est.textContent = `Subiendo ${i + 1} de ${archivos3.length}: ${f.name}`;
+      const s = await llamar('sesion', { nombre: f.name, tamano: f.size, tipo: f.type || MIME[tipoArchivo(f.name)], origen: location.origin });
+      ids.push(await subir(s.uploadUrl, f, () => {}));
+    }
+    est.textContent = 'Leyendo la licitación anterior…';
+    const a = await llamar('analizar', { fileIds: ids, nombre: 'Anterior · ' + ((resultado && resultado.nombre) || archivos3[0].name) });
+    const limite = Date.now() + 9 * 60 * 1000;
+    while (true) {
+      await new Promise(r => setTimeout(r, 4000));
+      est.textContent = `Leyendo la licitación anterior… ${Math.floor((Date.now() - t0) / 1000)} s`;
+      const e = await llamar('estado', { trabajo: a.trabajo });
+      if (e.estado === 'listo') break;
+      if (e.estado === 'error') throw new Error('No se pudo leer la licitación anterior: ' + (e.error || ''));
+      if (Date.now() > limite) throw new Error('La lectura está tardando más de lo normal; intenta de nuevo en unos minutos.');
+    }
+    est.textContent = 'Comparando…';
+    const c = await llamar('preguntar', { trabajo: trabajoActual, trabajoAnterior: a.trabajo, modo: 'comparar' });
+    $('txtComparar').innerHTML = textoAHtml(c.respuesta || '');
+    $('txtComparar').classList.remove('oculto');
+    est.textContent = `Comparativo listo en ${Math.floor((Date.now() - t0) / 1000)} s · contra: ${archivos3.map(f => f.name).join(', ')}`;
+    archivos3.splice(0); pintar3();
+  } catch (e) {
+    if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    est.textContent = e.message;
+  } finally { clearInterval(reloj); $('btnComparar').disabled = !archivos3.length; }
+};
+
+// Acceso con clave
+function pedirClave(msg) {
+  clave = ''; guardarClave('');
+  $('clave').value = '';
+  $('errClave').textContent = msg || '';
+  $('errClave').classList.toggle('oculto', !msg);
+  mostrar(['secClave']);
+  setTimeout(() => $('clave').focus(), 50);
+}
+async function entrar(valor, silencioso) {
+  const v = String(valor || '').trim();
+  if (!v) { if (!silencioso) pedirClave('Escribe la clave de acceso.'); else pedirClave(); return; }
+  $('btnEntrar').disabled = true;
+  clave = v;
+  try {
+    await llamar('verificar', {});
+    guardarClave(v);
+    $('errClave').classList.add('oculto');
+    const p = await cargarPerfiles();
+    if (p) { perfil = p; pintarUsuario(); mostrar(['secCarga']); } else verPerfil(null);
+  } catch (e) {
+    pedirClave(e.sinClave ? (silencioso ? '' : 'Clave incorrecta, revísala.') : 'No se pudo validar la clave: ' + e.message);
+  } finally { $('btnEntrar').disabled = false; }
+}
+$('btnEntrar').onclick = () => entrar($('clave').value);
+$('clave').addEventListener('keydown', e => { if (e.key === 'Enter') entrar($('clave').value); });
+entrar(leerClave(), true);
+
+$('btnGenerar').onclick = () => procesar(archivos1, '');
+$('btnActualizar').onclick = () => procesar(archivos2, trabajoActual);
+$('btnReintentar').onclick = () => mostrar(trabajoActual ? VISTA_RESULTADO : ['secCarga']);
+$('btnNuevo').onclick = () => {
+  archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear();
+  $('nombre').value = ''; $('chat').innerHTML = ''; pintar1(); pintar2(); mostrar(['secCarga']);
+};
+</script>
+</body>
+</html>
