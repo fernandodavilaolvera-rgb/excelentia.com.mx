@@ -197,7 +197,7 @@ input.campo-mal{border-color:#f59e0b !important;box-shadow:0 0 0 3px rgba(245,15
 .ci-medido{color:#059669;font-weight:700}
 .ci-nota{background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:5px;padding:.5rem .7rem;font-size:.72rem;color:#4a5068;margin-top:.6rem;line-height:1.5}
 /* ── COMPACTO (oct-2026): menos altura y esquinas menos redondas ── */
-.topbar{margin-bottom:.7rem}
+.topbar{margin-bottom:.7rem;justify-content:flex-start}
 .btn{padding:.38rem .75rem;border-radius:6px;font-size:.8rem}
 .btn-sm{padding:.26rem .5rem;font-size:.75rem}
 .sel-dias{padding:.38rem .5rem;border-radius:6px}
@@ -1041,8 +1041,8 @@ function toggleConsumo(){
     app.style.display = 'none';
     panel.style.display = 'block';
     btn.classList.remove('btn-ghost'); btn.classList.add('btn-primary');
-    if(!consumoData) cargarConsumo();
-    else renderConsumo();
+    if(!consumoData) consumoData = ciLeerCache();
+    renderConsumo();
   } else {
     panel.style.display = 'none';
     app.style.display = 'block';
@@ -1053,16 +1053,57 @@ function toggleConsumo(){
 let ciRango = null;   // {desde, hasta} en AAAA-MM-DD
 let ciBusca = '';
 let ciOrden = { col: 'costo', dir: -1 };
+// El cálculo no usa IA (solo lee el historial de n8n), pero tarda ~10 s y carga al servidor:
+// se guarda en este navegador y solo se recalcula con el botón Actualizar.
+const CI_CACHE = 'platsinfo_consumo_v1';
+function ciClave(){ return ciRango ? ('r:' + ciRango.desde + '_' + ciRango.hasta) : ('d:' + consumoDias); }
+function ciLeerCache(){
+  try {
+    const c = JSON.parse(localStorage.getItem(CI_CACHE) || '{}');
+    if (c.sel) { consumoDias = c.sel.dias || consumoDias; ciRango = c.sel.rango || null; }
+    const e = (c.datos || {})[ciClave()];
+    return e ? e.data : null;
+  } catch (e) { return null; }
+}
+function ciGuardarCache(data){
+  try {
+    const c = JSON.parse(localStorage.getItem(CI_CACHE) || '{}');
+    c.datos = c.datos || {};
+    c.datos[ciClave()] = { data: data };
+    const claves = Object.keys(c.datos);
+    if (claves.length > 8) delete c.datos[claves[0]];
+    c.sel = { dias: consumoDias, rango: ciRango };
+    localStorage.setItem(CI_CACHE, JSON.stringify(c));
+  } catch (e) {}
+}
+function ciDeCache(){
+  try { const c = JSON.parse(localStorage.getItem(CI_CACHE) || '{}'); const e = (c.datos || {})[ciClave()]; return e ? e.data : null; } catch (e) { return null; }
+}
+function ciGuardarSel(){
+  try { const c = JSON.parse(localStorage.getItem(CI_CACHE) || '{}'); c.sel = { dias: consumoDias, rango: ciRango }; localStorage.setItem(CI_CACHE, JSON.stringify(c)); } catch (e) {}
+}
 function setConsumoDias(d){
-  consumoDias = d; ciRango = null;
-  cargarConsumo();
+  consumoDias = d; ciRango = null; ciGuardarSel();
+  consumoData = ciDeCache();
+  renderConsumo();
 }
 function aplicarRango(){
   const de = document.getElementById('ci-desde').value, ha = document.getElementById('ci-hasta').value;
   if (!de || !ha) { toast('Elige las dos fechas', false); return; }
   if (de > ha) { toast('La fecha inicial va antes que la final', false); return; }
-  ciRango = { desde: de, hasta: ha };
-  cargarConsumo();
+  ciRango = { desde: de, hasta: ha }; ciGuardarSel();
+  consumoData = ciDeCache();
+  renderConsumo();
+}
+function hace(iso){
+  const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (!isFinite(min)) return '';
+  if (min < 1) return 'hace un momento';
+  if (min < 60) return 'hace ' + min + ' min';
+  const h = Math.round(min / 60);
+  if (h < 24) return 'hace ' + h + (h === 1 ? ' hora' : ' horas');
+  const d = Math.round(h / 24);
+  return 'hace ' + d + (d === 1 ? ' día' : ' días');
 }
 
 async function cargarConsumo(){
@@ -1073,6 +1114,7 @@ async function cargarConsumo(){
     const res = await fetch(CONSUMO_URL + qs, { method:'GET' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     consumoData = await res.json();
+    ciGuardarCache(consumoData);
     renderConsumo();
   } catch(e){
     panel.innerHTML = '<div class="alert">No se pudo cargar el consumo de IA. Revisa que el workflow «Dashboard · Uso de IA» esté activo e inténtalo de nuevo.</div>';
@@ -1119,6 +1161,7 @@ function filaAgente(w, tc){
 
 function renderConsumo(){
   const panel = document.getElementById('consumo');
+  const sinDatos = !consumoData;
   const d = consumoData || {};
   const t = d.totales || {};
   const tc = d.tipoCambio || 17;
@@ -1162,7 +1205,10 @@ function renderConsumo(){
   };
 
   let html = ''
-    + '<div class="ci-head"><h2>🤖 Consumo de IA por proyecto</h2></div>'
+    + '<div class="ci-head">'
+    +   '<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="toggleConsumo()">← Volver a Plat´s Info</button><h2>🤖 Consumo de IA por proyecto</h2></div>'
+    +   '<div style="display:flex;align-items:center;gap:.45rem"><span class="ci-lbl">' + (d.generadoEn ? 'Calculado ' + hace(d.generadoEn) : 'Sin calcular') + '</span><button class="btn btn-primary btn-sm" onclick="cargarConsumo()">🔄 Actualizar</button></div>'
+    + '</div>'
     + '<div class="ci-ctrl">'
     +   periodos
     +   '<span class="ci-sep"></span>'
@@ -1171,12 +1217,18 @@ function renderConsumo(){
     +   '<button class="ci-per' + (ciRango ? ' active' : '') + '" onclick="aplicarRango()">Aplicar</button>'
     + '</div>'
     + '<div class="ci-ctrl"><input type="search" id="ci-busca" class="ci-in ci-busca" placeholder="🔍 Buscar proyecto o agente…" value="' + esc(ciBusca) + '" oninput="buscarCI(this.value)" autocomplete="off"></div>'
-    + '<div class="ci-franja">'
-    +   '<div class="ci-st"><span class="l">Costo estimado</span><span class="n">' + ciMXN(t.costoMXNEstimado) + '</span><span class="s">' + ciUSD(t.costoUSDEstimado) + '</span></div>'
+    + (sinDatos ? '' : '<div class="ci-franja">')
+    +   (sinDatos ? '' : '<div class="ci-st"><span class="l">Costo estimado</span><span class="n">' + ciMXN(t.costoMXNEstimado) + '</span><span class="s">' + ciUSD(t.costoUSDEstimado) + '</span></div>'
     +   '<div class="ci-st"><span class="l">Ejecuciones</span><span class="n">' + (t.ejecuciones || 0) + '</span></div>'
     +   '<div class="ci-st"><span class="l">Errores</span><span class="n' + ((t.errores || 0) > 0 ? ' ci-err' : '') + '">' + (t.errores || 0) + '</span></div>'
     +   '<div class="ci-st"><span class="l">Agentes con IA</span><span class="n">' + (t.workflowsConIA || 0) + '</span></div>'
-    + '</div>';
+    + '</div>');
+
+  if (sinDatos) {
+    html += '<div class="alert">Este periodo todavía no se ha calculado. Da clic en <strong>🔄 Actualizar</strong>; tarda unos 10 segundos y no gasta IA, solo lee el historial de n8n.</div>';
+    panel.innerHTML = html;
+    return;
+  }
 
   html += '<div class="ci-tabla-wrap"><table class="ci-tabla"><thead><tr>'
     + th('proyecto', 'Proyecto') + th('agentes', 'Agentes') + th('ejec', 'Ejecuciones') + th('costo', 'Costo')
