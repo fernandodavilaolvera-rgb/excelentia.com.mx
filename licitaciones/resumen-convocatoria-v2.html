@@ -160,7 +160,15 @@
     .tema-body{padding:0 0 .3rem}
   }
   select.campo{width:100%;font-family:inherit;font-size:.95rem;padding:.6rem .7rem;border:1px solid var(--borde);border-radius:9px;color:var(--texto);background:#fff}
-  .perfil-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem .9rem;margin-top:.9rem}
+  .perfil-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .9rem;margin-top:.7rem}
+  .fila-2{display:grid;grid-template-columns:1fr 1.3fr;gap:.6rem .9rem}
+  details.formato{margin-top:.6rem;font-size:.85rem}
+  details.formato>summary{cursor:pointer;color:var(--azul-med);font-weight:700;font-size:.82rem;list-style:none}
+  details.formato>summary::-webkit-details-marker{display:none}
+  details.formato>summary::before{content:'▸ '}
+  details.formato[open]>summary::before{content:'▾ '}
+  #secCarga .drop{padding:1.1rem 1rem;margin-top:.8rem}
+  #secCarga .card-body{padding:.9rem 1.1rem}
   .checks{display:flex;flex-wrap:wrap;gap:.45rem .9rem;margin-top:.2rem}
   .checks label{display:flex;align-items:center;gap:.35rem;font-size:.86rem;color:var(--texto2);cursor:pointer}
   .checks input{accent-color:var(--azul)}
@@ -183,7 +191,7 @@
   .ejecutivo h5{margin:.5rem 0 .2rem;font-size:.88rem;color:var(--azul)}
   .ejecutivo h5:first-child{margin-top:0}
   .ejecutivo p{margin:0 0 .25rem}
-  @media (max-width:600px){ .perfil-grid{grid-template-columns:1fr} }
+  @media (max-width:600px){ .perfil-grid,.fila-2{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -218,42 +226,38 @@
     </div>
   </section>
 
-  <!-- Usuario -->
-  <section class="card no-print oculto" id="secPerfil">
-    <div class="card-cab"><span>¿Quién usa la página?</span></div>
-    <div class="card-body">
-      <label class="lbl" for="selPerfil">Usuario</label>
-      <select id="selPerfil" class="campo"></select>
-      <div id="formPerfil" class="perfil-grid">
-        <div><label class="lbl" for="pfNombre">Nombre</label><input type="text" id="pfNombre" placeholder="Ej. Emmanuel Estévez"></div>
-        <div><label class="lbl" for="pfSaludo">Saludo del correo</label><input type="text" id="pfSaludo" placeholder="Buena tarde"></div>
-        <div><label class="lbl" for="pfDest">A quién pide la confirmación</label><input type="text" id="pfDest" placeholder="Belem | Héctor"></div>
-        <div><label class="lbl" for="pfFirma">Firma</label><input type="text" id="pfFirma" placeholder="Emmanuel Estévez."></div>
-        <div><label class="lbl" for="pfPara">Para (correos, opcional)</label><input type="text" id="pfPara" placeholder="belem@…; hector@…"></div>
-        <div><label class="lbl" for="pfCc">Con copia (opcional)</label><input type="text" id="pfCc" placeholder="jonathan@…"></div>
-      </div>
-      <label class="lbl" style="margin-top:.8rem">Temas de su resumen ejecutivo para Dirección</label>
-      <div class="checks" id="pfTemas"></div>
-      <div class="error oculto" id="errPerfil" style="margin-top:.6rem"></div>
-      <div class="acciones"><button class="btn btn-pri" id="btnPerfil">Continuar</button></div>
-    </div>
-  </section>
-
-  <!-- Paso 1: archivos -->
+  <!-- Paso 1: usuario y archivos -->
   <section class="card no-print oculto" id="secCarga">
     <div class="card-cab"><span><span class="paso">1</span>Sube las bases de la licitación</span></div>
     <div class="card-body">
-      <label class="lbl" for="nombre">Nombre de referencia (opcional)</label>
-      <input type="text" id="nombre" placeholder="Ej. IMSS T-6 laboratorio clínico">
+      <div class="fila-2">
+        <div><label class="lbl" for="selPerfil">Usuario</label><select id="selPerfil" class="campo"></select></div>
+        <div><label class="lbl" for="nombre">Nombre de referencia (opcional)</label><input type="text" id="nombre" placeholder="Ej. IMSS T-6 laboratorio clínico"></div>
+      </div>
+      <details class="formato" id="detFormato">
+        <summary>Formato del correo de este usuario</summary>
+        <div id="formPerfil" class="perfil-grid">
+          <div><label class="lbl" for="pfNombre">Nombre</label><input type="text" id="pfNombre" placeholder="Ej. Emmanuel Estévez"></div>
+          <div><label class="lbl" for="pfSaludo">Saludo</label><input type="text" id="pfSaludo" placeholder="Buena tarde"></div>
+          <div><label class="lbl" for="pfDest">A quién pide la confirmación</label><input type="text" id="pfDest" placeholder="Belem | Héctor"></div>
+          <div><label class="lbl" for="pfFirma">Firma</label><input type="text" id="pfFirma" placeholder="Emmanuel Estévez."></div>
+          <div><label class="lbl" for="pfPara">Para (opcional)</label><input type="text" id="pfPara" placeholder="belem@…; hector@…"></div>
+          <div><label class="lbl" for="pfCc">Con copia (opcional)</label><input type="text" id="pfCc" placeholder="jonathan@…"></div>
+        </div>
+        <label class="lbl" style="margin-top:.7rem">Temas de su resumen ejecutivo</label>
+        <div class="checks" id="pfTemas"></div>
+        <div class="meta" style="margin-top:.5rem">Los cambios se guardan al generar el resumen.</div>
+      </details>
       <div class="drop" id="drop1" tabindex="0" role="button" aria-label="Elegir archivos">
         <strong>Arrastra aquí los archivos o da clic para elegirlos</strong>
-        <span>PDF, Word (.docx) o Excel (.xlsx): convocatoria, anexo técnico, términos y condiciones, anexos, actas y avisos</span>
+        <span>PDF, Word o Excel: bases, anexos, actas y avisos; también escaneados</span>
       </div>
       <input type="file" id="archivos1" multiple accept=".pdf,.docx,.xlsx" class="oculto">
       <ul class="lista" id="lista1"></ul>
-      <div class="nota">El agente lee todos los documentos completos, incluidos los escaneados y los anexos en Excel, y si hay actas, avisos o diferimientos toma de ellos las fechas vigentes. Después del resumen puedes hacerle preguntas y agregar documentos nuevos.</div>
+      <div class="error oculto" id="errPerfil" style="margin-top:.6rem"></div>
       <div class="acciones">
         <button class="btn btn-pri" id="btnGenerar" disabled>Generar resumen</button>
+        <button class="btn btn-sec oculto" id="btnVolver">Volver al resumen</button>
       </div>
     </div>
   </section>
@@ -398,7 +402,7 @@ const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' 
 const MIME = { pdf: 'application/pdf', word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2400); };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const SECCIONES = ['secClave', 'secPerfil', 'secCarga', 'secProgreso', 'secError', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+const SECCIONES = ['secClave', 'secCarga', 'secProgreso', 'secError', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
 const mostrar = ids => SECCIONES.forEach(s => $(s).classList.toggle('oculto', !ids.includes(s) || $(s).dataset.vacio === '1'));
 const VISTA_RESULTADO = ['secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
 
@@ -694,35 +698,49 @@ async function cargarPerfiles() {
   const p = perfiles.find(x => x.nombre === previo);
   return p || null;
 }
-function verPerfil(p) {
+function verPerfil(p, abrir) {
   $('selPerfil').value = p ? p.nombre : (perfiles[0] ? perfiles[0].nombre : '__nuevo');
   llenarForm(p || perfiles[0] || null);
+  $('detFormato').open = !!abrir || !perfiles.length;
   $('errPerfil').classList.add('oculto');
-  mostrar(['secPerfil']);
+  $('btnVolver').classList.toggle('oculto', !resultado);
+  mostrar(['secCarga']);
 }
-$('selPerfil').onchange = () => llenarForm(perfiles.find(x => x.nombre === $('selPerfil').value) || null);
-$('btnPerfil').onclick = async () => {
-  const datos = { nombre: $('pfNombre').value.trim(), saludo: $('pfSaludo').value.trim(), destinatarios: $('pfDest').value.trim(), firma: $('pfFirma').value.trim(), correo_para: $('pfPara').value.trim(), correo_cc: $('pfCc').value.trim(), temas_ejecutivo: marcadosDe('pfTemas') };
-  if (!datos.nombre) { $('errPerfil').textContent = 'Escribe el nombre del usuario.'; $('errPerfil').classList.remove('oculto'); return; }
+$('selPerfil').onchange = () => {
+  const p = perfiles.find(x => x.nombre === $('selPerfil').value) || null;
+  llenarForm(p);
+  if (!p) { $('detFormato').open = true; $('pfNombre').focus(); }
+};
+const datosForm = () => ({ nombre: $('pfNombre').value.trim(), saludo: $('pfSaludo').value.trim(), destinatarios: $('pfDest').value.trim(), firma: $('pfFirma').value.trim(), correo_para: $('pfPara').value.trim(), correo_cc: $('pfCc').value.trim(), temas_ejecutivo: marcadosDe('pfTemas') });
+const mismo = (a, b) => !!b && ['nombre', 'saludo', 'destinatarios', 'firma', 'correo_para', 'correo_cc'].every(k => String(a[k] || '') === String(b[k] || '')) && JSON.stringify(a.temas_ejecutivo) === JSON.stringify(b.temas_ejecutivo || []);
+// Guarda el perfil solo si es nuevo o cambió; regresa false si falta el nombre
+async function asegurarPerfil() {
+  const datos = datosForm();
+  if (!datos.nombre) { $('errPerfil').textContent = 'Elige tu usuario o escribe tu nombre en el formato del correo.'; $('errPerfil').classList.remove('oculto'); $('detFormato').open = true; return false; }
   if (!datos.firma) datos.firma = datos.nombre + '.';
-  $('btnPerfil').disabled = true;
-  try {
+  const previo = perfiles.find(x => x.nombre === datos.nombre);
+  if (mismo(datos, previo)) { perfil = previo; }
+  else {
     const j = await llamar('guardarPerfil', { perfil: datos });
     perfil = j.perfil || datos;
     const i = perfiles.findIndex(x => x.nombre === perfil.nombre);
     if (i >= 0) perfiles[i] = perfil; else perfiles.push(perfil);
-    guardarLS(LS_PERFIL, perfil.nombre);
-    pintarUsuario();
-    if (resultado) pintarResultado(null, false); else mostrar(['secCarga']);
-  } catch (e) {
-    if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
-    $('errPerfil').textContent = e.message; $('errPerfil').classList.remove('oculto');
-  } finally { $('btnPerfil').disabled = false; }
+    $('selPerfil').innerHTML = perfiles.map(p => `<option value="${esc(p.nombre)}">${esc(p.nombre)}</option>`).join('') + '<option value="__nuevo">+ Nuevo usuario</option>';
+    $('selPerfil').value = perfil.nombre;
+  }
+  guardarLS(LS_PERFIL, perfil.nombre);
+  $('errPerfil').classList.add('oculto');
+  pintarUsuario();
+  return true;
+}
+$('btnVolver').onclick = async () => {
+  try { if (await asegurarPerfil()) pintarResultado(null, false); }
+  catch (e) { if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; } $('errPerfil').textContent = e.message; $('errPerfil').classList.remove('oculto'); }
 };
 function pintarUsuario() {
   const h = document.querySelector('.header-tit');
   let c = $('chipUsuario');
-  if (!c) { c = document.createElement('div'); c.id = 'chipUsuario'; c.className = 'usuario-chip no-print'; c.title = 'Cambiar de usuario o editar su formato'; c.onclick = () => verPerfil(perfil); h.appendChild(c); }
+  if (!c) { c = document.createElement('div'); c.id = 'chipUsuario'; c.className = 'usuario-chip no-print'; c.title = 'Cambiar de usuario o editar su formato'; c.onclick = () => verPerfil(perfil, true); h.appendChild(c); }
   c.textContent = perfil ? perfil.nombre : '';
   c.classList.toggle('oculto', !perfil);
 }
@@ -841,7 +859,8 @@ async function entrar(valor, silencioso) {
     guardarClave(v);
     $('errClave').classList.add('oculto');
     const p = await cargarPerfiles();
-    if (p) { perfil = p; pintarUsuario(); mostrar(['secCarga']); } else verPerfil(null);
+    if (p) { perfil = p; pintarUsuario(); }
+    verPerfil(p);
   } catch (e) {
     pedirClave(e.sinClave ? (silencioso ? '' : 'Clave incorrecta, revísala.') : 'No se pudo validar la clave: ' + e.message);
   } finally { $('btnEntrar').disabled = false; }
@@ -850,12 +869,16 @@ $('btnEntrar').onclick = () => entrar($('clave').value);
 $('clave').addEventListener('keydown', e => { if (e.key === 'Enter') entrar($('clave').value); });
 entrar(leerClave(), true);
 
-$('btnGenerar').onclick = () => procesar(archivos1, '');
+$('btnGenerar').onclick = async () => {
+  try { if (!(await asegurarPerfil())) return; }
+  catch (e) { if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; } $('errPerfil').textContent = e.message; $('errPerfil').classList.remove('oculto'); return; }
+  procesar(archivos1, '');
+};
 $('btnActualizar').onclick = () => procesar(archivos2, trabajoActual);
-$('btnReintentar').onclick = () => mostrar(trabajoActual ? VISTA_RESULTADO : ['secCarga']);
+$('btnReintentar').onclick = () => trabajoActual ? mostrar(VISTA_RESULTADO) : verPerfil(perfil);
 $('btnNuevo').onclick = () => {
   archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear();
-  $('nombre').value = ''; $('chat').innerHTML = ''; pintar1(); pintar2(); mostrar(['secCarga']);
+  $('nombre').value = ''; $('chat').innerHTML = ''; pintar1(); pintar2(); verPerfil(perfil);
 };
 </script>
 </body>
