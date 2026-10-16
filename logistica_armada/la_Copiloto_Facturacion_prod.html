@@ -410,7 +410,7 @@ footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 16 (6-oct-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 17 (16-oct-2026)</footer>
 </div>
 
 <script>
@@ -552,6 +552,8 @@ function recalcular(o) {
   if (o.citaSig && peor < 1) peor = 1;
   o.sem = ['g', 'a', 'r'][peor];
   o.atencion = o.sem !== 'g';
+  // v17: al editar en pantalla se vuelve a revisar el servicio (si es reparto, su padre)
+  if (VIAJES.indexOf(o) >= 0) { if (o.padre) { const pp = VIAJES.find(x => x.id === o.padre); if (pp) recalcular(pp); } else verificaPagado(o); }
 }
 
 /* ---------- v10: viajes leídos de la base de Armadamyl ---------- */
@@ -634,13 +636,15 @@ function procesarBase(lista) {
       destino: b.destino || '', fecha, mes: fecha.slice(0, 7), hora: b.hora || '', unidad: b.unidad || '', status: b.status || '',
       dest, uni, costoPlat: null, costo, sC, srcC, man, sM, srcM, est, flags, editC: false, editM: false,
       zona: b.zona, zonaNombre: zonaTxt, ventaFija: fijo ? venta : null, srcVFija: srcV,
-      otroOrigen, padre: esSi(b.esReparto) ? String(parseInt(b.padre, 10) || '') : ''
+      otroOrigen, padre: esSi(b.esReparto) ? String(parseInt(b.padre, 10) || '') : '',
+      pag: num(b.pag) // v17: flete que se le debe al transportista (no se enseña en la tabla, solo avisa)
     };
     return o;
   });
   // v15: el padre dice cuáles son sus hijos
   const hijos = {};
   out.forEach(o => { if (o.padre) (hijos[o.padre] = hijos[o.padre] || []).push(o.id); });
+  out.forEach(o => { if (hijos[o.id]) o.hijos = hijos[o.id].slice(); });
   out.forEach(o => { const f = o.flags.find(x => x.t === 'viaje padre');
     if (f && hijos[o.id]) { f.l = 'padre de ' + hijos[o.id].join(', '); f.d = 'Sus repartos en esta carga: ' + hijos[o.id].join(', ') + '.'; } });
   // v15: citas de un mes posterior al que domina la carga
@@ -654,7 +658,27 @@ function procesarBase(lista) {
   out.forEach(o => { if (mesP && o.mes > mesP && !o.flags.some(f => f.t === 'pospuesto')) { o.citaSig = true;
     o.flags.push({ c: 'a', t: 'cita del mes siguiente', l: 'cita en ' + mesLabel(o.mes).split(' ')[0], d: 'La cita es el ' + o.fecha + '. Decide si se cobra en este corte o en el siguiente; si lo cobras ahora, cualquier costo que aparezca después ya no entraría.' }); }
     recalcular(o); });
+  // v17: cada servicio se revisa cuando ya tiene el precio de todos sus repartos
+  out.forEach(o => { if (!o.padre) verificaPagado(o, out); });
   return out;
+}
+
+/* v17 · aviso cuando lo que se le debe al transportista supera el precio de flete que se va a cobrar.
+   El servicio es el padre con sus repartos: se suman los dos lados. */
+function verificaPagado(o, lista) {
+  if (!o) return;
+  o.flags = o.flags.filter(f => f.t !== 'lo pagado supera el precio');
+  if (o.padre || o.pag == null) return;
+  const L = lista || VIAJES;
+  const grupo = [o].concat((o.hijos || []).map(id => L.find(x => x.id === id)).filter(Boolean));
+  const pag = grupo.reduce((a, x) => a + (x.pag || 0), 0), ven = grupo.reduce((a, x) => a + (x.venta || 0), 0);
+  if (pag > 0 && ven > 0 && pag > ven + 0.5) {
+    const nh = grupo.length - 1;
+    o.flags.push({ c: 'a', t: 'lo pagado supera el precio', dif: pag - ven,
+      d: 'Al transportista se le debe ' + mny0(pag) + ' de flete' + (nh ? (nh === 1 ? ' (con su reparto)' : ' (con sus ' + nh + ' repartos)') : '') +
+        ' y vas a cobrar ' + mny0(ven) + ' de flete; quedarías ' + mny0(pag - ven) + ' abajo. Revisa la tarifa antes de facturar.' });
+    if (o.sem === 'g') { o.sem = 'a'; o.atencion = true; }
+  }
 }
 
 /* ---------- estado ---------- */
@@ -685,7 +709,7 @@ function setMes(m) {
   FD2 = m + '-' + String(new Date(y, mm, 0).getDate()).padStart(2, '0');
   FMES = m;
 }
-const COL_SIG = { 'destino nuevo': 'costo', 'destino sin histórico': 'costo', 'tarifa inconsistente': 'costo', '__neg': 'costo', 'maniobra faltante': 'man', 'zona en duda': 'costo', 'sin tarifa en la zona': 'costo', 'tarifa editada': 'costo', 'costos extra': 'costo' };
+const COL_SIG = { 'lo pagado supera el precio': 'costo', 'destino nuevo': 'costo', 'destino sin histórico': 'costo', 'tarifa inconsistente': 'costo', '__neg': 'costo', 'maniobra faltante': 'man', 'zona en duda': 'costo', 'sin tarifa en la zona': 'costo', 'tarifa editada': 'costo', 'costos extra': 'costo' };
 const sinMargen = v => v.margen <= 0 && !!(v.totalVenta || v.totalCosto);
 const tieneSenal = (v, s) => s === '__neg' ? sinMargen(v) : v.flags.some(f => f.t === s);
 // vistos = base + filtro por tipo de señal (alimenta la tabla y la exportación)
@@ -738,6 +762,12 @@ function renderAlerts() {
       d: perdida > 0
         ? 'Se factura por debajo del costo. Así como está, el corte pierde ' + mny0(perdida) + '. Revísalos antes de descargar el Excel.'
         : 'Se factura exactamente al costo, sin dejar utilidad. Revísalos antes de descargar el Excel.' });
+  }
+  // v17: la tarjeta de lo pagado resume el total, no el primer viaje
+  const iPag = dec.find(x => x.t === 'lo pagado supera el precio');
+  if (iPag) {
+    const dif = base().reduce((a, v) => a + v.flags.filter(f => f.t === 'lo pagado supera el precio').reduce((b, f) => b + (f.dif || 0), 0), 0);
+    iPag.d = 'Lo que se le debe al transportista de flete es mayor a lo que vas a cobrar; entre todos quedarías ' + mny0(dif) + ' abajo. Revisa la tarifa antes de facturar.';
   }
   const tot = dec.reduce((a, x) => a + x.n, 0);
   const vj = new Set(); base().forEach(v => { if (v.flags.some(f => !f.auto) || sinMargen(v)) vj.add(v.id); });
@@ -795,7 +825,7 @@ const COLS = [
   { k: 'costo', t: 'Costo flete', n: 1 }, { k: 'venta', t: 'Precio flete', n: 1 },
   { k: 'margen', t: 'Margen', n: 1 }, { k: 'flags', t: 'Notas' }
 ];
-const PRIO = ['__neg', 'destino nuevo', 'zona en duda', 'sin tarifa en la zona', 'tarifa editada', 'costos extra', 'tarifa inconsistente', 'maniobra faltante', 'destino sin histórico'];
+const PRIO = ['__neg', 'lo pagado supera el precio', 'destino nuevo', 'zona en duda', 'sin tarifa en la zona', 'tarifa editada', 'costos extra', 'tarifa inconsistente', 'maniobra faltante', 'destino sin histórico'];
 function prioridad(v) {
   if (sinMargen(v)) return 0;
   let p = 99;
