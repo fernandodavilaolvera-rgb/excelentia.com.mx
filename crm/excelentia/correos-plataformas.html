@@ -1207,7 +1207,6 @@ function renderConsumo(){
   let html = ''
     + '<div class="ci-head">'
     +   '<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="toggleConsumo()">← Volver a Plat´s Info</button><h2>🤖 Consumo de IA por proyecto</h2></div>'
-    +   '<div style="display:flex;align-items:center;gap:.45rem"><span class="ci-lbl">' + (d.generadoEn ? 'Calculado ' + hace(d.generadoEn) : 'Sin calcular') + '</span><button class="btn btn-primary btn-sm" onclick="cargarConsumo()">🔄 Actualizar</button></div>'
     + '</div>'
     + '<div class="ci-ctrl">'
     +   periodos
@@ -1216,7 +1215,9 @@ function renderConsumo(){
     +   '<span class="ci-lbl">al</span><input type="date" id="ci-hasta" class="ci-in' + (ciRango ? ' rango-on' : '') + '" value="' + ha + '" min="' + minF + '" max="' + maxF + '">'
     +   '<button class="ci-per' + (ciRango ? ' active' : '') + '" onclick="aplicarRango()">Aplicar</button>'
     + '</div>'
-    + '<div class="ci-ctrl"><input type="search" id="ci-busca" class="ci-in ci-busca" placeholder="🔍 Buscar proyecto o agente…" value="' + esc(ciBusca) + '" oninput="buscarCI(this.value)" autocomplete="off"></div>'
+    + '<div class="ci-ctrl"><input type="search" id="ci-busca" class="ci-in ci-busca" placeholder="🔍 Buscar proyecto o agente…" value="' + esc(ciBusca) + '" oninput="buscarCI(this.value)" autocomplete="off">'
+    +   '<span class="ci-lbl" style="margin-left:.35rem">' + (d.generadoEn ? 'Calculado ' + hace(d.generadoEn) : 'Sin calcular') + '</span><button class="btn btn-primary btn-sm" onclick="cargarConsumo()">🔄 Actualizar</button>'
+    + '</div>'
     + (sinDatos ? '' : '<div class="ci-franja">')
     +   (sinDatos ? '' : '<div class="ci-st"><span class="l">Costo estimado</span><span class="n">' + ciMXN(t.costoMXNEstimado) + '</span><span class="s">' + ciUSD(t.costoUSDEstimado) + '</span></div>'
     +   '<div class="ci-st"><span class="l">Ejecuciones</span><span class="n">' + (t.ejecuciones || 0) + '</span></div>'
