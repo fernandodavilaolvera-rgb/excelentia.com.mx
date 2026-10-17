@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conciliación de Pagos v4 · Logística Armada</title>
+<title>Conciliación de Pagos v5 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -322,7 +322,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Conciliación de Pagos · Logística Armada</h1>
-        <p>v4 · Viajes contra facturas de transportistas</p>
+        <p>v5 · Viajes contra facturas de transportistas</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -370,7 +370,8 @@ tr.alt td{background:#f0f6ff}
     <section class="card"><h2>Lo que salió</h2><div id="rSalio"></div></section>
   </div>
   <div class="vw hidden" id="vTrans">
-    <section class="card"><h2>Por transportista</h2><p class="sub">Toca un transportista para ver su estado de cuenta, viaje por viaje.</p><div id="tTrans"></div></section>
+    <section class="card"><h2>Por transportista</h2><p class="sub">Toca un transportista para ver su estado de cuenta, viaje por viaje.</p>
+      <div class="btnrow no-print"><button class="btn" id="btnXlsTodos">Descargar Excel de todos los transportistas</button><span class="hint" id="xlsMsg"></span></div><div id="tTrans"></div></section>
     <section class="card hidden" id="cEcuenta"></section>
   </div>
   <div class="vw hidden" id="vNocuadra"><section class="card"><h2>Facturas que no cuadran</h2><p class="sub" id="ncSub"></p><div id="tNc"></div></section></div>
@@ -389,7 +390,7 @@ tr.alt td{background:#f0f6ff}
     </ul></div>
   </details>
 
-  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · v4 · versión para revisión</footer>
+  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · versión 5 · 16-oct-2026 · versión para revisión</footer>
 </div>
 
 <script>
@@ -498,7 +499,7 @@ function cruzar() {
       else v.motivo = 'facturó ' + mny0(-v.dif) + ' menos de lo registrado en el viaje y sus repartos';
     } });
   const viajesCli = viajes.filter(filtroCli);
-  return { viajes: viajesCli, sinViaje: CFG.cli === 'todos' ? sinViaje : [], hoy, todos: viajes };
+  return { viajes: viajesCli, sinViaje: CFG.cli === 'todos' ? sinViaje : [], hoy, todos: viajes, sinViajeTodos: sinViaje };
 }
 const filtroProv = x => !CFG.prov || String(x.pr) === String(CFG.prov);
 const TERMINADO = /complet|finaliz|entreg/i;
@@ -591,6 +592,101 @@ function pintarTrans() {
   $('#tTrans').querySelectorAll('[data-p]').forEach(tr => tr.onclick = () => { EC = tr.dataset.p; estadoCuenta(EC); $('#cEcuenta').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 }
 
+/* ---------- v5 (16-oct): Excel de lo pendiente para mandar a los transportistas ----------
+   Lleva todo lo que no está saldado: facturas por pagar, viajes terminados sin factura y diferencias por aclarar.
+   No lleva cliente, precio ni margen: solo lo que el transportista necesita para cuadrar con Logística Armada. */
+const XLS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+function cargarExcelJS() {
+  if (typeof ExcelJS !== 'undefined') return Promise.resolve();
+  return new Promise((ok, mal) => { const sc = document.createElement('script'); sc.src = XLS_URL; sc.onload = () => ok(); sc.onerror = () => mal(new Error('sin red')); document.head.appendChild(sc); });
+}
+function pendientesDe(pr) {
+  const todos = (R && R.todos) || [];
+  const filas = [];
+  todos.filter(v => String(v.pr) === String(pr) && !v.propia && ['sin', 'nocuadra', 'cuadra'].indexOf(v.estado) >= 0).forEach(v => {
+    const porPagar = v.fac.filter(f => !f.pagada);
+    let est = '';
+    if (v.estado === 'sin') est = 'Sin factura: favor de facturar';
+    else if (v.estado === 'nocuadra') est = v.dif > 0 ? 'Diferencia por aclarar: se facturó ' + mny0(v.dif) + ' más de lo registrado' : 'Diferencia por aclarar: se facturó ' + mny0(-v.dif) + ' menos de lo registrado';
+    else if (porPagar.length) est = porPagar.some(f => f.vencida) ? 'Por pagar · vencida' : 'Por pagar';
+    if (!est) return; // cuadra y pagado: no hay nada pendiente
+    if (v.estado === 'nocuadra' && porPagar.length) est += porPagar.some(f => f.vencida) ? ' · por pagar, vencida' : ' · por pagar';
+    const vence = porPagar.map(f => f.vence).filter(Boolean).sort()[0] || '';
+    filas.push({ viaje: v.id, fecha: v.fecha || '', des: v.des || '', uni: v.uni || '', rep: (v.repartos || []).join(', '), debe: v.debe,
+      folios: v.fac.map(f => f.folio || 'sin folio').join(', '), fFac: v.fac.map(f => f.fecha).filter(Boolean).sort()[0] || '',
+      fact: v.fac.length ? v.facturado : null, pag: v.fac.length ? v.pagado : null, pend: v.fac.length ? v.pend : null, vence, est });
+  });
+  (R && R.sinViajeTodos || []).filter(f => String(f.pr) === String(pr) && !f.pagada).forEach(f => filas.push({ viaje: '', fecha: '', des: 'Factura sin viaje (servicio)', uni: '', rep: '',
+    debe: null, folios: f.folio || 'sin folio', fFac: f.fecha || '', fact: f.sub, pag: 0, pend: f.sub, vence: f.vence || '', est: f.vencida ? 'Por pagar · vencida' : 'Por pagar' }));
+  return filas.sort((a, b) => String(a.fecha || a.fFac).localeCompare(String(b.fecha || b.fFac)));
+}
+function hojaPendientes(wb, pr, filas) {
+  const AZ = 'FF1A3A6B', CL = 'FFDCE8F7', BO = { style: 'thin', color: { argb: 'FFDDE1E9' } };
+  const nombre = provTxt(pr).replace(/[\\\/\?\*\[\]:]/g, ' ').slice(0, 31);
+  const ws = wb.addWorksheet(nombre, { views: [{ state: 'frozen', ySplit: 6 }] });
+  ws.columns = [{ width: 9 }, { width: 12 }, { width: 34 }, { width: 15 }, { width: 14 }, { width: 14 }, { width: 18 }, { width: 12 }, { width: 14 }, { width: 13 }, { width: 14 }, { width: 12 }, { width: 46 }];
+  ws.mergeCells('A1:M1'); ws.getCell('A1').value = 'Logística Armada · Estado de cuenta · ' + provTxt(pr);
+  ws.getCell('A1').font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+  ws.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: AZ } }; ws.getRow(1).height = 24;
+  ws.mergeCells('A2:M2'); ws.getCell('A2').value = 'Viajes con cita del ' + fechaTxt(SRV.desde) + ' al ' + fechaTxt(SRV.hasta) + ' · crédito de ' + CFG.cred + ' días · cifras sin IVA · generado el ' + fechaTxt(SRV.hasta);
+  ws.getCell('A2').font = { name: 'Arial', size: 10, color: { argb: 'FF4A5068' } };
+  const S = k => filas.reduce((a, f) => a + (Number(f[k]) || 0), 0);
+  const nSin = filas.filter(f => /^Sin factura/.test(f.est)), nDif = filas.filter(f => /^Diferencia/.test(f.est));
+  ws.getCell('A3').value = 'Por pagar'; ws.getCell('C3').value = S('pend');
+  ws.getCell('A4').value = 'Sin factura (' + nSin.length + ' viajes)'; ws.getCell('C4').value = nSin.reduce((a, f) => a + (f.debe || 0), 0);
+  ws.getCell('D3').value = 'Diferencias por aclarar'; ws.getCell('F3').value = nDif.length;
+  ['A3', 'A4', 'D3'].forEach(c => ws.getCell(c).font = { name: 'Arial', size: 10, bold: true });
+  ['C3', 'C4'].forEach(c => { ws.getCell(c).numFmt = '$#,##0.00'; ws.getCell(c).font = { name: 'Arial', size: 10, bold: true }; });
+  const H = ['Viaje', 'Fecha cita', 'Destino', 'Unidad', 'Repartos', 'Registrado', 'Factura(s)', 'Fecha factura', 'Facturado', 'Pagado', 'Por pagar', 'Vence', 'Estado'];
+  const hr = ws.getRow(6); hr.values = H; hr.height = 20;
+  hr.eachCell(c => { c.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF1A2035' } }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CL } }; c.border = { top: BO, bottom: BO, left: BO, right: BO }; c.alignment = { vertical: 'middle', wrapText: true }; });
+  const fx = s => { const f = fechaOk(s); if (!f) return ''; const x = f.split('-').map(Number); return new Date(Date.UTC(x[0], x[1] - 1, x[2])); };
+  filas.forEach((f, i) => {
+    const r = ws.getRow(7 + i);
+    r.values = [f.viaje ? Number(f.viaje) : '', fx(f.fecha), f.des, f.uni, f.rep, f.debe, f.folios, fx(f.fFac), f.fact, f.pag, f.pend, fx(f.vence), f.est];
+    r.eachCell({ includeEmpty: true }, (c, n) => { c.font = { name: 'Arial', size: 10, color: { argb: n === 13 && /vencida|Diferencia/.test(f.est) ? 'FFC0392B' : 'FF1A2035' } }; c.border = { bottom: BO }; c.alignment = { vertical: 'top', wrapText: n === 3 || n === 13 }; });
+    [2, 8, 12].forEach(n => r.getCell(n).numFmt = 'dd/mm/yyyy');
+    [6, 9, 10, 11].forEach(n => r.getCell(n).numFmt = '$#,##0.00');
+  });
+  if (!filas.length) ws.getCell('A7').value = 'Sin pendientes en este periodo.';
+  ws.autoFilter = { from: 'A6', to: 'M' + Math.max(6, 6 + filas.length) };
+  ws.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 1, printTitlesRow: '6:6' };
+  return { n: filas.length, pend: S('pend') };
+}
+async function excelPendientes(provs, boton) {
+  const msg = $('#xlsMsg'); const txt0 = boton ? boton.textContent : '';
+  if (boton) { boton.disabled = true; boton.textContent = 'Armando el Excel…'; }
+  try {
+    await cargarExcelJS();
+    const wb = new ExcelJS.Workbook(); wb.creator = 'ExcelentIA · Logística Armada';
+    let lista = provs;
+    if (!lista) { const P = {}; ((R && R.todos) || []).forEach(v => { if (!v.propia) P[v.pr] = 1; }); ((R && R.sinViajeTodos) || []).forEach(f => P[f.pr] = 1);
+      lista = Object.keys(P).filter(pr => pr && pr !== 'null' && pendientesDe(pr).length).sort((a, b) => provTxt(a).localeCompare(provTxt(b))); }
+    if (!lista.length) { if (msg) msg.textContent = 'No hay pendientes con ningún transportista en este periodo.'; return; }
+    const res = [];
+    if (lista.length > 1) {
+      const rs = wb.addWorksheet('Resumen'); rs.columns = [{ width: 34 }, { width: 12 }, { width: 16 }];
+      rs.getCell('A1').value = 'Logística Armada · Pendientes con transportistas'; rs.getCell('A1').font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF1A3A6B' } };
+      rs.getCell('A2').value = 'Viajes con cita del ' + fechaTxt(SRV.desde) + ' al ' + fechaTxt(SRV.hasta) + ' · cifras sin IVA'; rs.getCell('A2').font = { name: 'Arial', size: 10, color: { argb: 'FF4A5068' } };
+      rs.getRow(4).values = ['Transportista', 'Renglones', 'Por pagar']; rs.getRow(4).font = { name: 'Arial', size: 10, bold: true };
+      lista.forEach(pr => res.push([pr, hojaPendientes(wb, pr, pendientesDe(pr))]));
+      res.forEach((x, i) => { const r = rs.getRow(5 + i); r.values = [provTxt(x[0]), x[1].n, x[1].pend]; r.getCell(3).numFmt = '$#,##0.00'; r.font = { name: 'Arial', size: 10 }; });
+    } else res.push([lista[0], hojaPendientes(wb, lista[0], pendientesDe(lista[0]))]);
+    const buf = await wb.xlsx.writeBuffer();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    const limpio = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    a.download = (lista.length > 1 ? 'Pendientes_transportistas_' : 'Estado_de_cuenta_' + limpio(provTxt(lista[0])) + '_') + SRV.hasta + '.xlsx';
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    if (msg) msg.textContent = lista.length > 1 ? 'Listo: ' + lista.length + ' transportistas, una hoja por cada uno.' : '';
+  } catch (e) {
+    console.error('Excel de pendientes', e);
+    const t = e && e.message === 'sin red' ? 'Para bajar el Excel hace falta internet; revisa la conexión e intenta de nuevo.' : 'No se pudo armar el Excel; avísanos.';
+    if (msg) msg.textContent = t; else if (boton) boton.textContent = t;
+  } finally { if (boton) { boton.disabled = false; if (!/internet|avísanos/.test(boton.textContent)) boton.textContent = txt0; } }
+}
+$('#btnXlsTodos') && ($('#btnXlsTodos').onclick = () => excelPendientes(null, $('#btnXlsTodos')));
+
 function estadoCuenta(pr) {
   const vs = R.viajes.filter(v => String(v.pr) === String(pr) && v.estado !== 'nada' && v.estado !== 'enpadre').sort((a, b) => String(a.fecha || '').localeCompare(String(b.fecha || '')));
   const sv = R.sinViaje.filter(f => String(f.pr) === String(pr));
@@ -599,7 +695,7 @@ function estadoCuenta(pr) {
   const c = $('#cEcuenta'); c.classList.remove('hidden');
   c.innerHTML = `<div class="ec-hd"><div><h2>Estado de cuenta · ${esc(provTxt(pr))}</h2>
       <p class="sub">Viajes con cita del ${fechaTxt(SRV.desde)} al ${fechaTxt(SRV.hasta)} · crédito de ${CFG.cred} días · cifras sin IVA</p></div>
-      <div class="btnrow no-print"><button class="btn ghost" id="btnEcPrint">Imprimir estado de cuenta</button><button class="link" id="btnEcCerrar">cerrar</button></div></div>
+      <div class="btnrow no-print"><button class="btn" id="btnEcXls">Descargar Excel para el transportista</button><button class="btn ghost" id="btnEcPrint">Imprimir estado de cuenta</button><button class="link" id="btnEcCerrar">cerrar</button></div></div>
     <div class="precios">
       <div class="pbox costo"><div class="lb">Por pagar</div><div class="vl">${mny0(S(pend.map(f => f.sub)))}</div><div class="hint">${pend.length} facturas · ${pend.filter(f => f.vencida).length} vencidas</div></div>
       <div class="pbox"><div class="lb">Sin factura</div><div class="vl">${mny0(S(vs.filter(v => v.estado === 'sin').map(v => v.debe)))}</div><div class="hint">${vs.filter(v => v.estado === 'sin').length} viajes</div></div>
@@ -607,6 +703,7 @@ function estadoCuenta(pr) {
     </div>
     ${tablaViajes(vs, ['viaje', 'debe', 'fact', 'pagado', 'estado'])}
     ${sv.length ? '<h3 class="mr-h3">Facturas sin viaje</h3><ul class="mr-sup">' + sv.map(f => '<li>' + esc(f.folio) + ' · ' + fechaTxt(f.fecha) + ' · ' + mny0(f.sub) + (f.pagada ? ' · pagada' : ' · por pagar') + '</li>').join('') + '</ul>' : ''}`;
+  $('#btnEcXls').onclick = () => excelPendientes([pr], $('#btnEcXls'));
   $('#btnEcPrint').onclick = () => { document.body.classList.add('solo-ec'); window.print(); setTimeout(() => document.body.classList.remove('solo-ec'), 500); };
   $('#btnEcCerrar').onclick = () => { EC = null; c.classList.add('hidden'); };
 }
