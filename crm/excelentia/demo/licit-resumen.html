@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script>/* DEMO CORE */
+/* ==================================================================
+   DEMO · núcleo de simulación (ExcelentIA)
+   Se inyecta como PRIMER script del <head> de cada página demo.
+   - Intercepta fetch: las rutas registradas en window.__demoRoutes
+     responden con datos de muestra.
+   - Cualquier llamada a n8n o Supabase que no esté registrada se
+     BLOQUEA (nunca llega a producción).
+   ================================================================== */
+(function () {
+  var real = window.fetch ? window.fetch.bind(window) : null;
+  window.__demoRoutes = window.__demoRoutes || [];
+  window.__demoRealFetch = real; // para las rutas demo que sí van a un webhook DEMO real
+  window.__demoBloqueadas = [];
+  function cuerpo(init) {
+    if (!init || init.body == null) return null;
+    if (typeof init.body === 'string') { try { return JSON.parse(init.body); } catch (e) { return init.body; } }
+    return init.body; // FormData u otros
+  }
+  function json(o, status) {
+    return new Response(JSON.stringify(o), { status: status || 200, headers: { 'Content-Type': 'application/json' } });
+  }
+  window.__demoJson = json;
+  window.fetch = async function (input, init) {
+    var url = typeof input === 'string' ? input : ((input && input.url) || String(input || ''));
+    var body = cuerpo(init);
+    var rs = window.__demoRoutes;
+    for (var i = 0; i < rs.length; i++) {
+      var r = rs[i];
+      var ok = false;
+      try { ok = r.test(url, body, init); } catch (e) { ok = false; }
+      if (!ok) continue;
+      var espera = typeof r.delay === 'number' ? r.delay : 380;
+      if (espera) await new Promise(function (s) { setTimeout(s, espera); });
+      var out = await r.fn(url, body, init);
+      if (out instanceof Response) return out;
+      return json(out == null ? { ok: true } : out);
+    }
+    if (/n8n\.excelentia\.com\.mx|supabase\.co|ycloud|googleapis\.com\/(gmail|drive)/i.test(url)) {
+      window.__demoBloqueadas.push(url);
+      try { console.warn('[demo] llamada bloqueada (no toca producción):', url); } catch (e) {}
+      return json({ ok: false, error: 'Demo: esta acción no está disponible en la demostración.' });
+    }
+    return real ? real(input, init) : Promise.reject(new Error('sin fetch'));
+  };
+  // XMLHttpRequest y sendBeacon hacia producción también se bloquean
+  try {
+    var XO = window.XMLHttpRequest && window.XMLHttpRequest.prototype.open;
+    if (XO) window.XMLHttpRequest.prototype.open = function (m, u) {
+      if (/n8n\.excelentia\.com\.mx|supabase\.co/i.test(String(u))) { u = 'data:application/json,%7B%22ok%22%3Afalse%7D'; }
+      return XO.apply(this, [m, u].concat([].slice.call(arguments, 2)));
+    };
+    if (navigator.sendBeacon) { var SB = navigator.sendBeacon.bind(navigator); navigator.sendBeacon = function (u, d) { if (/n8n\.excelentia\.com\.mx|supabase\.co/i.test(String(u))) return true; return SB(u, d); }; }
+  } catch (e) {}
+
+  /* ---- utilidades de datos falsos (deterministas) ---- */
+  var semilla = 20261015;
+  function rnd() { semilla = (semilla * 1103515245 + 12345) & 0x7fffffff; return semilla / 0x7fffffff; }
+  function ent(a, b) { return Math.floor(a + rnd() * (b - a + 1)); }
+  function elige(arr) { return arr[Math.floor(rnd() * arr.length)]; }
+  function pesos(pares) { var t = 0, i; for (i = 0; i < pares.length; i++) t += pares[i][1]; var x = rnd() * t; for (i = 0; i < pares.length; i++) { x -= pares[i][1]; if (x <= 0) return pares[i][0]; } return pares[pares.length - 1][0]; }
+  function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function hoy() { var d = new Date(); d.setHours(12, 0, 0, 0); return d; }
+  function masDias(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
+  var NOMBRES_H = ['JUAN', 'CARLOS', 'LUIS', 'JORGE', 'MIGUEL', 'ALEJANDRO', 'RICARDO', 'FERNANDO', 'ROBERTO', 'EDUARDO', 'JAVIER', 'SERGIO', 'ARTURO', 'DANIEL', 'RAÚL', 'PABLO', 'ANDRÉS', 'DIEGO', 'EMILIO', 'SANTIAGO', 'MATEO', 'SEBASTIÁN', 'RODRIGO', 'HÉCTOR', 'GUILLERMO'];
+  var NOMBRES_M = ['MARÍA', 'GUADALUPE', 'ANA', 'LAURA', 'PATRICIA', 'SOFÍA', 'VALERIA', 'CAMILA', 'XIMENA', 'DANIELA', 'GABRIELA', 'MÓNICA', 'ALEJANDRA', 'ADRIANA', 'CLAUDIA', 'VERÓNICA', 'REGINA', 'RENATA', 'PAULINA', 'LUCÍA', 'FERNANDA', 'MARIANA', 'ISABELLA', 'ELENA', 'CAROLINA'];
+  var APELLIDOS = ['GARCÍA', 'HERNÁNDEZ', 'MARTÍNEZ', 'LÓPEZ', 'GONZÁLEZ', 'PÉREZ', 'RODRÍGUEZ', 'SÁNCHEZ', 'RAMÍREZ', 'CRUZ', 'FLORES', 'GÓMEZ', 'MORALES', 'VÁZQUEZ', 'JIMÉNEZ', 'REYES', 'DÍAZ', 'TORRES', 'GUTIÉRREZ', 'RUIZ', 'MENDOZA', 'AGUILAR', 'ORTIZ', 'CASTILLO', 'MORENO', 'ROMERO', 'ÁLVAREZ', 'CHÁVEZ', 'RIVERA', 'JUÁREZ', 'DOMÍNGUEZ', 'NAVARRO', 'SALAZAR', 'CORTÉS', 'MEDINA', 'VEGA', 'CAMPOS', 'LUNA', 'ROJAS', 'ESPINOSA'];
+  function sinAcento(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  window.__demo = { rnd: rnd, ent: ent, elige: elige, pesos: pesos, iso: iso, hoy: hoy, masDias: masDias, H: NOMBRES_H, M: NOMBRES_M, AP: APELLIDOS, sinAcento: sinAcento, json: json, reset: function (s) { semilla = s; } };
+
+  /* ---- franja visible de demostración ---- */
+  function franja() {
+    if (document.getElementById('demo-franja')) return;
+    if (window.__demoSinFranja) return;
+    var b = document.createElement('div');
+    b.id = 'demo-franja'; b.className = 'no-print';
+    b.style.cssText = 'position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:2147483000;background:#0d1b3e;color:#fff;font-family:Manrope,Montserrat,sans-serif;font-size:12px;font-weight:600;padding:.4rem .85rem;border-radius:6px;box-shadow:0 4px 14px rgba(13,27,62,.3);pointer-events:none;white-space:nowrap;opacity:.92';
+    b.textContent = 'Demostración · datos de muestra · los envíos se simulan';
+    document.body.appendChild(b);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', franja); else franja();
+})();
+
+</script>
+<script>/* DEMO LICIT RESUMEN */
+/* ==================================================================
+   DEMO · Resumen de convocatoria
+   - licit-resumen-dev (producción) se sustituye por rutas locales:
+       verificar / perfiles / guardarPerfil  -> en memoria
+       sesion -> uploadUrl falsas https://demo.local/subida/N
+       PUT a demo.local -> guarda el Blob en memoria y devuelve {id}
+       analizar -> FormData (archivo_1..N, nombre, hash) al webhook DEMO real
+       estado   -> webhook DEMO real, se devuelve tal cual
+       preguntar -> mensaje amable (no disponible en la demo)
+   Modo de prueba: window.__DEMO_FAKE_BACKEND = true (o ?fake=1 en la URL)
+   responde analizar/estado con un resumen de ejemplo sin llamar a n8n.
+   ================================================================== */
+(function () {
+  var DEMO_WEBHOOK_RESUMEN = 'https://n8n.excelentia.com.mx/webhook/demo-licit-resumen';
+  var DEMO_WEBHOOK_ESTADO = 'https://n8n.excelentia.com.mx/webhook/demo-licit-estado';
+  var SUBIDA_BASE = 'https://demo.local/subida/';
+  var EJEMPLO = [
+    ['licit/CONVOCATORIA_2.pdf', 'CONVOCATORIA_2.pdf', 'application/pdf'],
+    ['licit/ACTA_JA_LA-12-NCA-012NCA001-I-432-2026.pdf', 'ACTA_JA_LA-12-NCA-012NCA001-I-432-2026.pdf', 'application/pdf'],
+    ['licit/ANEXO_TEC_OK.docx', 'ANEXO_TEC_OK.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+  ];
+
+  try { if (/[?&]fake=1\b/.test(location.search)) window.__DEMO_FAKE_BACKEND = true; } catch (e) {}
+
+  /* ---------------- estado en memoria ---------------- */
+  var PERFIL_DEMO = {
+    nombre: 'Equipo de Licitaciones', saludo: 'Buen día', destinatarios: 'Área Comercial',
+    firma: 'Equipo de Licitaciones', correo_para: 'comercial@empresa.com', correo_cc: 'direccion@empresa.com',
+    temas_ejecutivo: ['Datos generales', 'Fechas clave', 'Riesgos', 'Requisitos relevantes', 'Recomendación']
+  };
+  var perfiles = [JSON.parse(JSON.stringify(PERFIL_DEMO))];
+  var sesiones = {};      // n -> {nombre, tipo}
+  var archivos = {};      // fileId -> {blob, nombre, tipo}
+  var trabajos = {};      // trabajo -> [fileIds]
+  var nSesion = 0, nArchivo = 0;
+  var fallasEstado = {};
+
+  // Siembra de localStorage con llaves propias de la demo
+  try {
+    if (!localStorage.getItem('demo_licit_resumen_clave')) localStorage.setItem('demo_licit_resumen_clave', 'demo');
+    if (!localStorage.getItem('demo_licit_resumen_perfil')) localStorage.setItem('demo_licit_resumen_perfil', PERFIL_DEMO.nombre);
+  } catch (e) {}
+
+  /* ---------------- SHA-256 (crypto.subtle con respaldo en JS) ---------------- */
+  function sha256js(bytes) {
+    var K = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2];
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    var l = bytes.length, nb = ((l + 9 + 63) >> 6) << 6, m = new Uint8Array(nb);
+    m.set(bytes); m[l] = 0x80;
+    var bits = l * 8, dv = new DataView(m.buffer);
+    dv.setUint32(nb - 4, bits >>> 0); dv.setUint32(nb - 8, Math.floor(bits / 4294967296));
+    var w = new Uint32Array(64);
+    for (var o = 0; o < nb; o += 64) {
+      for (var i = 0; i < 16; i++) w[i] = dv.getUint32(o + i * 4);
+      for (i = 16; i < 64; i++) {
+        var a0 = w[i - 15], a1 = w[i - 2];
+        var s0 = ((a0 >>> 7) | (a0 << 25)) ^ ((a0 >>> 18) | (a0 << 14)) ^ (a0 >>> 3);
+        var s1 = ((a1 >>> 17) | (a1 << 15)) ^ ((a1 >>> 19) | (a1 << 13)) ^ (a1 >>> 10);
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      }
+      var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (i = 0; i < 64; i++) {
+        var S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        var t1 = (h + S1 + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+        var S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        var t2 = (S0 + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+        h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+      H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+    }
+    return H.map(function (x) { return (x >>> 0).toString(16).padStart(8, '0'); }).join('');
+  }
+  async function sha256hex(blobs) {
+    var bufs = await Promise.all(blobs.map(function (b) { return b.arrayBuffer(); }));
+    var total = bufs.reduce(function (t, b) { return t + b.byteLength; }, 0);
+    var all = new Uint8Array(total), off = 0;
+    bufs.forEach(function (b) { all.set(new Uint8Array(b), off); off += b.byteLength; });
+    if (window.crypto && crypto.subtle && crypto.subtle.digest) {
+      try {
+        var d = await crypto.subtle.digest('SHA-256', all);
+        return Array.from(new Uint8Array(d)).map(function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+      } catch (e) {}
+    }
+    return sha256js(all);
+  }
+
+  /* ---------------- limpieza de nombres del cliente en lo que devuelve el agente ---------------- */
+  function limpiar(t) {
+    if (typeof t !== 'string' || !t) return t;
+    return t
+      .replace(/Pharmacur/gi, 'la empresa')
+      .replace(/Belem\s*\|\s*H[ée]ctor/g, 'Área Comercial')
+      .replace(/Emmanuel Est[ée]vez/g, 'Equipo de Licitaciones')
+      .replace(/\b(Belem|H[ée]ctor|Jonathan|Emmanuel)\b/g, 'Área Comercial');
+  }
+  function limpiarEstado(j) {
+    if (!j || typeof j !== 'object') return j;
+    ['nombre', 'asunto', 'resumen', 'alertas', 'extras', 'error'].forEach(function (k) { if (typeof j[k] === 'string') j[k] = limpiar(j[k]); });
+    return j;
+  }
+
+  /* ---------------- resultado de ejemplo (modo de prueba) ---------------- */
+  var fakeJobs = {};
+  function fakeListo(nombre, segs) {
+    var resumen = [
+      'Buena tarde,',
+      'Comparto el resumen de muestra para la demostración de la licitación indicada en el asunto.',
+      '',
+      'Generales',
+      '• Número de licitación: LA-12-NCA-012NCA001-I-432-2026',
+      '• Convocante: Instituto Nacional de Cardiología Ignacio Chávez',
+      '• Carácter: Internacional abierta, electrónica',
+      '• Objeto: Adquisición de material de curación y consumibles para hemodinamia',
+      '• Tipo de contrato: Abierto, con mínimos y máximos, por partida',
+      '• Criterio de evaluación: Binario',
+      '• Garantía de cumplimiento: 10% del monto máximo, sin IVA',
+      '',
+      'Calendario y/o tiempo de entrega:',
+      '• Junta de aclaraciones: 21/10/2026 10:00 h',
+      '• Presentación y apertura: 29/10/2026 10:00 h',
+      '• Fallo: 05/11/2026 17:00 h',
+      '• Entregas: dentro de los 10 días naturales posteriores a cada orden de suministro',
+      '',
+      'Observaciones Generales:',
+      '• Se requiere registro sanitario vigente y carta de respaldo del fabricante por partida.',
+      '• Penas convencionales del 1% diario sobre lo entregado con atraso.',
+      '• Liga de descarga: [PEGAR LIGA]',
+      '',
+      'Tiempo máximo de recepción de comentarios: 24/10/2026 a las 14:00 h',
+      '',
+      'Estimados Área Comercial me ayudan a confirmar si participamos en esta licitación.',
+      '',
+      'Quedo a sus órdenes.',
+      'Equipo de Licitaciones.'
+    ].join('\n');
+    return {
+      ok: true, estado: 'listo', nombre: nombre || 'Convocatoria de ejemplo',
+      asunto: 'RESUMEN DE LICITACIÓN NO. LA-12-NCA-012NCA001-I-432-2026 | INSTITUTO NACIONAL DE CARDIOLOGÍA (MUESTRA)',
+      resumen: resumen,
+      alertas: JSON.stringify(['Resultado de muestra del modo de prueba: no proviene del agente real.', 'Verificar la fecha de entrega de muestras indicada en el acta de la junta.']),
+      extras: JSON.stringify({
+        sugerencias: [
+          { tema: 'Muestras físicas', texto: 'El acta de la junta pide entregar muestras de las partidas 3 y 7 antes de la apertura.', fuente: 'ACTA_JA · página 4' },
+          { tema: 'Vigencia del contrato', texto: 'Del 1 de enero al 31 de diciembre de 2027.', fuente: 'CONVOCATORIA_2 · página 12' }
+        ],
+        riesgos: [
+          { nivel: 'Alto', riesgo: 'Penas convencionales elevadas', detalle: '1% diario sin tope menor al 10% de la garantía.' },
+          { nivel: 'Medio', riesgo: 'Plazo corto de entrega', detalle: '10 días naturales por orden de suministro.' },
+          { nivel: 'Bajo', riesgo: 'Partidas con precio de referencia bajo', detalle: 'Revisar margen antes de ofertar.' }
+        ],
+        datos: { numero: 'LA-12-NCA-012NCA001-I-432-2026' }
+      }),
+      error: '', segundos: segs || 12
+    };
+  }
+
+  /* ---------------- rutas ---------------- */
+  var NO_CHAT = 'En la demostración el chat sobre el documento no está disponible; en la versión completa puedes preguntarle lo que quieras a la convocatoria.';
+  async function api(url, b) {
+    b = b || {};
+    switch (b.accion) {
+      case 'verificar': return { ok: true };
+      case 'perfiles': return { ok: true, perfiles: JSON.parse(JSON.stringify(perfiles)) };
+      case 'guardarPerfil': {
+        var p = Object.assign({}, b.perfil || {});
+        var i = perfiles.findIndex(function (x) { return x.nombre === p.nombre; });
+        if (i >= 0) perfiles[i] = p; else perfiles.push(p);
+        return { ok: true, perfil: p };
+      }
+      case 'sesion': {
+        var n = ++nSesion;
+        sesiones[n] = { nombre: b.nombre || ('archivo_' + n), tipo: b.tipo || 'application/octet-stream' };
+        return { ok: true, uploadUrl: SUBIDA_BASE + n };
+      }
+      case 'analizar': return analizar(b);
+      case 'estado': return estado(b);
+      case 'preguntar': {
+        var msg = b.modo === 'ejecutivo'
+          ? 'En la demostración el resumen ejecutivo para Dirección no está disponible; en la versión completa el agente lo redacta con los temas que elijas.'
+          : b.modo === 'comparar'
+            ? 'En la demostración el comparativo con una licitación anterior no está disponible; en la versión completa el agente te dice qué cambió entre ambas.'
+            : NO_CHAT;
+        return { ok: true, respuesta: msg, fuentes: [] };
+      }
+      default: return { ok: false, error: 'Acción no disponible en la demostración.' };
+    }
+  }
+
+  async function analizar(b) {
+    var ids = (b.fileIds || []).slice();
+    if (b.trabajoBase && trabajos[b.trabajoBase]) ids = trabajos[b.trabajoBase].concat(ids.filter(function (x) { return trabajos[b.trabajoBase].indexOf(x) < 0; }));
+    var arch = ids.map(function (id) { return archivos[id]; }).filter(Boolean);
+    if (!arch.length) return { ok: false, error: 'No se encontraron los archivos subidos; vuelve a elegirlos.' };
+    var nombre = b.nombre || arch[0].nombre;
+
+    if (window.__DEMO_FAKE_BACKEND) {
+      await new Promise(function (s) { setTimeout(s, 800); });
+      var t = 'demo-fake-' + Date.now().toString(36);
+      fakeJobs[t] = { n: 0, nombre: nombre, t0: Date.now() };
+      trabajos[t] = ids;
+      return { ok: true, trabajo: t };
+    }
+
+    var fd = new FormData();
+    arch.forEach(function (a, i) { fd.append('archivo_' + (i + 1), a.blob, a.nombre); });
+    fd.append('nombre', nombre);
+    fd.append('hash', await sha256hex(arch.map(function (a) { return a.blob; })));
+    try {
+      var r = await window.__demoRealFetch(DEMO_WEBHOOK_RESUMEN, { method: 'POST', body: fd });
+      var j = await r.json().catch(function () { return null; });
+      if (!j) return { ok: false, error: 'El agente de la demostración respondió algo inesperado (HTTP ' + r.status + '). Intenta de nuevo.' };
+      if (!r.ok || j.ok === false || !j.trabajo) return { ok: false, error: limpiar(j.error) || 'El agente de la demostración no pudo recibir los documentos (HTTP ' + r.status + ').' };
+      trabajos[j.trabajo] = ids;
+      return { ok: true, trabajo: j.trabajo, cache: !!j.cache };
+    } catch (e) {
+      return { ok: false, error: 'No se pudo conectar con el agente de la demostración. Revisa tu conexión e intenta de nuevo.' };
+    }
+  }
+
+  async function estado(b) {
+    var t = b.trabajo;
+    if (fakeJobs[t]) {
+      var f = fakeJobs[t]; f.n++;
+      if (f.n < 2) return { ok: true, estado: 'procesando' };
+      return fakeListo(f.nombre, Math.round((Date.now() - f.t0) / 1000));
+    }
+    try {
+      var r = await window.__demoRealFetch(DEMO_WEBHOOK_ESTADO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trabajo: t }) });
+      var j = await r.json().catch(function () { return null; });
+      if (!j) throw new Error('respuesta no válida');
+      fallasEstado[t] = 0;
+      return limpiarEstado(j);
+    } catch (e) {
+      // tolera cortes momentáneos mientras se espera el resultado
+      fallasEstado[t] = (fallasEstado[t] || 0) + 1;
+      if (fallasEstado[t] < 4) return { ok: true, estado: 'procesando' };
+      return { ok: false, estado: 'error', error: 'Se perdió la conexión con el agente de la demostración. Intenta de nuevo.' };
+    }
+  }
+
+  async function subida(url, body) {
+    var n = +url.split('/').pop();
+    var meta = sesiones[n] || { nombre: 'archivo_' + n, tipo: 'application/octet-stream' };
+    var blob = body instanceof Blob ? body : new Blob([body || '']);
+    var id = 'demo-file-' + (++nArchivo);
+    archivos[id] = { blob: blob, nombre: (blob && blob.name) || meta.nombre, tipo: blob.type || meta.tipo };
+    return { id: id, name: archivos[id].nombre };
+  }
+
+  window.__demoRoutes.push(
+    { test: function (u) { return /functions\/v1\/licit-resumen/.test(u); }, delay: 150, fn: api },
+    { test: function (u) { return u.indexOf(SUBIDA_BASE) === 0; }, delay: 250, fn: subida }
+  );
+
+  /* ---------------- XHR: la página sube con XMLHttpRequest PUT ---------------- */
+  (function () {
+    var P = window.XMLHttpRequest && window.XMLHttpRequest.prototype;
+    if (!P) return;
+    var open0 = P.open, send0 = P.send;
+    P.open = function (m, u) {
+      this.__demoUrl = String(u || '');
+      this.__demoMetodo = m;
+      return open0.apply(this, arguments);
+    };
+    P.send = function (body) {
+      var x = this;
+      if (!x.__demoUrl || x.__demoUrl.indexOf(SUBIDA_BASE) !== 0) return send0.apply(x, arguments);
+      var total = (body && body.size) || 0;
+      var fin = function (status, txt) {
+        Object.defineProperty(x, 'readyState', { configurable: true, value: 4 });
+        Object.defineProperty(x, 'status', { configurable: true, value: status });
+        Object.defineProperty(x, 'responseText', { configurable: true, value: txt });
+        Object.defineProperty(x, 'response', { configurable: true, value: txt });
+        if (status) { if (typeof x.onload === 'function') x.onload({ type: 'load' }); }
+        else if (typeof x.onerror === 'function') x.onerror({ type: 'error' });
+        if (typeof x.onloadend === 'function') x.onloadend({ type: 'loadend' });
+      };
+      var avance = function (p) {
+        try { if (x.upload && typeof x.upload.onprogress === 'function') x.upload.onprogress({ lengthComputable: true, loaded: Math.round(total * p), total: total }); } catch (e) {}
+      };
+      avance(0.3); setTimeout(function () { avance(0.75); }, 120);
+      window.fetch(x.__demoUrl, { method: x.__demoMetodo || 'PUT', body: body })
+        .then(function (r) { return r.text().then(function (t) { avance(1); fin(r.status, t); }); })
+        .catch(function () { fin(0, ''); });
+    };
+  })();
+
+  /* ---------------- archivos de ejemplo (estáticos del mismo sitio) ---------------- */
+  window.__demoResumen = {
+    NOMBRE_EJEMPLO: 'Ejemplo · LA-12-NCA-012NCA001-I-432-2026',
+    webhooks: { resumen: DEMO_WEBHOOK_RESUMEN, estado: DEMO_WEBHOOK_ESTADO },
+    archivosEjemplo: async function () {
+      return Promise.all(EJEMPLO.map(async function (e) {
+        var r = await fetch(e[0]);
+        if (!r.ok) throw new Error('No se pudo descargar ' + e[1] + ' (' + r.status + ')');
+        var b = await r.blob();
+        return new File([b], e[1], { type: e[2] });
+      })).catch(function (err) {
+        throw new Error(/fetch/i.test(String(err && err.message)) ? 'No se pudieron descargar los archivos de ejemplo.' : err.message);
+      });
+    }
+  };
+})();
+
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resumen de Convocatoria · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fondo:#f5f6f8; --card:#ffffff; --borde:#dde1e9; --hover:#e8f0fb; --cab:#dce8f7;
+    --azul-osc:#0d1b3e; --azul:#1a3a6b; --azul-med:#1e5096; --acento:#4a9fd4;
+    --texto:#1a2035; --texto2:#4a5068; --gris:#8a90a0;
+    --alerta-bg:#f0f6ff; --alerta-borde:#c8d9f0; --nota-bg:#eef4fc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Manrope',sans-serif;background:var(--fondo);color:var(--texto);font-size:15px;line-height:1.5}
+  header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid var(--acento);color:#fff}
+  .header-in{max-width:960px;margin:0 auto;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  .logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+  .logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+  .logo-box img{height:48px;width:auto;display:block}
+  .logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+  .logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+  .header-tit{text-align:right}
+  .header-tit h1{margin:0;font-size:1.15rem;font-weight:800}
+  .header-tit p{margin:.15rem 0 0;font-size:.82rem;opacity:.85}
+
+  main{max-width:720px;margin:1.5rem auto 2.5rem;padding:0 16px}
+  .card{background:var(--card);border:1px solid var(--borde);border-radius:14px;margin:0 auto 1.25rem;overflow:hidden;max-width:720px}
+  .card-cab{background:var(--cab);padding:.8rem 1.1rem;font-weight:700;color:var(--azul);display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+  .card-cab .paso{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--azul);color:#fff;font-size:.8rem;margin-right:.5rem}
+  .card-body{padding:1.1rem}
+  label.lbl{display:block;font-weight:600;color:var(--texto2);font-size:.85rem;margin-bottom:.35rem}
+  input[type=text],input[type=password]{width:100%;font-family:inherit;font-size:.95rem;padding:.65rem .8rem;border:1px solid var(--borde);border-radius:9px;color:var(--texto);background:#fff}
+  input[type=text]:focus,input[type=password]:focus{outline:none;border-color:var(--acento);box-shadow:0 0 0 3px rgba(74,159,212,.18)}
+
+  .drop{border:2px dashed var(--alerta-borde);background:var(--alerta-bg);border-radius:12px;padding:1.6rem 1rem;text-align:center;cursor:pointer;transition:.15s;margin-top:1rem}
+  .drop:hover,.drop.sobre{background:var(--hover);border-color:var(--acento)}
+  .drop strong{color:var(--azul);display:block;font-size:1rem}
+  .drop span{color:var(--gris);font-size:.82rem}
+  .lista{list-style:none;margin:.9rem 0 0;padding:0}
+  .lista li{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border:1px solid var(--borde);border-radius:9px;margin-bottom:.45rem;font-size:.88rem}
+  .lista .ico{font-size:.72rem;font-weight:800;color:#fff;background:var(--azul-med);border-radius:5px;padding:.15rem .35rem;flex-shrink:0}
+  .lista .ico.word{background:#2b579a}
+  .lista .ico.excel{background:#217346}
+  .lista .nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lista .tam{color:var(--gris);font-size:.78rem;flex-shrink:0}
+  .lista .quitar{border:none;background:none;color:var(--gris);font-size:1.1rem;cursor:pointer;line-height:1;padding:0 .2rem}
+  .lista .quitar:hover{color:#b23b3b}
+  .barra{height:5px;background:#e7ebf2;border-radius:3px;overflow:hidden;margin-top:.35rem}
+  .barra i{display:block;height:100%;width:0;background:var(--acento);transition:width .2s}
+  .lista li.subiendo{flex-wrap:wrap}
+  .lista li.subiendo .barra{flex-basis:100%}
+  .nota{background:var(--nota-bg);border-left:4px solid var(--azul);border-radius:8px;padding:.7rem .9rem;font-size:.84rem;color:var(--texto2);margin-top:1rem}
+
+  .btn{font-family:inherit;font-weight:700;font-size:.92rem;border-radius:10px;padding:.7rem 1.1rem;cursor:pointer;border:1px solid transparent;display:inline-flex;align-items:center;gap:.45rem;transition:.15s}
+  .btn-pri{background:var(--azul);color:#fff}
+  .btn-pri:hover{background:var(--azul-med)}
+  .btn-sec{background:#fff;color:var(--azul);border-color:var(--borde)}
+  .btn-sec:hover{background:var(--hover);border-color:var(--acento)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .acciones{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.1rem}
+  .acciones.centro{justify-content:center}
+
+  .progreso{text-align:center;padding:1.6rem 1rem}
+  .reloj{font-size:2rem;font-weight:800;color:var(--azul);letter-spacing:1px}
+  .etapa{color:var(--texto2);font-size:.92rem;margin-top:.3rem}
+  .spinner{width:38px;height:38px;border:4px solid var(--cab);border-top-color:var(--acento);border-radius:50%;margin:0 auto 1rem;animation:gira 1s linear infinite}
+  @keyframes gira{to{transform:rotate(360deg)}}
+
+  .asunto{background:var(--alerta-bg);border:1px solid var(--alerta-borde);border-left:4px solid var(--acento);border-radius:9px;padding:.7rem .9rem;font-weight:700;font-size:.9rem;color:var(--azul-osc);word-break:break-word}
+  .asunto small{display:block;font-weight:600;color:var(--gris);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem}
+  .correo{margin-top:1rem;font-size:.9rem;line-height:1.55;color:var(--texto)}
+  .correo p{margin:0 0 .7rem}
+  .correo h4{margin:1rem 0 .35rem;font-size:.92rem;color:var(--azul)}
+  .correo ul{margin:0 0 .6rem;padding-left:1.25rem}
+  .correo li{margin-bottom:.2rem}
+  .liga{background:#fff3c4;padding:0 .25rem;border-radius:3px;font-weight:700}
+  .alertas{background:var(--alerta-bg);border:1px solid var(--alerta-borde);border-left:4px solid var(--acento);border-radius:9px;padding:.8rem 1rem;margin-top:1rem}
+  .alertas h4{margin:0 0 .4rem;font-size:.9rem;color:var(--azul)}
+  .alertas ul{margin:0;padding-left:1.15rem;font-size:.85rem;color:var(--texto2)}
+  .alertas li{margin-bottom:.3rem}
+  .meta{font-size:.8rem;color:var(--gris);margin-top:.8rem}
+  .error{background:#fdf1f1;border:1px solid #f0caca;border-left:4px solid #c25454;border-radius:9px;padding:.8rem 1rem;color:#7a2a2a;font-size:.88rem}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--azul-osc);color:#fff;padding:.6rem 1.1rem;border-radius:10px;font-size:.88rem;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:10}
+  .toast.ver{opacity:1;transform:translateX(-50%) translateY(0)}
+  footer{text-align:center;color:var(--gris);font-size:.78rem;padding:0 16px 2rem}
+  .oculto{display:none!important}
+
+  @media (max-width:600px){
+    .header-in{flex-direction:column;align-items:flex-start}
+    .header-tit{text-align:left}
+    .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+    .logo-slogan{font-size:11px}
+    main{margin-top:1rem}
+    .card-body{padding:.9rem}
+    .acciones .btn{flex:1 1 100%;justify-content:center}
+    .reloj{font-size:1.6rem}
+  }
+
+  @page{size:Letter;margin:13mm}
+  @media print{
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{background:#fff;font-size:11pt}
+    .no-print{display:none!important}
+    main{margin:0;max-width:none;padding:0}
+    section,.card,main,div{break-inside:auto}
+    .card{border:1px solid var(--borde)}
+    .asunto,.alertas,.lista li,img{break-inside:avoid}
+    h1,h2,h3,h4,.card-cab{break-after:avoid}
+    p,li{orphans:3;widows:3}
+    thead{display:table-header-group}
+    a[href]:after{content:none}
+  }
+  /* v2: vista por temas, chat con fuentes y agregar documentos */
+  .temas-bar{display:flex;justify-content:flex-end;gap:.5rem;margin:.9rem 0 .3rem}
+  .lnk{background:none;border:none;color:var(--azul-med);font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;padding:.2rem .3rem}
+  .lnk:hover{text-decoration:underline}
+  details.tema{border:1px solid var(--borde);border-radius:10px;margin-bottom:.55rem;background:#fff;overflow:hidden}
+  details.tema>summary{list-style:none;cursor:pointer;padding:.6rem .9rem;font-weight:700;color:var(--azul);background:#f7f9fd;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+  details.tema>summary::-webkit-details-marker{display:none}
+  details.tema>summary::after{content:'▾';color:var(--gris);font-size:.85rem;transition:transform .15s}
+  details.tema:not([open])>summary::after{transform:rotate(-90deg)}
+  details.tema>summary:hover{background:var(--hover)}
+  .tema-body{padding:.6rem .95rem .3rem;font-size:.9rem;line-height:1.55}
+  .tema-body p{margin:0 0 .6rem}
+  .tema-body ul{margin:0 0 .6rem;padding-left:1.25rem}
+  .tema-body li{margin-bottom:.25rem}
+  .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.9rem 0 .2rem}
+  .chip{border:1px solid var(--alerta-borde);background:var(--alerta-bg);color:var(--azul);border-radius:999px;padding:.35rem .75rem;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer}
+  .chip:hover{background:var(--hover);border-color:var(--acento)}
+  .chat{display:flex;flex-direction:column;gap:.6rem;margin-top:.9rem;max-height:520px;overflow-y:auto}
+  .chat:empty{display:none}
+  .msg{max-width:92%;padding:.65rem .85rem;border-radius:12px;font-size:.88rem;line-height:1.5;word-break:break-word}
+  .msg.u{align-self:flex-end;background:var(--azul);color:#fff;border-bottom-right-radius:4px}
+  .msg.a{align-self:flex-start;background:#fff;border:1px solid var(--borde);border-bottom-left-radius:4px;color:var(--texto)}
+  .msg.a.pensando{color:var(--gris);font-style:italic}
+  .msg.a.err{background:#fdf1f1;border-color:#f0caca;color:#7a2a2a}
+  .fuentes{margin-top:.55rem;display:flex;flex-direction:column;gap:.4rem}
+  .fuente{background:var(--alerta-bg);border-left:3px solid var(--acento);border-radius:6px;padding:.45rem .6rem;font-size:.8rem;color:var(--texto2)}
+  .fuente b{color:var(--azul-osc)}
+  .fuente i{display:block;margin-top:.2rem;color:var(--texto)}
+  .costo{margin-top:.35rem;font-size:.72rem;color:var(--gris)}
+  .chat-in{display:flex;gap:.5rem;margin-top:.9rem;align-items:flex-end}
+  .chat-in textarea{flex:1;font-family:inherit;font-size:.92rem;padding:.6rem .75rem;border:1px solid var(--borde);border-radius:9px;resize:vertical;min-height:46px;color:var(--texto)}
+  .chat-in textarea:focus{outline:none;border-color:var(--acento);box-shadow:0 0 0 3px rgba(74,159,212,.18)}
+  .docs-cargados{margin-top:.9rem;font-size:.8rem;color:var(--texto2)}
+  .docs-cargados b{color:var(--azul)}
+  .docs-cargados ul{margin:.3rem 0 0;padding-left:1.15rem}
+  .nuevo{display:inline-block;background:#e6f4ea;color:#1e6b34;border-radius:6px;padding:.1rem .45rem;font-size:.72rem;font-weight:700;margin-left:.4rem}
+  @media (max-width:600px){
+    .chat-in{flex-direction:column;align-items:stretch}
+    .msg{max-width:100%}
+  }
+  @media print{
+    details.tema{border:none;margin:0}
+    details.tema>summary{background:none;padding:.4rem 0 .2rem;break-after:avoid}
+    details.tema>summary::after{content:none}
+    .tema-body{padding:0 0 .3rem}
+  }
+  select.campo{width:100%;font-family:inherit;font-size:.95rem;padding:.6rem .7rem;border:1px solid var(--borde);border-radius:9px;color:var(--texto);background:#fff}
+  .perfil-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .9rem;margin-top:.7rem}
+  .fila-2{display:grid;grid-template-columns:1fr 1.3fr;gap:.6rem .9rem}
+  details.formato{margin-top:.6rem;font-size:.85rem}
+  details.formato>summary{cursor:pointer;color:var(--azul-med);font-weight:700;font-size:.82rem;list-style:none}
+  details.formato>summary::-webkit-details-marker{display:none}
+  details.formato>summary::before{content:'▸ '}
+  details.formato[open]>summary::before{content:'▾ '}
+  #secCarga .drop{padding:1.1rem 1rem;margin-top:.8rem}
+  #secCarga .card-body{padding:.9rem 1.1rem}
+  .checks{display:flex;flex-wrap:wrap;gap:.45rem .9rem;margin-top:.2rem}
+  .checks label{display:flex;align-items:center;gap:.35rem;font-size:.86rem;color:var(--texto2);cursor:pointer}
+  .checks input{accent-color:var(--azul)}
+  .usuario-chip{display:inline-block;margin-top:.35rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:.15rem .7rem;font-size:.75rem;font-weight:600;cursor:pointer}
+  .riesgo{display:flex;gap:.7rem;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--borde)}
+  .riesgo:last-child{border-bottom:none}
+  .nivel{flex-shrink:0;font-size:.7rem;font-weight:800;border-radius:6px;padding:.15rem .5rem;margin-top:.1rem;min-width:52px;text-align:center}
+  .nivel.alto{background:#fdecec;color:#a33a3a}
+  .nivel.medio{background:#fff4e0;color:#99620c}
+  .nivel.bajo{background:#e8f4ec;color:#2b6b3f}
+  .riesgo b{color:var(--texto);display:block;font-size:.88rem}
+  .riesgo span{color:var(--texto2);font-size:.84rem}
+  .sug{display:flex;gap:.6rem;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--borde);cursor:pointer}
+  .sug:last-child{border-bottom:none}
+  .sug input{margin-top:.25rem;accent-color:var(--azul)}
+  .sug b{color:var(--texto);font-size:.88rem}
+  .sug span{color:var(--texto2);font-size:.84rem}
+  .sug small{display:block;color:var(--gris);font-size:.74rem;margin-top:.1rem}
+  .ejecutivo{margin-top:1rem;background:#fff;border:1px solid var(--borde);border-left:4px solid var(--azul);border-radius:9px;padding:.8rem 1rem;font-size:.88rem;line-height:1.55;color:var(--texto)}
+  .ejecutivo h5{margin:.5rem 0 .2rem;font-size:.88rem;color:var(--azul)}
+  .ejecutivo h5:first-child{margin-top:0}
+  .ejecutivo p{margin:0 0 .25rem}
+  @media (max-width:600px){ .perfil-grid,.fila-2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-in">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="header-tit">
+      <h1>Resumen de convocatoria</h1>
+      <p>Agente de licitaciones · Demostración</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Acceso -->
+  <section class="card no-print" id="secClave">
+    <div class="card-cab"><span>Acceso</span></div>
+    <div class="card-body">
+      <label class="lbl" for="clave">Clave de acceso</label>
+      <input type="password" id="clave" placeholder="Escribe la clave que te compartió ExcelentIA" autocomplete="current-password">
+      <div class="error oculto" id="errClave" style="margin-top:.6rem"></div>
+      <div class="acciones">
+        <button class="btn btn-pri" id="btnEntrar">Entrar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Paso 1: usuario y archivos -->
+  <section class="card no-print oculto" id="secCarga">
+    <div class="card-cab"><span><span class="paso">1</span>Sube las bases de la licitación</span></div>
+    <div class="card-body">
+      <div class="fila-2">
+        <div><label class="lbl" for="selPerfil">Usuario</label><select id="selPerfil" class="campo"></select></div>
+        <div><label class="lbl" for="nombre">Nombre de referencia (opcional)</label><input type="text" id="nombre" placeholder="Ej. IMSS T-6 laboratorio clínico"></div>
+      </div>
+      <details class="formato" id="detFormato">
+        <summary>Formato del correo de este usuario</summary>
+        <div id="formPerfil" class="perfil-grid">
+          <div><label class="lbl" for="pfNombre">Nombre</label><input type="text" id="pfNombre" placeholder="Ej. Equipo de Licitaciones"></div>
+          <div><label class="lbl" for="pfSaludo">Saludo</label><input type="text" id="pfSaludo" placeholder="Buena tarde"></div>
+          <div><label class="lbl" for="pfDest">A quién pide la confirmación</label><input type="text" id="pfDest" placeholder="Área Comercial"></div>
+          <div><label class="lbl" for="pfFirma">Firma</label><input type="text" id="pfFirma" placeholder="Equipo de Licitaciones"></div>
+          <div><label class="lbl" for="pfPara">Para (opcional)</label><input type="text" id="pfPara" placeholder="comercial@empresa.com"></div>
+          <div><label class="lbl" for="pfCc">Con copia (opcional)</label><input type="text" id="pfCc" placeholder="direccion@empresa.com"></div>
+        </div>
+        <label class="lbl" style="margin-top:.7rem">Temas de su resumen ejecutivo</label>
+        <div class="checks" id="pfTemas"></div>
+        <div class="meta" style="margin-top:.5rem">Los cambios se guardan al generar el resumen.</div>
+      </details>
+      <div class="nota no-print" id="demoEjemplo" style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap">
+        <span>¿No tienes una convocatoria a la mano? Prueba con una licitación real de ejemplo (convocatoria, acta de junta y anexo técnico).</span>
+        <button type="button" class="btn btn-sec" id="btnEjemplo">Usar convocatoria de ejemplo</button>
+      </div>
+      <div class="drop" id="drop1" tabindex="0" role="button" aria-label="Elegir archivos">
+        <strong>Arrastra aquí los archivos o da clic para elegirlos</strong>
+        <span>PDF, Word o Excel: bases, anexos, actas y avisos; también escaneados</span>
+      </div>
+      <input type="file" id="archivos1" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <ul class="lista" id="lista1"></ul>
+      <div class="error oculto" id="errPerfil" style="margin-top:.6rem"></div>
+      <div class="acciones">
+        <button class="btn btn-pri" id="btnGenerar" disabled>Generar resumen</button>
+        <button class="btn btn-sec oculto" id="btnVolver">Volver al resumen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Paso 2: progreso -->
+  <section class="card no-print oculto" id="secProgreso">
+    <div class="card-cab"><span><span class="paso">2</span><span id="titProgreso">Trabajando en el resumen</span></span></div>
+    <div class="progreso">
+      <div class="spinner"></div>
+      <div class="reloj" id="reloj">00:00</div>
+      <div class="etapa" id="etapa">Preparando…</div>
+    </div>
+  </section>
+
+  <!-- Error -->
+  <section class="card no-print oculto" id="secError">
+    <div class="card-cab"><span>No se pudo terminar</span></div>
+    <div class="card-body">
+      <div class="error" id="txtError"></div>
+      <div class="acciones"><button class="btn btn-sec" id="btnReintentar">Volver a intentar</button></div>
+    </div>
+  </section>
+
+  <!-- Paso 3: resultado -->
+  <section class="card oculto" id="secResultado">
+    <div class="card-cab"><span><span class="paso no-print">3</span>Resumen listo para enviar</span><span class="nuevo oculto no-print" id="marcaAct">Actualizado</span></div>
+    <div class="card-body">
+      <div class="asunto"><small>Asunto</small><span id="txtAsunto"></span></div>
+      <div class="temas-bar no-print"><button class="lnk" id="btnExpandir">Expandir todo</button><button class="lnk" id="btnContraer">Contraer todo</button></div>
+      <div id="txtCorreo"></div>
+      <div class="alertas oculto" id="boxAlertas"><h4>Para revisión antes de enviar</h4><ul id="lstAlertas"></ul></div>
+      <div class="meta" id="txtMeta"></div>
+      <div class="acciones no-print">
+        <button class="btn btn-pri" id="btnCopiar">Copiar correo</button>
+        <button class="btn btn-sec" id="btnCopiarAsunto">Copiar asunto</button>
+        <button class="btn btn-sec" id="btnWord">Guardar en Word</button>
+        <button class="btn btn-sec" disabled title="Próximamente">Enviar por correo (próximamente)</button>
+      </div>
+      <div class="acciones no-print">
+        <button class="btn btn-sec" id="btnNuevo">Nuevo resumen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Riesgos -->
+  <section class="card oculto" id="secRiesgos">
+    <div class="card-cab"><span>Riesgos para decidir si participar</span></div>
+    <div class="card-body"><div id="lstRiesgos"></div><div class="meta">Identificados por el agente con base en los documentos; la decisión es del equipo.</div></div>
+  </section>
+
+  <!-- Sugerencias -->
+  <section class="card no-print oculto" id="secSugerencias">
+    <div class="card-cab"><span>Sugerencias del agente</span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0">Datos que no forman parte del formato y que pueden servirle al Área Comercial; marca los que quieras sumar al correo.</div>
+      <div id="lstSugerencias"></div>
+    </div>
+  </section>
+
+  <!-- Resumen ejecutivo -->
+  <section class="card no-print oculto" id="secEjecutivo">
+    <div class="card-cab"><span>Resumen ejecutivo para Dirección</span></div>
+    <div class="card-body">
+      <label class="lbl">Temas a incluir</label>
+      <div class="checks" id="ejTemas"></div>
+      <div class="acciones"><button class="btn btn-pri" id="btnEjecutivo">Generar resumen ejecutivo</button></div>
+      <div class="ejecutivo oculto" id="txtEjecutivo"></div>
+      <div class="acciones oculto" id="accEjecutivo"><button class="btn btn-sec" id="btnCopiarEj">Copiar resumen ejecutivo</button></div>
+    </div>
+  </section>
+
+  <!-- Chat con fuentes -->
+  <section class="card no-print oculto" id="secChat">
+    <div class="card-cab"><span>Pregúntale al agente</span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0">Pregunta de dónde sale un dato o pide información que no está en el resumen; cada respuesta trae el documento, la página y el texto de donde sale.</div>
+      <div class="chips" id="chips"></div>
+      <div class="chat" id="chat"></div>
+      <div class="chat-in">
+        <textarea id="pregunta" rows="2" placeholder="Ej. ¿De dónde sale la fecha del fallo?"></textarea>
+        <button class="btn btn-pri" id="btnPreguntar">Preguntar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agregar documentos -->
+  <section class="card no-print oculto" id="secAgregar">
+    <div class="card-cab"><span>Agregar documentos a este resumen</span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0">Sube actas, avisos, diferimientos o anexos nuevos; el agente los suma a los documentos que ya leyó y actualiza el resumen, el calendario y las alertas.</div>
+      <div class="drop" id="drop2" tabindex="0" role="button" aria-label="Elegir archivos para agregar">
+        <strong>Arrastra aquí los documentos nuevos</strong>
+        <span>PDF, Word (.docx) o Excel (.xlsx)</span>
+      </div>
+      <input type="file" id="archivos2" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <ul class="lista" id="lista2"></ul>
+      <div class="docs-cargados" id="docsCargados"></div>
+      <div class="acciones">
+        <button class="btn btn-pri" id="btnActualizar" disabled>Actualizar resumen</button>
+      </div>
+    </div>
+  </section>
+  <!-- Comparativo -->
+  <section class="card no-print oculto" id="secComparar">
+    <div class="card-cab"><span>Comparar con una licitación o contrato anterior</span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0">Sube las bases de la licitación anterior del mismo servicio, o el contrato vigente, y el agente te dice qué cambió.</div>
+      <div class="drop" id="drop3" tabindex="0" role="button" aria-label="Elegir archivos de la licitación anterior">
+        <strong>Arrastra aquí los documentos anteriores</strong>
+        <span>PDF, Word (.docx) o Excel (.xlsx)</span>
+      </div>
+      <input type="file" id="archivos3" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <ul class="lista" id="lista3"></ul>
+      <div class="acciones"><button class="btn btn-pri" id="btnComparar" disabled>Comparar</button></div>
+      <div class="etapa oculto" id="estComparar" style="text-align:left;margin-top:.8rem"></div>
+      <div class="ejecutivo oculto" id="txtComparar"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="no-print">ExcelentIA · Agente de resumen de convocatoria · demostración</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://rcotlydvsubvdapubnkx.supabase.co/functions/v1/licit-resumen-dev';
+const $ = id => document.getElementById(id);
+const archivos1 = [];
+const archivos2 = [];
+let resultado = null;
+let timer = null;
+let clave = '';
+let trabajoActual = '';
+let docsCargados = [];
+let historial = [];
+const LS_CLAVE = 'demo_licit_resumen_clave';
+const guardarClave = v => { try { v ? localStorage.setItem(LS_CLAVE, v) : localStorage.removeItem(LS_CLAVE); } catch (e) {} };
+const leerClave = () => { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } };
+
+const fmtTam = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+const esValido = f => /\.(pdf|docx|xlsx)$/i.test(f.name);
+const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' : 'pdf';
+const MIME = { pdf: 'application/pdf', word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2400); };
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const SECCIONES = ['secClave', 'secCarga', 'secProgreso', 'secError', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+const mostrar = ids => SECCIONES.forEach(s => $(s).classList.toggle('oculto', !ids.includes(s) || $(s).dataset.vacio === '1'));
+const VISTA_RESULTADO = ['secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+
+// Zonas para soltar archivos (la inicial y la de agregar documentos)
+function zona(n, arr, btn) {
+  const pintar = () => {
+    $('lista' + n).innerHTML = arr.map((f, i) => {
+      const t = tipoArchivo(f.name);
+      return `<li><span class="ico ${t === 'pdf' ? '' : t}">${({ pdf: 'PDF', word: 'DOCX', excel: 'XLSX' })[t]}</span>
+      <span class="nom" title="${esc(f.name)}">${esc(f.name)}</span><span class="tam">${fmtTam(f.size)}</span>
+      <button class="quitar" data-i="${i}" aria-label="Quitar">×</button></li>`;
+    }).join('');
+    $(btn).disabled = !arr.length;
+  };
+  const agregar = lista => {
+    const nuevos = [...lista];
+    if (nuevos.some(f => !esValido(f))) toast('Solo se aceptan PDF, Word (.docx) y Excel (.xlsx)');
+    nuevos.filter(esValido).forEach(f => { if (!arr.some(a => a.name === f.name && a.size === f.size)) arr.push(f); });
+    pintar();
+  };
+  const d = $('drop' + n), inp = $('archivos' + n);
+  d.onclick = () => inp.click();
+  d.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); } };
+  inp.onchange = e => { agregar(e.target.files); e.target.value = ''; };
+  ['dragenter', 'dragover'].forEach(ev => d.addEventListener(ev, e => { e.preventDefault(); d.classList.add('sobre'); }));
+  ['dragleave', 'drop'].forEach(ev => d.addEventListener(ev, e => { e.preventDefault(); d.classList.remove('sobre'); }));
+  d.addEventListener('drop', e => agregar(e.dataTransfer.files));
+  $('lista' + n).onclick = e => { const b = e.target.closest('.quitar'); if (b) { arr.splice(+b.dataset.i, 1); pintar(); } };
+  return pintar;
+}
+const pintar1 = zona(1, archivos1, 'btnGenerar');
+const pintar2 = zona(2, archivos2, 'btnActualizar');
+
+async function llamar(accion, datos) {
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, clave, ...datos }) });
+  const j = await r.json().catch(() => ({ ok: false, error: 'Respuesta no válida del servidor' }));
+  if (r.status === 401) { const e = new Error(j.error || 'Clave de acceso incorrecta.'); e.sinClave = true; throw e; }
+  if (!r.ok || j.ok === false && accion !== 'estado') throw new Error(j.error || 'Error de conexión');
+  return j;
+}
+function subir(url, archivo, alAvance) {
+  return new Promise((ok, mal) => {
+    const x = new XMLHttpRequest();
+    x.open('PUT', url);
+    x.upload.onprogress = e => e.lengthComputable && alAvance(e.loaded / e.total);
+    x.onload = () => { if (x.status >= 200 && x.status < 300) { try { ok(JSON.parse(x.responseText).id); } catch { mal(new Error('Drive no devolvió el archivo')); } } else mal(new Error('Drive rechazó ' + archivo.name + ' (' + x.status + ')')); };
+    x.onerror = () => mal(new Error('Se cortó la subida de ' + archivo.name));
+    x.send(archivo);
+  });
+}
+function iniciarReloj() {
+  const t0 = Date.now();
+  clearInterval(timer);
+  timer = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $('reloj').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }, 500);
+  return t0;
+}
+
+// Sube los archivos, lanza el agente y espera el resultado; base = trabajo anterior cuando se agregan documentos
+async function procesar(lista, base) {
+  if (!lista.length) return;
+  $('titProgreso').textContent = base ? 'Actualizando el resumen con los documentos nuevos' : 'Trabajando en el resumen';
+  mostrar(['secProgreso']);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const t0 = iniciarReloj();
+  const total = lista.reduce((a, f) => a + f.size, 0);
+  let subido = 0;
+  try {
+    const ids = [];
+    for (let i = 0; i < lista.length; i++) {
+      const f = lista[i];
+      $('etapa').textContent = `Subiendo ${i + 1} de ${lista.length}: ${f.name}`;
+      const s = await llamar('sesion', { nombre: f.name, tamano: f.size, tipo: f.type || MIME[tipoArchivo(f.name)], origen: location.origin });
+      if (!s.uploadUrl) throw new Error('No se pudo abrir la subida a Drive');
+      const b0 = subido;
+      ids.push(await subir(s.uploadUrl, f, p => { $('etapa').textContent = `Subiendo ${i + 1} de ${lista.length}: ${f.name} · ${Math.round((b0 + p * f.size) / total * 100)}%`; }));
+      subido += f.size;
+    }
+    $('etapa').textContent = 'Leyendo los documentos…';
+    const nombre = $('nombre').value.trim() || (resultado && resultado.nombre) || lista[0].name;
+    const a = await llamar('analizar', { fileIds: ids, nombre, trabajoBase: base || '' });
+    if (!a.trabajo) throw new Error('El agente no recibió el trabajo');
+    const etapas = base
+      ? ['Leyendo los documentos nuevos…', 'Juntándolos con los que ya había leído…', 'Analizando de nuevo con IA…', 'Armando el resumen actualizado…']
+      : ['Leyendo los documentos…', 'Leyendo escaneos y actas si los hay…', 'Analizando las bases con IA…', 'Armando el resumen con el formato del área…'];
+    let k = 0;
+    const limite = Date.now() + 9 * 60 * 1000;
+    let e;
+    while (true) {
+      await new Promise(r => setTimeout(r, 4000));
+      if (k < etapas.length - 1 && (Date.now() - t0) > (k + 1) * 25000) $('etapa').textContent = etapas[++k];
+      e = await llamar('estado', { trabajo: a.trabajo });
+      if (e.estado === 'listo') break;
+      if (e.estado === 'error') throw new Error('El análisis no pudo completarse: ' + (e.error || 'error desconocido'));
+      if (Date.now() > limite) throw new Error('El análisis está tardando más de lo normal; vuelve a consultar en unos minutos.');
+    }
+    clearInterval(timer);
+    resultado = { ...e, nombre };
+    try { extras = JSON.parse(e.extras || '{}') || {}; } catch (er) { extras = {}; }
+    extras.sugerencias = extras.sugerencias || []; extras.riesgos = extras.riesgos || [];
+    aceptadas.clear();
+    $('txtEjecutivo').classList.add('oculto'); $('accEjecutivo').classList.add('oculto'); $('txtComparar').classList.add('oculto'); $('estComparar').classList.add('oculto');
+    trabajoActual = a.trabajo;
+    docsCargados = (base ? docsCargados : []).concat(lista.map(f => f.name).filter(n => !docsCargados.includes(n) || !base));
+    lista.splice(0, lista.length);
+    pintar1(); pintar2();
+    if (!base) { historial = []; $('chat').innerHTML = ''; }
+    else agregarMsg('a', '<b>Resumen actualizado</b> con los documentos nuevos; las siguientes respuestas ya los consideran.');
+    pintarResultado(Math.round((Date.now() - t0) / 1000), !!base);
+  } catch (err) {
+    clearInterval(timer);
+    if (err.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    $('txtError').textContent = err.message;
+    mostrar(['secError']);
+  }
+}
+
+// Convierte el texto del agente en bloques con formato (encabezados, viñetas, etiquetas en negritas)
+const ENCABEZADOS = /^(Generales|Calendario y\/o tiempo de entrega:?|Calendario de eventos|Observaciones Generales:?|Datos adicionales:?)$/i;
+function bloques(texto) {
+  const out = []; let lista = null;
+  texto.split('\n').forEach(l => {
+    const t = l.trim();
+    if (!t) { lista = null; return; }
+    if (ENCABEZADOS.test(t)) { out.push({ tipo: 'h', texto: t.replace(/:$/, '') }); lista = null; return; }
+    if (t.startsWith('•')) { if (!lista) { lista = { tipo: 'ul', items: [] }; out.push(lista); } lista.items.push(t.replace(/^•\s*/, '')); return; }
+    out.push({ tipo: 'p', texto: t }); lista = null;
+  });
+  return out;
+}
+function partir(t) {
+  const m = t.match(/^([^:]{2,70}):\s(.*)$/);
+  if (m && !/^https?$/i.test(m[1])) return [m[1] + ':', ' ' + m[2]];
+  if (/^Estimados /.test(t)) { const i = t.indexOf(' me ayudan'); if (i > 0) return [t.slice(0, i), t.slice(i)]; }
+  return [null, t];
+}
+const conLiga = h => h.replace(/\[PEGAR LIGA\]/g, '<span class="liga">[PEGAR LIGA]</span>');
+function bloqueHTML(b) {
+  if (b.tipo === 'h') return `<h4>${esc(b.texto)}</h4>`;
+  if (b.tipo === 'ul') return '<ul>' + b.items.map(it => { const [e, r] = partir(it); return `<li>${e ? `<strong>${esc(e)}</strong>` : ''}${conLiga(esc(r))}</li>`; }).join('') + '</ul>';
+  const [e, r] = partir(b.texto);
+  return `<p>${e ? `<strong>${esc(e)}</strong>` : ''}${conLiga(esc(r))}</p>`;
+}
+const aHTML = bs => bs.map(bloqueHTML).join('');
+// Vista por temas: el correo en secciones desplegables (al copiar o guardar en Word sale completo)
+function aTemas(bs) {
+  const secciones = []; let actual = { titulo: 'Saludo y nota', abierto: false, items: [] };
+  const nueva = (titulo, abierto) => { if (actual.items.length) secciones.push(actual); actual = { titulo, abierto, items: [] }; };
+  bs.forEach(b => {
+    if (b.tipo === 'h') { nueva(b.texto.replace(/^Calendario y\/o tiempo de entrega$/i, 'Calendario y tiempo de entrega'), true); return; }
+    if (b.tipo === 'p' && /^Tiempo máximo de recepción/i.test(b.texto)) nueva('Recepción de comentarios', true);
+    if (b.tipo === 'p' && /^Estimados /.test(b.texto)) nueva('Petición al Área Comercial', true);
+    if (b.tipo === 'p' && /^Quedo a sus órdenes/i.test(b.texto)) nueva('Cierre', false);
+    actual.items.push(b);
+  });
+  if (actual.items.length) secciones.push(actual);
+  return secciones.map(s => `<details class="tema"${s.abierto ? ' open' : ''}><summary>${esc(s.titulo)}</summary><div class="tema-body">${aHTML(s.items)}</div></details>`).join('');
+}
+let ultimosSegs = 0;
+function pintarResultado(segs, actualizado) {
+  if (segs === null) segs = ultimosSegs; else ultimosSegs = segs;
+  const bs = bloques(textoFinal());
+  pintarExtras();
+  checks('ejTemas', perfil && Array.isArray(perfil.temas_ejecutivo) ? perfil.temas_ejecutivo : TEMAS_EJ.filter(x => x !== 'Sugerencias del agente'));
+  $('txtAsunto').textContent = resultado.asunto || '';
+  $('txtCorreo').innerHTML = aTemas(bs);
+  let al = [];
+  try { al = JSON.parse(resultado.alertas || '[]'); } catch { al = []; }
+  $('boxAlertas').classList.toggle('oculto', !al.length);
+  $('lstAlertas').innerHTML = al.map(a => `<li>${esc(a)}</li>`).join('');
+  $('txtMeta').textContent = `Generado en ${Math.floor(segs / 60)} min ${segs % 60} s · ${docsCargados.length} documento${docsCargados.length === 1 ? '' : 's'} · Revisar y pegar la liga de descarga antes de enviar.`;
+  $('marcaAct').classList.toggle('oculto', !actualizado);
+  $('docsCargados').innerHTML = docsCargados.length ? `<b>Documentos que ya leyó el agente:</b><ul>${docsCargados.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '';
+  pintarChips();
+  mostrar(VISTA_RESULTADO);
+}
+$('btnExpandir').onclick = () => document.querySelectorAll('details.tema').forEach(d => d.open = true);
+$('btnContraer').onclick = () => document.querySelectorAll('details.tema').forEach(d => d.open = false);
+window.addEventListener('beforeprint', () => document.querySelectorAll('details.tema').forEach(d => d.open = true));
+
+// Copiar con formato (para Outlook) y como texto plano
+async function copiar(html, texto, msg) {
+  try {
+    if (window.ClipboardItem && navigator.clipboard.write) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([texto], { type: 'text/plain' }) })]);
+    } else await navigator.clipboard.writeText(texto);
+    toast(msg);
+  } catch {
+    const ta = document.createElement('textarea'); ta.value = texto; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast(msg);
+  }
+}
+const htmlCorreo = () => `<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a2035">${aHTML(bloques(textoFinal())).replace(/<span class="liga">/g, '<span style="background:#fff3c4">')}</div>`;
+$('btnCopiar').onclick = () => copiar(htmlCorreo(), textoFinal(), 'Correo copiado, listo para pegar en Outlook');
+$('btnCopiarAsunto').onclick = () => copiar(esc(resultado.asunto || ''), resultado.asunto || '', 'Asunto copiado');
+
+// Word (.docx) generado en el navegador
+function cargarDocx() {
+  return window.docx ? Promise.resolve() : new Promise((ok, mal) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js';
+    s.onload = ok; s.onerror = () => mal(new Error('No se pudo cargar el generador de Word'));
+    document.head.appendChild(s);
+  });
+}
+$('btnWord').onclick = async () => {
+  try {
+    $('btnWord').disabled = true;
+    await cargarDocx();
+    const { Document, Packer, Paragraph, TextRun } = window.docx;
+    const run = (t, extra = {}) => new TextRun({ text: t, font: 'Calibri', size: 21, color: '1A2035', ...extra });
+    const linea = (e, r, opts = {}) => new Paragraph({ spacing: { after: 80 }, ...opts, children: [...(e ? [run(e, { bold: true })] : []), run(r)] });
+    const hijos = [new Paragraph({ spacing: { after: 200 }, children: [run('Asunto: ', { bold: true, color: '1A3A6B' }), run(resultado.asunto || '', { bold: true })] })];
+    bloques(textoFinal()).forEach(b => {
+      if (b.tipo === 'h') hijos.push(new Paragraph({ spacing: { before: 160, after: 80 }, keepNext: true, children: [run(b.texto, { bold: true, color: '1A3A6B' })] }));
+      else if (b.tipo === 'ul') b.items.forEach(it => { const [e, r] = partir(it); hijos.push(linea(e, r, { bullet: { level: 0 } })); });
+      else { const [e, r] = partir(b.texto); hijos.push(linea(e, r, { spacing: { after: 140 } })); }
+    });
+    const doc = new Document({ sections: [{ properties: { page: { margin: { top: 1000, bottom: 1000, left: 1100, right: 1100 } } }, children: hijos }] });
+    const blob = await Packer.toBlob(doc);
+    const a = document.createElement('a');
+    const base = (resultado.asunto || 'resumen').split('|')[0].replace(/RESUMEN DE LICITACIÓN NO\.\s*/i, '').trim().replace(/[^\w\-]+/g, '_');
+    a.href = URL.createObjectURL(blob); a.download = `Resumen_${base || 'licitacion'}.docx`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  } catch (e) { toast(e.message); } finally { $('btnWord').disabled = false; }
+};
+
+// Chat con fuentes
+const SUGERENCIAS = ['¿De dónde sale la fecha del fallo?', '¿Qué garantía de cumplimiento piden?', '¿Hay penas convencionales o deductivas?', '¿Qué documentos piden del fabricante?'];
+function pintarChips() {
+  $('chips').innerHTML = SUGERENCIAS.map(s => `<button class="chip">${esc(s)}</button>`).join('');
+}
+$('chips').onclick = e => { const c = e.target.closest('.chip'); if (c) { $('pregunta').value = c.textContent; preguntar(); } };
+function agregarMsg(tipo, html, extra = '') {
+  const d = document.createElement('div');
+  d.className = 'msg ' + tipo + (extra ? ' ' + extra : '');
+  d.innerHTML = html;
+  $('chat').appendChild(d);
+  $('chat').scrollTop = $('chat').scrollHeight;
+  return d;
+}
+function htmlRespuesta(j) {
+  const fuentes = (j.fuentes || []).map(f => `<div class="fuente"><b>${esc(f.documento || 'Documento')}</b>${f.pagina ? ` · ${/^\d+$/.test(f.pagina) ? 'página ' + esc(f.pagina) : esc(f.pagina)}` : ''}${f.cita ? `<i>“${esc(f.cita)}”</i>` : ''}</div>`).join('');
+  return `${esc(j.respuesta || '').replace(/\n/g, '<br>')}${fuentes ? `<div class="fuentes">${fuentes}</div>` : ''}`;
+}
+async function preguntar() {
+  const q = $('pregunta').value.trim();
+  if (!q || !trabajoActual) return;
+  $('pregunta').value = '';
+  $('btnPreguntar').disabled = true;
+  agregarMsg('u', esc(q));
+  const espera = agregarMsg('a', 'Buscando en los documentos…', 'pensando');
+  try {
+    const j = await llamar('preguntar', { trabajo: trabajoActual, pregunta: q, historial });
+    espera.classList.remove('pensando');
+    espera.innerHTML = htmlRespuesta(j);
+    historial.push({ rol: 'usuario', texto: q }, { rol: 'agente', texto: j.respuesta || '' });
+    historial = historial.slice(-8);
+  } catch (err) {
+    if (err.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    espera.classList.remove('pensando'); espera.classList.add('err');
+    espera.textContent = err.message || 'No se pudo obtener la respuesta, intenta de nuevo.';
+  } finally { $('btnPreguntar').disabled = false; $('pregunta').focus(); }
+}
+$('btnPreguntar').onclick = preguntar;
+$('pregunta').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); preguntar(); } });
+
+
+// ===== Perfiles de usuario =====
+const TEMAS_EJ = ['Datos generales', 'Fechas clave', 'Riesgos', 'Requisitos relevantes', 'Sugerencias del agente', 'Recomendación'];
+const LS_PERFIL = 'demo_licit_resumen_perfil';
+let perfiles = [];
+let perfil = null;
+const leerLS = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+const guardarLS = (k, v) => { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} };
+function checks(cont, marcados) {
+  $(cont).innerHTML = TEMAS_EJ.map(t => `<label><input type="checkbox" value="${esc(t)}" ${marcados.includes(t) ? 'checked' : ''}>${esc(t)}</label>`).join('');
+}
+const marcadosDe = cont => [...$(cont).querySelectorAll('input:checked')].map(i => i.value);
+function llenarForm(p) {
+  $('pfNombre').value = p ? p.nombre : '';
+  $('pfSaludo').value = p ? p.saludo : 'Buen día';
+  $('pfDest').value = p ? p.destinatarios : 'Área Comercial';
+  $('pfFirma').value = p ? p.firma : '';
+  $('pfPara').value = p ? (p.correo_para || '') : '';
+  $('pfCc').value = p ? (p.correo_cc || '') : '';
+  checks('pfTemas', p && Array.isArray(p.temas_ejecutivo) ? p.temas_ejecutivo : TEMAS_EJ.filter(t => t !== 'Sugerencias del agente'));
+}
+async function cargarPerfiles() {
+  const j = await llamar('perfiles', {});
+  perfiles = j.perfiles || [];
+  $('selPerfil').innerHTML = perfiles.map(p => `<option value="${esc(p.nombre)}">${esc(p.nombre)}</option>`).join('') + '<option value="__nuevo">+ Nuevo usuario</option>';
+  const previo = leerLS(LS_PERFIL);
+  const p = perfiles.find(x => x.nombre === previo);
+  return p || null;
+}
+function verPerfil(p, abrir) {
+  $('selPerfil').value = p ? p.nombre : (perfiles[0] ? perfiles[0].nombre : '__nuevo');
+  llenarForm(p || perfiles[0] || null);
+  $('detFormato').open = !!abrir || !perfiles.length;
+  $('errPerfil').classList.add('oculto');
+  $('btnVolver').classList.toggle('oculto', !resultado);
+  mostrar(['secCarga']);
+}
+$('selPerfil').onchange = () => {
+  const p = perfiles.find(x => x.nombre === $('selPerfil').value) || null;
+  llenarForm(p);
+  if (!p) { $('detFormato').open = true; $('pfNombre').focus(); }
+};
+const datosForm = () => ({ nombre: $('pfNombre').value.trim(), saludo: $('pfSaludo').value.trim(), destinatarios: $('pfDest').value.trim(), firma: $('pfFirma').value.trim(), correo_para: $('pfPara').value.trim(), correo_cc: $('pfCc').value.trim(), temas_ejecutivo: marcadosDe('pfTemas') });
+const mismo = (a, b) => !!b && ['nombre', 'saludo', 'destinatarios', 'firma', 'correo_para', 'correo_cc'].every(k => String(a[k] || '') === String(b[k] || '')) && JSON.stringify(a.temas_ejecutivo) === JSON.stringify(b.temas_ejecutivo || []);
+// Guarda el perfil solo si es nuevo o cambió; regresa false si falta el nombre
+async function asegurarPerfil() {
+  const datos = datosForm();
+  if (!datos.nombre) { $('errPerfil').textContent = 'Elige tu usuario o escribe tu nombre en el formato del correo.'; $('errPerfil').classList.remove('oculto'); $('detFormato').open = true; return false; }
+  if (!datos.firma) datos.firma = datos.nombre + '.';
+  const previo = perfiles.find(x => x.nombre === datos.nombre);
+  if (mismo(datos, previo)) { perfil = previo; }
+  else {
+    const j = await llamar('guardarPerfil', { perfil: datos });
+    perfil = j.perfil || datos;
+    const i = perfiles.findIndex(x => x.nombre === perfil.nombre);
+    if (i >= 0) perfiles[i] = perfil; else perfiles.push(perfil);
+    $('selPerfil').innerHTML = perfiles.map(p => `<option value="${esc(p.nombre)}">${esc(p.nombre)}</option>`).join('') + '<option value="__nuevo">+ Nuevo usuario</option>';
+    $('selPerfil').value = perfil.nombre;
+  }
+  guardarLS(LS_PERFIL, perfil.nombre);
+  $('errPerfil').classList.add('oculto');
+  pintarUsuario();
+  return true;
+}
+$('btnVolver').onclick = async () => {
+  try { if (await asegurarPerfil()) pintarResultado(null, false); }
+  catch (e) { if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; } $('errPerfil').textContent = e.message; $('errPerfil').classList.remove('oculto'); }
+};
+function pintarUsuario() {
+  const h = document.querySelector('.header-tit');
+  let c = $('chipUsuario');
+  if (!c) { c = document.createElement('div'); c.id = 'chipUsuario'; c.className = 'usuario-chip no-print'; c.title = 'Cambiar de usuario o editar su formato'; c.onclick = () => verPerfil(perfil, true); h.appendChild(c); }
+  c.textContent = perfil ? perfil.nombre : '';
+  c.classList.toggle('oculto', !perfil);
+}
+
+// ===== Correo final: formato del usuario + sugerencias aceptadas =====
+let extras = { sugerencias: [], riesgos: [] };
+const aceptadas = new Set();
+function textoFinal() {
+  let t = String((resultado && resultado.resumen) || '');
+  if (perfil) {
+    if (perfil.saludo) t = t.replace(/^Buena tarde,/, perfil.saludo.replace(/[,.]\s*$/, '') + ',');
+    if (perfil.destinatarios) t = t.replace(/Estimados [^\n]*?(?= me ayudan|,|\n|$)/, 'Estimados ' + perfil.destinatarios);
+    if (perfil.firma) t = t.replace(/\n[^\n]*\.?\s*$/, m => /órdenes|saludos/i.test(m) ? m : '\n' + perfil.firma);
+  }
+  const sel = (extras.sugerencias || []).filter((s, i) => aceptadas.has(i));
+  if (sel.length) {
+    const bloque = '\n\nDatos adicionales:\n' + sel.map(s => `• ${s.tema}: ${s.texto}`).join('\n');
+    t = t.replace(/\n\nQuedo a sus órdenes\./, bloque + '\n\nQuedo a sus órdenes.');
+  }
+  return t;
+}
+const ENC_EXTRA = /^Datos adicionales:?$/i;
+function pintarExtras() {
+  const r = extras.riesgos || [];
+  $('secRiesgos').dataset.vacio = r.length ? '' : '1';
+  $('lstRiesgos').innerHTML = r.map(x => { const n = String(x.nivel || '').toLowerCase(); return `<div class="riesgo"><span class="nivel ${['alto', 'medio', 'bajo'].includes(n) ? n : 'medio'}">${esc(x.nivel || '')}</span><div><b>${esc(x.riesgo || '')}</b><span>${esc(x.detalle || '')}</span></div></div>`; }).join('');
+  const s = extras.sugerencias || [];
+  $('secSugerencias').dataset.vacio = s.length ? '' : '1';
+  $('lstSugerencias').innerHTML = s.map((x, i) => `<label class="sug"><input type="checkbox" data-i="${i}" ${aceptadas.has(i) ? 'checked' : ''}><div><b>${esc(x.tema || '')}:</b> <span>${esc(x.texto || '')}</span>${x.fuente ? `<small>${esc(x.fuente)}</small>` : ''}</div></label>`).join('');
+}
+$('lstSugerencias').onchange = e => {
+  const c = e.target.closest('input[data-i]'); if (!c) return;
+  const i = +c.dataset.i; c.checked ? aceptadas.add(i) : aceptadas.delete(i);
+  $('txtCorreo').innerHTML = aTemas(bloques(textoFinal()));
+  toast(c.checked ? 'Agregado al correo' : 'Quitado del correo');
+};
+
+// ===== Resumen ejecutivo =====
+function textoAHtml(t) {
+  return String(t || '').split('\n').map(l => l.trim()).filter(Boolean).map(l => /:$/.test(l) && !l.startsWith('•') ? `<h5>${esc(l.replace(/:$/, ''))}</h5>` : `<p>${esc(l)}</p>`).join('');
+}
+let ejecutivoTxt = '';
+$('btnEjecutivo').onclick = async () => {
+  const temas = marcadosDe('ejTemas');
+  if (!temas.length) { toast('Elige al menos un tema'); return; }
+  $('btnEjecutivo').disabled = true;
+  $('txtEjecutivo').classList.remove('oculto'); $('txtEjecutivo').innerHTML = '<p>Redactando el resumen ejecutivo…</p>';
+  try {
+    const j = await llamar('preguntar', { trabajo: trabajoActual, modo: 'ejecutivo', temas });
+    ejecutivoTxt = j.respuesta || '';
+    $('txtEjecutivo').innerHTML = textoAHtml(ejecutivoTxt);
+    $('accEjecutivo').classList.remove('oculto');
+  } catch (e) {
+    if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    $('txtEjecutivo').innerHTML = `<p>${esc(e.message)}</p>`;
+  } finally { $('btnEjecutivo').disabled = false; }
+};
+$('btnCopiarEj').onclick = () => copiar(`<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt">${textoAHtml(ejecutivoTxt).replace(/<h5>/g, '<p><b>').replace(/<\/h5>/g, '</b></p>')}</div>`, `Resumen ejecutivo · ${resultado.asunto || ''}\n\n${ejecutivoTxt}`, 'Resumen ejecutivo copiado');
+
+// ===== Comparativo con licitación anterior =====
+const archivos3 = [];
+const pintar3 = zona(3, archivos3, 'btnComparar');
+$('btnComparar').onclick = async () => {
+  if (!archivos3.length || !trabajoActual) return;
+  const est = $('estComparar');
+  $('btnComparar').disabled = true; est.classList.remove('oculto'); $('txtComparar').classList.add('oculto');
+  const t0 = Date.now();
+  const reloj = setInterval(() => { est.dataset.s = Math.floor((Date.now() - t0) / 1000); }, 1000);
+  try {
+    const ids = [];
+    for (let i = 0; i < archivos3.length; i++) {
+      const f = archivos3[i];
+      est.textContent = `Subiendo ${i + 1} de ${archivos3.length}: ${f.name}`;
+      const s = await llamar('sesion', { nombre: f.name, tamano: f.size, tipo: f.type || MIME[tipoArchivo(f.name)], origen: location.origin });
+      ids.push(await subir(s.uploadUrl, f, () => {}));
+    }
+    est.textContent = 'Leyendo la licitación anterior…';
+    const a = await llamar('analizar', { fileIds: ids, nombre: 'Anterior · ' + ((resultado && resultado.nombre) || archivos3[0].name) });
+    const limite = Date.now() + 9 * 60 * 1000;
+    while (true) {
+      await new Promise(r => setTimeout(r, 4000));
+      est.textContent = `Leyendo la licitación anterior… ${Math.floor((Date.now() - t0) / 1000)} s`;
+      const e = await llamar('estado', { trabajo: a.trabajo });
+      if (e.estado === 'listo') break;
+      if (e.estado === 'error') throw new Error('No se pudo leer la licitación anterior: ' + (e.error || ''));
+      if (Date.now() > limite) throw new Error('La lectura está tardando más de lo normal; intenta de nuevo en unos minutos.');
+    }
+    est.textContent = 'Comparando…';
+    const c = await llamar('preguntar', { trabajo: trabajoActual, trabajoAnterior: a.trabajo, modo: 'comparar' });
+    $('txtComparar').innerHTML = textoAHtml(c.respuesta || '');
+    $('txtComparar').classList.remove('oculto');
+    est.textContent = `Comparativo listo en ${Math.floor((Date.now() - t0) / 1000)} s · contra: ${archivos3.map(f => f.name).join(', ')}`;
+    archivos3.splice(0); pintar3();
+  } catch (e) {
+    if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+    est.textContent = e.message;
+  } finally { clearInterval(reloj); $('btnComparar').disabled = !archivos3.length; }
+};
+
+// Acceso con clave
+function pedirClave(msg) {
+  clave = ''; guardarClave('');
+  $('clave').value = '';
+  $('errClave').textContent = msg || '';
+  $('errClave').classList.toggle('oculto', !msg);
+  mostrar(['secClave']);
+  setTimeout(() => $('clave').focus(), 50);
+}
+async function entrar(valor, silencioso) {
+  const v = String(valor || '').trim();
+  if (!v) { if (!silencioso) pedirClave('Escribe la clave de acceso.'); else pedirClave(); return; }
+  $('btnEntrar').disabled = true;
+  clave = v;
+  try {
+    await llamar('verificar', {});
+    guardarClave(v);
+    $('errClave').classList.add('oculto');
+    const p = await cargarPerfiles();
+    if (p) { perfil = p; pintarUsuario(); }
+    verPerfil(p);
+  } catch (e) {
+    pedirClave(e.sinClave ? (silencioso ? '' : 'Clave incorrecta, revísala.') : 'No se pudo validar la clave: ' + e.message);
+  } finally { $('btnEntrar').disabled = false; }
+}
+$('btnEntrar').onclick = () => entrar($('clave').value);
+$('clave').addEventListener('keydown', e => { if (e.key === 'Enter') entrar($('clave').value); });
+entrar(leerClave() || 'demo', true);
+
+$('btnGenerar').onclick = async () => {
+  try { if (!(await asegurarPerfil())) return; }
+  catch (e) { if (e.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; } $('errPerfil').textContent = e.message; $('errPerfil').classList.remove('oculto'); return; }
+  procesar(archivos1, '');
+};
+$('btnActualizar').onclick = () => procesar(archivos2, trabajoActual);
+// DEMO: carga los archivos de ejemplo como si el usuario los hubiera elegido
+$('btnEjemplo').onclick = async () => {
+  const b = $('btnEjemplo'), txt = b.textContent;
+  b.disabled = true; b.textContent = 'Descargando ejemplo…';
+  try {
+    const files = await window.__demoResumen.archivosEjemplo();
+    files.forEach(f => { if (!archivos1.some(a => a.name === f.name && a.size === f.size)) archivos1.push(f); });
+    pintar1();
+    if (!$('nombre').value.trim()) $('nombre').value = window.__demoResumen.NOMBRE_EJEMPLO;
+    toast('Convocatoria de ejemplo cargada: 3 documentos');
+  } catch (e) { toast(e.message || 'No se pudo descargar el ejemplo'); }
+  finally { b.disabled = false; b.textContent = txt; }
+};
+$('btnReintentar').onclick = () => trabajoActual ? mostrar(VISTA_RESULTADO) : verPerfil(perfil);
+$('btnNuevo').onclick = () => {
+  archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear();
+  $('nombre').value = ''; $('chat').innerHTML = ''; pintar1(); pintar2(); verPerfil(perfil);
+};
+</script>
+</body>
+</html>

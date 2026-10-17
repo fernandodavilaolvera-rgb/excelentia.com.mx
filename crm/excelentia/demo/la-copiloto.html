@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script>
+/* ==================================================================
+   DEMO · núcleo de simulación (ExcelentIA)
+   Se inyecta como PRIMER script del <head> de cada página demo.
+   - Intercepta fetch: las rutas registradas en window.__demoRoutes
+     responden con datos de muestra.
+   - Cualquier llamada a n8n o Supabase que no esté registrada se
+     BLOQUEA (nunca llega a producción).
+   ================================================================== */
+(function () {
+  var real = window.fetch ? window.fetch.bind(window) : null;
+  window.__demoRoutes = window.__demoRoutes || [];
+  window.__demoRealFetch = real; // para las rutas demo que sí van a un webhook DEMO real
+  window.__demoBloqueadas = [];
+  function cuerpo(init) {
+    if (!init || init.body == null) return null;
+    if (typeof init.body === 'string') { try { return JSON.parse(init.body); } catch (e) { return init.body; } }
+    return init.body; // FormData u otros
+  }
+  function json(o, status) {
+    return new Response(JSON.stringify(o), { status: status || 200, headers: { 'Content-Type': 'application/json' } });
+  }
+  window.__demoJson = json;
+  window.fetch = async function (input, init) {
+    var url = typeof input === 'string' ? input : ((input && input.url) || String(input || ''));
+    var body = cuerpo(init);
+    var rs = window.__demoRoutes;
+    for (var i = 0; i < rs.length; i++) {
+      var r = rs[i];
+      var ok = false;
+      try { ok = r.test(url, body, init); } catch (e) { ok = false; }
+      if (!ok) continue;
+      var espera = typeof r.delay === 'number' ? r.delay : 380;
+      if (espera) await new Promise(function (s) { setTimeout(s, espera); });
+      var out = await r.fn(url, body, init);
+      if (out instanceof Response) return out;
+      return json(out == null ? { ok: true } : out);
+    }
+    if (/n8n\.excelentia\.com\.mx|supabase\.co|ycloud|googleapis\.com\/(gmail|drive)/i.test(url)) {
+      window.__demoBloqueadas.push(url);
+      try { console.warn('[demo] llamada bloqueada (no toca producción):', url); } catch (e) {}
+      return json({ ok: false, error: 'Demo: esta acción no está disponible en la demostración.' });
+    }
+    return real ? real(input, init) : Promise.reject(new Error('sin fetch'));
+  };
+  // XMLHttpRequest y sendBeacon hacia producción también se bloquean
+  try {
+    var XO = window.XMLHttpRequest && window.XMLHttpRequest.prototype.open;
+    if (XO) window.XMLHttpRequest.prototype.open = function (m, u) {
+      if (/n8n\.excelentia\.com\.mx|supabase\.co/i.test(String(u))) { u = 'data:application/json,%7B%22ok%22%3Afalse%7D'; }
+      return XO.apply(this, [m, u].concat([].slice.call(arguments, 2)));
+    };
+    if (navigator.sendBeacon) { var SB = navigator.sendBeacon.bind(navigator); navigator.sendBeacon = function (u, d) { if (/n8n\.excelentia\.com\.mx|supabase\.co/i.test(String(u))) return true; return SB(u, d); }; }
+  } catch (e) {}
+
+  /* ---- utilidades de datos falsos (deterministas) ---- */
+  var semilla = 20261015;
+  function rnd() { semilla = (semilla * 1103515245 + 12345) & 0x7fffffff; return semilla / 0x7fffffff; }
+  function ent(a, b) { return Math.floor(a + rnd() * (b - a + 1)); }
+  function elige(arr) { return arr[Math.floor(rnd() * arr.length)]; }
+  function pesos(pares) { var t = 0, i; for (i = 0; i < pares.length; i++) t += pares[i][1]; var x = rnd() * t; for (i = 0; i < pares.length; i++) { x -= pares[i][1]; if (x <= 0) return pares[i][0]; } return pares[pares.length - 1][0]; }
+  function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function hoy() { var d = new Date(); d.setHours(12, 0, 0, 0); return d; }
+  function masDias(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
+  var NOMBRES_H = ['JUAN', 'CARLOS', 'LUIS', 'JORGE', 'MIGUEL', 'ALEJANDRO', 'RICARDO', 'FERNANDO', 'ROBERTO', 'EDUARDO', 'JAVIER', 'SERGIO', 'ARTURO', 'DANIEL', 'RAÚL', 'PABLO', 'ANDRÉS', 'DIEGO', 'EMILIO', 'SANTIAGO', 'MATEO', 'SEBASTIÁN', 'RODRIGO', 'HÉCTOR', 'GUILLERMO'];
+  var NOMBRES_M = ['MARÍA', 'GUADALUPE', 'ANA', 'LAURA', 'PATRICIA', 'SOFÍA', 'VALERIA', 'CAMILA', 'XIMENA', 'DANIELA', 'GABRIELA', 'MÓNICA', 'ALEJANDRA', 'ADRIANA', 'CLAUDIA', 'VERÓNICA', 'REGINA', 'RENATA', 'PAULINA', 'LUCÍA', 'FERNANDA', 'MARIANA', 'ISABELLA', 'ELENA', 'CAROLINA'];
+  var APELLIDOS = ['GARCÍA', 'HERNÁNDEZ', 'MARTÍNEZ', 'LÓPEZ', 'GONZÁLEZ', 'PÉREZ', 'RODRÍGUEZ', 'SÁNCHEZ', 'RAMÍREZ', 'CRUZ', 'FLORES', 'GÓMEZ', 'MORALES', 'VÁZQUEZ', 'JIMÉNEZ', 'REYES', 'DÍAZ', 'TORRES', 'GUTIÉRREZ', 'RUIZ', 'MENDOZA', 'AGUILAR', 'ORTIZ', 'CASTILLO', 'MORENO', 'ROMERO', 'ÁLVAREZ', 'CHÁVEZ', 'RIVERA', 'JUÁREZ', 'DOMÍNGUEZ', 'NAVARRO', 'SALAZAR', 'CORTÉS', 'MEDINA', 'VEGA', 'CAMPOS', 'LUNA', 'ROJAS', 'ESPINOSA'];
+  function sinAcento(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  window.__demo = { rnd: rnd, ent: ent, elige: elige, pesos: pesos, iso: iso, hoy: hoy, masDias: masDias, H: NOMBRES_H, M: NOMBRES_M, AP: APELLIDOS, sinAcento: sinAcento, json: json, reset: function (s) { semilla = s; } };
+
+  /* ---- franja visible de demostración ---- */
+  function franja() {
+    if (document.getElementById('demo-franja')) return;
+    if (window.__demoSinFranja) return;
+    var b = document.createElement('div');
+    b.id = 'demo-franja'; b.className = 'no-print';
+    b.style.cssText = 'position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:2147483000;background:#0d1b3e;color:#fff;font-family:Manrope,Montserrat,sans-serif;font-size:12px;font-weight:600;padding:.4rem .85rem;border-radius:6px;box-shadow:0 4px 14px rgba(13,27,62,.3);pointer-events:none;white-space:nowrap;opacity:.92';
+    b.textContent = 'Demostración · datos de muestra · los envíos se simulan';
+    document.body.appendChild(b);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', franja); else franja();
+})();
+
+</script>
+<script>
+/* ==================================================================
+   DEMO · Copiloto de Facturación (Logística Demo)
+   Datos de muestra deterministas + rutas falsas de 4pl-viajes y 4pl-corte.
+   ================================================================== */
+(function () {
+  var D = window.__demo; D.reset(44012026);
+  try { localStorage.setItem('demo_la_clave_viajes', 'demo'); } catch (e) { }
+  try { if (!localStorage.getItem('demo_4pl_usuario')) localStorage.setItem('demo_4pl_usuario', 'Ana R. · Facturación'); } catch (e) { }
+  window.__claveLA = 'demo';
+
+  function norm(s) {
+    return String(s == null ? '' : s).trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  var HOY = D.hoy();
+  var ym = function (d) { return D.iso(d).slice(0, 7); };
+  var primeroDe = function (d, mas) { return new Date(d.getFullYear(), d.getMonth() + (mas || 0), 1, 12); };
+  // corte: lo facturado llega hasta el cierre del mes anterior (o el anterior a ese si el mes apenas empieza)
+  var LIMITE = HOY.getDate() >= 10 ? primeroDe(HOY, 0) : primeroDe(HOY, -1);
+  var LIM = D.iso(LIMITE);
+  var MES_ANT = ym(D.masDias(LIMITE, -3));
+
+  var UNIS = ['Camioneta 3.5', 'Rabón', 'Torton', "Tráiler 53'"];
+  var ZONAS = {
+    1: ['CDMX / Edo. de México', [2300, 3900, 4800, 7200]],
+    2: ['Toluca', [3400, 5200, 6300, 9800]],
+    3: ['Querétaro', [5600, 8200, 9800, 15400]],
+    4: ['Puebla', [4700, 7100, 8600, 13200]],
+    5: ['León / Silao', [8100, 11800, 13900, 21500]],
+    6: ['Guadalajara', [11200, 15600, 18300, 27800]],
+    7: ['Monterrey', [14600, 19800, 23500, 34900]],
+    8: ['Veracruz', [9400, 13700, 16200, 24800]],
+    9: ['Villahermosa', [15800, 21900, 25600, 37400]],
+    10: ['Mérida', [21300, 28400, 33100, 46800]]
+  };
+  var precio = function (c) { return Math.round(c * 1.045 / 10) * 10; };
+  var MAN = { 'CAMIONETA 3 5': 1145, 'RABON': 1800, 'TORTON': 2440, 'TRAILER 53': 2700 };
+  var DEST = [
+    { d: 'CEDIS JUGUETERÍA CENTRAL TULTITLÁN', z: 1, w: 6, u: [0, 1, 2] },
+    { d: 'TIENDA DEPARTAMENTAL SATÉLITE', z: 1, w: 4, u: [0, 1] },
+    { d: 'CEDIS AUTOSERVICIO CUAUTITLÁN', z: 1, w: 5, u: [1, 2, 3], man: 0.82 },
+    { d: 'SUCURSAL CDMX POLANCO', z: 1, w: 3, u: [0] },
+    { d: 'CEDIS VALLEJO', z: 1, w: 3, u: [1, 2] },
+    { d: 'CEDIS TOLUCA LERMA', z: 2, w: 4, u: [1, 2, 3] },
+    { d: 'SUCURSAL TOLUCA METEPEC', z: 2, w: 2, u: [0, 1] },
+    { d: 'CEDIS QUERÉTARO EL MARQUÉS', z: 3, w: 4, u: [2, 3] },
+    { d: 'SUCURSAL QUERÉTARO JURIQUILLA', z: 3, w: 2, u: [0, 1] },
+    { d: 'CEDIS PUEBLA CUAUTLANCINGO', z: 4, w: 3, u: [1, 2, 3] },
+    { d: 'CEDIS SILAO PUERTO INTERIOR', z: 5, w: 3, u: [2, 3] },
+    { d: 'SUCURSAL LEÓN PLAZA', z: 5, w: 2, u: [0, 1] },
+    { d: 'CEDIS GUADALAJARA EL SALTO', z: 6, w: 4, u: [2, 3] },
+    { d: 'SUCURSAL GUADALAJARA ZAPOPAN', z: 6, w: 2, u: [1] },
+    { d: 'CEDIS MONTERREY APODACA', z: 7, w: 4, u: [2, 3] },
+    { d: 'SUCURSAL MONTERREY SAN PEDRO', z: 7, w: 2, u: [1, 3] },
+    { d: 'CEDIS VERACRUZ PUERTO', z: 8, w: 2, u: [2, 3] },
+    { d: 'CEDIS VILLAHERMOSA', z: 9, w: 2, u: [2, 3] },
+    { d: 'CEDIS MÉRIDA PONIENTE', z: 10, w: 2, u: [1, 3] }
+  ];
+  var CLIENTES = ['Juguetes del Norte', 'Electro Hogar MX', 'Bebidas del Valle', 'Farmacéutica Sol', 'Muebles Arista'];
+  var ORIGEN = 'ALMACÉN LOGÍSTICA DEMO';
+  var HORAS = ['07:30:00', '08:00:00', '09:15:00', '10:00:00', '11:30:00', '13:00:00', '15:45:00', '17:00:00', '18:30:00'];
+
+  /* ---- memoria aprendida (tarifario por destino y unidad) ---- */
+  var tarifario = {}, ventaFlete = {}, cadena = {};
+  Object.keys(ZONAS).forEach(function (z) { ZONAS[z][1].forEach(function (c) { ventaFlete[String(c)] = precio(c); }); });
+  ventaFlete['800'] = 880; ventaFlete['1100'] = 1200;
+  var totalHist = 0;
+  DEST.forEach(function (x) {
+    x.u.forEach(function (ui) {
+      var uni = norm(UNIS[ui]), c = ZONAS[x.z][1][ui], n = D.ent(3, 18), inest = D.rnd() < 0.18;
+      totalHist += n;
+      tarifario[norm(x.d) + '||' + uni] = {
+        m: c, p: inest ? Math.round((0.7 + D.rnd() * 0.2) * 100) / 100 : 1, n: n, nv: inest ? D.ent(2, 3) : 1,
+        min: inest ? Math.round(c * 0.92) : c, max: inest ? Math.round(c * 1.09) : c,
+        man: x.man ? MAN[uni] : null, pman: x.man || 0,
+        f: D.rnd() < 0.65 ? 'facturado' : undefined, um: MES_ANT
+      };
+      var k = norm(x.d).split(' ')[0] + '||' + uni;
+      if (!cadena[k]) cadena[k] = { m: c, n: n }; else cadena[k].n += n;
+    });
+  });
+  var mesesTxt = (function () {
+    var M = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    var a = D.masDias(LIMITE, -95), b = D.masDias(LIMITE, -3);
+    return M[a.getMonth()] + ' a ' + M[b.getMonth()] + ' ' + b.getFullYear();
+  })();
+  var MEMORIA = {
+    ventaFlete: ventaFlete,
+    ventaManiobra: { '1145': 1211, '1800': 1900, '2440': 2580, '2700': 2900 },
+    ventaEstadia: { '1700': 1800, '2600': 2700 },
+    ratioUnidad: { 'CAMIONETA 3 5': 1.045, 'RABON': 1.045, 'TORTON': 1.045, 'TRAILER 53': 1.04 },
+    ratioGlobal: 1.045,
+    tarifario: tarifario, cadena: cadena,
+    stats: { viajes: totalHist, meses: mesesTxt, destinos: DEST.length, rutas: Object.keys(tarifario).length }
+  };
+
+  /* ---- viajes de la plataforma (últimos ~3.5 meses + citas próximas) ---- */
+  var VIAJES = [], sigId = 2401;
+  function eligeDest() { var t = 0; DEST.forEach(function (x) { t += x.w; }); var r = D.rnd() * t; for (var i = 0; i < DEST.length; i++) { r -= DEST[i].w; if (r <= 0) return DEST[i]; } return DEST[0]; }
+  function nuevoViaje(cli, fecha) {
+    var x = eligeDest(), ui = D.elige(x.u), uni = UNIS[ui], c = ZONAS[x.z][1][ui];
+    var manP = x.man ? 0.85 : 0.22;
+    return {
+      id: String(sigId++).padStart(5, '0'), folio: 'S-' + String(D.ent(100000, 999999)).padStart(8, '0'), origen: ORIGEN, cliente: cli,
+      pedido: String(4500000000 + D.ent(100000, 999999)), destino: x.d, fecha: D.iso(fecha), hora: D.elige(HORAS), unidad: uni,
+      status: fecha > HOY ? 'Programado' : (D.iso(fecha) === D.iso(HOY) ? 'En tránsito' : 'Completado'),
+      zona: x.z, zonaNombre: ZONAS[x.z][0], costoZona: c, precioZona: precio(c),
+      manBase: D.rnd() < manP ? 1 : 0, est: '', tieneRepartos: 'No', esReparto: 'No', padre: '', edicion: 'No', extCosto: ''
+    };
+  }
+  var inicio = D.masDias(HOY, -112);
+  for (var i = 0; i <= 112; i++) {
+    var dia = D.masDias(inicio, i); if (dia.getDay() === 0) continue;
+    var lista = [];
+    for (var a = D.ent(2, 4); a > 0; a--) lista.push(CLIENTES[0]);
+    for (var b = D.ent(0, 2); b > 0; b--) lista.push(CLIENTES[1]);
+    if (D.rnd() < 0.7) lista.push(D.elige(CLIENTES.slice(2)));
+    lista.forEach(function (cli) { VIAJES.push(nuevoViaje(cli, dia)); });
+  }
+  // dos citas ya programadas para el mes siguiente
+  var sig = primeroDe(HOY, 1);
+  VIAJES.push(nuevoViaje(CLIENTES[0], D.masDias(sig, 1)));
+  VIAJES.push(nuevoViaje(CLIENTES[0], D.masDias(sig, 3)));
+
+  // casos que el Copiloto debe señalar (dentro de la carga de Juguetes del Norte)
+  var S = VIAJES.filter(function (v) { return v.cliente === CLIENTES[0] && v.fecha >= LIM && v.fecha <= D.iso(HOY); });
+  function caso(i, f) { if (S[i]) f(S[i]); }
+  caso(2, function (v) { v.destino = 'CEDIS MÉRIDA PONIENTE'; v.unidad = 'Rabón'; v.zona = 10; v.zonaNombre = 'Mérida'; v.costoZona = null; v.precioZona = null; });
+  caso(5, function (v) { v.destino = 'SUCURSAL VILLAHERMOSA TABASCO 2000'; v.unidad = 'Torton'; v.zona = 9; v.zonaNombre = 'Villahermosa'; v.costoZona = null; v.precioZona = null; v.manBase = 0; });
+  caso(8, function (v) { v.destino = 'CEDIS VALLEJO'; v.unidad = 'Torton'; v.zona = 2; v.zonaNombre = 'Toluca'; v.costoZona = 6300; v.precioZona = precio(6300); });
+  caso(11, function (v) { v.destino = 'SUCURSAL QUERÉTARO JURIQUILLA'; v.unidad = "Tráiler 53'"; v.zona = 3; v.zonaNombre = 'Querétaro'; v.costoZona = 15850; v.precioZona = 15600; v.manBase = 0;
+    v.edicion = 'Sí'; v.edMotivo = 'el transportista subió la tarifa por desvío'; v.edQuien = 'Operaciones'; v.edFecha = v.fecha; });
+  caso(14, function (v) { v.destino = 'CEDIS AUTOSERVICIO CUAUTITLÁN'; v.unidad = 'Torton'; v.zona = 1; v.zonaNombre = ZONAS[1][0]; v.costoZona = 4800; v.precioZona = precio(4800); v.manBase = 0; });
+  caso(17, function (v) { v.extCosto = 650; v.extConceptos = 'Casetas adicionales por ruta alterna'; v.extFacturar = 'Sí'; });
+  caso(20, function (v) { v.destino = 'CEDIS MONTERREY APODACA'; v.unidad = "Tráiler 53'"; v.zona = 7; v.zonaNombre = 'Monterrey'; v.costoZona = 34900; v.precioZona = precio(34900); v.tieneRepartos = 'Sí'; });
+  caso(21, function (v) { v.destino = 'SUCURSAL MONTERREY SAN PEDRO'; v.unidad = "Tráiler 53'"; v.zona = 7; v.zonaNombre = 'Monterrey'; v.esReparto = 'Sí'; v.padre = S[20] ? S[20].id : ''; v.fecha = S[20] ? S[20].fecha : v.fecha; v.facturarReparto = 'Sí'; });
+  caso(23, function (v) { v.destino = 'CEDIS JUGUETERÍA CENTRAL TULTITLÁN'; v.unidad = 'Torton'; v.zona = 1; v.zonaNombre = ZONAS[1][0]; v.costoZona = 4800; v.precioZona = precio(4800); v.tieneRepartos = 'Sí'; });
+  caso(24, function (v) { v.destino = 'SUCURSAL CDMX POLANCO'; v.unidad = 'Torton'; v.zona = 1; v.zonaNombre = ZONAS[1][0]; v.esReparto = 'Sí'; v.padre = S[23] ? S[23].id : ''; v.fecha = S[23] ? S[23].fecha : v.fecha; });
+  caso(26, function (v) { v.est = 1700; });
+  caso(28, function (v) { v.origen = 'PLANTA JUGUETES DEL NORTE SAN JUAN DEL RÍO'; });
+  // Electro Hogar MX: un destino sin tarifa en la zona
+  var E = VIAJES.filter(function (v) { return v.cliente === CLIENTES[1] && v.fecha >= LIM; });
+  if (E[3]) { E[3].destino = 'BODEGA ELECTRO HOGAR MÉRIDA'; E[3].zona = 10; E[3].zonaNombre = 'Mérida'; E[3].costoZona = null; E[3].precioZona = null; }
+
+  // cortes compartidos (uno por cliente) y lo ya facturado
+  function maxId(cli) { var m = 0; VIAJES.forEach(function (v) { if (v.fecha < LIM && (!cli || cli(v.cliente))) m = Math.max(m, parseInt(v.id, 10)); }); return m; }
+  var porJug = function (c) { return c === CLIENTES[0]; }, porEle = function (c) { return c === CLIENTES[1]; }, porOtros = function (c) { return c !== CLIENTES[0] && c !== CLIENTES[1]; };
+  var cuando = function (dias, h) { var d = D.masDias(LIMITE, dias); d.setHours(h, 20, 0, 0); return d.toISOString(); };
+  var CORTES = {
+    'LOGISTICA DEMO': { ultimoViaje: maxId(porJug), actualizadoPor: 'Ana R. · Facturación', actualizadoEn: cuando(1, 11) },
+    'LOGISTICA DEMO ELECTRO': { ultimoViaje: maxId(porEle), actualizadoPor: 'Ana R. · Facturación', actualizadoEn: cuando(2, 10) },
+    'LOGISTICA DEMO OTROS': { ultimoViaje: maxId(porOtros), actualizadoPor: 'Diego M. · Cobranza', actualizadoEn: cuando(2, 17) }
+  };
+  // un viaje del corte anterior que se pasó a este mes
+  var antJ = VIAJES.filter(function (v) { return porJug(v.cliente) && v.fecha < LIM; });
+  var POSP = antJ.length > 3 ? [[parseInt(antJ[antJ.length - 3].id, 10), MES_ANT]] : [];
+  function facturados() {
+    var p = {}; POSP.forEach(function (x) { p[x[0]] = 1; });
+    return VIAJES.filter(function (v) { return v.fecha < LIM && !p[parseInt(v.id, 10)]; }).map(function (v) { return parseInt(v.id, 10); });
+  }
+
+  /* ---- respaldo sin conexión: formato de filas con "|" ---- */
+  window.__demoRespaldo = VIAJES.filter(function (v) { return porJug(v.cliente) && v.fecha < LIM && v.fecha >= D.iso(D.masDias(LIMITE, -31)); })
+    .map(function (v) {
+      return [parseInt(v.id, 10), v.destino, v.unidad, String(v.zona).padStart(5, '0'), v.costoZona == null ? '' : v.costoZona.toFixed(2), v.precioZona == null ? '' : v.precioZona.toFixed(2),
+        v.manBase, '0.00', '', '', '', '', v.zonaNombre, v.fecha].join('|');
+    });
+
+  window.__demoDATA = { memoria: MEMORIA, demoCsv: [], realJulio: {} };
+  var copia = function (o) { return JSON.parse(JSON.stringify(o)); };
+
+  /* ---- rutas ---- */
+  window.__demoRoutes.push({
+    test: function (u) { return /4pl-corte/.test(u); },
+    fn: function (u, body) {
+      body = body || {};
+      var c = CORTES[body.empresa] || (CORTES[body.empresa] = { ultimoViaje: 0, actualizadoPor: '', actualizadoEn: '' });
+      if (body.accion === 'guardar') {
+        var n = Number(body.ultimoViaje) || 0;
+        if (n < c.ultimoViaje) return Object.assign({ ok: true, movimiento: 'rechazado: el corte ya iba más adelante' }, c);
+        c.ultimoViaje = n; c.actualizadoPor = body.usuario || 'Copiloto'; c.actualizadoEn = new Date().toISOString();
+        return Object.assign({ ok: true, movimiento: 'avanzado' }, c);
+      }
+      return Object.assign({ ok: true, empresa: body.empresa }, c);
+    }
+  });
+  window.__demoRoutes.push({
+    test: function (u) { return /4pl-viajes/.test(u); },
+    delay: 700,
+    fn: function (u, body) {
+      body = body || {};
+      if (body.modo === 'memoria') {
+        if (body.posponer) { body.posponer.forEach(function (id) { POSP = POSP.filter(function (x) { return x[0] !== id; }); POSP.push([id, body.mes || '']); }); return { ok: true, pospuestos: POSP }; }
+        if (body.quitar) { POSP = POSP.filter(function (x) { return body.quitar.indexOf(x[0]) < 0; }); return { ok: true, pospuestos: POSP }; }
+        var m = copia(MEMORIA); m.pospuestos = copia(POSP); m.facturados = facturados();
+        return { ok: true, memoria: m };
+      }
+      if (body.modo === 'corte') {
+        var desde = Number(body.desdeId) || 0;
+        return { ok: true, viajes: copia(VIAJES.filter(function (v) { return parseInt(v.id, 10) > desde; })) };
+      }
+      if (body.modo === 'fechas') {
+        return { ok: true, viajes: copia(VIAJES.filter(function (v) { return v.fecha >= body.desde && v.fecha <= body.hasta; })) };
+      }
+      return { ok: false, error: 'Demo: modo no reconocido.' };
+    }
+  });
+})();
+
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logística Demo · Copiloto de Facturación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',-apple-system,sans-serif;background:#f5f6f8;color:#1a2035;line-height:1.42;font-size:14px}
+.wrap{max-width:1360px;margin:0 auto;padding:0 1rem 3rem}
+.narrow{max-width:720px;margin:0 auto}
+
+/* HEADER (20% mas compacto, logo intacto 48px) */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;padding:.7rem 0;margin-bottom:1.1rem}
+.hd{max-width:1360px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.7rem}
+.logo-box{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;box-sizing:border-box;flex-shrink:0}
+.logo-box img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:11px;font-weight:500;color:#fff;letter-spacing:.2px}
+.hd-title{display:flex;align-items:center;gap:.75rem;text-align:right}
+.hd-title h1{font-size:14px;font-weight:800;color:#fff;letter-spacing:.2px}
+.hd-title p{font-size:10.5px;color:#b9d3ec;font-weight:500}
+.logo-box-4pl{background:#fff;border-radius:9px;padding:.25rem .6rem;display:flex;align-items:center;justify-content:center;width:134px;height:56px;box-sizing:border-box;flex-shrink:0}
+.logo-box-4pl img{height:48px;width:auto;max-width:100%;object-fit:contain;display:block}
+.logo-fallback-4pl{font-size:14px;font-weight:800;color:#1a3a6b;display:none;white-space:nowrap}
+
+/* CORTE */
+.corte{max-width:720px;margin:1rem auto 0;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:1rem 1.1rem}
+.corte h4{font-size:14px;font-weight:800;color:#1a3a6b;margin-bottom:.3rem}
+.corte p{font-size:12.5px;color:#4a5068;margin-bottom:.8rem}
+.corte p b{color:#1a2035}
+.corte .btnrow{gap:.5rem}
+.corte .link{font-size:11.5px;color:#8a90a0;background:none;border:none;font-family:inherit;cursor:pointer;text-decoration:underline;padding:.2rem 0}
+.corte .link:hover{color:#1a3a6b}
+.chip.corte-on{background:#fff5f3;border-color:#f3d4cd;color:#c0392b}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:1.1rem}
+.card h2{font-size:15px;font-weight:800;color:#1a2035;margin-bottom:.15rem}
+.card h2 .n{color:#4a9fd4;font-weight:700}
+.card .sub{font-size:12.5px;color:#4a5068;margin-bottom:.9rem}
+.memline{font-size:11.5px;color:#8a90a0;margin-top:.9rem;text-align:center}
+.memline .dot{width:7px;height:7px;border-radius:50%;background:#2e9e5b;display:inline-block;margin-right:.3rem;animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* DROP */
+.drop{max-width:720px;margin:0 auto;border:2px dashed #c8d9f0;background:#f0f6ff;border-radius:12px;padding:1.6rem 1.2rem;text-align:center;transition:.18s;cursor:pointer}
+.drop:hover,.drop.over{background:#e8f0fb;border-color:#4a9fd4}
+.drop .ico{font-size:28px;line-height:1;margin-bottom:.3rem}
+.drop h3{font-size:15px;font-weight:800;margin-bottom:.15rem}
+.drop p{font-size:12.5px;color:#4a5068}
+.drop.sm{padding:1.1rem;background:#fff}
+.base-box{max-width:720px;margin:0 auto;background:#f0f6ff;border:1px solid #c8d9f0;border-radius:12px;padding:1.2rem 1.2rem 1.1rem;text-align:center}
+.base-box .ico{font-size:28px;line-height:1;margin-bottom:.3rem}
+.base-box h3{font-size:15px;font-weight:800;margin-bottom:.6rem}
+.modo-row{display:flex;gap:.45rem;justify-content:center;flex-wrap:wrap;margin-bottom:.6rem}
+.base-hint{font-size:12.5px;color:#4a5068;margin-bottom:.75rem}
+.fechas-row{font-size:12.5px;color:#4a5068;margin-bottom:.85rem;display:flex;gap:.4rem;justify-content:center;align-items:center;flex-wrap:wrap}
+.fechas-row .dt{border:1px solid #dde1e9;border-radius:6px;padding:.3rem .45rem;background:#fff}
+.base-box .btnrow{justify-content:center}
+.base-box .link{font-size:11.5px;color:#8a90a0;background:none;border:none;font-family:inherit;cursor:pointer;text-decoration:underline;padding:.2rem 0}
+.base-box .link:hover{color:#1a3a6b}
+.btn:disabled{opacity:.6;cursor:wait}
+.base-msg{max-width:720px;margin:.8rem auto 0;font-size:12.5px;color:#1a3a6b;background:#fff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.55rem .8rem;text-align:left}
+.base-msg.warn{border-left-color:#c9392b;color:#1a2035}
+.respaldo{max-width:720px;margin:1rem auto 0}
+.respaldo summary{font-size:12.5px;font-weight:700;color:#4a5068;cursor:pointer;text-align:center;margin-bottom:.7rem;list-style-position:inside}
+
+/* BOTONES */
+.btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:.45rem .85rem;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{background:#1e5096}
+.btn.ghost{background:#fff;color:#1a3a6b}
+.btn.ghost:hover{background:#e8f0fb}
+.mini{font-family:inherit;font-size:10.5px;font-weight:700;border:1px solid #c8d9f0;background:#fff;color:#1a3a6b;border-radius:6px;padding:.12rem .4rem;margin:.15rem .2rem 0 0;cursor:pointer;white-space:nowrap}
+.mini:hover{background:#e8f0fb}
+.acciones{display:block}
+.pospbox{max-width:720px;margin:1rem auto 0;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:.8rem 1rem;font-size:12.5px;color:#1a2035}
+.pospbox h4{margin:0 0 .2rem;font-size:13.5px;color:#1a3a6b}.pospbox p{margin:0 0 .5rem;color:#4a5068}
+.posp-row{padding:.3rem 0;border-top:1px solid #dde1e9}
+@media print{.acciones,.mini{display:none!important}}
+.btn.green{background:#2e9e5b;border-color:#2e9e5b}
+.btn.green:hover{background:#268a4e}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+select.sel{font-family:inherit;font-size:12.5px;font-weight:600;border:1px solid #dde1e9;border-radius:8px;padding:.45rem .5rem;background:#fff;color:#1a2035;cursor:pointer}
+
+/* TABS */
+.tabs{display:flex;gap:.35rem;border-bottom:1px solid #dde1e9;margin-bottom:1.1rem;flex-wrap:wrap}
+.tab{font-size:13px;font-weight:700;padding:.5rem .9rem;border:1px solid transparent;border-bottom:none;border-radius:9px 9px 0 0;color:#4a5068;cursor:pointer;margin-bottom:-1px;background:transparent}
+.tab:hover{background:#e8f0fb}
+.tab.on{background:#fff;border-color:#dde1e9;color:#1a3a6b}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-bottom:1.1rem}
+.kpi{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.7rem .85rem}
+.kpi .lb{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a90a0}
+.kpi .vl{font-size:19px;font-weight:800;color:#1a2035;margin-top:.1rem;letter-spacing:-.3px}
+.kpi .hint{font-size:11px;color:#4a5068}
+.kpi.acc{background:#eef4fc;border-color:#c8d9f0}
+.kpi.acc .vl{color:#1a3a6b}
+.kpi.warn{background:#fff8ec;border-color:#f0dcb4}
+.kpi.warn .vl{color:#a06a12}
+
+/* ALERTAS */
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:.6rem}
+.alert{border-radius:10px;padding:.6rem .8rem;font-size:12.5px;border:1px solid #c8d9f0;background:#f0f6ff;border-left:3px solid #4a9fd4}
+.alert.red{background:#fdf0ef;border-color:#f2c9c4;border-left-color:#c9392b}
+.alert.amber{background:#fff8ec;border-color:#f0dcb4;border-left-color:#e0a02c}
+.alert.grey{background:#f6f7f9;border-color:#e3e6ec;border-left-color:#8a90a0}
+.alert .t{font-weight:800;margin-bottom:.1rem}
+.alert .m{color:#4a5068}
+.alert[data-sig]{cursor:pointer;transition:.15s}
+.alert[data-sig]:hover{filter:brightness(.985);transform:translateY(-1px)}
+.alert .lnk{font-size:11px;font-weight:700;color:#1a3a6b;margin-top:.3rem;opacity:.75}
+.alert.on{box-shadow:0 0 0 2px #1a3a6b inset}
+details.auto{margin-top:.9rem;border:1px solid #e3e6ec;border-radius:10px;background:#fafbfc}
+details.auto summary{cursor:pointer;font-size:12.5px;font-weight:700;color:#4a5068;padding:.55rem .8rem;list-style:none}
+details.auto summary::-webkit-details-marker{display:none}
+details.auto summary::before{content:'▸ ';color:#8a90a0}
+details.auto[open] summary::before{content:'▾ '}
+details.auto .bd{padding:0 .8rem .8rem}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.7rem}
+.toolbar .spacer{flex:1 1 auto}
+.chip{font-size:12px;font-weight:700;border-radius:20px;padding:.28rem .65rem;border:1px solid #dde1e9;background:#fff;cursor:pointer;color:#4a5068;white-space:nowrap}
+.chip.on{background:#1a3a6b;border-color:#1a3a6b;color:#fff}
+.cli-row{display:flex;gap:.45rem;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:.7rem}
+.cli-lb{font-size:12px;font-weight:700;color:#4a5068}
+.avance{max-width:720px;margin:.9rem auto 0;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:.8rem 1rem;text-align:left}
+.avance h4{margin:0 0 .3rem;font-size:14px;color:#1a2035}
+.avance p{margin:0 0 .6rem;font-size:13px;color:#4a5068}
+.fuera-nota{font-size:12px;color:#8a90a0;font-weight:500}
+.chip .c{opacity:.75;font-weight:600}
+.sep{width:1px;height:20px;background:#dde1e9;margin:0 .15rem}
+.fechas{display:inline-flex;align-items:center;gap:.3rem;font-size:11.5px;color:#8a90a0;font-weight:600;
+  border:1px solid #dde1e9;border-radius:20px;padding:.15rem .55rem;background:#fff}
+.dt{font-family:inherit;font-size:11.5px;font-weight:700;color:#1a2035;border:none;background:transparent;padding:.1rem;cursor:pointer}
+.dt:focus{outline:none;color:#1a3a6b}
+
+/* TABLA */
+.tblwrap{overflow-x:auto;border:1px solid #dde1e9;border-radius:10px;background:#fff}
+table{border-collapse:collapse;width:100%;min-width:1020px;font-size:12.5px}
+th{background:#dce8f7;color:#1a2035;font-weight:700;text-align:left;padding:.45rem .55rem;position:sticky;top:0;white-space:nowrap;font-size:11.5px;border-bottom:1px solid #c8d9f0;cursor:pointer;user-select:none}
+th:hover{background:#cfe0f4}
+th .ar{color:#4a9fd4;font-size:9px}
+td{padding:.38rem .55rem;border-bottom:1px solid #eef1f6;vertical-align:middle}
+tbody tr:hover{background:#e8f0fb}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th.num{text-align:right}
+td.dest{max-width:225px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sem{display:inline-block;width:9px;height:9px;border-radius:50%}
+.sem.g{background:#2e9e5b}.sem.a{background:#e0a02c}.sem.r{background:#c9392b}
+tr.st-a{background:#fffbf2}tr.st-r{background:#fdf3f2}
+.inp{width:80px;font-family:inherit;font-size:12.5px;font-weight:700;text-align:right;border:1px solid #dde1e9;border-radius:6px;padding:.15rem .3rem;background:#fff;color:#1a2035}
+.inp:focus{outline:none;border-color:#4a9fd4;background:#f0f6ff}
+.inp.edited{border-color:#2e9e5b;background:#f1faf4}
+.src{font-size:10.5px;color:#8a90a0;display:block;line-height:1.3}
+.flag{display:inline-block;font-size:10px;font-weight:800;border-radius:4px;padding:.05rem .3rem;margin-right:.2rem;white-space:nowrap}
+.flag.r{background:#fbe3e0;color:#a02a1e}
+.flag.a{background:#fdf0d8;color:#8a5a0c}
+.flag.b{background:#eceef2;color:#5a6070}
+td.hi{background:#fff6e4}
+th.hi{background:#f5dfae}
+tr:hover td.hi{background:#fdf0d8}
+.marg-neg{color:#c9392b;font-weight:800}
+.marg-ok{color:#2e9e5b;font-weight:700}
+tfoot td{background:#dce8f7;font-weight:800;border-top:2px solid #c8d9f0}
+
+/* GRAFICAS */
+.chart{margin-bottom:1.4rem}
+.chart h3{font-size:13.5px;font-weight:800;margin-bottom:.1rem}
+.chart .q{font-size:12px;color:#4a5068;margin-bottom:.7rem}
+.bars{display:flex;flex-direction:column;gap:.32rem}
+.bar{display:grid;grid-template-columns:minmax(120px,210px) 1fr auto;gap:.6rem;align-items:center;font-size:12px}
+.bar .lb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4a5068}
+.bar .tr{background:#eef1f6;border-radius:5px;height:16px;position:relative;overflow:hidden}
+.bar .fl{height:100%;border-radius:5px;background:#4a9fd4;transition:width .5s}
+.bar .fl.neg{background:#c9392b}
+.bar .fl.warn{background:#e0a02c}
+.bar .fl.good{background:#2e9e5b}
+.bar .vl{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:74px;text-align:right}
+.rng{background:#eef1f6;border-radius:5px;height:16px;position:relative}
+.rng .seg{position:absolute;height:100%;background:#e0a02c;border-radius:5px;opacity:.85}
+
+/* VALIDACION */
+.cmp-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.7rem;margin-bottom:.9rem}
+.cmp-box{border:1px solid #dde1e9;border-radius:12px;padding:.8rem;background:#fff;text-align:center}
+.cmp-box .big{font-size:26px;font-weight:800;letter-spacing:-.5px;color:#2e9e5b}
+.cmp-box .big.amber{color:#e0a02c}
+.cmp-box .lb{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a90a0}
+.cmp-box .hint{font-size:11.5px;color:#4a5068;margin-top:.2rem}
+.ok{color:#2e9e5b;font-weight:800}.no{color:#c9392b;font-weight:800}
+
+.note{background:#eef4fc;border-left:3px solid #1a3a6b;border-radius:8px;padding:.55rem .8rem;font-size:12px;color:#4a5068;margin-top:.9rem}
+.note b{color:#1a2035}
+.jul-banner{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);color:#fff;border-radius:12px;padding:.8rem 1.1rem;margin-bottom:1rem;cursor:pointer;border-bottom:3px solid #4a9fd4}
+.jul-banner .t1{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#c8d9f0}
+.jul-banner .t2{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.jul-banner .t3{font-size:12.5px;color:#c8d9f0}
+.jul-banner .go{font-size:12px;font-weight:800;background:#fff;color:#1a3a6b;border-radius:20px;padding:.35rem .9rem;white-space:nowrap}
+.jul-wrap{max-width:900px;margin:0 auto}
+.jul-hero .cmp-box .big{font-size:34px}
+.jul-hero .cmp-box .big.grey{color:#8a90a0}
+.jul-hero .cmp-box .big.blue{color:#1a3a6b}
+.jul-hero .cmp-box.meta{background:#eef4fc;border-color:#c8d9f0}
+.barj{height:9px;background:#eef0f4;border-radius:6px;overflow:hidden;margin-top:.5rem}
+.barj i{display:block;height:100%;background:#2e9e5b;transition:width .7s ease}
+.barj.grey i{background:#8a90a0}.barj.blue i{background:#1a3a6b}
+.rsp{display:grid;grid-template-columns:auto 1fr auto;gap:.2rem .85rem;align-items:start;padding:.85rem 0;border-top:1px solid #eef0f4}
+.rsp:first-child{border-top:none;padding-top:.3rem}
+.sw{position:relative;width:44px;height:25px;border-radius:14px;background:#c8d0dc;border:none;cursor:pointer;transition:.2s;margin-top:1px;flex-shrink:0}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw.on{background:#2e9e5b}.sw.on::after{left:22px}
+.rsp h3{font-size:14px;font-weight:800;color:#1a2035;line-height:1.3}
+.rsp .q{font-size:12.5px;color:#1a3a6b;font-weight:600;margin-top:.15rem}
+.rsp ul{list-style:none;margin-top:.35rem}
+.rsp li{font-size:12px;color:#4a5068;padding:.14rem 0}
+.rsp li b{color:#1a2035}
+.rsp .plus{font-size:13px;font-weight:800;color:#2e9e5b;white-space:nowrap;padding-top:2px}
+.rsp .plus.cero{color:#8a90a0}
+.jul-rest{margin-top:.6rem}
+#tblJul tr.flip td{background:#eaf7ef}
+@media(max-width:600px){.rsp{grid-template-columns:auto 1fr}.rsp .plus{grid-column:2}.jul-hero .cmp-box .big{font-size:28px}.jul-banner .t2{font-size:17px}}
+.hidden{display:none!important}
+@page{size:Letter;margin:13mm}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff}
+  section,.card,main,.wrap,.tbl-wrap{break-inside:auto}
+  .alert,.kpi,tr,.corte,.base-msg,.rsp,.cmp-box,.jul-banner{break-inside:avoid}
+  h1,h2,h3,h4{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  thead{display:table-header-group}
+  #cardLoad,.toolbar,#toolbar,.tabs,.btn,.no-print{display:none!important}
+  a[href]:after{content:none}
+}
+.empty{text-align:center;color:#8a90a0;font-size:12.5px;padding:1.6rem}
+footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
+
+@media(max-width:600px){
+  .hd{flex-direction:column;align-items:flex-start}
+  .hd-title{flex-direction:column;align-items:flex-start;text-align:left;gap:.4rem}
+  .logo-box-4pl img{height:38px}
+  .logo-box,.logo-box-4pl{width:112px;height:48px}
+  .logo-box img{height:38px}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.25rem}
+  .card{padding:.9rem}
+  .kpi .vl{font-size:16px}
+  .toolbar .spacer{display:none}
+  .toolbar{gap:.4rem}
+  .bar{grid-template-columns:1fr;gap:.15rem}
+  .bar .vl{text-align:left}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+    <div class="hd-title">
+      <h1>Copiloto de Facturación · Logística Demo</h1>
+      <div class="logo-box-4pl">
+        <span class="logo-fallback-4pl" style="display:block">Logística Demo</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- CARGA -->
+  <section class="card" id="cardLoad">
+    <h2>Trae los viajes de la plataforma de viajes</h2>
+    <div class="base-box">
+      <div class="ico">🔄</div>
+      <h3>Lectura directa, sin descargar el reporte</h3>
+      <div class="cli-row" id="cliRow">
+        <span class="cli-lb">Cliente:</span>
+        <button class="chip on" data-cli="juguetes">Juguetes del Norte</button>
+        <button class="chip" data-cli="electro">Electro Hogar MX</button>
+        <button class="chip" data-cli="otros">Otros clientes</button>
+      </div>
+      <div class="modo-row">
+        <button class="chip on" data-modo="corte">Desde el último viaje facturado</button>
+        <button class="chip" data-modo="fechas">Por rango de fechas</button>
+      </div>
+      <p class="base-hint" id="baseHint"></p>
+      <div class="fechas-row hidden" id="fechasRow">del <input type="date" class="dt" id="bd1"> al <input type="date" class="dt" id="bd2"></div>
+      <div class="btnrow">
+        <button class="btn green" id="btnBase">Traer viajes de la plataforma</button>
+        <button class="link" id="btnClave">Cambiar clave de acceso</button>
+      </div>
+    </div>
+    <p class="base-msg hidden" id="baseMsg"></p>
+    <details class="respaldo">
+      <summary>¿Sin conexión? Usa el respaldo</summary>
+      <div class="btnrow" style="margin:.6rem 0"><button class="btn ghost" id="btnDemoJul">Cargar el mes anterior de respaldo · copia sin conexión</button></div>
+      <div class="drop" id="drop">
+        <div class="ico">📥</div>
+        <h3>Arrastra el CSV aquí</h3>
+        <p>o haz clic para buscarlo en tu computadora</p>
+        <input type="file" id="file" accept=".csv,text/csv" class="hidden">
+      </div>
+    </details>
+    <div class="corte hidden" id="corteBox"></div>
+    <div class="avance hidden" id="avanceBox"></div>
+    <p class="memline" id="memLine"></p>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section id="results" class="hidden">
+    <div class="jul-banner hidden" id="julBanner"></div>
+    <div class="kpis" id="kpis"></div>
+
+    <div class="tabs">
+      <button class="tab on" data-tab="fact">Facturación</button>
+      <button class="tab hidden" data-tab="jul" id="tabJul">Contra tu Excel de julio</button>
+      <button class="tab" data-tab="ana">Análisis</button>
+      <button class="tab" data-tab="val">Validación</button>
+    </div>
+
+    <!-- TAB FACTURACION -->
+    <div id="tab-fact">
+      <div class="card">
+        <h2>Lo que requiere atención</h2>
+        <p class="sub" id="alertSub"></p>
+        <div class="alerts" id="alerts"></div>
+        <details class="auto" id="autoBox">
+          <summary id="autoSum"></summary>
+          <div class="bd"><div class="alerts" id="alertsAuto"></div></div>
+        </details>
+      </div>
+
+      <div class="card">
+        <h2 id="tblAnchor">Viajes <span class="n" id="periodo"></span></h2>
+        <div class="toolbar" id="toolbar"></div>
+        <div class="tblwrap"><table id="tbl"></table></div>
+        <p class="memline" style="text-align:left" id="tblFoot"></p>
+      <div class="pospbox hidden no-print" id="pospBox"></div>
+      </div>
+    </div>
+
+    <!-- TAB JULIO CONTRA EL EXCEL -->
+    <div id="tab-jul" class="hidden"><div class="jul-wrap">
+      <div class="card">
+        <h2>Julio, viaje por viaje, contra tu Excel</h2>
+        <p class="sub">Un viaje cuenta como listo solo si el flete y la maniobra quedan idénticos a tu Excel de julio, en costo y en precio.</p>
+        <div class="cmp-hero jul-hero" id="julHero" style="margin-top:.8rem"></div>
+      </div>
+      <div class="card">
+        <h2>Lo que falta para llegar a los 50</h2>
+        <p class="sub">No es algo que falte en el Copiloto: son datos que hoy no están capturados en la plataforma. Activa las respuestas en orden, de arriba hacia abajo, para ver cómo quedaría julio.</p>
+        <div id="julResp" style="margin-top:.5rem"></div>
+        <div class="jul-rest" id="julRest"></div>
+      </div>
+      <div class="card">
+        <h2>Los viajes de julio <span class="n" id="julN"></span></h2>
+        <div class="toolbar no-print"><button class="chip on" data-jf="faltan">Solo los que faltan</button><button class="chip" data-jf="todos">Todos</button></div>
+        <div class="tblwrap"><table id="tblJul"></table></div>
+      </div>
+    </div></div>
+
+    <!-- TAB ANALISIS -->
+    <div id="tab-ana" class="hidden">
+      <div class="card">
+        <h2>Análisis del periodo</h2>
+        <p class="sub">Tres preguntas que los números del archivo ya pueden contestar.</p>
+        <div id="charts"></div>
+      </div>
+    </div>
+
+    <!-- TAB VALIDACION -->
+    <div id="tab-val" class="hidden">
+      <div class="card">
+        <h2>Compara contra tu Excel</h2>
+        <p class="sub">Si ya tienes trabajado el Excel de este periodo, súbelo. Te digo renglón por renglón dónde coincidimos y dónde no.</p>
+        <div class="drop sm" id="dropX">
+          <div class="ico">📊</div>
+          <h3>Arrastra tu Excel aquí</h3>
+          <p>archivo .xlsx del reporte de distribución</p>
+          <input type="file" id="fileX" accept=".xlsx,.xls" class="hidden">
+        </div>
+        <div class="btnrow no-print" style="justify-content:center;margin-top:.7rem"><button class="btn ghost" id="btnXEjemplo">Usar un Excel de ejemplo</button></div>
+        <div id="cmpOut" class="hidden">
+          <div style="height:1rem"></div>
+          <div class="cmp-hero" id="cmpHero"></div>
+          <div class="tblwrap"><table id="tblCmp"></table></div>
+          <div class="note">
+            <b>Cómo leerlo:</b> el <b>precio</b> es la capa que el motor reproduce solo — dado el costo de compra, sabe exactamente
+            cuánto se le cobra al cliente. El <b>costo</b> es donde vive tu criterio: el motor propone con base en el histórico de la ruta,
+            y las diferencias suelen ser tarifas que cambiaron.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>ExcelentIA · Copiloto de Facturación · Logística Demo · versión de demostración</footer>
+</div>
+
+<script>
+const DATA = window.__demoDATA;
+</script>
+<script>
+/* ============ Copiloto de Facturación · demo ============ */
+const M_ARCHIVO = DATA.memoria;
+let M = M_ARCHIVO, MEM_FUENTE = 'archivo', MEM_PIDIENDO = null;
+// v12: la memoria vive en el servidor (modo memoria del flujo); la del archivo queda de respaldo sin conexión
+function usarMemoria(m) {
+  M = Object.assign({}, m, {
+    ratioUnidad: M_ARCHIVO.ratioUnidad, ratioGlobal: M_ARCHIVO.ratioGlobal,
+    ventaFlete: Object.assign({}, M_ARCHIVO.ventaFlete, m.ventaFlete || {}),
+    ventaManiobra: Object.assign({}, M_ARCHIVO.ventaManiobra, m.ventaManiobra || {}),
+    ventaEstadia: Object.assign({}, M_ARCHIVO.ventaEstadia, m.ventaEstadia || {})
+  });
+  MEM_FUENTE = 'servidor';
+}
+function conMemoriaArchivo(fn) { const prev = M; M = M_ARCHIVO; try { return fn(); } finally { M = prev; } }
+const RATIO_MAN = 1.057;
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+const $ = s => document.querySelector(s);
+const norm = s => String(s == null ? '' : s).trim().toUpperCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+const cadenaDe = d => { const w = norm(d).split(' '); return w.length ? w[0] : ''; };
+const num = v => {
+  if (v === null || v === undefined) return null;
+  const s = String(v).replace(/[$,\s]/g, '');
+  if (s === '' || s === '-') return null;
+  const n = parseFloat(s); return isNaN(n) ? null : n;
+};
+const mny = n => n == null ? '' : '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const mny0 = n => n == null ? '—' : '$' + Math.round(n).toLocaleString('es-MX');
+const k2 = n => (Math.round(n * 100) / 100).toString();
+const mesLabel = ym => { if (!ym || ym.length < 7) return 'sin fecha'; const p = ym.split('-'); return MESES[parseInt(p[1], 10) - 1] + ' ' + p[0]; };
+
+/* ---------- CSV ---------- */
+function parseCSV(text) {
+  text = text.replace(/^\uFEFF/, '');
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+    else if (c !== '\r') cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  if (!rows.length) return [];
+  const head = rows[0].map(h => h.trim());
+  return rows.slice(1).filter(r => r.some(v => String(v).trim() !== ''))
+    .map(r => { const o = {}; head.forEach((h, i) => o[h] = r[i] === undefined ? '' : r[i]); return o; });
+}
+
+/* ---------- motor ---------- */
+function ventaFlete(costo, uni) {
+  if (costo == null) return { v: null, s: 'r', src: 'sin costo' };
+  const hit = M.ventaFlete[k2(costo)];
+  if (hit != null) return { v: hit, s: 'g', src: 'precio conocido del histórico' };
+  const r = M.ratioUnidad[uni] || M.ratioGlobal;
+  return { v: Math.round(costo * r * 100) / 100, s: 'a', src: 'estimada (+' + ((r - 1) * 100).toFixed(2) + '%)' };
+}
+function ventaManiobra(costo) {
+  if (costo == null) return { v: null, s: 'g', src: '' };
+  const hit = M.ventaManiobra[k2(costo)];
+  if (hit != null) return { v: hit, s: 'g', src: 'tabulador de maniobras' };
+  return { v: Math.round(costo * RATIO_MAN * 100) / 100, s: 'a', src: 'estimada' };
+}
+
+function procesar(rows) {
+  return rows.map(r => {
+    const dest = norm(r['Dirección de Destino']), uni = norm(r['Tipo de Unidad']);
+    const t = M.tarifario[dest + '||' + uni];
+    const c = M.cadena[cadenaDe(r['Dirección de Destino']) + '||' + uni];
+    const costoPlat = num(r['Costo Flete']);
+    const flags = [];
+    let costo, sC, srcC;
+    if (t && (t.nv === 1 || t.p >= 0.7)) {
+      costo = t.m; sC = 'g';
+      srcC = t.nv === 1 ? 'tarifario · ' + t.n + ' viaje(s) a esta tarifa' : 'tarifario · ' + Math.round(t.p * 100) + '% de ' + t.n + ' viajes';
+      if (t.nv > 1) flags.push({ c: 'a', t: 'tarifa inconsistente', d: 'Esta ruta se ha cobrado entre ' + mny0(t.min) + ' y ' + mny0(t.max) + '.' });
+    } else if (t) {
+      costo = t.m; sC = 'a'; srcC = 'ruta con ' + t.nv + ' tarifas distintas';
+      flags.push({ c: 'a', t: 'tarifa inconsistente', d: 'Esta ruta se ha cobrado entre ' + mny0(t.min) + ' y ' + mny0(t.max) + '.' });
+    } else if (c) {
+      costo = c.m; sC = 'a'; srcC = 'estimado por la cadena (' + c.n + ' viajes)';
+      flags.push({ c: 'a', t: 'destino sin histórico', d: 'Tarifa estimada con otras sucursales de la misma cadena.' });
+    } else {
+      costo = costoPlat; sC = 'r'; srcC = 'sin antecedente requiere confirmación';
+      flags.push({ c: 'r', t: 'destino nuevo', d: 'No hay antecedente de esta ruta con esta unidad.' });
+    }
+    if (costoPlat != null && costo != null && Math.abs(costoPlat - costo) / Math.max(costo, 1) > 0.05)
+      flags.push({ c: 'b', auto: 1, t: 'viaje padre repartido', d: 'La plataforma trae ' + mny0(costoPlat) + '; suele ser el flete completo de un viaje padre repartido entre entregas.' });
+
+    const manRep = (num(r['Costo Maniobra']) || 0) + (num(r['Costo Maniobra Complemento']) || 0);
+    let man = manRep > 0 ? manRep : null, sM = 'g', srcM = manRep > 0 ? 'viene en el reporte' : '';
+    if (man == null && t && t.pman >= 0.5 && t.man) {
+      man = t.man; sM = 'a'; srcM = 'probable, no venía en el reporte';
+      flags.push({ c: 'a', t: 'maniobra faltante', d: 'El ' + Math.round(t.pman * 100) + '% de los viajes a este destino llevó maniobra de ' + mny0(t.man) + '.' });
+    }
+    const est = num(r[' Costo Estadía']) || num(r['Costo Estadía']) || null;
+    const fecha = String(r['Fecha Cita'] || '').slice(0, 10);
+    const o = {
+      id: String(r['ID Viaje'] || '').replace(/^0+/, ''), folio: r['Folio de Cliente'] || '',
+      origen: r['Dirección de Origen'] || '', cliente: r['Cliente'] || '', pedido: r['Pedido (OC)'] || '',
+      destino: r['Dirección de Destino'] || '', fecha, mes: fecha.slice(0, 7), hora: r['Hora Cita'] || '',
+      unidad: r['Tipo de Unidad'] || '', status: r['Status'] || '',
+      dest, uni, costoPlat, costo, sC, srcC, man, sM, srcM, est, flags, editC: false, editM: false
+    };
+    recalcular(o); return o;
+  });
+}
+
+function recalcular(o) {
+  const vf = (o.ventaFija != null && !o.editC) ? { v: o.ventaFija, s: 'g', src: o.srcVFija } : ventaFlete(o.costo, o.uni);
+  o.venta = vf.v; o.sV = o.editC ? 'g' : vf.s; o.srcV = vf.src;
+  const vm = ventaManiobra(o.man);
+  o.manVenta = vm.v; o.srcMV = vm.src;
+  o.estVenta = o.est != null ? Math.round(o.est * M.ratioGlobal * 100) / 100 : null;
+  o.margen = (o.venta || 0) - (o.costo || 0) + (o.manVenta || 0) - (o.man || 0) + (o.estVenta || 0) - (o.est || 0);
+  o.totalVenta = (o.venta || 0) + (o.manVenta || 0) + (o.estVenta || 0);
+  o.totalCosto = (o.costo || 0) + (o.man || 0) + (o.est || 0);
+  o.margenPct = o.totalVenta ? o.margen / o.totalVenta * 100 : 0;
+  // alerta de margen: se evalúa en cada recálculo y se refresca la bandera
+  o.flags = o.flags.filter(f => f.t !== 'precio por debajo del costo' && f.t !== 'viaje sin margen');
+  if (o.totalVenta || o.totalCosto) {
+    if (o.margen < 0) o.flags.unshift({ c: 'r', t: 'precio por debajo del costo',
+      d: 'Se cobra ' + mny0(o.totalVenta) + ' y se paga ' + mny0(o.totalCosto) + '. Facturarlo así deja una pérdida de ' + mny0(Math.abs(o.margen)) + '.' });
+    else if (o.margen === 0) o.flags.unshift({ c: 'r', t: 'viaje sin margen',
+      d: 'Se factura exactamente al costo: ' + mny0(o.totalCosto) + '. No deja utilidad.' });
+  }
+  const ord = { g: 0, a: 1, r: 2 };
+  let peor = Math.max(ord[o.sC], ord[o.sV], ord[o.sM]);
+  if (o.margen <= 0 && (o.totalVenta || o.totalCosto)) peor = 2;
+  if (o.citaSig && peor < 1) peor = 1;
+  o.sem = ['g', 'a', 'r'][peor];
+  o.atencion = o.sem !== 'g';
+}
+
+/* ---------- v10: viajes leídos de la base de la plataforma ---------- */
+const MAN_COSTO = { 'CAMIONETA 3 5': 1145, 'RABON': 1800, 'TORTON': 2440, 'TRAILER 53': 2700 };
+const esSi = v => /^s/i.test(String(v == null ? '' : v).trim());
+
+// centavos: la base guarda pesos cerrados; se busca en la memoria el costo a menos de $1
+function centavos(costo) {
+  let mejor = null, dif = 1;
+  Object.keys(M.ventaFlete).forEach(k => {
+    const d = Math.abs(parseFloat(k) - costo);
+    if (d < dif) { dif = d; mejor = k; }
+  });
+  return mejor == null ? null : { costo: parseFloat(mejor), venta: M.ventaFlete[mejor] };
+}
+
+function procesarBase(lista) {
+  const out = lista.map(b => {
+    const dest = norm(b.destino), uni = norm(b.unidad);
+    const t = M.tarifario[dest + '||' + uni];
+    // v15: viajes que no salen del almacén; si llegan al almacén (recolección) se cobra por la zona del origen
+    const org = norm(b.origen), otroOrigen = !!org && org.indexOf('ALMACEN LOGISTICA DEMO') < 0;
+    const recol = otroOrigen && dest.indexOf('ALMACEN LOGISTICA DEMO') >= 0 && num(b.costoZonaOrigen) != null;
+    const cz = recol ? num(b.costoZonaOrigen) : num(b.costoZona), pz = recol ? num(b.precioZonaOrigen) : num(b.precioZona);
+    const zonaTxt = recol ? (b.zonaOrigenNombre || 'zona del origen') + ' (origen)' : (b.zonaNombre ? b.zonaNombre : ('zona ' + (parseInt(b.zona, 10) || '?')));
+    const firme = t && (t.f === 'facturado' || t.nv === 1 || t.p >= 0.7);
+    const hist = t ? (t.f === 'facturado' ? 'lo facturado' + (t.um ? ' hasta ' + mesLabel(t.um) : '') : 'histórico') + ' · ' + t.n + (t.n === 1 ? ' viaje' : ' viajes') : '';
+    const flags = [];
+    let costo = null, venta = null, sC = 'g', srcC = '', srcV = '', fijo = false;
+
+    if (cz != null) {
+      if (t && (t.n >= 2 || t.f === 'facturado') && firme && Math.abs(t.m - cz) / Math.max(cz, 1) > 0.10) { // v15: solo con histórico firme
+        costo = t.m;
+        if (otroOrigen) { srcC = hist + ' · no sale del almacén';
+          flags.push({ c: 'b', auto: 1, t: 'no sale del almacén', d: 'Sale de ' + b.origen + '. Se cobró como las veces anteriores (' + mny0(t.m) + '); la zona de la plataforma daría ' + mny0(cz) + '.' });
+        } else { sC = 'a'; srcC = hist + ' · la zona no cuadra';
+          flags.push({ c: 'a', t: 'zona en duda', d: 'La plataforma tiene esta dirección en ' + zonaTxt + ' (' + mny0(cz) + '), pero la ruta se ha cobrado a ' + mny0(t.m) + ' (' + hist + '). Se usó eso; conviene corregir la zona de la dirección en la plataforma.' }); }
+      } else {
+        const c = centavos(cz);
+        if (c) { costo = c.costo; venta = c.venta; srcV = 'tabulador de la plataforma'; fijo = true; }
+        else { costo = cz; if (pz != null) { venta = pz; srcV = 'tabulador de la plataforma'; fijo = true; } }
+        srcC = 'tabulador · ' + zonaTxt;
+      }
+    } else if (t) {
+      costo = t.m; sC = 'a'; srcC = hist + ' · sin tarifa en la zona';
+      flags.push({ c: 'a', t: 'sin tarifa en la zona', d: zonaTxt + ' no tiene tarifa cargada para esta unidad; se usó el histórico de la ruta. Conviene cargarla en el tabulador.' });
+    } else {
+      sC = 'r'; srcC = 'sin tarifa en la zona ni antecedente';
+      flags.push({ c: 'r', t: 'destino nuevo', d: zonaTxt + ' no tiene tarifa para esta unidad y no hay antecedente de la ruta. Captura el flete o carga la tarifa en el tabulador.' });
+    }
+
+    // v16: el hijo de un reparto lleva tarifa de ruteo: 800 local, 1,100 foráneo; facturación la confirma
+    if (esSi(b.esReparto) && !esSi(b.edicion)) {
+      const loc = parseInt(b.zona, 10) === 1, r = loc ? 800 : 1100;
+      for (let i = flags.length - 1; i >= 0; i--) if (['sin tarifa en la zona', 'destino nuevo', 'zona en duda', 'no sale del almacén'].indexOf(flags[i].t) >= 0) flags.splice(i, 1);
+      costo = r; venta = null; fijo = false; sC = 'a'; srcC = 'tarifa de ruteo · ' + (loc ? 'local' : 'foráneo');
+      flags.push({ c: 'a', t: 'tarifa de ruteo', d: 'Es reparto del viaje ' + (parseInt(b.padre, 10) || 'padre') + ': se puso la tarifa de ruteo ' + (loc ? 'local' : 'foránea') + ' (' + mny0(r) + '). Si el reparto queda lejos del padre, pon la tarifa completa.' });
+    }
+
+    let man = null, sM = 'g', srcM = '';
+    const manRep = b.manRep === 1 || b.manRep === '1' || esSi(b.manRep);
+    if (esSi(b.manBase) || b.manBase === 1 || b.manBase === '1' || manRep) {
+      man = MAN_COSTO[uni] != null ? MAN_COSTO[uni] : (t && t.man) || null; srcM = manRep && !(b.manBase == 1 || esSi(b.manBase)) ? 'maniobra de reparto en la plataforma' : 'la plataforma marca maniobra';
+      if (man == null) { sM = 'a'; srcM = 'la plataforma marca maniobra; captura el monto'; }
+    } else if (t && t.pman >= 0.5 && t.man) {
+      man = t.man; sM = 'a'; srcM = 'probable, no está capturada en la plataforma';
+      flags.push({ c: 'a', t: 'maniobra faltante', d: 'El ' + Math.round(t.pman * 100) + '% de los viajes a este destino llevó maniobra de ' + mny0(t.man) + ' y la plataforma no la marca.' });
+    }
+
+    if (esSi(b.esReparto)) flags.push({ c: 'b', auto: 1, t: 'viaje hijo', l: 'hijo de ' + (parseInt(b.padre, 10) || '?'), d: 'Es reparto del viaje ' + (parseInt(b.padre, 10) || 'padre') + (b.facturarReparto ? ' · facturar: ' + b.facturarReparto : '') + '.' });
+    if (esSi(b.tieneRepartos)) flags.push({ c: 'b', auto: 1, t: 'viaje padre', d: 'Este viaje tiene repartos registrados en la plataforma.' });
+    if (esSi(b.edicion)) flags.push({ c: 'a', t: 'tarifa editada', d: 'La tarifa se editó en la plataforma' + (b.edMotivo ? ': ' + b.edMotivo : '') + (b.edQuien ? ' · ' + b.edQuien : '') + (b.edFecha ? ' · ' + String(b.edFecha).slice(0, 10) : '') + '.' });
+    const ext = num(b.extCosto);
+    if (ext) flags.push({ c: 'a', t: 'costos extra', d: 'Capturados en la plataforma: ' + (b.extConceptos || 'conceptos sin nombre') + ' por ' + mny0(ext) + (b.extFacturar ? ' · facturar: ' + b.extFacturar : '') + '.' });
+
+    const est = num(b.est) || null;
+    const fecha = String(b.fecha || '').slice(0, 10);
+    const o = {
+      id: String(parseInt(b.id, 10)), folio: b.folio || '', origen: b.origen || '', cliente: b.cliente || '', pedido: b.pedido || '',
+      destino: b.destino || '', fecha, mes: fecha.slice(0, 7), hora: b.hora || '', unidad: b.unidad || '', status: b.status || '',
+      dest, uni, costoPlat: null, costo, sC, srcC, man, sM, srcM, est, flags, editC: false, editM: false,
+      zona: b.zona, zonaNombre: zonaTxt, ventaFija: fijo ? venta : null, srcVFija: srcV,
+      otroOrigen, padre: esSi(b.esReparto) ? String(parseInt(b.padre, 10) || '') : ''
+    };
+    return o;
+  });
+  // v15: el padre dice cuáles son sus hijos
+  const hijos = {};
+  out.forEach(o => { if (o.padre) (hijos[o.padre] = hijos[o.padre] || []).push(o.id); });
+  out.forEach(o => { const f = o.flags.find(x => x.t === 'viaje padre');
+    if (f && hijos[o.id]) { f.l = 'padre de ' + hijos[o.id].join(', '); f.d = 'Sus repartos en esta carga: ' + hijos[o.id].join(', ') + '.'; } });
+  // v15: citas de un mes posterior al que domina la carga
+  const cuenta = {}; out.forEach(o => { if (o.mes) cuenta[o.mes] = (cuenta[o.mes] || 0) + 1; });
+  const mesP = Object.keys(cuenta).sort((a, b) => cuenta[b] - cuenta[a] || (a < b ? -1 : 1))[0];
+  MES_P = mesP || '';
+  const POSP = {}; (M.pospuestos || []).forEach(x => { POSP[String(x[0])] = x[1]; });
+  out.forEach(o => { const pm = POSP[o.id]; if (!pm) return;
+    if (pm === mesP) o.pospuesto = true;
+    else o.flags.push({ c: 'b', auto: 1, t: 'pospuesto', l: 'pospuesto de ' + mesLabel(pm).split(' ')[0], d: 'Se pasó desde el corte de ' + mesLabel(pm) + '; va en este reporte.' }); });
+  out.forEach(o => { if (mesP && o.mes > mesP && !o.flags.some(f => f.t === 'pospuesto')) { o.citaSig = true;
+    o.flags.push({ c: 'a', t: 'cita del mes siguiente', l: 'cita en ' + mesLabel(o.mes).split(' ')[0], d: 'La cita es el ' + o.fecha + '. Decide si se cobra en este corte o en el siguiente; si lo cobras ahora, cualquier costo que aparezca después ya no entraría.' }); }
+    recalcular(o); });
+  return out;
+}
+
+/* ---------- estado ---------- */
+let VIAJES = [], FMES = 'todos', FEST = 'todos', FSIG = null, FD1 = '', FD2 = '', SORT = { k: 'id', dir: 1 };
+// base = filtro de mes + estado (alimenta KPIs, tarjetas y gráficas)
+const base = () => VIAJES.filter(v => !v.pospuesto &&
+  (!FD1 || (v.fecha && v.fecha >= FD1)) &&
+  (!FD2 || (v.fecha && v.fecha <= FD2)) &&
+  (FEST === 'todos' || (FEST === 'atencion' ? v.atencion : !v.atencion)));
+// etiqueta legible del periodo activo
+function periodoTxt() {
+  if (!FD1 && !FD2) return 'de la carga';
+  const meses = [...new Set(base().map(v => v.mes))];
+  if (meses.length === 1 && esMesCompleto()) return 'de ' + mesLabel(meses[0]);
+  if (FD1 && FD2) return 'del ' + FD1 + ' al ' + FD2;
+  return FD1 ? 'desde el ' + FD1 : 'hasta el ' + FD2;
+}
+function esMesCompleto() {
+  if (!FD1 || !FD2) return false;
+  const d = new Date(FD2 + 'T12:00:00');
+  return FD1.slice(8) === '01' && FD1.slice(0, 7) === FD2.slice(0, 7) &&
+    FD2.slice(8) === String(new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()).padStart(2, '0');
+}
+function setMes(m) {
+  if (m === 'todos') { FD1 = ''; FD2 = ''; FMES = 'todos'; return; }
+  const [y, mm] = m.split('-').map(Number);
+  FD1 = m + '-01';
+  FD2 = m + '-' + String(new Date(y, mm, 0).getDate()).padStart(2, '0');
+  FMES = m;
+}
+const COL_SIG = { 'destino nuevo': 'costo', 'destino sin histórico': 'costo', 'tarifa inconsistente': 'costo', '__neg': 'costo', 'maniobra faltante': 'man', 'zona en duda': 'costo', 'sin tarifa en la zona': 'costo', 'tarifa editada': 'costo', 'costos extra': 'costo' };
+const sinMargen = v => v.margen <= 0 && !!(v.totalVenta || v.totalCosto);
+const tieneSenal = (v, s) => s === '__neg' ? sinMargen(v) : v.flags.some(f => f.t === s);
+// vistos = base + filtro por tipo de señal (alimenta la tabla y la exportación)
+const vistos = () => base().filter(v => !FSIG || tieneSenal(v, FSIG));
+
+/* ---------- KPIs ---------- */
+function renderKpis() {
+  const v = base();
+  const venta = v.reduce((a, x) => a + x.totalVenta, 0);
+  const costo = v.reduce((a, x) => a + x.totalCosto, 0);
+  const marg = venta - costo, at = v.filter(x => x.atencion).length;
+  const nNeg = v.filter(sinMargen).length;
+  $('#kpis').innerHTML = `
+  <div class="kpi acc"><div class="lb">Viajes ${periodoTxt()}</div><div class="vl">${v.length}</div>
+    <div class="hint">${v.length - at} listos sin tocarse</div></div>
+  <div class="kpi"><div class="lb">Precio a facturar</div><div class="vl">${mny0(venta)}</div><div class="hint">lo que se le cobra al cliente</div></div>
+  <div class="kpi"><div class="lb">Costo de compra</div><div class="vl">${mny0(costo)}</div><div class="hint">lo que se paga a transportistas</div></div>
+  <div class="kpi ${marg <= 0 ? 'warn' : ''}"><div class="lb">Margen</div><div class="vl">${mny0(marg)}</div>
+    <div class="hint">${venta ? (marg / venta * 100).toFixed(2) : '0'}% sobre el precio${nNeg ? ' · ' + nNeg + ' viaje(s) en pérdida' : ''}</div></div>
+  <div class="kpi ${at ? 'warn' : ''}"><div class="lb">Requieren atención</div><div class="vl">${at}</div>
+    <div class="hint">viajes por revisar · ${(at / (v.length || 1) * 100).toFixed(0)}% del total</div></div>
+`;
+}
+
+/* ---------- alertas ---------- */
+function agrupa(fl) {
+  const g = {};
+  base().forEach(v => v.flags.filter(fl).forEach(f => {
+    if (!g[f.t]) g[f.t] = { c: f.c, t: f.t, d: f.d, n: 0, vj: new Set() };
+    g[f.t].n++; g[f.t].vj.add(v.id);
+  }));
+  return Object.values(g).map(x => ({ ...x, v: x.vj.size }))
+    .sort((a, b) => (a.c === 'r' ? -1 : 1) - (b.c === 'r' ? -1 : 1) || b.n - a.n);
+}
+const cardAlert = i => `<div class="alert ${i.c === 'r' ? 'red' : (i.c === 'a' ? 'amber' : 'grey')}${FSIG === i.t ? ' on' : ''}" data-sig="${i.t}">
+  <div class="t">${i.n} · ${i.t === '__neg' ? 'viaje(s) sin margen' : i.t}</div><div class="m">${i.d}</div>
+  <div class="lnk">${FSIG === i.t ? 'quitar filtro' : 'ver los ' + i.v + ' viaje(s)'}</div></div>`;
+
+function renderAlerts() {
+  const dec = agrupa(f => !f.auto), aut = agrupa(f => f.auto);
+  const neg = base().filter(sinMargen);
+  // la señal de margen se presenta agrupada y con el monto en riesgo
+  const iNeg = dec.findIndex(x => x.t === 'precio por debajo del costo' || x.t === 'viaje sin margen');
+  if (iNeg >= 0) dec.splice(iNeg, 1);
+  const iSin = dec.findIndex(x => x.t === 'viaje sin margen');
+  if (iSin >= 0) dec.splice(iSin, 1);
+  if (neg.length) {
+    const perdida = neg.reduce((a, x) => a + (x.margen < 0 ? Math.abs(x.margen) : 0), 0);
+    dec.unshift({ c: 'r', t: '__neg', n: neg.length, v: neg.length,
+      d: perdida > 0
+        ? 'Se factura por debajo del costo. Así como está, el corte pierde ' + mny0(perdida) + '. Revísalos antes de descargar el Excel.'
+        : 'Se factura exactamente al costo, sin dejar utilidad. Revísalos antes de descargar el Excel.' });
+  }
+  const tot = dec.reduce((a, x) => a + x.n, 0);
+  const vj = new Set(); base().forEach(v => { if (v.flags.some(f => !f.auto) || sinMargen(v)) vj.add(v.id); });
+  $('#alertSub').textContent = dec.length
+    ? 'El motor resolvió lo mecánico. Quedan ' + tot + ' señales repartidas en ' + vj.size + ' viajes. Haz clic en una tarjeta para verlos en la tabla.'
+    : 'Nada pendiente: todos los viajes tienen tarifa confirmada por histórico.';
+  $('#alerts').innerHTML = dec.length ? dec.map(cardAlert).join('')
+    : '<div class="alert"><div class="t">Todo en verde</div><div class="m">Puedes descargar el Excel directo.</div></div>';
+  const nAut = aut.reduce((a, x) => a + x.n, 0);
+  $('#autoBox').classList.toggle('hidden', !aut.length);
+  $('#autoSum').textContent = 'Detectado automáticamente · ' + nAut + ' aviso(s) que el motor ya resolvió';
+  $('#alertsAuto').innerHTML = aut.map(cardAlert).join('');
+  document.querySelectorAll('.alert[data-sig]').forEach(el => el.onclick = () => {
+    FSIG = FSIG === el.dataset.sig ? null : el.dataset.sig;
+    redraw();
+    const t = $('#tblAnchor'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+/* ---------- toolbar ---------- */
+function renderToolbar() {
+  const meses = [...new Set(VIAJES.map(v => v.mes))].filter(Boolean).sort();
+  const cm = m => VIAJES.filter(v => v.mes === m).length;
+  const mesOn = m => m === 'todos' ? (!FD1 && !FD2) : (esMesCompleto() && FD1.slice(0, 7) === m);
+  const est = { todos: VIAJES.length, atencion: VIAJES.filter(v => v.atencion).length, listos: VIAJES.filter(v => !v.atencion).length };
+  $('#toolbar').innerHTML =
+    `<span class="chip ${mesOn('todos') ? 'on' : ''}" data-m="todos">Todos <span class="c">${VIAJES.length}</span></span>` +
+    meses.map(m => `<span class="chip ${mesOn(m) ? 'on' : ''}" data-m="${m}">${mesLabel(m)} <span class="c">${cm(m)}</span></span>`).join('') +
+    `<span class="fechas">del <input type="date" class="dt" id="fd1" value="${FD1}"> al <input type="date" class="dt" id="fd2" value="${FD2}"></span>
+     <span class="sep"></span>` +
+    `<span class="chip ${FEST === 'todos' ? 'on' : ''}" data-e="todos">Todos</span>
+     <span class="chip ${FEST === 'atencion' ? 'on' : ''}" data-e="atencion">Requieren atención <span class="c">${est.atencion}</span></span>
+     <span class="chip ${FEST === 'listos' ? 'on' : ''}" data-e="listos">Listos <span class="c">${est.listos}</span></span>
+     ${FSIG ? `<span class="sep"></span><span class="chip on" id="chipSig">${FSIG === '__neg' ? 'sin margen' : FSIG} ✕</span>` : ''}
+     ${DESDE ? `<span class="sep"></span><span class="chip corte-on" id="chipCorte" title="Se excluyeron los viajes ya facturados${CORTE_EN_LINEA ? ' segun el corte compartido' : ' segun el corte de este equipo'}. Clic para volver al archivo completo.">desde el viaje ${DESDE + 1} ✕</span>` : ''}
+     <span class="spacer"></span>
+     <button class="btn green" id="btnXlsx">Descargar Excel (${vistos().length})</button>
+     <button class="btn ghost" id="btnReset">Cargar otros viajes</button>`;
+  document.querySelectorAll('#toolbar [data-m]').forEach(c => c.onclick = () => { setMes(c.dataset.m); redraw(); });
+  const f1 = $('#fd1'), f2 = $('#fd2');
+  if (f1) f1.onchange = e => { FD1 = e.target.value; redraw(); };
+  if (f2) f2.onchange = e => { FD2 = e.target.value; redraw(); };
+  document.querySelectorAll('#toolbar [data-e]').forEach(c => c.onclick = () => { FEST = c.dataset.e; redraw(); });
+  const cs = $('#chipSig'); if (cs) cs.onclick = () => { FSIG = null; redraw(); };
+  const cc = $('#chipCorte'); if (cc) cc.onclick = () => arrancar(ROWS, null);
+  $('#btnXlsx').onclick = () => exportar(vistos().filter(o => !o.pospuesto));
+  $('#btnReset').onclick = reset;
+}
+
+/* ---------- tabla ---------- */
+const COLS = [
+  { k: 'sem', t: '', w: '' }, { k: 'id', t: 'ID' }, { k: 'destino', t: 'Destino' },
+  { k: 'unidad', t: 'Unidad' }, { k: 'fecha', t: 'Fecha' },
+  { k: 'man', t: 'Costo maniobra', n: 1 }, { k: 'manVenta', t: 'Precio maniobra', n: 1 },
+  { k: 'costo', t: 'Costo flete', n: 1 }, { k: 'venta', t: 'Precio flete', n: 1 },
+  { k: 'margen', t: 'Margen', n: 1 }, { k: 'flags', t: 'Notas' }
+];
+const PRIO = ['__neg', 'destino nuevo', 'zona en duda', 'sin tarifa en la zona', 'tarifa editada', 'costos extra', 'tarifa inconsistente', 'maniobra faltante', 'destino sin histórico'];
+function prioridad(v) {
+  if (sinMargen(v)) return 0;
+  let p = 99;
+  v.flags.filter(f => !f.auto).forEach(f => { const i = PRIO.indexOf(f.t); if (i >= 0 && i < p) p = i; });
+  return p;
+}
+function ordenar(a, b) {
+  const k = SORT.k, d = SORT.dir;
+  if (k === 'sem') return (prioridad(a) - prioridad(b) || String(a.id).localeCompare(String(b.id))) * d;
+  if (k === 'flags') return (a.flags.length - b.flags.length) * d;
+  let x = a[k], y = b[k];
+  if (x == null) x = -Infinity; if (y == null) y = -Infinity;
+  if (typeof x === 'number' || typeof y === 'number') return ((x || 0) - (y || 0)) * d;
+  return String(x).localeCompare(String(y), 'es') * d;
+}
+function renderTabla() {
+  const v = vistos().slice().sort(ordenar);
+  const hi = FSIG ? COL_SIG[FSIG] : null;
+  const sum = f => v.reduce((a, x) => a + (x[f] || 0), 0);
+  const ar = k => SORT.k === k ? `<span class="ar">${SORT.dir === 1 ? '▲' : '▼'}</span>` : '';
+  $('#tbl').innerHTML = `
+  <thead><tr>${COLS.map(c => `<th class="${c.n ? 'num' : ''}${hi === c.k ? ' hi' : ''}" data-k="${c.k}">${c.t} ${ar(c.k)}</th>`).join('')}</tr></thead>
+  <tbody>${v.length ? v.map(o => `
+    <tr class="st-${o.sem}" data-id="${o.id}">
+      <td><span class="sem ${o.sem}"></span></td>
+      <td><b>${o.id}</b></td>
+      <td class="dest" title="${o.destino}">${o.destino}${o.otroOrigen ? `<span class="src">sale de ${o.origen}</span>` : ''}</td>
+      <td style="white-space:nowrap">${o.unidad}</td>
+      <td style="white-space:nowrap">${o.fecha}</td>
+      <td class="num${hi === 'man' ? ' hi' : ''}"><input class="inp ${o.editM ? 'edited' : ''}" data-k="man" value="${o.man == null ? '' : o.man}"></td>
+      <td class="num">${mny(o.manVenta)}</td>
+      <td class="num${hi === 'costo' ? ' hi' : ''}"><input class="inp ${o.editC ? 'edited' : ''}" data-k="costo" value="${o.costo == null ? '' : o.costo}"><span class="src">${o.srcC}</span></td>
+      <td class="num">${mny(o.venta)}<span class="src">${o.srcV}</span></td>
+      <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
+      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
+    </tr>`).join('') : '<tr><td colspan="11" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
+  <tfoot><tr>
+    <td colspan="5">Subtotales (${v.length} viajes)</td>
+    <td class="num">${mny(sum('man'))}</td><td class="num">${mny(sum('manVenta'))}</td>
+    <td class="num">${mny(sum('costo'))}</td><td class="num">${mny(sum('venta'))}</td>
+    <td class="num">${mny(sum('margen'))}</td><td></td></tr></tfoot>`;
+  document.querySelectorAll('#tbl th').forEach(th => th.onclick = () => {
+    const k = th.dataset.k;
+    SORT = { k, dir: SORT.k === k ? -SORT.dir : 1 };
+    renderTabla();
+  });
+  document.querySelectorAll('#tbl .mini').forEach(bt => bt.onclick = e => {
+    const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
+    if (e.target.dataset.acc === 'ahora') { o.citaSig = false; o.flags = o.flags.filter(f => f.t !== 'cita del mes siguiente'); recalcular(o); redraw(); }
+    else posponer(o, true);
+  });
+  document.querySelectorAll('#tbl .inp').forEach(inp => inp.addEventListener('change', e => {
+    const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
+    const n = num(e.target.value), k = e.target.dataset.k;
+    if (k === 'costo') { o.costo = n; o.editC = true; o.sC = 'g'; o.srcC = 'confirmado por ti'; }
+    else { o.man = n; o.editM = true; o.sM = 'g'; o.srcM = 'confirmado por ti'; }
+    o.flags = o.flags.filter(f => f.auto || f.t === 'precio por debajo del costo' || f.t === 'viaje sin margen');
+    recalcular(o); redraw();
+  }));
+  $('#tblFoot').textContent = hi
+    ? (hi === 'man' ? 'Confirma o borra la columna Costo maniobra resaltada. El precio se recalcula solo.'
+                    : 'Corrige la columna Costo flete resaltada. El precio y el margen se recalculan solos.')
+    : 'Costo es lo que se paga al transportista; precio es lo que se le cobra al cliente. Las celdas blancas son editables: al cambiar un costo, el precio se recalcula solo. Haz clic en cualquier encabezado para ordenar (el primero ordena por prioridad de atención).';
+}
+
+/* ---------- gráficas ---------- */
+function bar(lb, pct, val, cls) {
+  return `<div class="bar"><div class="lb" title="${lb}">${lb}</div>
+    <div class="tr"><div class="fl ${cls || ''}" style="width:${Math.max(1, Math.min(100, pct))}%"></div></div>
+    <div class="vl">${val}</div></div>`;
+}
+function renderCharts() {
+  const v = base();
+  const byDest = {};
+  v.forEach(o => {
+    const k = o.destino || '(sin destino)';
+    if (!byDest[k]) byDest[k] = { n: 0, venta: 0, margen: 0 };
+    byDest[k].n++; byDest[k].venta += o.totalVenta; byDest[k].margen += o.margen;
+  });
+  const arr = Object.entries(byDest).map(([k, d]) => ({ k, ...d, pct: d.venta ? d.margen / d.venta * 100 : 0 }));
+
+  const peores = arr.slice().sort((a, b) => a.pct - b.pct).slice(0, 12);
+  const maxAbs = Math.max(...peores.map(x => Math.abs(x.pct)), 1);
+  const c1 = `<div class="chart"><h3>Margen por destino</h3>
+    <div class="q">¿Qué rutas se están comiendo el negocio? Los 12 destinos con menor margen del periodo.</div>
+    <div class="bars">${peores.map(x => bar(x.k + ' · ' + x.n + ' viaje(s)', Math.abs(x.pct) / maxAbs * 100,
+    x.pct.toFixed(1) + '% · ' + mny0(x.margen), x.pct <= 0 ? 'neg' : (x.pct < 3 ? 'warn' : 'good'))).join('')}</div></div>`;
+
+  const inc = [];
+  v.forEach(o => {
+    const t = M.tarifario[o.dest + '||' + o.uni];
+    if (t && t.nv > 1 && !inc.find(x => x.k === o.destino + ' · ' + o.unidad))
+      inc.push({ k: o.destino + ' · ' + o.unidad, min: t.min, max: t.max, n: t.n, nv: t.nv });
+  });
+  inc.sort((a, b) => (b.max - b.min) - (a.max - a.min));
+  const top = inc.slice(0, 12), gmax = Math.max(...top.map(x => x.max), 1);
+  const c2 = `<div class="chart"><h3>Rutas con tarifa inestable</h3>
+    <div class="q">¿Cuánto varía el precio de una misma ruta? La barra muestra el rango entre lo mínimo y lo máximo cobrado.</div>
+    ${top.length ? `<div class="bars">${top.map(x => `<div class="bar">
+      <div class="lb" title="${x.k}">${x.k}</div>
+      <div class="rng"><div class="seg" style="left:${x.min / gmax * 100}%;width:${Math.max(1.5, (x.max - x.min) / gmax * 100)}%"></div></div>
+      <div class="vl">${mny0(x.min)} – ${mny0(x.max)}</div></div>`).join('')}</div>`
+      : '<div class="empty">Ninguna ruta del periodo tiene tarifas contradictorias.</div>'}</div>`;
+
+  const tops = arr.slice().sort((a, b) => b.venta - a.venta).slice(0, 12);
+  const vmax = Math.max(...tops.map(x => x.venta), 1);
+  const c3 = `<div class="chart"><h3>Dónde está concentrado el negocio</h3>
+    <div class="q">¿Qué destinos mueven más dinero? Son los primeros que conviene negociar o renegociar.</div>
+    <div class="bars">${tops.map(x => bar(x.k + ' · ' + x.n + ' viaje(s)', x.venta / vmax * 100, mny0(x.venta))).join('')}</div></div>`;
+
+  $('#charts').innerHTML = c1 + c2 + c3;
+}
+
+/* ---------- Excel (formato de la plantilla de facturación) ---------- */
+const FMT_CONT = '_("$"* #,##0.00_);_("$"* \\(#,##0.00\\);_("$"* "-"??_);_(@_)';
+const ANCHOS = [8.2, 14.8, 17, 13, 18.8, 41.2, 10, 9, 14, 14.2, 17.3, 12.7, 15.7, 12.5, 13.7];
+const FILLS = ['FFFFE598','FFFFE598','FFFFE598','FFFFE699','FFFFE699','FFFFE598','FFFFE598','FFFFE598','FFFFE699','FFFFE598','FF8EAADB','FFFFE699','FF8EA9DB','FFFFE699','FF8EA9DB'];
+const HEAD = ['ID Viaje', 'Folio de Cliente', 'Dirección de Origen', 'Cliente', 'Pedido (OC)', 'Dirección de Destino',
+  'Fecha Cita', 'Hora Cita', 'Tipo de Unidad', 'Costo Maniobra', 'Precio Maniobra', ' Costo Estadía',
+  'Precio Estadía', 'Costo Flete', 'Precio Flete'];
+
+async function exportar(lista) {
+  if (!lista.length) { alert('No hay viajes que exportar con este filtro.'); return; }
+  if (typeof ExcelJS === 'undefined') { alert('No cargó la librería de Excel. Revisa tu conexión y recarga la página.'); return; }
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('REPORTE DISTRIBUCION', { views: [{ state: 'frozen', ySplit: 4 }] });
+  ws.columns = ANCHOS.map(w => ({ width: w }));
+
+  const last = 4 + lista.length;
+  // fila 3: subtotales
+  const r3 = ws.getRow(3);
+  for (let c = 10; c <= 15; c++) {
+    const L = String.fromCharCode(64 + c);
+    const cell = r3.getCell(c);
+    cell.value = { formula: `SUBTOTAL(9,${L}5:${L}${last})` };
+    cell.numFmt = FMT_CONT; cell.font = { size: 12 };
+  }
+  // fila 4: encabezados
+  const r4 = ws.getRow(4);
+  HEAD.forEach((h, i) => {
+    const cell = r4.getCell(i + 1);
+    cell.value = h;
+    cell.font = { bold: true, size: 11 };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: FILLS[i] } };
+    cell.border = { top: { style: 'thin', color: { argb: 'FFBFBFBF' } }, bottom: { style: 'thin', color: { argb: 'FFBFBFBF' } }, left: { style: 'thin', color: { argb: 'FFBFBFBF' } }, right: { style: 'thin', color: { argb: 'FFBFBFBF' } } };
+    cell.alignment = { vertical: 'middle', wrapText: true };
+    if (i >= 9) cell.numFmt = FMT_CONT;
+  });
+  r4.height = 30;
+  // datos desde la fila 5
+  lista.forEach((o, i) => {
+    const r = ws.getRow(5 + i);
+    [o.id, o.folio, o.origen, o.cliente, o.pedido, o.destino, o.fecha, o.hora, o.unidad,
+    o.man, o.manVenta, o.est, o.estVenta, o.costo, o.venta].forEach((v, c) => {
+      const cell = r.getCell(c + 1);
+      cell.value = v == null || v === '' ? null : v;
+      cell.font = { size: 12 };
+      if (c >= 9) cell.numFmt = FMT_CONT;
+    });
+  });
+  ws.autoFilter = { from: { row: 4, column: 1 }, to: { row: last, column: 15 } };
+
+  const tag = (FD1 || FD2)
+    ? (esMesCompleto() ? FD1.slice(0, 7) : (FD1 || 'inicio') + '_a_' + (FD2 || 'fin'))
+    : new Date().toISOString().slice(0, 10);
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'REPORTE_DISTRIBUCION_' + tag + '.xlsx';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  if (!DEMO) { AVANCE_DESC = new Date().toISOString(); guardarAvance(); }
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+  // se registra el último viaje descargado para que el siguiente corte arranque de ahí
+  if (DEMO) { alert('El Excel se descargó bien.\n\nComo son datos de respaldo, el corte compartido no se movió.'); return; }
+  const maxId = lista.concat(VIAJES.filter(o => o.pospuesto)).reduce((m, o) => Math.max(m, parseInt(String(o.id).replace(/\D/g, ''), 10) || 0), 0);
+  if (!maxId) return;
+  if (!USUARIO) {
+    const q = prompt('¿Quién está facturando? Se guarda junto con el corte para saber quién lo movió.', '');
+    if (q && q.trim()) guardarUsuario(q.trim());
+  }
+  const d = await publicarCorte(maxId, lista.length);
+  if (!d) alert('El Excel se descargó bien.\n\nNo se pudo avisar al servidor que el corte llegó al viaje ' + maxId +
+                '; queda guardado en este equipo y se vuelve a intentar la próxima vez.');
+  else if (d.movimiento && d.movimiento.indexOf('rechazado') === 0)
+    alert('El Excel se descargó bien.\n\nEl corte compartido ya iba en el viaje ' + d.ultimoViaje +
+          ', más adelante que este archivo, así que se dejó como estaba.');
+}
+
+/* ---------- validación contra Excel ---------- */
+function leerExcel(buf) {
+  const wb = XLSX.read(buf, { type: 'array' });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
+  let hr = -1;
+  for (let i = 0; i < Math.min(12, aoa.length); i++)
+    if ((aoa[i] || []).some(c => String(c).trim().toUpperCase() === 'ID VIAJE')) { hr = i; break; }
+  if (hr < 0) throw new Error('No encontré la fila de encabezados (ID Viaje).');
+  const head = aoa[hr].map(h => String(h == null ? '' : h).trim());
+  const col = (...ns) => head.findIndex(h => ns.includes(h.toUpperCase().replace(/\s+/g, ' ').trim()));
+  const iId = col('ID VIAJE'),
+    iFc = col('COSTO FLETE', 'COSTO'),
+    iFv = col('PRECIO FLETE 4PL', 'COSTO FLETE 4PL', 'PRECIO FLETE', 'PRECIO'),
+    iMc = col('COSTO MANIOBRA'),
+    iMv = col('PRECIO MANIOBRA 4PL', 'COSTO MANIOBRA 4PL', 'PRECIO MANIOBRA');
+  const out = {};
+  for (let i = hr + 1; i < aoa.length; i++) {
+    const r = aoa[i] || []; const id = num(r[iId]); if (id == null) continue;
+    out[String(id)] = { fc: num(r[iFc]), fv: num(r[iFv]), mc: num(r[iMc]), mv: num(r[iMv]) };
+  }
+  return out;
+}
+function comparar(real) {
+  const filas = VIAJES.filter(o => real[o.id]).map(o => {
+    const r = real[o.id], vp = ventaFlete(r.fc, o.uni).v;
+    return {
+      id: o.id, dest: o.destino, fcR: r.fc, fcM: o.costo, fvR: r.fv, fvM: vp,
+      okV: r.fv != null && vp != null && Math.abs(r.fv - vp) < 0.51,
+      okC: r.fc != null && o.costo != null && Math.abs(r.fc - o.costo) < 0.51,
+      cerca: r.fc != null && o.costo != null && Math.abs(r.fc - o.costo) / Math.max(r.fc, 1) < 0.01,
+      conoce: !!M.tarifario[o.dest + '||' + o.uni]
+    };
+  });
+  const n = filas.length;
+  if (!n) { alert('Ese Excel no tiene viajes en común con el CSV cargado. ¿Es el mismo periodo?'); return; }
+  const okV = filas.filter(f => f.okV).length, okC = filas.filter(f => f.okC).length;
+  const con = filas.filter(f => f.conoce), cerca = con.filter(f => f.cerca).length;
+  const difV = filas.filter(f => !f.okV).reduce((a, f) => a + Math.abs((f.fvR || 0) - (f.fvM || 0)), 0);
+  $('#cmpHero').innerHTML = `
+    <div class="cmp-box"><div class="lb">Precio calculado</div><div class="big">${(okV / n * 100).toFixed(0)}%</div>
+      <div class="hint">${okV} de ${n} idénticos a tu Excel · diferencia total ${mny0(difV)}</div></div>
+    <div class="cmp-box"><div class="lb">Costo en rutas conocidas</div><div class="big amber">${con.length ? (cerca / con.length * 100).toFixed(0) : 0}%</div>
+      <div class="hint">${cerca} de ${con.length} a menos de 1% · ${okC} idénticas</div></div>
+    <div class="cmp-box"><div class="lb">Viajes cotejados</div><div class="big">${n}</div>
+      <div class="hint">de ${VIAJES.length} en el CSV</div></div>
+    <div class="cmp-box"><div class="lb">Captura evitada</div><div class="big">${n * 2}</div>
+      <div class="hint">celdas que ya no se teclean</div></div>`;
+  $('#tblCmp').innerHTML = `
+  <thead><tr><th>ID</th><th>Destino</th><th class="num">Costo tuyo</th><th class="num">Costo motor</th>
+  <th class="num">Precio tuyo</th><th class="num">Precio motor</th><th>Precio</th><th>Costo</th></tr></thead>
+  <tbody>${filas.map(f => `<tr>
+    <td><b>${f.id}</b></td><td class="dest" title="${f.dest}">${f.dest}</td>
+    <td class="num">${mny(f.fcR)}</td><td class="num">${mny(f.fcM)}</td>
+    <td class="num">${mny(f.fvR)}</td><td class="num">${mny(f.fvM)}</td>
+    <td class="${f.okV ? 'ok' : 'no'}">${f.okV ? '✓ exacta' : '✕ ' + mny0(Math.abs((f.fvR || 0) - (f.fvM || 0)))}</td>
+    <td class="${f.okC || f.cerca ? 'ok' : 'no'}">${f.okC ? '✓ igual' : (f.cerca ? '≈ &lt;1%' : (f.conoce ? '✕ cambió' : '— ruta nueva'))}</td></tr>`).join('')}</tbody>`;
+  $('#cmpOut').classList.remove('hidden');
+}
+
+/* ---------- corte por ultimo viaje facturado ---------- */
+const CORTE_URL = 'https://n8n.excelentia.com.mx/webhook/4pl-corte';
+const EMPRESA = 'LOGISTICA DEMO';
+// v13: cada cliente se factura por separado y lleva su propio corte
+const CLIENTES = {
+  juguetes: { n: 'Juguetes del Norte', re: /JUGUETES DEL NORTE/i, corte: EMPRESA },
+  electro: { n: 'Electro Hogar MX', re: /ELECTRO HOGAR/i, corte: EMPRESA + ' ELECTRO' },
+  otros: { n: 'otros clientes', re: null, corte: EMPRESA + ' OTROS' }
+};
+let CLIENTE = 'juguetes', FUERA = {}, YA_FACT = 0;
+// v15: deja fuera los viajes que ya están en Viajes Facturados (llegan con la memoria del servidor)
+function quitarFacturados(rows) {
+  YA_FACT = 0;
+  const F = new Set((MEM_FUENTE === 'servidor' && M.facturados) || []);
+  const ya = rows.filter(r => F.has(idNum(r)));
+  if (!ya.length) return rows;
+  const ids = ya.map(idNum).sort((a, b) => a - b);
+  if (ya.length === rows.length) return confirm('Los ' + rows.length + ' viajes ya están en lo facturado (del ' + ids[0] + ' al ' + ids[ids.length - 1] + '). ¿Los cargo de todas formas para revisarlos?') ? rows : null;
+  if (!confirm(ya.length + ' de estos viajes ya están en lo facturado (' + (ids.length > 6 ? ids.slice(0, 6).join(', ') + '…' : ids.join(', ')) + '). ¿Los dejo fuera para no cobrarlos dos veces?')) return rows;
+  YA_FACT = ya.length;
+  return rows.filter(r => !F.has(idNum(r)));
+}
+const empresaCorte = () => CLIENTES[CLIENTE].corte;
+const lsCorte = () => CLIENTE === 'juguetes' ? LS_CORTE : LS_CORTE + '_' + CLIENTE;
+function clienteDe(r) {
+  const c = String(r.cliente || r['Cliente'] || '');
+  if (CLIENTES.juguetes.re.test(c)) return 'juguetes';
+  if (CLIENTES.electro.re.test(c)) return 'electro';
+  return c ? 'otros' : '';
+}
+function filtrarCliente(rows) {
+  const fuera = {}, dentro = [];
+  rows.forEach(r => {
+    const k = clienteDe(r);
+    if (!k || k === CLIENTE) dentro.push(r);
+    else { const nom = String(r.cliente || r['Cliente'] || 'sin cliente').trim(); fuera[nom] = (fuera[nom] || 0) + 1; }
+  });
+  return { rows: dentro, fuera };
+}
+function conMemoriaCliente(fn) {
+  if (CLIENTE === 'juguetes') return fn();
+  const prev = M; M = Object.assign({}, prev, { tarifario: {}, cadena: {} });
+  try { return fn(); } finally { M = prev; }
+}
+const LS_CORTE = 'demo_4pl_ultimo_facturado';
+
+let ULTIMO = null;      // respaldo en memoria si el navegador bloquea el guardado
+let DESDE = null;       // corte aplicado a la carga actual
+let ROWS = [];          // filas crudas del CSV cargado
+let CORTE_INFO = null;  // datos del corte compartido: quien y cuando
+let CORTE_EN_LINEA = false;
+
+const idNum = r => parseInt(String(r['ID Viaje'] || r.id || '').replace(/\D/g, ''), 10) || 0;
+
+// respaldo local: se usa cuando el servidor no responde
+function leerLocal() { try { const v = localStorage.getItem(lsCorte()); return v ? parseInt(v, 10) : ULTIMO; } catch (e) { return ULTIMO; } }
+function guardarLocal(n) { ULTIMO = n; try { localStorage.setItem(lsCorte(), String(n)); } catch (e) { } }
+function borrarLocal() { ULTIMO = null; try { localStorage.removeItem(lsCorte()); } catch (e) { } }
+function leerCorte() { return CORTE_INFO && CORTE_INFO.ultimoViaje ? CORTE_INFO.ultimoViaje : leerLocal(); }
+
+// llama al servidor con un limite de espera: si no contesta, se sigue sin el
+async function pedirCorte(cuerpo, msTope) {
+  const ctrl = new AbortController();
+  const reloj = setTimeout(function () { ctrl.abort(); }, msTope || 6000);
+  try {
+    const res = await fetch(CORTE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo),
+      signal: ctrl.signal
+    });
+    clearTimeout(reloj);
+    if (!res.ok) return null;
+    const d = await res.json();
+    return d && d.ok ? d : null;
+  } catch (e) { clearTimeout(reloj); return null; }
+}
+
+async function sincronizarCorte() {
+  const d = await pedirCorte({ accion: 'leer', empresa: empresaCorte() });
+  CORTE_EN_LINEA = !!d;
+  if (d) {
+    CORTE_INFO = d;
+    if (d.ultimoViaje) guardarLocal(d.ultimoViaje);
+  }
+  pintarMemLine();
+  return CORTE_EN_LINEA;
+}
+
+async function publicarCorte(n, viajes) {
+  guardarLocal(n);
+  const periodo = (FD1 || '').slice(0, 7) || new Date().toISOString().slice(0, 7);
+  const d = await pedirCorte({
+    accion: 'guardar', empresa: empresaCorte(), ultimoViaje: n,
+    usuario: USUARIO || 'Copiloto', periodo: periodo, viajesFacturados: viajes || 0
+  }, 8000);
+  CORTE_EN_LINEA = !!d;
+  if (d) CORTE_INFO = d;
+  renderToolbar(); pintarMemLine();
+  return d;
+}
+
+// nombre de quien opera, para saber despues quien movio el corte
+const LS_USUARIO = 'demo_4pl_usuario';
+let USUARIO = '';
+try { USUARIO = localStorage.getItem(LS_USUARIO) || ''; } catch (e) { }
+function guardarUsuario(v) { USUARIO = v; try { localStorage.setItem(LS_USUARIO, v); } catch (e) { } }
+
+function fechaCorta(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) + ' a las ' +
+         d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+}
+function quienCorte() {
+  if (!CORTE_EN_LINEA || !CORTE_INFO) return 'Corte guardado en este equipo.';
+  const q = CORTE_INFO.actualizadoPor ? CORTE_INFO.actualizadoPor : 'alguien del equipo';
+  const c = fechaCorta(CORTE_INFO.actualizadoEn);
+  return 'Lo registró ' + q + (c ? ' el ' + c : '') + '.';
+}
+function preguntarCorte(u, total, nuevos) {
+  const box = $('#corteBox');
+  box.innerHTML = `<h4>Ya se facturó hasta el viaje ${u}</h4>
+    <p>${quienCorte()} Esta carga trae <b>${total} viajes</b>; <b>${nuevos}</b> son posteriores a ese corte.
+       Puedo dejar fuera los que ya se facturaron para que no se revisen de nuevo.</p>
+    <div class="btnrow">
+      <button class="btn green" id="btnSoloNuevos">Procesar solo los ${nuevos} nuevos</button>
+      <button class="btn ghost" id="btnTodo">Procesar todos</button>
+    </div>
+    <button class="link" id="btnOlvidar">Ignorar el corte en esta carga</button>`;
+  box.classList.remove('hidden');
+  $('#btnSoloNuevos').onclick = () => { box.classList.add('hidden'); arrancar(ROWS.filter(r => idNum(r) > u), u); };
+  $('#btnTodo').onclick = () => { box.classList.add('hidden'); arrancar(ROWS, null); };
+  $('#btnOlvidar').onclick = () => { borrarLocal(); CORTE_INFO = null; box.classList.add('hidden'); arrancar(ROWS, null); };
+}
+
+/* ---------- lectura directa de la plataforma (v10) ---------- */
+const VIAJES_URL = 'https://n8n.excelentia.com.mx/webhook/4pl-viajes';
+const LS_CLAVE = 'demo_la_clave_viajes';
+function pedirMemoria() {
+  if (MEM_FUENTE === 'servidor') return Promise.resolve(true);
+  if (MEM_PIDIENDO) return MEM_PIDIENDO;
+  const clave = leerClave();
+  if (!clave) return Promise.resolve(false);
+  const ctrl = new AbortController();
+  const reloj = setTimeout(function () { ctrl.abort(); }, 12000);
+  MEM_PIDIENDO = fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clave: clave, modo: 'memoria' }), signal: ctrl.signal })
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      clearTimeout(reloj);
+      if (d && d.ok && d.memoria && d.memoria.tarifario && Object.keys(d.memoria.tarifario).length) { usarMemoria(d.memoria); return true; }
+      if (d && d.error === 'clave') guardarClave('');
+      return false;
+    })
+    .catch(() => { clearTimeout(reloj); return false; })
+    .finally(() => { MEM_PIDIENDO = null; pintarMemLine(); });
+  return MEM_PIDIENDO;
+}
+let FUENTE = 'csv', MODO_BASE = 'corte';
+
+function leerClave() { try { return localStorage.getItem(LS_CLAVE) || window.__claveLA || ''; } catch (e) { return window.__claveLA || ''; } }
+function guardarClave(v) { window.__claveLA = v; try { if (v) localStorage.setItem(LS_CLAVE, v); else localStorage.removeItem(LS_CLAVE); } catch (e) { } }
+function pedirClave(nueva) {
+  let c = nueva ? '' : leerClave();
+  if (!c) { c = (prompt('Escribe la clave de acceso a la plataforma. Se pide una sola vez en este equipo.') || '').trim(); if (c) guardarClave(c); }
+  return c;
+}
+function msgBase(txt, warn) {
+  const m = $('#baseMsg');
+  if (!txt) { m.classList.add('hidden'); return; }
+  m.className = 'base-msg' + (warn ? ' warn' : ''); m.innerHTML = txt;
+}
+function pintarHintBase() {
+  const u = leerCorte();
+  $('#baseHint').textContent = MODO_BASE === 'corte'
+    ? (u ? 'Trae los viajes de ' + CLIENTES[CLIENTE].n + ' posteriores al ' + u + ', el último facturado. ' + quienCorte() : 'Todavía no hay corte registrado para ' + CLIENTES[CLIENTE].n + '; para la primera carga usa el rango de fechas.')
+    : 'Trae los viajes de ' + CLIENTES[CLIENTE].n + ' cuya fecha de cita cae dentro del rango.';
+}
+let CORTE_U = 0;
+async function traerDeBase() {
+  if (!confirmarReemplazo()) return;
+  const clave = pedirClave(false);
+  if (!clave) return;
+  const cuerpo = { clave: clave, modo: MODO_BASE };
+  await pedirMemoria();
+  if (MODO_BASE === 'corte') {
+    await sincronizarCorte();
+    const u = leerCorte();
+    if (!u) { msgBase('No hay corte registrado todavía. Elige un rango de fechas.', true); return; }
+    cuerpo.desdeId = u; CORTE_U = u;
+    const pids = (M.pospuestos || []).map(x => Number(x[0])).filter(n => n > 0 && n <= u);
+    if (pids.length) cuerpo.desdeId = Math.min(u, Math.min.apply(null, pids) - 1);
+  } else { CORTE_U = 0;
+    const d1 = $('#bd1').value, d2 = $('#bd2').value;
+    if (!d1 || !d2 || d1 > d2) { msgBase('Elige las dos fechas del rango.', true); return; }
+    cuerpo.desde = d1; cuerpo.hasta = d2;
+  }
+  const btn = $('#btnBase');
+  btn.disabled = true; btn.textContent = 'Leyendo la plataforma…'; msgBase('');
+  const ctrl = new AbortController();
+  const reloj = setTimeout(function () { ctrl.abort(); }, 30000);
+  try {
+    const res = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo), signal: ctrl.signal });
+    clearTimeout(reloj);
+    const d = res.ok ? await res.json() : null;
+    if (!d) { msgBase('La plataforma no respondió. Intenta de nuevo o carga el CSV de respaldo.', true); return; }
+    if (!d.ok) {
+      if (d.error === 'clave') { guardarClave(''); msgBase('La clave no es correcta; vuelve a dar clic en Traer viajes para escribirla de nuevo.', true); }
+      else msgBase(d.error || 'No se pudieron leer los viajes.', true);
+      return;
+    }
+    if (!d.viajes || !d.viajes.length) { msgBase(MODO_BASE === 'corte' ? 'No hay viajes nuevos después del corte.' : 'No hay viajes en ese rango de fechas.', true); return; }
+    if (MODO_BASE === 'corte' && CORTE_U) { const P = new Set((M.pospuestos || []).map(x => Number(x[0]))); d.viajes = d.viajes.filter(r => idNum(r) > CORTE_U || P.has(idNum(r))); }
+    if (!d.viajes.length) { msgBase('No hay viajes nuevos después del corte.', true); return; }
+    const fx = filtrarCliente(d.viajes);
+    if (!fx.rows.length) { msgBase('Llegaron ' + d.viajes.length + ' viajes, pero ninguno es de ' + CLIENTES[CLIENTE].n + '.', true); return; }
+    await pedirMemoria();
+    const sinFact = quitarFacturados(fx.rows);
+    if (!sinFact) { msgBase('No se cargó nada.', true); return; }
+    FUENTE = 'base'; DEMO = false; ROWS = sinFact; FUERA = fx.fuera; AVANCE_DESC = null;
+    if (MODO_BASE === 'fechas') {
+      const u = leerCorte();
+      if (u) { const nuevos = ROWS.filter(r => idNum(r) > u).length; if (nuevos && nuevos < ROWS.length) { preguntarCorte(u, ROWS.length, nuevos); return; } }
+      arrancar(ROWS, null);
+    } else arrancar(ROWS, CORTE_U || cuerpo.desdeId);
+  } catch (e) {
+    clearTimeout(reloj);
+    msgBase('La plataforma no respondió a tiempo. Intenta de nuevo o carga el CSV de respaldo.', true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Traer viajes de la plataforma';
+  }
+}
+(function () {
+  const hoy = new Date(), p = n => String(n).padStart(2, '0');
+  $('#bd2').value = hoy.getFullYear() + '-' + p(hoy.getMonth() + 1) + '-' + p(hoy.getDate());
+  $('#bd1').value = hoy.getFullYear() + '-' + p(hoy.getMonth() + 1) + '-01';
+  document.querySelectorAll('#cardLoad [data-modo]').forEach(el => el.onclick = () => {
+    MODO_BASE = el.dataset.modo;
+    document.querySelectorAll('#cardLoad [data-modo]').forEach(x => x.classList.toggle('on', x === el));
+    $('#fechasRow').classList.toggle('hidden', MODO_BASE !== 'fechas');
+    msgBase(''); pintarHintBase();
+  });
+  $('#btnBase').onclick = traerDeBase;
+  document.querySelectorAll('#cliRow [data-cli]').forEach(el => el.onclick = async () => {
+    if (el.dataset.cli === CLIENTE) return;
+    CLIENTE = el.dataset.cli; CORTE_INFO = null; CORTE_EN_LINEA = false; ULTIMO = null;
+    document.querySelectorAll('#cliRow [data-cli]').forEach(x => x.classList.toggle('on', x === el));
+    $('#corteBox').classList.add('hidden'); msgBase(''); pintarAvance(); pintarHintBase(); pintarMemLine();
+    await sincronizarCorte(); pintarHintBase();
+  });
+  $('#btnClave').onclick = () => { const c = pedirClave(true); if (c) { msgBase('Clave guardada en este equipo.'); pedirMemoria(); } };
+})();
+
+
+/* ---------- v11: contra el Excel del mes y las tres respuestas ---------- */
+let DEMO = false, JF = 'faltan';
+const SIM = { tar: false, zona: false, man: false };
+const V9_JULIO = 14;
+const BASE_JULIO = window.__demoRespaldo || [];
+function filaDemo(l) {
+  const p = l.split('|');
+  return { id: p[0], destino: p[1], unidad: p[2], zona: p[3], costoZona: p[4], precioZona: p[5], manBase: p[6], est: p[7],
+    tieneRepartos: p[8], esReparto: p[9], edicion: p[10], extCosto: p[11], zonaNombre: p[12], fecha: p[13], cliente: '', folio: '', pedido: '', status: 'Respaldo' };
+}
+// Respuestas al cliente (en la demo no hay Excel del mes para comparar).
+const RESP_JULIO = { tarifas: [], unidades: {}, zonas: {}, chalco: {} };
+function aplicarRespuestas(lista, q) {
+  const R = DATA.realJulio;
+  return lista.map(b0 => {
+    const b = Object.assign({}, b0);
+    if (q.tar && RESP_JULIO.unidades[String(parseInt(b.id, 10))]) b.unidad = RESP_JULIO.unidades[String(parseInt(b.id, 10))];
+    if (q.zona && RESP_JULIO.zonas[norm(b.destino)]) {
+      const pr = RESP_JULIO.chalco[norm(b.unidad)];
+      b.zona = 2; b.zonaNombre = RESP_JULIO.zonas[norm(b.destino)];
+      if (pr) { b.costoZona = pr[0]; b.precioZona = pr[1]; }
+    }
+    if (q.tar && num(b.costoZona) == null) {
+      const t = RESP_JULIO.tarifas.find(x => x.zona === parseInt(b.zona, 10) && x.uni === norm(b.unidad));
+      if (t) { b.costoZona = t.cz; b.precioZona = t.pz; }
+    }
+    const r = R[String(parseInt(b.id, 10))];
+    if (q.man && r) b.manBase = r.mc ? 1 : 0;
+    return b;
+  });
+}
+const eqc = (a, b) => Math.abs((a || 0) - (b || 0)) < 0.005;
+function medirJulio(q) {
+  const R = DATA.realJulio;
+  const filas = ROWS.filter(b => R[String(parseInt(b.id, 10))]);
+  const V = conMemoriaArchivo(() => procesarBase(aplicarRespuestas(filas, q || {})));
+  const det = {}; let f = 0, m = 0, c = 0;
+  V.forEach(o => {
+    const r = R[o.id];
+    const okF = o.costo != null && eqc(o.costo, r.fc) && eqc(o.venta, r.fv);
+    const okM = eqc(o.man, r.mc) && eqc(o.manVenta, r.mv);
+    f += okF; m += okM; if (okF && okM) c++;
+    det[o.id] = { o, r, okF, okM, ok: okF && okM };
+  });
+  return { n: V.length, f, m, c, det };
+}
+const julioDisponible = () => FUENTE === 'base' && CLIENTE === 'juguetes' && ROWS.some(b => DATA.realJulio[String(parseInt(b.id, 10))]);
+function pintarJulio() {
+  const si = julioDisponible();
+  $('#tabJul').classList.toggle('hidden', !si); $('#julBanner').classList.toggle('hidden', !si);
+  if (!si) { if (!$('#tab-jul').classList.contains('hidden')) document.querySelector('.tab[data-tab="fact"]').click(); return; }
+  const h = medirJulio({});
+  $('#julBanner').innerHTML = `<div><div class="t1">Contra tu Excel de julio${DEMO ? ' · datos de respaldo' : ''}</div>
+    <div class="t2">${h.c} de ${h.n} viajes idénticos a tu Excel</div>
+    <div class="t3">Examen a ciegas con la memoria de mayo y junio. Antes, con el reporte descargado, eran ${V9_JULIO}. Con tres respuestas tuyas llega a ${medirJulio({ tar: 1, zona: 1, man: 1 }).c}.</div></div>
+    <span class="go">Ver el detalle →</span>`;
+  if (!$('#tab-jul').classList.contains('hidden')) renderJulio();
+}
+const pct = (a, n) => (n ? a / n * 100 : 0).toFixed(0);
+function renderJulio() {
+  if (!julioDisponible()) return;
+  const R = DATA.realJulio;
+  const hoy = medirJulio({}), q = { tar: SIM.tar, zona: SIM.zona, man: SIM.man }, sim = medirJulio(q);
+  const algun = SIM.tar || SIM.zona || SIM.man, n = hoy.n;
+  $('#julHero').innerHTML = `
+    <div class="cmp-box"><div class="lb">Con el reporte descargado</div><div class="big grey">${V9_JULIO}</div>
+      <div class="hint">de ${n} · la versión anterior</div><div class="barj grey"><i style="width:${pct(V9_JULIO, n)}%"></i></div></div>
+    <div class="cmp-box"><div class="lb">Leyendo tu plataforma</div><div class="big">${hoy.c}</div>
+      <div class="hint">de ${n} listos · flete ${hoy.f} · maniobra ${hoy.m}</div><div class="barj"><i style="width:${pct(hoy.c, n)}%"></i></div></div>
+    <div class="cmp-box meta"><div class="lb">Con tus respuestas</div><div class="big blue">${algun ? sim.c : '—'}</div>
+      <div class="hint">${algun ? 'de ' + n + ' · flete ' + sim.f + ' · maniobra ' + sim.m : 'activa las respuestas de abajo'}</div><div class="barj blue"><i style="width:${algun ? pct(sim.c, n) : 0}%"></i></div></div>`;
+
+  // lo que responde cada pregunta, calculado con los datos de la carga
+  const filas = ROWS.filter(b => R[String(parseInt(b.id, 10))]);
+  const c0 = hoy.c, c1 = medirJulio({ tar: 1 }).c, c2 = medirJulio({ tar: 1, zona: 1 }).c, c3 = medirJulio({ tar: 1, zona: 1, man: 1 }).c;
+  const GANA = { tar: c1 - c0, zona: c2 - c1, man: c3 - c2 }, gana = k => GANA[k];
+  const uniTxt = u => String(u).replace('Torton / rabon', 'rabón').replace(' toneladas', ' t');
+  const sinTar = filas.filter(b => num(b.costoZona) == null).map(b => {
+    const id = String(parseInt(b.id, 10)), r = R[id], t = RESP_JULIO.tarifas.find(x => x.zona === parseInt(b.zona, 10) && x.uni === norm(RESP_JULIO.unidades[id] || b.unidad));
+    const cambio = RESP_JULIO.unidades[id] ? ` · la plataforma lo tiene en ${uniTxt(b.unidad)} y se facturó en ${uniTxt(RESP_JULIO.unidades[id])}` : '';
+    return `<li><b>${b.destino}</b> · ${uniTxt(RESP_JULIO.unidades[id] || b.unidad)} · viaje ${id} · lo cobraste${t && t.como ? ' ' + t.como : ''}: ${mny(r.fc)} de costo y ${mny(r.fv)} de precio${cambio}</li>`;
+  });
+  const zonas = {};
+  filas.filter(b => RESP_JULIO.zonas[norm(b.destino)]).forEach(b => { (zonas[b.destino] = zonas[b.destino] || { z: b.zonaNombre, c: RESP_JULIO.zonas[norm(b.destino)], ids: [] }).ids.push(String(parseInt(b.id, 10))); });
+  const zonasLi = Object.keys(zonas).map(d => `<li><b>${d}</b> · viaje${zonas[d].ids.length > 1 ? 's' : ''} ${zonas[d].ids.join(', ')} · en la plataforma está en ${zonas[d].z} y lo cobras como ${zonas[d].c}</li>`);
+  const dudas = [...new Set(VIAJES.filter(o => R[o.id] && o.flags.some(f => f.t === 'zona en duda')).map(o => o.destino))];
+  if (dudas.length) zonasLi.push(`<li><b>${dudas.join(', ')}</b> · también está en otra zona; el Copiloto ya lo corrige con tu histórico</li>`);
+  const manSin = [], manDe = [];
+  filas.forEach(b => { const id = String(parseInt(b.id, 10)), r = R[id], marca = esSi(b.manBase) || b.manBase === 1 || b.manBase === '1';
+    if (r.mc && !marca) manSin.push(id); if (!r.mc && marca) manDe.push(id); });
+  const bloque = (k, titulo, pregunta, lis) => { const g = gana(k); return `<div class="rsp">
+    <button class="sw ${SIM[k] ? 'on' : ''} no-print" data-sw="${k}" aria-label="${titulo}"></button>
+    <div><h3>${titulo}</h3><p class="q">${pregunta}</p><ul>${lis.join('')}</ul></div>
+    <span class="plus ${g ? '' : 'cero'}">${g ? '+' + g + ' viaje' + (g > 1 ? 's' : '') : 'sin cambio'}</span></div>`; };
+  $('#julResp').innerHTML =
+    bloque('tar', `${sinTar.length} destinos sin tarifa en tu tabulador`, '¿Con qué tarifa se cobran y las vas a cargar al tabulador?', sinTar) +
+    bloque('zona', `${Object.keys(zonas).length + dudas.length} direcciones con la zona distinta a la que cobras`, '¿Corregimos la zona de esas direcciones en la plataforma?', zonasLi) +
+    bloque('man', `${manSin.length + manDe.length} maniobras que no coinciden con la plataforma`, '¿La maniobra se va a capturar siempre en la plataforma?',
+      [manSin.length ? `<li><b>${manSin.length} cobradas y sin marcar:</b> viajes ${manSin.join(', ')}</li>` : '', manDe.length ? `<li><b>${manDe.length} marcada${manDe.length > 1 ? 's' : ''} y sin cobrar:</b> viaje${manDe.length > 1 ? 's' : ''} ${manDe.join(', ')}</li>` : '']);
+  document.querySelectorAll('[data-sw]').forEach(b => b.onclick = () => { SIM[b.dataset.sw] = !SIM[b.dataset.sw]; renderJulio(); });
+
+  const todo = medirJulio({ tar: 1, zona: 1, man: 1 });
+  const quedan = Object.values(todo.det).filter(d => !d.ok).map(d => {
+    const dc = Math.abs((d.o.costo || 0) - (d.r.fc || 0)), dv = Math.abs((d.o.venta || 0) - (d.r.fv || 0));
+    return `<b>Viaje ${d.o.id} · ${d.o.destino}:</b> ${d.okF ? 'la maniobra no coincide' : `queda a ${mny(dc)} en costo y ${mny(dv)} en precio de tu Excel; tu histórico trae dos precios para la misma ruta`}.`;
+  });
+  $('#julRest').innerHTML = quedan.length ? `<div class="alert grey"><div class="t">Con las tres respuestas quedan ${todo.c} de ${n}</div><div class="m">${quedan.join('<br>')}</div></div>` : '';
+
+  const ids = Object.keys(hoy.det).sort((a, b) => a - b).filter(id => JF === 'todos' || !hoy.det[id].ok);
+  const est = d => d.ok ? '<span class="ok">✓ listo</span>' : `<span class="no">✕ ${!d.okF && !d.okM ? 'flete y maniobra' : (!d.okF ? 'flete' : 'maniobra')}</span>`;
+  $('#julN').textContent = '· ' + ids.length + (JF === 'todos' ? ' viajes' : ' por completar hoy');
+  $('#tblJul').innerHTML = `<thead><tr><th>ID</th><th>Destino</th><th>Unidad</th><th class="num">Flete en tu Excel</th><th>Hoy</th>${algun ? '<th>Con tus respuestas</th>' : ''}</tr></thead>
+    <tbody>${ids.map(id => { const d = hoy.det[id], s = sim.det[id]; return `<tr class="${algun && !d.ok && s.ok ? 'flip' : ''}">
+      <td><b>${id}</b></td><td class="dest" title="${d.o.destino}">${d.o.destino}</td><td>${uniTxt(d.o.unidad)}</td>
+      <td class="num">${mny(d.r.fv)}</td><td>${est(d)}</td>${algun ? '<td>' + est(s) + '</td>' : ''}</tr>`; }).join('')}</tbody>`;
+}
+
+/* ---------- flujo ---------- */
+function redraw() { renderKpis(); renderAlerts(); renderToolbar(); renderTabla(); renderPospuestos(); renderCharts(); pintarJulio(); guardarAvance(); }
+
+/* ---------- v16: viajes pasados al mes siguiente (se guardan en el servidor) ---------- */
+let MES_P = '';
+function renderPospuestos() {
+  const box = $('#pospBox'); if (!box) return;
+  const v = VIAJES.filter(o => o.pospuesto);
+  if (!v.length) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  box.innerHTML = `<h4>Pasados al mes siguiente (${v.length})</h4>
+    <p>No entran en este reporte ni en los totales; aparecen solos en el siguiente corte.</p>
+    ${v.map(o => `<div class="posp-row" data-id="${o.id}"><b>${o.id}</b> · ${o.destino} · ${o.unidad} · cita ${o.fecha} · ${mny(o.totalVenta)}
+      <button class="mini" data-acc="regresar">regresar a este reporte</button></div>`).join('')}`;
+  box.classList.remove('hidden');
+  box.querySelectorAll('.mini').forEach(bt => bt.onclick = e => {
+    const o = VIAJES.find(x => x.id === e.target.closest('.posp-row').dataset.id); if (o) posponer(o, false);
+  });
+}
+async function posponer(o, si) {
+  const mes = MES_P || o.mes || '';
+  o.pospuesto = si;
+  M.pospuestos = (M.pospuestos || []).filter(x => String(x[0]) !== o.id);
+  if (si) M.pospuestos.push([Number(o.id), mes]);
+  redraw();
+  if (DEMO) return;
+  let ok = false;
+  try {
+    const clave = localStorage.getItem(LS_CLAVE) || '';
+    const cuerpo = si ? { clave, modo: 'memoria', mes, posponer: [Number(o.id)] } : { clave, modo: 'memoria', quitar: [Number(o.id)] };
+    const res = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
+    const d = res.ok ? await res.json() : null; ok = !!(d && d.ok);
+  } catch (e) { }
+  if (!ok) alert('El viaje ' + o.id + (si ? ' salió de este reporte' : ' regresó a este reporte') + ', pero no se pudo avisar al servidor; ' +
+    (si ? 'el mes siguiente no aparecería solo. Revisa tu conexión y vuelve a marcarlo.' : 'podría volver a salir como pospuesto. Revisa tu conexión y vuelve a intentarlo.'));
+}
+
+/* ---------- v13: el avance se guarda solo en este equipo, uno por cliente ---------- */
+let AVANCE_DESC = null, RESTAURANDO = false;
+const lsAvance = () => 'demo_la_avance_' + CLIENTE;
+const cambiosDe = lista => (lista || []).filter(o => o.editC || o.editM).length;
+function guardarAvance() {
+  if (DEMO || !VIAJES.length || RESTAURANDO) return;
+  try {
+    localStorage.setItem(lsAvance(), JSON.stringify({ v: 13, cliente: CLIENTE, guardado: new Date().toISOString(), descargado: AVANCE_DESC,
+      fuente: FUENTE, desde: DESDE, periodo: $('#periodo').innerHTML, fuera: FUERA, viajes: VIAJES, rows: ROWS }));
+  } catch (e) { }
+}
+function leerAvance() {
+  try { const a = JSON.parse(localStorage.getItem(lsAvance()) || 'null'); return a && a.viajes && a.viajes.length ? a : null; } catch (e) { return null; }
+}
+function cuandoFue(iso) {
+  if (!iso) return '';
+  const d = new Date(iso); if (isNaN(d)) return '';
+  return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) + ' a las ' + d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+}
+function pintarAvance() {
+  const box = $('#avanceBox'), a = leerAvance();
+  if (!a) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  const n = cambiosDe(a.viajes);
+  box.innerHTML = `<h4>Tienes un avance guardado de ${CLIENTES[CLIENTE].n}</h4>
+    <p>${a.viajes.length} viajes${n ? ', ' + n + (n === 1 ? ' con cambio tuyo' : ' con cambios tuyos') : ''} · guardado el ${cuandoFue(a.guardado)}${a.descargado ? ' · el Excel ya se descargó el ' + cuandoFue(a.descargado) : ''}</p>
+    <div class="btnrow" style="justify-content:flex-start">
+      <button class="btn green" id="btnSeguir">Continuar donde me quedé</button>
+      <button class="link" id="btnDescartar">Descartar este avance</button>
+    </div>`;
+  box.classList.remove('hidden');
+  $('#btnSeguir').onclick = continuarAvance;
+  $('#btnDescartar').onclick = () => {
+    if (!confirm('Se borra el avance guardado de ' + CLIENTES[CLIENTE].n + (n ? ', con ' + n + ' cambios tuyos' : '') + '. ¿Seguro?')) return;
+    try { localStorage.removeItem(lsAvance()); } catch (e) { }
+    pintarAvance();
+  };
+}
+function continuarAvance() {
+  const a = leerAvance(); if (!a) return;
+  FUENTE = a.fuente || 'base'; DEMO = false; DESDE = a.desde || null; ROWS = a.rows || []; FUERA = a.fuera || {};
+  VIAJES = a.viajes; AVANCE_DESC = a.descargado || null;
+  FMES = 'todos'; FEST = 'todos'; FSIG = null; FD1 = ''; FD2 = '';
+  $('#periodo').innerHTML = a.periodo || '';
+  $('#cardLoad').classList.add('hidden'); $('#results').classList.remove('hidden');
+  redraw(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function confirmarReemplazo() {
+  const a = leerAvance(), n = a ? cambiosDe(a.viajes) : 0;
+  if (!n) return true;
+  return confirm('Tienes un avance guardado de ' + CLIENTES[CLIENTE].n + ' con ' + n + (n === 1 ? ' cambio tuyo' : ' cambios tuyos') +
+    '. Si traes viajes nuevos, ese avance se reemplaza.\n\n¿Quieres seguir? (Para recuperarlo, cancela y usa "Continuar donde me quedé".)');
+}
+window.addEventListener('pagehide', guardarAvance);
+function reset() {
+  $('#results').classList.add('hidden'); $('#cardLoad').classList.remove('hidden'); pintarMemLine();
+  $('#cmpOut').classList.add('hidden'); $('#file').value = ''; $('#fileX').value = '';
+  $('#corteBox').classList.add('hidden'); $('#baseMsg').classList.add('hidden'); FUENTE = 'csv';
+  VIAJES = []; ROWS = []; DESDE = null; DEMO = false; FMES = 'todos'; FEST = 'todos'; FSIG = null; FD1 = ''; FD2 = ''; FUERA = {};
+  pintarAvance();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+async function cargar(rows) {
+  if (!rows.length) { alert('No encontré viajes en ese archivo. ¿Es el reporte de viajes de la plataforma?'); return; }
+  if (!confirmarReemplazo()) return;
+  const fx = filtrarCliente(rows);
+  if (!fx.rows.length) { alert('Ninguno de los viajes del archivo es de ' + CLIENTES[CLIENTE].n + '.'); return; }
+  rows = fx.rows; FUERA = fx.fuera; AVANCE_DESC = null;
+  await pedirMemoria();
+  rows = quitarFacturados(rows);
+  if (!rows) return;
+  ROWS = rows;
+  await sincronizarCorte();
+  const u = leerCorte();
+  if (u) {
+    const nuevos = rows.filter(r => idNum(r) > u).length;
+    if (nuevos && nuevos < rows.length) { preguntarCorte(u, rows.length, nuevos); return; }
+  }
+  arrancar(rows, null);
+}
+function arrancar(rows, desde) {
+  DESDE = desde;
+  VIAJES = conMemoriaCliente(() => FUENTE === 'base' ? procesarBase(rows) : procesar(rows));
+  if (!VIAJES.length) { alert('Con ese corte no queda ningún viaje por procesar.'); DESDE = null; return; }
+  const fs = VIAJES.map(v => v.fecha).filter(Boolean).sort();
+  const nf = Object.values(FUERA).reduce((a, b) => a + b, 0);
+  $('#periodo').innerHTML = '· ' + CLIENTES[CLIENTE].n + (fs.length ? ' · ' + fs[0] + ' a ' + fs[fs.length - 1] : '') +
+    (nf ? ' <span class="fuera-nota">· se dejaron fuera ' + nf + ' viajes de otros clientes (' + Object.entries(FUERA).map(([k, v]) => k + ': ' + v).join(', ') + ')</span>' : '') +
+    (YA_FACT ? ' <span class="fuera-nota">· se dejaron fuera ' + YA_FACT + ' ya facturados</span>' : '');
+  $('#cardLoad').classList.add('hidden'); $('#results').classList.remove('hidden');
+  redraw(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function pintarMemLine() {
+  const u = leerCorte();
+  const origen = MEM_FUENTE === 'servidor' ? 'memoria del servidor' : (MEM_PIDIENDO ? 'memoria del archivo · consultando el servidor…' : 'memoria del archivo · respaldo sin conexión');
+  const base = `<span class="dot"></span>Memoria activa · ${M.stats.viajes} viajes aprendidos (${M.stats.meses}) ·
+    ${Object.keys(M.tarifario).length} rutas · ${Object.keys(M.ventaFlete).length} precios de venta · ${origen}${CLIENTE !== 'juguetes' ? ' · lo aprendido es de Juguetes del Norte: para ' + CLIENTES[CLIENTE].n + ' se usa solo el tabulador de la plataforma' : ''}`;
+  const corte = u
+    ? (CORTE_EN_LINEA
+        ? ` · corte compartido en el viaje ${u}${CORTE_INFO && CORTE_INFO.actualizadoPor ? ' · lo movió ' + CORTE_INFO.actualizadoPor : ''}`
+        : ` · corte de este equipo en el viaje ${u} · sin conexión al servidor`)
+    : (CORTE_EN_LINEA ? ' · sin corte previo registrado' : '');
+  $('#memLine').innerHTML = base + corte;
+  if ($('#baseHint')) pintarHintBase();
+}
+pintarMemLine();
+sincronizarCorte();
+pedirMemoria();
+pintarAvance();
+
+const drop = $('#drop'), file = $('#file');
+drop.onclick = () => file.click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) leerCsv(e.dataTransfer.files[0]); };
+file.onchange = e => { if (e.target.files[0]) leerCsv(e.target.files[0]); };
+function leerCsv(f) {
+  const rd = new FileReader();
+  rd.onload = ev => { try { FUENTE = 'csv'; DEMO = false; const filas = parseCSV(ev.target.result); cargar(filas).catch(err => alert('No pude procesar el archivo: ' + err.message)); } catch (err) { alert('No pude leer el archivo: ' + err.message); } };
+  rd.readAsText(f, 'UTF-8');
+}
+const dropX = $('#dropX'), fileX = $('#fileX');
+dropX.onclick = () => fileX.click();
+dropX.ondragover = e => { e.preventDefault(); dropX.classList.add('over'); };
+dropX.ondragleave = () => dropX.classList.remove('over');
+dropX.ondrop = e => { e.preventDefault(); dropX.classList.remove('over'); if (e.dataTransfer.files[0]) leerXls(e.dataTransfer.files[0]); };
+fileX.onchange = e => { if (e.target.files[0]) leerXls(e.target.files[0]); };
+function leerXls(f) {
+  const rd = new FileReader();
+  rd.onload = ev => { try { comparar(leerExcel(new Uint8Array(ev.target.result))); } catch (err) { alert('No pude leer el Excel: ' + err.message); } };
+  rd.readAsArrayBuffer(f);
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+  ['fact', 'jul', 'ana', 'val'].forEach(k => $('#tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
+  if (t.dataset.tab === 'jul') renderJulio();
+});
+document.querySelectorAll('[data-jf]').forEach(b => b.onclick = () => {
+  JF = b.dataset.jf; document.querySelectorAll('[data-jf]').forEach(x => x.classList.toggle('on', x === b)); renderJulio();
+});
+$('#julBanner').onclick = () => $('#tabJul').click();
+$('#btnDemoJul').onclick = () => {
+  FUENTE = 'base'; DEMO = true; ROWS = BASE_JULIO.map(filaDemo);
+  arrancar(ROWS, null);
+};
+
+</script>
+<script>
+/* DEMO · atajos: arranca con los viajes ya cargados y ofrece un Excel de ejemplo en Validación */
+(function () {
+  function excelEjemplo() {
+    var D = window.__demo; D.reset(777);
+    var real = {};
+    VIAJES.filter(function (o) { return !o.pospuesto && o.costo != null; }).forEach(function (o, i) {
+      var fc = o.costo, r = D.rnd();
+      if (r < 0.10) fc = Math.round(o.costo * 1.06);          // tarifa que cambió
+      else if (r < 0.16) fc = Math.round(o.costo * 1.004);    // diferencia menor a 1%
+      var fv = ventaFlete(fc, o.uni).v;
+      if (D.rnd() < 0.07) fv = Math.round((fv || 0) * 1.012); // precio capturado distinto
+      real[o.id] = { fc: fc, fv: fv, mc: o.man, mv: o.manVenta };
+    });
+    comparar(real);
+  }
+  var b = document.getElementById('btnXEjemplo'); if (b) b.onclick = excelEjemplo;
+  window.__demoExcelEjemplo = excelEjemplo;
+
+  async function arrancarDemo() {
+    try {
+      if (/[?&]inicio\b/.test(location.search)) return;
+      if (leerAvance()) { continuarAvance(); return; }
+      await pedirMemoria();
+      await traerDeBase();
+    } catch (e) { }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrancarDemo); else arrancarDemo();
+})();
+
+</script>
+</body>
+</html>
