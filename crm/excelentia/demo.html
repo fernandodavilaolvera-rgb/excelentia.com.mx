@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo · ExcelentIA</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/ExcelentiA_favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Manrope',sans-serif;background:#f5f6f8;color:#1a2035;font-size:14px;line-height:1.45;display:flex;flex-direction:column}
+
+/* pestañas con subrayado (estilo del CRM) */
+.tabs{display:flex;gap:.2rem;padding:0 1.2rem;background:#fff;border-bottom:1px solid #dde1e9;flex-shrink:0;overflow-x:auto}
+.tab{font-family:inherit;font-size:.86rem;font-weight:700;color:#8a90a0;background:none;border:none;border-bottom:2px solid transparent;padding:.7rem .9rem .6rem;cursor:pointer;white-space:nowrap}
+.tab:hover{color:#1a3a6b}
+.tab.on{color:#1a3a6b;border-bottom-color:#1a3a6b}
+.subtabs{display:flex;gap:.15rem;padding:0 1.2rem;background:#fff;border-bottom:1px solid #dde1e9;flex-shrink:0;overflow-x:auto}
+.subtab{font-family:inherit;font-size:.78rem;font-weight:700;color:#8a90a0;background:none;border:none;border-bottom:2px solid transparent;padding:.5rem .75rem .45rem;cursor:pointer;white-space:nowrap}
+.subtab:hover{color:#1a3a6b}
+.subtab.on{color:#1a3a6b;border-bottom-color:#4a9fd4}
+
+.panel{display:none;flex:1;min-height:0;flex-direction:column}
+.panel.on{display:flex}
+.frame-wrap{flex:1;min-height:0;position:relative;background:#f5f6f8}
+.frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;background:#f5f6f8}
+.frame-wrap iframe.on{display:block}
+.intro{font-size:.78rem;color:#4a5068;padding:.55rem 1.2rem;background:#eef4fc;border-bottom:1px solid #dde1e9;flex-shrink:0}
+.intro b{color:#1a3a6b}
+
+/* Eco IA */
+.eco{flex:1;min-height:0;overflow-y:auto;padding:1.1rem 1rem 3rem}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:6px;max-width:720px;margin:0 auto 1rem;padding:1rem 1.1rem}
+.card h2{font-size:.95rem;font-weight:800;color:#1a2035;margin-bottom:.15rem;break-after:avoid}
+.card .sub{font-size:.78rem;color:#4a5068;margin-bottom:.8rem}
+.ficha{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem .9rem}
+.ficha div{display:flex;flex-direction:column;gap:.05rem}
+.ficha span{font-size:.68rem;font-weight:700;color:#8a90a0;letter-spacing:.03em}
+.ficha b{font-size:.86rem;font-weight:700;color:#1a2035}
+.ficha .dos{grid-column:span 2}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px}
+.thumbs img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid #dde1e9;background:#0d1b3e;display:block}
+.cuenta{font-size:.75rem;color:#4a5068;margin-top:.5rem}
+.acciones{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.btn{font-family:inherit;font-size:.84rem;font-weight:700;border-radius:6px;padding:.6rem 1.1rem;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer}
+.btn:hover{background:#1e5096}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.verde{background:#2e9e5b;border-color:#2e9e5b}
+.btn.verde:hover{background:#268a4e}
+.btn.ghost{background:#fff;color:#1a3a6b}
+.btn.ghost:hover{background:#e8f0fb}
+.nota{font-size:.72rem;color:#8a90a0}
+.pasos{list-style:none;margin:.3rem 0 .2rem}
+.pasos li{display:flex;align-items:center;gap:.55rem;font-size:.82rem;color:#8a90a0;padding:.28rem 0}
+.pasos li .pt{width:16px;height:16px;border-radius:50%;border:2px solid #dde1e9;flex-shrink:0}
+.pasos li.activo{color:#1a3a6b;font-weight:700}
+.pasos li.activo .pt{border-color:#4a9fd4;border-top-color:transparent;animation:gira .8s linear infinite}
+.pasos li.hecho{color:#2e7d5b}
+.pasos li.hecho .pt{border-color:#2e9e5b;background:#2e9e5b}
+@keyframes gira{to{transform:rotate(360deg)}}
+.barra{height:6px;background:#eef1f6;border-radius:4px;overflow:hidden;margin:.6rem 0 .3rem}
+.barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1a3a6b,#4a9fd4);transition:width .6s}
+.reloj{font-size:.75rem;color:#4a5068}
+.aviso{background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:6px;padding:.6rem .8rem;font-size:.8rem;color:#1a3a6b;margin-top:.7rem}
+.aviso.err{background:#fdecea;border-color:#f3c3bd;border-left-color:#c0392b;color:#8a2a1f}
+.listo{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.doc{display:flex;align-items:center;gap:.6rem;border:1px solid #dde1e9;border-radius:6px;padding:.55rem .75rem;background:#f5f6f8;flex:1;min-width:220px}
+.doc .ic{width:30px;height:38px;border-radius:3px;background:#1e5096;color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;flex-shrink:0}
+.doc b{font-size:.82rem;display:block}
+.doc span{font-size:.72rem;color:#8a90a0}
+.hidden{display:none!important}
+
+@media(max-width:600px){
+  .tabs,.subtabs{padding:0 .5rem}
+  .intro{padding:.5rem .8rem}
+  .eco{padding:.8rem .6rem 3rem}
+  .card{padding:.85rem}
+  .ficha{grid-template-columns:1fr 1fr}
+  .thumbs{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))}
+}
+
+@media print{
+  @page{size:Letter;margin:13mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{height:auto;display:block}
+  .no-print,.tabs,.subtabs{display:none!important}
+  .panel{display:none!important}
+  .panel.on{display:block!important}
+  .eco{overflow:visible;padding:0}
+  .card{break-inside:auto;border:none;border-bottom:1px solid #dde1e9;border-radius:0;max-width:none}
+  .thumbs img,.doc,.aviso{break-inside:avoid}
+  h1,h2,h3,h4{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  a[href]:after{content:none}
+  .frame-wrap{position:static}
+  .frame-wrap iframe.on{position:static;height:1200px}
+}
+</style>
+</head>
+<body>
+
+<nav class="tabs no-print" id="tabs">
+  <button class="tab on" data-p="eco">Eco IA</button>
+  <button class="tab" data-p="club">Club ExcelentIA</button>
+  <button class="tab" data-p="logistica">Logística</button>
+  <button class="tab" data-p="licit">Licitaciones</button>
+</nav>
+
+<!-- ===================== ECO IA ===================== -->
+<section class="panel on" id="p-eco">
+  <div class="eco">
+    <div class="card">
+      <h2>Reporte de ecocardiograma con IA</h2>
+      <p class="sub">El agente lee las imágenes del ecógrafo, toma cada medición, aplica los criterios clínicos y entrega el reporte en Word listo para firmar. Esta demostración corre de verdad con un estudio de ejemplo.</p>
+      <div class="ficha">
+        <div class="dos"><span>PACIENTE</span><b>Elena Martínez Ruiz</b></div>
+        <div><span>SEXO</span><b>Femenino</b></div>
+        <div><span>FECHA DEL ESTUDIO</span><b id="ecoFecha">—</b></div>
+        <div><span>NACIMIENTO</span><b>18/10/1974</b></div>
+        <div><span>EDAD</span><b id="ecoEdad">—</b></div>
+        <div><span>ESTATURA · PESO</span><b>1.66 m · 85 kg</b></div>
+        <div><span>ASC</span><b>1.93 m²</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Imágenes del estudio</h2>
+      <p class="sub">Las mismas que exporta el ecógrafo: modo 2D, Doppler, strain y mapa polar.</p>
+      <div class="thumbs" id="ecoThumbs"></div>
+      <p class="cuenta" id="ecoCuenta"></p>
+    </div>
+    <div class="card no-print" id="ecoAccion">
+      <div class="acciones">
+        <button class="btn verde" id="ecoBtn">Generar reporte</button>
+        <span class="nota">Corrida real: tarda de 2 a 4 minutos y cuesta alrededor de 3.40 pesos.</span>
+      </div>
+      <div id="ecoProg" class="hidden">
+        <div class="barra"><i id="ecoBarra"></i></div>
+        <ul class="pasos" id="ecoPasos">
+          <li data-s="0"><span class="pt"></span>Enviando las imágenes del estudio</li>
+          <li data-s="1"><span class="pt"></span>Clasificando cada imagen por vista y modo</li>
+          <li data-s="2"><span class="pt"></span>Leyendo las mediciones de cada pantalla</li>
+          <li data-s="3"><span class="pt"></span>Aplicando los criterios de las guías ASE</li>
+          <li data-s="4"><span class="pt"></span>Redactando hallazgos y conclusiones</li>
+          <li data-s="5"><span class="pt"></span>Armando el reporte en Word</li>
+        </ul>
+        <p class="reloj" id="ecoReloj"></p>
+      </div>
+      <div id="ecoMsg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CLUB ===================== -->
+<section class="panel" id="p-club">
+  <div class="intro no-print">Dashboard de cobranza, cartera, accesos y avisos de un club deportivo. <b>Datos de muestra</b>: puedes navegar, filtrar y "enviar" avisos; nada sale de verdad.</div>
+  <div class="frame-wrap"><iframe class="on" data-src="demo/club.html" title="Club ExcelentIA"></iframe></div>
+</section>
+
+<!-- ===================== LOGÍSTICA ===================== -->
+<section class="panel" id="p-logistica">
+  <nav class="subtabs no-print" data-grupo="logistica">
+    <button class="subtab on" data-f="la-copiloto">Copiloto de Facturación</button>
+    <button class="subtab" data-f="la-motor">Motor Tarifario</button>
+    <button class="subtab" data-f="la-rentabilidad">Rentabilidad</button>
+    <button class="subtab" data-f="la-conciliacion">Conciliación de Pagos</button>
+    <button class="subtab" data-f="la-prospeccion">Prospección</button>
+  </nav>
+  <div class="intro no-print">Plataforma de cinco módulos para una operadora logística. <b>Datos de muestra</b> de una empresa ficticia; las acciones se simulan.</div>
+  <div class="frame-wrap">
+    <iframe class="on" id="f-la-copiloto" data-src="demo/la-copiloto.html" title="Copiloto de Facturación"></iframe>
+    <iframe id="f-la-motor" data-src="demo/la-motor.html" title="Motor Tarifario"></iframe>
+    <iframe id="f-la-rentabilidad" data-src="demo/la-rentabilidad.html" title="Rentabilidad"></iframe>
+    <iframe id="f-la-conciliacion" data-src="demo/la-conciliacion.html" title="Conciliación de Pagos"></iframe>
+    <iframe id="f-la-prospeccion" data-src="demo/la-prospeccion.html" title="Prospección"></iframe>
+  </div>
+</section>
+
+<!-- ===================== LICITACIONES ===================== -->
+<section class="panel" id="p-licit">
+  <nav class="subtabs no-print" data-grupo="licit">
+    <button class="subtab on" data-f="licit-dof">Búsqueda en el DOF</button>
+    <button class="subtab" data-f="licit-resumen">Análisis de Convocatoria</button>
+  </nav>
+  <div class="intro no-print" id="licitIntro">El agente baja el Diario Oficial del día, encuentra las licitaciones y separa las del sector salud. <b>La búsqueda corre de verdad</b> (si la fecha ya se buscó antes, responde al instante).</div>
+  <div class="frame-wrap">
+    <iframe class="on" id="f-licit-dof" data-src="demo/licit-dof.html" title="Búsqueda en el DOF"></iframe>
+    <iframe id="f-licit-resumen" data-src="demo/licit-resumen.html" title="Análisis de Convocatoria"></iframe>
+  </div>
+</section>
+
+<script>
+/* ============ Demo · ExcelentIA ============ */
+const $ = s => document.querySelector(s);
+const LS_TAB = 'demo_tab';
+const INTROS = {
+  'licit-dof': 'El agente baja el Diario Oficial del día, encuentra las licitaciones y separa las del sector salud. <b>La búsqueda corre de verdad</b> (si la fecha ya se buscó antes, responde al instante).',
+  'licit-resumen': 'Sube las bases de una licitación y el agente arma el resumen ejecutivo: fechas, requisitos, riesgos y sugerencias. <b>Corre de verdad</b>; usa la convocatoria de ejemplo o sube la tuya.'
+};
+
+function cargar(ifr){ if(ifr && !ifr.getAttribute('src')) ifr.src = ifr.dataset.src; }
+function verPanel(p){
+  if(!document.getElementById('p-'+p)) p = 'eco';
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.p === p));
+  document.querySelectorAll('.panel').forEach(x => x.classList.toggle('on', x.id === 'p-'+p));
+  const pan = document.getElementById('p-'+p);
+  cargar(pan.querySelector('iframe.on'));
+  try{ localStorage.setItem(LS_TAB, p); }catch(e){}
+  const url = new URL(location); url.searchParams.set('demo', p); history.replaceState({}, '', url);
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => verPanel(t.dataset.p));
+document.querySelectorAll('.subtabs').forEach(nav => {
+  nav.querySelectorAll('.subtab').forEach(b => b.onclick = () => {
+    nav.querySelectorAll('.subtab').forEach(x => x.classList.toggle('on', x === b));
+    const pan = nav.closest('.panel');
+    pan.querySelectorAll('iframe').forEach(f => f.classList.toggle('on', f.id === 'f-'+b.dataset.f));
+    cargar(document.getElementById('f-'+b.dataset.f));
+    if(INTROS[b.dataset.f]) $('#licitIntro').innerHTML = INTROS[b.dataset.f];
+  });
+});
+
+/* ---------- Eco IA ---------- */
+const ECO_URL = 'https://n8n.excelentia.com.mx/webhook/demo-eco-ia';
+const ECO_ESTADO = 'https://n8n.excelentia.com.mx/webhook/demo-eco-estado';
+const ECO_N = 35;
+const ECO_PACIENTE = { nombre:'Elena Martínez Ruiz', sexo:'Femenino', nacimiento:'1974-10-18', peso:'85', talla:'1.66', asc:'1.93' };
+function hoyIso(){ const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function edad(f){ const h = new Date(), n = new Date(f+'T12:00:00'); let e = h.getFullYear()-n.getFullYear(); if(h.getMonth()<n.getMonth() || (h.getMonth()===n.getMonth() && h.getDate()<n.getDate())) e--; return e; }
+(function pintarEco(){
+  const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const d = new Date();
+  $('#ecoFecha').textContent = d.getDate()+' '+MES[d.getMonth()]+' '+d.getFullYear();
+  $('#ecoEdad').textContent = edad(ECO_PACIENTE.nacimiento)+' años';
+  let h = '';
+  for(let i=1;i<=ECO_N;i++){ const n = String(i).padStart(2,'0'); h += `<img loading="lazy" src="demo/eco/min/eco_${n}.jpg" alt="Imagen ${i}">`; }
+  $('#ecoThumbs').innerHTML = h;
+  $('#ecoCuenta').textContent = ECO_N+' imágenes del estudio';
+})();
+
+let ecoTimer = null, ecoPasoT = null;
+function ecoPaso(i){
+  document.querySelectorAll('#ecoPasos li').forEach(li => {
+    const s = +li.dataset.s;
+    li.className = s < i ? 'hecho' : s === i ? 'activo' : '';
+  });
+}
+function ecoMsg(html, err){ $('#ecoMsg').innerHTML = html ? `<div class="aviso ${err?'err':''}">${html}</div>` : ''; }
+function nombreArchivo(){ return 'Reporte_Eco_Elena_Martinez_Ruiz_'+hoyIso()+'.docx'; }
+
+$('#ecoBtn').onclick = async () => {
+  const btn = $('#ecoBtn'); btn.disabled = true; btn.textContent = 'Generando…';
+  ecoMsg(''); $('#ecoProg').classList.remove('hidden');
+  const t0 = Date.now(); const ESTIMADO = 170;
+  ecoPaso(0);
+  ecoTimer = setInterval(() => {
+    const s = Math.round((Date.now()-t0)/1000);
+    $('#ecoReloj').textContent = 'Tiempo transcurrido: '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+    $('#ecoBarra').style.width = Math.min(95, s/ESTIMADO*100)+'%';
+    const paso = s < 8 ? 0 : s < 25 ? 1 : s < 95 ? 2 : s < 125 ? 3 : s < 150 ? 4 : 5;
+    ecoPaso(paso);
+  }, 1000);
+  try{
+    const fd = new FormData();
+    fd.append('nombre_paciente', ECO_PACIENTE.nombre);
+    fd.append('fecha_estudio', hoyIso());
+    fd.append('tipo_estudio', 'Ecocardiograma Transtorácico');
+    fd.append('medico_nombre', 'Demostración ExcelentIA');
+    fd.append('medico_email', 'demo@excelentia.com.mx');
+    fd.append('sexo', ECO_PACIENTE.sexo);
+    fd.append('fecha_nacimiento', ECO_PACIENTE.nacimiento);
+    fd.append('edad', String(edad(ECO_PACIENTE.nacimiento)));
+    fd.append('peso', ECO_PACIENTE.peso);
+    fd.append('talla', ECO_PACIENTE.talla);
+    fd.append('asc', ECO_PACIENTE.asc+' m²');
+    fd.append('total_imagenes', String(ECO_N));
+    fd.append('doctor_id', 'demo');
+    for(let i=1;i<=ECO_N;i++){
+      const n = String(i).padStart(2,'0');
+      const r = await fetch('demo/eco/eco_'+n+'.jpg');
+      if(!r.ok) throw new Error('No se pudo leer la imagen '+i);
+      fd.append('imagen_'+i, new File([await r.blob()], 'eco_'+n+'.jpg', { type:'image/jpeg' }));
+    }
+    const res = await fetch(ECO_URL, { method:'POST', body: fd });
+    const j0 = await res.json().catch(() => null);
+    if(!res.ok || !j0 || !j0.ok || !j0.trabajo) throw new Error((j0 && j0.error) || ('el servidor respondió '+res.status));
+    // El reporte se arma en segundo plano: se pregunta su estado cada 5 s
+    let fin = null, fallos = 0;
+    while(!fin){
+      await new Promise(r => setTimeout(r, 5000));
+      if(Date.now()-t0 > 13*60*1000) throw new Error('el reporte tardó demasiado');
+      try{
+        const r2 = await fetch(ECO_ESTADO, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ trabajo: j0.trabajo }) });
+        const j2 = await r2.json();
+        fallos = 0;
+        if(!j2 || j2.ok === false) throw new Error((j2 && j2.error) || 'sin respuesta');
+        if(j2.estado === 'listo') fin = j2;
+        else if(j2.estado === 'error') throw new Error(j2.error || 'el reporte no se generó');
+      }catch(e2){ if(e2 && e2.message && !/fetch|network|conex/i.test(e2.message)) throw e2; if(++fallos > 4) throw e2; }
+    }
+    clearInterval(ecoTimer); ecoPaso(6); $('#ecoBarra').style.width = '100%';
+    const s = Math.round((Date.now()-t0)/1000);
+    const url = fin.url;
+    const nom = fin.archivo || nombreArchivo();
+    $('#ecoMsg').innerHTML = `<div class="aviso"><div class="listo">
+        <div class="doc"><div class="ic">DOCX</div><div><b>${nom.replace(/[<>&"]/g,'')}</b><span>Listo en ${Math.floor(s/60)} min ${s%60} s</span></div></div>
+        <a class="btn" href="${url}" target="_blank" rel="noopener">Descargar reporte</a></div></div>`;
+    btn.textContent = 'Generar otra vez'; btn.disabled = false;
+  }catch(e){
+    clearInterval(ecoTimer);
+    ecoMsg('No se pudo generar el reporte: '+(e && e.message ? e.message : 'sin conexión')+'. Intenta de nuevo en un momento.', true);
+    btn.textContent = 'Generar reporte'; btn.disabled = false;
+    $('#ecoProg').classList.add('hidden');
+  }
+};
+
+/* ---------- arranque ---------- */
+(function(){
+  let p = new URLSearchParams(location.search).get('demo');
+  if(!p){ try{ p = localStorage.getItem(LS_TAB) || 'eco'; }catch(e){ p = 'eco'; } }
+  verPanel(p);
+})();
+</script>
+</body>
+</html>
