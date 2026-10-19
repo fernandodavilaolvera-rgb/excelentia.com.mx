@@ -376,7 +376,8 @@ tr.alt td{background:#f0f6ff}
   </div>
   <div class="vw hidden" id="vNocuadra"><section class="card"><h2>Facturas que no cuadran</h2><p class="sub" id="ncSub"></p><div id="tNc"></div></section></div>
   <div class="vw hidden" id="vSinfac"><section class="card"><h2>Viajes sin factura del transportista</h2><p class="sub" id="sfSub"></p>
-    <div class="empresas no-print" id="fEdad"></div><div id="tSf"></div></section></div>
+    <div class="empresas no-print" id="fEdad"></div><div id="tSf"></div></section>
+    <section class="card"><h2>Complementos sin factura</h2><p class="sub" id="csSub"></p><div id="tCs"></div></section></div>
   <div class="vw hidden" id="vPorpagar"><section class="card"><h2>Facturas por pagar</h2><p class="sub" id="ppSub"></p><div id="tPp"></div></section></div>
 
   <details class="acc">
@@ -386,11 +387,12 @@ tr.alt td{background:#f0f6ff}
       <li><b>Facturado:</b> subtotal de las facturas activas que subió para ese viaje, incluidas las de complemento; las facturas eliminadas no cuentan.</li>
       <li><b>Cuadra:</b> si lo facturado y lo que se le debe difieren menos que la diferencia que se tolera.</li>
       <li><b>Complemento aparte:</b> cuando la diferencia es justo lo de las facturas de complemento, casi siempre es una maniobra que se facturó pero no está capturada en el viaje.</li>
+      <li><b>Complemento sin factura:</b> el viaje tiene registrado un complemento (casetas, maniobra o estadía) y el transportista ya facturó todo lo demás, pero no ha subido la factura de ese complemento; mientras no la suba, ese complemento no se le paga.</li>
       <li><b>Vence:</b> fecha de la factura más los días de crédito; las pendientes que ya pasaron esa fecha salen como vencidas.</li>
     </ul></div>
   </details>
 
-  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · versión 5 · 16-oct-2026 · versión para revisión</footer>
+  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · versión 6 · 19-oct-2026 · versión para revisión</footer>
 </div>
 
 <script>
@@ -464,7 +466,7 @@ function cruzar() {
     (F[f.v] = F[f.v] || []).push(f);
   } catch (e) { console.error('Factura que no se pudo leer', a, e); } });
   const viajes = SRV.viajes.map(a => { try {
-    const v = { id: a[0], fecha: a[1], cli: cliTxt(a[2]), des: a[3], uni: a[4], pr: a[5], debe: a[6] + a[7], flete: a[6], otros: a[7], st: a[8], hijo: !!a[9], padre: a[10], propia: !!a[11] };
+    const v = { id: a[0], fecha: a[1], cli: cliTxt(a[2]), des: a[3], uni: a[4], pr: a[5], debe: a[6] + a[7], flete: a[6], otros: a[7], st: a[8], hijo: !!a[9], padre: a[10], propia: !!a[11], cc: Number(a[12]) || 0, cn: a[13] || '' };
     v.todas = F[v.id] || [];
     v.fac = v.todas.filter(f => f.activa);
     v.elim = v.todas.length - v.fac.length;
@@ -482,6 +484,7 @@ function cruzar() {
         else if (v.dif > 0) v.motivo = 'facturó ' + mny0(v.dif) + ' más de lo registrado en el viaje';
         else v.motivo = 'facturó ' + mny0(-v.dif) + ' menos de lo registrado en el viaje';
       }
+      compSin(v, tol);
     }
     return v;
   } catch (e) { console.error('Viaje que no se pudo leer', a, e); return null; } }).filter(Boolean);
@@ -489,7 +492,7 @@ function cruzar() {
   const porId = {}; viajes.forEach(v => porId[v.id] = v);
   viajes.forEach(v => { const p = v.hijo && v.padre ? porId[v.padre] : null;
     if (!p || p === v || v.fac.length) return;
-    p.debe += v.debe; p.otros += v.debe; p.repartos = (p.repartos || []).concat(v.id);
+    p.debe += v.debe; p.otros += v.debe; p.cc = (p.cc || 0) + (v.cc || 0); if (v.cn) p.cn = [p.cn, v.cn].filter(Boolean).join(', '); p.repartos = (p.repartos || []).concat(v.id);
     v.enPadre = p.id; v.debePropio = v.debe; v.debe = 0; v.estado = 'enpadre'; });
   viajes.forEach(v => { if (!v.repartos || !v.fac.length) return;
     v.dif = v.facturado - v.debe; v.estado = Math.abs(v.dif) <= tol ? 'cuadra' : 'nocuadra'; v.motivo = '';
@@ -497,10 +500,22 @@ function cruzar() {
       if (v.comp && Math.abs(v.facturado - v.comp - v.debe) <= tol) v.motivo = 'complemento aparte: se facturaron ' + mny0(v.comp) + ' de complemento que no están capturados en el viaje';
       else if (v.dif > 0) v.motivo = 'facturó ' + mny0(v.dif) + ' más de lo registrado en el viaje y sus repartos';
       else v.motivo = 'facturó ' + mny0(-v.dif) + ' menos de lo registrado en el viaje y sus repartos';
-    } });
+    }
+    compSin(v, tol); });
   const viajesCli = viajes.filter(filtroCli);
   return { viajes: viajesCli, sinViaje: CFG.cli === 'todos' ? sinViaje : [], hoy, todos: viajes, sinViajeTodos: sinViaje };
 }
+/* v6 (19-oct): el viaje trae complementos registrados (casetas, maniobra, estadía) y el transportista
+   facturó todo lo demás, pero no subió la factura del complemento. No es diferencia: es una factura que falta. */
+function compSin(v, tol) {
+  if (v.estado !== 'nocuadra' || !(v.cc > tol) || !(-v.dif > tol)) return;
+  if (Math.abs((v.facturado - v.comp) - (v.debe - v.cc)) > tol) return;
+  v.estado = 'compsin'; v.falta = -v.dif;
+  const con = conceptos(v.cn);
+  v.motivo = 'falta la factura del complemento' + (con ? ' (' + con + ')' : '') + ' por ' + mny0(v.falta) + '; el resto ya está facturado';
+}
+const CONC_TXT = { estadia: 'estadía', estadias: 'estadías', caseta: 'casetas', casetas: 'casetas', maniobra: 'maniobra', maniobras: 'maniobras' };
+const conceptos = t => [...new Set(String(t || '').split(',').map(x => x.trim()).filter(Boolean).map(x => CONC_TXT[x] || x))].join(', ');
 const filtroProv = x => !CFG.prov || String(x.pr) === String(CFG.prov);
 const TERMINADO = /complet|finaliz|entreg/i;
 const grupoCli = s => /PLAYMO/i.test(s || '') ? 'pm' : /\bLYC\b/i.test(s || '') ? 'lyc' : 'otros';
@@ -511,7 +526,7 @@ function pintar() {
   R = cruzar();
   const vs = R.viajes.filter(filtroProv);
   const facs = vs.flatMap(v => v.fac).concat(R.sinViaje.filter(filtroProv));
-  const nCu = vs.filter(v => v.estado === 'cuadra'), nNo = vs.filter(v => v.estado === 'nocuadra'), nSin = vs.filter(v => v.estado === 'sin');
+  const nCu = vs.filter(v => v.estado === 'cuadra'), nNo = vs.filter(v => v.estado === 'nocuadra'), nSin = vs.filter(v => v.estado === 'sin'), nCs = vs.filter(v => v.estado === 'compsin');
   const pend = facs.filter(f => !f.pagada), venc = pend.filter(f => f.vencida);
   const mesHoy = R.hoy.slice(0, 7);
   const pagMes = facs.filter(f => f.pagada && (f.fPago || '').slice(0, 7) === mesHoy);
@@ -524,11 +539,13 @@ function pintar() {
     <div class="pbox malbox"><div class="lb">No cuadran</div><div class="vl">${nNo.length}</div><div class="hint">${mny0(S(nNo.map(v => v.dif)))} de diferencia neta · ${comp.length} por complemento aparte</div></div>
     <div class="pbox"><div class="lb">Sin factura del transportista</div><div class="vl">${nSinT.length}</div><div class="hint">${mny0(S(nSinT.map(v => v.debe)))} que el transportista todavía no factura en la plataforma · ${nSinT.filter(v => v.edad > 60).length} con más de 60 días${nSinP.length ? ' · aparte, ' + nSinP.length + ' de tu propia empresa' : ''}</div></div>
     <div class="pbox costo"><div class="lb">Por pagar</div><div class="vl">${mny0(S(pend.map(f => f.sub)))}</div><div class="hint">${pend.length} facturas · ${venc.length} vencidas por ${mny0(S(venc.map(f => f.sub)))}</div></div>
+    <div class="pbox"><div class="lb">Complementos sin factura</div><div class="vl">${nCs.length}</div><div class="hint">${mny0(S(nCs.map(v => v.falta)))} de casetas, maniobras o estadías que el transportista todavía no factura; el resto del viaje ya está facturado</div></div>
     <div class="pbox"><div class="lb">Pagado este mes</div><div class="vl">${mny0(S(pagMes.map(f => f.sub)))}</div><div class="hint">${pagMes.length} facturas marcadas como pagadas</div></div>`;
   const av = [];
   if (comp.length) av.push(['Maniobras que se facturan aparte', comp.length + ' viajes traen una factura de complemento que no está capturada en el viaje, por ' + mny0(S(comp.map(v => v.comp))) + '. Es lo que hace que el margen de la plataforma no sea el real: el pago existe, pero el viaje no lo dice.']);
   const otros = nNo.filter(v => !/^complemento/.test(v.motivo || ''));
   if (otros.length) av.push(['Diferencias que hay que revisar', otros.length + ' viajes tienen una factura que no coincide con lo registrado y no se explica por un complemento; ' + otros.filter(v => v.dif > 0).length + ' facturaron de más y ' + otros.filter(v => v.dif < 0).length + ' de menos.']);
+  if (nCs.length) av.push(['Complementos que falta facturar', nCs.length + (nCs.length === 1 ? ' viaje tiene' : ' viajes tienen') + ' registrado un complemento (casetas, maniobra o estadía) por ' + mny0(S(nCs.map(v => v.falta))) + ' que el transportista no ha facturado; el flete ya está facturado. Mientras no suba esa factura no se le paga ese complemento. Están en la pestaña Sin factura del transportista.']);
   const pagNo = facs.filter(f => f.pagada && f.cuadra === 'No');
   if (pagNo.length) av.push(['Pagadas aunque la plataforma marca que no cuadran', pagNo.length + ' factura' + (pagNo.length > 1 ? 's' : '') + ' por ' + mny0(S(pagNo.map(f => f.sub))) + '.']);
   const viejos = nSinT.filter(v => v.edad > 60);
@@ -550,6 +567,8 @@ function pintar() {
   const sf = nSin.filter(enEdad).sort((a, b) => b.edad - a.edad);
   $('#sfSub').textContent = EDAD === 'propia' ? sf.length + (sf.length === 1 ? ' viaje hecho' : ' viajes hechos') + ' por tu propia empresa, por ' + mny0(S(sf.map(v => v.debe))) + '; no llevan factura de transportista.' : sf.length + (sf.length === 1 ? ' viaje' : ' viajes') + ' donde el transportista todavía no sube su factura a la plataforma, por ' + mny0(S(sf.map(v => v.debe))) + '; del más viejo al más reciente. No son viajes sin cobrarle a tu cliente.';
   $('#tSf').innerHTML = tablaViajes(sf, ['viaje', 'trans', 'debe', 'edad', 'estatus']);
+  $('#csSub').textContent = nCs.length ? nCs.length + (nCs.length === 1 ? ' viaje' : ' viajes') + ' con el flete ya facturado y un complemento registrado sin factura, por ' + mny0(S(nCs.map(v => v.falta))) + '.' : 'Ningún viaje tiene complementos pendientes de facturar.';
+  $('#tCs').innerHTML = nCs.length ? tablaViajes(nCs.slice().sort(ord), ['viaje', 'trans', 'debe', 'fact', 'falta', 'motivo']) : '';
   const pp = pend.slice().sort((a, b) => (a.vence || '').localeCompare(b.vence || ''));
   $('#ppSub').textContent = pp.length + ' facturas pendientes de pago por ' + mny0(S(pp.map(f => f.sub))) + ' (sin IVA); ' + venc.length + ' ya vencidas. La que vence primero va arriba.';
   $('#tPp').innerHTML = pp.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Factura</th><th>Transportista</th><th>Viaje</th><th class="num">Subtotal</th><th class="num">Total</th><th>Vence</th><th>Cuadra</th></tr></thead><tbody>${pp.map(f => { try { return `<tr>
@@ -562,16 +581,16 @@ function pintar() {
 
 function tablaViajes(lista, cols) {
   if (!lista.length) return '<p class="sub">No hay viajes en este grupo.</p>';
-  const H = { viaje: 'Viaje', trans: 'Transportista', debe: 'Se le debe', fact: 'Facturado', dif: 'Diferencia', motivo: 'Por qué', edad: 'Días sin factura', estatus: 'Estatus del viaje', pagado: 'Pagado', estado: 'Estado' };
-  const num = { debe: 1, fact: 1, dif: 1, edad: 1, pagado: 1 };
+  const H = { viaje: 'Viaje', trans: 'Transportista', debe: 'Se le debe', fact: 'Facturado', dif: 'Diferencia', motivo: 'Por qué', edad: 'Días sin factura', estatus: 'Estatus del viaje', pagado: 'Pagado', estado: 'Estado', falta: 'Falta facturar' };
+  const num = { debe: 1, fact: 1, dif: 1, edad: 1, pagado: 1, falta: 1 };
   const C = {
     viaje: v => `${v.id}<span class="mr-n">${fechaTxt(v.fecha)} · ${esc(v.des)} · ${esc(v.uni)}${v.hijo ? ' · reparto de ' + v.padre : ''}</span>`,
     trans: v => esc(provTxt(v.pr)) + (v.propia ? '<span class="mr-n">tu propia empresa</span>' : '') + (v.repartos ? '<span class="mr-n">incluye ' + v.repartos.length + (v.repartos.length === 1 ? ' reparto' : ' repartos') + ': ' + v.repartos.join(', ') + '</span>' : ''),
     debe: v => mny0(v.debe), fact: v => mny0(v.facturado) + '<span class="mr-n">' + v.fac.length + ' factura' + (v.fac.length > 1 ? 's' : '') + (v.elim ? ' · ' + v.elim + ' eliminada' + (v.elim > 1 ? 's' : '') : '') + '</span>',
     dif: v => `<b class="${v.dif > 0 ? 'neg' : ''}">${(v.dif > 0 ? '+' : '') + mny0(v.dif)}</b>`,
     motivo: v => esc(v.motivo || ''), edad: v => v.edad == null ? '<span class="dim">—</span>' : `<span class="${v.edad > 60 ? 'neg' : ''}">${v.edad}</span>`, estatus: v => esc(v.st || '—'),
-    pagado: v => mny0(v.pagado),
-    estado: v => ({ cuadra: 'cuadra', nocuadra: '<span class="neg">no cuadra</span>', sin: 'sin factura', nada: '<span class="dim">sin cobro</span>', proceso: '<span class="dim">en proceso, todavía no se factura</span>', enpadre: '<span class="dim">facturado dentro del viaje ' + v.enPadre + '</span>' }[v.estado] || '') + (v.fac.length ? '<span class="mr-n">' + (v.pend ? 'por pagar ' + mny0(v.pend) : 'pagada') + '</span>' : '')
+    pagado: v => mny0(v.pagado), falta: v => '<b>' + mny0(v.falta) + '</b>',
+    estado: v => ({ cuadra: 'cuadra', nocuadra: '<span class="neg">no cuadra</span>', compsin: 'falta factura del complemento<span class="mr-n">' + mny0(v.falta) + (conceptos(v.cn) ? ' · ' + esc(conceptos(v.cn)) : '') + '</span>', sin: 'sin factura', nada: '<span class="dim">sin cobro</span>', proceso: '<span class="dim">en proceso, todavía no se factura</span>', enpadre: '<span class="dim">facturado dentro del viaje ' + v.enPadre + '</span>' }[v.estado] || '') + (v.fac.length ? '<span class="mr-n">' + (v.pend ? 'por pagar ' + mny0(v.pend) : 'pagada') + '</span>' : '')
   };
   return `<div class="tblwrap"><table class="rt"><thead><tr>${cols.map(c => `<th class="${num[c] ? 'num' : ''}">${H[c]}</th>`).join('')}</tr></thead><tbody>${lista.map(v => { try { return `<tr>${cols.map(c => `<td class="${num[c] ? 'num' : c === 'motivo' ? 'motivo' : ''}">${C[c](v)}</td>`).join('')}</tr>`; } catch (e) { return filaMala(cols.length, v, e); } }).join('')}</tbody></table></div>`;
 }
@@ -579,7 +598,7 @@ function tablaViajes(lista, cols) {
 function pintarTrans() {
   const G = {};
   R.viajes.forEach(v => { const g = G[v.pr] || (G[v.pr] = { pr: v.pr, n: 0, sin: 0, sinM: 0, nc: 0, dif: 0, pend: 0, venc: 0, pag: 0 });
-    g.n++; if (v.estado === 'sin') { g.sin++; g.sinM += v.debe; } if (v.estado === 'nocuadra') { g.nc++; g.dif += v.dif; }
+    g.n++; if (v.estado === 'sin') { g.sin++; g.sinM += v.debe; } if (v.estado === 'compsin') { g.sin++; g.sinM += v.falta; } if (v.estado === 'nocuadra') { g.nc++; g.dif += v.dif; }
     v.fac.forEach(f => { if (f.pagada) g.pag += f.sub; else { g.pend += f.sub; if (f.vencida) g.venc += f.sub; } }); });
   R.sinViaje.forEach(f => { const g = G[f.pr] || (G[f.pr] = { pr: f.pr, n: 0, sin: 0, sinM: 0, nc: 0, dif: 0, pend: 0, venc: 0, pag: 0 }); if (f.pagada) g.pag += f.sub; else { g.pend += f.sub; if (f.vencida) g.venc += f.sub; } });
   const filas = Object.values(G).filter(filtroProv).sort((a, b) => (b.pend + b.sinM) - (a.pend + a.sinM));
@@ -603,14 +622,15 @@ function cargarExcelJS() {
 function pendientesDe(pr) {
   const todos = (R && R.todos) || [];
   const filas = [];
-  todos.filter(v => String(v.pr) === String(pr) && !v.propia && ['sin', 'nocuadra', 'cuadra'].indexOf(v.estado) >= 0).forEach(v => {
+  todos.filter(v => String(v.pr) === String(pr) && !v.propia && ['sin', 'nocuadra', 'cuadra', 'compsin'].indexOf(v.estado) >= 0).forEach(v => {
     const porPagar = v.fac.filter(f => !f.pagada);
     let est = '';
     if (v.estado === 'sin') est = 'Sin factura: favor de facturar';
     else if (v.estado === 'nocuadra') est = v.dif > 0 ? 'Diferencia por aclarar: se facturó ' + mny0(v.dif) + ' más de lo registrado' : 'Diferencia por aclarar: se facturó ' + mny0(-v.dif) + ' menos de lo registrado';
+    else if (v.estado === 'compsin') est = 'Falta factura del complemento' + (conceptos(v.cn) ? ' (' + conceptos(v.cn) + ')' : '') + ': favor de facturar ' + mny0(v.falta);
     else if (porPagar.length) est = porPagar.some(f => f.vencida) ? 'Por pagar · vencida' : 'Por pagar';
     if (!est) return; // cuadra y pagado: no hay nada pendiente
-    if (v.estado === 'nocuadra' && porPagar.length) est += porPagar.some(f => f.vencida) ? ' · por pagar, vencida' : ' · por pagar';
+    if ((v.estado === 'nocuadra' || v.estado === 'compsin') && porPagar.length) est += porPagar.some(f => f.vencida) ? ' · por pagar, vencida' : ' · por pagar';
     const vence = porPagar.map(f => f.vence).filter(Boolean).sort()[0] || '';
     filas.push({ viaje: v.id, fecha: v.fecha || '', des: v.des || '', uni: v.uni || '', rep: (v.repartos || []).join(', '), debe: v.debe,
       folios: v.fac.map(f => f.folio || 'sin folio').join(', '), fFac: v.fac.map(f => f.fecha).filter(Boolean).sort()[0] || '',
@@ -698,7 +718,7 @@ function estadoCuenta(pr) {
       <div class="btnrow no-print"><button class="btn" id="btnEcXls">Descargar Excel para el transportista</button><button class="btn ghost" id="btnEcPrint">Imprimir estado de cuenta</button><button class="link" id="btnEcCerrar">cerrar</button></div></div>
     <div class="precios">
       <div class="pbox costo"><div class="lb">Por pagar</div><div class="vl">${mny0(S(pend.map(f => f.sub)))}</div><div class="hint">${pend.length} facturas · ${pend.filter(f => f.vencida).length} vencidas</div></div>
-      <div class="pbox"><div class="lb">Sin factura</div><div class="vl">${mny0(S(vs.filter(v => v.estado === 'sin').map(v => v.debe)))}</div><div class="hint">${vs.filter(v => v.estado === 'sin').length} viajes</div></div>
+      <div class="pbox"><div class="lb">Sin factura</div><div class="vl">${mny0(S(vs.filter(v => v.estado === 'sin').map(v => v.debe)) + S(vs.filter(v => v.estado === 'compsin').map(v => v.falta)))}</div><div class="hint">${vs.filter(v => v.estado === 'sin').length} viajes${vs.some(v => v.estado === 'compsin') ? ' · ' + vs.filter(v => v.estado === 'compsin').length + ' complementos' : ''}</div></div>
       <div class="pbox malbox"><div class="lb">No cuadran</div><div class="vl">${vs.filter(v => v.estado === 'nocuadra').length}</div><div class="hint">viajes por aclarar</div></div>
     </div>
     ${tablaViajes(vs, ['viaje', 'debe', 'fact', 'pagado', 'estado'])}
