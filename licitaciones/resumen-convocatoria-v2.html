@@ -192,6 +192,35 @@
   .ejecutivo h5:first-child{margin-top:0}
   .ejecutivo p{margin:0 0 .25rem}
   @media (max-width:600px){ .perfil-grid,.fila-2{grid-template-columns:1fr} }
+  .mx{font-size:.8rem;color:var(--texto)}
+  .mx-cab{background:var(--cab);border-radius:9px;padding:.7rem .9rem;margin-bottom:.8rem}
+  .mx-cab-t{font-weight:800;color:var(--azul-osc);font-size:.9rem;letter-spacing:.2px}
+  .mx-cab-t span{font-weight:600;color:var(--texto2);font-size:.75rem}
+  .mx-id{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:.6rem;margin-top:.5rem}
+  .mx-id small{display:block;font-size:.66rem;font-weight:700;color:var(--texto2);text-transform:uppercase;letter-spacing:.3px}
+  .mx-id b{color:var(--azul-osc);font-size:.84rem}
+  .mx-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+  .mx-tit{font-weight:800;color:var(--azul);font-size:.82rem;margin-bottom:.3rem}
+  .mx-tab{width:100%;border-collapse:collapse}
+  .mx-tab th{background:var(--azul);color:#fff;text-align:left;font-size:.7rem;padding:.3rem .45rem;font-weight:700}
+  .mx-tab td{border:1px solid var(--borde);padding:.3rem .45rem;vertical-align:top;line-height:1.35}
+  .mx-tab tbody tr:nth-child(even) td{background:#f5f8fc}
+  .mx-c{font-weight:700;width:36%}
+  .mx-s{text-align:center;font-weight:800;width:26px;font-size:.95rem;line-height:1.1}
+  .mx-s.R{color:#2b6b3f}.mx-s.C{color:#99620c}.mx-s.N{color:var(--gris)}
+  .mx-f{font-weight:700;color:var(--azul);white-space:nowrap}
+  .mx-atn{margin-top:.4rem;background:var(--alerta-bg);border:1px solid var(--alerta-borde);border-left:4px solid var(--acento);border-radius:7px;padding:.35rem .55rem}
+  .mx-ley{margin:.8rem 0 .5rem;font-size:.76rem;color:var(--texto2)}
+  .mx-ley span{color:var(--gris)}
+  .mx-alertas{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+  .mx-al{border-radius:8px;padding:.55rem .75rem}
+  .mx-al p{margin:.25rem 0 0;color:var(--texto2)}
+  .mx-al.rojo{background:#fdecec;border-left:4px solid #a33a3a}.mx-al.rojo b{color:#a33a3a}
+  .mx-al.ambar{background:#fff7ea;border-left:4px solid #c98a1d}.mx-al.ambar b{color:#99620c}
+  .mx-al.ambar.activo{background:#ffe7bf}
+  .mx-nota{margin-top:.6rem;font-size:.72rem;color:var(--gris);font-style:italic}
+  @media (max-width:600px){ .mx-grid,.mx-alertas,.mx-id{grid-template-columns:1fr} .mx-tab{font-size:.75rem} }
+  @media print{ .mx-tab tr,.mx-al,.mx-atn{break-inside:avoid} .mx-tit{break-after:avoid} .mx-bloque{break-inside:auto} }
 </style>
 </head>
 <body>
@@ -235,7 +264,7 @@
         <div><label class="lbl" for="nombre">Nombre de referencia (opcional)</label><input type="text" id="nombre" placeholder="Ej. IMSS T-6 laboratorio clínico"></div>
       </div>
       <details class="formato" id="detFormato">
-        <summary>Formato del correo de este usuario</summary>
+        <summary>Formato del reporte de este usuario</summary>
         <div id="formPerfil" class="perfil-grid">
           <div><label class="lbl" for="pfNombre">Nombre</label><input type="text" id="pfNombre" placeholder="Ej. Emmanuel Estévez"></div>
           <div><label class="lbl" for="pfSaludo">Saludo</label><input type="text" id="pfSaludo" placeholder="Buena tarde"></div>
@@ -244,6 +273,7 @@
           <div><label class="lbl" for="pfPara">Para (opcional)</label><input type="text" id="pfPara" placeholder="belem@…; hector@…"></div>
           <div><label class="lbl" for="pfCc">Con copia (opcional)</label><input type="text" id="pfCc" placeholder="jonathan@…"></div>
         </div>
+        <div style="margin-top:.7rem"><label class="lbl" for="pfFormato">Tipo de reporte</label><select id="pfFormato" class="campo"><option value="correo">Correo de resumen (formato Emmanuel)</option><option value="matriz">Matriz ejecutiva (formato Alberto) además del correo</option></select></div>
         <label class="lbl" style="margin-top:.7rem">Temas de su resumen ejecutivo</label>
         <div class="checks" id="pfTemas"></div>
         <div class="meta" style="margin-top:.5rem">Los cambios se guardan al generar el resumen.</div>
@@ -278,6 +308,18 @@
     <div class="card-body">
       <div class="error" id="txtError"></div>
       <div class="acciones"><button class="btn btn-sec" id="btnReintentar">Volver a intentar</button></div>
+    </div>
+  </section>
+
+  <!-- Matriz ejecutiva (formato Alberto) -->
+  <section class="card oculto" id="secMatriz">
+    <div class="card-cab"><span><span class="paso no-print">3</span>Matriz ejecutiva de la licitación</span></div>
+    <div class="card-body">
+      <div id="txtMatriz"></div>
+      <div class="acciones no-print">
+        <button class="btn btn-pri" id="btnCopiarM" disabled>Copiar matriz</button>
+        <button class="btn btn-sec" id="btnWordM" disabled>Guardar en Word</button>
+      </div>
     </div>
   </section>
 
@@ -402,9 +444,9 @@ const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' 
 const MIME = { pdf: 'application/pdf', word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2400); };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const SECCIONES = ['secClave', 'secCarga', 'secProgreso', 'secError', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+const SECCIONES = ['secClave', 'secCarga', 'secProgreso', 'secError', 'secMatriz', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
 const mostrar = ids => SECCIONES.forEach(s => $(s).classList.toggle('oculto', !ids.includes(s) || $(s).dataset.vacio === '1'));
-const VISTA_RESULTADO = ['secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+const VISTA_RESULTADO = ['secMatriz', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
 
 // Zonas para soltar archivos (la inicial y la de agregar documentos)
 function zona(n, arr, btn) {
@@ -502,6 +544,7 @@ async function procesar(lista, base) {
     resultado = { ...e, nombre };
     try { extras = JSON.parse(e.extras || '{}') || {}; } catch (er) { extras = {}; }
     extras.sugerencias = extras.sugerencias || []; extras.riesgos = extras.riesgos || [];
+    matriz = extras.matriz ? Object.assign(normalizar(JSON.parse(JSON.stringify(extras.matriz))), { _trabajo: a.trabajo }) : null;
     aceptadas.clear();
     $('txtEjecutivo').classList.add('oculto'); $('accEjecutivo').classList.add('oculto'); $('txtComparar').classList.add('oculto'); $('estComparar').classList.add('oculto');
     trabajoActual = a.trabajo;
@@ -576,6 +619,7 @@ function pintarResultado(segs, actualizado) {
   $('marcaAct').classList.toggle('oculto', !actualizado);
   $('docsCargados').innerHTML = docsCargados.length ? `<b>Documentos que ya leyó el agente:</b><ul>${docsCargados.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '';
   pintarChips();
+  pintarMatriz();
   mostrar(VISTA_RESULTADO);
 }
 $('btnExpandir').onclick = () => document.querySelectorAll('details.tema').forEach(d => d.open = true);
@@ -688,6 +732,7 @@ function llenarForm(p) {
   $('pfFirma').value = p ? p.firma : '';
   $('pfPara').value = p ? (p.correo_para || '') : '';
   $('pfCc').value = p ? (p.correo_cc || '') : '';
+  $('pfFormato').value = p && p.formato === 'matriz' ? 'matriz' : 'correo';
   checks('pfTemas', p && Array.isArray(p.temas_ejecutivo) ? p.temas_ejecutivo : TEMAS_EJ.filter(t => t !== 'Sugerencias del agente'));
 }
 async function cargarPerfiles() {
@@ -711,8 +756,8 @@ $('selPerfil').onchange = () => {
   llenarForm(p);
   if (!p) { $('detFormato').open = true; $('pfNombre').focus(); }
 };
-const datosForm = () => ({ nombre: $('pfNombre').value.trim(), saludo: $('pfSaludo').value.trim(), destinatarios: $('pfDest').value.trim(), firma: $('pfFirma').value.trim(), correo_para: $('pfPara').value.trim(), correo_cc: $('pfCc').value.trim(), temas_ejecutivo: marcadosDe('pfTemas') });
-const mismo = (a, b) => !!b && ['nombre', 'saludo', 'destinatarios', 'firma', 'correo_para', 'correo_cc'].every(k => String(a[k] || '') === String(b[k] || '')) && JSON.stringify(a.temas_ejecutivo) === JSON.stringify(b.temas_ejecutivo || []);
+const datosForm = () => ({ nombre: $('pfNombre').value.trim(), saludo: $('pfSaludo').value.trim(), destinatarios: $('pfDest').value.trim(), firma: $('pfFirma').value.trim(), correo_para: $('pfPara').value.trim(), correo_cc: $('pfCc').value.trim(), formato: $('pfFormato').value, temas_ejecutivo: marcadosDe('pfTemas') });
+const mismo = (a, b) => !!b && ['nombre', 'saludo', 'destinatarios', 'firma', 'correo_para', 'correo_cc', 'formato'].every(k => String(a[k] || '') === String(b[k] || '')) && JSON.stringify(a.temas_ejecutivo) === JSON.stringify(b.temas_ejecutivo || []);
 // Guarda el perfil solo si es nuevo o cambió; regresa false si falta el nombre
 async function asegurarPerfil() {
   const datos = datosForm();
@@ -840,6 +885,175 @@ $('btnComparar').onclick = async () => {
   } finally { clearInterval(reloj); $('btnComparar').disabled = !archivos3.length; }
 };
 
+// ===== Matriz ejecutiva (formato Alberto) =====
+let matriz = null;
+const MES3 = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const SIMB = { R: '✓', C: '◐', N: '—' };
+const est = x => ['R', 'C', 'N'].includes(String(x || '').toUpperCase()) ? String(x).toUpperCase() : 'N';
+// Decisiones internas: salen del formato del usuario (a quién pide la confirmación)
+function dec(m) {
+  if (Array.isArray(m.decisiones) && m.decisiones.length) return m.decisiones;
+  const d = String((perfil && perfil.destinatarios) || 'Belem | Héctor').replace(/\s*\|\s*/g, ' / ');
+  return [
+    { responsable: d, accion: 'Confirmar estrategia de participación e integradores' + (m.porRegion ? ' y regiones donde brindaremos apoyo' : '') },
+    { responsable: d, accion: 'Definir equipos e insumos: marcas, modelos y códigos' },
+    { responsable: 'Área de Licitaciones', accion: 'Verificar muestras y cumplimiento documental por partida' },
+    { responsable: 'Canal único', accion: 'Enviar toda retroalimentación al Área de Licitaciones' }
+  ];
+}
+const esMatriz = () => !!perfil && perfil.formato === 'matriz';
+const hoy0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const corte = () => { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}/${MES3[d.getMonth()].toUpperCase()}/${d.getFullYear()}`; };
+// Semáforo ámbar: eventos pendientes a 0–2 días naturales; si no hay, el próximo evento y cuántos días faltan
+function ambar(m) {
+  const h = hoy0();
+  const ev = (m.calendario || []).map(e => { const f = new Date(String(e.iso || '').slice(0, 10) + 'T00:00:00'); return { ...e, dias: isNaN(f) ? null : Math.round((f - h) / 86400000) }; }).filter(e => e.dias !== null && e.dias >= 0);
+  const cerca = ev.filter(e => e.dias <= 2);
+  if (cerca.length) return { activo: true, texto: cerca.map(e => `${e.evento} ${e.fecha} (${e.dias === 0 ? 'hoy' : e.dias === 1 ? 'mañana' : 'en 2 días'})`).join('; ') };
+  const prox = ev.sort((a, b) => a.dias - b.dias)[0];
+  return { activo: false, texto: `Se activa cuando faltan 0–2 días naturales para un evento pendiente. Hoy no aplica${prox ? `; próximo evento: ${prox.evento.toLowerCase()} ${prox.fecha} (faltan ${prox.dias} días)` : ''}.` };
+}
+function tablaM(titulo, cols, filas) {
+  return `<div class="mx-bloque"><div class="mx-tit">${titulo}</div><table class="mx-tab"><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${filas.join('')}</tbody></table></div>`;
+}
+const filaE = r => { const e = est(r.estado); return `<tr><td class="mx-c">${esc(r.concepto || '')}</td><td class="mx-s ${e}">${SIMB[e]}</td><td>${esc(r.texto || '')}</td></tr>`; };
+function htmlMatriz(m) {
+  const a = ambar(m);
+  return `<div class="mx">
+  <div class="mx-cab"><div class="mx-cab-t">MATRIZ EJECUTIVA DE LICITACIÓN <span>· Ficha de decisión y cumplimiento · Corte: ${corte()}</span></div>
+    <div class="mx-id"><div><small>Convocante</small><b>${esc(m.convocante || '')}</b></div><div><small>Objeto</small><b>${esc(m.objeto || '')}</b></div><div><small>Número de expediente</small><b>${esc(m.expediente || '')}</b></div></div></div>
+  <div class="mx-grid">
+    ${tablaM('01 · Características del procedimiento', ['Característica', '', 'Especificación'], (m.caracteristicas || []).map(filaE))}
+    ${tablaM('02 · Calendario cronológico', ['Evento', 'Fecha / hora'], (m.calendario || []).map(e => `<tr><td class="mx-c">${esc(e.evento || '')}</td><td class="mx-f">${esc(e.fecha || '')}</td></tr>`)).replace(/<\/table><\/div>$/, `</table>${m.atencion ? `<div class="mx-atn"><b>Atención:</b> ${esc(m.atencion)}</div>` : ''}</div>`)}
+    ${tablaM('03 · Documentación y participación', ['Requisito', '', 'Condición'], (m.documentacion || []).map(filaE))}
+    ${tablaM('04 · Equipos en comodato y soporte', ['Condición', '', 'Alcance'], (m.equipos || []).map(filaE))}
+    ${tablaM('05 · Recepción y condiciones operativas', ['Concepto', 'Condición'], (m.recepcion || []).map(r => `<tr><td class="mx-c">${esc(r.concepto || '')}</td><td>${esc(r.texto || '')}</td></tr>`))}
+    ${tablaM('06 · Decisiones y comunicación interna', ['Responsable / control', 'Acción'], dec(m).map(r => `<tr><td class="mx-c">${esc(r.responsable || '')}</td><td>${esc(r.accion || '')}</td></tr>`))}
+  </div>
+  <div class="mx-ley"><b>Lectura de la matriz:</b> ✓ Requerido · ◐ Condicionado · — No especificado <span>· Alertas al corte: ${corte()}</span></div>
+  <div class="mx-alertas">
+    <div class="mx-al rojo"><b>■ Rojo · Riesgo / validación prioritaria</b><p>${esc(m.rojo || 'Sin riesgos prioritarios identificados.')}</p></div>
+    <div class="mx-al ambar${a.activo ? ' activo' : ''}"><b>■ Ámbar · Fecha límite en menos de 3 días</b><p>${esc(a.texto)}</p></div>
+  </div>
+  <div class="mx-nota">Importante: rojo señala posibles riesgos, no incumplimientos confirmados; la semaforización es fija al ${corte()}. Información basada en los documentos de la convocatoria, sujeta a revisión de convocatoria y aclaraciones.</div>
+</div>`;
+}
+// Acomoda lo que regresa la IA: llaves de identificación al primer nivel y calendario en orden de fecha
+function normalizar(m) {
+  const c = m.convocante;
+  if (c && typeof c === 'object') { m.objeto = m.objeto || c.objeto; m.expediente = m.expediente || c.expediente; m.convocante = c.convocante || c.nombre || ''; }
+  ['convocante', 'objeto', 'expediente'].forEach(k => { m[k] = m[k] ? String(m[k]) : ''; });
+  if (!m.convocante && resultado) { const r = (extras.datos || {}); m.convocante = r.convocante || ''; }
+  const k = e => String(e.iso || '9999');
+  m.calendario = (m.calendario || []).map((e, i) => ({ ...e, _i: i })).sort((a, b) => /^Cierre interno/i.test(a.evento) ? -1 : /^Cierre interno/i.test(b.evento) ? 1 : k(a).localeCompare(k(b)) || a._i - b._i);
+  return m;
+}
+// Se llama al pintar el resultado: para usuarios con matriz la arma una vez por resumen
+function pintarMatriz() {
+  const hay = esMatriz() && matriz && matriz._trabajo === trabajoActual;
+  $('secMatriz').dataset.vacio = hay ? '' : '1';
+  if (hay) $('txtMatriz').innerHTML = htmlMatriz(matriz);
+  $('btnWordM').disabled = !hay; $('btnCopiarM').disabled = !hay;
+}
+// Copiar para Outlook: tablas con estilos en línea
+function htmlMatrizCorreo(m) {
+  const td = 'border:1px solid #c8d3e3;padding:3px 6px;font-size:9pt;vertical-align:top';
+  const th = td + ';background:#1a3a6b;color:#fff;font-weight:bold;text-align:left';
+  const col = { R: '#2b6b3f', C: '#99620c', N: '#8a90a0' };
+  const tab = (t, cols, filas) => `<p style="margin:10px 0 3px;font-weight:bold;color:#1a3a6b;font-size:10pt">${t}</p><table style="border-collapse:collapse;width:100%"><tr>${cols.map(c => `<th style="${th}">${esc(c)}</th>`).join('')}</tr>${filas.join('')}</table>`;
+  const fe = r => { const e = est(r.estado); return `<tr><td style="${td};font-weight:bold">${esc(r.concepto || '')}</td><td style="${td};text-align:center;color:${col[e]};font-weight:bold">${SIMB[e]}</td><td style="${td}">${esc(r.texto || '')}</td></tr>`; };
+  const f2 = (a, b) => `<tr><td style="${td};font-weight:bold">${esc(a || '')}</td><td style="${td}">${esc(b || '')}</td></tr>`;
+  const a = ambar(m);
+  return `<div style="font-family:Calibri,Arial,sans-serif;color:#1a2035">
+<p style="margin:0;font-size:12pt;font-weight:bold;color:#0d1b3e">MATRIZ EJECUTIVA DE LICITACIÓN · Corte: ${corte()}</p>
+<p style="margin:2px 0;font-size:10pt"><b>Convocante:</b> ${esc(m.convocante || '')}<br><b>Objeto:</b> ${esc(m.objeto || '')}<br><b>Número de expediente:</b> ${esc(m.expediente || '')}</p>
+${tab('01 Características del procedimiento', ['Característica', '', 'Especificación'], (m.caracteristicas || []).map(fe))}
+${tab('02 Calendario cronológico', ['Evento', 'Fecha / hora'], (m.calendario || []).map(e => f2(e.evento, e.fecha)))}
+${m.atencion ? `<p style="margin:3px 0;font-size:9pt"><b>Atención:</b> ${esc(m.atencion)}</p>` : ''}
+${tab('03 Documentación y participación', ['Requisito', '', 'Condición'], (m.documentacion || []).map(fe))}
+${tab('04 Equipos en comodato y soporte', ['Condición', '', 'Alcance'], (m.equipos || []).map(fe))}
+${tab('05 Recepción y condiciones operativas', ['Concepto', 'Condición'], (m.recepcion || []).map(r => f2(r.concepto, r.texto)))}
+${tab('06 Decisiones y comunicación interna', ['Responsable / control', 'Acción'], dec(m).map(r => f2(r.responsable, r.accion)))}
+<p style="margin:8px 0 3px;font-size:9pt"><b>Lectura de la matriz:</b> ✓ Requerido · ◐ Condicionado · — No especificado</p>
+<p style="margin:3px 0;font-size:9pt;background:#fdecec;padding:4px 6px"><b style="color:#a33a3a">■ Rojo · Riesgo / validación prioritaria:</b> ${esc(m.rojo || '')}</p>
+<p style="margin:3px 0;font-size:9pt;background:#fff4e0;padding:4px 6px"><b style="color:#99620c">■ Ámbar · Fecha límite en menos de 3 días:</b> ${esc(a.texto)}</p>
+<p style="margin:6px 0 0;font-size:8pt;color:#4a5068">Importante: rojo señala posibles riesgos, no incumplimientos confirmados; la semaforización es fija al ${corte()}. Información sujeta a revisión de convocatoria y aclaraciones.</p></div>`;
+}
+function textoMatriz(m) {
+  const L = [`MATRIZ EJECUTIVA DE LICITACIÓN · Corte: ${corte()}`, `Convocante: ${m.convocante || ''}`, `Objeto: ${m.objeto || ''}`, `Número de expediente: ${m.expediente || ''}`];
+  const sec = (t, filas) => { L.push('', t); filas.forEach(x => L.push('• ' + x)); };
+  const fe = r => `${SIMB[est(r.estado)]} ${r.concepto}: ${r.texto}`;
+  sec('01 Características del procedimiento', (m.caracteristicas || []).map(fe));
+  sec('02 Calendario cronológico', (m.calendario || []).map(e => `${e.evento}: ${e.fecha}`));
+  sec('03 Documentación y participación', (m.documentacion || []).map(fe));
+  sec('04 Equipos en comodato y soporte', (m.equipos || []).map(fe));
+  sec('05 Recepción y condiciones operativas', (m.recepcion || []).map(r => `${r.concepto}: ${r.texto}`));
+  sec('06 Decisiones y comunicación interna', dec(m).map(r => `${r.responsable}: ${r.accion}`));
+  L.push('', 'Rojo · Riesgo / validación prioritaria: ' + (m.rojo || ''), 'Ámbar · Fecha límite en menos de 3 días: ' + ambar(m).texto);
+  return L.join('\n');
+}
+$('btnCopiarM').onclick = () => matriz && copiar(htmlMatrizCorreo(matriz), textoMatriz(matriz), 'Matriz copiada, lista para pegar en Outlook');
+// Word de la matriz, hoja carta horizontal con los seis bloques en dos columnas
+$('btnWordM').onclick = async () => {
+  if (!matriz) return;
+  try {
+    $('btnWordM').disabled = true;
+    await cargarDocx();
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType, BorderStyle, PageOrientation, AlignmentType, VerticalAlign } = window.docx;
+    const m = matriz;
+    const R = (t, o = {}) => new TextRun({ text: String(t || ''), font: 'Calibri', size: 16, color: '1A2035', ...o });
+    const P = (runs, o = {}) => new Paragraph({ spacing: { before: 0, after: 0 }, ...o, children: Array.isArray(runs) ? runs : [runs] });
+    const BRD = { style: BorderStyle.SINGLE, size: 4, color: 'C8D3E3' };
+    const NB = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+    const bordes = { top: BRD, bottom: BRD, left: BRD, right: BRD };
+    const sinB = { top: NB, bottom: NB, left: NB, right: NB };
+    const celda = (hijos, o = {}) => new TableCell({ borders: bordes, margins: { top: 22, bottom: 22, left: 60, right: 60 }, verticalAlign: VerticalAlign.TOP, ...o, children: Array.isArray(hijos) ? hijos : [hijos] });
+    const fondo = c => ({ shading: { type: ShadingType.CLEAR, color: 'auto', fill: c } });
+    const COL = { R: '2B6B3F', C: '99620C', N: '8A90A0' };
+    const ANCHO = 6950; // ancho de cada columna en twips
+    const mini = (titulo, cols, anchos, filas) => {
+      const cab = new TableRow({ tableHeader: true, children: cols.map((c, i) => celda(P(R(c, { bold: true, color: 'FFFFFF', size: 15 })), { ...fondo('1A3A6B'), width: { size: anchos[i], type: WidthType.DXA } })) });
+      return [
+        P(R(titulo, { bold: true, color: '1A3A6B', size: 19 }), { spacing: { before: 20, after: 30 }, keepNext: true }),
+        new Table({ width: { size: ANCHO, type: WidthType.DXA }, columnWidths: anchos, rows: [cab, ...filas.map((f, k) => new TableRow({ cantSplit: true, children: f.map((x, i) => celda(x, { width: { size: anchos[i], type: WidthType.DXA }, ...(k % 2 ? fondo('F5F8FC') : {}) })) }))] })
+      ];
+    };
+    const W3 = [1950, 380, 4620], W2 = [2300, 4650];
+    const fe = r => { const e = est(r.estado); return [P(R(r.concepto, { bold: true })), P(R(SIMB[e], { bold: true, color: COL[e] }), { alignment: AlignmentType.CENTER }), P(R(r.texto))]; };
+    const f2 = (a, b, o = {}) => [P(R(a, { bold: true })), P(R(b, o))];
+    const b1 = mini('01  Características del procedimiento', ['Característica', '✓', 'Especificación'], W3, (m.caracteristicas || []).map(fe));
+    const b2 = mini('02  Calendario cronológico', ['Evento', 'Fecha / hora'], W2, (m.calendario || []).map(e => f2(e.evento, e.fecha, { bold: true, color: '1A3A6B' })));
+    if (m.atencion) b2.push(P([R('ATENCIÓN · ', { bold: true, color: '1E5096' }), R(m.atencion)], { spacing: { before: 60 } }));
+    const b3 = mini('03  Documentación y participación', ['Requisito', '✓', 'Condición'], W3, (m.documentacion || []).map(fe));
+    const b4 = mini('04  Equipos en comodato y soporte', ['Condición', '✓', 'Alcance'], W3, (m.equipos || []).map(fe));
+    const b5 = mini('05  Recepción y condiciones operativas', ['Concepto', 'Condición'], W2, (m.recepcion || []).map(r => f2(r.concepto, r.texto)));
+    const b6 = mini('06  Decisiones y comunicación interna', ['Responsable / control', 'Acción'], W2, dec(m).map(r => f2(r.responsable, r.accion)));
+    const par = (izq, der) => new TableRow({ cantSplit: true, children: [izq, der].map((h, i) => new TableCell({ borders: sinB, width: { size: ANCHO + 150, type: WidthType.DXA }, margins: { left: i ? 150 : 0, right: i ? 0 : 150, bottom: 60 }, children: h })) });
+    const rejilla = new Table({ width: { size: (ANCHO + 150) * 2, type: WidthType.DXA }, columnWidths: [ANCHO + 150, ANCHO + 150], rows: [par(b1, b2), par(b3, b4), par(b5, b6)] });
+    const a = ambar(m);
+    const caja = (t, txt, fill, col) => new TableCell({ borders: { top: NB, bottom: NB, right: NB, left: { style: BorderStyle.SINGLE, size: 18, color: col } }, ...fondo(fill), width: { size: ANCHO + 150, type: WidthType.DXA }, margins: { top: 70, bottom: 70, left: 120, right: 120 }, children: [P(R(t, { bold: true, color: col, size: 17 })), P(R(txt), { spacing: { before: 30 } })] });
+    const alertas = new Table({ width: { size: (ANCHO + 150) * 2, type: WidthType.DXA }, columnWidths: [ANCHO + 150, ANCHO + 150], rows: [new TableRow({ cantSplit: true, children: [caja('■ ROJO · RIESGO / VALIDACIÓN PRIORITARIA', m.rojo || 'Sin riesgos prioritarios identificados.', 'FDECEC', 'A33A3A'), caja('■ ÁMBAR · FECHA LÍMITE EN MENOS DE 3 DÍAS', a.texto, a.activo ? 'FFE7BF' : 'FFF4E0', '99620C')] })] });
+    const id = (lbl, val) => new TableCell({ borders: sinB, ...fondo('DCE8F7'), margins: { top: 60, bottom: 60, left: 110, right: 110 }, children: [P(R(lbl.toUpperCase(), { size: 13, color: '4A5068', bold: true })), P(R(val, { bold: true, size: 18, color: '0D1B3E' }))] });
+    const cabecera = new Table({ width: { size: (ANCHO + 150) * 2, type: WidthType.DXA }, columnWidths: [4500, 5800, 4100], rows: [new TableRow({ children: [id('Convocante', m.convocante), id('Objeto', m.objeto), id('Número de expediente', m.expediente)] })] });
+    const hijos = [
+      P([R('MATRIZ EJECUTIVA DE LICITACIÓN', { bold: true, size: 26, color: '0D1B3E' }), R(`   |   FICHA DE DECISIÓN Y CUMPLIMIENTO   |   CORTE: ${corte()}`, { size: 17, color: '4A5068' })], { spacing: { after: 100 } }),
+      cabecera,
+      P(R('', { size: 8 }), { spacing: { after: 20 } }),
+      rejilla,
+      P([R('LECTURA DE LA MATRIZ  ', { bold: true, color: '1A3A6B' }), R('✓ Requerido   ', { color: COL.R, bold: true }), R('◐ Condicionado   ', { color: COL.C, bold: true }), R('— No especificado', { color: COL.N, bold: true }), R(`   |   ALERTAS AL CORTE: ${corte()}`, { color: '4A5068' })], { spacing: { before: 20, after: 50 } }),
+      alertas,
+      P(R(`Importante: rojo señala posibles riesgos, no incumplimientos confirmados; la semaforización es fija al ${corte()}. Información basada en los documentos de la convocatoria, sujeta a revisión de convocatoria y aclaraciones.`, { size: 14, color: '4A5068', italics: true }), { spacing: { before: 80 } })
+    ];
+    const doc = new Document({ sections: [{ properties: { page: { size: { orientation: PageOrientation.LANDSCAPE, width: 12240, height: 15840 }, margin: { top: 500, bottom: 450, left: 700, right: 700 } } }, children: hijos }] });
+    const blob = await Packer.toBlob(doc);
+    const el = document.createElement('a');
+    const base = String(m.expediente || 'licitacion').replace(/[^\w\-]+/g, '_');
+    el.href = URL.createObjectURL(blob); el.download = `Matriz_${base}.docx`;
+    document.body.appendChild(el); el.click(); el.remove();
+    setTimeout(() => URL.revokeObjectURL(el.href), 4000);
+  } catch (e) { toast(e.message); } finally { $('btnWordM').disabled = false; }
+};
+
 // Acceso con clave
 function pedirClave(msg) {
   clave = ''; guardarClave('');
@@ -877,7 +1091,7 @@ $('btnGenerar').onclick = async () => {
 $('btnActualizar').onclick = () => procesar(archivos2, trabajoActual);
 $('btnReintentar').onclick = () => trabajoActual ? mostrar(VISTA_RESULTADO) : verPerfil(perfil);
 $('btnNuevo').onclick = () => {
-  archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear();
+  archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear(); matriz = null;
   $('nombre').value = ''; $('chat').innerHTML = ''; pintar1(); pintar2(); verPerfil(perfil);
 };
 </script>
