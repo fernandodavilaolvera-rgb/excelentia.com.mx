@@ -257,6 +257,45 @@ footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
   .bar{grid-template-columns:1fr;gap:.15rem}
   .bar .vl{text-align:left}
 }
+
+/* v18 · revisión antes de facturar */
+.rev-strip{max-width:720px;margin:0 auto 1rem;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:.65rem .9rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.rev-strip .tx{flex:1;min-width:220px;font-size:12.5px;color:#4a5068}
+.rev-strip .tx b{color:#1a2035;font-size:13.5px}
+.rev-ov{position:fixed;inset:0;background:rgba(13,27,62,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:4vh 1rem;overflow:auto}
+.rev-box{background:#fff;border-radius:12px;max-width:720px;width:100%;margin:0 auto;box-shadow:0 12px 40px rgba(13,27,62,.25);overflow:hidden}
+.rev-hd{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid #4a9fd4;color:#fff;padding:.85rem 1.1rem}
+.rev-hd h3{font-size:15px;font-weight:800}
+.rev-hd p{font-size:12px;color:#b9d3ec;margin-top:.15rem}
+.rev-bd{padding:1rem 1.1rem .4rem}
+.rev-kp{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.rev-kp div{background:#f5f6f8;border:1px solid #dde1e9;border-radius:9px;padding:.45rem .55rem;text-align:center}
+.rev-kp b{display:block;font-size:18px;color:#1a3a6b}
+.rev-kp span{font-size:10.5px;color:#4a5068;font-weight:600}
+.rev-blk{margin-bottom:1rem}
+.rev-blk h4{font-size:13.5px;font-weight:800;color:#1a3a6b;margin-bottom:.15rem}
+.rev-blk .q{font-size:12px;color:#4a5068;margin-bottom:.45rem}
+.rev-it{border:1px solid #dde1e9;border-left:3px solid #4a9fd4;border-radius:8px;padding:.5rem .7rem;margin-bottom:.45rem;font-size:12.5px}
+.rev-it.r{border-left-color:#c9392b}
+.rev-it.a{border-left-color:#e0a030}
+.rev-it .t{font-weight:800;color:#1a2035}
+.rev-it .d{color:#4a5068;margin:.1rem 0 .3rem}
+.rev-vj{display:flex;flex-wrap:wrap;gap:.3rem}
+.rev-vj button{font-family:inherit;font-size:11px;font-weight:600;border:1px solid #c8d9f0;background:#f0f6ff;color:#1a3a6b;border-radius:6px;padding:.15rem .45rem;cursor:pointer;text-align:left}
+.rev-vj button:hover{background:#e8f0fb}
+.rev-vj button b{font-weight:800}
+.rev-ok{font-size:12.5px;color:#2e7d4f;background:#eaf7ef;border:1px solid #c6e6d2;border-radius:8px;padding:.5rem .7rem}
+.rev-ft{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;padding:.7rem 1.1rem 1rem;border-top:1px solid #dde1e9}
+tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
+@media(max-width:600px){.rev-kp{grid-template-columns:repeat(2,1fr)}.rev-ov{padding:2vh .5rem}}
+@media print{
+  body.solo-rev>*:not(#revOv){display:none!important}
+  body.solo-rev #revOv{position:static;background:#fff;padding:0;display:block}
+  body.solo-rev .rev-box{box-shadow:none;max-width:none}
+  body.solo-rev .rev-ft{display:none!important}
+  .rev-it,.rev-kp div{break-inside:avoid}
+  .rev-strip{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -326,6 +365,7 @@ footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
   <!-- RESULTADOS -->
   <section id="results" class="hidden">
     <div class="jul-banner hidden" id="julBanner"></div>
+    <div class="rev-strip no-print hidden" id="revStrip"></div>
     <div class="kpis" id="kpis"></div>
 
     <div class="tabs">
@@ -410,7 +450,7 @@ footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 17 (16-oct-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 18 (16-oct-2026)</footer>
 </div>
 
 <script>
@@ -605,10 +645,15 @@ function procesarBase(lista) {
       flags.push({ c: 'r', t: 'destino nuevo', d: zonaTxt + ' no tiene tarifa para esta unidad y no hay antecedente de la ruta. Captura el flete o carga la tarifa en el tabulador.' });
     }
 
+    // v18: el nombre del destino dice una ciudad que no es la zona con la que se cobra
+    if (!recol && cz != null && !flags.some(f => f.t === 'zona en duda')) {
+      const zr = zonaPorRevisar(dest, zonaTxt, cz);
+      if (zr) { if (sC === 'g') sC = 'a'; flags.push(zr); }
+    }
     // v16: el hijo de un reparto lleva tarifa de ruteo: 800 local, 1,100 foráneo; Luis la confirma
     if (esSi(b.esReparto) && !esSi(b.edicion)) {
       const loc = parseInt(b.zona, 10) === 1, r = loc ? 800 : 1100;
-      for (let i = flags.length - 1; i >= 0; i--) if (['sin tarifa en la zona', 'destino nuevo', 'zona en duda', 'no sale de 4PL'].indexOf(flags[i].t) >= 0) flags.splice(i, 1);
+      for (let i = flags.length - 1; i >= 0; i--) if (['sin tarifa en la zona', 'destino nuevo', 'zona en duda', 'zona por revisar', 'no sale de 4PL'].indexOf(flags[i].t) >= 0) flags.splice(i, 1);
       costo = r; venta = null; fijo = false; sC = 'a'; srcC = 'tarifa de ruteo · ' + (loc ? 'local' : 'foráneo');
       flags.push({ c: 'a', t: 'tarifa de ruteo', d: 'Es reparto del viaje ' + (parseInt(b.padre, 10) || 'padre') + ': se puso la tarifa de ruteo ' + (loc ? 'local' : 'foránea') + ' (' + mny0(r) + '). Si el reparto queda lejos del padre, pon la tarifa completa.' });
     }
@@ -637,6 +682,7 @@ function procesarBase(lista) {
       dest, uni, costoPlat: null, costo, sC, srcC, man, sM, srcM, est, flags, editC: false, editM: false,
       zona: b.zona, zonaNombre: zonaTxt, ventaFija: fijo ? venta : null, srcVFija: srcV,
       otroOrigen, padre: esSi(b.esReparto) ? String(parseInt(b.padre, 10) || '') : '',
+      sinHist: !t, // v18: el destino no aparece en lo aprendido
       pag: num(b.pag) // v17: flete que se le debe al transportista (no se enseña en la tabla, solo avisa)
     };
     return o;
@@ -661,6 +707,40 @@ function procesarBase(lista) {
   // v17: cada servicio se revisa cuando ya tiene el precio de todos sus repartos
   out.forEach(o => { if (!o.padre) verificaPagado(o, out); });
   return out;
+}
+
+
+/* v18 · ciudades que se pueden reconocer en el nombre del destino y la zona con que deberían cobrarse.
+   ok = zonas válidas (normalizadas); sin = la ciudad no tiene zona propia en el tabulador. */
+const ZONA_CIUDAD = [
+  ['JILOTEPEC', 'Jilotepec', ['JILOTEPEC']], ['METEPEC', 'Metepec', ['TOLUCA']], ['TOLUCA', 'Toluca', ['TOLUCA']],
+  ['CHALCO', 'Chalco', ['CHALCO']], ['QUERETARO', 'Querétaro', ['QUERETARO']], ['PUEBLA', 'Puebla', ['PUEBLA']],
+  ['PACHUCA', 'Pachuca', ['PACHUCA']], ['CUERNAVACA', 'Cuernavaca', ['CUERNAVACA', 'MORELOS']],
+  ['GUADALAJARA', 'Guadalajara', ['GUADALAJARA', 'JALISCO']], ['ZAPOPAN', 'Zapopan', ['GUADALAJARA', 'JALISCO']],
+  ['TLAQUEPAQUE', 'Tlaquepaque', ['GUADALAJARA', 'JALISCO']], ['MONTERREY', 'Monterrey', ['MONTERREY']],
+  ['APODACA', 'Apodaca', ['MONTERREY']], ['CULIACAN', 'Culiacán', ['CULIACAN']], ['VILLAHERMOSA', 'Villahermosa', ['VILLAHERMOSA']],
+  ['CHIHUAHUA', 'Chihuahua', ['CHIHUAHUA']], ['MERIDA', 'Mérida', ['MERIDA']], ['VERACRUZ', 'Veracruz', ['VERACRUZ']],
+  ['SILAO', 'Silao', ['SILAO', 'GUANAJUATO']], ['MEXICALI', 'Mexicali', ['MEXICALI']], ['TIJUANA', 'Tijuana', ['TIJUANA']],
+  ['AGUASCALIENTES', 'Aguascalientes', ['AGUASCALIENTES']], ['TEPEJI', 'Tepeji', ['TEPEJI']],
+  ['SAN LUIS POTOSI', 'San Luis Potosí', ['SAN LUIS']], ['SLP', 'San Luis Potosí', ['SAN LUIS']], ['ZACATECAS', 'Zacatecas', ['ZACATECAS']],
+  ['OAXACA', 'Oaxaca', ['OAXACA']], ['TLAXCALA', 'Tlaxcala', ['TLAXCALA']], ['CAMPECHE', 'Campeche', ['CAMPECHE']],
+  ['TEHUACAN', 'Tehuacán', [], 1], ['TULANCINGO', 'Tulancingo', [], 1], ['ATLACOMULCO', 'Atlacomulco', [], 1],
+  ['CANCUN', 'Cancún', [], 1], ['MAZATLAN', 'Mazatlán', [], 1], ['TAMPICO', 'Tampico', [], 1],
+  ['POZA RICA', 'Poza Rica', [], 1], ['XALAPA', 'Xalapa', [], 1], ['ORIZABA', 'Orizaba', [], 1],
+  ['OBREGON', 'Obregón', ['CDMX'], 2]
+];
+function zonaPorRevisar(dest, zonaTxt, cz) {
+  const d = ' ' + dest + ' ', z = norm(zonaTxt);
+  for (const [tok, nom, ok, tipo] of ZONA_CIUDAD) {
+    if (d.indexOf(' ' + tok + ' ') < 0) continue;
+    if (ok.some(x => z.indexOf(x) >= 0)) return null;
+    let txt;
+    if (tipo === 2) txt = 'Revisa si es Ciudad Obregón (Sonora) o Álvaro Obregón (CDMX): la plataforma tiene la dirección en ' + zonaTxt + ' y se cobró con esa zona (' + mny0(cz) + '). Si no es esa, corrige la zona de la dirección en la plataforma.';
+    else if (tipo === 1) txt = nom + ' no tiene zona propia en tu tabulador; la plataforma tiene la dirección en ' + zonaTxt + ' y se cobró con esa zona (' + mny0(cz) + '). Confirma que esa es la tarifa que cobras.';
+    else txt = 'El destino dice ' + nom + ', pero la plataforma tiene la dirección en ' + zonaTxt + ' y se cobró con esa zona (' + mny0(cz) + '). Si va en ' + nom + ', corrige la zona de la dirección en la plataforma.';
+    return { c: 'a', t: 'zona por revisar', l: 'zona por revisar · ' + nom, d: txt };
+  }
+  return null;
 }
 
 /* v17 · aviso cuando lo que se le debe al transportista supera el precio de flete que se va a cobrar.
@@ -709,7 +789,7 @@ function setMes(m) {
   FD2 = m + '-' + String(new Date(y, mm, 0).getDate()).padStart(2, '0');
   FMES = m;
 }
-const COL_SIG = { 'lo pagado supera el precio': 'costo', 'destino nuevo': 'costo', 'destino sin histórico': 'costo', 'tarifa inconsistente': 'costo', '__neg': 'costo', 'maniobra faltante': 'man', 'zona en duda': 'costo', 'sin tarifa en la zona': 'costo', 'tarifa editada': 'costo', 'costos extra': 'costo' };
+const COL_SIG = { 'lo pagado supera el precio': 'costo', 'destino nuevo': 'costo', 'destino sin histórico': 'costo', 'tarifa inconsistente': 'costo', '__neg': 'costo', 'maniobra faltante': 'man', 'zona en duda': 'costo', 'zona por revisar': 'costo', 'sin tarifa en la zona': 'costo', 'tarifa editada': 'costo', 'costos extra': 'costo' };
 const sinMargen = v => v.margen <= 0 && !!(v.totalVenta || v.totalCosto);
 const tieneSenal = (v, s) => s === '__neg' ? sinMargen(v) : v.flags.some(f => f.t === s);
 // vistos = base + filtro por tipo de señal (alimenta la tabla y la exportación)
@@ -825,7 +905,7 @@ const COLS = [
   { k: 'costo', t: 'Costo flete', n: 1 }, { k: 'venta', t: 'Precio flete', n: 1 },
   { k: 'margen', t: 'Margen', n: 1 }, { k: 'flags', t: 'Notas' }
 ];
-const PRIO = ['__neg', 'lo pagado supera el precio', 'destino nuevo', 'zona en duda', 'sin tarifa en la zona', 'tarifa editada', 'costos extra', 'tarifa inconsistente', 'maniobra faltante', 'destino sin histórico'];
+const PRIO = ['__neg', 'lo pagado supera el precio', 'destino nuevo', 'zona en duda', 'zona por revisar', 'sin tarifa en la zona', 'tarifa editada', 'costos extra', 'tarifa inconsistente', 'maniobra faltante', 'destino sin histórico'];
 function prioridad(v) {
   if (sinMargen(v)) return 0;
   let p = 99;
@@ -1457,8 +1537,125 @@ function renderJulio() {
       <td class="num">${mny(d.r.fv)}</td><td>${est(d)}</td>${algun ? '<td>' + est(s) + '</td>' : ''}</tr>`; }).join('')}</tbody>`;
 }
 
+
+/* ---------- v18: revisión antes de facturar ---------- */
+const terminado = s => /complet|finaliz|entreg/i.test(String(s || ''));
+let REV_ABIERTA_EN = null;
+function armarRevision() {
+  const L = VIAJES.filter(o => !o.pospuesto), ids = new Set(L.map(o => o.id));
+  const tiene = (o, t) => o.flags.some(f => f.t === t);
+  const fl = (o, t) => o.flags.find(f => f.t === t);
+  const vj = (o, extra) => ({ id: o.id, txt: o.destino + ' · ' + o.unidad + (extra ? ' · ' + extra : '') });
+  const it = (c, t, d, lista) => lista.length ? { c, t, d, vj: lista } : null;
+  const plataforma = [
+    it('a', 'Maniobras que probablemente faltan', 'A estos destinos casi siempre les cobras maniobra y la plataforma no la marca. Captúrala en la plataforma o confírmala aquí en la columna de maniobra.',
+      L.filter(o => tiene(o, 'maniobra faltante') && !o.editM).map(o => vj(o, mny0(o.man)))),
+    it('a', 'Direcciones con la zona dudosa', 'La zona con la que la plataforma cobra no parece la del destino. Corregir la dirección en la plataforma lo arregla para todos los meses.',
+      L.filter(o => (tiene(o, 'zona en duda') || tiene(o, 'zona por revisar')) && !o.editC).map(o => vj(o, o.zonaNombre))),
+    it('r', 'Destinos sin tarifa en el tabulador', 'Su zona no tiene tarifa para esa unidad. Cárgala en el tabulador de la plataforma o captura el flete aquí.',
+      L.filter(o => (tiene(o, 'destino nuevo') || tiene(o, 'sin tarifa en la zona')) && !o.editC).map(o => vj(o, o.zonaNombre))),
+    it('a', 'Maniobras marcadas sin monto', 'La plataforma dice que hubo maniobra pero no hay con qué ponerle precio. Captura el monto.',
+      L.filter(o => o.man == null && /captura el monto/.test(o.srcM || '')).map(o => vj(o))),
+    it('a', 'Repartos incompletos en esta carga', 'El padre y sus repartos se cobran juntos; aquí falta una de las dos partes. Revisa si el otro viaje ya se cobró o todavía no se registra.',
+      L.filter(o => (o.padre && !ids.has(o.padre)) || (tiene(o, 'viaje padre') && !(o.hijos || []).length))
+        .map(o => vj(o, o.padre ? 'su padre ' + o.padre + ' no viene' : 'sus repartos no vienen')))
+  ].filter(Boolean);
+  const neg = L.filter(sinMargen);
+  const pag = L.filter(o => tiene(o, 'lo pagado supera el precio'));
+  const difPag = pag.reduce((a, o) => a + (fl(o, 'lo pagado supera el precio').dif || 0), 0);
+  const decide = [
+    it('r', 'Viajes en pérdida o sin margen', 'Así como están, se cobran por debajo o igual a lo que cuestan.',
+      neg.map(o => vj(o, 'margen ' + mny0(o.margen)))),
+    it('a', 'Lo pagado supera el precio', 'Al transportista se le debe más flete del que vas a cobrar; entre todos quedarías ' + mny0(difPag) + ' abajo.',
+      pag.map(o => vj(o, mny0(fl(o, 'lo pagado supera el precio').dif) + ' abajo'))),
+    it('a', 'Repartos con tarifa de ruteo', 'Se puso la tarifa de ruteo (800 local, 1,100 foráneo). Si el reparto quedó lejos del padre, pon la tarifa completa.',
+      L.filter(o => tiene(o, 'tarifa de ruteo') && !o.editC).map(o => vj(o, 'hijo de ' + o.padre))),
+    it('a', 'Citas del mes siguiente', 'Decide si se cobran en este corte o si los pasas al siguiente con el botón del viaje.',
+      L.filter(o => o.citaSig).map(o => vj(o, 'cita ' + o.fecha))),
+    it('a', 'Tarifas editadas o costos extra en la plataforma', 'Alguien cambió la tarifa o capturó un costo adicional; confirma qué se cobra.',
+      L.filter(o => tiene(o, 'tarifa editada') || tiene(o, 'costos extra')).map(o => vj(o))),
+    CLIENTE === 'playmobil' ? it('b', 'Destinos que cobras por primera vez', 'No aparecen en lo que has facturado; se cobraron con el tabulador de la plataforma. Vale la pena verlos una vez.',
+      L.filter(o => o.sinHist && !o.padre && !tiene(o, 'destino nuevo') && !tiene(o, 'sin tarifa en la zona')).map(o => vj(o, mny0(o.venta)))) : null
+  ].filter(Boolean);
+  const pend = L.filter(o => o.status && !terminado(o.status));
+  const tocar = new Set();
+  plataforma.concat(decide).forEach(i => i.vj.forEach(v => tocar.add(v.id)));
+  return { total: L.length, listos: L.filter(o => !tocar.has(o.id)).length, plataforma, decide,
+    pend: pend.length ? { c: 'b', t: 'Viajes que todavía no terminan', d: 'Están asignados, en ruta o por confirmar. Si los cobras ahora, cualquier costo que aparezca después ya no entraría.',
+      vj: pend.map(o => vj(o, o.status + ' · cita ' + o.fecha)) } : null };
+}
+function renderRevStrip() {
+  const box = $('#revStrip'); if (!box) return;
+  if (!VIAJES.length) { box.classList.add('hidden'); return; }
+  const r = armarRevision(), np = r.plataforma.reduce((a, i) => a + i.vj.length, 0), nd = r.decide.reduce((a, i) => a + i.vj.length, 0);
+  box.innerHTML = `<div class="tx"><b>Revisión antes de facturar</b><br>${r.listos} de ${r.total} viajes listos · ${np} por corregir en la plataforma · ${nd} por decidir${r.pend ? ' · ' + r.pend.vj.length + ' sin terminar' : ''}</div>
+    <button class="btn" id="btnRev">Ver la revisión</button>`;
+  box.classList.remove('hidden');
+  $('#btnRev').onclick = abrirRevision;
+}
+const escH = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function itemHtml(i) {
+  return `<div class="rev-it ${i.c}"><div class="t">${escH(i.t)} · ${i.vj.length}</div><div class="d">${escH(i.d)}</div>
+    <div class="rev-vj">${i.vj.map(v => `<button data-ir="${v.id}" title="Ir al viaje en la tabla"><b>${v.id}</b> · ${escH(v.txt)}</button>`).join('')}</div></div>`;
+}
+function abrirRevision() {
+  const r = armarRevision(), ov = $('#revOv'); REV_ABIERTA_EN = new Date();
+  const np = r.plataforma.reduce((a, i) => a + i.vj.length, 0), nd = r.decide.reduce((a, i) => a + i.vj.length, 0);
+  const fs = VIAJES.map(v => v.fecha).filter(Boolean).sort();
+  ov.innerHTML = `<div class="rev-box">
+    <div class="rev-hd"><h3>Revisión antes de facturar · ${escH(CLIENTES[CLIENTE].n)}</h3>
+      <p>${r.total} viajes${fs.length ? ' · citas del ' + fs[0] + ' al ' + fs[fs.length - 1] : ''} · revisado el ${cuandoFue(REV_ABIERTA_EN.toISOString())} · no mueve el corte ni guarda nada</p></div>
+    <div class="rev-bd">
+      <div class="rev-kp"><div><b>${r.listos}</b><span>listos sin tocar</span></div><div><b>${np}</b><span>corregir en la plataforma</span></div>
+        <div><b>${nd}</b><span>decides tú</span></div><div><b>${r.pend ? r.pend.vj.length : 0}</b><span>sin terminar</span></div></div>
+      <div class="rev-blk"><h4>1 · Corrige en la plataforma</h4><p class="q">Si lo arreglas allá antes de facturar, el Copiloto lo toma solo y ya no lo vuelves a ver el mes siguiente.</p>
+        ${r.plataforma.length ? r.plataforma.map(itemHtml).join('') : '<div class="rev-ok">Nada que corregir en la plataforma.</div>'}</div>
+      <div class="rev-blk"><h4>2 · Decide tú</h4><p class="q">Aquí el Copiloto ya propone una tarifa, pero conviene que la confirmes.</p>
+        ${r.decide.length ? r.decide.map(itemHtml).join('') : '<div class="rev-ok">Nada pendiente de decidir.</div>'}</div>
+      <div class="rev-blk"><h4>3 · Todavía no terminan</h4>
+        ${r.pend ? itemHtml(r.pend) : '<div class="rev-ok">Todos los viajes de la carga ya terminaron.</div>'}</div>
+    </div>
+    <div class="rev-ft"><button class="btn ghost" id="revCopy">Copiar</button><button class="btn ghost" id="revPrint">Imprimir</button><button class="btn" id="revClose">Cerrar</button></div>
+  </div>`;
+  ov.classList.remove('hidden');
+  $('#revClose').onclick = cerrarRevision;
+  ov.onclick = e => { if (e.target === ov) cerrarRevision(); };
+  $('#revPrint').onclick = () => { document.body.classList.add('solo-rev'); window.print(); setTimeout(() => document.body.classList.remove('solo-rev'), 500); };
+  $('#revCopy').onclick = () => copiarRevision(r);
+  ov.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => irAViaje(b.dataset.ir));
+}
+function cerrarRevision() { const ov = $('#revOv'); if (ov) { ov.classList.add('hidden'); ov.innerHTML = ''; } }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarRevision(); });
+function irAViaje(id) {
+  cerrarRevision();
+  const ft = document.querySelector('.tab[data-tab="fact"]'); if (ft && !ft.classList.contains('on')) ft.click();
+  FSIG = null; FEST = 'todos'; FD1 = ''; FD2 = ''; redraw();
+  const tr = document.querySelector('#tbl tr[data-id="' + id + '"]'); if (!tr) return;
+  if (tr.scrollIntoView) tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  tr.classList.add('rev-hi'); setTimeout(() => tr.classList.remove('rev-hi'), 2600);
+}
+function textoRevision(r) {
+  const out = ['Revisión antes de facturar · ' + CLIENTES[CLIENTE].n, r.listos + ' de ' + r.total + ' viajes listos sin tocar', ''];
+  const blq = (tit, items) => { out.push(tit); if (!items.length) out.push('  Nada pendiente.');
+    items.forEach(i => { out.push('- ' + i.t + ' (' + i.vj.length + ')'); i.vj.forEach(v => out.push('    ' + v.id + ' · ' + v.txt)); }); out.push(''); };
+  blq('1 · Corrige en la plataforma', r.plataforma);
+  blq('2 · Decide tú', r.decide);
+  blq('3 · Todavía no terminan', r.pend ? [r.pend] : []);
+  return out.join('\n');
+}
+function copiarRevision(r) {
+  const t = textoRevision(r), b = $('#revCopy');
+  const ok = () => { b.textContent = 'Copiado'; setTimeout(() => { b.textContent = 'Copiar'; }, 1800); };
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(ok, () => respaldoCopia(t, ok)); return; } } catch (e) { }
+  respaldoCopia(t, ok);
+}
+function respaldoCopia(t, ok) {
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); ok(); } catch (e) { alert('No se pudo copiar; usa Imprimir.'); } ta.remove();
+}
+
 /* ---------- flujo ---------- */
-function redraw() { renderKpis(); renderAlerts(); renderToolbar(); renderTabla(); renderPospuestos(); renderCharts(); pintarJulio(); guardarAvance(); }
+function redraw() { renderRevStrip(); renderKpis(); renderAlerts(); renderToolbar(); renderTabla(); renderPospuestos(); renderCharts(); pintarJulio(); guardarAvance(); }
 
 /* ---------- v16: viajes pasados al mes siguiente (se guardan en el servidor) ---------- */
 let MES_P = '';
@@ -1547,6 +1744,7 @@ function confirmarReemplazo() {
 }
 window.addEventListener('pagehide', guardarAvance);
 function reset() {
+  cerrarRevision();
   $('#results').classList.add('hidden'); $('#cardLoad').classList.remove('hidden'); pintarMemLine();
   $('#cmpOut').classList.add('hidden'); $('#file').value = ''; $('#fileX').value = '';
   $('#corteBox').classList.add('hidden'); $('#baseMsg').classList.add('hidden'); FUENTE = 'csv';
@@ -1583,6 +1781,7 @@ function arrancar(rows, desde) {
     (YA_FACT ? ' <span class="fuera-nota">· se dejaron fuera ' + YA_FACT + ' ya facturados</span>' : '');
   $('#cardLoad').classList.add('hidden'); $('#results').classList.remove('hidden');
   redraw(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (FUENTE === 'base' && !DEMO) abrirRevision(); // v18
 }
 
 function pintarMemLine() {
@@ -1640,5 +1839,6 @@ $('#btnDemoJul').onclick = () => {
 };
 
 </script>
+<div class="rev-ov hidden" id="revOv" role="dialog" aria-modal="true"></div>
 </body>
 </html>
