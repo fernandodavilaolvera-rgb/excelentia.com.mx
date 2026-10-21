@@ -64,22 +64,6 @@
   .kpi .var{font-size:10.5px; font-weight:700; color:var(--txt2); margin-top:.2rem;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
-  /* franja de los datos fuertes */
-  .franja{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);
-    border-radius:13px; padding:1.15rem 1.4rem; margin-top:.9rem; color:#fff}
-  .franja-lab{font-size:11px; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
-    color:#9fc4ea; margin-bottom:.75rem}
-  .franja-nums{display:flex; align-items:center; gap:1.6rem}
-  .franja-dato{flex:1; display:flex; align-items:baseline; gap:.7rem}
-  .franja-dato b{font-size:52px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; color:#fff}
-  .franja-dato span{font-size:14px; font-weight:600; color:#dce8f7; line-height:1.4; max-width:340px}
-  .franja-sep{width:1px; align-self:stretch; background:rgba(255,255,255,.22)}
-  @media (max-width:700px){
-    .franja-nums{flex-direction:column; align-items:flex-start; gap:1.1rem}
-    .franja-sep{width:100%; height:1px; align-self:auto}
-    .franja-dato b{font-size:36px}
-  }
-
   .grid2{display:grid; grid-template-columns:1.5fr 1fr; gap:.9rem; margin-top:.9rem; align-items:start}
   .col-izq{display:flex; flex-direction:column; gap:.9rem}
   .card{background:#fff; border:1px solid var(--linea); border-radius:13px; overflow:hidden}
@@ -127,8 +111,6 @@
   .anden-bar i{display:block; height:100%; border-radius:5px; width:0;
     transition:width .8s cubic-bezier(.2,.8,.3,1)}
 
-  .grupo-esc{font-size:10.5px; color:var(--txt3); margin-top:.15rem; padding-top:.3rem;
-    border-top:1px dashed var(--linea)}
   .grupo-linea{margin-bottom:1.1rem}
   .grupo-linea:last-child{margin-bottom:0}
   .grupo-tit{font-size:10.5px; font-weight:800; letter-spacing:.4px; text-transform:uppercase;
@@ -136,21 +118,6 @@
   .grupo-tit span{font-weight:700; color:#a8aebd; text-transform:none; letter-spacing:0}
   .pil{display:inline-block; color:#fff; font-size:9.5px; font-weight:800;
     padding:.15rem .45rem; border-radius:5px; white-space:nowrap}
-
-  /* comparativa de lineas */
-  .cmp{display:grid; grid-template-columns:1fr 1fr; gap:.9rem}
-  .cmp-col{border:1px solid var(--linea); border-radius:11px; padding:1rem 1.1rem}
-  .cmp-col h4{font-size:12px; font-weight:800; margin-bottom:.8rem; display:flex;
-    align-items:center; gap:.45rem}
-  .cmp-col h4 i{width:11px; height:11px; border-radius:3px; display:inline-block}
-  .cmp-fila{display:flex; justify-content:space-between; align-items:baseline;
-    padding:.4rem 0; border-bottom:1px solid #f0f1f5; font-size:12px; color:var(--txt2)}
-  .cmp-fila:last-child{border-bottom:none}
-  .cmp-fila b{font-size:15px; font-weight:800; color:var(--txt); font-variant-numeric:tabular-nums}
-  .cmp-alerta{background:#fff6e5; border:1px solid #f0dcb4; border-left:3px solid var(--naranja);
-    border-radius:9px; padding:.8rem 1rem; margin-top:.9rem; font-size:11.5px;
-    color:#4a5068; line-height:1.55; max-width:720px}
-  @media (max-width:700px){ .cmp{grid-template-columns:1fr} }
 
   /* barras verticales de los 34 */
   .leyenda{display:flex; gap:1.2rem; flex-wrap:wrap; margin-bottom:1rem}
@@ -215,7 +182,7 @@
     body{ background:#fff }
     .vivo, .no-print, .filtros{ display:none !important }
     section, .card, main, div, .tabla-wrap{ break-inside:auto }
-    .kpi, .anden, .nota-final, .curva-wrap, .ley, .bgrupo, .franja, .cmp-col, .cmp-alerta, img, tr{ break-inside:avoid }
+    .kpi, .anden, .nota-final, .curva-wrap, .ley, .bgrupo, img, tr{ break-inside:avoid }
     h1,h2,h3,h4, .card h3{ break-after:avoid }
     p, li{ orphans:3; widows:3 }
     thead{ display:table-header-group }
@@ -274,21 +241,6 @@
     <div class="kpi k5"><div class="lab">Andenes activos</div><div class="num" id="k5">—</div><div class="var" id="v5">&nbsp;</div></div>
   </div>
 
-  <div class="franja">
-    <div class="franja-lab">Avance del escenario al corte</div>
-    <div class="franja-nums">
-      <div class="franja-dato">
-        <b id="fTotal">—</b>
-        <span>conexiones acumuladas de las 1,564,343 del escenario completo</span>
-      </div>
-      <div class="franja-sep"></div>
-      <div class="franja-dato">
-        <b id="fPct">—</b>
-        <span id="fDias">del periodo transcurrido</span>
-      </div>
-    </div>
-  </div>
-
   <div class="grid2">
     <div class="col-izq">
       <div class="card">
@@ -328,11 +280,6 @@
   </div>
 
   <div class="card" style="margin-top:.9rem">
-    <h3>Línea 1 contra Línea 2 <span id="cmpPeriodo">—</span></h3>
-    <div class="body" id="cmpBox"><div class="vacio">Cargando…</div></div>
-  </div>
-
-  <div class="card" style="margin-top:.9rem">
     <h3>Conexiones por andén · los 34 <span id="barrasPeriodo">—</span></h3>
     <div class="body">
       <div class="leyenda">
@@ -341,16 +288,19 @@
         <div class="ley"><i style="background:#dfe3ea"></i><b>Sin reportar</b></div>
       </div>
       <div class="barras-scroll"><div class="barras" id="barras"></div></div>
-      <p class="nota-barras" id="notaBarras"></p>
     </div>
   </div>
 
   <p class="nota-final">
-    <b>
+    <b>Escenario de proyección.</b> Las cifras de esta pantalla simulan la operación con los 34 andenes
+    trabajando al 100%; no son conexiones reales ni sustituyen el reporte de impactos que se le entrega al
+    patrocinador. La pantalla avanza con el reloj: solo muestra fechas y horas que ya ocurrieron. Los datos
+    salen de un escenario cargado en la base, no de la operación real. Cada línea de andenes se mide contra
+    su propio andén más alto, así que las barras se comparan dentro de su bloque y no entre bloques.
   </p>
 
   <p class="pie">
-    Desarrollado por <b>ExcelentIA</b> · Inteligencia Artificial con esencia Humana
+    Desarrollado por <b>Mexibus Radio</b>
   </p>
 </div>
 
@@ -470,7 +420,7 @@ function pintar(d){
   var nd = dias.length;
 
   document.getElementById('reloj').textContent = d.corte ? d.corte.slice(11) + ' h · ' + diaCorto(d.corte.slice(0,10)) : '--:--';
-  ['diasPeriodo','andenPeriodo','cmpPeriodo','barrasPeriodo'].forEach(function(id){
+  ['diasPeriodo','andenPeriodo','barrasPeriodo'].forEach(function(id){
     document.getElementById(id).textContent = etiqueta;
   });
 
@@ -490,11 +440,6 @@ function pintar(d){
   document.getElementById('v4').textContent = mejorH ? (String(mejorH[0]).padStart(2,'0') + ':00 h') : '—';
   document.getElementById('k5').textContent = activos;
   document.getElementById('v5').textContent = 'de 34 dados de alta';
-
-  /* --- Franja --- */
-  document.getElementById('fTotal').textContent = n(total);
-  document.getElementById('fPct').textContent = Math.round(nd/91*100) + '%';
-  document.getElementById('fDias').textContent = 'del periodo transcurrido · ' + n1(total/(nd*nh || 1)) + ' conexiones por hora de servicio';
 
   /* --- Horas --- */
   pintarV('horas', horas.map(function(h){
@@ -534,7 +479,7 @@ function pintar(d){
             return '<div class="anden"><div class="anden-top"><b>' + a[0] + '</b><span>' + n(a[2]) + '</span></div>'
               + '<div class="anden-bar"><i style="background:' + colorLinea(l) + '" data-w="' + w + '"></i></div></div>';
           }).join('')
-        + '<div class="grupo-esc">La barra más larga de este bloque son ' + n(mx) + ' conexiones</div></div>';
+        + '</div>';
     }).join('');
     setTimeout(function(){
       caja.querySelectorAll('.anden-bar i').forEach(function(b,i){
@@ -554,23 +499,6 @@ function pintar(d){
       }).join('')
     : '<tr><td colspan="5" class="vacio">Sin datos en el periodo</td></tr>';
   document.getElementById('totalReg').textContent = activos + ' andenes con actividad';
-
-  /* --- Comparativo de líneas --- */
-  var cmp = {}; lineas.forEach(function(l){ cmp[l[0]] = l[1]; });
-  var act = {}; andenes.forEach(function(a){ if(a[2] > 0) act[a[1]] = (act[a[1]]||0)+1; });
-  var alta = { 'Línea 1':18, 'Línea 2':16 };
-  document.getElementById('cmpBox').innerHTML =
-    '<div class="cmp">' + ['Línea 1','Línea 2'].map(function(l){
-      var c = cmp[l] || 0;
-      return '<div class="cmp-col"><h4><i style="background:' + colorLinea(l) + '"></i>' + l + '</h4>'
-        + '<div class="cmp-fila"><span>Conexiones</span><b>' + n(c) + '</b></div>'
-        + '<div class="cmp-fila"><span>Aporte al total</span><b>' + (total ? (c/total*100).toFixed(1) : '0.0') + '%</b></div>'
-        + '<div class="cmp-fila"><span>Andenes activos</span><b>' + (act[l]||0) + ' de ' + alta[l] + '</b></div>'
-        + '<div class="cmp-fila"><span>Promedio diario</span><b>' + n1(nd ? c/nd : 0) + '</b></div></div>';
-    }).join('') + '</div>'
-    + '<div class="cmp-alerta">El escenario concentra el grueso del tráfico en Línea 2, al contrario de '
-    + 'la operación real, donde Línea 1 es la que sostiene el volumen. Se respeta tal como viene del '
-    + 'modelo de proyección.</div>';
 
   /* --- Barras de los 34 --- */
   pintarBarras(andenes, total);
@@ -714,11 +642,6 @@ function pintarBarras(andenes, total){
     });
   }, 150);
 
-  var conAct = base.filter(function(a){ return a.v > 0; }).length;
-  document.getElementById('notaBarras').innerHTML =
-    '<b>' + conAct + ' de 34 andenes</b> registran conexiones en el periodo elegido, con <b>' + n(total)
-    + '</b> en total. Cada línea se mide contra su propio andén más alto, así que las alturas se comparan '
-    + 'dentro del bloque y no entre bloques.';
 }
 
 cargar();
