@@ -521,14 +521,23 @@ function pintarCurva(dias, horas){
     ? horas.map(function(h){ return [String(h[0]).padStart(2,'0') + ':00', h[1]]; })
     : dias.map(function(d){ return [diaCorto(d[0]), d[1]]; });
 
-  /* El acumulado es lo que muestra el crecimiento: cada punto suma los anteriores. */
-  var acum = [], s = 0;
-  base.forEach(function(d){ s += d[1]; acum.push([d[0], s]); });
+  /* La tendencia: promedio de los siete días que terminan en cada fecha. Quita el ruido
+     de los fines de semana y deja ver cómo arranca el servicio, cómo crece y dónde se
+     estabiliza. El día en curso se deja fuera porque va a medias y hundiría la punta. */
+  if(!porHora && base.length > 2) base = base.slice(0, base.length-1);
+  var suave = !porHora && base.length >= 7;
+  var acum = base.map(function(d,i){
+    if(!suave) return [d[0], d[1]];
+    var a = Math.max(0, i-6), t = 0;
+    for(var k = a; k <= i; k++) t += base[k][1];
+    return [d[0], t/(i-a+1)];
+  });
 
   var W = 620, H = 240, mL = 60, mR = 16, mT = 16, mB = 30;
   var w = W - mL - mR, h = H - mT - mB;
-  var max = s || 1;
+  var max = Math.max.apply(null, acum.map(function(a){ return a[1]; })) * 1.08 || 1;
   var np = acum.length;
+  var ultimo = acum[np-1][1];
   var px = function(i){ return np > 1 ? mL + i/(np-1)*w : mL + w/2; };
   var py = function(v){ return mT + h - (v/max*h); };
 
@@ -560,33 +569,33 @@ function pintarCurva(dias, horas){
   });
 
   /* punto final con su cifra */
-  var xf = px(np-1), yf = py(max);
+  var xf = px(np-1), yf = py(ultimo);
   p.push('<circle class="cv-pt" cx="' + xf.toFixed(1) + '" cy="' + yf.toFixed(1) + '" r="4.5"/>');
   var anclaF = xf > mL + w*0.75 ? 'end' : 'start';
   p.push('<text class="cv-val" x="' + (xf + (anclaF === 'end' ? -8 : 8)).toFixed(1) + '" y="'
-    + (yf - 9).toFixed(1) + '" text-anchor="' + anclaF + '">' + n(max) + '</text>');
+    + (yf - 9).toFixed(1) + '" text-anchor="' + anclaF + '">' + n1(ultimo) + '</text>');
 
-  /* zonas de hover: marcan el punto y muestran el acumulado de ese día */
+  /* zonas de hover: marcan el punto y muestran la cifra de ese día */
   var anchoHit = np > 1 ? w/(np-1) : w;
   acum.forEach(function(a,i){
     var x = px(i), y = py(a[1]);
     p.push('<rect class="cv-hit" x="' + (x - anchoHit/2).toFixed(1) + '" y="' + mT
       + '" width="' + anchoHit.toFixed(1) + '" height="' + h + '">'
-      + '<title>' + a[0] + ' · ' + n(a[1]) + ' acumuladas</title></rect>');
+      + '<title>' + a[0] + ' · ' + n1(a[1]) + (porHora ? ' por hora' : ' al día') + '</title></rect>');
     p.push('<g class="cv-marca"><line x1="' + x.toFixed(1) + '" y1="' + mT + '" x2="' + x.toFixed(1)
       + '" y2="' + (mT+h) + '"/><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.5"/></g>');
   });
 
   svg.innerHTML = p.join('');
 
-  var prom = np ? max/np : 0;
-  var ultimos = (!porHora && np >= 14) ? (acum[np-1][1] - acum[np-8][1]) / 7 : null;
+  var arranque = acum[0][1], crece = arranque > 0 ? ultimo/arranque : 0;
   document.getElementById('notaCurva').innerHTML = porHora
-    ? ('La línea suma las horas una sobre otra: al corte van <b>' + n(max)
-       + '</b> conexiones en el día, con un promedio de <b>' + n1(prom) + '</b> por hora de servicio.')
-    : ('La línea suma los días uno sobre otro: al cierre del periodo elegido van <b>' + n(max)
-       + '</b> conexiones, con un promedio de <b>' + n1(prom) + '</b> al día'
-       + (ultimos ? ', y <b>' + n1(ultimos) + '</b> en los últimos siete.' : '.'));
+    ? ('Cómo se llena el día hora por hora: la hora más alta va en <b>' + n1(max/1.08) + '</b> conexiones.')
+    : ((suave ? 'La línea es el promedio de los siete días que terminan en cada fecha, para ver la tendencia sin el ruido de los fines de semana; el día en curso queda fuera porque va a medias. '
+              : 'Conexiones por día. ')
+       + 'Arrancó en <b>' + n1(arranque) + '</b> conexiones y '
+       + (suave ? 'la última semana cerrada promedia <b>' : 'el último día cerrado va en <b>') + n1(ultimo) + '</b>'
+       + (crece > 1.2 ? ', <b>' + crece.toFixed(1) + ' veces más</b>.' : '.'));
 }
 
 function pintarV(id, datos){
