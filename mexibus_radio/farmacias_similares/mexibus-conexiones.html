@@ -103,6 +103,20 @@
     margin-bottom:4px; opacity:0; pointer-events:none; transition:.15s; white-space:nowrap; z-index:5}
   .h-col:hover .tip{opacity:1}
 
+  /* curva de crecimiento */
+  .curva-wrap{width:100%}
+  .curva-wrap svg{width:100%; height:auto; display:block; overflow:visible}
+  .cv-grid{stroke:#eef0f5; stroke-width:1}
+  .cv-eje{fill:#8a90a0; font-size:9.5px; font-weight:700; font-family:'Manrope',sans-serif}
+  .cv-linea{fill:none; stroke:#E8114B; stroke-width:2.4; stroke-linejoin:round; stroke-linecap:round}
+  .cv-pt{fill:#E8114B; stroke:#fff; stroke-width:2}
+  .cv-val{fill:#1a2035; font-size:11px; font-weight:800; font-family:'Manrope',sans-serif}
+  .cv-hit{fill:transparent; cursor:default}
+  .cv-hit:hover + .cv-marca{opacity:1}
+  .cv-marca{opacity:0; transition:.12s}
+  .cv-marca line{stroke:#E5449A; stroke-width:1; stroke-dasharray:3 3}
+  .cv-marca circle{fill:#E5449A; stroke:#fff; stroke-width:2}
+
   /* andenes */
   .anden{margin-bottom:.95rem}
   .anden:last-child{margin-bottom:0}
@@ -201,7 +215,7 @@
     body{ background:#fff }
     .vivo, .no-print, .filtros{ display:none !important }
     section, .card, main, div, .tabla-wrap{ break-inside:auto }
-    .kpi, .anden, .nota-final, .ley, .bgrupo, .franja, .cmp-col, .cmp-alerta, img, tr{ break-inside:avoid }
+    .kpi, .anden, .nota-final, .curva-wrap, .ley, .bgrupo, .franja, .cmp-col, .cmp-alerta, img, tr{ break-inside:avoid }
     h1,h2,h3,h4, .card h3{ break-after:avoid }
     p, li{ orphans:3; widows:3 }
     thead{ display:table-header-group }
@@ -289,6 +303,13 @@
           <p class="nota-barras" id="notaDias">&nbsp;</p>
         </div>
       </div>
+      <div class="card">
+        <h3>Curva de crecimiento <span id="curvaPeriodo">—</span></h3>
+        <div class="body">
+          <div class="curva-wrap"><svg id="curva" viewBox="0 0 620 240" preserveAspectRatio="xMidYMid meet"></svg></div>
+          <p class="nota-barras" id="notaCurva">&nbsp;</p>
+        </div>
+      </div>
     </div>
     <div class="card" style="align-self:start">
       <h3>Por andén <span id="andenPeriodo">—</span></h3>
@@ -325,11 +346,7 @@
   </div>
 
   <p class="nota-final">
-    <b>Escenario de proyección.</b> Las cifras de esta pantalla simulan la operación con los 34 andenes
-    trabajando al 100%; no son conexiones reales ni sustituyen el reporte de impactos que se le entrega al
-    patrocinador. La pantalla avanza con el reloj: solo muestra fechas y horas que ya ocurrieron. Los datos
-    salen de un escenario cargado en la base, no de la operación real. Cada línea de andenes se mide contra
-    su propio andén más alto, así que las barras se comparan dentro de su bloque y no entre bloques.
+    <b>
   </p>
 
   <p class="pie">
@@ -495,6 +512,10 @@ function pintar(d){
   document.getElementById('notaDias').textContent =
     nd ? ('El último día va parcial: llega hasta la hora del corte.') : '';
 
+  /* --- Curva de crecimiento (acumulado) --- */
+  document.getElementById('curvaPeriodo').textContent = etiqueta;
+  pintarCurva(dias, horas);
+
   /* --- Por andén, cada línea con su propia escala --- */
   var porL = {};
   andenes.forEach(function(a){ (porL[a[1]] = porL[a[1]] || []).push(a); });
@@ -553,6 +574,91 @@ function pintar(d){
 
   /* --- Barras de los 34 --- */
   pintarBarras(andenes, total);
+}
+
+function corto(v){
+  if(v >= 1000000) return (v/1000000).toFixed(v >= 10000000 ? 0 : 1).replace('.0','') + 'M';
+  if(v >= 10000)   return Math.round(v/1000) + 'k';
+  if(v >= 1000)    return (v/1000).toFixed(1).replace('.0','') + 'k';
+  return String(Math.round(v));
+}
+
+function pintarCurva(dias, horas){
+  var svg = document.getElementById('curva');
+  if(!dias.length){ svg.innerHTML = ''; document.getElementById('notaCurva').textContent = ''; return; }
+
+  /* Con un solo día la curva avanza hora por hora; con varios, día por día. */
+  var porHora = dias.length === 1 && horas && horas.length > 1;
+  var base = porHora
+    ? horas.map(function(h){ return [String(h[0]).padStart(2,'0') + ':00', h[1]]; })
+    : dias.map(function(d){ return [diaCorto(d[0]), d[1]]; });
+
+  /* El acumulado es lo que muestra el crecimiento: cada punto suma los anteriores. */
+  var acum = [], s = 0;
+  base.forEach(function(d){ s += d[1]; acum.push([d[0], s]); });
+
+  var W = 620, H = 240, mL = 60, mR = 16, mT = 16, mB = 30;
+  var w = W - mL - mR, h = H - mT - mB;
+  var max = s || 1;
+  var np = acum.length;
+  var px = function(i){ return np > 1 ? mL + i/(np-1)*w : mL + w/2; };
+  var py = function(v){ return mT + h - (v/max*h); };
+
+  var p = [];
+
+  /* rejilla y eje vertical */
+  for(var g = 0; g <= 4; g++){
+    var val = max * g / 4, y = py(val);
+    p.push('<line class="cv-grid" x1="' + mL + '" y1="' + y.toFixed(1) + '" x2="' + (mL+w) + '" y2="' + y.toFixed(1) + '"/>');
+    p.push('<text class="cv-eje" x="' + (mL-8) + '" y="' + (y+3.5).toFixed(1) + '" text-anchor="end">' + corto(val) + '</text>');
+  }
+
+  /* área bajo la curva y línea */
+  var pts = acum.map(function(a,i){ return px(i).toFixed(1) + ',' + py(a[1]).toFixed(1); });
+  p.push('<defs><linearGradient id="cvFill" x1="0" y1="0" x2="0" y2="1">'
+    + '<stop offset="0%" stop-color="#E8114B" stop-opacity=".22"/>'
+    + '<stop offset="100%" stop-color="#E8114B" stop-opacity=".02"/></linearGradient></defs>');
+  p.push('<path fill="url(#cvFill)" stroke="none" d="M' + pts.join(' L')
+    + ' L' + px(np-1).toFixed(1) + ',' + (mT+h) + ' L' + px(0).toFixed(1) + ',' + (mT+h) + ' Z"/>');
+  p.push('<path class="cv-linea" d="M' + pts.join(' L') + '"/>');
+
+  /* eje horizontal con algunas fechas */
+  var paso = np > 30 ? Math.ceil(np/7) : (np > 10 ? Math.ceil(np/5) : 1);
+  acum.forEach(function(a,i){
+    if(i % paso !== 0 && i !== np-1) return;
+    if(i !== np-1 && np-1-i < Math.max(2, paso-1)) return;
+    p.push('<text class="cv-eje" x="' + px(i).toFixed(1) + '" y="' + (mT+h+16) + '" text-anchor="middle">'
+      + a[0] + '</text>');
+  });
+
+  /* punto final con su cifra */
+  var xf = px(np-1), yf = py(max);
+  p.push('<circle class="cv-pt" cx="' + xf.toFixed(1) + '" cy="' + yf.toFixed(1) + '" r="4.5"/>');
+  var anclaF = xf > mL + w*0.75 ? 'end' : 'start';
+  p.push('<text class="cv-val" x="' + (xf + (anclaF === 'end' ? -8 : 8)).toFixed(1) + '" y="'
+    + (yf - 9).toFixed(1) + '" text-anchor="' + anclaF + '">' + n(max) + '</text>');
+
+  /* zonas de hover: marcan el punto y muestran el acumulado de ese día */
+  var anchoHit = np > 1 ? w/(np-1) : w;
+  acum.forEach(function(a,i){
+    var x = px(i), y = py(a[1]);
+    p.push('<rect class="cv-hit" x="' + (x - anchoHit/2).toFixed(1) + '" y="' + mT
+      + '" width="' + anchoHit.toFixed(1) + '" height="' + h + '">'
+      + '<title>' + a[0] + ' · ' + n(a[1]) + ' acumuladas</title></rect>');
+    p.push('<g class="cv-marca"><line x1="' + x.toFixed(1) + '" y1="' + mT + '" x2="' + x.toFixed(1)
+      + '" y2="' + (mT+h) + '"/><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.5"/></g>');
+  });
+
+  svg.innerHTML = p.join('');
+
+  var prom = np ? max/np : 0;
+  var ultimos = (!porHora && np >= 14) ? (acum[np-1][1] - acum[np-8][1]) / 7 : null;
+  document.getElementById('notaCurva').innerHTML = porHora
+    ? ('La línea suma las horas una sobre otra: al corte van <b>' + n(max)
+       + '</b> conexiones en el día, con un promedio de <b>' + n1(prom) + '</b> por hora de servicio.')
+    : ('La línea suma los días uno sobre otro: al cierre del periodo elegido van <b>' + n(max)
+       + '</b> conexiones, con un promedio de <b>' + n1(prom) + '</b> al día'
+       + (ultimos ? ', y <b>' + n1(ultimos) + '</b> en los últimos siete.' : '.'));
 }
 
 function pintarV(id, datos){
