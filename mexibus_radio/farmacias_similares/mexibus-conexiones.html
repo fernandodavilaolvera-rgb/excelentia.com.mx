@@ -64,8 +64,9 @@
   .kpi .var{font-size:10.5px; font-weight:700; color:var(--txt2); margin-top:.2rem;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
-  .grid2{display:grid; grid-template-columns:1.5fr 1fr; gap:.9rem; margin-top:.9rem; align-items:start}
-  .col-izq{display:flex; flex-direction:column; gap:.9rem}
+  .grid2{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:.9rem;
+    margin-top:.9rem; align-items:start}
+  .col-izq{display:flex; flex-direction:column; gap:.9rem; min-width:0}
   .card{background:#fff; border:1px solid var(--linea); border-radius:13px; overflow:hidden}
   .card h3{font-size:13px; font-weight:800; color:var(--txt); padding:.95rem 1.15rem;
     background:#dce8f7; border-bottom:1px solid var(--linea); display:flex;
@@ -145,6 +146,7 @@
     transform:rotate(-60deg); transform-origin:top right; display:block;
     width:126px; flex:none; text-align:right; overflow:hidden; text-overflow:ellipsis}
   .blab.mudo span{color:#c2c6d0}
+  .desliza{display:none}
   .nota-barras{font-size:11.5px; color:#8a90a0; margin-top:1.1rem; line-height:1.55; max-width:720px}
 
   /* tabla */
@@ -164,15 +166,39 @@
   .vacio{text-align:center; padding:2.2rem 1rem; color:#8a90a0; font-size:12.5px; line-height:1.6}
   .vacio b{display:block; color:#1a2035; font-size:13.5px; margin-bottom:.3rem}
 
-  @media (max-width:900px){ .grid2{grid-template-columns:1fr} }
+  @media (max-width:900px){ .grid2{grid-template-columns:minmax(0,1fr)} }
   @media (max-width:820px){ .kpis{grid-template-columns:repeat(3,1fr)} }
   @media (max-width:560px){ .kpis{grid-template-columns:repeat(2,1fr)} }
+
+  @media (max-width:700px){
+    /* las barras por día no caben en un celular: se deslizan de lado */
+    #dias{overflow-x:auto; overflow-y:hidden; padding-bottom:.35rem;
+      -webkit-overflow-scrolling:touch}
+    #dias .h-col{flex:0 0 16px}
+    #horas .h-col{min-width:0}
+    .h-lab{font-size:7.5px}
+    .card .body{padding:.9rem}
+    /* el SVG se achica con la pantalla, así que su texto sube de tamaño para seguir leyéndose */
+    .cv-eje{font-size:14px}
+    .cv-val{font-size:16px}
+    /* la tabla cabe sin deslizarse: se guardan las dos columnas que se pueden deducir */
+    .sec{display:none}
+    table{min-width:0; font-size:12px}
+    th, td{padding:.6rem .55rem}
+    .desliza{display:block; margin-top:.3rem; color:#a8aebd; font-weight:700; font-size:10.5px}
+    .bcol{height:170px}
+    .bgtit{flex-wrap:wrap}
+  }
+
   @media (max-width:600px){
     header{padding:.9rem 1rem}
     .cont{padding:0 1rem}
     .logo-zone img{height:34px}
     .logo-zone .div{display:none}
     .horas{height:120px}
+    .card h3{padding:.8rem .9rem; font-size:12.5px}
+    .filtros{gap:.4rem}
+    .kpi .num{font-size:22px}
   }
 
   /* ===== IMPRESIÓN / PDF ===== */
@@ -273,7 +299,7 @@
     <h3>Actividad por andén <span id="totalReg">—</span></h3>
     <div class="tabla-wrap">
       <table>
-        <thead><tr><th>Andén</th><th>Línea</th><th class="num">Conexiones</th><th class="num">% del total</th><th class="num">Promedio diario</th></tr></thead>
+        <thead><tr><th>Andén</th><th>Línea</th><th class="num">Conexiones</th><th class="num sec">% del total</th><th class="num sec">Promedio diario</th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -288,6 +314,7 @@
         <div class="ley"><i style="background:#dfe3ea"></i><b>Sin reportar</b></div>
       </div>
       <div class="barras-scroll"><div class="barras" id="barras"></div></div>
+      <p class="nota-barras"><span class="desliza">Desliza la gráfica de lado para ver los 34 andenes.</span></p>
     </div>
   </div>
 
@@ -302,7 +329,8 @@
 
 <script>
 /* ============================================================
-   
+   El corte por reloj lo
+   decide el servidor: nunca devuelve fechas ni horas futuras.
    ============================================================ */
 
 var RPC = 'https://rcotlydvsubvdapubnkx.supabase.co/rest/v1/rpc/mexibus_sim_reporte';
@@ -448,8 +476,9 @@ function pintar(d){
     var pone = (i % paso === 0 && ult - i >= Math.max(2, paso-1)) || i === ult;
     return { k: pone ? diaCorto(x[0]) : '', v: x[1], tip: diaCorto(x[0]) + ' · ' + n(x[1]) };
   }));
-  document.getElementById('notaDias').textContent =
-    nd ? ('El último día va parcial: llega hasta la hora del corte.') : '';
+  document.getElementById('notaDias').innerHTML =
+    nd ? ('El último día va parcial: llega hasta la hora del corte.'
+          + '<span class="desliza">Desliza la gráfica de lado para ver todos los días.</span>') : '';
 
   /* --- Curva de crecimiento (acumulado) --- */
   document.getElementById('curvaPeriodo').textContent = etiqueta;
@@ -488,8 +517,8 @@ function pintar(d){
         return '<tr><td><b>' + a[0] + '</b></td>'
           + '<td><span class="pil" style="background:' + colorLinea(a[1]) + '">' + a[1] + '</span></td>'
           + '<td class="num">' + n(a[2]) + '</td>'
-          + '<td class="num">' + (total ? (a[2]/total*100).toFixed(2) : '0.00') + '%</td>'
-          + '<td class="num">' + n1(nd ? a[2]/nd : 0) + '</td></tr>';
+          + '<td class="num sec">' + (total ? (a[2]/total*100).toFixed(2) : '0.00') + '%</td>'
+          + '<td class="num sec">' + n1(nd ? a[2]/nd : 0) + '</td></tr>';
       }).join('')
     : '<tr><td colspan="5" class="vacio">Sin datos en el periodo</td></tr>';
   document.getElementById('totalReg').textContent = activos + ' andenes con actividad';
