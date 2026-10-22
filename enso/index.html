@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ENSO OS · Hoy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --washi:#F6F3EE; --papel:#FFFFFF; --tinta:#1D1B19; --texto2:#5E584F; --texto3:#6F695F;
+  --borde:#E2DCD2; --columna:#EDE8DF; --indigo:#2E3F5C; --indigo-suave:#E3E8F0;
+  --bermellon:#8A2E1C; --bermellon-suave:#F7E4DF; --verde:#3F5B45; --verde-suave:#E4ECE4;
+  --serif:'Cormorant Garamond','Times New Roman',serif; --sans:'Zen Kaku Gothic New',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--washi);color:var(--tinta)}
+body{font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--indigo)}
+button,input,textarea,select{font:inherit}
+.etiqueta{font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--texto2)}
+h1,h2,.serif{font-family:var(--serif);font-weight:400;letter-spacing:.01em}
+[hidden]{display:none!important}
+
+/* Encabezado */
+header{background:var(--tinta);color:var(--washi);padding:18px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.marca{display:flex;align-items:center;gap:14px}
+.marca .nombre{font-family:var(--serif);font-size:26px;font-weight:500;letter-spacing:.08em;line-height:1.1}
+.marca .sub{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#C9C2B6;margin-top:3px}
+.marca .fecha{font-size:12px;color:#C9C2B6;margin-top:2px}
+nav{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+nav a,nav button{color:var(--washi);padding:10px 16px;border-radius:999px;text-decoration:none;font-size:11px;letter-spacing:.16em;text-transform:uppercase;background:none;border:none;cursor:pointer}
+nav a.activo{color:var(--tinta);background:var(--washi);font-weight:700}
+nav a:hover,nav button:hover{background:rgba(246,243,238,.12)}
+nav a.activo:hover{background:var(--washi)}
+.usuario{position:relative}
+.menu-usuario{position:absolute;right:0;top:44px;background:var(--papel);color:var(--tinta);border:1px solid var(--borde);border-radius:12px;padding:6px;min-width:220px;z-index:20;box-shadow:0 8px 24px rgba(29,27,25,.12)}
+.menu-usuario button{display:block;width:100%;text-align:left;color:var(--tinta);padding:10px 12px;border-radius:8px;text-transform:none;letter-spacing:0;font-size:14px}
+.menu-usuario button:hover{background:var(--washi)}
+.menu-usuario .quien{padding:10px 12px;font-size:12px;color:var(--texto2);border-bottom:1px solid var(--borde);margin-bottom:4px}
+
+main{max-width:1240px;margin:0 auto;padding:36px 24px 56px;display:flex;flex-direction:column;gap:32px}
+
+/* Acceso */
+.acceso{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.acceso-caja{background:var(--papel);border:1px solid var(--borde);border-radius:16px;padding:32px;max-width:420px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.acceso-caja .marca .nombre{color:var(--tinta)}
+.acceso-caja .marca .sub{color:var(--texto2)}
+.campo{display:flex;flex-direction:column;gap:6px}
+.campo input,.campo textarea{width:100%;border:1px solid var(--borde);border-radius:10px;padding:12px 14px;background:var(--papel);color:var(--tinta)}
+.campo input:focus,.campo textarea:focus{outline:2px solid var(--indigo-suave);border-color:var(--indigo)}
+.error-txt{color:var(--bermellon);font-size:13px;min-height:18px}
+
+.saludo{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.saludo h1{margin:4px 0 0;font-size:44px;font-weight:300;line-height:1.1}
+.saludo p{margin:6px 0 0;color:var(--texto2)}
+.estado{font-size:13px;color:var(--texto2);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* Indicadores compactos */
+.indicadores{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.ind{background:var(--papel);border:1px solid var(--borde);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit}
+.ind .num{font-family:var(--serif);font-size:38px;line-height:1;min-width:48px;text-align:center}
+.ind .txt{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ind .det{font-size:13px;color:var(--texto2)}
+.ind .det.alerta{color:var(--bermellon);font-weight:700}
+
+.dos-col{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.col-principal{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.col-lateral{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:14px}
+h2{margin:0;font-size:28px;line-height:1.15}
+.bloque-titulo{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.vacio{background:var(--papel);border:1px dashed var(--borde);border-radius:14px;padding:18px 22px;color:var(--texto2);font-size:14px;max-width:720px}
+
+.tarjeta{background:var(--papel);border:1px solid var(--borde);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:14px;max-width:720px;width:100%}
+.tarjeta-cab{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:flex-start}
+.tarjeta-cab .titulo{font-weight:700}
+.meta{font-size:13px;color:var(--texto2)}
+.pill{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:7px 12px;border-radius:999px;white-space:nowrap}
+.pill-alerta{background:var(--bermellon-suave);color:var(--bermellon)}
+.pill-indigo{background:var(--indigo-suave);color:var(--indigo)}
+.pill-neutra{background:var(--columna);color:var(--texto2)}
+.porque{margin:0;font-size:14px;color:var(--texto2)}
+.porque strong{color:var(--tinta)}
+.consulta{border-left:3px solid var(--borde);padding:2px 0 2px 12px;font-size:14px;color:var(--texto2)}
+.borrador{background:var(--washi);border-radius:10px;padding:16px 18px;font-size:14px;white-space:pre-line}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;background:var(--washi);border:1px solid var(--borde);border-radius:999px;padding:4px 10px;color:var(--texto2)}
+.chip.neg{background:var(--bermellon-suave);border-color:var(--bermellon-suave);color:var(--bermellon)}
+.acciones{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{min-height:44px;padding:0 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn:disabled{opacity:.55;cursor:wait}
+.btn-primario{border:none;background:var(--indigo);color:#fff}
+.btn-secundario{border:1px solid var(--indigo);background:transparent;color:var(--indigo)}
+.btn-terciario{border:1px solid #CFC7BA;background:transparent;color:var(--texto2);font-weight:400}
+.btn-peligro{border:1px solid var(--bermellon);background:transparent;color:var(--bermellon)}
+.btn-chico{min-height:34px;padding:0 12px;font-size:13px}
+.editor{display:flex;flex-direction:column;gap:10px}
+.editor textarea{min-height:220px;resize:vertical;line-height:1.5}
+.solo-lectura{font-size:13px;color:var(--texto2);background:var(--washi);border-radius:10px;padding:10px 14px}
+details.mas summary{cursor:pointer;font-size:13px;color:var(--indigo);font-weight:700}
+details.mas[open] summary{margin-bottom:8px}
+.historial{list-style:none;margin:0;padding:0;font-size:13px;color:var(--texto2);display:flex;flex-direction:column;gap:4px}
+
+/* Tareas */
+.filtros{display:flex;flex-wrap:wrap;gap:6px}
+.filtro{border:1px solid var(--borde);background:var(--papel);border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--texto2)}
+.filtro.activo{background:var(--tinta);color:var(--washi);border-color:var(--tinta)}
+.tareas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.tareas li{background:var(--papel);border:1px solid var(--borde);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;max-width:720px}
+.tarea-cab{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.tarea-cab strong{font-size:14px}
+.prio{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--texto2);white-space:nowrap}
+.prio.alta{color:var(--bermellon);font-weight:700}
+.tarea-acciones{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px}
+.folio-form{display:flex;gap:8px;flex-wrap:wrap}
+.folio-form input{border:1px solid var(--borde);border-radius:8px;padding:6px 10px;width:150px;text-transform:uppercase}
+.ver-mas{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;background:none;border:none;color:var(--indigo);cursor:pointer;padding:6px 0;text-align:left}
+
+/* Tablero de viajes */
+.tablero-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px}
+.tablero{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:14px}
+.columna{background:var(--columna);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:220px}
+.columna.viaje{background:var(--indigo-suave)}
+.columna.viaje .etiqueta{color:var(--indigo)}
+.columna .etiqueta{font-weight:700}
+.viaje-card{background:var(--papel);border-radius:10px;padding:12px;font-size:14px;display:flex;flex-direction:column;gap:3px}
+.viaje-card .folio{font-size:11px;letter-spacing:.12em;font-weight:700}
+.viaje-card .folio.pendiente{color:var(--bermellon)}
+.viaje-card .socio{font-weight:500}
+.viaje-card .det{font-size:13px;color:var(--texto2)}
+.marca-viaje{align-self:flex-start;margin-top:4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--bermellon-suave);color:var(--bermellon);font-weight:700}
+
+footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padding-top:16px}
+
+/* Avisos */
+.aviso{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tinta);color:var(--washi);padding:12px 20px;border-radius:12px;font-size:14px;z-index:50;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(29,27,25,.25)}
+.aviso.error{background:var(--bermellon)}
+.cargando{color:var(--texto2);font-size:14px;padding:40px 0;text-align:center}
+
+/* Diálogo */
+.velo{position:fixed;inset:0;background:rgba(29,27,25,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:40}
+.dialogo{background:var(--papel);border-radius:16px;padding:24px;max-width:460px;width:100%;display:flex;flex-direction:column;gap:14px}
+.dialogo h3{margin:0;font-family:var(--serif);font-weight:400;font-size:26px}
+
+/* Móvil */
+@media (max-width:600px){
+  header{flex-direction:column;align-items:flex-start;padding:16px}
+  nav{width:100%}
+  nav a,nav button{padding:9px 12px;font-size:10px}
+  .menu-usuario{left:0;right:auto}
+  main{padding:24px 16px 40px;gap:26px}
+  .saludo h1{font-size:34px}
+  .indicadores{grid-template-columns:1fr}
+  .tarjeta{padding:16px}
+  h2{font-size:24px}
+  .acciones .btn{flex:1 1 100%}
+  .acceso-caja{padding:24px}
+}
+
+/* Impresión */
+@page{size:Letter;margin:13mm}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-size:12px;background:var(--washi)}
+  .no-print,.acciones,.tarea-acciones,.editor,.filtros,.ver-mas,nav,.aviso{display:none!important}
+  a[href]:after{content:none!important}
+  main,section,.dos-col,.col-principal,.col-lateral,.tablero-scroll{break-inside:auto}
+  .ind,.tarjeta,.tareas li,.viaje-card,.pill,.vacio{break-inside:avoid}
+  h1,h2,h3,h4,.bloque-titulo,.tarjeta-cab{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  main{padding:0;max-width:none}
+  .tablero-scroll{overflow:visible}
+  .tablero{grid-auto-flow:row;grid-template-columns:repeat(3,1fr)}
+  .tareas li{max-width:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Acceso -->
+<div id="pantalla-acceso" class="acceso" hidden>
+  <form class="acceso-caja" id="form-acceso" autocomplete="on">
+    <div class="marca">
+      <svg width="38" height="38" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 3a14 14 0 1 1-12.6 7.9" fill="none" stroke="#1D1B19" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <div>
+        <div class="nombre">ENSO OS</div>
+        <div class="sub">ENSO Japan · DMC B2B</div>
+      </div>
+    </div>
+    <div class="campo">
+      <label class="etiqueta" for="acc-email">Correo</label>
+      <input id="acc-email" type="email" name="email" autocomplete="username" required>
+    </div>
+    <div class="campo">
+      <label class="etiqueta" for="acc-pass">Contraseña</label>
+      <input id="acc-pass" type="password" name="password" autocomplete="current-password" required>
+    </div>
+    <div class="error-txt" id="acc-error" role="alert"></div>
+    <button class="btn btn-primario" type="submit" id="acc-btn">Entrar</button>
+  </form>
+</div>
+
+<!-- Aplicación -->
+<div id="pantalla-app" hidden>
+  <header>
+    <div class="marca">
+      <svg width="38" height="38" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 3a14 14 0 1 1-12.6 7.9" fill="none" stroke="#F6F3EE" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <div>
+        <div class="nombre">ENSO OS</div>
+        <div class="sub">ENSO Japan · DMC B2B</div>
+        <div class="fecha" id="reloj"></div>
+      </div>
+    </div>
+    <nav aria-label="Secciones">
+      <a href="#hoy" class="activo">Hoy</a>
+      <a href="#t-atencion">Respuestas</a>
+      <a href="#t-acerc">Acercamientos</a>
+      <a href="#t-tareas">Pendientes</a>
+      <a href="#t-viajes">Viajes</a>
+      <span class="usuario no-print">
+        <button type="button" id="btn-usuario" aria-haspopup="true" aria-expanded="false">Mi cuenta</button>
+        <div class="menu-usuario" id="menu-usuario" hidden>
+          <div class="quien" id="quien"></div>
+          <button type="button" id="btn-recargar">Actualizar datos</button>
+          <button type="button" id="btn-contrasena">Cambiar contraseña</button>
+          <button type="button" id="btn-imprimir">Imprimir</button>
+          <button type="button" id="btn-salir">Salir</button>
+        </div>
+      </span>
+    </nav>
+  </header>
+
+  <main id="hoy">
+    <div class="cargando" id="cargando">Cargando la memoria…</div>
+    <div id="contenido" hidden>
+      <div class="saludo">
+        <div>
+          <div class="etiqueta">Vista del día</div>
+          <h1 id="saludo-h1">Hola</h1>
+          <p>Lo que necesita una decisión hoy aparece primero; lo demás sigue su curso.</p>
+        </div>
+        <div class="estado" id="estado-memoria"></div>
+      </div>
+
+      <section class="indicadores" aria-label="Indicadores" id="indicadores" style="margin-top:32px"></section>
+
+      <div class="dos-col" style="margin-top:32px">
+        <div class="col-principal">
+          <div class="bloque-titulo">
+            <div class="etiqueta">Atención</div>
+            <h2 id="t-atencion">Respuestas por revisar</h2>
+          </div>
+          <div id="lista-atencion"></div>
+
+          <div class="bloque-titulo" style="margin-top:22px">
+            <div class="etiqueta">Motor comercial</div>
+            <h2 id="t-acerc">Acercamientos por aprobar</h2>
+          </div>
+          <div id="lista-acerc"></div>
+        </div>
+
+        <aside class="col-lateral" aria-labelledby="t-tareas">
+          <div class="bloque-titulo">
+            <div class="etiqueta">Operación</div>
+            <h2 id="t-tareas">Pendientes del equipo</h2>
+          </div>
+          <div class="filtros no-print" id="filtros-tareas"></div>
+          <ul class="tareas" id="lista-tareas"></ul>
+          <button class="ver-mas no-print" id="ver-mas-tareas" type="button" hidden></button>
+        </aside>
+      </div>
+
+      <section aria-labelledby="t-viajes" style="display:flex;flex-direction:column;gap:14px;margin-top:32px">
+        <div class="bloque-titulo">
+          <div class="etiqueta">Memoria</div>
+          <h2 id="t-viajes">Viajes por etapa</h2>
+        </div>
+        <div class="tablero-scroll"><div class="tablero" id="tablero"></div></div>
+      </section>
+
+      <footer style="margin-top:32px">ENSO OS · datos en vivo de la memoria empresarial. Ningún correo sale sin aprobación humana.</footer>
+    </div>
+  </main>
+</div>
+
+<div id="velo" class="velo" hidden></div>
+<div id="aviso" class="aviso" role="status" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'https://n8n.excelentia.com.mx/webhook/enso-os';
+  var CLAVE = 'enso_os_sesion';
+  var estado = { token: null, datos: null, filtroRol: 'todas', tareasTodas: false };
+
+  // ---------- utilidades ----------
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function leerSesion() { try { return localStorage.getItem(CLAVE); } catch (e) { return null; } }
+  function guardarSesion(t) { try { if (t) localStorage.setItem(CLAVE, t); else localStorage.removeItem(CLAVE); } catch (e) {} }
+  function aviso(txt, error) {
+    var a = $('aviso'); a.textContent = txt; a.className = 'aviso' + (error ? ' error' : ''); a.hidden = false;
+    clearTimeout(aviso._t); aviso._t = setTimeout(function () { a.hidden = true; }, 4200);
+  }
+  var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  function fechaCorta(iso) {
+    if (!iso) return '';
+    var p = String(iso).slice(0, 10).split('-');
+    return parseInt(p[2], 10) + ' ' + MESES[parseInt(p[1], 10) - 1] + (p[0] !== String(new Date().getFullYear()) ? ' ' + p[0] : '');
+  }
+  function hace(iso) {
+    if (!iso) return '';
+    var min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (min < 1) return 'hace un momento';
+    if (min < 60) return 'hace ' + min + ' min';
+    var h = Math.round(min / 60);
+    if (h < 24) return 'hace ' + h + (h === 1 ? ' hora' : ' horas');
+    var d = Math.round(h / 24);
+    return 'hace ' + d + (d === 1 ? ' día' : ' días');
+  }
+  function limpiarNombreViaje(n, folio) {
+    var s = String(n || '');
+    s = s.replace(/【[^】]*】/g, '').replace(/\b(EJ|ES)-\d{2}-[A-Z]?\d{2,4}\b/gi, '');
+    if (folio) s = s.replace(folio, '');
+    return s.replace(/^[\s·\-|]+|[\s·\-|]+$/g, '').replace(/\s{2,}/g, ' ') || 'Viaje';
+  }
+
+  async function api(cuerpo) {
+    var r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(cuerpo) });
+    if (!r.ok) throw new Error('No se pudo conectar (' + r.status + ')');
+    var j = await r.json();
+    if (j && j.ok === false && j.error === 'sesion') { cerrarSesion('Tu sesión terminó; vuelve a entrar.'); throw new Error('sesion'); }
+    return j;
+  }
+  async function accion(cuerpo, boton) {
+    if (boton) boton.disabled = true;
+    try {
+      cuerpo.token = estado.token;
+      var j = await api(cuerpo);
+      if (!j.ok) { aviso(j.error || 'No se pudo completar', true); return false; }
+      aviso(j.mensaje || 'Listo');
+      await cargar(true);
+      return true;
+    } catch (e) {
+      if (e.message !== 'sesion') aviso(e.message || 'Error de conexión', true);
+      return false;
+    } finally { if (boton) boton.disabled = false; }
+  }
+
+  // ---------- acceso ----------
+  function mostrarAcceso(msg) {
+    $('pantalla-app').hidden = true; $('pantalla-acceso').hidden = false;
+    $('acc-error').textContent = msg || '';
+    setTimeout(function () { $('acc-email').focus(); }, 50);
+  }
+  function cerrarSesion(msg) { estado.token = null; estado.datos = null; guardarSesion(null); mostrarAcceso(msg); }
+
+  $('form-acceso').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    var btn = $('acc-btn'); btn.disabled = true; $('acc-error').textContent = '';
+    try {
+      var j = await api({ accion: 'login', email: $('acc-email').value.trim(), contrasena: $('acc-pass').value });
+      if (!j.ok) { $('acc-error').textContent = j.error || 'No se pudo entrar'; return; }
+      estado.token = j.token; guardarSesion(j.token); $('acc-pass').value = '';
+      iniciarApp();
+    } catch (e) { $('acc-error').textContent = 'No se pudo conectar con el sistema; intenta de nuevo.'; }
+    finally { btn.disabled = false; }
+  });
+
+  function iniciarApp() {
+    $('pantalla-acceso').hidden = true; $('pantalla-app').hidden = false;
+    cargar(false);
+  }
+
+  // ---------- carga ----------
+  async function cargar(silencioso) {
+    if (!silencioso) { $('cargando').hidden = false; $('contenido').hidden = true; }
+    try {
+      var j = await api({ accion: 'hoy', token: estado.token });
+      if (!j.ok) { aviso(j.error || 'No se pudo cargar', true); return; }
+      estado.datos = j.datos; pintar();
+      $('cargando').hidden = true; $('contenido').hidden = false;
+    } catch (e) {
+      if (e.message !== 'sesion') { $('cargando').textContent = 'No se pudo cargar la memoria. ' + (e.message || ''); }
+    }
+  }
+
+  // ---------- pintar ----------
+  function pintar() {
+    var d = estado.datos, u = d.usuario || {};
+    var h = new Date().getHours();
+    var saludo = h < 12 ? 'Buenos días' : (h < 19 ? 'Buenas tardes' : 'Buenas noches');
+    $('saludo-h1').textContent = saludo + ', ' + String(u.nombre || '').split(' ')[0];
+    $('quien').textContent = (u.nombre || '') + ' · ' + (u.rol_nombre || u.rol || '');
+    var i = d.indicadores || {};
+    $('estado-memoria').innerHTML = (i.correos_sin_procesar ? '<span>' + i.correos_sin_procesar + ' correos por leer</span> · ' : '<span>Memoria al día</span> · ') +
+      '<span>última lectura de correo ' + esc(hace(d.ultima_lectura)) + '</span>';
+    pintarIndicadores(d); pintarAtencion(d); pintarAcercamientos(d); pintarTareas(d); pintarTablero(d);
+  }
+
+  function indicador(num, etiqueta, det, alerta, ancla) {
+    return '<a class="ind" href="#' + ancla + '"><div class="num">' + esc(num) + '</div><div class="txt"><div class="etiqueta">' + esc(etiqueta) +
+      '</div><div class="det' + (alerta ? ' alerta' : '') + '">' + esc(det) + '</div></div></a>';
+  }
+  function pintarIndicadores(d) {
+    var i = d.indicadores || {}, c = d.cupos || {}, m = d.motor || {};
+    var html = '';
+    html += indicador(i.respuestas || 0, 'Respuestas por revisar', i.respuestas_escaladas ? i.respuestas_escaladas + (i.respuestas_escaladas === 1 ? ' requiere dirección' : ' requieren dirección') : 'Ninguna escalada', !!i.respuestas_escaladas, 't-atencion');
+    html += indicador(i.acercamientos || 0, 'Acercamientos por aprobar', m.activo ? (c.primeros_mes || 0) + ' de ' + (c.tope_primeros || 30) + ' primeros correos este mes' : 'Motor comercial apagado', false, 't-acerc');
+    var partes = []; if (i.en_viaje) partes.push(i.en_viaje + ' en viaje'); if (i.en_operacion) partes.push(i.en_operacion + ' en operación'); if (i.folio_pendiente) partes.push(i.folio_pendiente + ' con folio pendiente');
+    html += indicador(i.viajes_activos || 0, 'Viajes activos', partes.join(' · ') || 'Sin viajes en curso', false, 't-viajes');
+    html += indicador(i.tareas || 0, 'Pendientes abiertos', i.tareas_alta ? i.tareas_alta + ' de prioridad alta' : 'Ninguno urgente', !!i.tareas_alta, 't-tareas');
+    $('indicadores').innerHTML = html;
+  }
+
+  function pintarAtencion(d) {
+    var lista = d.atencion || [];
+    if (!lista.length) { $('lista-atencion').innerHTML = '<div class="vacio">No hay respuestas por revisar. Cuando llegue una consulta nueva a info@, su borrador aparecerá aquí y dentro del mismo hilo en Gmail.</div>'; return; }
+    $('lista-atencion').innerHTML = lista.map(function (b) {
+      var jap = b.estado === 'escalado_japones';
+      var quien = b.de_nombre ? b.de_nombre + ' (' + b.de_email + ')' : b.de_email;
+      var faltan = (b.datos_faltantes || []).join(' · ');
+      var fuentes = (b.fuentes || []).map(function (f) { return String(f).split(' · ')[0].replace(/\.(pdf|docx|pptx)$/i, ''); });
+      fuentes = fuentes.filter(function (f, k) { return fuentes.indexOf(f) === k; }).join(' · ');
+      return '<article class="tarjeta" data-id="' + esc(b.id) + '">' +
+        '<div class="tarjeta-cab"><div><div class="titulo">' + esc(b.consulta_asunto || '(sin asunto)') + '</div>' +
+        '<div class="meta">' + esc(quien) + ' · llegó ' + esc(hace(b.consulta_fecha)) + (b.folio ? ' · ' + esc(b.folio) : '') + '</div></div>' +
+        (b.escalar ? '<span class="pill pill-alerta">' + (jap ? 'En japonés' : 'Requiere dirección') + '</span>' : '<span class="pill pill-indigo">Lista para revisar</span>') + '</div>' +
+        (b.consulta_resumen ? '<div class="consulta">' + esc(b.consulta_resumen) + '</div>' : '') +
+        (b.motivo_escalar ? '<p class="porque"><strong>Por qué escala:</strong> ' + esc(b.motivo_escalar) + '</p>' : '') +
+        (b.cuerpo ? '<div class="borrador">' + esc(b.cuerpo) + '</div>' : '<div class="solo-lectura">El sistema no redacta respuestas en japonés; la atiende el equipo directamente.</div>') +
+        ((faltan || fuentes) ? '<div class="meta">' + (faltan ? 'Datos que pide: ' + esc(faltan) : '') + (faltan && fuentes ? ' &nbsp;·&nbsp; ' : '') + (fuentes ? 'Se apoyó en: ' + esc(fuentes) : '') + '</div>' : '') +
+        '<div class="acciones">' +
+        (b.gmail_url ? '<a class="btn btn-primario" href="' + esc(b.gmail_url) + '" target="_blank" rel="noopener">Abrir en Gmail para enviar</a>' : '') +
+        '<button type="button" class="btn btn-secundario" data-acc="borrador-enviado">Ya la envié</button>' +
+        '<button type="button" class="btn btn-terciario" data-acc="borrador-descartar">Descartar</button></div>' +
+        (b.en_gmail ? '' : (b.cuerpo ? '<div class="meta">Este borrador se preparó antes de encender los borradores en Gmail; copia el texto si lo vas a usar.</div>' : '')) +
+        '</article>';
+    }).join('');
+  }
+
+  function pintarAcercamientos(d) {
+    var lista = d.acercamientos || [], u = d.usuario || {}, m = d.motor || {};
+    if (!lista.length) {
+      $('lista-acerc').innerHTML = '<div class="vacio">' + (m.activo ? 'No hay acercamientos por aprobar.' : 'El motor comercial está apagado. Cuando se encienda con la primera fuente, aquí aparecerá cada acercamiento con su cuenta, la razón de su calificación, las señales y el borrador para aprobar, editar o rechazar.') + '</div>';
+      return;
+    }
+    var TIPOS = { primer: 'Primer acercamiento', seguimiento_1: 'Seguimiento 1', seguimiento_2: 'Seguimiento 2' };
+    $('lista-acerc').innerHTML = lista.map(function (a) {
+      var c = a.cuenta || {}, ct = a.contacto || {}, q = a.calificacion || {};
+      var pos = (q.senales_positivas || []).map(function (s) { return '<span class="chip">' + esc(s) + '</span>'; }).join('');
+      var neg = (q.senales_descarte || []).map(function (s) { return '<span class="chip neg">' + esc(s) + '</span>'; }).join('');
+      var hist = (a.historial || []).map(function (h) { return '<li>' + esc(TIPOS[h.tipo] || h.tipo) + ' · ' + esc(h.estado) + (h.enviado_en ? ' · enviado ' + esc(fechaCorta(h.enviado_en)) : '') + ' · ' + esc(h.asunto || '') + '</li>'; }).join('');
+      var relacion = a.correos_previos ? a.correos_previos + ' conversaciones previas en la memoria' : 'Sin relación previa en la memoria';
+      var edit = u.puede_aprobar
+        ? '<div class="editor"><div class="campo"><label class="etiqueta">Asunto</label><input type="text" data-campo="asunto" value="' + esc(a.asunto) + '"></div>' +
+          '<div class="campo"><label class="etiqueta">Correo</label><textarea data-campo="cuerpo">' + esc(a.cuerpo) + '</textarea></div></div>' +
+          '<div class="acciones"><button type="button" class="btn btn-primario" data-acc="aprobar">Aprobar</button>' +
+          '<button type="button" class="btn btn-peligro" data-acc="rechazar">Rechazar</button></div>'
+        : '<div class="borrador"><strong>' + esc(a.asunto) + '</strong>\n\n' + esc(a.cuerpo) + '</div><div class="solo-lectura">La aprobación la hace dirección.</div>';
+      return '<article class="tarjeta" data-id="' + esc(a.id) + '">' +
+        '<div class="tarjeta-cab"><div><div class="titulo">' + esc(c.nombre) + (ct.nombre ? ' · ' + esc(ct.nombre) : '') + '</div>' +
+        '<div class="meta">' + esc(TIPOS[a.tipo] || a.tipo) + ' · para ' + esc(a.para_email || '') + (c.pais ? ' · ' + esc(c.pais) : '') + (c.red ? ' · red ' + esc(c.red) : '') + '</div></div>' +
+        '<span class="pill ' + (q.prioridad === 'A' ? 'pill-alerta' : 'pill-indigo') + '">Prioridad ' + esc(q.prioridad || '—') + (q.puntaje != null ? ' · ' + esc(q.puntaje) : '') + '</span></div>' +
+        (q.explicacion ? '<p class="porque"><strong>Por qué ' + esc(q.prioridad || '') + ':</strong> ' + esc(q.explicacion) + '</p>' : '') +
+        ((pos || neg) ? '<div class="chips">' + pos + neg + '</div>' : '') +
+        '<details class="mas"><summary>Relación e historial</summary><div class="meta">' + esc(relacion) + (c.sitio ? ' · <a href="' + esc(c.sitio) + '" target="_blank" rel="noopener">sitio</a>' : '') + (c.fuente ? ' · fuente: ' + esc(c.fuente) : '') + '</div>' +
+        (c.descripcion ? '<div class="meta">' + esc(c.descripcion) + '</div>' : '') +
+        (hist ? '<ul class="historial">' + hist + '</ul>' : '<div class="meta">Sin acercamientos previos.</div>') + '</details>' +
+        edit + '</article>';
+    }).join('');
+  }
+
+  var ROLES = { operaciones: 'Operaciones', direccion: 'Dirección', aprobador: 'Aprobación', excelentia: 'ExcelentIA', sin_rol: 'Sin rol' };
+  function pintarTareas(d) {
+    var todas = d.tareas || [], por = d.tareas_por_rol || {};
+    var f = '<button type="button" class="filtro' + (estado.filtroRol === 'todas' ? ' activo' : '') + '" data-rol="todas">Todas · ' + todas.length + '</button>';
+    Object.keys(por).forEach(function (r) { f += '<button type="button" class="filtro' + (estado.filtroRol === r ? ' activo' : '') + '" data-rol="' + esc(r) + '">' + esc(ROLES[r] || r) + ' · ' + por[r] + '</button>'; });
+    $('filtros-tareas').innerHTML = f;
+    var lista = todas.filter(function (t) { return estado.filtroRol === 'todas' || (t.rol || 'sin_rol') === estado.filtroRol; });
+    var visibles = estado.tareasTodas ? lista : lista.slice(0, 8);
+    if (!lista.length) { $('lista-tareas').innerHTML = '<li class="meta">Sin pendientes.</li>'; $('ver-mas-tareas').hidden = true; return; }
+    $('lista-tareas').innerHTML = visibles.map(function (t) {
+      var ref = t.folio || (t.entidad === 'oportunidad' && t.viaje ? 'Folio pendiente · ' + limpiarNombreViaje(t.viaje) : '') || (t.mensaje_asunto ? 'Correo: ' + t.mensaje_asunto : '');
+      return '<li data-id="' + esc(t.id) + '"><div class="tarea-cab"><strong>' + esc(t.titulo) + '</strong><span class="prio' + (t.prioridad === 'alta' ? ' alta' : '') + '">' + esc(t.prioridad || '') + '</span></div>' +
+        '<div class="meta">' + esc(ROLES[t.rol] || t.rol || '') + ' · ' + esc(hace(t.creado_en)) + (ref ? ' · ' + esc(ref) : '') + '</div>' +
+        (t.detalle ? '<details class="mas"><summary>Detalle</summary><div class="meta">' + esc(t.detalle) + '</div></details>' : '') +
+        '<div class="tarea-acciones">' +
+        (t.asignar_folio ? '<form class="folio-form" data-opp="' + esc(t.entidad_id) + '"><input type="text" placeholder="EJ-26-045" aria-label="Folio ENSO" required><button class="btn btn-primario btn-chico" type="submit">Asignar folio</button></form>' : '') +
+        '<button type="button" class="btn btn-secundario btn-chico" data-acc="tarea-resuelta">Resuelta</button>' +
+        '<button type="button" class="btn btn-terciario btn-chico" data-acc="tarea-descartada">Descartar</button></div></li>';
+    }).join('');
+    var b = $('ver-mas-tareas');
+    if (lista.length > 8) { b.hidden = false; b.textContent = estado.tareasTodas ? 'Ver menos' : 'Ver los ' + lista.length + ' pendientes'; } else b.hidden = true;
+  }
+
+  function pintarTablero(d) {
+    var etapas = d.etapas || [], viajes = d.viajes || [];
+    var html = etapas.map(function (e) {
+      var vs = viajes.filter(function (v) { return v.estado === e.codigo; });
+      if (!vs.length) return '';
+      return '<div class="columna' + (e.codigo === 'en_viaje' ? ' viaje' : '') + '"><div class="etiqueta">' + esc(e.nombre) + ' · ' + vs.length + '</div>' +
+        vs.map(function (v) {
+          var socio = v.cuenta ? (v.cuenta_tipo === 'particular' ? 'Cliente directo · ' + v.cuenta : v.cuenta) : (v.contacto || 'Sin agencia ligada');
+          var fecha = v.fecha_llegada ? fechaCorta(v.fecha_llegada) + (v.fecha_salida ? ' – ' + fechaCorta(v.fecha_salida) : '') : '';
+          var det = limpiarNombreViaje(v.nombre, v.folio) + (fecha ? ' · ' + fecha : '') + (v.pax ? ' · ' + v.pax + ' pax' : '');
+          var marca = v.validacion === 'por_confirmar' ? 'Por confirmar' : (v.validacion === 'no_resuelta' ? 'Referencia no resuelta' : '');
+          return '<div class="viaje-card"><span class="folio' + (v.folio ? '' : ' pendiente') + '">' + esc(v.folio || 'Folio pendiente') + '</span>' +
+            '<span class="socio">' + esc(socio) + (v.red && v.cuenta_tipo !== 'red' ? ' <span class="det">· ' + esc(v.red) + '</span>' : '') + '</span>' +
+            '<span class="det">' + esc(det) + '</span>' + (marca ? '<span class="marca-viaje">' + esc(marca) + '</span>' : '') + '</div>';
+        }).join('') + '</div>';
+    }).join('');
+    $('tablero').innerHTML = html || '<div class="vacio">Sin viajes activos.</div>';
+  }
+
+  // ---------- eventos ----------
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-acc]');
+    if (b) {
+      var acc = b.getAttribute('data-acc');
+      var tarjeta = b.closest('[data-id]'); var id = tarjeta && tarjeta.getAttribute('data-id');
+      if (acc === 'borrador-enviado') accion({ accion: 'borrador', id: id, estado: 'enviado' }, b);
+      else if (acc === 'borrador-descartar') confirmar('Descartar respuesta', 'El borrador se quita de la lista. Si ya existe en Gmail, ahí sigue hasta que lo borres.', 'Descartar', function () { accion({ accion: 'borrador', id: id, estado: 'descartado' }, b); });
+      else if (acc === 'aprobar') {
+        var asunto = tarjeta.querySelector('[data-campo="asunto"]').value, cuerpo = tarjeta.querySelector('[data-campo="cuerpo"]').value;
+        confirmar('Aprobar acercamiento', 'Queda aprobado para envío desde os@ en horario hábil del destinatario y dentro del calentamiento.', 'Aprobar', function () { accion({ accion: 'aprobar_acercamiento', id: id, asunto: asunto, cuerpo: cuerpo }, b); });
+      }
+      else if (acc === 'rechazar') pedirTexto('Rechazar acercamiento', 'Motivo del rechazo (queda en la memoria):', 'Rechazar', function (motivo) { accion({ accion: 'rechazar_acercamiento', id: id, motivo: motivo }, b); });
+      else if (acc === 'tarea-resuelta') accion({ accion: 'tarea', id: id, estado: 'resuelta' }, b);
+      else if (acc === 'tarea-descartada') accion({ accion: 'tarea', id: id, estado: 'descartada' }, b);
+      return;
+    }
+    var fr = ev.target.closest('.filtro');
+    if (fr) { estado.filtroRol = fr.getAttribute('data-rol'); estado.tareasTodas = false; pintarTareas(estado.datos); return; }
+    if (!ev.target.closest('.usuario')) cerrarMenu();
+  });
+  document.addEventListener('submit', function (ev) {
+    var f = ev.target.closest('.folio-form'); if (!f) return;
+    ev.preventDefault();
+    accion({ accion: 'asignar_folio', oportunidad_id: f.getAttribute('data-opp'), folio: f.querySelector('input').value }, f.querySelector('button'));
+  });
+  $('ver-mas-tareas').addEventListener('click', function () { estado.tareasTodas = !estado.tareasTodas; pintarTareas(estado.datos); });
+
+  function cerrarMenu() { $('menu-usuario').hidden = true; $('btn-usuario').setAttribute('aria-expanded', 'false'); }
+  $('btn-usuario').addEventListener('click', function () { var m = $('menu-usuario'); m.hidden = !m.hidden; $('btn-usuario').setAttribute('aria-expanded', String(!m.hidden)); });
+  $('btn-recargar').addEventListener('click', function () { cerrarMenu(); cargar(true).then(function () { aviso('Datos actualizados'); }); });
+  $('btn-imprimir').addEventListener('click', function () { cerrarMenu(); window.print(); });
+  $('btn-salir').addEventListener('click', async function () { cerrarMenu(); try { await api({ accion: 'salir', token: estado.token }); } catch (e) {} cerrarSesion(''); });
+  $('btn-contrasena').addEventListener('click', function () {
+    cerrarMenu();
+    abrirDialogo('<h3>Cambiar contraseña</h3>' +
+      '<div class="campo"><label class="etiqueta" for="pw-a">Contraseña actual</label><input id="pw-a" type="password" autocomplete="current-password"></div>' +
+      '<div class="campo"><label class="etiqueta" for="pw-n">Nueva contraseña (mínimo 10 caracteres)</label><input id="pw-n" type="password" autocomplete="new-password"></div>' +
+      '<div class="acciones"><button type="button" class="btn btn-primario" id="dlg-ok">Guardar</button><button type="button" class="btn btn-terciario" id="dlg-no">Cancelar</button></div>',
+      function () {
+        $('dlg-ok').addEventListener('click', async function () {
+          var ok = await accion({ accion: 'cambiar_contrasena', actual: $('pw-a').value, nueva: $('pw-n').value }, $('dlg-ok'));
+          if (ok) cerrarDialogo();
+        });
+      });
+  });
+
+  // ---------- diálogos ----------
+  function abrirDialogo(html, alAbrir) {
+    var v = $('velo'); v.innerHTML = '<div class="dialogo" role="dialog" aria-modal="true">' + html + '</div>'; v.hidden = false;
+    var no = $('dlg-no'); if (no) no.addEventListener('click', cerrarDialogo);
+    if (alAbrir) alAbrir();
+    var primero = v.querySelector('input,textarea,button'); if (primero) primero.focus();
+  }
+  function cerrarDialogo() { $('velo').hidden = true; $('velo').innerHTML = ''; }
+  $('velo').addEventListener('click', function (ev) { if (ev.target === $('velo')) cerrarDialogo(); });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { cerrarDialogo(); cerrarMenu(); } });
+  function confirmar(titulo, texto, boton, alAceptar) {
+    abrirDialogo('<h3>' + esc(titulo) + '</h3><p class="porque">' + esc(texto) + '</p><div class="acciones"><button type="button" class="btn btn-primario" id="dlg-ok">' + esc(boton) + '</button><button type="button" class="btn btn-terciario" id="dlg-no">Cancelar</button></div>',
+      function () { $('dlg-ok').addEventListener('click', function () { cerrarDialogo(); alAceptar(); }); });
+  }
+  function pedirTexto(titulo, etiqueta, boton, alAceptar) {
+    abrirDialogo('<h3>' + esc(titulo) + '</h3><div class="campo"><label class="etiqueta" for="dlg-txt">' + esc(etiqueta) + '</label><textarea id="dlg-txt" rows="3"></textarea></div>' +
+      '<div class="acciones"><button type="button" class="btn btn-peligro" id="dlg-ok">' + esc(boton) + '</button><button type="button" class="btn btn-terciario" id="dlg-no">Cancelar</button></div>',
+      function () { $('dlg-ok').addEventListener('click', function () { var t = $('dlg-txt').value.trim(); if (!t) { $('dlg-txt').focus(); return; } cerrarDialogo(); alAceptar(t); }); });
+  }
+
+  // ---------- reloj ----------
+  function reloj() {
+    try {
+      var s = new Intl.DateTimeFormat('es-MX', { timeZone: 'Asia/Tokyo', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+      $('reloj').textContent = s.charAt(0).toUpperCase() + s.slice(1) + ' en Tokio';
+    } catch (e) {}
+  }
+  reloj(); setInterval(reloj, 30000);
+  setInterval(function () { if (estado.token && !document.hidden && $('velo').hidden) cargar(true); }, 5 * 60000);
+
+  // ---------- arranque ----------
+  estado.token = leerSesion();
+  if (estado.token) iniciarApp(); else mostrarAcceso('');
+})();
+</script>
+</body>
+</html>
