@@ -450,7 +450,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 18 (16-oct-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 19 (23-oct-2026)</footer>
 </div>
 
 <script>
@@ -610,6 +610,23 @@ function centavos(costo) {
   return mejor == null ? null : { costo: parseFloat(mejor), venta: M.ventaFlete[mejor] };
 }
 
+/* v19 · maniobra probable: medido a ciegas contra septiembre (20 → 26 de 36 sin ninguna de más).
+   Con historial del destino y la unidad, basta que 1 de cada 5 viajes la haya llevado; si la unidad es nueva
+   para ese destino, se usa el destino en cualquier unidad (2 viajes o más). */
+const UMBRAL_MAN = 0.2;
+function probManiobra(dest, uni, t) {
+  if (t) {
+    if (!(t.pman >= UMBRAL_MAN)) return null;
+    const n = t.n || 0, k = Math.max(1, Math.round((t.pman || 0) * n));
+    return { man: t.man || MAN_COSTO[uni] || null, n, k, todas: false };
+  }
+  let n = 0, k = 0;
+  Object.keys(M.tarifario).forEach(key => { if (key.slice(0, dest.length + 2) !== dest + '||') return;
+    const x = M.tarifario[key]; n += x.n || 0; k += (x.pman || 0) * (x.n || 0); });
+  if (n < 2 || k / n < UMBRAL_MAN || MAN_COSTO[uni] == null) return null;
+  return { man: MAN_COSTO[uni], n, k: Math.max(1, Math.round(k)), todas: true };
+}
+
 function procesarBase(lista) {
   const out = lista.map(b => {
     const dest = norm(b.destino), uni = norm(b.unidad);
@@ -663,9 +680,13 @@ function procesarBase(lista) {
     if (esSi(b.manBase) || b.manBase === 1 || b.manBase === '1' || manRep) {
       man = MAN_COSTO[uni] != null ? MAN_COSTO[uni] : (t && t.man) || null; srcM = manRep && !(b.manBase == 1 || esSi(b.manBase)) ? 'maniobra de reparto en la plataforma' : 'la plataforma marca maniobra';
       if (man == null) { sM = 'a'; srcM = 'la plataforma marca maniobra; captura el monto'; }
-    } else if (t && t.pman >= 0.5 && t.man) {
-      man = t.man; sM = 'a'; srcM = 'probable, no está capturada en la plataforma';
-      flags.push({ c: 'a', t: 'maniobra faltante', d: 'El ' + Math.round(t.pman * 100) + '% de los viajes a este destino llevó maniobra de ' + mny0(t.man) + ' y la plataforma no la marca.' });
+    } else {
+      const pr = probManiobra(dest, uni, t); // v19
+      if (pr) {
+        man = pr.man; sM = 'a'; srcM = 'probable, no está capturada en la plataforma';
+        flags.push({ c: 'a', t: 'maniobra faltante', d: 'De ' + pr.n + (pr.n === 1 ? ' viaje' : ' viajes') + ' a este destino' + (pr.todas ? ' (en cualquier unidad)' : '') +
+          ', ' + pr.k + (pr.k === 1 ? ' llevó' : ' llevaron') + ' maniobra; se propone ' + mny0(pr.man) + ' y la plataforma no la marca. Si no hubo, bórrala.' });
+      }
     }
 
     if (esSi(b.esReparto)) flags.push({ c: 'b', auto: 1, t: 'viaje hijo', l: 'hijo de ' + (parseInt(b.padre, 10) || '?'), d: 'Es reparto del viaje ' + (parseInt(b.padre, 10) || 'padre') + (b.facturarReparto ? ' · facturar: ' + b.facturarReparto : '') + '.' });
@@ -1548,7 +1569,7 @@ function armarRevision() {
   const vj = (o, extra) => ({ id: o.id, txt: o.destino + ' · ' + o.unidad + (extra ? ' · ' + extra : '') });
   const it = (c, t, d, lista) => lista.length ? { c, t, d, vj: lista } : null;
   const plataforma = [
-    it('a', 'Maniobras que probablemente faltan', 'A estos destinos casi siempre les cobras maniobra y la plataforma no la marca. Captúrala en la plataforma o confírmala aquí en la columna de maniobra.',
+    it('a', 'Maniobras que probablemente faltan', 'A estos destinos les has cobrado maniobra antes y la plataforma no la marca. Si sí hubo, captúrala en la plataforma o confírmala aquí; si no hubo, bórrala en la columna de maniobra.',
       L.filter(o => tiene(o, 'maniobra faltante') && !o.editM).map(o => vj(o, mny0(o.man)))),
     it('a', 'Direcciones con la zona dudosa', 'La zona con la que la plataforma cobra no parece la del destino. Corregir la dirección en la plataforma lo arregla para todos los meses.',
       L.filter(o => (tiene(o, 'zona en duda') || tiene(o, 'zona por revisar')) && !o.editC).map(o => vj(o, o.zonaNombre))),
