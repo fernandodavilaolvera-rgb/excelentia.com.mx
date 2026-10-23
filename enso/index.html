@@ -134,6 +134,11 @@ details.mas[open] summary{margin-bottom:8px}
 
 footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padding-top:16px}
 
+/* Solo lectura */
+body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura .editor{display:none!important}
+.dialogo{max-height:calc(100vh - 32px);overflow-y:auto}
+.aviso-lectura{background:var(--indigo-suave);color:var(--indigo);border-radius:12px;padding:10px 16px;font-size:13px;max-width:720px}
+
 /* Avisos */
 .aviso{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tinta);color:var(--washi);padding:12px 20px;border-radius:12px;font-size:14px;z-index:50;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(29,27,25,.25)}
 .aviso.error{background:var(--bermellon)}
@@ -217,6 +222,7 @@ footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padd
       <a href="#hoy" class="activo">Hoy</a>
       <a href="#t-atencion">Respuestas</a>
       <a href="#t-acerc">Acercamientos</a>
+      <a href="#t-prosp">Prospectos</a>
       <a href="#t-tareas">Pendientes</a>
       <a href="#t-viajes">Viajes</a>
       <span class="usuario no-print">
@@ -240,6 +246,7 @@ footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padd
           <div class="etiqueta">Vista del día</div>
           <h1 id="saludo-h1">Hola</h1>
           <p>Lo que necesita una decisión hoy aparece primero; lo demás sigue su curso.</p>
+          <div class="aviso-lectura" id="aviso-lectura" style="margin-top:12px" hidden>Acceso de solo lectura: puedes consultar todo, sin aprobar ni modificar.</div>
         </div>
         <div class="estado" id="estado-memoria"></div>
       </div>
@@ -259,6 +266,13 @@ footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padd
             <h2 id="t-acerc">Acercamientos por aprobar</h2>
           </div>
           <div id="lista-acerc"></div>
+
+          <div class="bloque-titulo" style="margin-top:22px">
+            <div class="etiqueta">Motor comercial</div>
+            <h2 id="t-prosp">Prospectos y su calificación</h2>
+          </div>
+          <div class="acciones"><button type="button" class="btn btn-secundario" id="btn-prospecto">Agregar prospecto</button></div>
+          <div id="lista-prosp"></div>
         </div>
 
         <aside class="col-lateral" aria-labelledby="t-tareas">
@@ -394,10 +408,31 @@ footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padd
     var saludo = h < 12 ? 'Buenos días' : (h < 19 ? 'Buenas tardes' : 'Buenas noches');
     $('saludo-h1').textContent = saludo + ', ' + String(u.nombre || '').split(' ')[0];
     $('quien').textContent = (u.nombre || '') + ' · ' + (u.rol_nombre || u.rol || '');
+    document.body.classList.toggle('solo-lectura', !!u.solo_lectura);
+    $('aviso-lectura').hidden = !u.solo_lectura;
     var i = d.indicadores || {};
     $('estado-memoria').innerHTML = (i.correos_sin_procesar ? '<span>' + i.correos_sin_procesar + ' correos por leer</span> · ' : '<span>Memoria al día</span> · ') +
       '<span>correo revisado ' + esc(hace(d.ultima_lectura)) + '</span>';
-    pintarIndicadores(d); pintarAtencion(d); pintarAcercamientos(d); pintarTareas(d); pintarTablero(d);
+    pintarIndicadores(d); pintarAtencion(d); pintarAcercamientos(d); pintarProspectos(d); pintarTareas(d); pintarTablero(d);
+  }
+
+  var ESTADOS_COM = { por_calificar: 'Por calificar', calificando: 'Calificando', calificada: 'Calificada', descartada: 'Descartada', en_acercamiento: 'En acercamiento', en_conversacion: 'En conversación', sin_respuesta: 'Sin respuesta', pausada: 'Pausada' };
+  function pintarProspectos(d) {
+    var lista = d.prospectos || [];
+    if (!lista.length) { $('lista-prosp').innerHTML = '<div class="vacio">Todavía no hay prospectos. Con "Agregar prospecto" el equipo registra una agencia o advisor con su sitio; el sistema lee el sitio, lo califica A, B, C o D y explica por qué. En esta etapa no se redacta ni se envía nada.</div>'; return; }
+    $('lista-prosp').innerHTML = lista.map(function (p) {
+      var pos = (p.senales_positivas || []).map(function (s) { return '<span class="chip">' + esc(s) + '</span>'; }).join('');
+      var neg = (p.senales_descarte || []).map(function (s) { return '<span class="chip neg">' + esc(s) + '</span>'; }).join('');
+      var pill = p.prioridad ? '<span class="pill ' + (p.prioridad === 'A' ? 'pill-alerta' : (p.prioridad === 'B' ? 'pill-indigo' : 'pill-neutra')) + '">Prioridad ' + esc(p.prioridad) + (p.puntaje != null ? ' · ' + esc(p.puntaje) : '') + '</span>'
+        : '<span class="pill pill-neutra">' + esc(p.investigado ? 'En calificación' : 'Leyendo su sitio') + '</span>';
+      return '<article class="tarjeta"><div class="tarjeta-cab"><div><div class="titulo">' + esc(p.nombre) + '</div>' +
+        '<div class="meta">' + esc(ESTADOS_COM[p.estado] || p.estado || '') + (p.pais ? ' · ' + esc(p.pais) : '') + (p.red ? ' · red ' + esc(p.red) : '') +
+        (p.sitio ? ' · <a href="' + esc(p.sitio) + '" target="_blank" rel="noopener">sitio</a>' : '') + ' · registrado ' + esc(hace(p.registrado)) + '</div></div>' + pill + '</div>' +
+        (p.explicacion ? '<p class="porque"><strong>Por qué ' + esc(p.prioridad) + ':</strong> ' + esc(p.explicacion) + '</p>' : '') +
+        ((pos || neg) ? '<div class="chips">' + pos + neg + '</div>' : '') +
+        (p.investigado && !p.sitio_leido && p.sitio ? '<div class="meta">No se pudo leer su sitio; se calificó con lo registrado.</div>' : '') +
+        '</article>';
+    }).join('');
   }
 
   function indicador(num, etiqueta, det, alerta, ancla) {
@@ -548,6 +583,27 @@ footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padd
   $('btn-recargar').addEventListener('click', function () { cerrarMenu(); cargar(true).then(function () { aviso('Datos actualizados'); }); });
   $('btn-imprimir').addEventListener('click', function () { cerrarMenu(); window.print(); });
   $('btn-salir').addEventListener('click', async function () { cerrarMenu(); try { await api({ accion: 'salir', token: estado.token }); } catch (e) {} cerrarSesion(''); });
+  $('btn-prospecto').addEventListener('click', function () {
+    abrirDialogo('<h3>Agregar prospecto</h3>' +
+      '<p class="porque">Agencia o travel advisor que podría ser cliente. El sistema lee su sitio propio, lo califica y explica por qué; en esta etapa no se le escribe.</p>' +
+      '<div class="campo"><label class="etiqueta" for="pr-nombre">Agencia o advisor *</label><input id="pr-nombre" type="text"></div>' +
+      '<div class="campo"><label class="etiqueta" for="pr-sitio">Sitio web propio *</label><input id="pr-sitio" type="text" placeholder="agencia.com"></div>' +
+      '<div class="campo"><label class="etiqueta" for="pr-red">Red</label><select id="pr-red" style="border:1px solid var(--borde);border-radius:10px;padding:12px 14px;background:#fff"><option value="">Ninguna o no sé</option><option>Fora Travel</option><option>Departure Lounge</option><option>Virtuoso</option><option>Signature</option></select></div>' +
+      '<div class="campo"><label class="etiqueta" for="pr-pais">País</label><input id="pr-pais" type="text" placeholder="Estados Unidos"></div>' +
+      '<div class="campo"><label class="etiqueta" for="pr-cnombre">Nombre del contacto</label><input id="pr-cnombre" type="text"></div>' +
+      '<div class="campo"><label class="etiqueta" for="pr-cemail">Correo del contacto (si se conoce)</label><input id="pr-cemail" type="email"></div>' +
+      '<div class="campo"><label class="etiqueta" for="pr-notas">Por qué vale la pena</label><textarea id="pr-notas" rows="3" placeholder="Vende Japón, viajes privados de lujo…"></textarea></div>' +
+      '<div class="error-txt" id="pr-error"></div>' +
+      '<div class="acciones"><button type="button" class="btn btn-primario" id="dlg-ok">Agregar</button><button type="button" class="btn btn-terciario" id="dlg-no">Cancelar</button></div>',
+      function () {
+        $('dlg-ok').addEventListener('click', async function () {
+          if (!$('pr-nombre').value.trim() || !$('pr-sitio').value.trim()) { $('pr-error').textContent = 'Escribe el nombre y su sitio web.'; return; }
+          var ok = await accion({ accion: 'agregar_prospecto', nombre: $('pr-nombre').value, sitio: $('pr-sitio').value, red: $('pr-red').value, pais: $('pr-pais').value,
+            contacto_nombre: $('pr-cnombre').value, contacto_email: $('pr-cemail').value, notas: $('pr-notas').value }, $('dlg-ok'));
+          if (ok) cerrarDialogo();
+        });
+      });
+  });
   $('btn-contrasena').addEventListener('click', function () {
     cerrarMenu();
     abrirDialogo('<h3>Cambiar contraseña</h3>' +
