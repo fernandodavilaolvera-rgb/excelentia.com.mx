@@ -169,7 +169,7 @@ header{background:linear-gradient(120deg,#7ED957 0%,#12A150 65%,#0B8A45 100%);pa
     <div class="brand">
       <span class="cart">🛒</span>
       <h1 class="disp">Ferrock List<small>Lista del súper</small></h1>
-      <button class="syncbadge" id="syncBadge"><span class="led"></span><span id="syncTxt">En la nube</span></button>
+      <button class="syncbadge" id="syncBadge"><span class="led"></span><span id="syncTxt">Cloud</span></button>
     </div>
   </div>
 </header>
@@ -436,7 +436,7 @@ function paintBadge(){
   const busy = !off && (S.sync.dirty||syncing);
   b.classList.toggle('off',off);
   b.classList.toggle('busy',busy);
-  t.textContent = off ? 'Sin conexión' : (busy ? 'Guardando…' : 'En la nube');
+  t.textContent = off ? 'Sin conexión' : (busy ? 'Guardando…' : 'Cloud');
 }
 document.getElementById('syncBadge').onclick=()=>{ syncNow(true); toast('Buscando cambios…') };
 document.addEventListener('visibilitychange',()=>{
@@ -868,9 +868,9 @@ function installManifest(){
 (function(){
   var YO = 'list';
   var APPS = [
-    {k:'list',  n:'Ferrock List',  s:'Lista del super', f:'ferrock-list',  q:'l', ek:'ferrock_espacio',       ic:'\uD83D\uDED2'},
-    {k:'money', n:'Ferrock Money', s:'Finanzas',        f:'ferrock-money', q:'m', ek:'ferrock_money_espacio', ic:'\uD83D\uDCB0'},
-    {k:'plan',  n:'Ferrock Plan',  s:'Proyecciones',    f:'ferrock-plan',  q:'p', ek:'ferrock_plan_espacio',  ic:'\uD83D\uDCC8'}
+    {k:'list',  n:'Ferrock List',  corto:'List',  s:'Lista del super', f:'ferrock-list',  q:'l', ek:'ferrock_espacio',       ic:'\uD83D\uDED2'},
+    {k:'money', n:'Ferrock Money', corto:'Money', s:'Finanzas',        f:'ferrock-money', q:'m', ek:'ferrock_money_espacio', ic:'\uD83D\uDCB0'},
+    {k:'plan',  n:'Ferrock Plan',  corto:'Plan',  s:'Proyecciones',    f:'ferrock-plan',  q:'p', ek:'ferrock_plan_espacio',  ic:'\uD83D\uDCC8'}
   ];
   var EXT = /\.html$/i.test(location.pathname) ? '.html' : '';
   var CARPETA = location.pathname.replace(/[^\/]*$/, '');
@@ -889,59 +889,37 @@ function installManifest(){
     location.href = CARPETA + a.f + EXT + '?' + a.q + '=' + c;
   }
 
-  /* ---- estilos ---- */
-  var st = document.createElement('style');
-  st.textContent =
-    '.fapps{background:rgba(255,255,255,.22);border:none;color:#fff;border-radius:999px;' +
-    'padding:6px 12px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;' +
-    'display:inline-flex;align-items:center;gap:6px;flex-shrink:0;line-height:1.2}' +
-    '.fapps:active{background:rgba(255,255,255,.34)}' +
-    '.fapps-back{position:fixed;inset:0;z-index:9998;display:none}' +
-    '.fapps-back.on{display:block}' +
-    '.fapps-pop{position:fixed;z-index:9999;background:#fff;border-radius:14px;padding:6px;' +
-    'min-width:216px;box-shadow:0 12px 34px rgba(0,0,0,.24);display:none}' +
-    '.fapps-pop.on{display:block}' +
-    '.fapps-pop a{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:11px;' +
-    'text-decoration:none;color:#22242a;font-family:inherit;font-weight:800;font-size:14.5px;cursor:pointer}' +
-    '.fapps-pop a:hover{background:#FFF3E6}' +
-    '.fapps-pop .ic{font-size:18px;flex-shrink:0}' +
-    '.fapps-pop small{display:block;font-weight:700;font-size:11.5px;color:#7b7f8a;margin-top:1px}' +
-    '@media print{.fapps,.fapps-pop,.fapps-back{display:none !important}}';
-  document.head.appendChild(st);
+  var SEL_CONT = '.brand', SEL_ANCLA = '#syncBadge';
+  /* ---- estilo de los botones de navegacion ---- */
+  var stn = document.createElement('style');
+  stn.textContent =
+    '.fnav{background:rgba(255,255,255,.17);border:none;color:#fff;border-radius:999px;' +
+    'padding:6px 11px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;' +
+    'display:inline-flex;align-items:center;gap:5px;flex-shrink:0;line-height:1.2;' +
+    '-webkit-tap-highlight-color:transparent}' +
+    '.fnav:active{background:rgba(255,255,255,.32)}' +
+    '.fnav .ic{font-size:13px}' +
+    '@media (max-width:600px){.fnav{padding:5px 9px;font-size:11.5px}}' +
+    '@media print{.fnav{display:none !important}}';
+  document.head.appendChild(stn);
 
-  /* ---- menu ---- */
-  var back = document.createElement('div'); back.className = 'fapps-back';
-  var pop = document.createElement('div'); pop.className = 'fapps-pop';
+  /* ---- un boton por cada una de las otras dos apps ---- */
+  var cont = document.querySelector(SEL_CONT);
+  var ancla = document.querySelector(SEL_ANCLA);
   APPS.filter(function(a){ return a.k !== YO; })
       .sort(function(a,b){ return a.n.localeCompare(b.n); })
       .forEach(function(a){
-        var el = document.createElement('a');
-        el.innerHTML = '<span class="ic">' + a.ic + '</span>' +
-                       '<span>' + a.n + '<small>' + a.s + '</small></span>';
-        el.onclick = function(ev){ ev.preventDefault(); irA(a); };
-        pop.appendChild(el);
+        var b = document.createElement('button');
+        b.className = 'fnav no-print';
+        b.type = 'button';
+        b.title = 'Ir a ' + a.n;
+        b.innerHTML = '<span class="ic">' + a.ic + '</span><span>' + a.corto + '</span>';
+        b.onclick = function(ev){ ev.stopPropagation(); irA(a); };
+        if(cont){
+          if(ancla && ancla.parentNode === cont) cont.insertBefore(b, ancla);
+          else cont.appendChild(b);
+        }
       });
-  document.body.appendChild(back);
-  document.body.appendChild(pop);
-
-  /* ---- pill ---- */
-  var btn = document.createElement('button');
-  btn.className = 'fapps no-print';
-  btn.type = 'button';
-  btn.innerHTML = '\u25A6 Apps';
-  btn.onclick = function(e){
-    e.stopPropagation();
-    var r = btn.getBoundingClientRect();
-    pop.style.top = (r.bottom + 8) + 'px';
-    var izq = Math.min(r.left, window.innerWidth - 232);
-    pop.style.left = Math.max(8, izq) + 'px';
-    pop.classList.add('on'); back.classList.add('on');
-  };
-  back.onclick = function(){ pop.classList.remove('on'); back.classList.remove('on'); };
-
-  var cont = document.querySelector('.brand');
-  var ancla = document.querySelector('#syncBadge');
-  if(cont){ if(ancla && ancla.parentNode === cont) cont.insertBefore(btn, ancla); else cont.appendChild(btn); }
 
   /* ---- cambiar mi codigo de espacio ---- */
   var PREF = {list:'ferrock_list_v4_', money:'ferrock_money_v1_', plan:'ferrock_plan_v1_'};
