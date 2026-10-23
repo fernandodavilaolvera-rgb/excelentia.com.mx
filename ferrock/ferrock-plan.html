@@ -174,6 +174,8 @@ table.grid td.cnc{
   padding:4px 3px;border-radius:7px;width:100%;min-width:0;color:var(--ink);line-height:16px
 }
 .cel input:focus{background:#fff;box-shadow:0 0 0 1.5px var(--naranja)}
+input.formula{color:#1a5fa8;font-style:italic}
+.cel input.formula:focus{box-shadow:0 0 0 1.5px #4a9fd4}
 .cel .ck{
   background:none;border:none;color:#ded2c4;font-size:11px;cursor:pointer;
   padding:2px;line-height:1;flex-shrink:0;width:15px
@@ -775,8 +777,10 @@ function filaConcepto(c, sem, editable, cls){
     const v = valor(c.id, w.iso), ok = conf(c.id, w.iso);
     h += '<td class="'+(ok?'ok ':(v?'':'zz '))+(w.iso===HOY?'hoy':'')+'" id="td-'+c.id+'-'+w.i+'"><div class="cel">' +
       '<button class="ck no-print" onclick="toggleOk(\''+c.id+'\',\''+w.iso+'\')" title="Marcar como ya pagado o ya cobrado">✓</button>' +
-      '<input inputmode="decimal" value="'+(v?v:'')+'" data-c="'+c.id+'" data-s="'+w.iso+'" ' +
-      'oninput="editarCelda(this)" onfocus="this.select()"></div></td>';
+      '<input inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" ' +
+      'value="'+(v?v:'')+'" data-c="'+c.id+'" data-s="'+w.iso+'" ' +
+      'oninput="editarCelda(this)" onblur="cerrarCelda(this)" ' +
+      'onkeydown="teclaCampo(event,this,false)" onfocus="this.select()"></div></td>';
   });
   return h + '</tr>';
 }
@@ -904,7 +908,7 @@ function renderFoco(D){
       const v = valor(c.id, w.iso), ok = conf(c.id, w.iso);
       h += '<div class="frow'+(ok?' ok':'')+'">' +
         '<div class="nm">'+esc(c.n)+'</div>' +
-        '<input inputmode="decimal" value="'+(v?v:'')+'" data-c="'+c.id+'" data-s="'+w.iso+'" oninput="editarCelda(this)" onfocus="this.select()">' +
+        '<input inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" value="'+(v?v:'')+'" data-c="'+c.id+'" data-s="'+w.iso+'" oninput="editarCelda(this)" onblur="cerrarCelda(this)" onkeydown="teclaCampo(event,this,false)" onfocus="this.select()">' +
         '<button class="ck2 no-print" onclick="toggleOk(\''+c.id+'\',\''+w.iso+'\')">✓</button></div>';
     });
     return h;
@@ -938,9 +942,88 @@ function masSemanas(){
   toast('Ahora son ' + S.cfg.nsem + ' semanas');
 }
 
+/* ---------- operaciones dentro de las celdas ----------
+   Se puede escribir 3+5, 120*3, 500/4 y al salir de la celda queda el
+   resultado. Respeta que x y / van antes que + y -. */
+function esFormula(t){
+  t = String(t == null ? '' : t).trim();
+  if(!t) return false;
+  var cuerpo = (t.charAt(0) === '-' || t.charAt(0) === '+') ? t.slice(1) : t;
+  return /[+\-*\/xX\u00d7\u00f7]/.test(cuerpo);
+}
+function evalExpr(t){
+  t = String(t == null ? '' : t)
+        .replace(/[xX\u00d7]/g, '*')
+        .replace(/\u00f7/g, '/')
+        .replace(/,/g, '.')
+        .replace(/\s+/g, '');
+  if(!t) return null;
+  var neg = false;
+  if(t.charAt(0) === '-'){ neg = true; t = t.slice(1); }
+  else if(t.charAt(0) === '+'){ t = t.slice(1); }
+  if(!/^\d+(\.\d+)?([-+*\/]\d+(\.\d+)?)*$/.test(t)) return null;
+  var tok = t.match(/\d+(?:\.\d+)?|[-+*\/]/g);
+  if(!tok || !tok.length) return null;
+  var n0 = parseFloat(tok[0]);
+  if(isNaN(n0)) return null;
+  if(neg) n0 = -n0;
+  var a = [n0];
+  for(var i = 1; i < tok.length; i += 2){
+    var op = tok[i], v = parseFloat(tok[i+1]);
+    if(isNaN(v)) return null;
+    if(op === '*')      a[a.length-1] = a[a.length-1] * v;
+    else if(op === '/'){ if(v === 0) return null; a[a.length-1] = a[a.length-1] / v; }
+    else if(op === '+')  a.push(v);
+    else if(op === '-')  a.push(-v);
+    else return null;
+  }
+  var r = 0; for(var j = 0; j < a.length; j++) r += a[j];
+  if(!isFinite(r)) return null;
+  return Math.round(r * 100) / 100;
+}
+/* al salir de la celda (o con Enter / Tab) se resuelve la operacion */
+function resolverCampo(inp){
+  if(!esFormula(inp.value)) return false;
+  var r = evalExpr(inp.value);
+  if(r === null){ inp.classList.remove('formula'); return false; }
+  inp.value = String(r);
+  inp.classList.remove('formula');
+  return true;
+}
+function cerrarCelda(inp){
+  if(resolverCampo(inp)){ editarCelda(inp, true); return; }
+  if(esFormula(inp.value)){                       /* quedo a medias: se deshace */
+    var vg = valor(inp.dataset.c, inp.dataset.s);
+    inp.value = vg ? String(vg) : '';
+    inp.classList.remove('formula');
+  }
+}
+function cerrarReg(inp){
+  if(resolverCampo(inp)){ editarReg(inp, true); return; }
+  if(esFormula(inp.value)){
+    var r = S.regs.find(function(x){ return x.id === inp.dataset.r; });
+    inp.value = (r && num(r.v)) ? String(r.v) : '';
+    inp.classList.remove('formula');
+  }
+}
+function teclaCampo(ev, inp, esReg){
+  if(ev.key === 'Enter'){
+    ev.preventDefault();
+    if(esReg) cerrarReg(inp); else cerrarCelda(inp);
+    inp.blur();
+  }
+}
+
 /* ---------- edicion de celda sin re-render ---------- */
 let recalcT = null;
-function editarCelda(inp){
+function editarCelda(inp, yaResuelta){
+  /* mientras se escribe una operacion no se guarda nada: se espera a que
+     el usuario salga de la celda y entonces se guarda el resultado */
+  if(!yaResuelta && esFormula(inp.value)){
+    inp.classList.add('formula');
+    return;
+  }
+  inp.classList.remove('formula');
   setCel(inp.dataset.c, inp.dataset.s, inp.value);
   const td = inp.closest('td');
   if(td && !td.classList.contains('ok')) td.classList.toggle('zz', !num(inp.value));
@@ -1156,9 +1239,14 @@ function moverReg(id, dir){
   tocar(); render();
 }
 let regT = null;
-function editarReg(inp){
+function editarReg(inp, yaResuelta){
   const r = S.regs.find(x => x.id===inp.dataset.r);
   if(!r) return;
+  if(inp.dataset.f === 'v' && !yaResuelta && esFormula(inp.value)){
+    inp.classList.add('formula');
+    return;
+  }
+  inp.classList.remove('formula');
   if(inp.dataset.f === 'n') r.n = inp.value;
   else r.v = num(inp.value);
   r.mt = ahora();
@@ -1222,7 +1310,7 @@ function renderInfo(){
           '<button onclick="moverReg(\''+r.id+'\',-1)">▲</button>' +
           '<button onclick="moverReg(\''+r.id+'\',1)">▼</button></div>' +
         '<input class="c" value="'+esc(r.n)+'" placeholder="Concepto o nota" data-r="'+r.id+'" data-f="n" oninput="editarReg(this)">' +
-        '<input class="m" inputmode="decimal" value="'+(num(r.v)?r.v:'')+'" placeholder="—" data-r="'+r.id+'" data-f="v" oninput="editarReg(this)" onfocus="this.select()">' +
+        '<input class="m" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" value="'+(num(r.v)?r.v:'')+'" placeholder="—" data-r="'+r.id+'" data-f="v" oninput="editarReg(this)" onblur="cerrarReg(this)" onkeydown="teclaCampo(event,this,true)" onfocus="this.select()">' +
         '<button class="x no-print" onclick="borrarReg(\''+r.id+'\')" title="Quitar">✕</button>' +
       '</div>';
     });
