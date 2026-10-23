@@ -61,7 +61,7 @@ main{max-width:1240px;margin:0 auto;padding:36px 24px 56px;display:flex;flex-dir
 /* Indicadores compactos */
 .indicadores{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
 .ind{background:var(--papel);border:1px solid var(--borde);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit}
-.ind .num{font-family:var(--serif);font-size:38px;line-height:1;min-width:48px;text-align:center}
+.ind .num{font-family:var(--serif);font-size:38px;line-height:1;min-width:48px;text-align:center;font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1}
 .ind .txt{display:flex;flex-direction:column;gap:3px;min-width:0}
 .ind .det{font-size:13px;color:var(--texto2)}
 .ind .det.alerta{color:var(--bermellon);font-weight:700}
@@ -396,7 +396,7 @@ footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padd
     $('quien').textContent = (u.nombre || '') + ' · ' + (u.rol_nombre || u.rol || '');
     var i = d.indicadores || {};
     $('estado-memoria').innerHTML = (i.correos_sin_procesar ? '<span>' + i.correos_sin_procesar + ' correos por leer</span> · ' : '<span>Memoria al día</span> · ') +
-      '<span>última lectura de correo ' + esc(hace(d.ultima_lectura)) + '</span>';
+      '<span>correo revisado ' + esc(hace(d.ultima_lectura)) + '</span>';
     pintarIndicadores(d); pintarAtencion(d); pintarAcercamientos(d); pintarTareas(d); pintarTablero(d);
   }
 
