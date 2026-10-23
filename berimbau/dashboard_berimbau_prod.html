@@ -8068,7 +8068,139 @@ function renderSwitchAnual(){
           ? 'background:#f5f6f8;color:#4a5068;border:1px solid #dde1e9">⏸ Apagar la campaña'
           : 'background:#3AAA35;color:#fff;border:none">🟢 Activar la campaña')
     + '</button>'
+    + '</div>'
+    // 22-oct-2026 — ENVIAR AHORA LA CAMPAÑA ANUAL.
+    // La campaña solo despierta el 1-oct, 1-nov, 1-dic y 1-ene a las 11:20. El 22 de
+    // octubre el Club quiso mandarla y no había manera: el día 1 ya había pasado y el
+    // interruptor, encendido o apagado, no adelanta nada. Este botón manda la misma
+    // campaña a la misma gente, el día que se decida, y solo aparece con el
+    // interruptor encendido, igual que el de domiciliados.
+    + (ANUAL_ACTIVO
+        ? '<div style="margin-top:13px;padding-top:13px;border-top:1px solid #bfe3bf">'
+          + '<div style="font-size:.72rem;color:#4a5068;line-height:1.55;margin-bottom:9px">'
+            + '¿Hay que mandarla hoy, fuera de sus cuatro fechas? Elige cuál de los tres mensajes '
+            + 'sale y te decimos a cuántos les va a llegar antes de soltarlo.'
+          + '</div>'
+          + '<button id="btn-anual-ahora" onclick="anualEnviarAhora()" '
+            + 'style="padding:9px 18px;border-radius:20px;cursor:pointer;border:none;background:#1a3a6b;color:#fff;'
+            + 'font-family:\'Montserrat\',sans-serif;font-size:.75rem;font-weight:800">🚀 Enviar ahora</button>'
+          + '</div>'
+        : '');
+}
+
+// 22-oct-2026 — DISPARO MANUAL DE LA CAMPAÑA ANUAL.
+// Igual que el de domiciliados, con un paso más: fuera de las cuatro fechas el sistema
+// no puede deducir cuál de los tres mensajes toca, así que aquí se elige. El texto del
+// correo y la plantilla de WhatsApp van atados a esa elección, no se escriben aquí.
+const URL_ANUAL_DISPARAR = 'https://n8n.excelentia.com.mx/webhook/berimbau-anual-disparar';
+
+const ANUAL_MENSAJES = [
+  { id:'berimbau_renovacion_30dias',
+    nombre:'Ya casi llegan los mayores beneficios',
+    pista:'El de octubre · avisa que a partir del 1 de noviembre pueden pedir su cotización' },
+  { id:'berimbau_renovacion_noviembre',
+    nombre:'Estamos listos, renueva tu pago anual',
+    pista:'El de noviembre · pide renovar antes del 31 de diciembre' },
+  { id:'berimbau_anual_cierre',
+    nombre:'Aún es posible obtener beneficios',
+    pista:'El de cierre · el de diciembre y enero' }
+];
+
+function anualCerrarModalEnvio(){
+  const m = document.getElementById('anual-envio-modal');
+  if(m) m.remove();
+}
+
+function anualEnviarAhora(){
+  const ov = document.createElement('div');
+  ov.className = 'modal-overlay';
+  ov.id = 'anual-envio-modal';
+  ov.innerHTML =
+    '<div class="modal-box" style="max-width:520px;text-align:left">'
+    + '<h3 style="text-align:center">🚀 Enviar la campaña anual ahora</h3>'
+    + '<p style="text-align:center;margin-bottom:14px">¿Cuál de los tres mensajes quieres mandar?</p>'
+    + ANUAL_MENSAJES.map(function(m, i){
+        return '<label style="display:flex;gap:9px;align-items:flex-start;border:1px solid #dde1e9;'
+          + 'border-radius:10px;padding:11px 13px;margin-bottom:9px;cursor:pointer">'
+          + '<input type="radio" name="anual-msg" value="' + m.id + '"' + (i===0?' checked':'')
+            + ' style="accent-color:#3AAA35;width:15px;height:15px;margin-top:2px">'
+          + '<span><span style="font-size:.8rem;font-weight:700;color:#1a2035">' + m.nombre + '</span>'
+          + '<span style="display:block;font-size:.7rem;color:#4a5068;margin-top:2px">' + m.pista + '</span></span>'
+          + '</label>';
+      }).join('')
+    + '<div style="background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px;'
+      + 'padding:9px 12px;margin:4px 0 14px;font-size:.72rem;color:#1a3a6b;line-height:1.55">'
+      + 'El texto no se escribe aquí: cada mensaje tiene su correo y su plantilla de WhatsApp ya aprobada. '
+      + 'Antes de mandar nada te vamos a decir a cuántos les va a llegar.'
+      + '</div>'
+    + '<div class="modal-btns">'
+      + '<button class="modal-btn-cancel" onclick="anualCerrarModalEnvio()">Cancelar</button>'
+      + '<button class="modal-btn-del" id="anual-envio-btn" onclick="anualConfirmarEnvio()" '
+        + 'style="background:#1a3a6b">Ver a cuántos les llega</button>'
+    + '</div>'
     + '</div>';
+  document.body.appendChild(ov);
+}
+
+async function anualConfirmarEnvio(){
+  const sel = document.querySelector('input[name="anual-msg"]:checked');
+  const plantilla = sel ? sel.value : '';
+  const elegido = ANUAL_MENSAJES.filter(function(m){ return m.id === plantilla; })[0];
+  if(!elegido){ showToast('⚠️ Elige cuál mensaje quieres mandar'); return; }
+
+  const btn = document.getElementById('anual-envio-btn');
+  const txt = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled = true; btn.innerHTML = '⏳ Consultando...'; }
+
+  let info;
+  try {
+    const r = await fetch(URL_ANUAL_DISPARAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ solo_contar:true, plantilla: plantilla })
+    });
+    info = await r.json();
+    if(!r.ok || !info || info.ok !== true){
+      if(btn){ btn.disabled = false; btn.innerHTML = txt; }
+      showToast('⚠️ ' + ((info && info.mensaje) || 'No se pudo consultar a cuántos les toca'));
+      return;
+    }
+  } catch(e){
+    if(btn){ btn.disabled = false; btn.innerHTML = txt; }
+    showToast('❌ No se pudo conectar con el sistema de avisos');
+    return;
+  }
+  if(btn){ btn.disabled = false; btn.innerHTML = txt; }
+
+  const total = Number(info.total||0);
+  if(!total){
+    showToast('⚠️ Ahora mismo no hay nadie con pago anual vigente a quien mandarle este mensaje');
+    return;
+  }
+
+  if(!confirm('Campaña anual de renovación\n\n'
+      + 'Mensaje: ' + elegido.nombre + '\n\n'
+      + 'Le va a llegar a ' + total.toLocaleString('es-MX') + ' usuario' + (total===1?'':'s') + ':\n'
+      + '· ' + Number(info.con_correo||0).toLocaleString('es-MX') + ' por correo\n'
+      + '· ' + Number(info.con_whatsapp||0).toLocaleString('es-MX') + ' por WhatsApp\n\n'
+      + (info.modo_prueba ? '🔒 Modo prueba: llega solo al equipo de prueba.' : '⚠️ Llega de verdad a los usuarios del Club.')
+      + '\n\n¿Lo mando ahora?')) return;
+
+  anualCerrarModalEnvio();
+  showToast('⏳ Lanzando la campaña...');
+  try {
+    const r = await fetch(URL_ANUAL_DISPARAR, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ plantilla: plantilla })
+    });
+    const d = await r.json();
+    if(r.ok && d && d.ok === true){
+      showToast('✅ Campaña lanzada a ' + Number(d.total||total).toLocaleString('es-MX') + ' usuarios. Tarda unos minutos; el acuse llega por correo.');
+    } else {
+      showToast('⚠️ ' + ((d && d.mensaje) || 'No se pudo lanzar la campaña'));
+    }
+  } catch(e){
+    showToast('❌ No se pudo conectar con el sistema de avisos');
+  }
 }
 
 function anualPedirCambio(prender){
