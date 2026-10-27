@@ -102,9 +102,41 @@ main{max-width:720px;margin:0 auto;padding:1.5rem 1rem 3rem;}
   .logo-slogan{font-size:11px;}
 }
 
+/* BOTÓN CÓMO FUNCIONA */
+.btn-como{padding:.5rem 1rem;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-como:hover{background:rgba(255,255,255,.15);border-color:#fff;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(13,27,62,.7);z-index:1000;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:16px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-header{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);padding:1.2rem 1.4rem;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-header h2{font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:800;color:#fff;}
+.modal-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:.2rem .4rem;line-height:1;opacity:.7;}
+.modal-close:hover{opacity:1;}
+.modal-body{padding:1.4rem;}
+.modal-intro{font-size:.9rem;color:var(--texto2);margin-bottom:1.2rem;line-height:1.5;}
+.api-card{border:1.5px solid var(--gris-borde);border-radius:12px;margin-bottom:.9rem;overflow:hidden;}
+.api-card-head{padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.api-card-head h3{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;color:var(--azul);}
+.api-tag{padding:.25rem .65rem;border-radius:20px;font-size:.72rem;font-weight:700;}
+.tag-actual{background:#e8f8f2;color:var(--verde);}
+.tag-opcion{background:#fff3e8;color:var(--naranja);}
+.tag-avanzado{background:#ffe8e8;color:#c0392b;}
+.api-card-body{padding:.7rem 1rem 1rem;border-top:1px solid var(--gris-borde);}
+.api-card-body p{font-size:.85rem;color:var(--texto2);line-height:1.5;margin-bottom:.6rem;}
+.api-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px dashed var(--gris-borde);font-size:.83rem;}
+.api-row:last-child{border-bottom:none;}
+.api-row span:first-child{color:var(--texto2);}
+.api-row span:last-child{font-weight:700;color:var(--azul);}
+.api-row span.precio-verde{color:var(--verde);}
+.api-row span.precio-naranja{color:var(--naranja);}
+.api-row span.precio-rojo{color:#c0392b;}
+.modal-nota{background:#f0f6ff;border-left:3px solid var(--azul2);border-radius:0 8px 8px 0;padding:.7rem .9rem;font-size:.82rem;color:var(--texto);line-height:1.5;margin-top:1rem;}
+
 /* PRINT */
 @media print{
-  .btn-nueva,.btn-ver,.filtros{display:none!important;}
+  .btn-nueva,.btn-ver,.filtros,.btn-como,.modal-overlay{display:none!important;}
   @page{size:Letter;margin:14mm;}
   body{background:#fff;}
   .prop-card{break-inside:avoid;margin-bottom:1rem;}
@@ -122,7 +154,86 @@ main{max-width:720px;margin:0 auto;padding:1.5rem 1rem 3rem;}
     </div>
     <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
   </div>
+  <div style="margin-top:.7rem;">
+    <button class="btn-como" onclick="abrirModal()">⚙️ ¿Cómo funciona este agente?</button>
+  </div>
 </header>
+
+<!-- MODAL APIS -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModalSiAfuera(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>⚙️ Tecnología detrás del Agente Buscador</h2>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-intro">Este agente busca propiedades en Inmuebles24 y Lamudi, las analiza con inteligencia artificial y te entrega los mejores resultados rankeados. Así es como funciona por dentro:</p>
+
+      <!-- GOOGLE SEARCH (actual) -->
+      <div class="api-card">
+        <div class="api-card-head" style="background:#f0f8f4;">
+          <h3>🔍 Google Search + Jina AI <small style="font-weight:400;color:#4a5068;font-size:.78rem;">(método actual)</small></h3>
+          <span class="api-tag tag-actual">✅ Activo hoy</span>
+        </div>
+        <div class="api-card-body">
+          <p>Buscamos en Google apuntando a los portales (<code>site:inmuebles24.com</code>). Google devuelve ~10 resultados por búsqueda con título, precio y descripción de cada propiedad. Jina AI convierte esos resultados en texto limpio para que la IA los analice.</p>
+          <div class="api-row"><span>Costo</span><span class="precio-verde">$0 — Completamente gratuito</span></div>
+          <div class="api-row"><span>Resultados por búsqueda</span><span>~10 propiedades por portal</span></div>
+          <div class="api-row"><span>Velocidad</span><span>5–15 segundos</span></div>
+          <div class="api-row"><span>Limitación</span><span>Datos básicos del snippet de Google</span></div>
+        </div>
+      </div>
+
+      <!-- APIFY -->
+      <div class="api-card">
+        <div class="api-card-head" style="background:#fff8f0;">
+          <h3>🕷️ Apify — Scrapers especializados</h3>
+          <span class="api-tag tag-opcion">Siguiente paso</span>
+        </div>
+        <div class="api-card-body">
+          <p>Apify tiene scrapers dedicados para Inmuebles24 y Lamudi que evitan los bloqueos de Cloudflare. Devuelven datos completos: fotos, superficies, amenidades, historial de precio. Se conectan directo a n8n via API REST.</p>
+          <div class="api-row"><span>Costo</span><span class="precio-naranja">$49 USD/mes (~$980 MXN)</span></div>
+          <div class="api-row"><span>Resultados por búsqueda</span><span>50–200 propiedades</span></div>
+          <div class="api-row"><span>Velocidad</span><span>15–60 segundos</span></div>
+          <div class="api-row"><span>Ventaja</span><span>Datos completos + fotos reales</span></div>
+        </div>
+      </div>
+
+      <!-- BRIGHT DATA -->
+      <div class="api-card">
+        <div class="api-card-head" style="background:#fff5f5;">
+          <h3>🌐 Bright Data — Infraestructura enterprise</h3>
+          <span class="api-tag tag-avanzado">Enterprise</span>
+        </div>
+        <div class="api-card-body">
+          <p>La opción más robusta del mercado. Usa una red de millones de IPs residenciales para evitar cualquier bloqueo. Ideal para agencias con alto volumen de búsquedas o que necesitan datos en tiempo real sin interrupciones.</p>
+          <div class="api-row"><span>Costo</span><span class="precio-rojo">Desde $500 USD/mes (~$10,000 MXN)</span></div>
+          <div class="api-row"><span>Resultados por búsqueda</span><span>Sin límite</span></div>
+          <div class="api-row"><span>Velocidad</span><span>2–10 segundos</span></div>
+          <div class="api-row"><span>Ventaja</span><span>Máxima confiabilidad + SLA garantizado</span></div>
+        </div>
+      </div>
+
+      <!-- IA ANALYSIS -->
+      <div class="api-card">
+        <div class="api-card-head" style="background:#f0f4ff;">
+          <h3>🤖 Claude Haiku — Análisis y rankeo con IA</h3>
+          <span class="api-tag tag-actual">✅ Activo hoy</span>
+        </div>
+        <div class="api-card-body">
+          <p>Después del scraping, Claude Haiku analiza todas las propiedades encontradas, las compara con tus criterios de búsqueda y asigna un score del 1 al 10. Extrae datos estructurados (precio, recámaras, ubicación) y genera una descripción personalizada de cada inmueble.</p>
+          <div class="api-row"><span>Costo</span><span class="precio-verde">~$0.002 USD por búsqueda</span></div>
+          <div class="api-row"><span>Proveedor</span><span>Anthropic (Claude Haiku)</span></div>
+          <div class="api-row"><span>Función</span><span>Extracción + score + descripción IA</span></div>
+        </div>
+      </div>
+
+      <div class="modal-nota">
+        💡 <strong>Recomendación para escalar:</strong> Con el método actual (Google + Jina) el agente ya es funcional para demos y primeros clientes. Cuando el volumen de búsquedas crezca o se necesiten fotos reales de los listados, el siguiente paso natural es integrar <strong>Apify</strong> por ~$980 MXN/mes.
+      </div>
+    </div>
+  </div>
+</div>
 
 <main>
   <div class="status-bar" id="statusBar">
@@ -296,6 +407,12 @@ function ordenar(criterio) {
 
 // Iniciar polling
 poll();
+
+// Modal
+function abrirModal(){ document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow='hidden'; }
+function cerrarModal(){ document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow=''; }
+function cerrarModalSiAfuera(e){ if(e.target===document.getElementById('modalOverlay')) cerrarModal(); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') cerrarModal(); });
 </script>
 </body>
 </html>
