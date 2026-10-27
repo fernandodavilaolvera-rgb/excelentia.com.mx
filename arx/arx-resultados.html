@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARX — Resultados de búsqueda</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --azul:#0D2355;--azul2:#2D7DD2;--cyan:#00C8E0;--blanco:#fff;
+  --gris-bg:#f4f6fb;--gris-borde:#dde3ee;--texto:#1a2035;--texto2:#4a5068;--radio:14px;
+  --verde:#22a06b;--naranja:#e8690a;--rojo:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito Sans',sans-serif;background:var(--gris-bg);color:var(--texto);min-height:100vh;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid var(--cyan);padding:1rem 1.2rem;}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem;}
+.logo-box{background:#fff;border-radius:10px;padding:.35rem .7rem;display:flex;align-items:center;justify-content:center;min-width:76px;min-height:48px;flex-shrink:0;}
+.logo-box img{height:44px;width:auto;display:block;}
+.logo-fallback{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:#1a3a6b;display:none;}
+.logo-slogan{font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:#fff;opacity:.85;}
+
+/* CONTENIDO */
+main{max-width:720px;margin:0 auto;padding:1.5rem 1rem 3rem;}
+
+/* BARRA DE ESTADO */
+.status-bar{background:#fff;border:1px solid var(--gris-borde);border-radius:var(--radio);padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.status-info{display:flex;align-items:center;gap:.6rem;}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#22a06b;flex-shrink:0;}
+.status-dot.loading{background:var(--azul2);animation:pulse 1.2s ease-in-out infinite;}
+.status-dot.empty{background:#8a90a0;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.status-text{font-weight:700;font-size:.9rem;color:var(--azul);}
+.status-sub{font-size:.8rem;color:var(--texto2);}
+.btn-nueva{padding:.5rem 1rem;background:var(--azul);color:#fff;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s;}
+.btn-nueva:hover{opacity:.85;}
+
+/* FILTROS */
+.filtros{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center;}
+.filtro-btn{padding:.4rem .9rem;border:1.5px solid var(--gris-borde);border-radius:20px;font-size:.82rem;font-weight:700;color:var(--texto2);background:#fff;cursor:pointer;transition:all .2s;}
+.filtro-btn:hover,.filtro-btn.active{background:var(--azul);border-color:var(--azul);color:#fff;}
+.filtros-label{font-size:.8rem;color:var(--texto2);font-weight:600;}
+
+/* CARDS */
+.grid{display:flex;flex-direction:column;gap:1rem;}
+
+.prop-card{background:#fff;border-radius:var(--radio);border:1px solid var(--gris-borde);overflow:hidden;box-shadow:0 2px 8px rgba(13,35,85,.06);transition:box-shadow .2s;}
+.prop-card:hover{box-shadow:0 6px 20px rgba(13,35,85,.12);}
+
+.card-img{width:100%;height:200px;object-fit:cover;background:#e8eff8;display:block;}
+.card-img-placeholder{width:100%;height:200px;background:linear-gradient(135deg,#e8eff8,#d0dff5);display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
+
+.card-body{padding:1.1rem;}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.5rem;}
+.card-titulo{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;color:var(--azul);line-height:1.3;flex:1;}
+
+.score-badge{flex-shrink:0;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;color:#fff;}
+.score-alto{background:var(--verde);}
+.score-medio{background:var(--naranja);}
+.score-bajo{background:#8a90a0;}
+
+.card-meta{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.7rem;}
+.badge{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .6rem;border-radius:20px;font-size:.75rem;font-weight:700;}
+.badge-portal{background:#e8f0fb;color:var(--azul2);}
+.badge-tipo{background:#e8f8f2;color:var(--verde);}
+.badge-op{background:#fff3e8;color:var(--naranja);}
+
+.precio{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:800;color:var(--azul);margin-bottom:.5rem;}
+
+.card-specs{display:flex;flex-wrap:wrap;gap:.5rem .8rem;margin-bottom:.7rem;}
+.spec{display:flex;align-items:center;gap:.25rem;font-size:.83rem;color:var(--texto2);}
+.spec strong{color:var(--texto);}
+
+.ubicacion{font-size:.82rem;color:var(--texto2);margin-bottom:.7rem;display:flex;align-items:center;gap:.3rem;}
+
+.desc-ia{background:#f0f6ff;border-left:3px solid var(--azul2);border-radius:0 8px 8px 0;padding:.6rem .8rem;font-size:.83rem;color:var(--texto);margin-bottom:.8rem;line-height:1.5;}
+.razon-ia{font-size:.78rem;color:var(--texto2);font-style:italic;}
+
+.card-footer{display:flex;gap:.7rem;align-items:center;}
+.btn-ver{flex:1;padding:.6rem;background:linear-gradient(135deg,var(--azul2),var(--cyan));color:#fff;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block;transition:opacity .2s;}
+.btn-ver:hover{opacity:.9;}
+
+/* ESTADOS */
+.estado-carga{text-align:center;padding:3rem 1rem;}
+.spinner-grande{width:44px;height:44px;border:4px solid rgba(45,125,210,.15);border-top-color:var(--azul2);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.estado-carga p{color:var(--texto2);font-size:.95rem;}
+.estado-carga strong{color:var(--azul);display:block;font-family:'Nunito',sans-serif;font-size:1.1rem;margin-bottom:.3rem;}
+
+.sin-resultados{text-align:center;padding:3rem 1rem;}
+.sin-resultados .icon{font-size:3rem;margin-bottom:.8rem;}
+.sin-resultados h3{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:800;color:var(--azul);margin-bottom:.3rem;}
+.sin-resultados p{color:var(--texto2);font-size:.9rem;}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .status-bar{flex-direction:column;align-items:flex-start;}
+  .filtros{gap:.45rem;}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem;}
+  .logo-slogan{font-size:11px;}
+}
+
+/* PRINT */
+@media print{
+  .btn-nueva,.btn-ver,.filtros{display:none!important;}
+  @page{size:Letter;margin:14mm;}
+  body{background:#fff;}
+  .prop-card{break-inside:avoid;margin-bottom:1rem;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-header-wrap">
+    <div class="logo-box">
+      <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+  </div>
+</header>
+
+<main>
+  <div class="status-bar" id="statusBar">
+    <div class="status-info">
+      <div class="status-dot loading" id="statusDot"></div>
+      <div>
+        <div class="status-text" id="statusText">Buscando propiedades…</div>
+        <div class="status-sub" id="statusSub">Consultando Inmuebles24 y Lamudi · IA evaluando resultados</div>
+      </div>
+    </div>
+    <a href="arx-busqueda.html" class="btn-nueva">+ Nueva búsqueda</a>
+  </div>
+
+  <div class="filtros" id="filtrosBar" style="display:none;">
+    <span class="filtros-label">Ordenar:</span>
+    <button class="filtro-btn active" onclick="ordenar('score')">⭐ Mejor puntuación</button>
+    <button class="filtro-btn" onclick="ordenar('precio_asc')">💰 Menor precio</button>
+    <button class="filtro-btn" onclick="ordenar('precio_desc')">💰 Mayor precio</button>
+    <button class="filtro-btn" onclick="ordenar('portal')">🌐 Portal</button>
+  </div>
+
+  <div id="contenedor">
+    <div class="estado-carga">
+      <div class="spinner-grande"></div>
+      <strong>Analizando portales inmobiliarios</strong>
+      <p>Esto toma entre 15 y 40 segundos.<br>La IA está evaluando y rankeando los resultados para ti.</p>
+    </div>
+  </div>
+</main>
+
+<footer style="text-align:center;color:#8a90a0;font-size:.78rem;padding:1.5rem;border-top:1px solid var(--gris-borde);">
+  ARX Inmobiliaria · Powered by <strong>ExcelentIA</strong>
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://rcotlydvsubvdapubnkx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjb3RseWR2c3VidmRhcHVibmt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDc5MzYsImV4cCI6MjA5OTEyMzkzNn0.gZyklBXbSI6B_5Iz62faMf31ZlmpGmCD7v0tMICK_9Y';
+
+// Obtener busqueda_id de la URL
+const params = new URLSearchParams(window.location.search);
+const busquedaId = params.get('id');
+
+let todosLosResultados = [];
+let intentos = 0;
+const MAX_INTENTOS = 20; // 20 × 3s = 60s máx
+
+async function fetchResultados() {
+  if (!busquedaId) {
+    mostrarSinResultados('Sin ID de búsqueda', 'Regresa al formulario e inicia una búsqueda nueva.');
+    return;
+  }
+
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/arx_propiedades_busqueda?busqueda_id=eq.${busquedaId}&order=score_ia.desc`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+  );
+  const data = await res.json();
+  return data;
+}
+
+async function poll() {
+  intentos++;
+  const data = await fetchResultados();
+
+  if (data && data.length > 0) {
+    todosLosResultados = data;
+    actualizarStatus(data.length);
+    renderCards(data);
+    document.getElementById('filtrosBar').style.display = 'flex';
+    return; // Listo
+  }
+
+  if (intentos >= MAX_INTENTOS) {
+    mostrarSinResultados('No se encontraron resultados', 'El agente no encontró propiedades con esos criterios. Intenta ampliar la búsqueda.');
+    return;
+  }
+
+  // Sigue esperando
+  setTimeout(poll, 3000);
+}
+
+function actualizarStatus(count) {
+  document.getElementById('statusDot').className = 'status-dot';
+  document.getElementById('statusText').textContent = `${count} propiedades encontradas`;
+  document.getElementById('statusSub').textContent = 'Rankeadas por la IA según tus criterios · ID: ' + busquedaId;
+}
+
+function scoreClass(score) {
+  if (score >= 8) return 'score-alto';
+  if (score >= 5) return 'score-medio';
+  return 'score-bajo';
+}
+
+function formatPrecio(p, moneda) {
+  if (!p) return '—';
+  return (moneda || 'MXN') + ' ' + Number(p).toLocaleString('es-MX');
+}
+
+function renderCards(lista) {
+  const contenedor = document.getElementById('contenedor');
+  if (!lista || lista.length === 0) {
+    mostrarSinResultados('Sin propiedades', 'No hay resultados para mostrar.');
+    return;
+  }
+
+  contenedor.innerHTML = `<div class="grid">${lista.map(p => cardHTML(p)).join('')}</div>`;
+}
+
+function cardHTML(p) {
+  const score = p.score_ia || 0;
+  const imgTag = p.imagen_url
+    ? `<img class="card-img" src="${p.imagen_url}" alt="${p.titulo || ''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+       <div class="card-img-placeholder" style="display:none;">🏠</div>`
+    : `<div class="card-img-placeholder">🏠</div>`;
+
+  const specs = [
+    p.recamaras ? `<span class="spec">🛏 <strong>${p.recamaras}</strong> rec.</span>` : '',
+    p.banos ? `<span class="spec">🚿 <strong>${p.banos}</strong> baños</span>` : '',
+    p.estacionamiento ? `<span class="spec">🚗 <strong>${p.estacionamiento}</strong> est.</span>` : '',
+    p.superficie_m2 ? `<span class="spec">📐 <strong>${p.superficie_m2}</strong> m²</span>` : '',
+  ].filter(Boolean).join('');
+
+  const ubic = [p.colonia, p.ciudad, p.estado].filter(Boolean).join(', ');
+
+  return `
+  <div class="prop-card">
+    ${imgTag}
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-titulo">${p.titulo || 'Propiedad'}</div>
+        ${score ? `<div class="score-badge ${scoreClass(score)}">${score}/10</div>` : ''}
+      </div>
+      <div class="card-meta">
+        ${p.portal ? `<span class="badge badge-portal">🌐 ${p.portal}</span>` : ''}
+        ${p.tipo_propiedad ? `<span class="badge badge-tipo">${p.tipo_propiedad}</span>` : ''}
+        ${p.operacion ? `<span class="badge badge-op">${p.operacion}</span>` : ''}
+      </div>
+      <div class="precio">${p.precio_formateado || formatPrecio(p.precio, p.moneda)}</div>
+      ${specs ? `<div class="card-specs">${specs}</div>` : ''}
+      ${ubic ? `<div class="ubicacion">📍 ${ubic}</div>` : ''}
+      ${p.descripcion_ia ? `<div class="desc-ia">💡 ${p.descripcion_ia}${p.razon_ia ? `<br><span class="razon-ia">${p.razon_ia}</span>` : ''}</div>` : ''}
+      <div class="card-footer">
+        ${p.url_original ? `<a href="${p.url_original}" target="_blank" class="btn-ver">Ver en ${p.portal || 'portal'} →</a>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function mostrarSinResultados(titulo, texto) {
+  document.getElementById('statusDot').className = 'status-dot empty';
+  document.getElementById('statusText').textContent = titulo;
+  document.getElementById('statusSub').textContent = texto;
+  document.getElementById('contenedor').innerHTML = `
+    <div class="sin-resultados">
+      <div class="icon">🔍</div>
+      <h3>${titulo}</h3>
+      <p>${texto}</p>
+    </div>`;
+}
+
+function ordenar(criterio) {
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  let lista = [...todosLosResultados];
+  if (criterio === 'score') lista.sort((a,b) => (b.score_ia||0)-(a.score_ia||0));
+  else if (criterio === 'precio_asc') lista.sort((a,b) => (a.precio||0)-(b.precio||0));
+  else if (criterio === 'precio_desc') lista.sort((a,b) => (b.precio||0)-(a.precio||0));
+  else if (criterio === 'portal') lista.sort((a,b) => (a.portal||'').localeCompare(b.portal||''));
+  renderCards(lista);
+}
+
+// Iniciar polling
+poll();
+</script>
+</body>
+</html>

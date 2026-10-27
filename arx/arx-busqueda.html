@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARX Inmobiliaria — Buscar Propiedades</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --azul:#0D2355;
+  --azul2:#2D7DD2;
+  --cyan:#00C8E0;
+  --blanco:#ffffff;
+  --gris-bg:#f4f6fb;
+  --gris-borde:#dde3ee;
+  --texto:#1a2035;
+  --texto2:#4a5068;
+  --radio:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito Sans',sans-serif;background:var(--gris-bg);color:var(--texto);min-height:100vh;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:3px solid var(--cyan);padding:1rem 1.2rem;}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem;}
+.logo-box{background:#fff;border-radius:10px;padding:.35rem .7rem;display:flex;align-items:center;justify-content:center;min-width:76px;min-height:48px;flex-shrink:0;}
+.logo-box img{height:44px;width:auto;display:block;}
+.logo-fallback{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:#1a3a6b;display:none;}
+.logo-slogan{font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:#fff;opacity:.85;letter-spacing:.2px;}
+
+/* CONTENIDO */
+main{max-width:720px;margin:0 auto;padding:1.5rem 1rem 3rem;}
+
+.hero{text-align:center;margin-bottom:2rem;}
+.hero h1{font-family:'Nunito',sans-serif;font-size:1.7rem;font-weight:800;color:var(--azul);line-height:1.2;}
+.hero p{color:var(--texto2);margin-top:.4rem;font-size:.95rem;}
+
+/* CARD FORMULARIO */
+.card{background:#fff;border-radius:var(--radio);border:1px solid var(--gris-borde);padding:1.5rem;margin-bottom:1.2rem;box-shadow:0 2px 8px rgba(13,35,85,.06);}
+.card-title{font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--azul2);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--gris-borde);}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+.form-grid.one{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:.35rem;}
+label{font-size:.8rem;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.5px;}
+select,input{width:100%;padding:.65rem .85rem;border:1.5px solid var(--gris-borde);border-radius:8px;font-family:'Nunito Sans',sans-serif;font-size:.95rem;color:var(--texto);background:#fff;transition:border-color .2s;}
+select:focus,input:focus{outline:none;border-color:var(--azul2);}
+
+.precio-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.1rem;}
+.chip{display:flex;align-items:center;justify-content:center;padding:.45rem .95rem;border:1.5px solid var(--gris-borde);border-radius:20px;font-size:.85rem;font-weight:600;color:var(--texto2);cursor:pointer;transition:all .2s;background:#fff;user-select:none;}
+.chip:hover{border-color:var(--azul2);color:var(--azul2);}
+.chip.active{background:var(--azul);border-color:var(--azul);color:#fff;}
+
+/* BOTÓN */
+.btn-buscar{width:100%;padding:1rem;background:linear-gradient(135deg,var(--azul2),var(--cyan));color:#fff;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:800;cursor:pointer;transition:opacity .2s;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.5rem;}
+.btn-buscar:hover{opacity:.9;}
+.btn-buscar:disabled{opacity:.6;cursor:not-allowed;}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.btn-buscar.loading .spinner{display:block;}
+.btn-buscar.loading .btn-text{display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* MENSAJE */
+.msg{display:none;text-align:center;padding:1rem;border-radius:10px;font-weight:600;margin-top:1rem;}
+.msg.error{background:#fff0f0;color:#c0392b;border:1px solid #fbc4c4;}
+.msg.info{background:#e8f4fd;color:#1a3a6b;border:1px solid #b3d9f5;}
+
+/* FOOTER */
+footer{text-align:center;color:#8a90a0;font-size:.78rem;padding:1.5rem;border-top:1px solid var(--gris-borde);}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr;}
+  .precio-row{grid-template-columns:1fr;}
+  .hero h1{font-size:1.4rem;}
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem;}
+  .logo-slogan{font-size:11px;}
+}
+
+/* PRINT */
+@media print{
+  .btn-buscar,.msg{display:none!important;}
+  @page{size:Letter;margin:14mm;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-header-wrap">
+    <div class="logo-box">
+      <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+    </div>
+    <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>🔍 Buscar propiedades en portales</h1>
+    <p>Buscamos en Inmuebles24 y Lamudi; la IA filtra y rankea los mejores resultados para ti.</p>
+  </div>
+
+  <form id="formBusqueda">
+
+    <!-- OPERACIÓN Y TIPO -->
+    <div class="card">
+      <div class="card-title">¿Qué estás buscando?</div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label>Operación</label>
+        <div class="chips" id="chips-operacion">
+          <div class="chip active" data-val="venta">Venta</div>
+          <div class="chip" data-val="renta">Renta</div>
+        </div>
+        <input type="hidden" id="operacion" value="venta">
+      </div>
+      <div class="form-group">
+        <label>Tipo de propiedad</label>
+        <div class="chips" id="chips-tipo">
+          <div class="chip active" data-val="casa">Casa</div>
+          <div class="chip" data-val="departamento">Depto</div>
+          <div class="chip" data-val="terreno">Terreno</div>
+          <div class="chip" data-val="local">Local</div>
+          <div class="chip" data-val="oficina">Oficina</div>
+          <div class="chip" data-val="bodega">Bodega</div>
+        </div>
+        <input type="hidden" id="tipo_propiedad" value="casa">
+      </div>
+    </div>
+
+    <!-- UBICACIÓN -->
+    <div class="card">
+      <div class="card-title">📍 Ubicación</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Ciudad</label>
+          <input type="text" id="ciudad" placeholder="Ej. Ciudad de México" required>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select id="estado">
+            <option value="">— Selecciona —</option>
+            <option>Ciudad de México</option><option>Estado de México</option><option>Jalisco</option>
+            <option>Nuevo León</option><option>Querétaro</option><option>Puebla</option>
+            <option>Guanajuato</option><option>Yucatán</option><option>Quintana Roo</option>
+            <option>Morelos</option><option>Hidalgo</option><option>Aguascalientes</option>
+            <option>San Luis Potosí</option><option>Tamaulipas</option><option>Veracruz</option>
+            <option>Baja California</option><option>Sonora</option><option>Chihuahua</option>
+            <option>Sinaloa</option><option>Oaxaca</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Colonia / Zona <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input type="text" id="colonia" placeholder="Ej. Polanco, Santa Fe, Del Valle…">
+        </div>
+      </div>
+    </div>
+
+    <!-- PRECIO -->
+    <div class="card">
+      <div class="card-title">💰 Presupuesto</div>
+      <div class="precio-row">
+        <div class="form-group">
+          <label>Precio mínimo (MXN)</label>
+          <input type="number" id="precio_min" placeholder="Ej. 1500000" min="0">
+        </div>
+        <div class="form-group">
+          <label>Precio máximo (MXN)</label>
+          <input type="number" id="precio_max" placeholder="Ej. 5000000" min="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- CARACTERÍSTICAS -->
+    <div class="card">
+      <div class="card-title">🏠 Características</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Recámaras mínimas</label>
+          <select id="recamaras">
+            <option value="">Sin importar</option>
+            <option value="1">1+</option><option value="2">2+</option>
+            <option value="3">3+</option><option value="4">4+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Baños mínimos</label>
+          <select id="banos">
+            <option value="">Sin importar</option>
+            <option value="1">1+</option><option value="2">2+</option><option value="3">3+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Superficie mín. (m²)</label>
+          <input type="number" id="superficie_min" placeholder="Ej. 100" min="0">
+        </div>
+        <div class="form-group">
+          <label>Estacionamientos</label>
+          <select id="estacionamiento">
+            <option value="">Sin importar</option>
+            <option value="1">1+</option><option value="2">2+</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTAS ADICIONALES -->
+    <div class="card">
+      <div class="card-title">💬 Instrucción adicional para la IA <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></div>
+      <div class="form-group form-grid one">
+        <textarea id="notas_ia" rows="3" placeholder="Ej. Prefiero zona con colegios cercanos, que tenga jardín, cerca del metro, sin departamentos en planta baja…" style="resize:vertical;padding:.65rem .85rem;border:1.5px solid var(--gris-borde);border-radius:8px;font-family:'Nunito Sans',sans-serif;font-size:.95rem;color:var(--texto);width:100%;transition:border-color .2s;"></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-buscar" id="btnBuscar">
+      <div class="spinner"></div>
+      <span class="btn-text">🔍 Buscar propiedades</span>
+    </button>
+
+    <div class="msg" id="msg"></div>
+  </form>
+</main>
+
+<footer>ARX Inmobiliaria · Powered by <strong>ExcelentIA</strong></footer>
+
+<script>
+const WEBHOOK = 'https://n8n.excelentia.com.mx/webhook/arx-busqueda';
+
+// Chips toggle
+function initChips(groupId, hiddenId) {
+  const group = document.getElementById(groupId);
+  const hidden = document.getElementById(hiddenId);
+  group.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      hidden.value = chip.dataset.val;
+    });
+  });
+}
+initChips('chips-operacion', 'operacion');
+initChips('chips-tipo', 'tipo_propiedad');
+
+// Submit
+document.getElementById('formBusqueda').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btnBuscar');
+  const msg = document.getElementById('msg');
+
+  const ciudad = document.getElementById('ciudad').value.trim();
+  if (!ciudad) { showMsg('Por favor escribe una ciudad.', 'error'); return; }
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  msg.style.display = 'none';
+
+  const busqueda_id = 'ARX-' + Date.now();
+
+  const payload = {
+    busqueda_id,
+    operacion: document.getElementById('operacion').value,
+    tipo_propiedad: document.getElementById('tipo_propiedad').value,
+    ciudad,
+    estado: document.getElementById('estado').value,
+    colonia: document.getElementById('colonia').value.trim(),
+    precio_min: document.getElementById('precio_min').value || null,
+    precio_max: document.getElementById('precio_max').value || null,
+    recamaras: document.getElementById('recamaras').value || null,
+    banos: document.getElementById('banos').value || null,
+    superficie_min: document.getElementById('superficie_min').value || null,
+    estacionamiento: document.getElementById('estacionamiento').value || null,
+    notas_ia: document.getElementById('notas_ia').value.trim(),
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    const res = await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      showMsg('✅ ¡Búsqueda iniciada! En unos segundos verás los resultados. <br><br><a href="arx-resultados.html?id=' + busqueda_id + '" style="color:var(--azul2);font-weight:700;">→ Ver resultados</a>', 'info');
+    } else {
+      showMsg('Error al conectar con el servidor. Intenta de nuevo.', 'error');
+    }
+  } catch(err) {
+    showMsg('Error de conexión. Verifica tu internet e intenta de nuevo.', 'error');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+});
+
+function showMsg(text, type) {
+  const msg = document.getElementById('msg');
+  msg.innerHTML = text;
+  msg.className = 'msg ' + type;
+  msg.style.display = 'block';
+  msg.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>
