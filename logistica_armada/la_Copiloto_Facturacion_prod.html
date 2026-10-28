@@ -79,6 +79,7 @@ header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);bo
 .btn.ghost:hover{background:#e8f0fb}
 .mini{font-family:inherit;font-size:10.5px;font-weight:700;border:1px solid #c8d9f0;background:#fff;color:#1a3a6b;border-radius:6px;padding:.12rem .4rem;margin:.15rem .2rem 0 0;cursor:pointer;white-space:nowrap}
 .mini:hover{background:#e8f0fb}
+.mini.ok{border-color:#9fd3b2;color:#1f7a45;background:#eaf7ef}.mini.ok:hover{background:#d6f0df}
 .acciones{display:block}
 .pospbox{max-width:720px;margin:1rem auto 0;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:.8rem 1rem;font-size:12.5px;color:#1a2035}
 .pospbox h4{margin:0 0 .2rem;font-size:13.5px;color:#1a3a6b}.pospbox p{margin:0 0 .5rem;color:#4a5068}
@@ -284,6 +285,7 @@ footer{text-align:center;font-size:11.5px;color:#8a90a0;padding:1.2rem 1rem 0}
 .rev-vj button{font-family:inherit;font-size:11px;font-weight:600;border:1px solid #c8d9f0;background:#f0f6ff;color:#1a3a6b;border-radius:6px;padding:.15rem .45rem;cursor:pointer;text-align:left}
 .rev-vj button:hover{background:#e8f0fb}
 .rev-vj button b{font-weight:800}
+.rev-acc{margin-top:.35rem}
 .rev-ok{font-size:12.5px;color:#2e7d4f;background:#eaf7ef;border:1px solid #c6e6d2;border-radius:8px;padding:.5rem .7rem}
 .rev-ft{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;padding:.7rem 1.1rem 1rem;border-top:1px solid #dde1e9}
 tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
@@ -450,7 +452,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 19 (23-oct-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 20 (28-oct-2026)</footer>
 </div>
 
 <script>
@@ -573,7 +575,7 @@ function recalcular(o) {
   o.venta = vf.v; o.sV = o.editC ? 'g' : vf.s; o.srcV = vf.src;
   const vm = ventaManiobra(o.man);
   o.manVenta = vm.v; o.srcMV = vm.src;
-  o.estVenta = o.est != null ? Math.round(o.est * M.ratioGlobal * 100) / 100 : null;
+  o.estVenta = o.est != null ? ((M.ventaEstadia && M.ventaEstadia[k2(o.est)] != null) ? M.ventaEstadia[k2(o.est)] : Math.round(o.est * M.ratioGlobal * 100) / 100) : null; // v20
   o.margen = (o.venta || 0) - (o.costo || 0) + (o.manVenta || 0) - (o.man || 0) + (o.estVenta || 0) - (o.est || 0);
   o.totalVenta = (o.venta || 0) + (o.manVenta || 0) + (o.estVenta || 0);
   o.totalCosto = (o.costo || 0) + (o.man || 0) + (o.est || 0);
@@ -918,12 +920,34 @@ function renderToolbar() {
   $('#btnReset').onclick = reset;
 }
 
+/* ---------- v20: aceptar lo que propone el Copiloto y ver lo que se le debe ---------- */
+function aceptarManiobra(o) {
+  if (!o || !o.flags.some(f => f.t === 'maniobra faltante')) return false;
+  o.editM = true; o.sM = 'g'; o.srcM = 'aceptada por ti';
+  o.flags = o.flags.filter(f => f.t !== 'maniobra faltante');
+  recalcular(o); return true;
+}
+function aceptarRuteo(o) {
+  if (!o || !o.flags.some(f => f.t === 'tarifa de ruteo')) return false;
+  o.editC = true; o.sC = 'g'; o.srcC = 'tarifa de ruteo · aceptada por ti';
+  o.flags = o.flags.filter(f => f.t !== 'tarifa de ruteo');
+  recalcular(o); return true;
+}
+function pagSrc(o) {
+  if (o.pag == null) return '';
+  if (o.padre) return '<span class="src">va con el viaje ' + o.padre + '</span>';
+  const f = o.flags.find(x => x.t === 'lo pagado supera el precio');
+  if (f) return '<span class="src">' + mny0(f.dif) + ' arriba del precio' + ((o.hijos || []).length ? ' · con repartos' : '') + '</span>';
+  return '';
+}
+
 /* ---------- tabla ---------- */
 const COLS = [
   { k: 'sem', t: '', w: '' }, { k: 'id', t: 'ID' }, { k: 'destino', t: 'Destino' },
   { k: 'unidad', t: 'Unidad' }, { k: 'fecha', t: 'Fecha' },
   { k: 'man', t: 'Costo maniobra', n: 1 }, { k: 'manVenta', t: 'Precio maniobra', n: 1 },
-  { k: 'costo', t: 'Costo flete', n: 1 }, { k: 'venta', t: 'Precio flete', n: 1 },
+  { k: 'est', t: 'Costo estadía', n: 1 }, { k: 'estVenta', t: 'Precio estadía', n: 1 },
+  { k: 'costo', t: 'Costo flete', n: 1 }, { k: 'venta', t: 'Precio flete', n: 1 }, { k: 'pag', t: 'Se le debe (flete)', n: 1 },
   { k: 'margen', t: 'Margen', n: 1 }, { k: 'flags', t: 'Notas' }
 ];
 const PRIO = ['__neg', 'lo pagado supera el precio', 'destino nuevo', 'zona en duda', 'zona por revisar', 'sin tarifa en la zona', 'tarifa editada', 'costos extra', 'tarifa inconsistente', 'maniobra faltante', 'destino sin histórico'];
@@ -958,15 +982,19 @@ function renderTabla() {
       <td style="white-space:nowrap">${o.fecha}</td>
       <td class="num${hi === 'man' ? ' hi' : ''}"><input class="inp ${o.editM ? 'edited' : ''}" data-k="man" value="${o.man == null ? '' : o.man}"></td>
       <td class="num">${mny(o.manVenta)}</td>
+      <td class="num"><input class="inp ${o.editE ? 'edited' : ''}" data-k="est" value="${o.est == null ? '' : o.est}"></td>
+      <td class="num">${mny(o.estVenta)}</td>
       <td class="num${hi === 'costo' ? ' hi' : ''}"><input class="inp ${o.editC ? 'edited' : ''}" data-k="costo" value="${o.costo == null ? '' : o.costo}"><span class="src">${o.srcC}</span></td>
       <td class="num">${mny(o.venta)}<span class="src">${o.srcV}</span></td>
+      <td class="num${o.flags.some(f => f.t === 'lo pagado supera el precio') ? ' marg-neg' : ''}">${o.pag == null ? '' : mny(o.pag)}${pagSrc(o)}</td>
       <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
-      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
-    </tr>`).join('') : '<tr><td colspan="11" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
+      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.flags.some(f => f.t === 'maniobra faltante') ? '<button class="mini ok" data-acc="aceptarMan" title="La maniobra propuesta es correcta">aceptar maniobra</button>' : ''}${o.flags.some(f => f.t === 'tarifa de ruteo') ? '<button class="mini ok" data-acc="aceptarRuteo" title="La tarifa de ruteo es correcta">aceptar ruteo</button>' : ''}${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
+    </tr>`).join('') : '<tr><td colspan="14" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
   <tfoot><tr>
     <td colspan="5">Subtotales (${v.length} viajes)</td>
     <td class="num">${mny(sum('man'))}</td><td class="num">${mny(sum('manVenta'))}</td>
-    <td class="num">${mny(sum('costo'))}</td><td class="num">${mny(sum('venta'))}</td>
+    <td class="num">${mny(sum('est'))}</td><td class="num">${mny(sum('estVenta'))}</td>
+    <td class="num">${mny(sum('costo'))}</td><td class="num">${mny(sum('venta'))}</td><td class="num">${mny(sum('pag'))}</td>
     <td class="num">${mny(sum('margen'))}</td><td></td></tr></tfoot>`;
   document.querySelectorAll('#tbl th').forEach(th => th.onclick = () => {
     const k = th.dataset.k;
@@ -975,12 +1003,15 @@ function renderTabla() {
   });
   document.querySelectorAll('#tbl .mini').forEach(bt => bt.onclick = e => {
     const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
+    if (e.target.dataset.acc === 'aceptarMan') { aceptarManiobra(o); redraw(); return; }
+    if (e.target.dataset.acc === 'aceptarRuteo') { aceptarRuteo(o); redraw(); return; }
     if (e.target.dataset.acc === 'ahora') { o.citaSig = false; o.flags = o.flags.filter(f => f.t !== 'cita del mes siguiente'); recalcular(o); redraw(); }
     else posponer(o, true);
   });
   document.querySelectorAll('#tbl .inp').forEach(inp => inp.addEventListener('change', e => {
     const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
     const n = num(e.target.value), k = e.target.dataset.k;
+    if (k === 'est') { o.est = n; o.editE = true; recalcular(o); redraw(); return; } // v20: la estadía no toca los avisos
     if (k === 'costo') { o.costo = n; o.editC = true; o.sC = 'g'; o.srcC = 'confirmado por ti'; }
     else { o.man = n; o.editM = true; o.sM = 'g'; o.srcM = 'confirmado por ti'; }
     o.flags = o.flags.filter(f => f.auto || f.t === 'precio por debajo del costo' || f.t === 'viaje sin margen');
@@ -1562,6 +1593,7 @@ function renderJulio() {
 /* ---------- v18: revisión antes de facturar ---------- */
 const terminado = s => /complet|finaliz|entreg/i.test(String(s || ''));
 let REV_ABIERTA_EN = null;
+const itAcc = (acc, txt, i) => { if (i) { i.acc = acc; i.accTxt = txt; } return i; };
 function armarRevision() {
   const L = VIAJES.filter(o => !o.pospuesto), ids = new Set(L.map(o => o.id));
   const tiene = (o, t) => o.flags.some(f => f.t === t);
@@ -1569,8 +1601,8 @@ function armarRevision() {
   const vj = (o, extra) => ({ id: o.id, txt: o.destino + ' · ' + o.unidad + (extra ? ' · ' + extra : '') });
   const it = (c, t, d, lista) => lista.length ? { c, t, d, vj: lista } : null;
   const plataforma = [
-    it('a', 'Maniobras que probablemente faltan', 'A estos destinos les has cobrado maniobra antes y la plataforma no la marca. Si sí hubo, captúrala en la plataforma o confírmala aquí; si no hubo, bórrala en la columna de maniobra.',
-      L.filter(o => tiene(o, 'maniobra faltante') && !o.editM).map(o => vj(o, mny0(o.man)))),
+    itAcc('aceptarMan', 'Aceptar todas las maniobras propuestas', it('a', 'Maniobras que probablemente faltan', 'A estos destinos les has cobrado maniobra antes y la plataforma no la marca. Si sí hubo, captúrala en la plataforma o confírmala aquí; si no hubo, bórrala en la columna de maniobra.',
+      L.filter(o => tiene(o, 'maniobra faltante') && !o.editM).map(o => vj(o, mny0(o.man))))),
     it('a', 'Direcciones con la zona dudosa', 'La zona con la que la plataforma cobra no parece la del destino. Corregir la dirección en la plataforma lo arregla para todos los meses.',
       L.filter(o => (tiene(o, 'zona en duda') || tiene(o, 'zona por revisar')) && !o.editC).map(o => vj(o, o.zonaNombre))),
     it('r', 'Destinos sin tarifa en el tabulador', 'Su zona no tiene tarifa para esa unidad. Cárgala en el tabulador de la plataforma o captura el flete aquí.',
@@ -1589,8 +1621,8 @@ function armarRevision() {
       neg.map(o => vj(o, 'margen ' + mny0(o.margen)))),
     it('a', 'Lo pagado supera el precio', 'Al transportista se le debe más flete del que vas a cobrar; entre todos quedarías ' + mny0(difPag) + ' abajo.',
       pag.map(o => vj(o, mny0(fl(o, 'lo pagado supera el precio').dif) + ' abajo'))),
-    it('a', 'Repartos con tarifa de ruteo', 'Se puso la tarifa de ruteo (800 local, 1,100 foráneo). Si el reparto quedó lejos del padre, pon la tarifa completa.',
-      L.filter(o => tiene(o, 'tarifa de ruteo') && !o.editC).map(o => vj(o, 'hijo de ' + o.padre))),
+    itAcc('aceptarRuteo', 'Aceptar todas las tarifas de ruteo', it('a', 'Repartos con tarifa de ruteo', 'Se puso la tarifa de ruteo (800 local, 1,100 foráneo). Si el reparto quedó lejos del padre, pon la tarifa completa.',
+      L.filter(o => tiene(o, 'tarifa de ruteo') && !o.editC).map(o => vj(o, 'hijo de ' + o.padre)))),
     it('a', 'Citas del mes siguiente', 'Decide si se cobran en este corte o si los pasas al siguiente con el botón del viaje.',
       L.filter(o => o.citaSig).map(o => vj(o, 'cita ' + o.fecha))),
     it('a', 'Tarifas editadas o costos extra en la plataforma', 'Alguien cambió la tarifa o capturó un costo adicional; confirma qué se cobra.',
@@ -1617,7 +1649,7 @@ function renderRevStrip() {
 const escH = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function itemHtml(i) {
   return `<div class="rev-it ${i.c}"><div class="t">${escH(i.t)} · ${i.vj.length}</div><div class="d">${escH(i.d)}</div>
-    <div class="rev-vj">${i.vj.map(v => `<button data-ir="${v.id}" title="Ir al viaje en la tabla"><b>${v.id}</b> · ${escH(v.txt)}</button>`).join('')}</div></div>`;
+    <div class="rev-vj">${i.vj.map(v => `<button data-ir="${v.id}" title="Ir al viaje en la tabla"><b>${v.id}</b> · ${escH(v.txt)}</button>`).join('')}</div>${i.acc ? `<div class="rev-acc no-print"><button class="mini ok" data-bulk="${i.acc}">${escH(i.accTxt)} (${i.vj.length})</button></div>` : ''}</div>`;
 }
 function abrirRevision() {
   const r = armarRevision(), ov = $('#revOv'); REV_ABIERTA_EN = new Date();
@@ -1644,6 +1676,13 @@ function abrirRevision() {
   $('#revPrint').onclick = () => { document.body.classList.add('solo-rev'); window.print(); setTimeout(() => document.body.classList.remove('solo-rev'), 500); };
   $('#revCopy').onclick = () => copiarRevision(r);
   ov.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => irAViaje(b.dataset.ir));
+  ov.querySelectorAll('[data-bulk]').forEach(b => b.onclick = () => {
+    const acc = b.dataset.bulk, fn = acc === 'aceptarMan' ? aceptarManiobra : aceptarRuteo;
+    const item = r.plataforma.concat(r.decide).find(i => i.acc === acc); if (!item) return;
+    if (!confirm('Se aceptan ' + item.vj.length + (acc === 'aceptarMan' ? ' maniobras propuestas' : ' tarifas de ruteo') + ' tal como las propone el Copiloto. Puedes cambiar cualquiera después en la tabla. ¿Sigo?')) return;
+    item.vj.forEach(v => fn(VIAJES.find(x => x.id === v.id)));
+    redraw(); abrirRevision();
+  });
 }
 function cerrarRevision() { const ov = $('#revOv'); if (ov) { ov.classList.add('hidden'); ov.innerHTML = ''; } }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarRevision(); });
