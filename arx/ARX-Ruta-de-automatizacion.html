@@ -55,6 +55,34 @@ p.lead{color:var(--ink);font-weight:600}
 .stage.next small{color:var(--next);font-weight:700}
 .map-note{font-size:.88rem;color:var(--ink2)}
 
+
+/* Hoja de ruta visual */
+.roadmap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 6px}
+.rm-col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.rm-here{height:18px;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ok);display:flex;align-items:center;gap:6px}
+.rm-here i{width:9px;height:9px;border-radius:50%;background:var(--ok);display:inline-block;box-shadow:0 0 0 3px var(--ok-bg)}
+.rm-chev{color:#fff;padding:9px 18px 9px 22px;min-height:56px;display:flex;flex-direction:column;justify-content:center;font-weight:800;font-size:.9rem;line-height:1.2;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%,14px 50%)}
+.rm-col:first-child .rm-chev{padding-left:14px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%);border-radius:8px 0 0 8px}
+.rm-chev span{font-weight:500;font-size:.72rem;opacity:.92}
+.rm-f1{background:#1a3a6b}.rm-f2{background:#1e5096}.rm-f3{background:#2f74b5}.rm-f4{background:#4a9fd4}
+.rm-stage{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;gap:8px;align-items:flex-start;font-size:.82rem;font-weight:700;color:var(--ink);line-height:1.25}
+.rm-stage small{display:block;margin-top:2px;font-size:.7rem;font-weight:600;color:var(--ink3)}
+.rm-n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#eef0f4;color:var(--ink2);font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.rm-stage.ok{border:2px solid var(--ok);background:var(--ok-bg)}.rm-stage.ok .rm-n{background:var(--ok);color:#fff}.rm-stage.ok small{color:var(--ok)}
+.rm-stage.next{border:2px solid var(--next);background:var(--next-bg)}.rm-stage.next .rm-n{background:var(--next);color:#fff}.rm-stage.next small{color:var(--next)}
+.rm-loop{grid-column:1 / 4;margin:0 10% 0 25%;height:16px;border:2px dashed var(--sky);border-top:none;border-radius:0 0 12px 12px}
+.rm-loop-txt{grid-column:1 / 5;text-align:center;font-size:.8rem;color:var(--ink2);margin-top:-2px}
+.rm-legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.78rem;color:var(--ink2)}
+.rm-legend span{display:flex;align-items:center;gap:6px}
+.rm-legend i{width:12px;height:12px;border-radius:3px;display:inline-block;border:2px solid}
+@media (max-width:600px){
+  .roadmap{grid-template-columns:1fr}
+  .rm-here.empty,.rm-loop{display:none}
+  .rm-chev,.rm-col:first-child .rm-chev{clip-path:none;border-radius:8px;padding-left:14px;min-height:0}
+  .rm-loop-txt{grid-column:1;text-align:left}
+}
+@media print{.roadmap{break-inside:avoid}}
+
 /* Tablas */
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
 table{width:100%;border-collapse:collapse;font-size:.88rem}
@@ -138,39 +166,41 @@ footer{text-align:center;color:var(--ink3);font-size:12px;padding-bottom:28px}
   </section>
 
   <section>
-    <div class="sec-head"><h2>El mapa, ordenado</h2></div>
+    <div class="sec-head"><h2>Hoja de ruta</h2></div>
     <div class="sec-body">
-      <div class="map">
-        <div class="phase">
-          <div class="phase-name"><b>Fase 1</b><span>Inventario y recomendación</span></div>
-          <div class="stages">
-            <div class="stage ok"><b>1. Gestión de propiedades</b><small>Hecha en buena parte</small></div>
-            <div class="stage next"><b>2. Matching cliente–propiedad</b><small>Siguiente paso</small></div>
-          </div>
+      <div class="roadmap" role="img" aria-label="Hoja de ruta de 8 etapas en 4 fases; la etapa 1 ya funciona y la 2 es el siguiente paso">
+        <div class="rm-col">
+          <div class="rm-here"><i></i>Estamos aquí</div>
+          <div class="rm-chev rm-f1">Fase 1<span>Inventario y recomendación</span></div>
+          <div class="rm-stage ok"><div class="rm-n">1</div><div>Gestión de propiedades<small>Hecha en buena parte</small></div></div>
+          <div class="rm-stage next"><div class="rm-n">2</div><div>Matching cliente–propiedad<small>Siguiente paso</small></div></div>
         </div>
-        <div class="phase">
-          <div class="phase-name"><b>Fase 2</b><span>Captación y visitas</span></div>
-          <div class="stages">
-            <div class="stage"><b>3. Contacto inicial</b><small>Por hacer</small></div>
-            <div class="stage"><b>4. Agenda de visitas</b><small>Por hacer</small></div>
-          </div>
+        <div class="rm-col">
+          <div class="rm-here empty"></div>
+          <div class="rm-chev rm-f2">Fase 2<span>Captación y visitas</span></div>
+          <div class="rm-stage"><div class="rm-n">3</div><div>Contacto inicial<small>Por hacer</small></div></div>
+          <div class="rm-stage"><div class="rm-n">4</div><div>Agenda de visitas<small>Por hacer</small></div></div>
         </div>
-        <div class="phase">
-          <div class="phase-name"><b>Fase 3</b><span>Seguimiento</span></div>
-          <div class="stages">
-            <div class="stage"><b>5. Seguimiento post visita</b><small>Por hacer</small></div>
-            <div class="stage"><b>6. Intención de compra</b><small>Por hacer</small></div>
-          </div>
+        <div class="rm-col">
+          <div class="rm-here empty"></div>
+          <div class="rm-chev rm-f3">Fase 3<span>Seguimiento</span></div>
+          <div class="rm-stage"><div class="rm-n">5</div><div>Seguimiento post visita<small>Por hacer</small></div></div>
+          <div class="rm-stage"><div class="rm-n">6</div><div>Intención de compra<small>Por hacer</small></div></div>
         </div>
-        <div class="phase">
-          <div class="phase-name"><b>Fase 4</b><span>Cierre</span></div>
-          <div class="stages">
-            <div class="stage"><b>7. Revisión documental</b><small>Por hacer</small></div>
-            <div class="stage"><b>8. Contratos y firmas</b><small>Por hacer</small></div>
-          </div>
+        <div class="rm-col">
+          <div class="rm-here empty"></div>
+          <div class="rm-chev rm-f4">Fase 4<span>Cierre</span></div>
+          <div class="rm-stage"><div class="rm-n">7</div><div>Revisión documental<small>Por hacer</small></div></div>
+          <div class="rm-stage"><div class="rm-n">8</div><div>Contratos y firmas<small>Por hacer</small></div></div>
         </div>
+        <div class="rm-loop"></div>
+        <div class="rm-loop-txt">↺ Si el cliente no se interesa después de la visita (5), el sistema regresa al matching (2) con lo que aprendió.</div>
       </div>
-      <p class="map-note">Se avanza en orden de la etapa 1 a la 8; cuando un cliente no se interesa después de una visita (etapa 5), el sistema regresa al matching (etapa 2) con lo que aprendió.</p>
+      <div class="rm-legend">
+        <span><i style="border-color:var(--ok);background:var(--ok-bg)"></i>Hecha en buena parte</span>
+        <span><i style="border-color:var(--next);background:var(--next-bg)"></i>Siguiente paso</span>
+        <span><i style="border-color:var(--line);background:var(--card)"></i>Por hacer</span>
+      </div>
     </div>
   </section>
 
@@ -182,12 +212,12 @@ footer{text-align:center;color:var(--ink3);font-size:12px;padding-bottom:28px}
         <table>
           <thead><tr><th>Pieza</th><th>Qué hace</th><th>Estado</th></tr></thead>
           <tbody>
-            <tr><td><a href="https://excelentia.com.mx/arx/registro-propiedad.html">Registro de propiedades</a></td><td>El asesor captura la propiedad desde el celular; se crea su carpeta en Drive con fotos y documentos, la IA redacta la descripción de venta, la ficha se guarda en la base de datos y llegan avisos por correo.</td><td><span class="pill ok">Funciona real</span></td></tr>
-            <tr><td><a href="https://excelentia.com.mx/arx/arx-busqueda.html">Buscador de propiedades</a></td><td>El cliente indica zona, operación, precio y recámaras, y recibe 6 opciones ordenadas por qué tan bien encajan.</td><td><span class="pill demo">Demostración</span></td></tr>
+            <tr><td><a target="_blank" rel="noopener" href="https://excelentia.com.mx/arx/registro-propiedad.html">Registro de propiedades</a></td><td>El asesor captura la propiedad desde el celular; se crea su carpeta en Drive con fotos y documentos, la IA redacta la descripción de venta, la ficha se guarda en la base de datos y llegan avisos por correo.</td><td><span class="pill ok">Funciona real</span></td></tr>
+            <tr><td><a target="_blank" rel="noopener" href="https://excelentia.com.mx/arx/arx-busqueda.html">Buscador de propiedades</a></td><td>El cliente indica zona, operación, precio y recámaras, y recibe 6 opciones ordenadas por qué tan bien encajan.</td><td><span class="pill demo">Demostración</span></td></tr>
           </tbody>
         </table>
       </div>
-      <div class="alert">El buscador intenta leer Inmuebles24 y Lamudi, pero esos portales bloquean la lectura automática; por ahora las opciones son ejemplos generados con los filtros del cliente. Ejemplo resuelto: <a href="https://excelentia.com.mx/arx/arx-resultados.html?busqueda_id=ARX-DEMO-SATELITE">casas en renta en Satélite</a>.</div>
+      <div class="alert">El buscador intenta leer Inmuebles24 y Lamudi, pero esos portales bloquean la lectura automática; por ahora las opciones son ejemplos generados con los filtros del cliente. Ejemplo resuelto: <a target="_blank" rel="noopener" href="https://excelentia.com.mx/arx/arx-resultados.html?busqueda_id=ARX-DEMO-SATELITE">casas en renta en Satélite</a>.</div>
     </div>
   </section>
 
