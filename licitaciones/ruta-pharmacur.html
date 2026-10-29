@@ -158,7 +158,8 @@ svg.lazos{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 /* Controles */
 .barra-prog{position:absolute;left:0;bottom:0;height:4px;background:var(--cielo);width:0}
 .ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
-.ctrl button{font:700 14px var(--f);color:var(--tinta);background:rgba(255,255,255,.08);border:1px solid var(--linea);border-radius:999px;padding:8px 16px;cursor:pointer}
+.ctrl button{font:700 16px var(--f);color:var(--tinta);background:rgba(255,255,255,.08);border:1px solid var(--linea);border-radius:999px;padding:10px 20px;cursor:pointer}
+.ctrl button.grande{background:var(--cielo);color:var(--noche);border-color:var(--cielo);min-width:150px}
 .ctrl button:hover{background:rgba(255,255,255,.16)}
 .ctrl button:focus-visible{outline:2px solid var(--cielo);outline-offset:2px}
 .puntos{display:flex;gap:7px}
@@ -371,10 +372,10 @@ svg.lazos{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 </div></div>
 
 <div class="ctrl">
-  <button id="ant" aria-label="Anterior">‹ Anterior</button>
+  <button id="ant" aria-label="Atrás">◀ Atrás</button>
   <div class="puntos" id="puntos"></div>
-  <button id="pausa">Pausar</button>
-  <button id="sig" aria-label="Siguiente">Siguiente ›</button>
+  <button id="pausa" class="grande">❚❚ Pausa</button>
+  <button id="sig" aria-label="Adelante">Adelante ▶</button>
   <button id="full">Pantalla completa</button>
 </div>
 
@@ -413,7 +414,7 @@ document.getElementById('ant').onclick = () => ir(i - 1);
 document.getElementById('pausa').onclick = e => {
   const now = performance.now();
   if (play) { restante -= (now - t0); } else { t0 = now; }
-  play = !play; e.target.textContent = play ? 'Pausar' : 'Reanudar';
+  play = !play; e.target.textContent = play ? '❚❚ Pausa' : '▶ Reproducir';
 };
 document.getElementById('full').onclick = () => { const el = document.documentElement; (el.requestFullscreen ? el.requestFullscreen() : Promise.reject()).catch(() => {}); };
 document.addEventListener('keydown', e => {
