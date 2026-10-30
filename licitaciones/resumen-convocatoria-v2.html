@@ -221,6 +221,7 @@
   .mx-nota{margin-top:.6rem;font-size:.72rem;color:var(--gris);font-style:italic}
   @media (max-width:600px){ .mx-grid,.mx-alertas,.mx-id{grid-template-columns:1fr} .mx-tab{font-size:.75rem} }
   @media print{ .mx-tab tr,.mx-al,.mx-atn{break-inside:avoid} .mx-tit{break-after:avoid} .mx-bloque{break-inside:auto} }
+  .fte{color:var(--gris);font-size:.78em;font-weight:500;white-space:normal}
 </style>
 </head>
 <body>
@@ -280,9 +281,9 @@
       </details>
       <div class="drop" id="drop1" tabindex="0" role="button" aria-label="Elegir archivos">
         <strong>Arrastra aquí los archivos o da clic para elegirlos</strong>
-        <span>PDF, Word o Excel: bases, anexos, actas y avisos; también escaneados</span>
+        <span>PDF, Word, Excel, correos de Outlook (.msg) e imágenes: bases, anexos, actas y avisos; también escaneados</span>
       </div>
-      <input type="file" id="archivos1" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <input type="file" id="archivos1" multiple accept=".pdf,.docx,.xlsx,.msg,.png,.jpg,.jpeg" class="oculto">
       <ul class="lista" id="lista1"></ul>
       <div class="error oculto" id="errPerfil" style="margin-top:.6rem"></div>
       <div class="acciones">
@@ -392,9 +393,9 @@
       <div class="nota" style="margin-top:0">Sube actas, avisos, diferimientos o anexos nuevos; el agente los suma a los documentos que ya leyó y actualiza el resumen, el calendario y las alertas.</div>
       <div class="drop" id="drop2" tabindex="0" role="button" aria-label="Elegir archivos para agregar">
         <strong>Arrastra aquí los documentos nuevos</strong>
-        <span>PDF, Word (.docx) o Excel (.xlsx)</span>
+        <span>PDF, Word, Excel, correos de Outlook (.msg) o imágenes</span>
       </div>
-      <input type="file" id="archivos2" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <input type="file" id="archivos2" multiple accept=".pdf,.docx,.xlsx,.msg,.png,.jpg,.jpeg" class="oculto">
       <ul class="lista" id="lista2"></ul>
       <div class="docs-cargados" id="docsCargados"></div>
       <div class="acciones">
@@ -409,9 +410,9 @@
       <div class="nota" style="margin-top:0">Sube las bases de la licitación anterior del mismo servicio, o el contrato vigente, y el agente te dice qué cambió.</div>
       <div class="drop" id="drop3" tabindex="0" role="button" aria-label="Elegir archivos de la licitación anterior">
         <strong>Arrastra aquí los documentos anteriores</strong>
-        <span>PDF, Word (.docx) o Excel (.xlsx)</span>
+        <span>PDF, Word, Excel, correos de Outlook (.msg) o imágenes</span>
       </div>
-      <input type="file" id="archivos3" multiple accept=".pdf,.docx,.xlsx" class="oculto">
+      <input type="file" id="archivos3" multiple accept=".pdf,.docx,.xlsx,.msg,.png,.jpg,.jpeg" class="oculto">
       <ul class="lista" id="lista3"></ul>
       <div class="acciones"><button class="btn btn-pri" id="btnComparar" disabled>Comparar</button></div>
       <div class="etapa oculto" id="estComparar" style="text-align:left;margin-top:.8rem"></div>
@@ -439,8 +440,8 @@ const guardarClave = v => { try { v ? localStorage.setItem(LS_CLAVE, v) : localS
 const leerClave = () => { try { return localStorage.getItem(LS_CLAVE) || ''; } catch (e) { return ''; } };
 
 const fmtTam = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
-const esValido = f => /\.(pdf|docx|xlsx)$/i.test(f.name);
-const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' : 'pdf';
+const esValido = f => /\.(pdf|docx|xlsx|msg|png|jpe?g)$/i.test(f.name);
+const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' : /msg$/i.test(n) ? 'correo' : /(png|jpe?g)$/i.test(n) ? 'imagen' : 'pdf';
 const MIME = { pdf: 'application/pdf', word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2400); };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -453,7 +454,7 @@ function zona(n, arr, btn) {
   const pintar = () => {
     $('lista' + n).innerHTML = arr.map((f, i) => {
       const t = tipoArchivo(f.name);
-      return `<li><span class="ico ${t === 'pdf' ? '' : t}">${({ pdf: 'PDF', word: 'DOCX', excel: 'XLSX' })[t]}</span>
+      return `<li><span class="ico ${t === 'pdf' ? '' : t}">${({ pdf: 'PDF', word: 'DOCX', excel: 'XLSX', correo: 'MSG', imagen: 'IMG' })[t]}</span>
       <span class="nom" title="${esc(f.name)}">${esc(f.name)}</span><span class="tam">${fmtTam(f.size)}</span>
       <button class="quitar" data-i="${i}" aria-label="Quitar">×</button></li>`;
     }).join('');
@@ -461,7 +462,7 @@ function zona(n, arr, btn) {
   };
   const agregar = lista => {
     const nuevos = [...lista];
-    if (nuevos.some(f => !esValido(f))) toast('Solo se aceptan PDF, Word (.docx) y Excel (.xlsx)');
+    if (nuevos.some(f => !esValido(f))) toast('Solo se aceptan PDF, Word, Excel, correos .msg e imágenes');
     nuevos.filter(esValido).forEach(f => { if (!arr.some(a => a.name === f.name && a.size === f.size)) arr.push(f); });
     pintar();
   };
@@ -509,22 +510,23 @@ async function procesar(lista, base) {
   mostrar(['secProgreso']);
   window.scrollTo({ top: 0, behavior: 'smooth' });
   const t0 = iniciarReloj();
-  const total = lista.reduce((a, f) => a + f.size, 0);
   let subido = 0;
   try {
+    const envio = await preparar(lista, t => { $('etapa').textContent = t; });
+    const total = envio.reduce((a, f) => a + f.size, 0);
     const ids = [];
-    for (let i = 0; i < lista.length; i++) {
-      const f = lista[i];
-      $('etapa').textContent = `Subiendo ${i + 1} de ${lista.length}: ${f.name}`;
+    for (let i = 0; i < envio.length; i++) {
+      const f = envio[i];
+      $('etapa').textContent = `Subiendo ${i + 1} de ${envio.length}: ${f.name}`;
       const s = await llamar('sesion', { nombre: f.name, tamano: f.size, tipo: f.type || MIME[tipoArchivo(f.name)], origen: location.origin });
       if (!s.uploadUrl) throw new Error('No se pudo abrir la subida a Drive');
       const b0 = subido;
-      ids.push(await subir(s.uploadUrl, f, p => { $('etapa').textContent = `Subiendo ${i + 1} de ${lista.length}: ${f.name} · ${Math.round((b0 + p * f.size) / total * 100)}%`; }));
+      ids.push(await subir(s.uploadUrl, f, p => { $('etapa').textContent = `Subiendo ${i + 1} de ${envio.length}: ${f.name} · ${Math.round((b0 + p * f.size) / total * 100)}%`; }));
       subido += f.size;
     }
     $('etapa').textContent = 'Leyendo los documentos…';
     const nombre = $('nombre').value.trim() || (resultado && resultado.nombre) || lista[0].name;
-    const a = await llamar('analizar', { fileIds: ids, nombre, trabajoBase: base || '' });
+    const a = await llamar('analizar', { fileIds: ids, nombre, trabajoBase: base || '', v3: true });
     if (!a.trabajo) throw new Error('El agente no recibió el trabajo');
     const etapas = base
       ? ['Leyendo los documentos nuevos…', 'Juntándolos con los que ya había leído…', 'Analizando de nuevo con IA…', 'Armando el resumen actualizado…']
@@ -548,7 +550,7 @@ async function procesar(lista, base) {
     aceptadas.clear();
     $('txtEjecutivo').classList.add('oculto'); $('accEjecutivo').classList.add('oculto'); $('txtComparar').classList.add('oculto'); $('estComparar').classList.add('oculto');
     trabajoActual = a.trabajo;
-    docsCargados = (base ? docsCargados : []).concat(lista.map(f => f.name).filter(n => !docsCargados.includes(n) || !base));
+    docsCargados = (base ? docsCargados : []).concat(envio.map(f => f.name).filter(n => !docsCargados.includes(n) || !base));
     lista.splice(0, lista.length);
     pintar1(); pintar2();
     if (!base) { historial = []; $('chat').innerHTML = ''; }
@@ -563,7 +565,7 @@ async function procesar(lista, base) {
 }
 
 // Convierte el texto del agente en bloques con formato (encabezados, viñetas, etiquetas en negritas)
-const ENCABEZADOS = /^(Generales|Calendario y\/o tiempo de entrega:?|Calendario de eventos|Observaciones Generales:?|Datos adicionales:?)$/i;
+const ENCABEZADOS = /^(Generales|Datos Generales del Proyecto|Calendario y\/o tiempo de entrega:?|Calendario de eventos|Equipamiento|Insumos|Observaciones Generales:?|Datos adicionales:?)$/i;
 function bloques(texto) {
   const out = []; let lista = null;
   texto.split('\n').forEach(l => {
@@ -582,11 +584,15 @@ function partir(t) {
   return [null, t];
 }
 const conLiga = h => h.replace(/\[PEGAR LIGA\]/g, '<span class="liga">[PEGAR LIGA]</span>');
+// Separa la fuente del dato (documento y página) que va al final entre paréntesis
+const RE_FTE = /\s\(((?:[^()]*?(?:págs?\.|hoja |numeral|apartado|Correo de la convocante)[^()]*?))\)$/;
+function sinFuente(t) { const m = String(t).match(RE_FTE); return m ? [t.slice(0, m.index), m[1]] : [t, '']; }
+const conFte = r => { const [v, f] = sinFuente(r); return conLiga(esc(v)) + (f ? ` <span class="fte">(${esc(f)})</span>` : ''); };
 function bloqueHTML(b) {
   if (b.tipo === 'h') return `<h4>${esc(b.texto)}</h4>`;
-  if (b.tipo === 'ul') return '<ul>' + b.items.map(it => { const [e, r] = partir(it); return `<li>${e ? `<strong>${esc(e)}</strong>` : ''}${conLiga(esc(r))}</li>`; }).join('') + '</ul>';
+  if (b.tipo === 'ul') return '<ul>' + b.items.map(it => { const [e, r] = partir(it); return `<li>${e ? `<strong>${esc(e)}</strong>` : ''}${conFte(r)}</li>`; }).join('') + '</ul>';
   const [e, r] = partir(b.texto);
-  return `<p>${e ? `<strong>${esc(e)}</strong>` : ''}${conLiga(esc(r))}</p>`;
+  return `<p>${e ? `<strong>${esc(e)}</strong>` : ''}${conFte(r)}</p>`;
 }
 const aHTML = bs => bs.map(bloqueHTML).join('');
 // Vista por temas: el correo en secciones desplegables (al copiar o guardar en Word sale completo)
@@ -637,9 +643,86 @@ async function copiar(html, texto, msg) {
     const ta = document.createElement('textarea'); ta.value = texto; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast(msg);
   }
 }
-const htmlCorreo = () => `<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a2035">${aHTML(bloques(textoFinal())).replace(/<span class="liga">/g, '<span style="background:#fff3c4">')}</div>`;
+const htmlCorreo = () => `<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a2035">${aHTML(bloques(textoFinal())).replace(/<span class="liga">/g, '<span style="background:#fff3c4">').replace(/<span class="fte">/g, '<span style="color:#8a90a0;font-size:9pt">')}</div>`;
 $('btnCopiar').onclick = () => copiar(htmlCorreo(), textoFinal(), 'Correo copiado, listo para pegar en Outlook');
 $('btnCopiarAsunto').onclick = () => copiar(esc(resultado.asunto || ''), resultado.asunto || '', 'Asunto copiado');
+
+// ===== Preparar archivos: correos de Outlook (.msg) e imágenes se convierten a PDF antes de subir =====
+function cargarScript(src, listo) {
+  return listo() ? Promise.resolve() : new Promise((ok, mal) => {
+    const s = document.createElement('script'); s.src = src;
+    s.onload = ok; s.onerror = () => mal(new Error('No se pudo cargar ' + src.split('/').pop()));
+    document.head.appendChild(s);
+  });
+}
+const cargarPDF = () => cargarScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => window.jspdf);
+const cargarMsg = () => cargarScript('lib/msgreader.min.js', () => window.MsgReader);
+const nombreLimpio = t => String(t || '').replace(/[\\/:*?"<>|“”]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90) || 'sin asunto';
+const MIME_EXT = { pdf: 'application/pdf', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
+const extDe = n => (String(n).match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || '';
+
+async function imagenAPDF(file) {
+  await cargarPDF();
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => mal(new Error('Imagen ilegible: ' + file.name)); i.src = url; });
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0);
+    const horiz = c.width > c.height;
+    const doc = new window.jspdf.jsPDF({ orientation: horiz ? 'landscape' : 'portrait', unit: 'pt', format: 'letter' });
+    const W = doc.internal.pageSize.getWidth() - 48, H = doc.internal.pageSize.getHeight() - 48;
+    const k = Math.min(W / c.width, H / c.height);
+    doc.addImage(c.toDataURL('image/jpeg', 0.88), 'JPEG', 24, 24, c.width * k, c.height * k);
+    return new File([doc.output('blob')], file.name.replace(/\.[^.]+$/, '') + '.pdf', { type: 'application/pdf' });
+  } finally { URL.revokeObjectURL(url); }
+}
+
+async function correoAPDF(d) {
+  await cargarPDF();
+  const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
+  const M = 50, W = doc.internal.pageSize.getWidth() - 2 * M, H = doc.internal.pageSize.getHeight() - M;
+  let y = M;
+  const escribe = (t, tam = 10, negrita = false) => {
+    doc.setFont('helvetica', negrita ? 'bold' : 'normal'); doc.setFontSize(tam);
+    doc.splitTextToSize(String(t || '').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\t/g, '  '), W).forEach(l => {
+      if (y > H) { doc.addPage(); y = M; }
+      doc.text(l, M, y); y += tam * 1.35;
+    });
+  };
+  escribe('Correo de la convocante', 13, true); y += 4;
+  escribe('Asunto: ' + (d.subject || ''), 10, true);
+  if (d.senderName || d.senderEmail) escribe('De: ' + [d.senderName, d.senderEmail].filter(Boolean).join(' · '));
+  const f = d.messageDeliveryTime || d.clientSubmitTime; if (f) escribe('Fecha: ' + f);
+  y += 8;
+  escribe((d.body || '').replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n'));
+  return new File([doc.output('blob')], `Correo - ${nombreLimpio(d.subject)}.pdf`, { type: 'application/pdf' });
+}
+
+async function preparar(lista, avisar = () => {}) {
+  const salida = [], vistos = new Set();
+  const agrega = f => { const k = f.name.toLowerCase() + '|' + f.size; if (!vistos.has(k)) { vistos.add(k); salida.push(f); } };
+  const procesa = async (f, delCorreo) => {
+    const e = extDe(f.name);
+    if (['pdf', 'docx', 'xlsx'].includes(e)) return agrega(f);
+    if (['png', 'jpg', 'jpeg'].includes(e)) { avisar('Convirtiendo imagen: ' + f.name); return agrega(await imagenAPDF(f)); }
+    if (e === 'msg' && !delCorreo) {
+      avisar('Leyendo correo: ' + f.name);
+      await cargarMsg();
+      const r = new window.MsgReader(await f.arrayBuffer()); const d = r.getFileData();
+      if (d.error) throw new Error('No se pudo leer el correo ' + f.name);
+      agrega(await correoAPDF(d));
+      for (const a of d.attachments || []) {
+        if (a.attachmentHidden === true || a.innerMsgContent) continue; // imágenes de la firma y del cuerpo
+        const x = r.getAttachment(a); const ext = extDe(x.fileName);
+        if (!MIME_EXT[ext]) continue;
+        await procesa(new File([x.content], x.fileName, { type: MIME_EXT[ext] }), true);
+      }
+    }
+  };
+  for (const f of lista) await procesa(f, false);
+  if (!salida.length) throw new Error('No encontramos documentos que se puedan leer');
+  return salida;
+}
 
 // Word (.docx) generado en el navegador
 function cargarDocx() {
@@ -656,7 +739,7 @@ $('btnWord').onclick = async () => {
     await cargarDocx();
     const { Document, Packer, Paragraph, TextRun } = window.docx;
     const run = (t, extra = {}) => new TextRun({ text: t, font: 'Calibri', size: 21, color: '1A2035', ...extra });
-    const linea = (e, r, opts = {}) => new Paragraph({ spacing: { after: 80 }, ...opts, children: [...(e ? [run(e, { bold: true })] : []), run(r)] });
+    const linea = (e, r, opts = {}) => { const [v, f] = sinFuente(r); return new Paragraph({ spacing: { after: 80 }, ...opts, children: [...(e ? [run(e, { bold: true })] : []), run(v), ...(f ? [run(' (' + f + ')', { color: '8A90A0', size: 17 })] : [])] }); };
     const hijos = [new Paragraph({ spacing: { after: 200 }, children: [run('Asunto: ', { bold: true, color: '1A3A6B' }), run(resultado.asunto || '', { bold: true })] })];
     bloques(textoFinal()).forEach(b => {
       if (b.tipo === 'h') hijos.push(new Paragraph({ spacing: { before: 160, after: 80 }, keepNext: true, children: [run(b.texto, { bold: true, color: '1A3A6B' })] }));
@@ -856,9 +939,10 @@ $('btnComparar').onclick = async () => {
   const reloj = setInterval(() => { est.dataset.s = Math.floor((Date.now() - t0) / 1000); }, 1000);
   try {
     const ids = [];
-    for (let i = 0; i < archivos3.length; i++) {
-      const f = archivos3[i];
-      est.textContent = `Subiendo ${i + 1} de ${archivos3.length}: ${f.name}`;
+    const envio3 = await preparar(archivos3, t => { est.textContent = t; });
+    for (let i = 0; i < envio3.length; i++) {
+      const f = envio3[i];
+      est.textContent = `Subiendo ${i + 1} de ${envio3.length}: ${f.name}`;
       const s = await llamar('sesion', { nombre: f.name, tamano: f.size, tipo: f.type || MIME[tipoArchivo(f.name)], origen: location.origin });
       ids.push(await subir(s.uploadUrl, f, () => {}));
     }
