@@ -452,7 +452,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 20 (28-oct-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 21 (30-oct-2026)</footer>
 </div>
 
 <script>
@@ -575,7 +575,8 @@ function recalcular(o) {
   o.venta = vf.v; o.sV = o.editC ? 'g' : vf.s; o.srcV = vf.src;
   const vm = ventaManiobra(o.man);
   o.manVenta = vm.v; o.srcMV = vm.src;
-  o.estVenta = o.est != null ? ((M.ventaEstadia && M.ventaEstadia[k2(o.est)] != null) ? M.ventaEstadia[k2(o.est)] : Math.round(o.est * M.ratioGlobal * 100) / 100) : null; // v20
+  const _et = Object.values(EST_TABLA).find(x => o.est != null && o.est > 0 && Math.abs(o.est / x[0] - Math.round(o.est / x[0])) < 1e-9);
+  o.estVenta = o.est != null ? (_et ? Math.round(o.est / _et[0] * _et[1] * 100) / 100 : (M.ventaEstadia && M.ventaEstadia[k2(o.est)] != null) ? M.ventaEstadia[k2(o.est)] : Math.round(o.est * M.ratioGlobal * 100) / 100) : null; // v20
   o.margen = (o.venta || 0) - (o.costo || 0) + (o.manVenta || 0) - (o.man || 0) + (o.estVenta || 0) - (o.est || 0);
   o.totalVenta = (o.venta || 0) + (o.manVenta || 0) + (o.estVenta || 0);
   o.totalCosto = (o.costo || 0) + (o.man || 0) + (o.est || 0);
@@ -592,6 +593,7 @@ function recalcular(o) {
   let peor = Math.max(ord[o.sC], ord[o.sV], ord[o.sM]);
   if (o.margen <= 0 && (o.totalVenta || o.totalCosto)) peor = 2;
   if (o.citaSig && peor < 1) peor = 1;
+  if (peor < 1 && o.flags.some(f => f.t === 'estadía con tu tabla' || f.t === 'zona por revisar')) peor = 1; // v21
   o.sem = ['g', 'a', 'r'][peor];
   o.atencion = o.sem !== 'g';
   // v17: al editar en pantalla se vuelve a revisar el servicio (si es reparto, su padre)
@@ -599,6 +601,7 @@ function recalcular(o) {
 }
 
 /* ---------- v10: viajes leídos de la base de Armadamyl ---------- */
+const EST_TABLA = { '1 5 TONELADAS': [1568, 1635], 'TRAILER': [3623, 3731] }; // v21: estadía por día (costo / precio); 3.5 t y rabón, pendientes de Luis
 const MAN_COSTO = { '1 5 TONELADAS': 1145, '3 5 TONELADAS': 1145, 'TORTON RABON': 2440, 'TRAILER': 2700 };
 const esSi = v => /^s/i.test(String(v == null ? '' : v).trim());
 
@@ -667,7 +670,17 @@ function procesarBase(lista) {
     // v18: el nombre del destino dice una ciudad que no es la zona con la que se cobra
     if (!recol && cz != null && !flags.some(f => f.t === 'zona en duda')) {
       const zr = zonaPorRevisar(dest, zonaTxt, cz);
-      if (zr) { if (sC === 'g') sC = 'a'; flags.push(zr); }
+      if (zr) {
+        if (sC === 'g') sC = 'a';
+        const tz = zr.zid && TAB_ZONA[zr.zid] && TAB_ZONA[zr.zid][uni]; // v21: se cobra con la zona que dice el destino
+        if (tz && !(t && t.n >= 2 && t.p >= 0.7 && Math.abs(t.m - cz) / Math.max(cz, 1) < 0.01)) { // si tu histórico firme cobra la zona de la plataforma, manda tu histórico
+          const c = centavos(tz[0]);
+          costo = c ? c.costo : tz[0]; venta = c ? c.venta : tz[1]; fijo = true; srcV = 'tabulador · ' + ZONA_NOM[zr.zid];
+          srcC = 'tabulador · ' + ZONA_NOM[zr.zid] + ' (la plataforma dice ' + zonaTxt + ')';
+          zr.d = 'El destino dice ' + zr.nom + ', pero la plataforma tiene la dirección en ' + zonaTxt + ' (' + mny0(cz) + '). Se cobró con la tarifa de ' + ZONA_NOM[zr.zid] + ' (' + mny0(costo) + ' / ' + mny0(venta) + '); corrige la zona de la dirección en la plataforma para que salga así desde el origen.';
+        }
+        flags.push(zr);
+      }
     }
     // v16: el hijo de un reparto lleva tarifa de ruteo: 800 local, 1,100 foráneo; Luis la confirma
     if (esSi(b.esReparto) && !esSi(b.edicion)) {
@@ -697,7 +710,12 @@ function procesarBase(lista) {
     const ext = num(b.extCosto);
     if (ext) flags.push({ c: 'a', t: 'costos extra', d: 'Capturados en la plataforma: ' + (b.extConceptos || 'conceptos sin nombre') + ' por ' + mny0(ext) + (b.extFacturar ? ' · facturar: ' + b.extFacturar : '') + '.' });
 
-    const est = num(b.est) || null;
+    let est = num(b.est) || null;
+    // v21: la estadía se cobra con tu tabla por unidad (1 día); lo que registra la plataforma es lo pagado al transportista
+    if (est && EST_TABLA[uni]) {
+      flags.push({ c: 'a', t: 'estadía con tu tabla', d: 'La plataforma registra estadía (' + mny0(est) + ' al transportista). Se propone 1 día con tu tabla: ' + mny0(EST_TABLA[uni][0]) + ' / ' + mny0(EST_TABLA[uni][1]) + '. Si fueron más días, multiplícalo en la columna de estadía.' });
+      est = EST_TABLA[uni][0];
+    }
     const fecha = String(b.fecha || '').slice(0, 10);
     const o = {
       id: String(parseInt(b.id, 10)), folio: b.folio || '', origen: b.origen || '', cliente: b.cliente || '', pedido: b.pedido || '',
@@ -752,6 +770,11 @@ const ZONA_CIUDAD = [
   ['POZA RICA', 'Poza Rica', [], 1], ['XALAPA', 'Xalapa', [], 1], ['ORIZABA', 'Orizaba', [], 1],
   ['OBREGON', 'Obregón', ['CDMX'], 2]
 ];
+/* v21 · tabulador de la plataforma por zona y unidad (costo de tu empresa / precio 4PL), leído el 30-oct-2026.
+   Se usa solo cuando el nombre del destino dice otra zona que sí tiene tarifa. */
+const TAB_ZONA = {"1":{"TRAILER":[6750,6929],"1 5 TONELADAS":[2257,2337],"3 5 TONELADAS":[2778,2863],"TORTON RABON":[4762,4906]},"2":{"TRAILER":[9501,9786],"1 5 TONELADAS":[5016,5193],"3 5 TONELADAS":[6300,6600],"TORTON RABON":[7245,7463]},"3":{"TRAILER":[11178,11513],"1 5 TONELADAS":[5016,5193],"3 5 TONELADAS":[6300,6600],"TORTON RABON":[7245,7463]},"4":{"TRAILER":[11178,11513],"1 5 TONELADAS":[5016,5193],"3 5 TONELADAS":[6300,6600],"TORTON RABON":[7245,7463]},"5":{"TRAILER":[28980,29849],"1 5 TONELADAS":[15675,16225],"3 5 TONELADAS":[18375,19250],"TORTON RABON":[22770,23454]},"6":{"TRAILER":[31298,32237],"1 5 TONELADAS":[18288,18929],"3 5 TONELADAS":[21000,22000],"TORTON RABON":[25278,26038]},"7":{"TRAILER":[67275,69293],"1 5 TONELADAS":[34987,36212],"3 5 TONELADAS":[40950,42900],"TORTON RABON":[47610,49039]},"8":{"TRAILER":[42435,43708],"1 5 TONELADAS":[24035,24877],"3 5 TONELADAS":[38350,29700],"TORTON RABON":[34155,35181]},"9":{"TRAILER":[83835,86350],"1 5 TONELADAS":[36115,37670],"3 5 TONELADAS":[40824,42768],"TORTON RABON":[46948,48357]},"10":{"TRAILER":[67275,69293],"1 5 TONELADAS":[34987,36493],"3 5 TONELADAS":[40950,42900],"TORTON RABON":[47610,49039]},"11":{"TRAILER":[15525,15991],"1 5 TONELADAS":[8465,8829],"3 5 TONELADAS":[8959,9385],"TORTON RABON":[10294,10604]},"12":{"TRAILER":[14490,14925],"1 5 TONELADAS":[5304,5533],"3 5 TONELADAS":[7938,8316],"TORTON RABON":[10690,11012]},"13":{"TRAILER":[27945,28783],"1 5 TONELADAS":[14672,15304],"3 5 TONELADAS":[17010,17820],"TORTON RABON":[21150,21785]},"14":{"TRAILER":[20700,21321],"1 5 TONELADAS":[10973,11445],"3 5 TONELADAS":[16800,17600],"TORTON RABON":[18630,19190]},"15":{"TRAILER":[167670,172700],"1 5 TONELADAS":[87162,90916],"3 5 TONELADAS":[96390,100980],"TORTON RABON":[95013,97864]},"16":{"TRAILER":[9315,9594],"1 5 TONELADAS":[4703,4905],"3 5 TONELADAS":[5880,6160],"TORTON RABON":[6831,7037]},"17":{"TRAILER":[9315,9594],"1 5 TONELADAS":[3344,3488],"3 5 TONELADAS":[4200,4400],"TORTON RABON":[5693,5864]}};
+const ZONA_ID = { JILOTEPEC: 17, TOLUCA: 4, CHALCO: 2, QUERETARO: 12, PUEBLA: 11, GUADALAJARA: 5, MONTERREY: 6, CULIACAN: 7, VILLAHERMOSA: 8, CHIHUAHUA: 9, MERIDA: 10, VERACRUZ: 13, SILAO: 14, MEXICALI: 15, TEPEJI: 16 };
+const ZONA_NOM = { 17: 'Jilotepec', 4: 'Toluca', 2: 'Chalco', 12: 'Querétaro', 11: 'Puebla', 5: 'Guadalajara', 6: 'Monterrey', 7: 'Culiacán', 8: 'Villahermosa', 9: 'Chihuahua', 10: 'Mérida', 13: 'Veracruz', 14: 'Silao', 15: 'Mexicali', 16: 'Tepeji' };
 function zonaPorRevisar(dest, zonaTxt, cz) {
   const d = ' ' + dest + ' ', z = norm(zonaTxt);
   for (const [tok, nom, ok, tipo] of ZONA_CIUDAD) {
@@ -761,7 +784,7 @@ function zonaPorRevisar(dest, zonaTxt, cz) {
     if (tipo === 2) txt = 'Revisa si es Ciudad Obregón (Sonora) o Álvaro Obregón (CDMX): la plataforma tiene la dirección en ' + zonaTxt + ' y se cobró con esa zona (' + mny0(cz) + '). Si no es esa, corrige la zona de la dirección en la plataforma.';
     else if (tipo === 1) txt = nom + ' no tiene zona propia en tu tabulador; la plataforma tiene la dirección en ' + zonaTxt + ' y se cobró con esa zona (' + mny0(cz) + '). Confirma que esa es la tarifa que cobras.';
     else txt = 'El destino dice ' + nom + ', pero la plataforma tiene la dirección en ' + zonaTxt + ' y se cobró con esa zona (' + mny0(cz) + '). Si va en ' + nom + ', corrige la zona de la dirección en la plataforma.';
-    return { c: 'a', t: 'zona por revisar', l: 'zona por revisar · ' + nom, d: txt };
+    return { c: 'a', t: 'zona por revisar', l: 'zona por revisar · ' + nom, d: txt, zid: !tipo && ok.length ? ZONA_ID[ok[0]] || null : null, nom };
   }
   return null;
 }
@@ -812,7 +835,7 @@ function setMes(m) {
   FD2 = m + '-' + String(new Date(y, mm, 0).getDate()).padStart(2, '0');
   FMES = m;
 }
-const COL_SIG = { 'lo pagado supera el precio': 'costo', 'destino nuevo': 'costo', 'destino sin histórico': 'costo', 'tarifa inconsistente': 'costo', '__neg': 'costo', 'maniobra faltante': 'man', 'zona en duda': 'costo', 'zona por revisar': 'costo', 'sin tarifa en la zona': 'costo', 'tarifa editada': 'costo', 'costos extra': 'costo' };
+const COL_SIG = { 'lo pagado supera el precio': 'costo', 'destino nuevo': 'costo', 'destino sin histórico': 'costo', 'tarifa inconsistente': 'costo', '__neg': 'costo', 'maniobra faltante': 'man', 'zona en duda': 'costo', 'zona por revisar': 'costo', 'estadía con tu tabla': 'costo', 'sin tarifa en la zona': 'costo', 'tarifa editada': 'costo', 'costos extra': 'costo' };
 const sinMargen = v => v.margen <= 0 && !!(v.totalVenta || v.totalCosto);
 const tieneSenal = (v, s) => s === '__neg' ? sinMargen(v) : v.flags.some(f => f.t === s);
 // vistos = base + filtro por tipo de señal (alimenta la tabla y la exportación)
@@ -927,6 +950,10 @@ function aceptarManiobra(o) {
   o.flags = o.flags.filter(f => f.t !== 'maniobra faltante');
   recalcular(o); return true;
 }
+function aceptarEstadia(o) {
+  if (!o || !o.flags.some(f => f.t === 'estadía con tu tabla')) return false;
+  o.editE = true; o.flags = o.flags.filter(f => f.t !== 'estadía con tu tabla'); recalcular(o); return true;
+}
 function aceptarRuteo(o) {
   if (!o || !o.flags.some(f => f.t === 'tarifa de ruteo')) return false;
   o.editC = true; o.sC = 'g'; o.srcC = 'tarifa de ruteo · aceptada por ti';
@@ -988,7 +1015,7 @@ function renderTabla() {
       <td class="num">${mny(o.venta)}<span class="src">${o.srcV}</span></td>
       <td class="num${o.flags.some(f => f.t === 'lo pagado supera el precio') ? ' marg-neg' : ''}">${o.pag == null ? '' : mny(o.pag)}${pagSrc(o)}</td>
       <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
-      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.flags.some(f => f.t === 'maniobra faltante') ? '<button class="mini ok" data-acc="aceptarMan" title="La maniobra propuesta es correcta">aceptar maniobra</button>' : ''}${o.flags.some(f => f.t === 'tarifa de ruteo') ? '<button class="mini ok" data-acc="aceptarRuteo" title="La tarifa de ruteo es correcta">aceptar ruteo</button>' : ''}${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
+      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.flags.some(f => f.t === 'maniobra faltante') ? '<button class="mini ok" data-acc="aceptarMan" title="La maniobra propuesta es correcta">aceptar maniobra</button>' : ''}${o.flags.some(f => f.t === 'estadía con tu tabla') ? '<button class="mini ok" data-acc="aceptarEst" title="La estadía propuesta es correcta">aceptar estadía</button>' : ''}${o.flags.some(f => f.t === 'tarifa de ruteo') ? '<button class="mini ok" data-acc="aceptarRuteo" title="La tarifa de ruteo es correcta">aceptar ruteo</button>' : ''}${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
     </tr>`).join('') : '<tr><td colspan="14" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
   <tfoot><tr>
     <td colspan="5">Subtotales (${v.length} viajes)</td>
@@ -1005,13 +1032,14 @@ function renderTabla() {
     const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
     if (e.target.dataset.acc === 'aceptarMan') { aceptarManiobra(o); redraw(); return; }
     if (e.target.dataset.acc === 'aceptarRuteo') { aceptarRuteo(o); redraw(); return; }
+    if (e.target.dataset.acc === 'aceptarEst') { aceptarEstadia(o); redraw(); return; }
     if (e.target.dataset.acc === 'ahora') { o.citaSig = false; o.flags = o.flags.filter(f => f.t !== 'cita del mes siguiente'); recalcular(o); redraw(); }
     else posponer(o, true);
   });
   document.querySelectorAll('#tbl .inp').forEach(inp => inp.addEventListener('change', e => {
     const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
     const n = num(e.target.value), k = e.target.dataset.k;
-    if (k === 'est') { o.est = n; o.editE = true; recalcular(o); redraw(); return; } // v20: la estadía no toca los avisos
+    if (k === 'est') { o.est = n; o.editE = true; o.flags = o.flags.filter(f => f.t !== 'estadía con tu tabla'); recalcular(o); redraw(); return; } // v20: la estadía no toca los avisos
     if (k === 'costo') { o.costo = n; o.editC = true; o.sC = 'g'; o.srcC = 'confirmado por ti'; }
     else { o.man = n; o.editM = true; o.sM = 'g'; o.srcM = 'confirmado por ti'; }
     o.flags = o.flags.filter(f => f.auto || f.t === 'precio por debajo del costo' || f.t === 'viaje sin margen');
@@ -1621,6 +1649,8 @@ function armarRevision() {
       neg.map(o => vj(o, 'margen ' + mny0(o.margen)))),
     it('a', 'Lo pagado supera el precio', 'Al transportista se le debe más flete del que vas a cobrar; entre todos quedarías ' + mny0(difPag) + ' abajo.',
       pag.map(o => vj(o, mny0(fl(o, 'lo pagado supera el precio').dif) + ' abajo'))),
+    itAcc('aceptarEst', 'Aceptar todas las estadías propuestas', it('a', 'Estadías con tu tabla', 'La plataforma registra estadía; se propone 1 día con tu tabla. Si fueron más días, cámbialo en la columna de estadía.',
+      L.filter(o => tiene(o, 'estadía con tu tabla')).map(o => vj(o, mny0(o.est) + ' / ' + mny0(o.estVenta))))),
     itAcc('aceptarRuteo', 'Aceptar todas las tarifas de ruteo', it('a', 'Repartos con tarifa de ruteo', 'Se puso la tarifa de ruteo (800 local, 1,100 foráneo). Si el reparto quedó lejos del padre, pon la tarifa completa.',
       L.filter(o => tiene(o, 'tarifa de ruteo') && !o.editC).map(o => vj(o, 'hijo de ' + o.padre)))),
     it('a', 'Citas del mes siguiente', 'Decide si se cobran en este corte o si los pasas al siguiente con el botón del viaje.',
@@ -1677,9 +1707,9 @@ function abrirRevision() {
   $('#revCopy').onclick = () => copiarRevision(r);
   ov.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => irAViaje(b.dataset.ir));
   ov.querySelectorAll('[data-bulk]').forEach(b => b.onclick = () => {
-    const acc = b.dataset.bulk, fn = acc === 'aceptarMan' ? aceptarManiobra : aceptarRuteo;
+    const acc = b.dataset.bulk, fn = acc === 'aceptarMan' ? aceptarManiobra : acc === 'aceptarEst' ? aceptarEstadia : aceptarRuteo;
     const item = r.plataforma.concat(r.decide).find(i => i.acc === acc); if (!item) return;
-    if (!confirm('Se aceptan ' + item.vj.length + (acc === 'aceptarMan' ? ' maniobras propuestas' : ' tarifas de ruteo') + ' tal como las propone el Copiloto. Puedes cambiar cualquiera después en la tabla. ¿Sigo?')) return;
+    if (!confirm('Se aceptan ' + item.vj.length + (acc === 'aceptarMan' ? ' maniobras propuestas' : acc === 'aceptarEst' ? ' estadías propuestas' : ' tarifas de ruteo') + ' tal como las propone el Copiloto. Puedes cambiar cualquiera después en la tabla. ¿Sigo?')) return;
     item.vj.forEach(v => fn(VIAJES.find(x => x.id === v.id)));
     redraw(); abrirRevision();
   });
