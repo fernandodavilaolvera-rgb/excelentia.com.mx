@@ -222,6 +222,10 @@
   @media (max-width:600px){ .mx-grid,.mx-alertas,.mx-id{grid-template-columns:1fr} .mx-tab{font-size:.75rem} }
   @media print{ .mx-tab tr,.mx-al,.mx-atn{break-inside:avoid} .mx-tit{break-after:avoid} .mx-bloque{break-inside:auto} }
   .fte{color:var(--gris);font-size:.78em;font-weight:500;white-space:normal}
+  .agregar-renglon{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.55rem;padding-top:.5rem;border-top:1px dashed var(--borde);font-size:.82em;color:var(--texto2)}
+  .agregar-renglon .btn-mini{padding:.3rem .7rem;font-size:.8rem}
+  .agregar-renglon .btn-mini.activo{background:#e8f0fb;border-color:#4a9fd4;color:#1a3a6b}
+  @media print{.agregar-renglon{display:none}}
 </style>
 </head>
 <body>
@@ -376,7 +380,7 @@
   <section class="card no-print oculto" id="secChat">
     <div class="card-cab"><span>Pregúntale al agente</span></div>
     <div class="card-body">
-      <div class="nota" style="margin-top:0">Pregunta de dónde sale un dato o pide información que no está en el resumen; cada respuesta trae el documento, la página y el texto de donde sale.</div>
+      <div class="nota" style="margin-top:0">Pregunta de dónde sale un dato o pide información que no está en el resumen; cada respuesta trae el documento, la página y el texto de donde sale, y con un clic la puedes agregar al resumen como renglón.</div>
       <div class="chips" id="chips"></div>
       <div class="chat" id="chat"></div>
       <div class="chat-in">
@@ -785,6 +789,12 @@ async function preguntar() {
     const j = await llamar('preguntar', { trabajo: trabajoActual, pregunta: q, historial });
     espera.classList.remove('pensando');
     espera.innerHTML = htmlRespuesta(j);
+    if (j.renglon && j.renglon.tema && j.renglon.texto) {
+      const k = renglonesChat.length; renglonesChat.push({ ...j.renglon, activo: false });
+      const b = document.createElement('div'); b.className = 'agregar-renglon';
+      b.innerHTML = `<button class="btn btn-sec btn-mini" data-k="${k}">+ Agregar al resumen</button><span>${esc(j.renglon.tema)}: ${esc(j.renglon.texto)}</span>`;
+      espera.appendChild(b);
+    }
     historial.push({ rol: 'usuario', texto: q }, { rol: 'agente', texto: j.respuesta || '' });
     historial = historial.slice(-8);
   } catch (err) {
@@ -794,6 +804,18 @@ async function preguntar() {
   } finally { $('btnPreguntar').disabled = false; $('pregunta').focus(); }
 }
 $('btnPreguntar').onclick = preguntar;
+// Respuestas del chat que el usuario agrega al resumen como renglón
+let renglonesChat = [];
+$('chat').addEventListener('click', e => {
+  const b = e.target.closest('.agregar-renglon button'); if (!b) return;
+  const r = renglonesChat[+b.dataset.k]; if (!r) return;
+  r.activo = !r.activo;
+  b.textContent = r.activo ? '✓ Agregado · quitar' : '+ Agregar al resumen';
+  b.classList.toggle('activo', r.activo);
+  $('txtCorreo').innerHTML = aTemas(bloques(textoFinal()));
+  pintarMatriz();
+  toast(r.activo ? 'Agregado al resumen' : 'Quitado del resumen');
+});
 $('pregunta').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); preguntar(); } });
 
 
@@ -883,10 +905,11 @@ function textoFinal() {
     if (perfil.destinatarios) t = t.replace(/Estimados Belem \| Héctor/, 'Estimados ' + perfil.destinatarios);
     if (perfil.firma) t = t.replace(/Emmanuel Estévez\.\s*$/, perfil.firma);
   }
-  const sel = (extras.sugerencias || []).filter((s, i) => aceptadas.has(i));
+  const sel = (extras.sugerencias || []).filter((s, i) => aceptadas.has(i)).concat((typeof renglonesChat !== 'undefined' ? renglonesChat : []).filter(r => r.activo));
   if (sel.length) {
-    const bloque = '\n\nDatos adicionales:\n' + sel.map(s => `• ${s.tema}: ${s.texto}`).join('\n');
-    t = t.replace(/\n\nQuedo a sus órdenes\./, bloque + '\n\nQuedo a sus órdenes.');
+    const bloque = '\n\nDatos adicionales:\n' + sel.map(s => `• ${s.tema}: ${s.texto}${s.fuente ? ` (${String(s.fuente).replace(/^\(|\)$/g, '')})` : ''}`).join('\n');
+    if (/\n\nEstimados /.test(t)) t = t.replace(/\n\nEstimados /, bloque + '\n\nEstimados ');
+    else t = t.replace(/\n\nQuedo a sus órdenes\./, bloque + '\n\nQuedo a sus órdenes.');
   }
   return t;
 }
@@ -903,6 +926,7 @@ $('lstSugerencias').onchange = e => {
   const c = e.target.closest('input[data-i]'); if (!c) return;
   const i = +c.dataset.i; c.checked ? aceptadas.add(i) : aceptadas.delete(i);
   $('txtCorreo').innerHTML = aTemas(bloques(textoFinal()));
+  pintarMatriz();
   toast(c.checked ? 'Agregado al correo' : 'Quitado del correo');
 };
 
@@ -1013,6 +1037,7 @@ function htmlMatriz(m) {
     ${tablaM('04 · Equipos en comodato y soporte', ['Condición', '', 'Alcance'], (m.equipos || []).map(filaE))}
     ${tablaM('05 · Recepción y condiciones operativas', ['Concepto', 'Condición'], (m.recepcion || []).map(r => `<tr><td class="mx-c">${esc(r.concepto || '')}</td><td>${esc(r.texto || '')}</td></tr>`))}
     ${tablaM('06 · Decisiones y comunicación interna', ['Responsable / control', 'Acción'], dec(m).map(r => `<tr><td class="mx-c">${esc(r.responsable || '')}</td><td>${esc(r.accion || '')}</td></tr>`))}
+    ${adicionalesM().length ? tablaM('07 · Datos adicionales', ['Tema', 'Dato'], adicionalesM().map(r => `<tr><td class="mx-c">${esc(r.tema || '')}</td><td>${conFte(txtAd(r))}</td></tr>`)) : ''}
   </div>
   <div class="mx-ley"><b>Lectura de la matriz:</b> ✓ Requerido · ◐ Condicionado · — No especificado <span>· Alertas al corte: ${corte()}</span></div>
   <div class="mx-alertas">
@@ -1032,6 +1057,9 @@ function normalizar(m) {
   m.calendario = (m.calendario || []).map((e, i) => ({ ...e, _i: i })).sort((a, b) => /^Cierre interno/i.test(a.evento) ? -1 : /^Cierre interno/i.test(b.evento) ? 1 : k(a).localeCompare(k(b)) || a._i - b._i);
   return m;
 }
+// Respuestas del chat agregadas por el usuario: también van en la matriz como bloque 07
+const adicionalesM = () => renglonesChat.filter(r => r.activo).concat((extras.sugerencias || []).filter((s, i) => aceptadas.has(i)));
+const txtAd = r => r.texto + (r.fuente ? ` (${String(r.fuente).replace(/^\(|\)$/g, '')})` : '');
 // Se llama al pintar el resultado: para usuarios con matriz la arma una vez por resumen
 function pintarMatriz() {
   const hay = esMatriz() && matriz && matriz._trabajo === trabajoActual;
@@ -1058,6 +1086,7 @@ ${tab('03 Documentación y participación', ['Requisito', '', 'Condición'], (m.
 ${tab('04 Equipos en comodato y soporte', ['Condición', '', 'Alcance'], (m.equipos || []).map(fe))}
 ${tab('05 Recepción y condiciones operativas', ['Concepto', 'Condición'], (m.recepcion || []).map(r => f2(r.concepto, r.texto)))}
 ${tab('06 Decisiones y comunicación interna', ['Responsable / control', 'Acción'], dec(m).map(r => f2(r.responsable, r.accion)))}
+${adicionalesM().length ? tab('07 Datos adicionales', ['Tema', 'Dato'], adicionalesM().map(r => f2(r.tema, txtAd(r)))) : ''}
 <p style="margin:8px 0 3px;font-size:9pt"><b>Lectura de la matriz:</b> ✓ Requerido · ◐ Condicionado · — No especificado</p>
 <p style="margin:3px 0;font-size:9pt;background:#fdecec;padding:4px 6px"><b style="color:#a33a3a">■ Rojo · Riesgo / validación prioritaria:</b> ${esc(m.rojo || '')}</p>
 <p style="margin:3px 0;font-size:9pt;background:#fff4e0;padding:4px 6px"><b style="color:#99620c">■ Ámbar · Fecha límite en menos de 3 días:</b> ${esc(a.texto)}</p>
@@ -1073,6 +1102,7 @@ function textoMatriz(m) {
   sec('04 Equipos en comodato y soporte', (m.equipos || []).map(fe));
   sec('05 Recepción y condiciones operativas', (m.recepcion || []).map(r => `${r.concepto}: ${r.texto}`));
   sec('06 Decisiones y comunicación interna', dec(m).map(r => `${r.responsable}: ${r.accion}`));
+  if (adicionalesM().length) sec('07 Datos adicionales', adicionalesM().map(r => `${r.tema}: ${txtAd(r)}`));
   L.push('', 'Rojo · Riesgo / validación prioritaria: ' + (m.rojo || ''), 'Ámbar · Fecha límite en menos de 3 días: ' + ambar(m).texto);
   return L.join('\n');
 }
@@ -1113,7 +1143,9 @@ $('btnWordM').onclick = async () => {
     const b5 = mini('05  Recepción y condiciones operativas', ['Concepto', 'Condición'], W2, (m.recepcion || []).map(r => f2(r.concepto, r.texto)));
     const b6 = mini('06  Decisiones y comunicación interna', ['Responsable / control', 'Acción'], W2, dec(m).map(r => f2(r.responsable, r.accion)));
     const par = (izq, der) => new TableRow({ cantSplit: true, children: [izq, der].map((h, i) => new TableCell({ borders: sinB, width: { size: ANCHO + 150, type: WidthType.DXA }, margins: { left: i ? 150 : 0, right: i ? 0 : 150, bottom: 60 }, children: h })) });
-    const rejilla = new Table({ width: { size: (ANCHO + 150) * 2, type: WidthType.DXA }, columnWidths: [ANCHO + 150, ANCHO + 150], rows: [par(b1, b2), par(b3, b4), par(b5, b6)] });
+    const ad = adicionalesM();
+    const b7 = ad.length ? mini('07  Datos adicionales', ['Tema', 'Dato'], W2, ad.map(r => f2(r.tema, txtAd(r)))) : null;
+    const rejilla = new Table({ width: { size: (ANCHO + 150) * 2, type: WidthType.DXA }, columnWidths: [ANCHO + 150, ANCHO + 150], rows: [par(b1, b2), par(b3, b4), par(b5, b6), ...(b7 ? [par(b7, [P(R(''))])] : [])] });
     const a = ambar(m);
     const caja = (t, txt, fill, col) => new TableCell({ borders: { top: NB, bottom: NB, right: NB, left: { style: BorderStyle.SINGLE, size: 18, color: col } }, ...fondo(fill), width: { size: ANCHO + 150, type: WidthType.DXA }, margins: { top: 70, bottom: 70, left: 120, right: 120 }, children: [P(R(t, { bold: true, color: col, size: 17 })), P(R(txt), { spacing: { before: 30 } })] });
     const alertas = new Table({ width: { size: (ANCHO + 150) * 2, type: WidthType.DXA }, columnWidths: [ANCHO + 150, ANCHO + 150], rows: [new TableRow({ cantSplit: true, children: [caja('■ ROJO · RIESGO / VALIDACIÓN PRIORITARIA', m.rojo || 'Sin riesgos prioritarios identificados.', 'FDECEC', 'A33A3A'), caja('■ ÁMBAR · FECHA LÍMITE EN MENOS DE 3 DÍAS', a.texto, a.activo ? 'FFE7BF' : 'FFF4E0', '99620C')] })] });
@@ -1175,7 +1207,7 @@ $('btnGenerar').onclick = async () => {
 $('btnActualizar').onclick = () => procesar(archivos2, trabajoActual);
 $('btnReintentar').onclick = () => trabajoActual ? mostrar(VISTA_RESULTADO) : verPerfil(perfil);
 $('btnNuevo').onclick = () => {
-  archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear(); matriz = null;
+  archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; renglonesChat = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear(); matriz = null;
   $('nombre').value = ''; $('chat').innerHTML = ''; pintar1(); pintar2(); verPerfil(perfil);
 };
 </script>
