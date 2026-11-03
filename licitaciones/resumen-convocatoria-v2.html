@@ -226,6 +226,17 @@
   .agregar-renglon .btn-mini{padding:.3rem .7rem;font-size:.8rem}
   .agregar-renglon .btn-mini.activo{background:#e8f0fb;border-color:#4a9fd4;color:#1a3a6b}
   @media print{.agregar-renglon{display:none}}
+  /* v3.1: tablas de calendario, equipamiento e insumos; fuente una vez por bloque */
+  .tabla-wrap{overflow-x:auto;max-width:100%;margin:.35rem 0 .25rem}
+  .tabla-res{width:100%;border-collapse:collapse;font-size:.86rem}
+  .tabla-res th{background:#dce8f7;color:#1a3a6b;text-align:left;font-weight:700}
+  .tabla-res th,.tabla-res td{padding:.38rem .55rem;border:1px solid #dde1e9;vertical-align:top}
+  .tabla-res tbody tr:hover{background:#e8f0fb}
+  .tabla-res td:nth-child(3){white-space:nowrap}
+  .fte-bloque{margin:.15rem 0 .65rem;font-size:.86rem}
+  .interruptor{display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--texto2);cursor:pointer;margin-right:auto;order:-1}
+  @media (max-width:600px){ .tabla-res{font-size:.78rem} .tabla-res th,.tabla-res td{padding:.3rem .4rem} }
+  @media print{ .tabla-res tr{break-inside:avoid} .tabla-res thead{display:table-header-group} .tabla-wrap{overflow:visible} }
 </style>
 </head>
 <body>
@@ -333,7 +344,7 @@
     <div class="card-cab"><span><span class="paso no-print">3</span>Resumen listo para enviar</span><span class="nuevo oculto no-print" id="marcaAct">Actualizado</span></div>
     <div class="card-body">
       <div class="asunto"><small>Asunto</small><span id="txtAsunto"></span></div>
-      <div class="temas-bar no-print"><button class="lnk" id="btnExpandir">Expandir todo</button><button class="lnk" id="btnContraer">Contraer todo</button></div>
+      <div class="temas-bar no-print"><button class="lnk" id="btnExpandir">Expandir todo</button><button class="lnk" id="btnContraer">Contraer todo</button><label class="interruptor" title="Con fuentes para validar; sin fuentes para enviar"><input type="checkbox" id="chkFuentes" checked> Mostrar fuentes</label></div>
       <div id="txtCorreo"></div>
       <div class="alertas oculto" id="boxAlertas"><h4>Para revisión antes de enviar</h4><ul id="lstAlertas"></ul></div>
       <div class="meta" id="txtMeta"></div>
@@ -576,7 +587,9 @@ function bloques(texto) {
     const t = l.trim();
     if (!t) { lista = null; return; }
     if (ENCABEZADOS.test(t)) { out.push({ tipo: 'h', texto: t.replace(/:$/, '') }); lista = null; return; }
-    if (t.startsWith('•')) { if (!lista) { lista = { tipo: 'ul', items: [] }; out.push(lista); } lista.items.push(t.replace(/^•\s*/, '')); return; }
+    if (t.startsWith('|')) { const celdas = t.replace(/^\||\|$/g, '').split('|').map(c => c.trim()); if (lista && lista.tipo === 'tabla') lista.filas.push(celdas); else { lista = { tipo: 'tabla', filas: [celdas] }; out.push(lista); } return; }
+    if (/^Fuentes?:\s/.test(t)) { out.push({ tipo: 'fte', texto: t }); lista = null; return; }
+    if (t.startsWith('•')) { if (!lista || lista.tipo !== 'ul') { lista = { tipo: 'ul', items: [] }; out.push(lista); } lista.items.push(t.replace(/^•\s*/, '')); return; }
     out.push({ tipo: 'p', texto: t }); lista = null;
   });
   return out;
@@ -592,8 +605,13 @@ const conLiga = h => h.replace(/\[PEGAR LIGA\]/g, '<span class="liga">[PEGAR LIG
 const RE_FTE = /\s\(((?:[^()]*?(?:págs?\.|hoja |numeral|apartado|Correo de la convocante)[^()]*?))\)$/;
 function sinFuente(t) { const m = String(t).match(RE_FTE); return m ? [t.slice(0, m.index), m[1]] : [t, '']; }
 const conFte = r => { const [v, f] = sinFuente(r); return conLiga(esc(v)) + (f ? ` <span class="fte">(${esc(f)})</span>` : ''); };
+// Estilos en línea para que las tablas se vean igual al pegarlas en Outlook
+const TH = 'background:#dce8f7;color:#1a3a6b;text-align:left;font-weight:bold;padding:4px 8px;border:1px solid #c8d9f0';
+const TD = 'padding:4px 8px;border:1px solid #dde1e9;vertical-align:top';
 function bloqueHTML(b) {
   if (b.tipo === 'h') return `<h4>${esc(b.texto)}</h4>`;
+  if (b.tipo === 'tabla') { const [enc, ...fs] = b.filas; return `<div class="tabla-wrap"><table class="tabla-res" style="border-collapse:collapse;width:100%"><thead><tr>${enc.map(c => `<th style="${TH}">${esc(c)}</th>`).join('')}</tr></thead><tbody>${fs.map(f => `<tr>${f.map(c => `<td style="${TD}">${conFte(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; }
+  if (b.tipo === 'fte') return `<p class="fte-bloque"><span class="fte">${esc(b.texto)}</span></p>`;
   if (b.tipo === 'ul') return '<ul>' + b.items.map(it => { const [e, r] = partir(it); return `<li>${e ? `<strong>${esc(e)}</strong>` : ''}${conFte(r)}</li>`; }).join('') + '</ul>';
   const [e, r] = partir(b.texto);
   return `<p>${e ? `<strong>${esc(e)}</strong>` : ''}${conFte(r)}</p>`;
@@ -741,13 +759,15 @@ $('btnWord').onclick = async () => {
   try {
     $('btnWord').disabled = true;
     await cargarDocx();
-    const { Document, Packer, Paragraph, TextRun } = window.docx;
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType } = window.docx;
     const run = (t, extra = {}) => new TextRun({ text: t, font: 'Calibri', size: 21, color: '1A2035', ...extra });
     const linea = (e, r, opts = {}) => { const [v, f] = sinFuente(r); return new Paragraph({ spacing: { after: 80 }, ...opts, children: [...(e ? [run(e, { bold: true })] : []), run(v), ...(f ? [run(' (' + f + ')', { color: '8A90A0', size: 17 })] : [])] }); };
     const hijos = [new Paragraph({ spacing: { after: 200 }, children: [run('Asunto: ', { bold: true, color: '1A3A6B' }), run(resultado.asunto || '', { bold: true })] })];
     bloques(textoFinal()).forEach(b => {
       if (b.tipo === 'h') hijos.push(new Paragraph({ spacing: { before: 160, after: 80 }, keepNext: true, children: [run(b.texto, { bold: true, color: '1A3A6B' })] }));
       else if (b.tipo === 'ul') b.items.forEach(it => { const [e, r] = partir(it); hijos.push(linea(e, r, { bullet: { level: 0 } })); });
+      else if (b.tipo === 'tabla') hijos.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: b.filas.map((f, k) => new TableRow({ tableHeader: k === 0, children: f.map(c => { const [v, ft] = sinFuente(c); return new TableCell({ shading: k === 0 ? { type: ShadingType.CLEAR, color: 'auto', fill: 'DCE8F7' } : undefined, margins: { top: 40, bottom: 40, left: 90, right: 90 }, children: [new Paragraph({ children: [run(v, k === 0 ? { bold: true, color: '1A3A6B' } : {}), ...(ft ? [run(' (' + ft + ')', { color: '8A90A0', size: 17 })] : [])] })] }); }) })) }));
+      else if (b.tipo === 'fte') hijos.push(new Paragraph({ spacing: { before: 60, after: 140 }, children: [run(b.texto, { color: '8A90A0', size: 17 })] }));
       else { const [e, r] = partir(b.texto); hijos.push(linea(e, r, { spacing: { after: 140 } })); }
     });
     const doc = new Document({ sections: [{ properties: { page: { margin: { top: 1000, bottom: 1000, left: 1100, right: 1100 } } }, children: hijos }] });
@@ -911,8 +931,24 @@ function textoFinal() {
     if (/\n\nEstimados /.test(t)) t = t.replace(/\n\nEstimados /, bloque + '\n\nEstimados ');
     else t = t.replace(/\n\nQuedo a sus órdenes\./, bloque + '\n\nQuedo a sus órdenes.');
   }
-  return t;
+  return verFuentes ? t : quitarFuentes(t);
 }
+// Versión sin fuentes (para enviar hacia arriba): quita la línea "Fuente:" de cada bloque y la fuente de cada dato
+function quitarFuentes(t) {
+  return t.split('\n').filter(l => !/^Fuentes?:\s/.test(l.trim())).map(l => {
+    const s = l.trim();
+    if (s.startsWith('|')) return '| ' + s.replace(/^\||\|$/g, '').split('|').map(c => sinFuente(c.trim())[0].trim()).join(' | ') + ' |';
+    return sinFuente(l)[0];
+  }).join('\n');
+}
+let verFuentes = leerLS('licit_fuentes') !== 'no';
+$('chkFuentes').checked = verFuentes;
+$('chkFuentes').onchange = e => {
+  verFuentes = e.target.checked;
+  guardarLS('licit_fuentes', verFuentes ? '' : 'no');
+  if (resultado) $('txtCorreo').innerHTML = aTemas(bloques(textoFinal()));
+  toast(verFuentes ? 'Con fuentes: para validar la información' : 'Sin fuentes: listo para enviar');
+};
 const ENC_EXTRA = /^Datos adicionales:?$/i;
 function pintarExtras() {
   const r = extras.riesgos || [];
