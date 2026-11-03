@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Roldán CPC · Recepción de documentos</title>
+<title>Recepción de Documentos CPC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -142,6 +142,30 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
 .toast.on{transform:translateX(-50%) translateY(0)}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:g .8s linear infinite;vertical-align:-2px;margin-right:.4rem}
 @keyframes g{to{transform:rotate(360deg)}}
+.buscador{position:relative;margin-bottom:.8rem}
+.buscador input{width:100%;border:1px solid var(--borde);border-radius:10px;padding:.6rem .8rem .6rem 2.2rem;background:#fff;color:var(--txt)}
+.buscador input:focus{outline:2px solid var(--acento);border-color:var(--acento)}
+.buscador::before{content:"🔍";position:absolute;left:.7rem;top:50%;transform:translateY(-50%);font-size:.85rem;opacity:.6}
+.dash-g{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem}
+.dash-g .m{background:#f8fafd;border:1px solid var(--borde);border-radius:11px;padding:.7rem .75rem}
+.dash-g .m span{display:block;font-size:.72rem;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.4px}
+.dash-g .m b{display:block;font-size:1.15rem;font-weight:800;color:var(--azul2);margin-top:.15rem;font-variant-numeric:tabular-nums}
+.dash-g .m small{display:block;font-size:.74rem;color:var(--gris);font-weight:600}
+.sub-t{font-size:.78rem;font-weight:800;color:var(--azul2);text-transform:uppercase;letter-spacing:.5px;margin:1rem 0 .5rem}
+.hbar{display:grid;grid-template-columns:minmax(0,1.4fr) 2fr auto;gap:.6rem;align-items:center;font-size:.82rem;padding:.28rem 0}
+.hbar .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.hbar .t{height:10px;background:#eef1f6;border-radius:6px;overflow:hidden}
+.hbar .t i{display:block;height:100%;background:linear-gradient(90deg,var(--acento),var(--azul3));border-radius:6px}
+.hbar .v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--txt2);text-align:right;min-width:92px}
+.mix{display:flex;height:14px;border-radius:7px;overflow:hidden;background:#eef1f6}
+.mix i{display:block;height:100%}
+.mix-l{display:flex;flex-wrap:wrap;gap:.4rem .9rem;font-size:.76rem;color:var(--txt2);margin-top:.45rem}
+.mix-l span{display:flex;align-items:center;gap:.3rem}
+.mix-l i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.pend{list-style:none;margin:0;padding:0}
+.pend li{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0;border-top:1px solid #eef1f6;font-size:.84rem}
+.pend li:first-child{border-top:0}
+.pend .dot{margin-top:.4rem}
 .oculto{display:none!important}
 .print-only{display:none}
 
@@ -151,6 +175,9 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
   .hrow{align-items:flex-start}
   .htitle h1{font-size:1.25rem}
   .kpis{grid-template-columns:1fr 1fr}
+  .dash-g{grid-template-columns:1fr 1fr}
+  .hbar{grid-template-columns:1fr auto}
+  .hbar .t{grid-column:1 / -1;grid-row:2}
   .grid{grid-template-columns:1fr}
   .velo{padding:0}
   .panel{border-radius:0;min-height:100%}
@@ -176,6 +203,8 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
   .wrap{max-width:none}
   .grid{grid-template-columns:1fr 1fr}
   .cli{cursor:default}
+  .buscador{display:none}
+  .dash-g .m,.hbar{break-inside:avoid}
 }
 </style>
 </head>
@@ -195,7 +224,7 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
       <button class="salir no-print oculto" id="btnSalir" type="button">Cerrar sesión</button>
     </div>
     <div class="htitle">
-      <div class="eyebrow">Roldán CPC · Consultoría Profesional Contable</div>
+      <div class="eyebrow">Consultoría Profesional Contable</div>
       <h1>Recepción de documentos del piloto</h1>
       <p>Suba los XML del SAT y los estados de cuenta de cada cliente; el sistema los revisa al momento y avisa qué falta.</p>
     </div>
@@ -231,6 +260,11 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
       <div class="kpi"><b id="kCfdi">0</b><span>Comprobantes leídos</span></div>
     </div>
 
+    <div class="card" id="dash">
+      <div class="card-h"><span>Panorama del mes</span><span id="dashCorte" style="font-size:.78rem;color:var(--txt2)"></span></div>
+      <div class="card-b" id="dashB"></div>
+    </div>
+
     <div class="card">
       <div class="card-h"><span>Clientes del piloto</span><span id="avance" style="font-size:.82rem;color:var(--txt2)"></span></div>
       <div class="card-b">
@@ -240,6 +274,7 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
           <span><i class="dot no"></i>Sin documentos</span>
         </div>
         <div class="barra" style="margin:0 0 1rem"><i id="bOk" style="background:var(--ok)"></i><i id="bMed" style="background:var(--med)"></i></div>
+        <div class="buscador no-print"><input type="search" id="buscar" placeholder="Buscar cliente por nombre o RFC" autocomplete="off"></div>
         <div class="grid" id="grid"></div>
       </div>
     </div>
@@ -263,6 +298,10 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
       <button class="cerrar" id="btnCerrar" type="button" aria-label="Cerrar">×</button>
     </div>
     <div class="panel-b">
+      <div class="card oculto" id="pResumen" style="margin-bottom:.9rem">
+        <div class="card-h"><span>Lo que dicen los XML de este mes</span></div>
+        <div class="card-b" id="pResumenB"></div>
+      </div>
 
       <div class="card" style="margin-bottom:.9rem">
         <div class="card-h"><span>1 · XML del SAT</span><span class="chip" id="pXmlChip"></span></div>
@@ -387,10 +426,26 @@ function estadoCliente(rfc){
   const nivel = (xml && edo) ? "ok" : (xml||edo||tdc) ? "med" : "no";
   return {cs,r,xml,edo,tdc,aviso,nivel};
 }
+const norm = t => String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const corto = n => { n=Number(n)||0; return n>=1e6 ? "$"+(n/1e6).toFixed(2)+" M" : dinero(n).replace(/\.\d\d$/,""); };
+st.q="";
+$("#buscar").addEventListener("input",e=>{ st.q=e.target.value; pintarGrid(); });
 function pintar(){
   const cl=st.datos.clientes||[]; let ok=0,med=0,no=0,cf=0;
+  cl.forEach(c=>{ const e=estadoCliente(c.rfc); if(e.nivel==="ok")ok++; else if(e.nivel==="med")med++; else no++; cf+=e.r.total||0; });
+  pintarGrid(); pintarDash();
+  $("#kComp").textContent=ok; $("#kParc").textContent=med; $("#kSin").textContent=no; $("#kCfdi").textContent=cf.toLocaleString("es-MX");
+  const t=cl.length||1; $("#bOk").style.width=(ok/t*100)+"%"; $("#bMed").style.width=(med/t*100)+"%";
+  $("#avance").textContent=`${ok} de ${cl.length} completos`;
+  $("#printPeriodo").textContent="Recepción de documentos · "+nomPeriodo(st.periodo);
+  $("#printFecha").textContent=new Date().toLocaleString("es-MX",{dateStyle:"long",timeStyle:"short"});
+}
+function pintarGrid(){
+  const q=norm(st.q).trim();
+  const cl=(st.datos.clientes||[]).filter(c=>!q || norm(c.nombre+" "+c.rfc+" "+c.regimen).includes(q));
+  if(!cl.length){ $("#grid").innerHTML='<div class="vacio" style="grid-column:1/-1">Ningún cliente coincide con la búsqueda.</div>'; return; }
   $("#grid").innerHTML = cl.map(c=>{
-    const e=estadoCliente(c.rfc); if(e.nivel==="ok")ok++; else if(e.nivel==="med")med++; else no++; cf+=e.r.total||0;
+    const e=estadoCliente(c.rfc);
     return `<button type="button" class="cli" data-rfc="${esc(c.rfc)}">
       <div class="cli-top"><i class="dot ${e.nivel}"></i><div><h3>${esc(c.nombre)}</h3><small>${esc(c.rfc)} · ${esc(c.regimen||"")}</small></div></div>
       <div class="chips">
@@ -400,11 +455,47 @@ function pintar(){
       </div></button>`;
   }).join("");
   $("#grid").querySelectorAll(".cli").forEach(b=>b.onclick=()=>abrirPanel(b.dataset.rfc));
-  $("#kComp").textContent=ok; $("#kParc").textContent=med; $("#kSin").textContent=no; $("#kCfdi").textContent=cf.toLocaleString("es-MX");
-  const t=cl.length||1; $("#bOk").style.width=(ok/t*100)+"%"; $("#bMed").style.width=(med/t*100)+"%";
-  $("#avance").textContent=`${ok} de ${cl.length} completos`;
-  $("#printPeriodo").textContent="Recepción de documentos · "+nomPeriodo(st.periodo);
-  $("#printFecha").textContent=new Date().toLocaleString("es-MX",{dateStyle:"long",timeStyle:"short"});
+}
+function barras(lista){
+  const max=Math.max(...lista.map(x=>+x.monto||0),1);
+  return lista.map(x=>`<div class="hbar"><span class="n" title="${esc(x.nombre)}">${esc(x.nombre)}</span><span class="t"><i style="width:${Math.max(2,(+x.monto||0)/max*100)}%"></i></span><span class="v">${dinero(x.monto)}${x.n?` <small style="color:var(--gris)">· ${x.n}</small>`:""}</span></div>`).join("");
+}
+function pintarDash(){
+  const cl=st.datos.clientes||[], R=st.datos.resumen||{}, cs=st.datos.cargas||[];
+  const sum=k=>Object.values(R).reduce((a,r)=>a+(+r[k]||0),0);
+  const ult=cs[0];
+  $("#dashCorte").textContent = ult ? `Último documento: ${new Date(ult.creado).toLocaleString("es-MX",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}` : "";
+  if(!cs.length){ $("#dashB").innerHTML=`<div class="vacio">Aún no hay documentos de ${nomPeriodo(st.periodo).toLowerCase()}; en cuanto se suban, aquí aparece el panorama.</div>`; return; }
+  const ppd=sum("ppd"), sinp=sum("ppd_sin_pago");
+  let h=`<div class="dash-g">
+    <div class="m"><span>Ventas facturadas</span><b>${corto(sum("ventas"))}</b><small>${sum("emitidos")} facturas emitidas</small></div>
+    <div class="m"><span>Compras y gastos</span><b>${corto(sum("compras"))}</b><small>${sum("recibidos")} facturas recibidas</small></div>
+    <div class="m"><span>Cobrado con complemento</span><b>${corto(sum("cobrado"))}</b><small>${sum("pagos")} complementos de pago</small></div>
+    <div class="m"><span>Nómina timbrada</span><b>${corto(sum("nomina_monto"))}</b><small>${sum("nomina")} recibos</small></div>
+    <div class="m"><span>A crédito sin complemento</span><b style="color:${sinp?"#9a6a0c":"var(--ok)"}">${sinp} de ${ppd}</b><small>facturas PPD emitidas</small></div>
+    <div class="m"><span>XML de otro mes</span><b style="color:${sum("otro_mes")?"#9a6a0c":"var(--azul2)"}">${sum("otro_mes")}</b><small>fecha fuera del periodo</small></div>
+  </div>`;
+  const tipos=[["Emitidas",sum("emitidos"),"#1e5096"],["Recibidas",sum("recibidos"),"#4a9fd4"],["Complementos",sum("pagos"),"#2e9d5b"],["Nómina",sum("nomina"),"#d99a1e"],["Notas de crédito",sum("egresos"),"#7a3ea8"]].filter(t=>t[1]);
+  const tt=tipos.reduce((a,t)=>a+t[1],0);
+  if(tt){
+    h+=`<div class="sub-t">Comprobantes por tipo</div><div class="mix">${tipos.map(t=>`<i style="width:${t[1]/tt*100}%;background:${t[2]}"></i>`).join("")}</div>
+      <div class="mix-l">${tipos.map(t=>`<span><i style="background:${t[2]}"></i>${t[0]} · ${t[1]}</span>`).join("")}</div>`;
+  }
+  const ventas=cl.map(c=>({nombre:c.nombre,monto:(R[c.rfc]||{}).ventas||0})).filter(x=>x.monto>0).sort((a,b)=>b.monto-a.monto);
+  if(ventas.length) h+=`<div class="sub-t">Ventas facturadas por cliente</div>${barras(ventas)}`;
+  const pend=[];
+  cl.forEach(c=>{
+    const e=estadoCliente(c.rfc), r=R[c.rfc]||{}, f=[];
+    if(!e.r.total) f.push("XML del mes");
+    if(!e.edo) f.push("estado de cuenta");
+    else if(e.aviso) f.push("completar el periodo del estado de cuenta");
+    if(r.ppd_sin_pago) f.push(`${r.ppd_sin_pago} complemento${r.ppd_sin_pago>1?"s":""} de pago de facturas a crédito`);
+    if(f.length) pend.push({c,e,f});
+  });
+  h+=`<div class="sub-t">Lo que falta para hacer el cruce</div>`;
+  h+= pend.length ? `<ul class="pend">${pend.map(p=>`<li><i class="dot ${p.e.nivel}"></i><div><b>${esc(p.c.nombre)}</b><br><span style="color:var(--txt2)">Falta ${p.f.join(", ").replace(/, ([^,]*)$/," y $1")}</span></div></li>`).join("")}</ul>`
+     : `<div class="alerta good">✓ Todos los clientes tienen lo necesario para el cruce de este mes.</div>`;
+  $("#dashB").innerHTML=h;
 }
 
 /* ---------- Panel ---------- */
@@ -419,6 +510,19 @@ function pintarPanel(){
   $("#pNombre").textContent=c.nombre; $("#pSub").textContent=`${c.rfc} · ${c.regimen||""} · ${nomPeriodo(st.periodo)}`;
   const xc=$("#pXmlChip"); xc.className="chip "+(e.r.total?"si":""); xc.textContent=e.r.total?`${e.r.total} comprobantes`:"Pendiente";
   const ec=$("#pEdoChip"); ec.className="chip "+(e.edo||e.tdc?(e.aviso?"av":"si"):""); ec.textContent=e.edo||e.tdc?(e.aviso?"Incompleto":"Recibido"):"Pendiente";
+  const r=e.r;
+  if(r.total){
+    let h=`<div class="dash-g">
+      <div class="m"><span>Ventas facturadas</span><b>${corto(r.ventas)}</b><small>${r.emitidos} facturas</small></div>
+      <div class="m"><span>Compras y gastos</span><b>${corto(r.compras)}</b><small>${r.recibidos} facturas</small></div>
+      <div class="m"><span>Cobrado con complemento</span><b>${corto(r.cobrado)}</b><small>${r.pagos} complementos</small></div>
+      <div class="m"><span>Nómina timbrada</span><b>${corto(r.nomina_monto)}</b><small>${r.nomina} recibos</small></div>
+      <div class="m"><span>A crédito sin complemento</span><b style="color:${r.ppd_sin_pago?"#9a6a0c":"var(--ok)"}">${r.ppd_sin_pago||0} de ${r.ppd||0}</b><small>facturas PPD</small></div>
+      <div class="m"><span>XML de otro mes</span><b>${r.otro_mes||0}</b><small>fuera del periodo</small></div></div>`;
+    if((r.top_clientes||[]).length) h+=`<div class="sub-t">A quién le vendió</div>${barras(r.top_clientes)}`;
+    if((r.top_proveedores||[]).length) h+=`<div class="sub-t">A quién le compró</div>${barras(r.top_proveedores)}`;
+    $("#pResumenB").innerHTML=h; $("#pResumen").classList.remove("oculto");
+  } else $("#pResumen").classList.add("oculto");
   const ICO={xml:"🗂️",estado:"🏦",tarjeta:"💳",otro:"📎"}, NOM={xml:"XML",estado:"Estado de cuenta",tarjeta:"Tarjeta de crédito",otro:"Otro"};
   $("#pLista").innerHTML = e.cs.length ? e.cs.map(x=>{
     const d=x.detalle||{}; let info=`${NOM[x.tipo]} · ${kb(x.tamano||0)} · ${fCorta(x.creado)}`;
