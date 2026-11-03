@@ -330,10 +330,10 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
         <div class="card-b">
           <div class="zona" id="zonaXml" tabindex="0">
             <div class="ico">🗂️</div>
-            <b>Arrastre aquí el .zip o los XML</b>
-            <span>Emitidos, recibidos, nómina y complementos de pago del mes</span>
+            <b>Arrastre aquí el .zip, los XML o el correo completo</b>
+            <span>Emitidos, recibidos, nómina y complementos; también correos de Outlook (.eml o .msg) con sus adjuntos</span>
           </div>
-          <input type="file" id="fileXml" accept=".zip,.xml" multiple class="oculto">
+          <input type="file" id="fileXml" accept=".zip,.xml,.eml,.msg" multiple class="oculto">
           <div class="prev oculto" id="prevXml"></div>
           <div class="progreso" id="progXml"><i></i></div>
         </div>
@@ -348,10 +348,10 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
           </div>
           <div class="zona" id="zonaEdo" tabindex="0">
             <div class="ico">📄</div>
-            <b>Arrastre aquí el PDF o las fotos</b>
-            <span>PDF del banco, capturas o fotos de cada hoja</span>
+            <b>Arrastre aquí el PDF, las fotos o el correo</b>
+            <span>PDF del banco, fotos de cada hoja o el correo de Outlook que los trae</span>
           </div>
-          <input type="file" id="fileEdo" accept=".pdf,.jpg,.jpeg,.png,.heic,.webp" multiple class="oculto">
+          <input type="file" id="fileEdo" accept=".pdf,.jpg,.jpeg,.png,.heic,.webp,.eml,.msg" multiple class="oculto">
           <div class="prev oculto" id="prevEdo">
             <div id="edoArchivos"></div>
             <div class="fila3">
@@ -626,25 +626,95 @@ function parsearCfdi(texto, rfc){
     metodo:attr(c,"MetodoPago"), forma:attr(c,"FormaPago"), rfcE, nomE:attr(em,"Nombre"), rfcR, nomR:attr(re,"Nombre"),
     direccion: rfcE===rfc ? "emitido" : rfcR===rfc ? "recibido" : "ajeno", pagos: pagos.length?pagos:null };
 }
+/* ---------- Lectura de zip, correos .eml y .msg ---------- */
+function bytesDeTexto(s){ const u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i)&255; return u; }
+function textoDeBytes(u){ let s=""; for(let i=0;i<u.length;i+=8192) s+=String.fromCharCode.apply(null,u.subarray(i,i+8192)); return s; }
+function b64(s){ s=s.replace(/[^A-Za-z0-9+/=]/g,""); try{ return bytesDeTexto(atob(s)); }catch(e){ return new Uint8Array(0); } }
+function qp(s){ s=s.replace(/=\r?\n/g,""); const o=[]; for(let i=0;i<s.length;i++){ if(s[i]==="="&&/^[0-9A-Fa-f]{2}$/.test(s.substr(i+1,2))){ o.push(parseInt(s.substr(i+1,2),16)); i+=2; } else o.push(s.charCodeAt(i)&255); } return new Uint8Array(o); }
+function palabras(v){
+  return String(v||"").replace(/(=\?[^?]+\?[BbQq]\?[^?]*\?=)\s+(?==\?)/g,"$1").replace(/=\?([^?]+)\?([BbQq])\?([^?]*)\?=/g,(m,cs,en,t)=>{
+    try{ return new TextDecoder(cs.toLowerCase()).decode(en.toUpperCase()==="B"?b64(t):qp(t.replace(/_/g," "))); }catch(e){ return t; } });
+}
+const escRe=t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+function param(v,k){
+  v=v||""; let m=v.match(new RegExp("(?:^|;)\\s*"+k+"\\*=([^']*)'[^']*'([^;]+)","i"));
+  if(m){ try{ return decodeURIComponent(m[2].trim().replace(/"/g,"")); }catch(e){ return m[2]; } }
+  const partes=[], re=new RegExp("(?:^|;)\\s*"+k+"\\*(\\d+)\\*?=\\s*(\"[^\"]*\"|[^;]+)","gi"); let x;
+  while((x=re.exec(v))) partes[+x[1]]=x[2].trim().replace(/^"|"$/g,"");
+  if(partes.length){ const t=partes.join(""), mm=t.match(/^([^']*)'[^']*'(.*)$/); if(mm){ try{ return decodeURIComponent(mm[2]); }catch(e){ return mm[2]; } } return t; }
+  m=v.match(new RegExp("(?:^|;)\\s*"+k+"=\\s*(?:\"([^\"]*)\"|([^;]+))","i"));
+  return m ? (m[1]!==undefined?m[1]:m[2]).trim() : "";
+}
+function parteMime(raw,out,prof){
+  const i=raw.search(/\r?\n\r?\n/), hraw=i<0?raw:raw.slice(0,i), cuerpo=i<0?"":raw.slice(i).replace(/^\r?\n\r?\n/,"");
+  const h={}; hraw.replace(/\r?\n[ \t]+/g," ").split(/\r?\n/).forEach(l=>{ const k=l.indexOf(":"); if(k>0) h[l.slice(0,k).trim().toLowerCase()]=l.slice(k+1).trim(); });
+  const ct=h["content-type"]||"text/plain", bnd=param(ct,"boundary");
+  if(/^multipart\//i.test(ct) && bnd && prof<10){
+    cuerpo.split(new RegExp("\\r?\\n?--"+escRe(bnd)+"(?:--)?[ \\t]*(?:\\r?\\n|$)")).slice(1).forEach(p=>{ if(p.trim()) parteMime(p,out,prof+1); });
+    return;
+  }
+  if(/^message\/rfc822/i.test(ct) && prof<10){ parteMime(cuerpo,out,prof+1); return; }
+  const nombre=param(h["content-disposition"],"filename")||param(ct,"name"); if(!nombre) return;
+  const enc=(h["content-transfer-encoding"]||"").toLowerCase();
+  out.push({nombre:palabras(nombre), datos: enc==="base64"?b64(cuerpo) : enc==="quoted-printable"?qp(cuerpo) : bytesDeTexto(cuerpo)});
+}
+function leerEml(buf){ const out=[]; parteMime(textoDeBytes(new Uint8Array(buf)),out,0); return out; }
+let msgLib=null;
+function cargarMsg(){
+  if(window.MsgReader) return Promise.resolve();
+  if(!msgLib) msgLib=new Promise((res,rej)=>{ const s=document.createElement("script"); s.src="lib/msgreader-1.28.0.min.js"; s.onload=res; s.onerror=()=>{ msgLib=null; rej(new Error("No se pudo abrir el correo de Outlook; intente de nuevo.")); }; document.head.appendChild(s); });
+  return msgLib;
+}
+async function leerMsg(buf){
+  await cargarMsg(); const r=new window.MsgReader(buf), d=r.getFileData();
+  return (d.attachments||[]).map(a=>{ try{ const x=r.getAttachment(a); return x&&x.content ? {nombre:x.fileName||a.fileName||"adjunto",datos:x.content} : null; }catch(e){ return null; } }).filter(Boolean);
+}
+const MIME={pdf:"application/pdf",jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",heic:"image/heic",webp:"image/webp"};
+async function expandir(nombre,blob,acc,nivel){
+  const n=nombre.toLowerCase(), base=nombre.split("/").pop();
+  if(n.endsWith(".xml")){ acc.textos.push({n:base,t:await blob.text()}); return; }
+  if(n.endsWith(".zip")){
+    if(nivel>4){ acc.ignorados++; return; }
+    if(typeof JSZip==="undefined") throw new Error("No se pudo abrir el zip; recargue la página.");
+    if(nivel===0) acc.zips.push(blob);
+    if(nivel>0) acc.anidados++;
+    const z=await JSZip.loadAsync(blob);
+    for(const [ruta,ent] of Object.entries(z.files)){
+      if(ent.dir || /(^|\/)(__MACOSX|\.)/.test(ruta)) continue;
+      await expandir(ruta, await ent.async("blob"), acc, nivel+1);
+    }
+    return;
+  }
+  if(n.endsWith(".eml") || n.endsWith(".msg")){
+    if(nivel>4){ acc.ignorados++; return; }
+    const buf=await blob.arrayBuffer(), adj=n.endsWith(".eml")?leerEml(buf):await leerMsg(buf);
+    acc.correos++; acc.adjuntos+=adj.length;
+    for(const a of adj) await expandir(a.nombre, new Blob([a.datos]), acc, nivel+1);
+    return;
+  }
+  const ext=(n.match(/\.([a-z0-9]+)$/)||[])[1];
+  // Logos e imágenes de firma que vienen pegados en los correos
+  if(MIME[ext] && ext!=="pdf" && nivel>0 && (blob.size<60*1024 || /^(image|outlook)\d*\./i.test(base))){ acc.ignorados++; return; }
+  if(MIME[ext]){ acc.docs.push(new File([blob],base,{type:MIME[ext]})); return; }
+  acc.ignorados++;
+}
+async function extraer(files){
+  const acc={textos:[],docs:[],zips:[],ignorados:0,correos:0,adjuntos:0,anidados:0};
+  for(const f of files) await expandir(f.name,f,acc,0);
+  // Los PDF que se llaman igual que un XML son la factura impresa, no un estado de cuenta
+  const bases=new Set(acc.textos.map(t=>t.n.toLowerCase().replace(/\.xml$/,"")));
+  const impresas=acc.docs.filter(d=>bases.has(d.name.toLowerCase().replace(/\.[a-z0-9]+$/,"")));
+  acc.docs=acc.docs.filter(d=>!impresas.includes(d)); acc.impresas=impresas.length;
+  return acc;
+}
+
 async function leerXml(files){
   if(!st.cli) return;
   const prev=$("#prevXml"); prev.classList.remove("oculto"); prev.innerHTML='<div class="alerta">Leyendo los archivos…</div>';
-  const textos=[]; let ignorados=0, zipsOrig=[];
-  try{
-    for(const f of files){
-      const n=f.name.toLowerCase();
-      if(n.endsWith(".zip")){
-        if(typeof JSZip==="undefined") throw new Error("No se pudo abrir el zip; recargue la página.");
-        zipsOrig.push(f);
-        const z=await JSZip.loadAsync(f);
-        for(const [ruta,ent] of Object.entries(z.files)){
-          if(ent.dir || /(^|\/)(__MACOSX|\.)/.test(ruta)) continue;
-          if(ruta.toLowerCase().endsWith(".xml")) textos.push({n:ruta,t:await ent.async("string")}); else ignorados++;
-        }
-      } else if(n.endsWith(".xml")) textos.push({n:f.name,t:await f.text()});
-      else ignorados++;
-    }
-  }catch(e){ prev.innerHTML=`<div class="alerta bad">${esc(e.message||"No se pudo leer el archivo")}</div>`; return; }
+  let acc;
+  try{ acc=await extraer(files); }
+  catch(e){ prev.innerHTML=`<div class="alerta bad">${esc(e.message||"No se pudo leer el archivo")}</div>`; return; }
+  const textos=acc.textos, ignorados=acc.ignorados, zipsOrig=acc.zips;
 
   const rfc=st.cli.rfc, vistos=new Set(), ok=[], ajenos=[], invalidos=[], repetidos=[], otroMes=[];
   for(const x of textos){
@@ -657,7 +727,7 @@ async function leerXml(files){
     if(mesRef.slice(0,7)!==st.periodo) otroMes.push(c);
     ok.push(c);
   }
-  st.xml={files,zipsOrig,textos,ok,ajenos,invalidos,repetidos,otroMes,ignorados};
+  st.xml={files,zipsOrig,textos,ok,ajenos,invalidos,repetidos,otroMes,ignorados,acc};
   pintarPrevXml();
 }
 function pintarPrevXml(){
@@ -672,14 +742,24 @@ function pintarPrevXml(){
     <div><b>${rc}</b><span>Facturas recibidas</span></div>
     <div><b>${cnt("P")}</b><span>Complementos de pago</span></div>
     <div><b>${cnt("N")}</b><span>Recibos de nómina</span></div></div>`;
+  const A=x.acc||{};
+  if(A.correos) h+=`<div class="alerta">✉️ Se ${A.correos>1?"leyeron":"leyó"} <b>${A.correos} correo${A.correos>1?"s":""}</b> con ${A.adjuntos} adjunto${A.adjuntos!==1?"s":""}${A.anidados?` y ${A.anidados} zip dentro de otro`:""}.</div>`;
+  else if(A.anidados) h+=`<div class="alerta">🗂️ Se abrieron ${A.anidados} zip que venían dentro de otro.</div>`;
+  if(A.impresas) h+=`<div class="alerta">${A.impresas} PDF de facturas (la versión impresa de los XML) no se suben; con el XML basta.</div>`;
+  if(A.docs && A.docs.length) h+=`<div class="alerta warn">📄 También ${A.docs.length>1?"vienen":"viene"} <b>${A.docs.length} PDF o imagen${A.docs.length>1?"es":""}</b> que pueden ser el estado de cuenta: ${esc(A.docs.slice(0,3).map(d=>d.name).join(", "))}${A.docs.length>3?"…":""}
+      <div style="margin-top:.5rem"><button class="btn sec" type="button" id="btnPasarEdo" style="padding:.4rem .8rem;font-size:.82rem">Pasarlos al estado de cuenta</button></div></div>`;
   if(x.ok.length) h+=`<div class="alerta good">✓ <b>${x.ok.length} comprobantes válidos</b> de ${esc(st.cli.nombre)}; ventas facturadas ${dinero(sumEm)} y compras ${dinero(sumRc)}.${ppd?` ${ppd} factura${ppd>1?"s":""} emitida${ppd>1?"s":""} a crédito (PPD) que deberá${ppd>1?"n":""} tener complemento de pago.`:""}</div>`;
   if(x.ajenos.length){ const r=[...new Set(x.ajenos.map(c=>c.rfcE+" → "+c.rfcR))].slice(0,3).join("; ");
     h+=`<div class="alerta bad">✕ <b>${x.ajenos.length} XML no ${x.ajenos.length>1?"son":"es"} de este cliente</b> (no traen el RFC ${esc(st.cli.rfc)}); no se subirán. Ej.: ${esc(r)}</div>`; }
   if(x.otroMes.length) h+=`<div class="alerta warn">⚠ <b>${x.otroMes.length} comprobante${x.otroMes.length>1?"s son":" es"} de otro mes</b> distinto a ${nomPeriodo(st.periodo).toLowerCase()}; se guardan, y el contador los verá marcados.</div>`;
   if(x.repetidos.length) h+=`<div class="alerta">${x.repetidos.length} XML venían repetidos en lo que subió; se tomará uno solo.</div>`;
   if(x.invalidos.length) h+=`<div class="alerta warn">⚠ ${x.invalidos.length} archivo${x.invalidos.length>1?"s":""} no ${x.invalidos.length>1?"son":"es"} un CFDI válido o no trae timbre: ${esc(x.invalidos.slice(0,3).join(", "))}</div>`;
-  if(x.ignorados) h+=`<div class="alerta">${x.ignorados} archivo${x.ignorados>1?"s":""} que no ${x.ignorados>1?"son":"es"} XML se guardará${x.ignorados>1?"n":""} dentro del zip original sin leerse (por ejemplo el resumen en Excel del SAT).</div>`;
+  const zipOriginal = x.zipsOrig.length===1 && x.files.length===1 && !A.anidados;
+  if(x.ignorados) h+= zipOriginal
+    ? `<div class="alerta">${x.ignorados} archivo${x.ignorados>1?"s":""} que no ${x.ignorados>1?"son":"es"} XML se guardará${x.ignorados>1?"n":""} dentro del zip original sin leerse (por ejemplo el resumen en Excel del SAT).</div>`
+    : `<div class="alerta">${x.ignorados} archivo${x.ignorados>1?"s":""} que no ${x.ignorados>1?"son":"es"} XML ni estado de cuenta no se toma${x.ignorados>1?"n":""} en cuenta (por ejemplo un Excel o una imagen de firma).</div>`;
   if(!x.textos.length) h+=`<div class="alerta bad">No se encontró ningún XML en lo que seleccionó.</div>`;
+  if(!x.textos.length && !(A.docs&&A.docs.length) && A.correos) h+=`<div class="alerta">Si el correo trae las facturas como liga y no como adjunto, hay que descargarlas primero.</div>`;
   if(x.ok.length){
     const filas=[...x.ok].sort((a,b)=>a.fecha<b.fecha?-1:1).map(c=>{
       const cp=c.direccion==="emitido"?(c.nomR||c.rfcR):(c.nomE||c.rfcE);
@@ -692,6 +772,7 @@ function pintarPrevXml(){
       <button class="btn" type="button" id="btnXmlSubir" ${x.ok.length?"":"disabled"}>Subir ${x.ok.length} comprobantes</button></div>`;
   prev.innerHTML=h;
   $("#btnXmlCancelar").onclick=limpiarXml;
+  if($("#btnPasarEdo")) $("#btnPasarEdo").onclick=()=>{ leerEdo(A.docs); $("#zonaEdo").scrollIntoView({behavior:"smooth",block:"center"}); toast("Revise el banco y las fechas del estado de cuenta"); };
   $("#btnXmlSubir").onclick=subirXml;
 }
 function limpiarXml(){ st.xml=null; $("#prevXml").classList.add("oculto"); $("#prevXml").innerHTML=""; barra("#progXml",-1); }
@@ -710,7 +791,7 @@ async function subirXml(){
   const x=st.xml, b=$("#btnXmlSubir"); b.disabled=true; b.innerHTML='<span class="spin"></span>Subiendo';
   try{
     let blob, nombre;
-    if(x.zipsOrig.length===1 && x.files.length===1){ blob=x.zipsOrig[0]; nombre=blob.name; }
+    if(x.zipsOrig.length===1 && x.files.length===1 && !(x.acc&&x.acc.anidados)){ blob=x.zipsOrig[0]; nombre=blob.name; }
     else {
       const z=new JSZip(); x.textos.forEach(t=>z.file(t.n.split("/").pop(),t.t));
       blob=await z.generateAsync({type:"blob",compression:"DEFLATE"}); nombre=`XML_${st.cli.rfc}_${st.periodo}.zip`;
@@ -735,6 +816,14 @@ async function contarHojas(f){
 }
 async function leerEdo(files){
   if(!st.cli) return;
+  if(files.some(f=>/\.(eml|msg|zip)$/i.test(f.name))){
+    try{
+      const acc=await extraer(files);
+      if(acc.textos.length){ toast(`El correo también trae ${acc.textos.length} XML; se cargaron en la sección 1`); leerXml(files); }
+      files=acc.docs;
+      if(!files.length){ if(!acc.textos.length) toast("El correo no trae PDF ni imágenes"); return; }
+    }catch(e){ toast(e.message||"No se pudo leer el correo"); return; }
+  }
   const val=files.filter(f=>/\.(pdf|jpe?g|png|heic|webp)$/i.test(f.name));
   if(!val.length){ toast("Solo PDF o imágenes"); return; }
   const grandes=val.filter(f=>f.size>50*1048576); if(grandes.length){ toast("Un archivo pasa de 50 MB"); return; }
