@@ -156,7 +156,7 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
 .hbar .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .hbar .t{height:10px;background:#eef1f6;border-radius:6px;overflow:hidden}
 .hbar .t i{display:block;height:100%;background:linear-gradient(90deg,var(--acento),var(--azul3));border-radius:6px}
-.hbar .v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--txt2);text-align:right;min-width:92px}
+.hbar .v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--txt2);text-align:right;min-width:92px;white-space:nowrap}
 .mix{display:flex;height:14px;border-radius:7px;overflow:hidden;background:#eef1f6}
 .mix i{display:block;height:100%}
 .mix-l{display:flex;flex-wrap:wrap;gap:.4rem .9rem;font-size:.76rem;color:var(--txt2);margin-top:.45rem}
@@ -166,6 +166,19 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
 .pend li{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0;border-top:1px solid #eef1f6;font-size:.84rem}
 .pend li:first-child{border-top:0}
 .pend .dot{margin-top:.4rem}
+.al{display:flex;gap:.6rem;padding:.55rem 0;border-top:1px solid #eef1f6;font-size:.84rem}
+.al:first-child{border-top:0}
+.al .ni{flex-shrink:0;font-size:.66rem;font-weight:800;border-radius:6px;padding:.15rem .45rem;height:fit-content;margin-top:.1rem;text-transform:uppercase;letter-spacing:.3px}
+.ni.alta{background:var(--errbg);color:var(--err)}.ni.media{background:var(--medbg);color:#9a6a0c}.ni.info{background:#e3effc;color:var(--azul3)}
+.al b{display:block;font-size:.82rem}
+.al span{color:var(--txt2)}
+.cruce-top{display:flex;align-items:center;gap:1rem;margin-bottom:.4rem}
+.anillo{--p:0;width:86px;height:86px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--ok) calc(var(--p)*1%),#e4e9f2 0);display:flex;align-items:center;justify-content:center}
+.anillo div{width:66px;height:66px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.anillo b{font-size:1.2rem;font-weight:800;color:var(--azul2);line-height:1}
+.anillo small{font-size:.62rem;color:var(--gris);font-weight:700}
+.nlist{margin:0;padding-left:1.15rem;font-size:.85rem}
+.nlist li{margin:.3rem 0}
 .oculto{display:none!important}
 .print-only{display:none}
 
@@ -176,6 +189,7 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
   .htitle h1{font-size:1.25rem}
   .kpis{grid-template-columns:1fr 1fr}
   .dash-g{grid-template-columns:1fr 1fr}
+  .cruce-top{align-items:flex-start}
   .hbar{grid-template-columns:1fr auto}
   .hbar .t{grid-column:1 / -1;grid-row:2}
   .grid{grid-template-columns:1fr}
@@ -298,6 +312,14 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
       <button class="cerrar" id="btnCerrar" type="button" aria-label="Cerrar">×</button>
     </div>
     <div class="panel-b">
+      <div class="card" id="pCruce" style="margin-bottom:.9rem">
+        <div class="card-h"><span>Resultado del cruce con el estado de cuenta</span><span class="chip" id="pCruceChip"></span></div>
+        <div class="card-b" id="pCruceB"></div>
+      </div>
+      <div class="card oculto" id="pAlertas" style="margin-bottom:.9rem">
+        <div class="card-h"><span>Alertas automáticas de los XML</span><span class="chip av" id="pAlertasChip"></span></div>
+        <div class="card-b" id="pAlertasB"></div>
+      </div>
       <div class="card oculto" id="pResumen" style="margin-bottom:.9rem">
         <div class="card-h"><span>Lo que dicen los XML de este mes</span></div>
         <div class="card-b" id="pResumenB"></div>
@@ -424,7 +446,8 @@ function estadoCliente(rfc){
   const xml=cs.filter(c=>c.tipo==="xml").length, edo=cs.filter(c=>c.tipo==="estado").length, tdc=cs.filter(c=>c.tipo==="tarjeta").length;
   const aviso=cs.some(c=>c.detalle && c.detalle.incompleto);
   const nivel = (xml && edo) ? "ok" : (xml||edo||tdc) ? "med" : "no";
-  return {cs,r,xml,edo,tdc,aviso,nivel};
+  const cz=(st.datos.cruces||{})[rfc], al=(st.datos.alertas||{})[rfc]||[];
+  return {cs,r,xml,edo,tdc,aviso,nivel,cz,al};
 }
 const norm = t => String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const corto = n => { n=Number(n)||0; return n>=1e6 ? "$"+(n/1e6).toFixed(2)+" M" : dinero(n).replace(/\.\d\d$/,""); };
@@ -452,13 +475,15 @@ function pintarGrid(){
         <span class="chip ${e.r.total?"si":""}">XML ${e.r.total?"· "+e.r.total:"pendiente"}</span>
         <span class="chip ${e.edo?(e.aviso?"av":"si"):""}">Estado de cuenta${e.edo?(e.aviso?" · incompleto":" ✓"):""}</span>
         ${e.tdc?'<span class="chip si">Tarjeta ✓</span>':""}
+        ${e.cz&&e.cz.movimientos?`<span class="chip si">Cruce ${Math.round(e.cz.identificados/e.cz.movimientos*100)}%</span>`:""}
+        ${e.al.length?`<span class="chip av">⚠ ${e.al.length} alerta${e.al.length>1?"s":""}</span>`:""}
       </div></button>`;
   }).join("");
   $("#grid").querySelectorAll(".cli").forEach(b=>b.onclick=()=>abrirPanel(b.dataset.rfc));
 }
 function barras(lista){
   const max=Math.max(...lista.map(x=>+x.monto||0),1);
-  return lista.map(x=>`<div class="hbar"><span class="n" title="${esc(x.nombre)}">${esc(x.nombre)}</span><span class="t"><i style="width:${Math.max(2,(+x.monto||0)/max*100)}%"></i></span><span class="v">${dinero(x.monto)}${x.n?` <small style="color:var(--gris)">· ${x.n}</small>`:""}</span></div>`).join("");
+  return lista.map(x=>`<div class="hbar"><span class="n" title="${esc(x.nombre)}">${esc(x.nombre)}</span><span class="t"><i style="width:${Math.max(2,(+x.monto||0)/max*100)}%"></i></span><span class="v">${dinero(x.monto)}${x.n?` <small style="color:var(--gris);font-weight:600">· ${x.n} factura${x.n>1?"s":""}</small>`:""}</span></div>`).join("");
 }
 function pintarDash(){
   const cl=st.datos.clientes||[], R=st.datos.resumen||{}, cs=st.datos.cargas||[];
@@ -467,6 +492,10 @@ function pintarDash(){
   $("#dashCorte").textContent = ult ? `Último documento: ${new Date(ult.creado).toLocaleString("es-MX",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}` : "";
   if(!cs.length){ $("#dashB").innerHTML=`<div class="vacio">Aún no hay documentos de ${nomPeriodo(st.periodo).toLowerCase()}; en cuanto se suban, aquí aparece el panorama.</div>`; return; }
   const ppd=sum("ppd"), sinp=sum("ppd_sin_pago");
+  const CZ=Object.values(st.datos.cruces||{}), AL=Object.values(st.datos.alertas||{}).flat();
+  const movT=CZ.reduce((a,z)=>a+(z.movimientos||0),0), movI=CZ.reduce((a,z)=>a+(z.identificados||0),0), nCz=CZ.length;
+  const preg=CZ.reduce((a,z)=>a+(z.preguntas||[]).length,0), obs=CZ.reduce((a,z)=>a+(z.observaciones||[]).length,0);
+  const alT=AL.length, alA=AL.filter(a=>a.nivel==="alta").length;
   let h=`<div class="dash-g">
     <div class="m"><span>Ventas facturadas</span><b>${corto(sum("ventas"))}</b><small>${sum("emitidos")} facturas emitidas</small></div>
     <div class="m"><span>Compras y gastos</span><b>${corto(sum("compras"))}</b><small>${sum("recibidos")} facturas recibidas</small></div>
@@ -474,6 +503,9 @@ function pintarDash(){
     <div class="m"><span>Nómina timbrada</span><b>${corto(sum("nomina_monto"))}</b><small>${sum("nomina")} recibos</small></div>
     <div class="m"><span>A crédito sin complemento</span><b style="color:${sinp?"#9a6a0c":"var(--ok)"}">${sinp} de ${ppd}</b><small>facturas PPD emitidas</small></div>
     <div class="m"><span>XML de otro mes</span><b style="color:${sum("otro_mes")?"#9a6a0c":"var(--azul2)"}">${sum("otro_mes")}</b><small>fecha fuera del periodo</small></div>
+    <div class="m"><span>Movimientos identificados</span><b style="color:var(--ok)">${movT?Math.round(movI/movT*100)+"%":"—"}</b><small>${movT?`${movI} de ${movT} · ${nCz} cliente${nCz>1?"s":""} cruzado${nCz>1?"s":""}`:"sin cruces todavía"}</small></div>
+    <div class="m"><span>Preguntas para clientes</span><b>${preg}</b><small>${obs} observaciones al contador</small></div>
+    <div class="m"><span>Alertas de los XML</span><b style="color:${alA?"var(--err)":"var(--azul2)"}">${alT}</b><small>${alA} para revisar</small></div>
   </div>`;
   const tipos=[["Emitidas",sum("emitidos"),"#1e5096"],["Recibidas",sum("recibidos"),"#4a9fd4"],["Complementos",sum("pagos"),"#2e9d5b"],["Nómina",sum("nomina"),"#d99a1e"],["Notas de crédito",sum("egresos"),"#7a3ea8"]].filter(t=>t[1]);
   const tt=tipos.reduce((a,t)=>a+t[1],0);
@@ -489,6 +521,7 @@ function pintarDash(){
     if(!e.r.total) f.push("XML del mes");
     if(!e.edo) f.push("estado de cuenta");
     else if(e.aviso) f.push("completar el periodo del estado de cuenta");
+    if(e.cz && (e.cz.faltantes||[]).length) f.push(`${e.cz.faltantes.length} documento${e.cz.faltantes.length>1?"s":""} que pidió el cruce`);
     if(r.ppd_sin_pago) f.push(`${r.ppd_sin_pago} complemento${r.ppd_sin_pago>1?"s":""} de pago de facturas a crédito`);
     if(f.length) pend.push({c,e,f});
   });
@@ -510,6 +543,26 @@ function pintarPanel(){
   $("#pNombre").textContent=c.nombre; $("#pSub").textContent=`${c.rfc} · ${c.regimen||""} · ${nomPeriodo(st.periodo)}`;
   const xc=$("#pXmlChip"); xc.className="chip "+(e.r.total?"si":""); xc.textContent=e.r.total?`${e.r.total} comprobantes`:"Pendiente";
   const ec=$("#pEdoChip"); ec.className="chip "+(e.edo||e.tdc?(e.aviso?"av":"si"):""); ec.textContent=e.edo||e.tdc?(e.aviso?"Incompleto":"Recibido"):"Pendiente";
+  const cz=(st.datos.cruces||{})[c.rfc], al=(st.datos.alertas||{})[c.rfc]||[];
+  if(cz && cz.movimientos){
+    const pc=Math.round(cz.identificados/cz.movimientos*100), pf=(cz.preguntas||[]), ob=(cz.observaciones||[]), fa=(cz.faltantes||[]);
+    $("#pCruceChip").className="chip si"; $("#pCruceChip").textContent=pc+"% identificado";
+    const li=a=>a.map(x=>`<li>${esc(x.texto)}</li>`).join("");
+    $("#pCruceB").innerHTML=`<div class="cruce-top"><div class="anillo" style="--p:${pc}"><div><b>${pc}%</b><small>${cz.identificados} de ${cz.movimientos}</small></div></div>
+      <div><b style="color:var(--azul2)">${cz.identificados} de ${cz.movimientos} movimientos</b> del estado de cuenta se identificaron solos.<br><span style="color:var(--txt2);font-size:.85rem">${esc(cz.resumen||"")}</span></div></div>
+      ${pf.length?`<div class="sub-t">Preguntas para el cliente · ${pf.length}</div><ol class="nlist">${li(pf)}</ol>`:""}
+      ${ob.length?`<div class="sub-t">Observaciones para el contador · ${ob.length}</div><ol class="nlist">${li(ob)}</ol>`:""}
+      ${fa.length?`<div class="sub-t">Documentos que faltan · ${fa.length}</div><ol class="nlist">${li(fa)}</ol>`:""}`;
+  } else {
+    $("#pCruceChip").className="chip"; $("#pCruceChip").textContent="Pendiente";
+    $("#pCruceB").innerHTML=`<div class="vacio" style="text-align:left">El cruce se corre en cuanto estén los XML y el estado de cuenta del mes; aquí aparecerá el porcentaje identificado, las preguntas para el cliente y las observaciones para el contador.</div>`;
+  }
+  if(al.length){
+    const NI={alta:"Revisar",media:"Atención",info:"Aviso"};
+    $("#pAlertasChip").textContent=al.length+" alerta"+(al.length>1?"s":"");
+    $("#pAlertasB").innerHTML=al.map(a=>`<div class="al"><span class="ni ${a.nivel}">${NI[a.nivel]||a.nivel}</span><div><b>${esc(a.titulo)}</b><span>${esc(a.texto)}</span></div></div>`).join("");
+    $("#pAlertas").classList.remove("oculto");
+  } else $("#pAlertas").classList.add("oculto");
   const r=e.r;
   if(r.total){
     let h=`<div class="dash-g">
