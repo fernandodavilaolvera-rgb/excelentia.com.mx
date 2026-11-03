@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Roldán CPC · Recepción de documentos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#f5f6f8;--card:#fff;--borde:#dde1e9;--hover:#e8f0fb;--cab:#dce8f7;
+  --azul1:#0d1b3e;--azul2:#1a3a6b;--azul3:#1e5096;--acento:#4a9fd4;
+  --txt:#1a2035;--txt2:#4a5068;--gris:#8a90a0;
+  --ok:#2e9d5b;--okbg:#e7f6ee;--med:#d99a1e;--medbg:#fdf4e1;--no:#c4cad6;--err:#c8423b;--errbg:#fdecea;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:'Manrope',sans-serif;font-size:15px;line-height:1.5}
+button,input,select{font-family:inherit;font-size:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+
+/* Header */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:4px solid var(--acento);color:#fff;padding:1.1rem 0 1.3rem}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.logo-header-wrap{display:flex;align-items:center;gap:.9rem}
+.logo-box{background:#fff;border-radius:10px;padding:.4rem .75rem;display:flex;align-items:center;justify-content:center;min-width:80px;min-height:52px;flex-shrink:0}
+.logo-box img{height:48px;width:auto;display:block}
+.logo-fallback{font-family:'Manrope',sans-serif;font-size:15px;font-weight:800;color:#1a3a6b;display:none}
+.logo-slogan{font-size:13px;font-weight:500;color:#fff;letter-spacing:.2px}
+.htitle{margin-top:1.1rem}
+.htitle .eyebrow{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#a9cdee}
+.htitle h1{margin:.15rem 0 0;font-size:1.55rem;font-weight:800;line-height:1.2}
+.htitle p{margin:.35rem 0 0;color:#d6e4f5;font-size:.92rem}
+.salir{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:.4rem .8rem;cursor:pointer;font-weight:600;font-size:.82rem}
+.salir:hover{background:rgba(255,255,255,.22)}
+
+main{padding:1.4rem 0 3rem}
+.card{background:var(--card);border:1px solid var(--borde);border-radius:14px;max-width:720px;margin:0 auto 1rem}
+.card-h{background:var(--cab);border-radius:13px 13px 0 0;padding:.75rem 1.1rem;font-weight:700;color:var(--azul2);display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.card-b{padding:1.1rem}
+
+/* Login */
+#login .card-b{text-align:center;padding:2rem 1.2rem}
+#login h2{margin:.2rem 0 .3rem;font-size:1.25rem}
+#login p{color:var(--txt2);margin:0 0 1.2rem}
+.inp{width:100%;max-width:340px;border:1px solid var(--borde);border-radius:10px;padding:.75rem .9rem;text-align:center;letter-spacing:2px;font-weight:700;text-transform:uppercase}
+.inp:focus,.campo:focus{outline:2px solid var(--acento);border-color:var(--acento)}
+.btn{background:var(--azul2);color:#fff;border:0;border-radius:10px;padding:.7rem 1.2rem;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--azul3)}
+.btn:disabled{background:var(--no);cursor:not-allowed}
+.btn.sec{background:#fff;color:var(--azul2);border:1px solid var(--borde)}
+.btn.sec:hover{background:var(--hover)}
+.msg-err{color:var(--err);font-weight:600;margin-top:.7rem;min-height:1.2em}
+
+/* Periodos */
+.periodos{display:flex;gap:.5rem;flex-wrap:wrap;max-width:720px;margin:0 auto 1rem}
+.periodos button{flex:1;min-width:120px;background:#fff;border:1px solid var(--borde);border-radius:10px;padding:.6rem .8rem;font-weight:700;color:var(--txt2);cursor:pointer}
+.periodos button.on{background:var(--azul2);border-color:var(--azul2);color:#fff}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:720px;margin:0 auto 1rem}
+.kpi{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:.8rem .7rem}
+.kpi b{display:block;font-size:1.55rem;font-weight:800;line-height:1.1;color:var(--azul2)}
+.kpi span{font-size:.78rem;color:var(--txt2);font-weight:600}
+.barra{height:8px;background:#eef1f6;border-radius:6px;overflow:hidden;margin-top:.7rem;display:flex}
+.barra i{display:block;height:100%}
+
+/* Clientes */
+.leyenda{display:flex;gap:1rem;flex-wrap:wrap;font-size:.8rem;color:var(--txt2);margin-bottom:.8rem}
+.leyenda span{display:flex;align-items:center;gap:.35rem}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot.ok{background:var(--ok)}.dot.med{background:var(--med)}.dot.no{background:var(--no)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.cli{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:.85rem .9rem;cursor:pointer;text-align:left;width:100%;transition:background .15s,border-color .15s}
+.cli:hover{background:var(--hover);border-color:#b9cfe9}
+.cli-top{display:flex;gap:.55rem;align-items:flex-start}
+.cli-top .dot{margin-top:.35rem}
+.cli h3{margin:0;font-size:.93rem;font-weight:700;line-height:1.3;color:var(--txt)}
+.cli small{display:block;color:var(--gris);font-size:.74rem;font-weight:600;letter-spacing:.3px}
+.chips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.6rem}
+.chip{font-size:.72rem;font-weight:700;border-radius:20px;padding:.15rem .55rem;background:#eef1f6;color:var(--gris)}
+.chip.si{background:var(--okbg);color:var(--ok)}
+.chip.av{background:var(--medbg);color:#9a6a0c}
+
+/* Panel cliente */
+.velo{position:fixed;inset:0;background:rgba(13,27,62,.45);display:none;z-index:50;overflow-y:auto;padding:2rem 16px}
+.velo.on{display:block}
+.panel{background:var(--bg);border-radius:16px;max-width:720px;margin:0 auto;overflow:hidden;box-shadow:0 20px 60px rgba(13,27,62,.35)}
+.panel-h{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);color:#fff;padding:1rem 1.2rem;display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
+.panel-h h2{margin:0;font-size:1.15rem;line-height:1.25}
+.panel-h small{color:#bcd6f0;font-weight:600}
+.cerrar{background:rgba(255,255,255,.15);border:0;color:#fff;width:34px;height:34px;border-radius:50%;font-size:1.2rem;cursor:pointer;flex-shrink:0}
+.panel-b{padding:1rem}
+.zona{border:2px dashed #b9cfe9;border-radius:12px;background:#fbfdff;padding:1.2rem;text-align:center;cursor:pointer;transition:background .15s,border-color .15s}
+.zona:hover,.zona.arrastre{background:var(--hover);border-color:var(--acento)}
+.zona .ico{font-size:1.8rem;line-height:1}
+.zona b{display:block;margin-top:.3rem;color:var(--azul2)}
+.zona span{font-size:.82rem;color:var(--txt2)}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.7rem}
+.fila3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:.6rem;margin-top:.8rem}
+label.l{display:block;font-size:.75rem;font-weight:700;color:var(--txt2);margin-bottom:.2rem}
+.campo{width:100%;border:1px solid var(--borde);border-radius:9px;padding:.55rem .65rem;background:#fff;color:var(--txt)}
+.seg{display:flex;border:1px solid var(--borde);border-radius:10px;overflow:hidden;margin-bottom:.8rem}
+.seg button{flex:1;border:0;background:#fff;padding:.55rem;font-weight:700;color:var(--txt2);cursor:pointer}
+.seg button.on{background:var(--azul2);color:#fff}
+
+.prev{margin-top:.9rem}
+.mini{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-bottom:.7rem}
+.mini div{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:.5rem;text-align:center}
+.mini b{display:block;font-size:1.25rem;color:var(--azul2);font-weight:800}
+.mini span{font-size:.7rem;color:var(--txt2);font-weight:600}
+.alerta{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid var(--acento);border-radius:9px;padding:.6rem .8rem;font-size:.85rem;margin-bottom:.5rem;color:var(--txt)}
+.alerta.warn{background:var(--medbg);border-color:#f0d9a6;border-left-color:var(--med)}
+.alerta.bad{background:var(--errbg);border-color:#f3c3bf;border-left-color:var(--err)}
+.alerta.good{background:var(--okbg);border-color:#bfe3cd;border-left-color:var(--ok)}
+.tabla-w{overflow-x:auto;border:1px solid var(--borde);border-radius:10px;background:#fff;max-height:260px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{background:var(--cab);color:var(--azul2);text-align:left;padding:.45rem .55rem;font-weight:700;position:sticky;top:0;white-space:nowrap}
+td{padding:.4rem .55rem;border-top:1px solid #eef1f6;white-space:nowrap}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{font-size:.68rem;font-weight:800;border-radius:6px;padding:.1rem .4rem;background:#eef1f6;color:var(--txt2)}
+.tag.I{background:#e3effc;color:var(--azul3)}.tag.E{background:#f3e8fb;color:#7a3ea8}.tag.P{background:var(--okbg);color:var(--ok)}.tag.N{background:var(--medbg);color:#9a6a0c}
+.acciones{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap}
+.progreso{height:10px;background:#e4e9f2;border-radius:6px;overflow:hidden;margin-top:.8rem;display:none}
+.progreso i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acento),var(--azul3));transition:width .2s}
+
+.lista{list-style:none;margin:0;padding:0}
+.lista li{display:flex;gap:.7rem;align-items:center;padding:.6rem 0;border-top:1px solid #eef1f6}
+.lista li:first-child{border-top:0}
+.lista .ic{width:36px;height:36px;border-radius:9px;background:var(--cab);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.lista .tx{flex:1;min-width:0}
+.lista .tx b{display:block;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lista .tx span{font-size:.75rem;color:var(--gris)}
+.borrar{background:none;border:1px solid var(--borde);border-radius:8px;color:var(--err);padding:.3rem .55rem;cursor:pointer;font-size:.75rem;font-weight:700}
+.borrar:hover{background:var(--errbg)}
+.vacio{color:var(--gris);font-size:.85rem;text-align:center;padding:.6rem}
+.nota{background:#eef4fc;border-left:4px solid var(--azul2);border-radius:9px;padding:.75rem .9rem;font-size:.82rem;color:var(--txt2);max-width:720px;margin:0 auto}
+.nota b{color:var(--azul2)}
+footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2rem}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:var(--azul1);color:#fff;padding:.7rem 1.1rem;border-radius:10px;font-weight:600;font-size:.88rem;z-index:80;transition:transform .25s;max-width:calc(100% - 32px)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:g .8s linear infinite;vertical-align:-2px;margin-right:.4rem}
+@keyframes g{to{transform:rotate(360deg)}}
+.oculto{display:none!important}
+.print-only{display:none}
+
+@media (max-width:600px){
+  .logo-header-wrap{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .logo-slogan{font-size:11px}
+  .hrow{align-items:flex-start}
+  .htitle h1{font-size:1.25rem}
+  .kpis{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:1fr}
+  .velo{padding:0}
+  .panel{border-radius:0;min-height:100%}
+  .fila,.fila3{grid-template-columns:1fr}
+  .mini{grid-template-columns:1fr 1fr}
+  .card-b{padding:.9rem}
+  .periodos button{min-width:0;font-size:.85rem;padding:.55rem .4rem}
+}
+
+@media print{
+  @page{size:Letter;margin:13mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{background:#fff;font-size:12px}
+  .no-print,.velo,.toast,.periodos,#login{display:none!important}
+  .print-only{display:block}
+  header{padding:.8rem 0}
+  main,section,.card,div{break-inside:auto}
+  .cli,.kpi,.alerta,.nota,tr,img{break-inside:avoid}
+  h1,h2,h3,h4,.card-h{break-after:avoid}
+  p,li{orphans:3;widows:3}
+  thead{display:table-header-group}
+  a[href]:after{content:none}
+  .wrap{max-width:none}
+  .grid{grid-template-columns:1fr 1fr}
+  .cli{cursor:default}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hrow">
+      <div class="logo-header-wrap">
+        <div class="logo-box">
+          <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+          <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+        </div>
+        <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+      </div>
+      <button class="salir no-print oculto" id="btnSalir" type="button">Cerrar sesión</button>
+    </div>
+    <div class="htitle">
+      <div class="eyebrow">Roldán CPC · Consultoría Profesional Contable</div>
+      <h1>Recepción de documentos del piloto</h1>
+      <p>Suba los XML del SAT y los estados de cuenta de cada cliente; el sistema los revisa al momento y avisa qué falta.</p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Acceso -->
+  <section id="login" class="card">
+    <div class="card-b">
+      <div style="font-size:2rem">🔐</div>
+      <h2>Acceso privado</h2>
+      <p>Escriba la clave que le compartió ExcelentIA.</p>
+      <form id="formLogin" autocomplete="off">
+        <input class="inp" id="clave" placeholder="CPC-XXXX-XXXX" maxlength="20" autocomplete="off" spellcheck="false">
+        <div style="margin-top:.9rem"><button class="btn" id="btnEntrar" type="submit">Entrar</button></div>
+        <div class="msg-err" id="loginErr"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Tablero -->
+  <section id="tablero" class="oculto">
+    <div class="periodos no-print" id="periodos"></div>
+
+    <div class="print-only" style="margin-bottom:.6rem"><b id="printPeriodo"></b> · Corte al <span id="printFecha"></span></div>
+
+    <div class="kpis">
+      <div class="kpi"><b id="kComp">0</b><span>Clientes completos</span></div>
+      <div class="kpi"><b id="kParc">0</b><span>Con información parcial</span></div>
+      <div class="kpi"><b id="kSin">0</b><span>Sin información</span></div>
+      <div class="kpi"><b id="kCfdi">0</b><span>Comprobantes leídos</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span>Clientes del piloto</span><span id="avance" style="font-size:.82rem;color:var(--txt2)"></span></div>
+      <div class="card-b">
+        <div class="leyenda">
+          <span><i class="dot ok"></i>XML y estado de cuenta</span>
+          <span><i class="dot med"></i>Falta una parte</span>
+          <span><i class="dot no"></i>Sin documentos</span>
+        </div>
+        <div class="barra" style="margin:0 0 1rem"><i id="bOk" style="background:var(--ok)"></i><i id="bMed" style="background:var(--med)"></i></div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+
+    <div class="acciones no-print" style="max-width:720px;margin:0 auto 1rem">
+      <button class="btn sec" type="button" id="btnRefrescar">↻ Actualizar</button>
+      <button class="btn sec" type="button" onclick="window.print()">🖨 Imprimir acuse</button>
+    </div>
+
+    <div class="nota">
+      <b>Resguardo de la información.</b> Los archivos se guardan en un almacenamiento privado con acceso solo mediante clave; esta página no conserva copia de ningún documento. Si un XML ya se había subido antes, el sistema lo reconoce y no lo duplica.
+    </div>
+  </section>
+</main>
+
+<!-- Panel de cliente -->
+<div class="velo" id="velo">
+  <div class="panel" role="dialog" aria-modal="true">
+    <div class="panel-h">
+      <div><h2 id="pNombre"></h2><small id="pSub"></small></div>
+      <button class="cerrar" id="btnCerrar" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <div class="panel-b">
+
+      <div class="card" style="margin-bottom:.9rem">
+        <div class="card-h"><span>1 · XML del SAT</span><span class="chip" id="pXmlChip"></span></div>
+        <div class="card-b">
+          <div class="zona" id="zonaXml" tabindex="0">
+            <div class="ico">🗂️</div>
+            <b>Arrastre aquí el .zip o los XML</b>
+            <span>Emitidos, recibidos, nómina y complementos de pago del mes</span>
+          </div>
+          <input type="file" id="fileXml" accept=".zip,.xml" multiple class="oculto">
+          <div class="prev oculto" id="prevXml"></div>
+          <div class="progreso" id="progXml"><i></i></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:.9rem">
+        <div class="card-h"><span>2 · Estado de cuenta</span><span class="chip" id="pEdoChip"></span></div>
+        <div class="card-b">
+          <div class="seg" id="segTipo">
+            <button type="button" class="on" data-t="estado">Cuenta bancaria</button>
+            <button type="button" data-t="tarjeta">Tarjeta de crédito</button>
+          </div>
+          <div class="zona" id="zonaEdo" tabindex="0">
+            <div class="ico">📄</div>
+            <b>Arrastre aquí el PDF o las fotos</b>
+            <span>PDF del banco, capturas o fotos de cada hoja</span>
+          </div>
+          <input type="file" id="fileEdo" accept=".pdf,.jpg,.jpeg,.png,.heic,.webp" multiple class="oculto">
+          <div class="prev oculto" id="prevEdo">
+            <div id="edoArchivos"></div>
+            <div class="fila3">
+              <div><label class="l" for="edoBanco">Banco</label>
+                <input class="campo" id="edoBanco" list="bancos" placeholder="Ej. BBVA">
+                <datalist id="bancos"><option>BBVA</option><option>Inbursa</option><option>Banorte</option><option>Santander</option><option>Banamex</option><option>HSBC</option><option>Scotiabank</option><option>BanBajío</option><option>Afirme</option></datalist>
+              </div>
+              <div><label class="l" for="edoDel">Periodo del</label><input class="campo" type="date" id="edoDel"></div>
+              <div><label class="l" for="edoAl">al</label><input class="campo" type="date" id="edoAl"></div>
+            </div>
+            <div id="edoAviso" style="margin-top:.7rem"></div>
+            <div class="acciones">
+              <button class="btn sec" type="button" id="btnEdoCancelar">Cancelar</button>
+              <button class="btn" type="button" id="btnEdoSubir">Subir estado de cuenta</button>
+            </div>
+          </div>
+          <div class="progreso" id="progEdo"><i></i></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-h"><span>Documentos recibidos de este mes</span></div>
+        <div class="card-b"><ul class="lista" id="pLista"></ul></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<footer>ExcelentIA · excelentia.com.mx</footer>
+
+<script>
+(function(){
+"use strict";
+const API = "https://rcotlydvsubvdapubnkx.supabase.co/functions/v1/roldan-carga";
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const PERIODOS = ["2026-09","2026-10","2026-11"];
+const $ = s => document.querySelector(s);
+const st = { clave:"", periodo:"2026-09", datos:null, cli:null, xml:null, edo:null, tipoEdo:"estado" };
+
+const store = {
+  get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} },
+  del(k){ try{ sessionStorage.removeItem(k); }catch(e){} }
+};
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dinero = n => (Number(n)||0).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
+const kb = n => n>1048576 ? (n/1048576).toFixed(1)+" MB" : Math.max(1,Math.round(n/1024))+" KB";
+const nomPeriodo = p => { const [y,m]=p.split("-"); const t=MESES[+m-1]; return t[0].toUpperCase()+t.slice(1)+" "+y; };
+const fCorta = d => { if(!d) return ""; const x=new Date(d); return x.toLocaleDateString("es-MX",{day:"2-digit",month:"short"}); };
+function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove("on"),3200); }
+
+async function api(accion, extra){
+  const r = await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({accion,clave:st.clave,periodo:st.periodo},extra||{}))});
+  let j={}; try{ j=await r.json(); }catch(e){}
+  if(r.status===401){ salir(); throw new Error("La clave ya no es válida"); }
+  if(!r.ok) throw new Error(j.error||"No se pudo conectar");
+  return j;
+}
+
+/* ---------- Acceso ---------- */
+$("#formLogin").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const c=$("#clave").value.trim().toUpperCase(); if(!c) return;
+  const b=$("#btnEntrar"); b.disabled=true; b.innerHTML='<span class="spin"></span>Entrando';
+  $("#loginErr").textContent="";
+  st.clave=c;
+  try{ await api("login"); store.set("rcpc_clave",c); entrar(); }
+  catch(err){ st.clave=""; $("#loginErr").textContent = err.message==="La clave ya no es válida" ? "Clave incorrecta; revísela e intente de nuevo." : err.message; }
+  b.disabled=false; b.textContent="Entrar";
+});
+function entrar(){ $("#login").classList.add("oculto"); $("#tablero").classList.remove("oculto"); $("#btnSalir").classList.remove("oculto"); pintarPeriodos(); cargar(); }
+function salir(){ store.del("rcpc_clave"); st.clave=""; cerrarPanel(); $("#tablero").classList.add("oculto"); $("#login").classList.remove("oculto"); $("#btnSalir").classList.add("oculto"); }
+$("#btnSalir").onclick=salir;
+
+/* ---------- Tablero ---------- */
+function pintarPeriodos(){
+  $("#periodos").innerHTML = PERIODOS.map(p=>`<button type="button" data-p="${p}" class="${p===st.periodo?"on":""}">${nomPeriodo(p)}</button>`).join("");
+  $("#periodos").querySelectorAll("button").forEach(b=>b.onclick=()=>{ st.periodo=b.dataset.p; store.set("rcpc_periodo",st.periodo); pintarPeriodos(); cargar(); });
+}
+async function cargar(){
+  $("#grid").innerHTML='<div class="vacio">Cargando…</div>';
+  try{ st.datos = await api("estado"); pintar(); if(st.cli) pintarPanel(); }
+  catch(e){ $("#grid").innerHTML=`<div class="alerta bad">${esc(e.message)}</div>`; }
+}
+$("#btnRefrescar").onclick=cargar;
+
+function estadoCliente(rfc){
+  const cs=(st.datos.cargas||[]).filter(c=>c.rfc===rfc);
+  const r=(st.datos.resumen||{})[rfc]||{total:0};
+  const xml=cs.filter(c=>c.tipo==="xml").length, edo=cs.filter(c=>c.tipo==="estado").length, tdc=cs.filter(c=>c.tipo==="tarjeta").length;
+  const aviso=cs.some(c=>c.detalle && c.detalle.incompleto);
+  const nivel = (xml && edo) ? "ok" : (xml||edo||tdc) ? "med" : "no";
+  return {cs,r,xml,edo,tdc,aviso,nivel};
+}
+function pintar(){
+  const cl=st.datos.clientes||[]; let ok=0,med=0,no=0,cf=0;
+  $("#grid").innerHTML = cl.map(c=>{
+    const e=estadoCliente(c.rfc); if(e.nivel==="ok")ok++; else if(e.nivel==="med")med++; else no++; cf+=e.r.total||0;
+    return `<button type="button" class="cli" data-rfc="${esc(c.rfc)}">
+      <div class="cli-top"><i class="dot ${e.nivel}"></i><div><h3>${esc(c.nombre)}</h3><small>${esc(c.rfc)} · ${esc(c.regimen||"")}</small></div></div>
+      <div class="chips">
+        <span class="chip ${e.r.total?"si":""}">XML ${e.r.total?"· "+e.r.total:"pendiente"}</span>
+        <span class="chip ${e.edo?(e.aviso?"av":"si"):""}">Estado de cuenta${e.edo?(e.aviso?" · incompleto":" ✓"):""}</span>
+        ${e.tdc?'<span class="chip si">Tarjeta ✓</span>':""}
+      </div></button>`;
+  }).join("");
+  $("#grid").querySelectorAll(".cli").forEach(b=>b.onclick=()=>abrirPanel(b.dataset.rfc));
+  $("#kComp").textContent=ok; $("#kParc").textContent=med; $("#kSin").textContent=no; $("#kCfdi").textContent=cf.toLocaleString("es-MX");
+  const t=cl.length||1; $("#bOk").style.width=(ok/t*100)+"%"; $("#bMed").style.width=(med/t*100)+"%";
+  $("#avance").textContent=`${ok} de ${cl.length} completos`;
+  $("#printPeriodo").textContent="Recepción de documentos · "+nomPeriodo(st.periodo);
+  $("#printFecha").textContent=new Date().toLocaleString("es-MX",{dateStyle:"long",timeStyle:"short"});
+}
+
+/* ---------- Panel ---------- */
+function abrirPanel(rfc){ st.cli=(st.datos.clientes||[]).find(c=>c.rfc===rfc); limpiarXml(); limpiarEdo(); pintarPanel(); $("#velo").classList.add("on"); document.body.style.overflow="hidden"; }
+function cerrarPanel(){ st.cli=null; $("#velo").classList.remove("on"); document.body.style.overflow=""; }
+$("#btnCerrar").onclick=cerrarPanel;
+$("#velo").addEventListener("click",e=>{ if(e.target.id==="velo") cerrarPanel(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && st.cli) cerrarPanel(); });
+
+function pintarPanel(){
+  const c=st.cli; if(!c) return; const e=estadoCliente(c.rfc);
+  $("#pNombre").textContent=c.nombre; $("#pSub").textContent=`${c.rfc} · ${c.regimen||""} · ${nomPeriodo(st.periodo)}`;
+  const xc=$("#pXmlChip"); xc.className="chip "+(e.r.total?"si":""); xc.textContent=e.r.total?`${e.r.total} comprobantes`:"Pendiente";
+  const ec=$("#pEdoChip"); ec.className="chip "+(e.edo||e.tdc?(e.aviso?"av":"si"):""); ec.textContent=e.edo||e.tdc?(e.aviso?"Incompleto":"Recibido"):"Pendiente";
+  const ICO={xml:"🗂️",estado:"🏦",tarjeta:"💳",otro:"📎"}, NOM={xml:"XML",estado:"Estado de cuenta",tarjeta:"Tarjeta de crédito",otro:"Otro"};
+  $("#pLista").innerHTML = e.cs.length ? e.cs.map(x=>{
+    const d=x.detalle||{}; let info=`${NOM[x.tipo]} · ${kb(x.tamano||0)} · ${fCorta(x.creado)}`;
+    if(x.tipo==="xml") info+=` · ${d.nuevos!=null?d.nuevos:(d.leidos||0)} nuevos${d.duplicados?`, ${d.duplicados} ya estaban`:""}`;
+    if(x.banco) info+=` · ${esc(x.banco)}`;
+    if(x.del&&x.al) info+=` · ${fCorta(x.del+"T12:00")} al ${fCorta(x.al+"T12:00")}`;
+    if(d.hojas) info+=` · ${d.hojas} hojas`;
+    return `<li><div class="ic">${ICO[x.tipo]}</div><div class="tx"><b>${esc(x.nombre)}</b><span>${info}${d.incompleto?' · <b style="display:inline;color:#9a6a0c">periodo incompleto</b>':""}</span></div>
+      <button class="borrar no-print" type="button" data-id="${x.id}">Quitar</button></li>`;
+  }).join("") : '<li class="vacio">Aún no hay documentos de este mes.</li>';
+  $("#pLista").querySelectorAll(".borrar").forEach(b=>b.onclick=()=>quitar(b.dataset.id,b));
+}
+async function quitar(id,b){
+  if(b.dataset.ok!=="1"){ b.dataset.ok="1"; b.textContent="¿Seguro?"; setTimeout(()=>{ if(b.isConnected){ b.dataset.ok=""; b.textContent="Quitar"; } },3500); return; }
+  b.disabled=true; b.textContent="…";
+  try{ await api("eliminar",{id}); toast("Documento quitado"); await cargar(); }catch(e){ toast(e.message); b.disabled=false; b.textContent="Quitar"; }
+}
+
+/* ---------- Zonas de arrastre ---------- */
+function zona(z,inp,fn){
+  z.onclick=()=>inp.click();
+  z.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); inp.click(); } };
+  ["dragenter","dragover"].forEach(t=>z.addEventListener(t,e=>{ e.preventDefault(); z.classList.add("arrastre"); }));
+  ["dragleave","drop"].forEach(t=>z.addEventListener(t,e=>{ e.preventDefault(); z.classList.remove("arrastre"); }));
+  z.addEventListener("drop",e=>{ if(e.dataTransfer.files.length) fn([...e.dataTransfer.files]); });
+  inp.onchange=()=>{ if(inp.files.length) fn([...inp.files]); inp.value=""; };
+}
+zona($("#zonaXml"),$("#fileXml"),leerXml);
+zona($("#zonaEdo"),$("#fileEdo"),leerEdo);
+
+/* ---------- XML ---------- */
+function attr(el,n){ return el ? (el.getAttribute(n)||"") : ""; }
+function primero(doc,tag){ return doc.getElementsByTagNameNS("*",tag)[0] || null; }
+function parsearCfdi(texto, rfc){
+  const doc=new DOMParser().parseFromString(texto.replace(/^﻿/,""),"application/xml");
+  if(doc.getElementsByTagName("parsererror").length) return null;
+  const c=primero(doc,"Comprobante"); if(!c) return null;
+  const em=primero(doc,"Emisor"), re=primero(doc,"Receptor"), tfd=primero(doc,"TimbreFiscalDigital");
+  const rfcE=attr(em,"Rfc").toUpperCase(), rfcR=attr(re,"Rfc").toUpperCase();
+  const tipo=attr(c,"TipoDeComprobante");
+  const pagos=[...doc.getElementsByTagNameNS("*","Pago")].filter(p=>p.getAttribute("FechaPago")).map(p=>({
+    fecha:attr(p,"FechaPago"), monto:attr(p,"Monto"), forma:attr(p,"FormaDePagoP"),
+    docs:[...p.getElementsByTagNameNS("*","DoctoRelacionado")].map(d=>({uuid:attr(d,"IdDocumento").toUpperCase(),pagado:attr(d,"ImpPagado"),parc:attr(d,"NumParcialidad")}))
+  }));
+  let total=attr(c,"Total");
+  if(tipo==="P" && pagos.length) total=String(pagos.reduce((s,p)=>s+(+p.monto||0),0));
+  return { uuid:attr(tfd,"UUID").toUpperCase(), tipo, fecha:attr(c,"Fecha"), total, moneda:attr(c,"Moneda"),
+    metodo:attr(c,"MetodoPago"), forma:attr(c,"FormaPago"), rfcE, nomE:attr(em,"Nombre"), rfcR, nomR:attr(re,"Nombre"),
+    direccion: rfcE===rfc ? "emitido" : rfcR===rfc ? "recibido" : "ajeno", pagos: pagos.length?pagos:null };
+}
+async function leerXml(files){
+  if(!st.cli) return;
+  const prev=$("#prevXml"); prev.classList.remove("oculto"); prev.innerHTML='<div class="alerta">Leyendo los archivos…</div>';
+  const textos=[]; let ignorados=0, zipsOrig=[];
+  try{
+    for(const f of files){
+      const n=f.name.toLowerCase();
+      if(n.endsWith(".zip")){
+        if(typeof JSZip==="undefined") throw new Error("No se pudo abrir el zip; recargue la página.");
+        zipsOrig.push(f);
+        const z=await JSZip.loadAsync(f);
+        for(const [ruta,ent] of Object.entries(z.files)){
+          if(ent.dir || /(^|\/)(__MACOSX|\.)/.test(ruta)) continue;
+          if(ruta.toLowerCase().endsWith(".xml")) textos.push({n:ruta,t:await ent.async("string")}); else ignorados++;
+        }
+      } else if(n.endsWith(".xml")) textos.push({n:f.name,t:await f.text()});
+      else ignorados++;
+    }
+  }catch(e){ prev.innerHTML=`<div class="alerta bad">${esc(e.message||"No se pudo leer el archivo")}</div>`; return; }
+
+  const rfc=st.cli.rfc, vistos=new Set(), ok=[], ajenos=[], invalidos=[], repetidos=[], otroMes=[];
+  for(const x of textos){
+    const c=parsearCfdi(x.t,rfc);
+    if(!c || !c.uuid){ invalidos.push(x.n); continue; }
+    if(vistos.has(c.uuid)){ repetidos.push(c.uuid); continue; }
+    vistos.add(c.uuid);
+    if(c.direccion==="ajeno"){ ajenos.push(c); continue; }
+    const mesRef = (c.tipo==="P" && c.pagos) ? c.pagos[0].fecha : c.fecha;
+    if(mesRef.slice(0,7)!==st.periodo) otroMes.push(c);
+    ok.push(c);
+  }
+  st.xml={files,zipsOrig,textos,ok,ajenos,invalidos,repetidos,otroMes,ignorados};
+  pintarPrevXml();
+}
+function pintarPrevXml(){
+  const x=st.xml, prev=$("#prevXml");
+  const cnt=t=>x.ok.filter(c=>c.tipo===t).length;
+  const em=x.ok.filter(c=>c.direccion==="emitido" && c.tipo==="I").length, rc=x.ok.filter(c=>c.direccion==="recibido" && (c.tipo==="I"||c.tipo==="E")).length;
+  const sumEm=x.ok.filter(c=>c.direccion==="emitido"&&c.tipo==="I").reduce((s,c)=>s+(+c.total||0),0);
+  const sumRc=x.ok.filter(c=>c.direccion==="recibido"&&c.tipo==="I").reduce((s,c)=>s+(+c.total||0),0);
+  const ppd=x.ok.filter(c=>c.direccion==="emitido"&&c.tipo==="I"&&c.metodo==="PPD").length;
+  let h=`<div class="mini">
+    <div><b>${em}</b><span>Facturas emitidas</span></div>
+    <div><b>${rc}</b><span>Facturas recibidas</span></div>
+    <div><b>${cnt("P")}</b><span>Complementos de pago</span></div>
+    <div><b>${cnt("N")}</b><span>Recibos de nómina</span></div></div>`;
+  if(x.ok.length) h+=`<div class="alerta good">✓ <b>${x.ok.length} comprobantes válidos</b> de ${esc(st.cli.nombre)}; ventas facturadas ${dinero(sumEm)} y compras ${dinero(sumRc)}.${ppd?` ${ppd} factura${ppd>1?"s":""} emitida${ppd>1?"s":""} a crédito (PPD) que deberá${ppd>1?"n":""} tener complemento de pago.`:""}</div>`;
+  if(x.ajenos.length){ const r=[...new Set(x.ajenos.map(c=>c.rfcE+" → "+c.rfcR))].slice(0,3).join("; ");
+    h+=`<div class="alerta bad">✕ <b>${x.ajenos.length} XML no ${x.ajenos.length>1?"son":"es"} de este cliente</b> (no traen el RFC ${esc(st.cli.rfc)}); no se subirán. Ej.: ${esc(r)}</div>`; }
+  if(x.otroMes.length) h+=`<div class="alerta warn">⚠ <b>${x.otroMes.length} comprobante${x.otroMes.length>1?"s son":" es"} de otro mes</b> distinto a ${nomPeriodo(st.periodo).toLowerCase()}; se guardan, y el contador los verá marcados.</div>`;
+  if(x.repetidos.length) h+=`<div class="alerta">${x.repetidos.length} XML venían repetidos en lo que subió; se tomará uno solo.</div>`;
+  if(x.invalidos.length) h+=`<div class="alerta warn">⚠ ${x.invalidos.length} archivo${x.invalidos.length>1?"s":""} no ${x.invalidos.length>1?"son":"es"} un CFDI válido o no trae timbre: ${esc(x.invalidos.slice(0,3).join(", "))}</div>`;
+  if(x.ignorados) h+=`<div class="alerta">${x.ignorados} archivo${x.ignorados>1?"s":""} que no ${x.ignorados>1?"son":"es"} XML se guardará${x.ignorados>1?"n":""} dentro del zip original sin leerse (por ejemplo el resumen en Excel del SAT).</div>`;
+  if(!x.textos.length) h+=`<div class="alerta bad">No se encontró ningún XML en lo que seleccionó.</div>`;
+  if(x.ok.length){
+    const filas=[...x.ok].sort((a,b)=>a.fecha<b.fecha?-1:1).map(c=>{
+      const cp=c.direccion==="emitido"?(c.nomR||c.rfcR):(c.nomE||c.rfcE);
+      const om=x.otroMes.includes(c);
+      return `<tr${om?' style="background:#fffaf0"':""}><td>${fCorta(c.fecha)}</td><td><span class="tag ${c.tipo}">${c.tipo==="I"?"Ingreso":c.tipo==="E"?"Egreso":c.tipo==="P"?"Pago":c.tipo==="N"?"Nómina":c.tipo}</span></td><td>${c.direccion==="emitido"?"Emitida":"Recibida"}</td><td>${esc(cp).slice(0,38)}</td><td>${c.metodo||""}</td><td class="num">${dinero(c.total)}</td></tr>`;
+    }).join("");
+    h+=`<div class="tabla-w"><table><thead><tr><th>Fecha</th><th>Tipo</th><th></th><th>Contraparte</th><th>Método</th><th style="text-align:right">Total</th></tr></thead><tbody>${filas}</tbody></table></div>`;
+  }
+  h+=`<div class="acciones"><button class="btn sec" type="button" id="btnXmlCancelar">Cancelar</button>
+      <button class="btn" type="button" id="btnXmlSubir" ${x.ok.length?"":"disabled"}>Subir ${x.ok.length} comprobantes</button></div>`;
+  prev.innerHTML=h;
+  $("#btnXmlCancelar").onclick=limpiarXml;
+  $("#btnXmlSubir").onclick=subirXml;
+}
+function limpiarXml(){ st.xml=null; $("#prevXml").classList.add("oculto"); $("#prevXml").innerHTML=""; barra("#progXml",-1); }
+
+function barra(sel,p){ const b=$(sel); if(p<0){ b.style.display="none"; b.firstElementChild.style.width="0"; return; } b.style.display="block"; b.firstElementChild.style.width=p+"%"; }
+function put(url,blob,tipo,onp){
+  return new Promise((res,rej)=>{
+    const r=new XMLHttpRequest(); r.open("PUT",url); r.setRequestHeader("Content-Type",tipo||"application/octet-stream");
+    r.upload.onprogress=e=>{ if(e.lengthComputable) onp(e.loaded/e.total); };
+    r.onload=()=> r.status<300 ? res() : rej(new Error("No se pudo subir el archivo ("+r.status+")"));
+    r.onerror=()=>rej(new Error("Se perdió la conexión al subir"));
+    r.send(blob);
+  });
+}
+async function subirXml(){
+  const x=st.xml, b=$("#btnXmlSubir"); b.disabled=true; b.innerHTML='<span class="spin"></span>Subiendo';
+  try{
+    let blob, nombre;
+    if(x.zipsOrig.length===1 && x.files.length===1){ blob=x.zipsOrig[0]; nombre=blob.name; }
+    else {
+      const z=new JSZip(); x.textos.forEach(t=>z.file(t.n.split("/").pop(),t.t));
+      blob=await z.generateAsync({type:"blob",compression:"DEFLATE"}); nombre=`XML_${st.cli.rfc}_${st.periodo}.zip`;
+    }
+    const u=await api("url",{rfc:st.cli.rfc,tipo:"xml",nombre});
+    barra("#progXml",2);
+    await put(u.url,blob,"application/zip",p=>barra("#progXml",Math.max(2,p*90)));
+    const comps=x.ok.map(c=>({uuid:c.uuid,tipo:c.tipo,direccion:c.direccion,fecha:c.fecha,total:c.total,moneda:c.moneda,metodo:c.metodo,forma:c.forma,rfcE:c.rfcE,nomE:c.nomE,rfcR:c.rfcR,nomR:c.nomR,pagos:c.pagos}));
+    const r=await api("registrar",{rfc:st.cli.rfc,tipo:"xml",nombre,ruta:u.ruta,tamano:blob.size,
+      detalle:{leidos:x.ok.length,ajenos:x.ajenos.length,otro_mes:x.otroMes.length,invalidos:x.invalidos.length},comprobantes:comps});
+    barra("#progXml",100);
+    toast(r.duplicados ? `Listo: ${r.nuevos} comprobantes nuevos; ${r.duplicados} ya estaban` : `Listo: ${r.nuevos} comprobantes recibidos ✓`);
+    limpiarXml(); await cargar();
+  }catch(e){ toast(e.message); b.disabled=false; b.textContent="Reintentar"; barra("#progXml",-1); }
+}
+
+/* ---------- Estado de cuenta ---------- */
+$("#segTipo").querySelectorAll("button").forEach(b=>b.onclick=()=>{ st.tipoEdo=b.dataset.t; $("#segTipo").querySelectorAll("button").forEach(o=>o.classList.toggle("on",o===b)); });
+async function contarHojas(f){
+  if(!/\.pdf$/i.test(f.name)) return null;
+  try{ const t=new TextDecoder("latin1").decode(await f.arrayBuffer()); const m=t.match(/\/Type\s*\/Page(?!s)/g); return m?m.length:null; }catch(e){ return null; }
+}
+async function leerEdo(files){
+  if(!st.cli) return;
+  const val=files.filter(f=>/\.(pdf|jpe?g|png|heic|webp)$/i.test(f.name));
+  if(!val.length){ toast("Solo PDF o imágenes"); return; }
+  const grandes=val.filter(f=>f.size>50*1048576); if(grandes.length){ toast("Un archivo pasa de 50 MB"); return; }
+  for(const f of val) f._hojas=await contarHojas(f);
+  st.edo=val;
+  const [y,m]=st.periodo.split("-").map(Number);
+  if(!$("#edoDel").value) $("#edoDel").value=`${st.periodo}-01`;
+  if(!$("#edoAl").value) $("#edoAl").value=`${st.periodo}-${String(new Date(y,m,0).getDate()).padStart(2,"0")}`;
+  $("#edoArchivos").innerHTML=val.map(f=>`<div class="alerta">${/\.pdf$/i.test(f.name)?"📄":"🖼️"} <b>${esc(f.name)}</b> · ${kb(f.size)}${f._hojas?` · ${f._hojas} hoja${f._hojas>1?"s":""}`:""}</div>`).join("");
+  $("#prevEdo").classList.remove("oculto"); revisarPeriodo();
+}
+function revisarPeriodo(){
+  const d=$("#edoDel").value, a=$("#edoAl").value, [y,m]=st.periodo.split("-").map(Number);
+  const ini=`${st.periodo}-01`, fin=`${st.periodo}-${String(new Date(y,m,0).getDate()).padStart(2,"0")}`;
+  const av=$("#edoAviso");
+  if(!d||!a){ av.innerHTML=""; return false; }
+  if(d>a){ av.innerHTML='<div class="alerta bad">La fecha inicial es posterior a la final.</div>'; return true; }
+  const falta=[]; const fmt=s=>new Date(s+"T12:00").toLocaleDateString("es-MX",{day:"numeric",month:"long"});
+  if(d>ini){ const x=new Date(d+"T12:00"); x.setDate(x.getDate()-1); falta.push(`del ${fmt(ini)} al ${fmt(x.toISOString().slice(0,10))}`); }
+  if(a<fin){ const x=new Date(a+"T12:00"); x.setDate(x.getDate()+1); falta.push(`del ${fmt(x.toISOString().slice(0,10))} al ${fmt(fin)}`); }
+  if(d>fin||a<ini){ av.innerHTML=`<div class="alerta bad">✕ Este periodo no corresponde a ${nomPeriodo(st.periodo).toLowerCase()}; revise las fechas o cambie de mes arriba.</div>`; return true; }
+  av.innerHTML = falta.length
+    ? `<div class="alerta warn">⚠ El estado de cuenta no cubre todo ${nomPeriodo(st.periodo).toLowerCase()}; faltaría ${falta.join(" y ")}. Se puede subir así y luego agregar la parte que falta.</div>`
+    : `<div class="alerta good">✓ El periodo cubre ${nomPeriodo(st.periodo).toLowerCase()} completo.</div>`;
+  return falta.length>0;
+}
+$("#edoDel").onchange=revisarPeriodo; $("#edoAl").onchange=revisarPeriodo;
+function limpiarEdo(){ st.edo=null; $("#prevEdo").classList.add("oculto"); $("#edoArchivos").innerHTML=""; $("#edoAviso").innerHTML=""; $("#edoBanco").value=""; $("#edoDel").value=""; $("#edoAl").value=""; barra("#progEdo",-1); }
+$("#btnEdoCancelar").onclick=limpiarEdo;
+$("#btnEdoSubir").onclick=async()=>{
+  const fs=st.edo; if(!fs) return;
+  const b=$("#btnEdoSubir"); b.disabled=true; b.innerHTML='<span class="spin"></span>Subiendo';
+  const incompleto=revisarPeriodo();
+  const total=fs.reduce((s,f)=>s+f.size,0); let hecho=0;
+  try{
+    for(const f of fs){
+      const u=await api("url",{rfc:st.cli.rfc,tipo:st.tipoEdo,nombre:f.name});
+      await put(u.url,f,f.type||"application/octet-stream",p=>barra("#progEdo",((hecho+p*f.size)/total)*95));
+      hecho+=f.size;
+      await api("registrar",{rfc:st.cli.rfc,tipo:st.tipoEdo,nombre:f.name,ruta:u.ruta,tamano:f.size,
+        banco:$("#edoBanco").value.trim(),del:$("#edoDel").value,al:$("#edoAl").value,detalle:{hojas:f._hojas||null,incompleto}});
+    }
+    barra("#progEdo",100);
+    toast(fs.length>1?`Listo: ${fs.length} archivos recibidos ✓`:"Estado de cuenta recibido ✓");
+    limpiarEdo(); await cargar();
+  }catch(e){ toast(e.message); }
+  b.disabled=false; b.textContent="Subir estado de cuenta";
+};
+
+/* ---------- Inicio ---------- */
+const pg=store.get("rcpc_periodo"); if(pg && PERIODOS.includes(pg)) st.periodo=pg;
+const cg=store.get("rcpc_clave"); if(cg){ st.clave=cg; entrar(); }
+})();
+</script>
+</body>
+</html>
