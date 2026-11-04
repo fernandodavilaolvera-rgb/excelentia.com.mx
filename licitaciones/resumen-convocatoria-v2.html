@@ -237,6 +237,18 @@
   .interruptor{display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--texto2);cursor:pointer;margin-right:auto;order:-1}
   @media (max-width:600px){ .tabla-res{font-size:.78rem} .tabla-res th,.tabla-res td{padding:.3rem .4rem} }
   @media print{ .tabla-res tr{break-inside:avoid} .tabla-res thead{display:table-header-group} .tabla-wrap{overflow:visible} }
+  /* Bloque D: preguntas para la junta de aclaraciones */
+  .btn-preg{margin-left:.45rem;border:1px solid #c8d9f0;background:#f0f6ff;color:#1a3a6b;border-radius:6px;padding:.05rem .45rem;font-size:.72rem;font-weight:600;font-family:inherit;cursor:pointer;vertical-align:middle}
+  .btn-preg:hover{background:#e8f0fb;border-color:#4a9fd4}
+  .preg-form{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;margin:.45rem 0 .2rem;padding:.55rem .6rem;background:#f0f6ff;border:1px solid #c8d9f0;border-left:3px solid #4a9fd4;border-radius:8px}
+  .preg-form input{flex:1 1 240px;min-width:0;font-size:.85rem;padding:.45rem .6rem}
+  .preg-form .btn{padding:.4rem .8rem;font-size:.82rem}
+  .junta-item{border:1px solid var(--borde);border-radius:9px;padding:.65rem .75rem;margin-bottom:.6rem;background:#fff;break-inside:avoid}
+  .junta-item .ref{font-size:.78rem;color:var(--gris);margin-bottom:.3rem}
+  .junta-item .ref b{color:var(--azul-osc)}
+  .junta-item textarea{width:100%;min-height:84px;font-family:inherit;font-size:.88rem;line-height:1.45;border:1px solid var(--borde);border-radius:7px;padding:.5rem .6rem;color:var(--texto);resize:vertical}
+  .junta-item .pie{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.35rem;font-size:.76rem;color:var(--gris)}
+  @media print{ .btn-preg,.preg-form{display:none} .junta-item textarea{border:none;padding:0;min-height:0;resize:none} }
 </style>
 </head>
 <body>
@@ -361,6 +373,18 @@
   </section>
 
   <!-- Riesgos -->
+  <section class="card oculto" id="secJunta" data-vacio="1">
+    <div class="card-cab"><span>Preguntas para la junta de aclaraciones</span><span class="nuevo" id="cuentaJunta"></span></div>
+    <div class="card-body">
+      <div class="nota" style="margin-top:0" id="notaJunta">Junto a cada dato del resumen está el botón Preguntar: escribe lo que necesitan pedir y el agente redacta la pregunta formal con su referencia. Puedes editar el texto antes de copiarlo.</div>
+      <div id="lstJunta"></div>
+      <div class="acciones no-print">
+        <button class="btn btn-pri" id="btnCopiarJunta">Copiar preguntas</button>
+        <button class="btn btn-sec" id="btnWordJunta">Guardar en Word</button>
+      </div>
+    </div>
+  </section>
+
   <section class="card oculto" id="secRiesgos">
     <div class="card-cab"><span>Riesgos para decidir si participar</span></div>
     <div class="card-body"><div id="lstRiesgos"></div><div class="meta">Identificados por el agente con base en los documentos; la decisión es del equipo.</div></div>
@@ -460,9 +484,9 @@ const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' 
 const MIME = { pdf: 'application/pdf', word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2400); };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const SECCIONES = ['secClave', 'secCarga', 'secProgreso', 'secError', 'secMatriz', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+const SECCIONES = ['secClave', 'secCarga', 'secProgreso', 'secError', 'secMatriz', 'secResultado', 'secJunta', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
 const mostrar = ids => SECCIONES.forEach(s => $(s).classList.toggle('oculto', !ids.includes(s) || $(s).dataset.vacio === '1'));
-const VISTA_RESULTADO = ['secMatriz', 'secResultado', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
+const VISTA_RESULTADO = ['secMatriz', 'secResultado', 'secJunta', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
 
 // Zonas para soltar archivos (la inicial y la de agregar documentos)
 function zona(n, arr, btn) {
@@ -608,15 +632,16 @@ const conFte = r => { const [v, f] = sinFuente(r); return conLiga(esc(v)) + (f ?
 // Estilos en línea para que las tablas se vean igual al pegarlas en Outlook
 const TH = 'background:#dce8f7;color:#1a3a6b;text-align:left;font-weight:bold;padding:4px 8px;border:1px solid #c8d9f0';
 const TD = 'padding:4px 8px;border:1px solid #dde1e9;vertical-align:top';
-function bloqueHTML(b) {
+const BTN_PREG = d => `<button type="button" class="btn-preg no-print" data-dato="${encodeURIComponent(d)}" title="Redactar una pregunta para la junta de aclaraciones sobre este dato">Preguntar</button>`;
+function bloqueHTML(b, botones) {
   if (b.tipo === 'h') return `<h4>${esc(b.texto)}</h4>`;
-  if (b.tipo === 'tabla') { const [enc, ...fs] = b.filas; return `<div class="tabla-wrap"><table class="tabla-res" style="border-collapse:collapse;width:100%"><thead><tr>${enc.map(c => `<th style="${TH}">${esc(c)}</th>`).join('')}</tr></thead><tbody>${fs.map(f => `<tr>${f.map(c => `<td style="${TD}">${conFte(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; }
+  if (b.tipo === 'tabla') { const [enc, ...fs] = b.filas; return `<div class="tabla-wrap"><table class="tabla-res" style="border-collapse:collapse;width:100%"><thead><tr>${enc.map(c => `<th style="${TH}">${esc(c)}</th>`).join('')}</tr></thead><tbody>${fs.map(f => `<tr>${f.map((c, k) => `<td style="${TD}">${conFte(c)}${botones && k === 0 && !/^tiempo máximo/i.test(c) ? BTN_PREG(enc.map((h, j) => h + ': ' + sinFuente(f[j] || '')[0]).join('; ')) : ''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; }
   if (b.tipo === 'fte') return `<p class="fte-bloque"><span class="fte">${esc(b.texto)}</span></p>`;
-  if (b.tipo === 'ul') return '<ul>' + b.items.map(it => { const [e, r] = partir(it); return `<li>${e ? `<strong>${esc(e)}</strong>` : ''}${conFte(r)}</li>`; }).join('') + '</ul>';
+  if (b.tipo === 'ul') return '<ul>' + b.items.map(it => { const [e, r] = partir(it); return `<li>${e ? `<strong>${esc(e)}</strong>` : ''}${conFte(r)}${botones ? BTN_PREG((e || '') + sinFuente(r)[0]) : ''}</li>`; }).join('') + '</ul>';
   const [e, r] = partir(b.texto);
   return `<p>${e ? `<strong>${esc(e)}</strong>` : ''}${conFte(r)}</p>`;
 }
-const aHTML = bs => bs.map(bloqueHTML).join('');
+const aHTML = (bs, botones) => bs.map(b => bloqueHTML(b, botones)).join('');
 // Vista por temas: el correo en secciones desplegables (al copiar o guardar en Word sale completo)
 function aTemas(bs) {
   const secciones = []; let actual = { titulo: 'Saludo y nota', abierto: false, items: [] };
@@ -629,7 +654,7 @@ function aTemas(bs) {
     actual.items.push(b);
   });
   if (actual.items.length) secciones.push(actual);
-  return secciones.map(s => `<details class="tema"${s.abierto ? ' open' : ''}><summary>${esc(s.titulo)}</summary><div class="tema-body">${aHTML(s.items)}</div></details>`).join('');
+  return secciones.map(s => `<details class="tema"${s.abierto ? ' open' : ''}><summary>${esc(s.titulo)}</summary><div class="tema-body">${aHTML(s.items, true)}</div></details>`).join('');
 }
 let ultimosSegs = 0;
 function pintarResultado(segs, actualizado) {
@@ -648,6 +673,7 @@ function pintarResultado(segs, actualizado) {
   $('docsCargados').innerHTML = docsCargados.length ? `<b>Documentos que ya leyó el agente:</b><ul>${docsCargados.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '';
   pintarChips();
   pintarMatriz();
+  pintarJunta();
   mostrar(VISTA_RESULTADO);
 }
 $('btnExpandir').onclick = () => document.querySelectorAll('details.tema').forEach(d => d.open = true);
@@ -941,6 +967,73 @@ function quitarFuentes(t) {
     return sinFuente(l)[0];
   }).join('\n');
 }
+// ===== Bloque D: preguntas para la junta de aclaraciones =====
+let preguntasJunta = [];
+function pintarJunta() {
+  const n = preguntasJunta.length;
+  $('secJunta').dataset.vacio = n ? '' : '1';
+  $('secJunta').classList.toggle('oculto', !n);
+  $('cuentaJunta').textContent = n ? `${n} pregunta${n === 1 ? '' : 's'}` : '';
+  const lim = (String((resultado && resultado.resumen) || '').match(/\| Tiempo máximo de recepción de comentarios[^|]*\|\s*([^|]*)\|\s*([^|]*)\|/) || []);
+  $('notaJunta').textContent = 'Revisa y ajusta el texto antes de enviarlas' + (lim[1] && !/no lo menciona/i.test(lim[1]) ? `; tiempo máximo sugerido para enviarlas: ${lim[1].trim()} ${lim[2].trim()}.` : '.');
+  $('lstJunta').innerHTML = preguntasJunta.map((q, i) => `<div class="junta-item"><div class="ref"><b>Pregunta ${i + 1}</b>${q.referencia ? ` · ${esc(q.referencia)}` : ''}</div><textarea data-i="${i}">${esc(q.pregunta)}</textarea><div class="pie"><span>Sobre: ${esc(q.dato.slice(0, 140))}${q.dato.length > 140 ? '…' : ''}</span><button class="lnk no-print" data-quitar="${i}">Quitar</button></div></div>`).join('');
+}
+$('lstJunta').addEventListener('input', e => { const t = e.target.closest('textarea[data-i]'); if (t) preguntasJunta[+t.dataset.i].pregunta = t.value; });
+$('lstJunta').addEventListener('click', e => { const b = e.target.closest('[data-quitar]'); if (!b) return; preguntasJunta.splice(+b.dataset.quitar, 1); pintarJunta(); toast('Pregunta quitada'); });
+$('txtCorreo').addEventListener('click', e => {
+  const b = e.target.closest('.btn-preg'); if (!b) return;
+  e.preventDefault();
+  const cont = b.closest('li') || b.closest('td');
+  const fila = b.closest('tr');
+  const abierto = (fila ? fila.nextElementSibling : cont.querySelector('.preg-form'));
+  if (abierto && (abierto.classList.contains('preg-form') || abierto.classList.contains('fila-preg'))) { abierto.remove(); return; }
+  const dato = decodeURIComponent(b.dataset.dato || '');
+  const html = `<div class="preg-form"><input type="text" placeholder="¿Qué necesitan pedir? Por ejemplo: 60 días como mínimo"><button class="btn btn-pri" type="button" data-ok>Redactar pregunta</button><button class="lnk" type="button" data-cancel>Cancelar</button></div>`;
+  let caja;
+  if (fila) { const tr = document.createElement('tr'); tr.className = 'fila-preg'; tr.innerHTML = `<td colspan="${fila.children.length}" style="padding:0 .4rem">${html}</td>`; fila.after(tr); caja = tr; }
+  else { cont.insertAdjacentHTML('beforeend', html); caja = cont.querySelector('.preg-form'); }
+  const inp = caja.querySelector('input'); inp.focus();
+  const cerrar = () => (caja.classList.contains('fila-preg') ? caja : caja.closest('.preg-form') || caja).remove();
+  caja.querySelector('[data-cancel]').onclick = cerrar;
+  const enviar = async () => {
+    const pet = inp.value.trim(); if (!pet) { inp.focus(); return; }
+    const ok = caja.querySelector('[data-ok]'); ok.disabled = true; ok.textContent = 'Redactando…';
+    try {
+      const j = await llamar('preguntar', { trabajo: trabajoActual, modo: 'junta', pregunta: `DATO DEL RESUMEN: ${dato}\nLO QUE NECESITAMOS PEDIR: ${pet}` });
+      preguntasJunta.push({ dato, peticion: pet, pregunta: String(j.respuesta || '').trim(), referencia: j.referencia || '' });
+      cerrar(); pintarJunta();
+      toast('Pregunta agregada a la lista de la junta');
+    } catch (err) {
+      if (err.sinClave) { pedirClave('La clave ya no es válida; escríbela de nuevo.'); return; }
+      toast(err.message); ok.disabled = false; ok.textContent = 'Redactar pregunta';
+    }
+  };
+  caja.querySelector('[data-ok]').onclick = enviar;
+  inp.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); enviar(); } };
+});
+const textoJunta = () => preguntasJunta.map((q, i) => `${i + 1}. ${q.referencia ? q.referencia + '\n' : ''}${q.pregunta}`).join('\n\n');
+$('btnCopiarJunta').onclick = () => copiar(`<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a2035">${preguntasJunta.map((q, i) => `<p style="margin:0 0 10pt"><b>Pregunta ${i + 1}.</b>${q.referencia ? ` <span style="color:#8a90a0;font-size:9pt">(${esc(q.referencia)})</span>` : ''}<br>${esc(q.pregunta).replace(/\n/g, '<br>')}</p>`).join('')}</div>`, textoJunta(), 'Preguntas copiadas');
+$('btnWordJunta').onclick = async () => {
+  try {
+    $('btnWordJunta').disabled = true;
+    await cargarDocx();
+    const { Document, Packer, Paragraph, TextRun } = window.docx;
+    const run = (t, extra = {}) => new TextRun({ text: t, font: 'Calibri', size: 21, color: '1A2035', ...extra });
+    const hijos = [new Paragraph({ spacing: { after: 120 }, children: [run('Preguntas para la junta de aclaraciones', { bold: true, color: '1A3A6B', size: 26 })] }),
+      new Paragraph({ spacing: { after: 240 }, children: [run((resultado && resultado.asunto || '').split('|')[0].replace(/^RESUMEN DE /i, '').trim(), { color: '4A5068' })] })];
+    preguntasJunta.forEach((q, i) => {
+      hijos.push(new Paragraph({ spacing: { before: 120, after: 60 }, keepNext: true, children: [run(`Pregunta ${i + 1}`, { bold: true, color: '1A3A6B' }), ...(q.referencia ? [run(`  ·  ${q.referencia}`, { color: '8A90A0', size: 18 })] : [])] }));
+      String(q.pregunta).split('\n').forEach(l => hijos.push(new Paragraph({ spacing: { after: 80 }, children: [run(l)] })));
+    });
+    const doc = new Document({ sections: [{ properties: { page: { margin: { top: 1000, bottom: 1000, left: 1100, right: 1100 } } }, children: hijos }] });
+    const blob = await Packer.toBlob(doc);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'Preguntas_junta_aclaraciones.docx';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  } catch (e) { toast(e.message); } finally { $('btnWordJunta').disabled = false; }
+};
+
 let verFuentes = leerLS('licit_fuentes') !== 'no';
 $('chkFuentes').checked = verFuentes;
 $('chkFuentes').onchange = e => {
@@ -1243,7 +1336,7 @@ $('btnGenerar').onclick = async () => {
 $('btnActualizar').onclick = () => procesar(archivos2, trabajoActual);
 $('btnReintentar').onclick = () => trabajoActual ? mostrar(VISTA_RESULTADO) : verPerfil(perfil);
 $('btnNuevo').onclick = () => {
-  archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; renglonesChat = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear(); matriz = null;
+  archivos1.splice(0); archivos2.splice(0); resultado = null; trabajoActual = ''; docsCargados = []; historial = []; renglonesChat = []; preguntasJunta = []; extras = { sugerencias: [], riesgos: [] }; aceptadas.clear(); matriz = null;
   $('nombre').value = ''; $('chat').innerHTML = ''; pintar1(); pintar2(); verPerfil(perfil);
 };
 </script>
