@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script src="auth.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRM ExcelentIA — Equipo</title>
@@ -28,6 +29,18 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;display:flex;flex-direc
 .user-menu.open{display:block}
 .user-menu-item{padding:.55rem .9rem;cursor:pointer;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:.5rem;color:#1a2035}
 .user-menu-item:hover{background:#e8f0fb}
+.clave-veil{display:none;position:fixed;inset:0;background:rgba(13,27,62,.45);z-index:400;align-items:center;justify-content:center;padding:16px}
+.clave-veil.open{display:flex}
+.clave-card{width:100%;max-width:400px;margin:0 auto;background:#fff;border:1px solid #dde1e9;border-radius:12px;overflow:hidden;font-family:'Manrope',sans-serif}
+.clave-head{background:#dce8f7;padding:.8rem 1rem;font-weight:800;color:#1a3a6b;font-size:.95rem}
+.clave-body{padding:1rem;display:flex;flex-direction:column;gap:.7rem}
+.clave-body label{font-size:.75rem;font-weight:700;color:#4a5068;display:flex;flex-direction:column;gap:.3rem}
+.clave-body input{font-family:inherit;font-size:.9rem;padding:.55rem .7rem;border:1px solid #dde1e9;border-radius:8px}
+.clave-msg{display:none;font-size:.8rem;padding:.5rem .7rem;border-radius:7px;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4}
+.clave-msg.error{background:#fdf2f2;border-color:#f5c6c6;border-left-color:#dc2626}
+.clave-btns{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.2rem}
+.clave-btn{font-family:inherit;font-weight:800;font-size:.8rem;border:none;border-radius:8px;padding:.55rem 1rem;background:#1a3a6b;color:#fff;cursor:pointer}
+.clave-btn.sec{background:#e8f0fb;color:#1a3a6b}
 .btn-hamb{display:none;background:none;border:1px solid rgba(255,255,255,.3);border-radius:6px;color:#fff;font-size:1.2rem;width:36px;height:34px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
 
 .shell{flex:1;min-height:0;display:flex}
@@ -123,9 +136,20 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;display:flex;flex-direc
 </header>
 
 <div class="user-menu no-print" id="userMenu">
-  <div class="user-menu-item" onclick="setUser('fernando')"><span style="width:9px;height:9px;border-radius:50%;background:#1a3a6b;display:inline-block"></span>Fernando</div>
-  <div class="user-menu-item" onclick="setUser('juanjose')"><span style="width:9px;height:9px;border-radius:50%;background:#7c3aed;display:inline-block"></span>Juan José</div>
-  <div class="user-menu-item" onclick="setUser('adolfo')"><span style="width:9px;height:9px;border-radius:50%;background:#059669;display:inline-block"></span>Adolfo</div>
+  <div class="user-menu-item" onclick="abrirClave()"><i class="ti ti-key" aria-hidden="true"></i>Cambiar contraseña</div>
+  <div class="user-menu-item" onclick="CRM_AUTH.salir()"><i class="ti ti-logout" aria-hidden="true"></i>Salir</div>
+</div>
+<div class="clave-veil no-print" id="claveVeil" onclick="if(event.target===this)cerrarClave()">
+  <form class="clave-card" id="claveForm" onsubmit="guardarClave(event)">
+    <div class="clave-head">Cambiar contraseña</div>
+    <div class="clave-body">
+      <div class="clave-msg" id="claveMsg"></div>
+      <label>Contraseña actual<input type="password" id="claveActual" autocomplete="current-password" required></label>
+      <label>Nueva contraseña<input type="password" id="claveNueva" autocomplete="new-password" minlength="8" required></label>
+      <label>Repite la nueva<input type="password" id="claveNueva2" autocomplete="new-password" minlength="8" required></label>
+      <div class="clave-btns"><button type="button" class="clave-btn sec" onclick="cerrarClave()">Cancelar</button><button type="submit" class="clave-btn" id="claveBtn">Guardar</button></div>
+    </div>
+  </form>
 </div>
 
 <div class="nav-veil no-print" id="navVeil" onclick="cerrarMenuMovil()"></div>
@@ -180,7 +204,6 @@ body{font-family:'Manrope',sans-serif;background:#f5f6f8;display:flex;flex-direc
 <script>
 const USERS = {
   fernando: { nombre: 'Fernando', color: '#4a9fd4' },
-  juanjose: { nombre: 'Juan José', color: '#a78bfa' },
   adolfo:   { nombre: 'Adolfo',   color: '#34d399' }
 };
 let currentUser = 'fernando';
@@ -245,6 +268,30 @@ function setUser(uid){
   const activa = document.querySelector('.nav-item.active')?.dataset.tab;
   if(activa) cargarFrame(activa);
 }
+function abrirClave(){
+  document.getElementById('userMenu').classList.remove('open');
+  ['claveActual','claveNueva','claveNueva2'].forEach(i=>document.getElementById(i).value='');
+  claveAviso('');
+  document.getElementById('claveVeil').classList.add('open');
+  document.getElementById('claveActual').focus();
+}
+function cerrarClave(){ document.getElementById('claveVeil').classList.remove('open'); }
+function claveAviso(t, err){ const m=document.getElementById('claveMsg'); m.textContent=t; m.className='clave-msg'+(err?' error':''); m.style.display=t?'block':'none'; }
+async function guardarClave(ev){
+  ev.preventDefault();
+  const a=document.getElementById('claveActual').value, n=document.getElementById('claveNueva').value, n2=document.getElementById('claveNueva2').value;
+  if(n!==n2){ claveAviso('Las dos contraseñas nuevas no coinciden', true); return; }
+  if(n.length<8){ claveAviso('La nueva contraseña debe tener al menos 8 caracteres', true); return; }
+  const b=document.getElementById('claveBtn'); b.disabled=true; b.textContent='Guardando…';
+  try{
+    const j = await CRM_AUTH.cambiarClave(a, n);
+    if(!j || !j.ok) throw new Error((j && j.error) || 'No se pudo cambiar');
+    claveAviso('Listo, tu contraseña quedó cambiada.');
+    setTimeout(cerrarClave, 1400);
+  }catch(e){ claveAviso(e.message==='Failed to fetch'?'No se pudo conectar; intenta de nuevo.':e.message, true); }
+  b.disabled=false; b.textContent='Guardar';
+}
+
 function toggleUserMenu(){ document.getElementById('userMenu').classList.toggle('open'); }
 document.addEventListener('click', e=>{
   if(!e.target.closest('.user-chip') && !e.target.closest('#userMenu')){
@@ -263,12 +310,11 @@ function autoSize(iframe){
 
 document.addEventListener('DOMContentLoaded', ()=>{
   try{ if(localStorage.getItem(NAV_KEY) === '1') document.getElementById('sideNav').classList.add('mini'); }catch(e){}
-  // Usuario: la liga personal (?u=) manda; si no, el último que se eligió en este navegador
-  const uParam = (new URLSearchParams(window.location.search).get('u') || '').toLowerCase();
-  let uGuardado = ''; try{ uGuardado = localStorage.getItem(USER_KEY) || ''; }catch(e){}
-  const uInicial = USERS[uParam] ? uParam : (USERS[uGuardado] ? uGuardado : 'fernando');
-  currentUser = uInicial; pintarUsuario(uInicial);
-  if(USERS[uParam]){ try{ localStorage.setItem(USER_KEY, uParam); }catch(e){} }
+  // Usuario: el de la sesión iniciada (login)
+  const uSesion = (window.CRM_AUTH && CRM_AUTH.usuario) || '';
+  if(!USERS[uSesion]) USERS[uSesion] = { nombre: (CRM_AUTH && CRM_AUTH.nombre || uSesion).split(' ')[0], color: '#4a9fd4' };
+  currentUser = uSesion; pintarUsuario(uSesion);
+  { const url = new URL(window.location); if(url.searchParams.has('u')){ url.searchParams.delete('u'); window.history.replaceState({}, '', url); } }
   let tabParam = new URLSearchParams(window.location.search).get('tab');
   if(tabParam === 'timeline') tabParam = 'desarrollo';
   if(tabParam && document.getElementById('wrap-'+tabParam) && document.querySelector(`.nav-item[data-tab="${tabParam}"]`)) showTab(tabParam);
