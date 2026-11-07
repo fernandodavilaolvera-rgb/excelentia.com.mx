@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conciliación de Pagos v6 · Logística Armada</title>
+<title>Conciliación de Pagos v7 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -33,6 +33,8 @@ header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);bo
 .card .sub{font-size:12.5px;color:#4a5068;margin-bottom:.9rem;max-width:720px}
 
 /* BARRA DE EMPRESA */
+.fc-si{color:#1f7a45;font-weight:700}.fc-no{color:#b26a00;font-weight:700}
+.filtros2{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.9rem}.filtros2 .empresas{margin-bottom:0}.filtros2 .lbl{font-size:11.5px;font-weight:700;color:#8a90a0;margin-right:.2rem}
 .empresas{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
 .emp{font-size:12.5px;font-weight:700;padding:.42rem .85rem;border-radius:20px;border:1px solid #dde1e9;background:#fff;color:#4a5068;cursor:pointer;transition:.15s}
 .emp:hover{background:#e8f0fb;border-color:#4a9fd4}
@@ -349,7 +351,7 @@ tr.alt td{background:#f0f6ff}
     <button class="vista" data-v="trans">Por transportista</button>
     <button class="vista" data-v="nocuadra">No cuadran</button>
     <button class="vista" data-v="sinfac">Sin factura del transportista</button>
-    <button class="vista" data-v="porpagar">Por pagar</button>
+    <button class="vista" data-v="porpagar">Pagos a transportistas</button>
   </div>
 
   <section class="card no-print">
@@ -378,7 +380,9 @@ tr.alt td{background:#f0f6ff}
   <div class="vw hidden" id="vSinfac"><section class="card"><h2>Viajes sin factura del transportista</h2><p class="sub" id="sfSub"></p>
     <div class="empresas no-print" id="fEdad"></div><div id="tSf"></div></section>
     <section class="card"><h2>Complementos sin factura</h2><p class="sub" id="csSub"></p><div id="tCs"></div></section></div>
-  <div class="vw hidden" id="vPorpagar"><section class="card"><h2>Facturas por pagar</h2><p class="sub" id="ppSub"></p><div id="tPp"></div></section></div>
+  <div class="vw hidden" id="vPorpagar"><section class="card"><h2>Facturas de los transportistas</h2>
+    <div class="filtros2 no-print"><div class="empresas" id="fPago"></div><div class="empresas" id="fFcli"></div></div>
+    <p class="sub" id="ppSub"></p><div id="tPp"></div></section></div>
 
   <details class="acc">
     <summary>De dónde sale cada número</summary>
@@ -388,11 +392,12 @@ tr.alt td{background:#f0f6ff}
       <li><b>Cuadra:</b> si lo facturado y lo que se le debe difieren menos que la diferencia que se tolera.</li>
       <li><b>Complemento aparte:</b> cuando la diferencia es justo lo de las facturas de complemento, casi siempre es una maniobra que se facturó pero no está capturada en el viaje.</li>
       <li><b>Complemento sin factura:</b> el viaje tiene registrado un complemento (casetas, maniobra o estadía) y el transportista ya facturó todo lo demás, pero no ha subido la factura de ese complemento; mientras no la suba, ese complemento no se le paga.</li>
+      <li><b>Tu cliente:</b> si el viaje ya viene en tu reporte de facturación de algún mes (los que nos has pasado, hoy enero a octubre de Playmobil). Lo de LYC sale sin dato hasta tener su reporte.</li>
       <li><b>Vence:</b> fecha de la factura más los días de crédito; las pendientes que ya pasaron esa fecha salen como vencidas.</li>
     </ul></div>
   </details>
 
-  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · versión 6 · 19-oct-2026 · versión para revisión</footer>
+  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · versión 7 · 6-nov-2026 · versión para revisión</footer>
 </div>
 
 <script>
@@ -413,7 +418,7 @@ const dias = (a, b) => { const x = fechaOk(a), y = fechaOk(b); if (!x || !y) ret
 const sumar = (dIso, n) => { const f = fechaOk(dIso); if (!f) return ''; const d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + (Number(n) || 0)); return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10); };
 const filaMala = (n, dato, e) => { console.error('Renglón que no se pudo mostrar', dato, e); return '<tr><td colspan="' + n + '" class="dim">Un renglón trae datos que no se pudieron mostrar; avísanos y lo revisamos.</td></tr>'; };
 
-let CFG = { desde: '2026-01-01', tol: 1, cred: 30, prov: '', cli: 'pm' };
+let CFG = { desde: '2026-01-01', tol: 1, cred: 30, prov: '', cli: 'pm', pago: 'pend', fcli: 'todo' };
 try { CFG = Object.assign(CFG, JSON.parse(localStorage.getItem(LS_CFG) || '{}')); } catch (e) { }
 const guardarCfg = () => { try { localStorage.setItem(LS_CFG, JSON.stringify(CFG)); } catch (e) { } };
 let SRV = null, R = null, EDAD = 'todos', EC = null;
@@ -519,6 +524,23 @@ const conceptos = t => [...new Set(String(t || '').split(',').map(x => x.trim())
 const filtroProv = x => !CFG.prov || String(x.pr) === String(CFG.prov);
 const TERMINADO = /complet|finaliz|entreg/i;
 const grupoCli = s => /PLAYMO/i.test(s || '') ? 'pm' : /\bLYC\b/i.test(s || '') ? 'lyc' : 'otros';
+/* v7 (6-nov): ¿ese viaje ya lo facturaste a tu cliente? Sale de tus reportes mensuales cargados (Viajes Facturados). */
+const mesTxt = m => m && /^\d{4}-\d{2}$/.test(m) ? MESES[Number(m.slice(5)) - 1] + (m.slice(0, 4) !== String(new Date().getFullYear()) ? ' ' + m.slice(0, 4) : '') : '';
+let FCLI = null;
+function mapaFcli() {
+  if (FCLI && FCLI.src === SRV) return FCLI;
+  const m = new Map(); String(SRV.fcli || '').split(',').forEach(x => { const [id, mes] = x.split(':'); if (id) m.set(Number(id), mes); });
+  return (FCLI = { src: SRV, m, ult: SRV.fcliMax || '' });
+}
+function facCli(v) {
+  if (!v) return { s: 'sv', t: 'sin viaje', l: 'Factura sin viaje' };
+  const F = mapaFcli(), mes = F.m.get(Number(v.id));
+  if (mes) return { s: 'si', t: 'facturado · ' + mesTxt(mes), l: 'Ya facturado a tu cliente en tu reporte de ' + mesTxt(mes) };
+  if (grupoCli(v.cli) !== 'pm') return { s: 'nd', t: 'sin dato', l: 'Todavía no tenemos los reportes de este cliente' };
+  if (F.ult && (v.fecha || '').slice(0, 7) <= F.ult) return { s: 'no', t: 'sin facturar', l: 'No vino en tu reporte de ' + mesTxt((v.fecha || '').slice(0, 7)) + '; si lo pasaste al mes siguiente, ahí sale' };
+  return { s: 'no', t: 'sin facturar', l: 'Pendiente de facturar a tu cliente' };
+}
+const fcliHtml = c => c.s === 'si' ? '<span class="fc-si">' + esc(c.t) + '</span>' : c.s === 'no' ? '<span class="fc-no">' + esc(c.t) + '</span><span class="mr-n">' + esc(c.l) + '</span>' : '<span class="dim">' + esc(c.t) + '</span>';
 const filtroCli = v => !CFG.cli || CFG.cli === 'todos' || grupoCli(v.cli) === CFG.cli;
 
 function pintar() {
@@ -528,6 +550,9 @@ function pintar() {
   const facs = vs.flatMap(v => v.fac).concat(R.sinViaje.filter(filtroProv));
   const nCu = vs.filter(v => v.estado === 'cuadra'), nNo = vs.filter(v => v.estado === 'nocuadra'), nSin = vs.filter(v => v.estado === 'sin'), nCs = vs.filter(v => v.estado === 'compsin');
   const pend = facs.filter(f => !f.pagada), venc = pend.filter(f => f.vencida);
+  const VID = new Map(R.viajes.map(v => [v.id, v])); // v7
+  facs.forEach(f => { f.fc = facCli(f.v ? VID.get(f.v) : null); });
+  const pendSi = pend.filter(f => f.fc.s === 'si'), pendNo = pend.filter(f => f.fc.s === 'no'), pendNd = pend.filter(f => f.fc.s === 'nd' || f.fc.s === 'sv');
   const mesHoy = R.hoy.slice(0, 7);
   const pagMes = facs.filter(f => f.pagada && (f.fPago || '').slice(0, 7) === mesHoy);
   const S = a => a.reduce((s, x) => s + x, 0);
@@ -539,6 +564,8 @@ function pintar() {
     <div class="pbox malbox"><div class="lb">No cuadran</div><div class="vl">${nNo.length}</div><div class="hint">${mny0(S(nNo.map(v => v.dif)))} de diferencia neta · ${comp.length} por complemento aparte</div></div>
     <div class="pbox"><div class="lb">Sin factura del transportista</div><div class="vl">${nSinT.length}</div><div class="hint">${mny0(S(nSinT.map(v => v.debe)))} que el transportista todavía no factura en la plataforma · ${nSinT.filter(v => v.edad > 60).length} con más de 60 días${nSinP.length ? ' · aparte, ' + nSinP.length + ' de tu propia empresa' : ''}</div></div>
     <div class="pbox costo"><div class="lb">Por pagar</div><div class="vl">${mny0(S(pend.map(f => f.sub)))}</div><div class="hint">${pend.length} facturas · ${venc.length} vencidas por ${mny0(S(venc.map(f => f.sub)))}</div></div>
+    <div class="pbox"><div class="lb">Por pagar · ya facturado a tu cliente</div><div class="vl">${mny0(S(pendSi.map(f => f.sub)))}</div><div class="hint">${pendSi.length} facturas de transportistas de viajes que ya le cobraste a tu cliente</div></div>
+    <div class="pbox"><div class="lb">Por pagar · sin facturar a tu cliente</div><div class="vl">${mny0(S(pendNo.map(f => f.sub)))}</div><div class="hint">${pendNo.length} facturas de viajes que todavía no facturas${pendNd.length ? ' · ' + pendNd.length + ' sin dato (otros clientes)' : ''}</div></div>
     <div class="pbox"><div class="lb">Complementos sin factura</div><div class="vl">${nCs.length}</div><div class="hint">${mny0(S(nCs.map(v => v.falta)))} de casetas, maniobras o estadías que el transportista todavía no factura; el resto del viaje ya está facturado</div></div>
     <div class="pbox"><div class="lb">Pagado este mes</div><div class="vl">${mny0(S(pagMes.map(f => f.sub)))}</div><div class="hint">${pagMes.length} facturas marcadas como pagadas</div></div>`;
   const av = [];
@@ -566,22 +593,36 @@ function pintar() {
   const enEdad = v => EDAD === 'propia' ? v.propia : !v.propia && (EDAD === 'todos' || v.edad != null && (EDAD === '0-30' ? v.edad <= 30 : EDAD === '31-60' ? v.edad > 30 && v.edad <= 60 : v.edad > 60));
   const sf = nSin.filter(enEdad).sort((a, b) => b.edad - a.edad);
   $('#sfSub').textContent = EDAD === 'propia' ? sf.length + (sf.length === 1 ? ' viaje hecho' : ' viajes hechos') + ' por tu propia empresa, por ' + mny0(S(sf.map(v => v.debe))) + '; no llevan factura de transportista.' : sf.length + (sf.length === 1 ? ' viaje' : ' viajes') + ' donde el transportista todavía no sube su factura a la plataforma, por ' + mny0(S(sf.map(v => v.debe))) + '; del más viejo al más reciente. No son viajes sin cobrarle a tu cliente.';
-  $('#tSf').innerHTML = tablaViajes(sf, ['viaje', 'trans', 'debe', 'edad', 'estatus']);
+  $('#tSf').innerHTML = tablaViajes(sf, ['viaje', 'trans', 'debe', 'edad', 'estatus', 'fcli']);
   $('#csSub').textContent = nCs.length ? nCs.length + (nCs.length === 1 ? ' viaje' : ' viajes') + ' con el flete ya facturado y un complemento registrado sin factura, por ' + mny0(S(nCs.map(v => v.falta))) + '.' : 'Ningún viaje tiene complementos pendientes de facturar.';
   $('#tCs').innerHTML = nCs.length ? tablaViajes(nCs.slice().sort(ord), ['viaje', 'trans', 'debe', 'fact', 'falta', 'motivo']) : '';
-  const pp = pend.slice().sort((a, b) => (a.vence || '').localeCompare(b.vence || ''));
-  $('#ppSub').textContent = pp.length + ' facturas pendientes de pago por ' + mny0(S(pp.map(f => f.sub))) + ' (sin IVA); ' + venc.length + ' ya vencidas. La que vence primero va arriba.';
-  $('#tPp').innerHTML = pp.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Factura</th><th>Transportista</th><th>Viaje</th><th class="num">Subtotal</th><th class="num">Total</th><th>Vence</th><th>Cuadra</th></tr></thead><tbody>${pp.map(f => { try { return `<tr>
+  // v7: facturas de los transportistas, pendientes o pagadas, y si el viaje ya se le facturó a tu cliente
+  const PAGOS = [['pend', 'Pendientes de pago'], ['pag', 'Pagadas'], ['todas', 'Todas']];
+  const FCS = [['todo', 'Todo'], ['si', 'Ya facturado a tu cliente'], ['no', 'Sin facturar a tu cliente']];
+  $('#fPago').innerHTML = '<span class="lbl">Pago</span>' + PAGOS.map(e => `<button class="emp ${CFG.pago === e[0] ? 'on' : ''}" data-p="${e[0]}">${e[1]}</button>`).join('');
+  $('#fFcli').innerHTML = '<span class="lbl">Tu cliente</span>' + FCS.map(e => `<button class="emp ${CFG.fcli === e[0] ? 'on' : ''}" data-f="${e[0]}">${e[1]}</button>`).join('');
+  $('#fPago').querySelectorAll('[data-p]').forEach(b => b.onclick = () => { CFG.pago = b.dataset.p; guardarCfg(); pintar(); });
+  $('#fFcli').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { CFG.fcli = b.dataset.f; guardarCfg(); pintar(); });
+  let pp = facs.filter(f => f.activa && (CFG.pago === 'todas' || (CFG.pago === 'pag') === f.pagada));
+  if (CFG.fcli !== 'todo') pp = pp.filter(f => f.fc.s === CFG.fcli);
+  pp.sort((a, b) => a.pagada !== b.pagada ? (a.pagada ? 1 : -1) : a.pagada ? (b.fPago || '').localeCompare(a.fPago || '') : (a.vence || '').localeCompare(b.vence || ''));
+  const ppP = pp.filter(f => !f.pagada), ppG = pp.filter(f => f.pagada);
+  $('#ppSub').textContent = pp.length + (pp.length === 1 ? ' factura' : ' facturas') + ' por ' + mny0(S(pp.map(f => f.sub))) + ' (sin IVA)' +
+    (ppP.length ? '; ' + ppP.length + ' por pagar (' + ppP.filter(f => f.vencida).length + ' vencidas), la que vence primero va arriba' : '') +
+    (ppG.length ? '; ' + ppG.length + ' pagadas, la más reciente primero' : '') + '.' +
+    (SRV.fcliMax ? ' Lo facturado a tu cliente sale de tus reportes cargados hasta ' + mesTxt(SRV.fcliMax) + '.' : '');
+  $('#tPp').innerHTML = pp.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Factura</th><th>Transportista</th><th>Viaje</th><th class="num">Subtotal</th><th class="num">Total</th><th>Vence o se pagó</th><th>Tu cliente</th><th>Cuadra</th></tr></thead><tbody>${pp.map(f => { try { return `<tr>
     <td>${esc(f.folio || 'sin folio')}<span class="mr-n">${fechaTxt(f.fecha)}${/si/i.test(f.comp) ? ' · complemento' : ''}</span></td><td>${esc(provTxt(f.pr))}</td>
     <td>${f.v || '<span class="dim">sin viaje</span>'}</td><td class="num">${mny0(f.sub)}</td><td class="num">${mny0(f.tot)}</td>
-    <td class="${f.vencida ? 'neg' : ''}">${fechaTxt(f.vence)}<span class="mr-n">${f.diasV == null ? '' : f.diasV < 0 ? 'vencida hace ' + (-f.diasV) + ' días' : 'en ' + f.diasV + ' días'}</span></td>
-    <td>${f.cuadra === 'Si' ? 'sí' : f.cuadra === 'No' ? '<span class="neg">no</span>' : '<span class="dim">—</span>'}</td></tr>`; } catch (e) { return filaMala(7, f, e); } }).join('')}</tbody></table></div>` : '<p class="sub">No hay facturas pendientes de pago.</p>';
+    ${f.pagada ? `<td><span class="fc-si">pagada</span><span class="mr-n">${f.fPago ? fechaTxt(f.fPago) : 'sin fecha de pago'}</span></td>` : `<td class="${f.vencida ? 'neg' : ''}">${fechaTxt(f.vence)}<span class="mr-n">${f.diasV == null ? '' : f.diasV < 0 ? 'vencida hace ' + (-f.diasV) + ' días' : 'en ' + f.diasV + ' días'}</span></td>`}
+    <td>${fcliHtml(f.fc)}</td>
+    <td>${f.cuadra === 'Si' ? 'sí' : f.cuadra === 'No' ? '<span class="neg">no</span>' : '<span class="dim">—</span>'}</td></tr>`; } catch (e) { return filaMala(8, f, e); } }).join('')}</tbody></table></div>` : '<p class="sub">No hay facturas con estos filtros.</p>';
   if (EC) estadoCuenta(EC);
 }
 
 function tablaViajes(lista, cols) {
   if (!lista.length) return '<p class="sub">No hay viajes en este grupo.</p>';
-  const H = { viaje: 'Viaje', trans: 'Transportista', debe: 'Se le debe', fact: 'Facturado', dif: 'Diferencia', motivo: 'Por qué', edad: 'Días sin factura', estatus: 'Estatus del viaje', pagado: 'Pagado', estado: 'Estado', falta: 'Falta facturar' };
+  const H = { viaje: 'Viaje', trans: 'Transportista', debe: 'Se le debe', fact: 'Facturado', dif: 'Diferencia', motivo: 'Por qué', edad: 'Días sin factura', estatus: 'Estatus del viaje', pagado: 'Pagado', estado: 'Estado', falta: 'Falta facturar', fcli: 'Tu cliente' };
   const num = { debe: 1, fact: 1, dif: 1, edad: 1, pagado: 1, falta: 1 };
   const C = {
     viaje: v => `${v.id}<span class="mr-n">${fechaTxt(v.fecha)} · ${esc(v.des)} · ${esc(v.uni)}${v.hijo ? ' · reparto de ' + v.padre : ''}</span>`,
@@ -589,7 +630,7 @@ function tablaViajes(lista, cols) {
     debe: v => mny0(v.debe), fact: v => mny0(v.facturado) + '<span class="mr-n">' + v.fac.length + ' factura' + (v.fac.length > 1 ? 's' : '') + (v.elim ? ' · ' + v.elim + ' eliminada' + (v.elim > 1 ? 's' : '') : '') + '</span>',
     dif: v => `<b class="${v.dif > 0 ? 'neg' : ''}">${(v.dif > 0 ? '+' : '') + mny0(v.dif)}</b>`,
     motivo: v => esc(v.motivo || ''), edad: v => v.edad == null ? '<span class="dim">—</span>' : `<span class="${v.edad > 60 ? 'neg' : ''}">${v.edad}</span>`, estatus: v => esc(v.st || '—'),
-    pagado: v => mny0(v.pagado), falta: v => '<b>' + mny0(v.falta) + '</b>',
+    pagado: v => mny0(v.pagado), falta: v => '<b>' + mny0(v.falta) + '</b>', fcli: v => fcliHtml(facCli(v)),
     estado: v => ({ cuadra: 'cuadra', nocuadra: '<span class="neg">no cuadra</span>', compsin: 'falta factura del complemento<span class="mr-n">' + mny0(v.falta) + (conceptos(v.cn) ? ' · ' + esc(conceptos(v.cn)) : '') + '</span>', sin: 'sin factura', nada: '<span class="dim">sin cobro</span>', proceso: '<span class="dim">en proceso, todavía no se factura</span>', enpadre: '<span class="dim">facturado dentro del viaje ' + v.enPadre + '</span>' }[v.estado] || '') + (v.fac.length ? '<span class="mr-n">' + (v.pend ? 'por pagar ' + mny0(v.pend) : 'pagada') + '</span>' : '')
   };
   return `<div class="tblwrap"><table class="rt"><thead><tr>${cols.map(c => `<th class="${num[c] ? 'num' : ''}">${H[c]}</th>`).join('')}</tr></thead><tbody>${lista.map(v => { try { return `<tr>${cols.map(c => `<td class="${num[c] ? 'num' : c === 'motivo' ? 'motivo' : ''}">${C[c](v)}</td>`).join('')}</tr>`; } catch (e) { return filaMala(cols.length, v, e); } }).join('')}</tbody></table></div>`;
@@ -721,7 +762,7 @@ function estadoCuenta(pr) {
       <div class="pbox"><div class="lb">Sin factura</div><div class="vl">${mny0(S(vs.filter(v => v.estado === 'sin').map(v => v.debe)) + S(vs.filter(v => v.estado === 'compsin').map(v => v.falta)))}</div><div class="hint">${vs.filter(v => v.estado === 'sin').length} viajes${vs.some(v => v.estado === 'compsin') ? ' · ' + vs.filter(v => v.estado === 'compsin').length + ' complementos' : ''}</div></div>
       <div class="pbox malbox"><div class="lb">No cuadran</div><div class="vl">${vs.filter(v => v.estado === 'nocuadra').length}</div><div class="hint">viajes por aclarar</div></div>
     </div>
-    ${tablaViajes(vs, ['viaje', 'debe', 'fact', 'pagado', 'estado'])}
+    ${tablaViajes(vs, ['viaje', 'debe', 'fact', 'pagado', 'estado', 'fcli'])}
     ${sv.length ? '<h3 class="mr-h3">Facturas sin viaje</h3><ul class="mr-sup">' + sv.map(f => '<li>' + esc(f.folio) + ' · ' + fechaTxt(f.fecha) + ' · ' + mny0(f.sub) + (f.pagada ? ' · pagada' : ' · por pagar') + '</li>').join('') + '</ul>' : ''}`;
   $('#btnEcXls').onclick = () => excelPendientes([pr], $('#btnEcXls'));
   $('#btnEcPrint').onclick = () => { document.body.classList.add('solo-ec'); window.print(); setTimeout(() => document.body.classList.remove('solo-ec'), 500); };
