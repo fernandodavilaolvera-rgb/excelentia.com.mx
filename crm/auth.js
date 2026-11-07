@@ -30,6 +30,14 @@
     irALogin();
   }
 
+  // Páginas exclusivas de Fernando (Ferrock CRM y sus módulos propios)
+  var SOLO_FERNANDO = /\/crm\/(Ferrock-CRM\.html|excelentia\/(Ferrock_Index|correos-plataformas|dashboard-eco-ia_actividad|finanzas)\.html)$/;
+  if (token && leer(KU) !== 'fernando' && SOLO_FERNANDO.test(location.pathname)) {
+    document.documentElement.style.visibility = 'hidden';
+    var arriba = window; try { if (window.top.location.href) arriba = window.top; } catch (e) {}
+    arriba.location.replace(base + 'crm_excelentIA_index.html');
+  }
+
   var fetchOriginal = window.fetch.bind(window);
   window.fetch = function (input, init) {
     var url = typeof input === 'string' ? input : (input && input.url) || String(input || '');
