@@ -1166,6 +1166,9 @@ function aplicarRepetir(){
 const tablasDe = () => S.tablas.filter(t => !t.del).sort((a,b)=>(a.o||0)-(b.o||0));
 const regsDe = id => S.regs.filter(r => !r.del && r.tb===id).sort((a,b)=>(a.o||0)-(b.o||0));
 const sumaTb = id => regsDe(id).reduce((a,r)=>a+num(r.v),0);
+/* el siguiente numero de orden libre: se toma el mayor que ya existe y se le
+   suma uno, para que al borrar algo no se repitan numeros */
+const sigOrden = lista => lista.reduce((m,x)=>Math.max(m, (x.o||0)), -1) + 1;
 function nid(pre){ return pre + Date.now().toString(36) + Math.floor(Math.random()*9999).toString(36); }
 
 let EDIT_TB = null;
@@ -1191,7 +1194,7 @@ function guardarTabla(){
   if(!n){ toast('Ponle nombre', true); return; }
   if(EDIT_TB){ EDIT_TB.n = n; EDIT_TB.mt = ahora(); }
   else{
-    const t = {id:nid('t'), n, o:tablasDe().length, mt:ahora()};
+    const t = {id:nid('t'), n, o:sigOrden(tablasDe()), mt:ahora()};
     S.tablas.push(t);
     S.regs.push({id:nid('r'), tb:t.id, n:'', v:0, o:0, mt:ahora()});
   }
@@ -1210,13 +1213,15 @@ function borrarTabla(){
 function moverTabla(id, dir){
   const lista = tablasDe(), i = lista.findIndex(x => x.id===id), j = i + dir;
   if(i < 0 || j < 0 || j >= lista.length) return;
-  const a = lista[i], b = lista[j], tmp = a.o;
-  a.o = b.o; b.o = tmp; a.mt = ahora(); b.mt = ahora();
+  /* se mueve por posicion y se renumera todo: asi funciona aunque dos
+     tablas hayan quedado con el mismo numero de orden */
+  lista.splice(j, 0, lista.splice(i, 1)[0]);
+  lista.forEach((t, k) => { if(t.o !== k){ t.o = k; t.mt = ahora(); } });
   tocar(); render();
 }
 function nuevoReg(tbid){
   const l = regsDe(tbid);
-  S.regs.push({id:nid('r'), tb:tbid, n:'', v:0, o:(l.length?(l[l.length-1].o||0)+1:0), mt:ahora()});
+  S.regs.push({id:nid('r'), tb:tbid, n:'', v:0, o:sigOrden(l), mt:ahora()});
   tocar(); render();
   setTimeout(()=>{
     const c = document.querySelectorAll('#tb-'+tbid+' .reg input.c');
@@ -1233,9 +1238,9 @@ function moverReg(id, dir){
   const r = S.regs.find(x => x.id===id);
   if(!r) return;
   const lista = regsDe(r.tb), i = lista.findIndex(x => x.id===id), j = i + dir;
-  if(j < 0 || j >= lista.length) return;
-  const b = lista[j], tmp = r.o;
-  r.o = b.o; b.o = tmp; r.mt = ahora(); b.mt = ahora();
+  if(i < 0 || j < 0 || j >= lista.length) return;
+  lista.splice(j, 0, lista.splice(i, 1)[0]);
+  lista.forEach((x, k) => { if(x.o !== k){ x.o = k; x.mt = ahora(); } });
   tocar(); render();
 }
 let regT = null;
