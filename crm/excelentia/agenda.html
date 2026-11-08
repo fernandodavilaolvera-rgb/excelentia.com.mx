@@ -272,8 +272,11 @@ function correoRecordado(){ try{ return localStorage.getItem(LS_EMAIL) || ''; }c
 function olvidarCorreo(){ try{ localStorage.removeItem(LS_EMAIL); }catch(e){} }
 function opcionesGoogle(prompt){
   const o = { prompt: prompt };
-  const em = userEmail || correoRecordado();
-  if(em) o.login_hint = em;
+  // Solo cuentas @excelentia: si el correo recordado es otro, se ignora
+  let em = userEmail || correoRecordado();
+  if(!/@excelentia\.com\.mx$/i.test(em || '')) em = '';
+  o.login_hint = em || (window.CRM_AUTH && CRM_AUTH.usuario === 'fernando' ? 'fdavila@excelentia.com.mx' : '');
+  if(!o.login_hint) delete o.login_hint;
   return o;
 }
 
@@ -318,6 +321,7 @@ function gisLoaded(){
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
+    hd: 'excelentia.com.mx',
     callback: (resp) => {
       if(resp && resp.access_token){
         accessToken = resp.access_token;
