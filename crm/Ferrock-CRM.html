@@ -327,6 +327,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(tabParam && document.getElementById('wrap-'+tabParam) && document.querySelector(`.nav-item[data-tab="${tabParam}"]`)) showTab(tabParam);
   else showTab('ferrock');
 });
+// Copia sin señal de Ferrock CRM, Ferrock Index y Agenda
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
 </script>
 </body>
 </html>

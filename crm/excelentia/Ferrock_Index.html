@@ -567,27 +567,47 @@ function toggleFolder(head, id) {
 }
 
 /* ── CARGA INICIAL ──────────────────────────────── */
+/* Sin señal: se usa la última lista guardada en este equipo */
+const FI_CACHE = 'fi_arbol_v1';
+function fiGuardar(tree){
+  try{
+    const min = tree.map(f => ({ path: f.path, type: f.type, size: f.size }));
+    localStorage.setItem(FI_CACHE, JSON.stringify({ t: Date.now(), tree: min }));
+  }catch(e){}
+}
+function fiLeer(){ try{ return JSON.parse(localStorage.getItem(FI_CACHE) || 'null'); }catch(e){ return null; } }
+function fiPintar(tree, hora){
+  allFiles = tree || [];
+  document.getElementById('statusEl').style.display = 'none';
+  const visible      = allFiles.filter(f => f.type === 'blob' && !EXCLUDE.some(e => f.path.startsWith(e)));
+  const totalFiles   = visible.length;
+  const totalHTML    = visible.filter(f => getExt(f.path.split('/').pop()) === 'html').length;
+  const folderMap    = buildFolderMap(allFiles);
+  const totalFolders = Object.keys(folderMap).filter(k => k !== '').length;
+  document.getElementById('sTotal').textContent    = totalFiles;
+  document.getElementById('sHtml').textContent     = totalHTML;
+  document.getElementById('sCarpetas').textContent = totalFolders;
+  document.getElementById('sHora').textContent     = hora;
+  renderAll();
+}
 async function loadRepo() {
+  const ctrl = new AbortController();
+  const corte = setTimeout(() => ctrl.abort(), 8000);
   try {
-    const r = await fetch(`https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1`);
+    const r = await fetch(`https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1`, { signal: ctrl.signal });
+    clearTimeout(corte);
     if (!r.ok) throw new Error('GitHub API error ' + r.status);
     const d  = await r.json();
-    allFiles = d.tree || [];
-    document.getElementById('statusEl').style.display = 'none';
-
-    const visible      = allFiles.filter(f => f.type === 'blob' && !EXCLUDE.some(e => f.path.startsWith(e)));
-    const totalFiles   = visible.length;
-    const totalHTML    = visible.filter(f => getExt(f.path.split('/').pop()) === 'html').length;
-    const folderMap    = buildFolderMap(allFiles);
-    const totalFolders = Object.keys(folderMap).filter(k => k !== '').length;
-
-    document.getElementById('sTotal').textContent    = totalFiles;
-    document.getElementById('sHtml').textContent     = totalHTML;
-    document.getElementById('sCarpetas').textContent = totalFolders;
-    document.getElementById('sHora').textContent     = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-
-    renderAll();
+    fiGuardar(d.tree || []);
+    fiPintar(d.tree || [], new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }));
   } catch (e) {
+    clearTimeout(corte);
+    const g = fiLeer();
+    if (g && g.tree && g.tree.length) {
+      const d = new Date(g.t);
+      fiPintar(g.tree, 'Sin conexión · lista del ' + d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }));
+      return;
+    }
     document.getElementById('statusEl').innerHTML =
       `<p style="color:#b83232;font-weight:600;">No se pudo conectar con GitHub</p>
        <p style="font-size:11px;margin-top:8px;font-family:monospace;color:#8a90a0">${e.message}</p>`;
@@ -645,8 +665,13 @@ async function favCargar(){
     const data = await favApi({ accion:'listar' });
     favs = Array.isArray(data) ? data : (data && data.data) || [];
     favCargado = true;
+    try{ localStorage.setItem('fi_misurls_v1', JSON.stringify(favs)); }catch(_){}
     favRender();
   } catch(e){
+    try{
+      const g = JSON.parse(localStorage.getItem('fi_misurls_v1') || 'null');
+      if (Array.isArray(g) && g.length) { favs = g; favRender(); favToast('Sin conexión · ligas guardadas'); return; }
+    }catch(_){}
     cont.innerHTML = '<div class="fav-msg" style="color:#b83232">No se pudieron cargar tus ligas.<br><span style="font-size:11px;font-family:monospace">' + e.message + '</span></div>';
   }
 }

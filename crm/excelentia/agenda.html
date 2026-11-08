@@ -490,6 +490,43 @@ function isoLocal(fecha, hora){
 }
 
 // ════════════════════════════════════════════
+// SIN SEÑAL: la última agenda cargada se guarda en este equipo
+// ════════════════════════════════════════════
+const LS_AGENDA = 'agenda_guardada_v1';
+let modoGuardado = false;
+function agendaGuardar(){
+  try{ localStorage.setItem(LS_AGENDA, JSON.stringify({ t: Date.now(), eventos: EVENTOS, min: rangoCargado.min, max: rangoCargado.max, email: userEmail || null })); }catch(e){}
+  if(modoGuardado){
+    modoGuardado = false;
+    document.getElementById('connDot').style.background = '#059669';
+    document.getElementById('connStatus').textContent = 'Conectado:';
+  }
+}
+function mostrarGuardado(){
+  let g = null;
+  try{ g = JSON.parse(localStorage.getItem(LS_AGENDA) || 'null'); }catch(e){}
+  if(!g || !Array.isArray(g.eventos)) return false;
+  modoGuardado = true;
+  EVENTOS = g.eventos;
+  rangoCargado = { min: g.min, max: g.max };
+  if(!lunesActual) lunesActual = lunesDe(new Date());
+  const d = new Date(g.t);
+  document.getElementById('connDot').style.background = '#d97706';
+  document.getElementById('connStatus').textContent = 'Sin conexión · agenda guardada del ' +
+    d.getDate() + ' ' + MESES[d.getMonth()] + ' ' + d.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+  const em = document.getElementById('connEmail'); em.style.display = 'none';
+  document.getElementById('btnConectar').style.display = 'none';
+  document.getElementById('toolbar').style.display = 'flex';
+  renderSemana();
+  return true;
+}
+// Si no hay señal (o Google no carga en 6 s), se enseña lo guardado
+window.addEventListener('load', () => {
+  if(!navigator.onLine) mostrarGuardado();
+  setTimeout(() => { if(!conectado && !modoGuardado) mostrarGuardado(); }, 6000);
+});
+
+// ════════════════════════════════════════════
 // CARGA DE EVENTOS
 // ════════════════════════════════════════════
 async function cargarEventos(force){
@@ -515,9 +552,11 @@ async function cargarEventos(force){
     const r = await calFetch(`${CAL_API}?${params.toString()}`);
     EVENTOS = (r.items || []).map(normalizar).filter(Boolean);
     rangoCargado = { min: isoFecha(minD), max: isoFecha(maxD) };
+    agendaGuardar();
     renderSemana();
   }catch(e){
     if(e.message === 'sesion') return;
+    if(mostrarGuardado()) return;
     document.getElementById('agenda-content').innerHTML =
       '<div class="connect-card"><span class="ico">⚠️</span><h3>No se pudo cargar</h3><p>'+esc(e.message||'Error desconocido')+'</p><button class="btn btn-primary" onclick="cargarEventos(true)">Reintentar</button></div>';
   }
