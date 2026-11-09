@@ -502,9 +502,9 @@ function zona(n, arr, btn) {
   const agregar = lista => {
     const nuevos = [...lista];
     if (nuevos.some(f => !esValido(f))) toast('Solo se aceptan PDF, Word, Excel, correos .msg e imágenes');
-    // Tope de 45 MB para PDF: un escaneo más pesado no se puede leer todavía (9-nov-2026)
-    const pesados = nuevos.filter(f => esValido(f) && /\.pdf$/i.test(f.name) && f.size > 45 * 1048576);
-    if (pesados.length) toast(`${pesados.map(f => `${f.name} (${(f.size / 1048576).toFixed(1)} MB)`).join(', ')}: el máximo por PDF es 45 MB; divídelo en partes (por ejemplo con Dividir PDF de iLovePDF) y agrégalas por separado`, 9000);
+    // Tope de 200 MB por PDF: desde el 9-nov-2026 los PDF pesados se leen completos en nuestro servidor
+    const pesados = nuevos.filter(f => esValido(f) && /\.pdf$/i.test(f.name) && f.size > 200 * 1048576);
+    if (pesados.length) toast(`${pesados.map(f => `${f.name} (${(f.size / 1048576).toFixed(1)} MB)`).join(', ')}: el máximo por PDF es 200 MB; divídelo en partes (por ejemplo con Dividir PDF de iLovePDF) y agrégalas por separado`, 9000);
     nuevos.filter(f => esValido(f) && !pesados.includes(f)).forEach(f => { if (!arr.some(a => a.name === f.name && a.size === f.size)) arr.push(f); });
     pintar();
   };
@@ -574,7 +574,7 @@ async function procesar(lista, base) {
       ? ['Leyendo los documentos nuevos…', 'Juntándolos con los que ya había leído…', 'Analizando de nuevo con IA…', 'Armando el resumen actualizado…']
       : ['Leyendo los documentos…', 'Leyendo escaneos y actas si los hay…', 'Analizando las bases con IA…', 'Armando el resumen con el formato del área…'];
     let k = 0;
-    const limite = Date.now() + 15 * 60 * 1000;
+    const limite = Date.now() + 25 * 60 * 1000;
     let e;
     while (true) {
       await new Promise(r => setTimeout(r, 4000));
