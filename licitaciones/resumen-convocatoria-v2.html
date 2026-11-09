@@ -83,7 +83,7 @@
   .alertas li{margin-bottom:.3rem}
   .meta{font-size:.8rem;color:var(--gris);margin-top:.8rem}
   .error{background:#fdf1f1;border:1px solid #f0caca;border-left:4px solid #c25454;border-radius:9px;padding:.8rem 1rem;color:#7a2a2a;font-size:.88rem}
-  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--azul-osc);color:#fff;padding:.6rem 1.1rem;border-radius:10px;font-size:.88rem;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:10}
+  .toast{position:fixed;left:50%;bottom:24px;max-width:min(92vw,560px);text-align:center;transform:translateX(-50%) translateY(20px);background:var(--azul-osc);color:#fff;padding:.6rem 1.1rem;border-radius:10px;font-size:.88rem;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:10}
   .toast.ver{opacity:1;transform:translateX(-50%) translateY(0)}
   footer{text-align:center;color:var(--gris);font-size:.78rem;padding:0 16px 2rem}
   .oculto{display:none!important}
@@ -482,7 +482,7 @@ const fmtTam = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1,
 const esValido = f => /\.(pdf|docx|xlsx|msg|png|jpe?g)$/i.test(f.name);
 const tipoArchivo = n => /xlsx$/i.test(n) ? 'excel' : /docx$/i.test(n) ? 'word' : /msg$/i.test(n) ? 'correo' : /(png|jpe?g)$/i.test(n) ? 'imagen' : 'pdf';
 const MIME = { pdf: 'application/pdf', word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
-const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); setTimeout(() => e.classList.remove('ver'), 2400); };
+const toast = (t, ms = 2400) => { const e = $('toast'); e.textContent = t; e.classList.add('ver'); clearTimeout(toast._t); toast._t = setTimeout(() => e.classList.remove('ver'), ms); };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const SECCIONES = ['secClave', 'secCarga', 'secProgreso', 'secError', 'secMatriz', 'secResultado', 'secJunta', 'secRiesgos', 'secSugerencias', 'secEjecutivo', 'secChat', 'secAgregar', 'secComparar'];
 const mostrar = ids => SECCIONES.forEach(s => $(s).classList.toggle('oculto', !ids.includes(s) || $(s).dataset.vacio === '1'));
@@ -502,7 +502,10 @@ function zona(n, arr, btn) {
   const agregar = lista => {
     const nuevos = [...lista];
     if (nuevos.some(f => !esValido(f))) toast('Solo se aceptan PDF, Word, Excel, correos .msg e imágenes');
-    nuevos.filter(esValido).forEach(f => { if (!arr.some(a => a.name === f.name && a.size === f.size)) arr.push(f); });
+    // Tope de 45 MB para PDF: un escaneo más pesado no se puede leer todavía (9-nov-2026)
+    const pesados = nuevos.filter(f => esValido(f) && /\.pdf$/i.test(f.name) && f.size > 45 * 1048576);
+    if (pesados.length) toast(`${pesados.map(f => `${f.name} (${(f.size / 1048576).toFixed(1)} MB)`).join(', ')}: el máximo por PDF es 45 MB; divídelo en partes (por ejemplo con Dividir PDF de iLovePDF) y agrégalas por separado`, 9000);
+    nuevos.filter(f => esValido(f) && !pesados.includes(f)).forEach(f => { if (!arr.some(a => a.name === f.name && a.size === f.size)) arr.push(f); });
     pintar();
   };
   const d = $('drop' + n), inp = $('archivos' + n);
