@@ -79,6 +79,10 @@ header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);bo
 .btn.ghost:hover{background:#e8f0fb}
 .mini{font-family:inherit;font-size:10.5px;font-weight:700;border:1px solid #c8d9f0;background:#fff;color:#1a3a6b;border-radius:6px;padding:.12rem .4rem;margin:.15rem .2rem 0 0;cursor:pointer;white-space:nowrap}
 .mini:hover{background:#e8f0fb}
+.practica-sw{display:flex;align-items:flex-start;gap:.45rem;font-size:13px;font-weight:700;color:#1a3a6b;margin:.2rem 0 .7rem;cursor:pointer}
+.practica-sw input{margin-top:.2rem}.practica-sw span{display:block;font-weight:500;font-size:12px;color:#4a5068}
+.practica-band{max-width:720px;margin:0 auto 1rem;background:#fff4d6;border:1px solid #f0d58a;border-left:4px solid #e0a030;border-radius:10px;padding:.55rem .9rem;font-size:12.5px;color:#5a4300}
+.practica-band b{color:#3d2e00}
 .mini.ok{border-color:#9fd3b2;color:#1f7a45;background:#eaf7ef}.mini.ok:hover{background:#d6f0df}
 .acciones{display:block}
 .pospbox{max-width:720px;margin:1rem auto 0;background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:10px;padding:.8rem 1rem;font-size:12.5px;color:#1a2035}
@@ -343,6 +347,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
       </div>
       <p class="base-hint" id="baseHint"></p>
       <div class="fechas-row hidden" id="fechasRow">del <input type="date" class="dt" id="bd1"> al <input type="date" class="dt" id="bd2"></div>
+      <label class="practica-sw"><input type="checkbox" id="swPractica"> Modo práctica <span>no mueve el corte, no pasa viajes al mes siguiente en el servidor y no guarda lo facturado</span></label>
       <div class="btnrow">
         <button class="btn green" id="btnBase">Traer viajes de la plataforma</button>
         <button class="link" id="btnClave">Cambiar clave de acceso</button>
@@ -367,6 +372,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
   <!-- RESULTADOS -->
   <section id="results" class="hidden">
     <div class="jul-banner hidden" id="julBanner"></div>
+    <div class="practica-band no-print hidden" id="practicaBand"><b>Modo práctica.</b> Puedes hacer todo como en el cierre real; no se mueve el corte, no se guarda lo facturado y lo que pases al mes siguiente solo queda en este equipo.</div>
     <div class="rev-strip no-print hidden" id="revStrip"></div>
     <div class="kpis" id="kpis"></div>
 
@@ -452,7 +458,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 21 (30-oct-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 22 (9-nov-2026)</footer>
 </div>
 
 <script>
@@ -930,7 +936,9 @@ function renderToolbar() {
      ${FSIG ? `<span class="sep"></span><span class="chip on" id="chipSig">${FSIG === '__neg' ? 'sin margen' : FSIG} ✕</span>` : ''}
      ${DESDE ? `<span class="sep"></span><span class="chip corte-on" id="chipCorte" title="Se excluyeron los viajes ya facturados${CORTE_EN_LINEA ? ' segun el corte compartido' : ' segun el corte de este equipo'}. Clic para volver al archivo completo.">desde el viaje ${DESDE + 1} ✕</span>` : ''}
      <span class="spacer"></span>
-     <button class="btn green" id="btnXlsx">Descargar Excel (${vistos().length})</button>
+     <button class="btn green" id="btnCerrar" title="Descarga el Excel, mueve el corte y guarda lo facturado">${PRACTICA ? 'Cerrar el mes · práctica' : 'Cerrar el mes'} (${listaCierre().length})</button>
+     <button class="btn ghost" id="btnXlsx" title="Solo descarga el Excel de lo que ves; no mueve el corte ni guarda nada">Descargar sin cerrar</button>
+     ${CIERRE_PEND ? '<button class="btn" id="btnReintentar">Reintentar guardar</button>' : ''}
      <button class="btn ghost" id="btnReset">Cargar otros viajes</button>`;
   document.querySelectorAll('#toolbar [data-m]').forEach(c => c.onclick = () => { setMes(c.dataset.m); redraw(); });
   const f1 = $('#fd1'), f2 = $('#fd2');
@@ -939,9 +947,83 @@ function renderToolbar() {
   document.querySelectorAll('#toolbar [data-e]').forEach(c => c.onclick = () => { FEST = c.dataset.e; redraw(); });
   const cs = $('#chipSig'); if (cs) cs.onclick = () => { FSIG = null; redraw(); };
   const cc = $('#chipCorte'); if (cc) cc.onclick = () => arrancar(ROWS, null);
-  $('#btnXlsx').onclick = () => exportar(vistos().filter(o => !o.pospuesto));
+  $('#btnXlsx').onclick = () => exportar(vistos().filter(o => !o.pospuesto), 'solo');
+  $('#btnCerrar').onclick = cerrarMes;
+  const br = $('#btnReintentar'); if (br) br.onclick = () => guardarFacturado(CIERRE_PEND.lista, CIERRE_PEND.mes);
   $('#btnReset').onclick = reset;
 }
+
+/* ---------- v22: modo práctica, flete doble y cerrar el mes ---------- */
+const LS_PRACTICA = 'la_practica';
+let PRACTICA = false;
+try { PRACTICA = localStorage.getItem(LS_PRACTICA) === '1'; } catch (e) { }
+function ponerPractica(v) {
+  PRACTICA = !!v; try { localStorage.setItem(LS_PRACTICA, PRACTICA ? '1' : '0'); } catch (e) { }
+  const sw = $('#swPractica'); if (sw) sw.checked = PRACTICA;
+  const b = $('#practicaBand'); if (b) b.classList.toggle('hidden', !PRACTICA);
+}
+function fleteDoble(o) {
+  if (o.doble) {
+    Object.assign(o, o.doble); o.doble = null;
+  } else {
+    o.doble = { costo: o.costo, ventaFija: o.ventaFija, srcVFija: o.srcVFija, editC: o.editC, srcC: o.srcC, sC: o.sC };
+    const c2 = Math.round(o.costo * 2 * 100) / 100, par = centavos(c2);
+    o.costo = par ? par.costo : c2;
+    o.ventaFija = par ? par.venta : Math.round((o.venta || 0) * 2 * 100) / 100;
+    o.srcVFija = par ? 'flete doble · precio de tu facturación' : 'flete doble · el doble del precio';
+    o.srcC = 'flete doble (dos vueltas o dos unidades)'; o.editC = false; o.sC = 'g';
+  }
+  recalcular(o);
+}
+// lo que se cierra: todo lo del rango de fechas, sin importar el filtro de estado
+const listaCierre = () => VIAJES.filter(v => !v.pospuesto && (!FD1 || (v.fecha && v.fecha >= FD1)) && (!FD2 || (v.fecha && v.fecha <= FD2)));
+function mesDeCierre(lista) {
+  if (esMesCompleto && FD1 && esMesCompleto()) return FD1.slice(0, 7);
+  const c = {}; lista.forEach(o => { const m = (o.fecha || '').slice(0, 7); if (m) c[m] = (c[m] || 0) + 1; });
+  return Object.keys(c).sort((a, b) => c[b] - c[a])[0] || new Date().toISOString().slice(0, 7);
+}
+let CIERRE_PEND = null; // si el guardado falla, se puede reintentar
+async function cerrarMes() {
+  const lista = listaCierre();
+  if (!lista.length) { alert('No hay viajes para cerrar.'); return; }
+  const mes = mesDeCierre(lista), tot = lista.reduce((a, o) => a + (o.totalVenta || 0), 0);
+  const rojos = lista.filter(o => o.sem === 'r').length, amb = lista.filter(o => o.sem === 'a').length;
+  const aviso = (rojos || amb) ? '\n\nTodavía hay ' + (rojos ? rojos + ' en rojo' : '') + (rojos && amb ? ' y ' : '') + (amb ? amb + ' en ámbar' : '') + '; se guardan tal como están.' : '';
+  if (PRACTICA) {
+    if (!confirm('Modo práctica: se descarga el Excel de ' + mesLabel(mes) + ' con ' + lista.length + ' viajes por ' + mny0(tot) + '.' + aviso + '\n\nNo se mueve el corte ni se guarda nada. ¿Sigo?')) return;
+    if (!(await exportar(lista, 'practica'))) return;
+    alert('Listo, práctica terminada.\n\nEn el cierre real se habrían guardado ' + lista.length + ' viajes de ' + mesLabel(mes) + ' por ' + mny0(tot) + '.');
+    return;
+  }
+  if (DEMO) { await exportar(lista, 'cerrar'); return; }
+  if (!USUARIO) { const q = prompt('¿Quién está facturando? Se guarda junto con el cierre.', ''); if (q && q.trim()) guardarUsuario(q.trim()); }
+  if (!confirm('Vas a cerrar la facturación de ' + mesLabel(mes) + ': ' + lista.length + ' viajes por ' + mny0(tot) + ' (sin IVA).' + aviso +
+    '\n\nSe descarga el Excel, el corte avanza y lo facturado queda guardado para Conciliación, Rentabilidad y el Motor. Si después corriges algo, vuelves a cerrar y se reemplaza. ¿Sigo?')) return;
+  if (!(await exportar(lista, 'cerrar'))) return;
+  await guardarFacturado(lista, mes);
+}
+async function guardarFacturado(lista, mes) {
+  CIERRE_PEND = { lista, mes };
+  const viajes = lista.map(o => ({ id: String(o.id).replace(/\D/g, ''), folio: o.folio, cliente: o.cliente, pedido: o.pedido, origen: o.origen, destino: o.destino,
+    fecha: o.fecha, hora: o.hora, unidad: o.unidad, man: o.man, manVenta: o.manVenta, est: o.est, estVenta: o.estVenta, costo: o.costo, venta: o.venta }));
+  let d = null;
+  try {
+    const res = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clave: leerClave(), modo: 'cerrar', mes, archivo: 'Copiloto · cierre de ' + mes, usuario: USUARIO || '', viajes }) });
+    d = res.ok ? await res.json() : null;
+  } catch (e) { d = null; }
+  if (d && d.ok) {
+    CIERRE_PEND = null; GUARDADO_EN = new Date().toISOString();
+    M.facturados = [...new Set((M.facturados || []).concat(viajes.map(v => Number(v.id))))];
+    AVANCE_DESC = GUARDADO_EN; guardarAvance(); renderToolbar();
+    alert('Mes cerrado.\n\nSe guardaron ' + d.viajes + ' viajes de ' + mesLabel(d.mes) + ' por ' + mny0(d.precio) + (d.reemplazados ? ' (' + d.reemplazados + (d.reemplazados === 1 ? ' ya estaba y se reemplazó)' : ' ya estaban y se reemplazaron)') : '') +
+      '.\nConciliación, Rentabilidad y el Motor ya los toman, y la memoria aprendió lo de este mes.');
+  } else {
+    renderToolbar();
+    alert('El Excel se descargó y el corte avanzó, pero no se pudo guardar lo facturado en el servidor.\n\nRevisa tu conexión y toca "Reintentar guardar" arriba de la tabla; tu avance sigue en este equipo.');
+  }
+}
+let GUARDADO_EN = null;
 
 /* ---------- v20: aceptar lo que propone el Copiloto y ver lo que se le debe ---------- */
 function aceptarManiobra(o) {
@@ -1015,7 +1097,7 @@ function renderTabla() {
       <td class="num">${mny(o.venta)}<span class="src">${o.srcV}</span></td>
       <td class="num${o.flags.some(f => f.t === 'lo pagado supera el precio') ? ' marg-neg' : ''}">${o.pag == null ? '' : mny(o.pag)}${pagSrc(o)}</td>
       <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
-      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.flags.some(f => f.t === 'maniobra faltante') ? '<button class="mini ok" data-acc="aceptarMan" title="La maniobra propuesta es correcta">aceptar maniobra</button>' : ''}${o.flags.some(f => f.t === 'estadía con tu tabla') ? '<button class="mini ok" data-acc="aceptarEst" title="La estadía propuesta es correcta">aceptar estadía</button>' : ''}${o.flags.some(f => f.t === 'tarifa de ruteo') ? '<button class="mini ok" data-acc="aceptarRuteo" title="La tarifa de ruteo es correcta">aceptar ruteo</button>' : ''}${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
+      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.costo && !o.padre ? (o.doble ? '<button class="mini" data-acc="doble" title="Regresar al flete sencillo">quitar ×2</button>' : '<button class="mini" data-acc="doble" title="Cobrar el flete doble (dos vueltas o dos unidades)">flete ×2</button>') : ''}${o.flags.some(f => f.t === 'maniobra faltante') ? '<button class="mini ok" data-acc="aceptarMan" title="La maniobra propuesta es correcta">aceptar maniobra</button>' : ''}${o.flags.some(f => f.t === 'estadía con tu tabla') ? '<button class="mini ok" data-acc="aceptarEst" title="La estadía propuesta es correcta">aceptar estadía</button>' : ''}${o.flags.some(f => f.t === 'tarifa de ruteo') ? '<button class="mini ok" data-acc="aceptarRuteo" title="La tarifa de ruteo es correcta">aceptar ruteo</button>' : ''}${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
     </tr>`).join('') : '<tr><td colspan="14" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
   <tfoot><tr>
     <td colspan="5">Subtotales (${v.length} viajes)</td>
@@ -1033,6 +1115,7 @@ function renderTabla() {
     if (e.target.dataset.acc === 'aceptarMan') { aceptarManiobra(o); redraw(); return; }
     if (e.target.dataset.acc === 'aceptarRuteo') { aceptarRuteo(o); redraw(); return; }
     if (e.target.dataset.acc === 'aceptarEst') { aceptarEstadia(o); redraw(); return; }
+    if (e.target.dataset.acc === 'doble') { fleteDoble(o); redraw(); return; }
     if (e.target.dataset.acc === 'ahora') { o.citaSig = false; o.flags = o.flags.filter(f => f.t !== 'cita del mes siguiente'); recalcular(o); redraw(); }
     else posponer(o, true);
   });
@@ -1107,7 +1190,7 @@ const HEAD = ['ID Viaje', 'Folio de Cliente', 'Dirección de Origen', 'Cliente',
   'Fecha Cita', 'Hora Cita', 'Tipo de Unidad', 'Costo Maniobra', 'Precio Maniobra 4PL', ' Costo Estadía',
   'Precio Estadía 4PL', 'Costo Flete', 'Precio Flete 4PL'];
 
-async function exportar(lista) {
+async function exportar(lista, modo) { // v22: modo 'solo' descarga sin cerrar; 'cerrar' mueve el corte
   if (!lista.length) { alert('No hay viajes que exportar con este filtro.'); return; }
   if (typeof ExcelJS === 'undefined') { alert('No cargó la librería de Excel. Revisa tu conexión y recarga la página.'); return; }
   const wb = new ExcelJS.Workbook();
@@ -1154,15 +1237,16 @@ async function exportar(lista) {
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const url = URL.createObjectURL(blob), a = document.createElement('a');
-  a.href = url; a.download = 'REPORTE_DISTRIBUCION_' + tag + '.xlsx';
+  a.href = url; a.download = (PRACTICA ? 'PRACTICA_' : '') + 'REPORTE_DISTRIBUCION_' + tag + '.xlsx';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   if (!DEMO) { AVANCE_DESC = new Date().toISOString(); guardarAvance(); }
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 
   // se registra el último viaje descargado para que el siguiente corte arranque de ahí
-  if (DEMO) { alert('El Excel se descargó bien.\n\nComo son datos de respaldo, el corte compartido no se movió.'); return; }
+  if (modo !== 'cerrar' || PRACTICA) return true; // v22: solo el cierre real mueve el corte
+  if (DEMO) { alert('El Excel se descargó bien.\n\nComo son datos de respaldo, el corte compartido no se movió.'); return true; }
   const maxId = lista.concat(VIAJES.filter(o => o.pospuesto)).reduce((m, o) => Math.max(m, parseInt(String(o.id).replace(/\D/g, ''), 10) || 0), 0);
-  if (!maxId) return;
+  if (!maxId) return true;
   if (!USUARIO) {
     const q = prompt('¿Quién está facturando? Se guarda junto con el corte para saber quién lo movió.', '');
     if (q && q.trim()) guardarUsuario(q.trim());
@@ -1173,6 +1257,7 @@ async function exportar(lista) {
   else if (d.movimiento && d.movimiento.indexOf('rechazado') === 0)
     alert('El Excel se descargó bien.\n\nEl corte compartido ya iba en el viaje ' + d.ultimoViaje +
           ', más adelante que este archivo, así que se dejó como estaba.');
+  return true;
 }
 
 /* ---------- validación contra Excel ---------- */
@@ -1479,6 +1564,7 @@ async function traerDeBase() {
     msgBase(''); pintarHintBase();
   });
   $('#btnBase').onclick = traerDeBase;
+  ponerPractica(PRACTICA); const swp = $('#swPractica'); if (swp) swp.onchange = e => ponerPractica(e.target.checked);
   document.querySelectorAll('#cliRow [data-cli]').forEach(el => el.onclick = async () => {
     if (el.dataset.cli === CLIENTE) return;
     CLIENTE = el.dataset.cli; CORTE_INFO = null; CORTE_EN_LINEA = false; ULTIMO = null;
@@ -1768,7 +1854,7 @@ async function posponer(o, si) {
   M.pospuestos = (M.pospuestos || []).filter(x => String(x[0]) !== o.id);
   if (si) M.pospuestos.push([Number(o.id), mes]);
   redraw();
-  if (DEMO) return;
+  if (DEMO || PRACTICA) return; // v22: en práctica no se avisa al servidor
   let ok = false;
   try {
     const clave = localStorage.getItem(LS_CLAVE) || '';
@@ -1782,7 +1868,7 @@ async function posponer(o, si) {
 
 /* ---------- v13: el avance se guarda solo en este equipo, uno por cliente ---------- */
 let AVANCE_DESC = null, RESTAURANDO = false;
-const lsAvance = () => 'la_avance_' + CLIENTE;
+const lsAvance = () => 'la_avance_' + CLIENTE + (PRACTICA ? '_practica' : '');
 const cambiosDe = lista => (lista || []).filter(o => o.editC || o.editM).length;
 function guardarAvance() {
   if (DEMO || !VIAJES.length || RESTAURANDO) return;
