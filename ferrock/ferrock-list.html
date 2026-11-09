@@ -287,6 +287,10 @@ const L=()=>S.lists.find(l=>l.id===S.active&&!l.del)||S.lists.filter(l=>!l.del)[
 const LIVE=()=>S.lists.filter(l=>!l.del);
 const IT=l=>(l&&l.items?l.items.filter(i=>!i.del):[]);
 const C=k=>S.cats[k]||S.cats.otros||{n:'Otros',c:'#8A90A0'};
+/* Para los selectores de seccion: mismas secciones, ordenadas por nombre.
+   El recorrido del super (S.route) no se toca: eso ordena la lista de compras. */
+const rutaAZ=()=>S.route.slice().sort((a,b)=>
+  C(a).n.localeCompare(C(b).n,'es',{sensitivity:'base'}));
 
 function save(local){ DB.set(KEY(),JSON.stringify(S)); if(!local) queuePush(); }
 
@@ -518,7 +522,7 @@ function editorEl(it){
     let sel=it.cat; const grid=d.querySelector('#edCats');
     const paint=()=>{
       grid.innerHTML='';
-      S.route.forEach(k=>{
+      rutaAZ().forEach(k=>{
         const c=C(k), b=document.createElement('button');
         b.className='cat-chip'+(k===sel?' on':'');
         if(k===sel){b.style.borderColor=c.c;b.style.background=hexA(c.c,.1)}
@@ -575,7 +579,7 @@ function modalPickCat(title){
     <div class="cats-grid" id="pkGrid"></div>
     <div class="m-actions"><button class="b-ghost" onclick="closeModal()">Cancelar</button></div>`);
   const grid=document.getElementById('pkGrid');
-  S.route.forEach(k=>{
+  rutaAZ().forEach(k=>{
     const c=C(k), b=document.createElement('button');
     b.className='cat-chip'; b.style.borderColor=c.c;
     b.innerHTML=`<span class="dot" style="background:${c.c}"></span>${esc(c.n)}`;
