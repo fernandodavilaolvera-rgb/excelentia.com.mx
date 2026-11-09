@@ -262,12 +262,6 @@
       <div class="tit">Dashboard de Impactos<span></span>
         <small id="campanaNombre">Campaña</small>
       </div>
-      <!-- Logo del patrocinador. Se oculta solo si el archivo no está
-           publicado todavía, para que el header nunca salga roto. -->
-      <div class="div div-pat"></div>
-      <img class="logo-pat" src="assets/logo-similares-final_ligero.png" alt="Farmacias Similares"
-           onerror="this.style.display='none';
-                    var d=document.querySelector('.div-pat'); if(d) d.style.display='none';">
     </div>
     <div class="vivo"><i class="punto"></i> EN VIVO · <span id="reloj">--:--</span></div>
   </div>
@@ -309,19 +303,9 @@
       <div class="var" id="v2">&nbsp;</div>
     </div>
     <div class="kpi k5">
-      <div class="lab">Clics al sitio</div>
+      <div class="lab">Promedio diario</div>
       <div class="num" id="k5">—</div>
       <div class="var" id="v5">&nbsp;</div>
-    </div>
-  </div>
-
-  <div class="franja" id="franja">
-    <div class="franja-lab">Del 100% de las conexiones al WiFi</div>
-    <div class="franja-nums">
-      <div class="franja-dato">
-        <b id="hClic">—</b>
-        <span>entran al sitio de Farmacias Similares</span>
-      </div>
     </div>
   </div>
 
@@ -334,11 +318,11 @@
         <div class="body"><div class="horas" id="horas"></div></div>
       </div>
       <div class="card">
-        <h3>Embudo de conversión <span id="embudoPeriodo">Mes</span></h3>
+        <h3>De la conexión al internet <span id="embudoPeriodo">Mes</span></h3>
         <div class="body">
           <div class="embudo" id="embudo"></div>
           <p class="nota-embudo">
-            <span id="notaEmbudo">El número que se le reporta al patrocinador es el de entradas al sitio.</span>
+            <span id="notaEmbudo">Cuántas de las conexiones terminaron con el internet liberado.</span>
           </p>
         </div>
       </div>
@@ -353,7 +337,7 @@
     <h3>Actividad por andén <span id="totalReg">—</span></h3>
     <div class="tabla-wrap">
       <table>
-        <thead><tr><th>Andén</th><th>Línea</th><th>Conexiones</th><th>Clics al sitio</th><th>Entran al sitio</th><th></th></tr></thead>
+        <thead><tr><th>Andén</th><th>Línea</th><th>Conexiones</th><th>Aporte</th><th></th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -405,6 +389,7 @@ var RANGO = 'mes';
 var F_DESDE = '', F_HASTA = '';   /* filtro por fechas, cuando se usa */
 var LINEA = '';                   /* '' = ambas lineas */
 var CATALOGO = [];                /* andenes dados de alta, por linea */
+var NDIAS = 1;                    /* dias del periodo elegido, para los promedios */
 var COLORES = ['#E8114B','#E5449A','#7B3F8C','#29ABE2','#8CC63F','#FFC20E','#F7941E'];
 
 /* Cada linea tiene su familia de color: azules la 1, verdes la 2.
@@ -420,6 +405,7 @@ function tonoLinea(ln, i){
 
 /* ---------- Utilidades ---------- */
 function n(v){ return (v || 0).toLocaleString('es-MX'); }
+function n1(v){ return (v || 0).toLocaleString('es-MX',{minimumFractionDigits:1, maximumFractionDigits:1}); }
 function hoyMX(){
   var f = new Intl.DateTimeFormat('en-CA', { timeZone:'America/Mexico_City',
     year:'numeric', month:'2-digit', day:'2-digit' });
@@ -576,7 +562,8 @@ function pintarKpis(dias, d){
   document.getElementById('k2').textContent = n(t.registros);
 
 
-  document.getElementById('k5').textContent = n(t.clics);
+  NDIAS = dias.length || 1;
+  document.getElementById('k5').textContent = n1(t.registros / NDIAS);
 
   /* Comparación contra el día anterior, solo cuando el rango es "hoy" */
   if(RANGO === 'hoy'){
@@ -585,7 +572,7 @@ function pintarKpis(dias, d){
       var y = a[0];
       comparar('v1', t.dispositivos, y && y.dispositivos);
       comparar('v2', t.registros,    y && y.registros);
-      comparar('v5', t.clics,        y && y.clics);
+      comparar('v5', t.registros,    y && y.registros);
     }).catch(function(){});
   } else {
     ['v1','v2','v5'].forEach(function(i){ document.getElementById(i).innerHTML = '&nbsp;'; });
@@ -600,8 +587,7 @@ function pintarKpis(dias, d){
   var base = t.registros || 1;
   var pasos = [
     ['Se conectaron al WiFi', t.registros,   '#29ABE2'],
-    ['Internet liberado', t.autorizados,     '#8CC63F'],
-    ['Entraron al sitio de Farmacias Similares', t.clics, '#7B3F8C']
+    ['Internet liberado', t.autorizados,     '#8CC63F']
   ];
   document.getElementById('embudo').innerHTML = t.registros
     ? pasos.map(function(p){
@@ -612,22 +598,17 @@ function pintarKpis(dias, d){
       }).join('')
     : '<div class="vacio"><b>Todavía no hay datos</b>El embudo aparece con el primer registro.</div>';
 
-  /* Franja de arriba: los dos datos que de verdad importan, sobre la
-     misma base de conexiones. */
-  var fC = document.getElementById('hClic');
-  if(fC) fC.innerHTML = t.registros ? Math.round(t.clics / t.registros * 100) + '<i>%</i>' : '—';
-
   var nota = document.getElementById('notaEmbudo');
   if(t.registros){
-    var deClic = Math.round(t.clics / base * 100);
+    var deLib = Math.round(t.autorizados / base * 100);
     nota.innerHTML =
       'Son <b style="color:#1a2035">' + n(t.registros) + ' conexiones</b> hechas desde <b style="color:#1a2035">' +
       n(t.dispositivos) + ' celulares distintos</b>; una misma persona puede conectarse varios días, ' +
       'por eso los porcentajes se calculan sobre las conexiones y no sobre los celulares. ' +
-      'De cada 100 conexiones, <b style="color:#1a2035">' + deClic +
-      ' entran al sitio de Farmacias Similares</b>.';
+      'De cada 100 conexiones, <b style="color:#1a2035">' + deLib +
+      ' terminaron con el internet liberado</b>.';
   } else {
-    nota.textContent = 'El número que se le reporta al patrocinador es el de entradas al sitio.';
+    nota.textContent = 'Cuántas de las conexiones terminaron con el internet liberado.';
   }
 }
 
@@ -681,7 +662,7 @@ function pintarAndenes(filas){
 
   if(!lista.length){
     cajaA.innerHTML = '<div class="vacio"><b>Sin datos por andén</b>Aparecen en cuanto los equipos queden registrados en la bitácora.</div>';
-    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
+    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#8a90a0;padding:1.6rem">Todavía no hay actividad</td></tr>';
     document.getElementById('totalReg').textContent = '—';
     pintarBarras([]);
     return;
@@ -724,17 +705,16 @@ function pintarAndenes(filas){
     });
   }, 300);
 
+  var granTotal = lista.reduce(function(s,a){ return s + a.registros; }, 0) || 1;
   tb.innerHTML = lista.map(function(a){
-    /* La efectividad del anden ahora se mide con las entradas al sitio,
-       que es el numero que se le reporta al patrocinador. */
-    var ef = a.registros ? Math.round(a.clics / a.registros * 100) : 0;
+    /* Sin patrocinador, lo que ubica a cada andén es cuánto aporta al total. */
+    var ap = Math.round(a.registros / granTotal * 1000) / 10;
     return '<tr><td><b>' + a.anden + '</b></td>' +
            '<td><span class="pil" style="background:' + colorLinea(a.linea) + '">' + a.linea + '</span></td>' +
            '<td>' + n(a.registros) + '</td>' +
-           '<td>' + n(a.clics) + '</td>' +
-           '<td>' + ef + '%</td>' +
-           '<td><span class="badge ' + (ef >= 75 ? 'ok' : 'mid') + '">' +
-           (ef >= 75 ? 'Buena' : 'Revisar') + '</span></td></tr>';
+           '<td>' + ap.toFixed(1) + '%</td>' +
+           '<td><span class="badge ' + (a.registros > 0 ? 'ok' : 'mid') + '">' +
+           (a.registros > 0 ? 'Activo' : 'Sin datos') + '</span></td></tr>';
   }).join('');
   document.getElementById('totalReg').textContent = lista.length + ' andenes con actividad';
   pintarBarras(lista);
@@ -771,14 +751,14 @@ function pintarLineas(filas){
     var d      = t[ln];
     var activos = Object.keys(d.andenes).length;
     var deAlta  = catalogo[ln] || 0;
-    var pctClic = d.registros ? Math.round(d.clics / d.registros * 100) : 0;
+    var promLin = d.registros && NDIAS ? d.registros / NDIAS : 0;
     var aporte  = total ? Math.round(d.registros / total * 100) : 0;
 
     return '<div class="cmp-col">' +
       '<h4><i style="background:' + colorLinea(ln) + '"></i>' + ln + '</h4>' +
       '<div class="cmp-fila"><span>Conexiones</span><b>' + n(d.registros) + '</b></div>' +
       '<div class="cmp-fila"><span>Andenes activos</span><b>' + activos + ' de ' + deAlta + '</b></div>' +
-      '<div class="cmp-fila"><span>Entran al sitio</span><b>' + pctClic + '%</b></div>' +
+      '<div class="cmp-fila"><span>Promedio diario</span><b>' + n1(promLin) + '</b></div>' +
       '<div class="cmp-fila"><span>Del total de conexiones</span><b>' + aporte + '%</b></div>' +
       '</div>';
   }).join('') + '</div>' + avisoCobertura(t, catalogo);
@@ -896,7 +876,9 @@ function pintarCampana(config){
   var cfg = {};
   config.forEach(function(c){ cfg[c.clave] = c.valor; });
   var nom = document.getElementById('campanaNombre');
-  if(nom) nom.textContent = 'Campaña · ' + (cfg.campana_nombre || '—');
+  /* Sin patrocinador el tablero no anuncia campaña; en cuanto se cargue
+     un nombre en la configuracion vuelve a aparecer solo. */
+  if(nom) nom.textContent = cfg.campana_nombre ? ('Campaña · ' + cfg.campana_nombre) : 'Mexibus Radio WiFi';
 }
 
 /* ---------- Arranque ---------- */
