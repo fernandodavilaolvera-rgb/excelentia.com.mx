@@ -48,6 +48,10 @@ main{padding:1.4rem 0 3rem}
 .inp:focus,.campo:focus{outline:2px solid var(--acento);border-color:var(--acento)}
 .btn{background:var(--azul2);color:#fff;border:0;border-radius:10px;padding:.7rem 1.2rem;font-weight:700;cursor:pointer}
 .btn:hover{background:var(--azul3)}
+.agente-acc{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.6rem}
+.agente-acc small{color:var(--txt2);font-size:.82rem}
+.agente-nota{font-size:.78rem;color:var(--gris);margin-top:.6rem}
+
 .btn:disabled{background:var(--no);cursor:not-allowed}
 .btn.sec{background:#fff;color:var(--azul2);border:1px solid var(--borde)}
 .btn.sec:hover{background:var(--hover)}
@@ -316,6 +320,13 @@ footer{text-align:center;color:var(--gris);font-size:.75rem;padding:1rem 16px 2r
         <div class="card-h"><span>Resultado del cruce con el estado de cuenta</span><span class="chip" id="pCruceChip"></span></div>
         <div class="card-b" id="pCruceB"></div>
       </div>
+      <div class="card" id="pAgente" style="margin-bottom:.9rem">
+        <div class="card-h"><span>Cruce automático con IA</span><span class="chip" id="pAgenteChip">Sin correr</span></div>
+        <div class="card-b">
+          <div class="agente-acc no-print"><button class="btn" type="button" id="btnCruce">Correr cruce</button><small id="pAgenteMsg">Lee los estados de cuenta, los empata contra los XML y redacta las preguntas; tarda de 1 a 4 minutos.</small></div>
+          <div id="pAgenteB"></div>
+        </div>
+      </div>
       <div class="card oculto" id="pAlertas" style="margin-bottom:.9rem">
         <div class="card-h"><span>Alertas automáticas de los XML</span><span class="chip av" id="pAlertasChip"></span></div>
         <div class="card-b" id="pAlertasB"></div>
@@ -533,7 +544,7 @@ function pintarDash(){
 
 /* ---------- Panel ---------- */
 function abrirPanel(rfc){ st.cli=(st.datos.clientes||[]).find(c=>c.rfc===rfc); limpiarXml(); limpiarEdo(); pintarPanel(); $("#velo").classList.add("on"); document.body.style.overflow="hidden"; }
-function cerrarPanel(){ st.cli=null; $("#velo").classList.remove("on"); document.body.style.overflow=""; }
+function cerrarPanel(){ st.cli=null; ag.rfc=null; clearTimeout(ag.timer); $("#velo").classList.remove("on"); document.body.style.overflow=""; }
 $("#btnCerrar").onclick=cerrarPanel;
 $("#velo").addEventListener("click",e=>{ if(e.target.id==="velo") cerrarPanel(); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape" && st.cli) cerrarPanel(); });
@@ -543,6 +554,7 @@ function pintarPanel(){
   $("#pNombre").textContent=c.nombre; $("#pSub").textContent=`${c.rfc} · ${c.regimen||""} · ${nomPeriodo(st.periodo)}`;
   const xc=$("#pXmlChip"); xc.className="chip "+(e.r.total?"si":""); xc.textContent=e.r.total?`${e.r.total} comprobantes`:"Pendiente";
   const ec=$("#pEdoChip"); ec.className="chip "+(e.edo||e.tdc?(e.aviso?"av":"si"):""); ec.textContent=e.edo||e.tdc?(e.aviso?"Incompleto":"Recibido"):"Pendiente";
+  if(ag.rfc!==c.rfc){ ag.rfc=c.rfc; ag.inicio=0; clearTimeout(ag.timer); $("#pAgenteB").innerHTML=""; $("#pAgenteChip").textContent="…"; cargarAgente(c.rfc); }
   const cz=(st.datos.cruces||{})[c.rfc], al=(st.datos.alertas||{})[c.rfc]||[];
   if(cz && cz.movimientos){
     const pc=Math.round(cz.identificados/cz.movimientos*100), pf=(cz.preguntas||[]), ob=(cz.observaciones||[]), fa=(cz.faltantes||[]);
@@ -588,6 +600,57 @@ function pintarPanel(){
   }).join("") : '<li class="vacio">Aún no hay documentos de este mes.</li>';
   $("#pLista").querySelectorAll(".borrar").forEach(b=>b.onclick=()=>quitar(b.dataset.id,b));
 }
+/* ---------- Cruce automático con IA ---------- */
+const ag={rfc:null,timer:null,inicio:0};
+const AG_EST={"en cola":"En cola","leyendo":"Leyendo estados de cuenta","redactando":"Redactando preguntas","listo":"Listo","error":"No se pudo correr","sin_correr":"Sin correr"};
+function pintarAgente(a){
+  const chip=$("#pAgenteChip"), b=$("#pAgenteB"), btn=$("#btnCruce"), msg=$("#pAgenteMsg");
+  const corriendo=["en cola","leyendo","redactando"].includes(a.estado);
+  btn.disabled=corriendo; btn.innerHTML=corriendo?'<span class="spin"></span>Cruzando':(a.estado==="listo"?"Volver a correr":"Correr cruce");
+  chip.className="chip "+(a.estado==="listo"&&a.movimientos?"si":(a.estado==="error"?"av":""));
+  if(a.estado==="listo"&&a.movimientos){
+    const pc=Math.round(a.identificados/a.movimientos*100); chip.textContent=pc+"% identificado";
+    msg.textContent="Último cruce: "+new Date(a.actualizado).toLocaleString("es-MX",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+    const li=x=>x.map(y=>`<li>${esc(y.texto)}</li>`).join(""), pf=a.preguntas||[], ob=a.observaciones||[], fa=a.faltantes||[];
+    const nocuadra=(a.lecturas||[]).filter(l=>l.estado==="error");
+    b.innerHTML=`<div class="cruce-top"><div class="anillo" style="--p:${pc}"><div><b>${pc}%</b><small>${a.identificados} de ${a.movimientos}</small></div></div>
+      <div><b style="color:var(--azul2)">${a.identificados} de ${a.movimientos} movimientos</b> identificados por la IA.<br><span style="color:var(--txt2);font-size:.85rem">${esc(a.resumen||"")}</span></div></div>
+      ${nocuadra.length?`<div class="alerta"><b>${nocuadra.length} estado${nocuadra.length>1?"s":""} de cuenta no se pudo leer.</b> Revise que el archivo sea legible y vuelva a correr el cruce.</div>`:""}
+      ${a.error?`<div class="alerta">La redacción no se completó; vuelva a correr el cruce.</div>`:""}
+      ${pf.length?`<div class="sub-t">Preguntas para el cliente · ${pf.length}</div><ol class="nlist">${li(pf)}</ol>`:""}
+      ${ob.length?`<div class="sub-t">Observaciones para el contador · ${ob.length}</div><ol class="nlist">${li(ob)}</ol>`:""}
+      ${fa.length?`<div class="sub-t">Documentos que faltan · ${fa.length}</div><ol class="nlist">${li(fa)}</ol>`:""}
+      <div class="agente-nota">Resultado en revisión; el resultado oficial es el de arriba hasta que se valide.</div>`;
+  } else if(corriendo){
+    chip.textContent=AG_EST[a.estado]; msg.textContent=AG_EST[a.estado]+"… puede cerrar esta ventana, el cruce sigue solo.";
+    b.innerHTML="";
+  } else {
+    chip.textContent=AG_EST[a.estado]||"Sin correr"; b.innerHTML="";
+    msg.textContent=a.estado==="error"?"El cruce no arrancó; inténtelo de nuevo en unos minutos.":"Lee los estados de cuenta, los empata contra los XML y redacta las preguntas; tarda de 1 a 4 minutos.";
+  }
+}
+async function cargarAgente(rfc){
+  try{ const a=await api("agente",{rfc}); if(ag.rfc!==rfc) return; pintarAgente(a);
+    if(["en cola","leyendo","redactando"].includes(a.estado)) seguirAgente(rfc); else if(a.estado==="listo"&&ag.inicio){ ag.inicio=0; toast("Cruce listo"); }
+  }catch(e){}
+}
+function seguirAgente(rfc){
+  clearTimeout(ag.timer);
+  if(ag.inicio && Date.now()-ag.inicio>12*60000){ $("#pAgenteMsg").textContent="El cruce está tardando más de lo normal; revise en unos minutos."; return; }
+  ag.timer=setTimeout(()=>{ if(ag.rfc===rfc && $("#velo").classList.contains("on")) cargarAgente(rfc); },8000);
+}
+$("#btnCruce").addEventListener("click", async ()=>{
+  const c=st.cli; if(!c) return; const btn=$("#btnCruce");
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Iniciando';
+  try{
+    const r=await api("cruzar",{rfc:c.rfc});
+    if(!r.ok){
+      const M={sin_estado:"Primero suba el estado de cuenta del mes.",corriendo:"El cruce de este cliente ya está corriendo.",n8n:"No se pudo iniciar el cruce; inténtelo en unos minutos."};
+      toast(M[r.motivo]||"No se pudo iniciar el cruce");
+    } else { ag.inicio=Date.now(); toast("Cruce iniciado"); }
+  }catch(e){ toast(e.message); }
+  cargarAgente(c.rfc);
+});
 async function quitar(id,b){
   if(b.dataset.ok!=="1"){ b.dataset.ok="1"; b.textContent="¿Seguro?"; setTimeout(()=>{ if(b.isConnected){ b.dataset.ok=""; b.textContent="Quitar"; } },3500); return; }
   b.disabled=true; b.textContent="…";
