@@ -620,7 +620,8 @@ function pintarAgente(a){
       ${pf.length?`<div class="sub-t">Preguntas para el cliente · ${pf.length}</div><ol class="nlist">${li(pf)}</ol>`:""}
       ${ob.length?`<div class="sub-t">Observaciones para el contador · ${ob.length}</div><ol class="nlist">${li(ob)}</ol>`:""}
       ${fa.length?`<div class="sub-t">Documentos que faltan · ${fa.length}</div><ol class="nlist">${li(fa)}</ol>`:""}
-      <div class="agente-nota">Resultado en revisión; el resultado oficial es el de arriba hasta que se valide.</div>`;
+      <div class="agente-acc no-print" style="margin-top:.8rem"><button class="btn sec" type="button" id="btnAprobar">Usar este resultado</button><small>Reemplaza el resultado oficial de arriba; el anterior queda guardado.</small></div>`;
+    $("#btnAprobar").onclick=aprobarAgente;
   } else if(corriendo){
     chip.textContent=AG_EST[a.estado]; msg.textContent=AG_EST[a.estado]+"… puede cerrar esta ventana, el cruce sigue solo.";
     b.innerHTML="";
@@ -628,6 +629,13 @@ function pintarAgente(a){
     chip.textContent=AG_EST[a.estado]||"Sin correr"; b.innerHTML="";
     msg.textContent=a.estado==="error"?"El cruce no arrancó; inténtelo de nuevo en unos minutos.":"Lee los estados de cuenta, los empata contra los XML y redacta las preguntas; tarda de 1 a 4 minutos.";
   }
+}
+async function aprobarAgente(){
+  const c=st.cli, b=$("#btnAprobar"); if(!c||!b) return;
+  if(b.dataset.ok!=="1"){ b.dataset.ok="1"; b.textContent="¿Confirmar?"; setTimeout(()=>{ if(b.isConnected){ b.dataset.ok=""; b.textContent="Usar este resultado"; } },4000); return; }
+  b.disabled=true; b.innerHTML='<span class="spin"></span>Guardando';
+  try{ const r=await api("aprobar",{rfc:c.rfc}); if(!r.ok) throw new Error("No hay resultado para usar"); toast("Resultado oficial actualizado"); await cargar(); }
+  catch(e){ toast(e.message); b.disabled=false; b.textContent="Usar este resultado"; }
 }
 async function cargarAgente(rfc){
   try{ const a=await api("agente",{rfc}); if(ag.rfc!==rfc) return; pintarAgente(a);
