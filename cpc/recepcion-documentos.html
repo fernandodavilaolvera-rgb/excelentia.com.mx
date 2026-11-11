@@ -557,12 +557,13 @@ function pintarPanel(){
   if(ag.rfc!==c.rfc){ ag.rfc=c.rfc; ag.inicio=0; clearTimeout(ag.timer); $("#pAgenteB").innerHTML=""; $("#pAgenteChip").textContent="…"; cargarAgente(c.rfc); }
   const cz=(st.datos.cruces||{})[c.rfc], al=(st.datos.alertas||{})[c.rfc]||[];
   if(cz && cz.movimientos){
-    const pc=Math.round(cz.identificados/cz.movimientos*100), pf=(cz.preguntas||[]), ob=(cz.observaciones||[]), fa=(cz.faltantes||[]);
+    const pc=Math.round(cz.identificados/cz.movimientos*100), pf=(cz.preguntas||[]), ob=(cz.observaciones||[]), fa=(cz.faltantes||[]), rv=(cz.revision||[]);
     $("#pCruceChip").className="chip si"; $("#pCruceChip").textContent=pc+"% identificado";
     const li=a=>a.map(x=>`<li>${esc(x.texto)}</li>`).join("");
     $("#pCruceB").innerHTML=`<div class="cruce-top"><div class="anillo" style="--p:${pc}"><div><b>${pc}%</b><small>${cz.identificados} de ${cz.movimientos}</small></div></div>
       <div><b style="color:var(--azul2)">${cz.identificados} de ${cz.movimientos} movimientos</b> del estado de cuenta se identificaron solos.<br><span style="color:var(--txt2);font-size:.85rem">${esc(cz.resumen||"")}</span></div></div>
       ${pf.length?`<div class="sub-t">Preguntas para el cliente · ${pf.length}</div><ol class="nlist">${li(pf)}</ol>`:""}
+      ${rv.length?`<div class="sub-t">Para revisión del contador · ${rv.length}</div><ol class="nlist">${li(rv)}</ol>`:""}
       ${ob.length?`<div class="sub-t">Observaciones para el contador · ${ob.length}</div><ol class="nlist">${li(ob)}</ol>`:""}
       ${fa.length?`<div class="sub-t">Documentos que faltan · ${fa.length}</div><ol class="nlist">${li(fa)}</ol>`:""}`;
   } else {
@@ -611,13 +612,14 @@ function pintarAgente(a){
   if(a.estado==="listo"&&a.movimientos){
     const pc=Math.round(a.identificados/a.movimientos*100); chip.textContent=pc+"% identificado";
     msg.textContent="Último cruce: "+new Date(a.actualizado).toLocaleString("es-MX",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
-    const li=x=>x.map(y=>`<li>${esc(y.texto)}</li>`).join(""), pf=a.preguntas||[], ob=a.observaciones||[], fa=a.faltantes||[];
+    const li=x=>x.map(y=>`<li>${esc(y.texto)}</li>`).join(""), pf=a.preguntas||[], ob=a.observaciones||[], fa=a.faltantes||[], rv=a.revision||[];
     const nocuadra=(a.lecturas||[]).filter(l=>l.estado==="error");
     b.innerHTML=`<div class="cruce-top"><div class="anillo" style="--p:${pc}"><div><b>${pc}%</b><small>${a.identificados} de ${a.movimientos}</small></div></div>
       <div><b style="color:var(--azul2)">${a.identificados} de ${a.movimientos} movimientos</b> identificados por la IA.<br><span style="color:var(--txt2);font-size:.85rem">${esc(a.resumen||"")}</span></div></div>
       ${nocuadra.length?`<div class="alerta"><b>${nocuadra.length} estado${nocuadra.length>1?"s":""} de cuenta no se pudo leer.</b> Revise que el archivo sea legible y vuelva a correr el cruce.</div>`:""}
       ${a.error?`<div class="alerta">La redacción no se completó; vuelva a correr el cruce.</div>`:""}
       ${pf.length?`<div class="sub-t">Preguntas para el cliente · ${pf.length}</div><ol class="nlist">${li(pf)}</ol>`:""}
+      ${rv.length?`<div class="sub-t">Para revisión del contador · ${rv.length}</div><ol class="nlist">${li(rv)}</ol>`:""}
       ${ob.length?`<div class="sub-t">Observaciones para el contador · ${ob.length}</div><ol class="nlist">${li(ob)}</ol>`:""}
       ${fa.length?`<div class="sub-t">Documentos que faltan · ${fa.length}</div><ol class="nlist">${li(fa)}</ol>`:""}
       <div class="agente-acc no-print" style="margin-top:.8rem"><button class="btn sec" type="button" id="btnAprobar">Usar este resultado</button><small>Reemplaza el resultado oficial de arriba; el anterior queda guardado.</small></div>`;
