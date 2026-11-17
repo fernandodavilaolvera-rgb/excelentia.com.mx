@@ -143,7 +143,21 @@ footer{text-align:center;color:var(--ink3);font-size:12px;padding-bottom:28px}
 .rm-band b{font-weight:800}
 .acuerdos{margin:0;padding-left:20px;color:var(--ink2);display:flex;flex-direction:column;gap:8px}
 .acuerdos li::marker{color:var(--navy);font-weight:800}
-@media (max-width:600px){.roadmap.three{grid-template-columns:1fr}}
+.gantt{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:.8rem}
+.gantt th{background:var(--head);color:var(--navy);font-size:.74rem;font-weight:700;padding:7px 4px;text-align:center}
+.gantt th:first-child{text-align:left;padding-left:12px}
+.gantt td{border-top:1px solid var(--line);padding:0;height:34px;position:relative}
+.gantt td.act{padding:6px 12px;color:var(--ink);font-weight:700;line-height:1.25}
+.gantt td.act small{display:block;font-weight:500;color:var(--ink3);font-size:.7rem}
+.gantt td.w{border-left:1px dashed var(--line)}
+.gantt td.on::after{content:"";position:absolute;left:3px;right:3px;top:9px;bottom:9px;background:#1a3a6b;border-radius:5px}
+.gantt td.on.s::after{background:#4a9fd4}
+.gantt td.on.c::after{background:#F37021}
+.gantt td.on.l::after{left:-1px;z-index:1;border-top-left-radius:0;border-bottom-left-radius:0}
+.gantt td.on.r::after{right:0;z-index:1;border-top-right-radius:0;border-bottom-right-radius:0}
+.gantt td.hito::after{content:"";position:absolute;left:50%;top:50%;width:13px;height:13px;background:#F37021;transform:translate(-50%,-50%) rotate(45deg);border-radius:2px}
+@media (max-width:600px){.roadmap.three{grid-template-columns:1fr}.gantt{min-width:560px}}
+@media print{.sec-ruta{break-inside:avoid}.gantt tr{break-inside:avoid}.gantt-wrap{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -175,7 +189,7 @@ footer{text-align:center;color:var(--ink3);font-size:12px;padding-bottom:28px}
     </div>
   </section>
 
-  <section>
+  <section class="sec-ruta">
     <div class="sec-head"><h2>Hoja de ruta</h2></div>
     <div class="sec-body">
       <div class="roadmap three" role="img" aria-label="Hoja de ruta en tres prioridades: llenar el embudo, retener compradores y operación de cierre, con un tablero del director transversal">
@@ -207,6 +221,64 @@ footer{text-align:center;color:var(--ink3);font-size:12px;padding-bottom:28px}
         <span><i style="border-color:var(--next);background:var(--next-bg)"></i>Prioridad actual</span>
         <span><i style="border-color:var(--line);background:var(--card)"></i>Por hacer</span>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Cómo arranca la Prioridad 1</h2></div>
+    <div class="sec-body">
+      <p class="lead">Se trabaja en dos frentes al mismo tiempo: la presencia con la base da resultados sin pagar anuncios, y la captación de propietarios se prueba primero con esa misma base antes de lanzar la campaña.</p>
+
+      <div class="etapa">
+        <div class="etapa-head"><div class="num">A</div><h3>Frente A · Presencia con la base</h3></div>
+        <div class="etapa-body">
+          <ul>
+            <li>Se junta la base de contactos en una sola lista, separada por tipo: clientes, propietarios, amigos y vecinos, y quienes tienen cumpleaños registrado.</li>
+            <li>Los correos salen desde el dominio de ARX, autenticado para que no lleguen como spam.</li>
+            <li>El primer gran envío es la felicitación de fin de año; después, newsletter mensual aprobado por ARX, cumpleaños, fechas especiales y propiedades nuevas.</li>
+            <li>Cada correo pide recomendaciones con una liga a un formulario.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="etapa">
+        <div class="etapa-head"><div class="num">B</div><h3>Frente B · Captación de propietarios</h3></div>
+        <div class="etapa-body">
+          <ul>
+            <li>Página "¿Cuánto vale tu casa?" con un rango de precio basado en la tabla por zona de ARX; el asesor confirma el valor real en una llamada.</li>
+            <li>Respuesta inmediata por WhatsApp, calificación del propietario y aviso al asesor.</li>
+            <li>Primero se prueba invitando a la base desde el newsletter; después el proveedor de anuncios lleva tráfico a la página, con el píxel de Meta conectado.</li>
+            <li>El tablero muestra propietarios captados, de dónde llegaron y en qué estado van: es la primera pieza del tablero del director.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-wrap gantt-wrap">
+        <table class="gantt">
+          <colgroup><col style="width:40%"><col><col><col><col><col><col></colgroup>
+          <thead><tr><th>Actividad</th><th>Sem 1</th><th>Sem 2</th><th>Sem 3</th><th>Sem 4</th><th>Sem 5</th><th>Sem 6</th></tr></thead>
+          <tbody>
+            <tr><td class="act">Arranque<small>Accesos, base de contactos, dominio y contenidos</small></td><td class="w on s"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td></tr>
+            <tr><td class="act">Integración de la base<small>Frente A</small></td><td class="w on r"></td><td class="w on l"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td></tr>
+            <tr><td class="act">Correo desde el dominio de ARX<small>Frente A</small></td><td class="w on r"></td><td class="w on l"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td></tr>
+            <tr><td class="act">Página "¿Cuánto vale tu casa?"<small>Frente B</small></td><td class="w"></td><td class="w on r"></td><td class="w on l"></td><td class="w"></td><td class="w"></td><td class="w"></td></tr>
+            <tr><td class="act">WhatsApp: respuesta y calificación<small>Frente B</small></td><td class="w"></td><td class="w on r"></td><td class="w on l"></td><td class="w"></td><td class="w"></td><td class="w"></td></tr>
+            <tr><td class="act">Tablero de prospección</td><td class="w"></td><td class="w"></td><td class="w on r"></td><td class="w on l"></td><td class="w"></td><td class="w"></td></tr>
+            <tr><td class="act">Pruebas de punta a punta</td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w on s"></td><td class="w"></td><td class="w"></td></tr>
+            <tr><td class="act">Primer envío<small>Newsletter con el valuador incluido</small></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w hito"></td><td class="w"></td><td class="w"></td></tr>
+            <tr><td class="act">Felicitación de fin de año</td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w hito"></td><td class="w"></td></tr>
+            <tr><td class="act">Arranque de campaña en Meta<small>Con el proveedor de pauta de ARX</small></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w on c r"></td><td class="w on c l"></td></tr>
+            <tr><td class="act">Ajuste fino y entrega</td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w on s"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rm-legend">
+        <span><i style="border-color:#1a3a6b;background:#1a3a6b"></i>Desarrollo</span>
+        <span><i style="border-color:#4a9fd4;background:#4a9fd4"></i>Arranque, pruebas y entrega</span>
+        <span><i style="border-color:#F37021;background:#F37021"></i>Campaña con el proveedor de pauta</span>
+        <span><i style="border-color:#F37021;background:#F37021;transform:rotate(45deg);width:10px;height:10px"></i>Envío</span>
+      </div>
+      <div class="alert">Las semanas cuentan a partir de que ARX entregue los accesos y la información: base de contactos, dominio, número de WhatsApp Business y tabla de precios por zona. Los tiempos de las prioridades 2 y 3 se definen al terminar la Prioridad 1.</div>
     </div>
   </section>
 
@@ -363,7 +435,7 @@ footer{text-align:center;color:var(--ink3);font-size:12px;padding-bottom:28px}
   <section>
     <div class="sec-head"><h2>Siguiente paso</h2></div>
     <div class="sec-body">
-      <p class="lead">Con esta ruta preparamos la propuesta con los tiempos de cada etapa, empezando por la Prioridad 1.</p>
+      <p class="lead">Con esta ruta preparamos la propuesta del primer módulo, que cubre la Prioridad 1.</p>
       <p>Para dimensionarla nos ayuda saber:</p>
       <ul class="acuerdos">
         <li>Dónde está hoy la base de contactos de ARX (EasyBroker, Excel, teléfono) y de qué tamaño es.</li>
