@@ -509,19 +509,29 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
   }
 
   var ROLES = { operaciones: 'Operaciones', direccion: 'Dirección', aprobador: 'Aprobación', excelentia: 'ExcelentIA', sin_rol: 'Sin rol' };
+  // Pendientes en japonés: por defecto para operaciones; cada quien puede cambiarlo y se recuerda en su navegador
+  function verJapones() {
+    if (typeof estado.ja === 'boolean') return estado.ja;
+    try { var g = localStorage.getItem('enso_ja'); if (g === '1' || g === '0') { estado.ja = g === '1'; return estado.ja; } } catch (e) {}
+    var u = (estado.datos && estado.datos.usuario) || {};
+    return u.rol === 'operaciones';
+  }
   function pintarTareas(d) {
     var todas = d.tareas || [], por = d.tareas_por_rol || {};
     var f = '<button type="button" class="filtro' + (estado.filtroRol === 'todas' ? ' activo' : '') + '" data-rol="todas">Todas · ' + todas.length + '</button>';
     Object.keys(por).forEach(function (r) { f += '<button type="button" class="filtro' + (estado.filtroRol === r ? ' activo' : '') + '" data-rol="' + esc(r) + '">' + esc(ROLES[r] || r) + ' · ' + por[r] + '</button>'; });
+    var hayJa = todas.some(function (t) { return t.titulo_ja; });
+    if (hayJa) f += '<button type="button" class="filtro idioma' + (verJapones() ? ' activo' : '') + '" data-ja="1" title="Ver los pendientes en japonés">日本語</button>';
     $('filtros-tareas').innerHTML = f;
     var lista = todas.filter(function (t) { return estado.filtroRol === 'todas' || (t.rol || 'sin_rol') === estado.filtroRol; });
     var visibles = estado.tareasTodas ? lista : lista.slice(0, 8);
     if (!lista.length) { $('lista-tareas').innerHTML = '<li class="meta">Sin pendientes.</li>'; $('ver-mas-tareas').hidden = true; return; }
     $('lista-tareas').innerHTML = visibles.map(function (t) {
       var ref = t.folio || (t.entidad === 'oportunidad' && t.viaje ? 'Folio pendiente · ' + limpiarNombreViaje(t.viaje) : '') || (t.mensaje_asunto ? 'Correo: ' + t.mensaje_asunto : '');
-      return '<li data-id="' + esc(t.id) + '"><div class="tarea-cab"><strong>' + esc(t.titulo) + '</strong><span class="prio' + (t.prioridad === 'alta' ? ' alta' : '') + '">' + esc(t.prioridad || '') + '</span></div>' +
+      var ja = verJapones(), tit = (ja && t.titulo_ja) || t.titulo, det = (ja && t.detalle_ja) || t.detalle;
+      return '<li data-id="' + esc(t.id) + '"><div class="tarea-cab"><strong' + (ja && t.titulo_ja ? ' lang="ja"' : '') + '>' + esc(tit) + '</strong><span class="prio' + (t.prioridad === 'alta' ? ' alta' : '') + '">' + esc(t.prioridad || '') + '</span></div>' +
         '<div class="meta">' + esc(ROLES[t.rol] || t.rol || '') + ' · ' + esc(hace(t.creado_en)) + (ref ? ' · ' + esc(ref) : '') + '</div>' +
-        (t.detalle ? '<details class="mas"><summary>Detalle</summary><div class="meta">' + esc(t.detalle) + '</div></details>' : '') +
+        (det ? '<details class="mas"><summary>' + (ja ? '詳細' : 'Detalle') + '</summary><div class="meta">' + esc(det) + '</div></details>' : '') +
         '<div class="tarea-acciones">' +
         (t.asignar_folio ? '<form class="folio-form" data-opp="' + esc(t.entidad_id) + '"><input type="text" placeholder="EJ-26-045" aria-label="Folio ENSO" required><button class="btn btn-primario btn-chico" type="submit">Asignar folio</button></form>' : '') +
         '<button type="button" class="btn btn-secundario btn-chico" data-acc="tarea-resuelta">Resuelta</button>' +
@@ -567,6 +577,8 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
       else if (acc === 'tarea-descartada') accion({ accion: 'tarea', id: id, estado: 'descartada' }, b);
       return;
     }
+    var fj = ev.target.closest('.filtro[data-ja]');
+    if (fj) { estado.ja = !verJapones(); try { localStorage.setItem('enso_ja', estado.ja ? '1' : '0'); } catch (e) {} pintarTareas(estado.datos); return; }
     var fr = ev.target.closest('.filtro');
     if (fr) { estado.filtroRol = fr.getAttribute('data-rol'); estado.tareasTodas = false; pintarTareas(estado.datos); return; }
     if (!ev.target.closest('.usuario')) cerrarMenu();
