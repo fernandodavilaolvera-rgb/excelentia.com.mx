@@ -82,6 +82,10 @@ h2{margin:0;font-size:28px;line-height:1.15}
 .pill-indigo{background:var(--indigo-suave);color:var(--indigo)}
 .pill-neutra{background:var(--columna);color:var(--texto2)}
 .porque{margin:0;font-size:14px;color:var(--texto2)}
+.alerta-campos{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
+.alerta-campos dt{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--texto2);padding-top:3px}
+.alerta-campos dd{margin:0}
+@media (max-width:600px){.alerta-campos{grid-template-columns:1fr}.alerta-campos dd{margin-bottom:6px}}
 .porque strong{color:var(--tinta)}
 .consulta{border-left:3px solid var(--borde);padding:2px 0 2px 12px;font-size:14px;color:var(--texto2)}
 .borrador{background:var(--washi);border-radius:10px;padding:16px 18px;font-size:14px;white-space:pre-line}
@@ -255,7 +259,15 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
 
       <div class="dos-col" style="margin-top:32px">
         <div class="col-principal">
-          <div class="bloque-titulo">
+          <div id="bloque-alertas" hidden>
+            <div class="bloque-titulo">
+              <div class="etiqueta">Viajes activos</div>
+              <h2 id="t-alertas">Alertas</h2>
+            </div>
+            <div id="lista-alertas" style="display:flex;flex-direction:column;gap:14px;margin-top:10px"></div>
+          </div>
+
+          <div class="bloque-titulo" id="titulo-atencion">
             <div class="etiqueta">Atención</div>
             <h2 id="t-atencion">Respuestas por revisar</h2>
           </div>
@@ -413,7 +425,7 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
     var i = d.indicadores || {};
     $('estado-memoria').innerHTML = (i.correos_sin_procesar ? '<span>' + i.correos_sin_procesar + ' correos por leer</span> · ' : '<span>Memoria al día</span> · ') +
       '<span>correo revisado ' + esc(hace(d.ultima_lectura)) + '</span>';
-    pintarIndicadores(d); pintarAtencion(d); pintarAcercamientos(d); pintarProspectos(d); pintarTareas(d); pintarTablero(d);
+    pintarIndicadores(d); pintarAlertas(d); pintarAtencion(d); pintarAcercamientos(d); pintarProspectos(d); pintarTareas(d); pintarTablero(d);
   }
 
   var ESTADOS_COM = { por_calificar: 'Por calificar', calificando: 'Calificando', calificada: 'Calificada', descartada: 'Descartada', en_acercamiento: 'En acercamiento', en_conversacion: 'En conversación', sin_respuesta: 'Sin respuesta', pausada: 'Pausada' };
@@ -442,12 +454,29 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
   function pintarIndicadores(d) {
     var i = d.indicadores || {}, c = d.cupos || {}, m = d.motor || {};
     var html = '';
+    if (i.alertas) html += indicador(i.alertas, 'Alertas de viajes', i.alertas_nivel2 ? i.alertas_nivel2 + ' para dirección' : 'Todas de nivel 1', !!i.alertas_nivel2, 't-alertas');
     html += indicador(i.respuestas || 0, 'Respuestas por revisar', i.respuestas_escaladas ? i.respuestas_escaladas + (i.respuestas_escaladas === 1 ? ' requiere dirección' : ' requieren dirección') : 'Ninguna escalada', !!i.respuestas_escaladas, 't-atencion');
     html += indicador(i.acercamientos || 0, 'Acercamientos por aprobar', m.activo ? (c.primeros_mes || 0) + ' de ' + (c.tope_primeros || 30) + ' primeros correos este mes' : 'Motor comercial apagado', false, 't-acerc');
     var partes = []; if (i.en_viaje) partes.push(i.en_viaje + ' en viaje'); if (i.en_operacion) partes.push(i.en_operacion + ' en operación'); if (i.folio_pendiente) partes.push(i.folio_pendiente + ' con folio pendiente');
     html += indicador(i.viajes_activos || 0, 'Viajes activos', partes.join(' · ') || 'Sin viajes en curso', false, 't-viajes');
     html += indicador(i.tareas || 0, 'Pendientes abiertos', i.tareas_alta ? i.tareas_alta + ' de prioridad alta' : 'Ninguno urgente', !!i.tareas_alta, 't-tareas');
     $('indicadores').innerHTML = html;
+  }
+
+  function pintarAlertas(d) {
+    var lista = d.alertas || [];
+    $('bloque-alertas').hidden = !lista.length;
+    $('titulo-atencion').style.marginTop = lista.length ? '28px' : '';
+    $('lista-alertas').innerHTML = lista.map(function (a) {
+      var campos = [['Situación', a.situacion], ['Impacto', a.impacto], ['Recomendación', a.recomendacion], ['Decisión', a.decision]]
+        .filter(function (c) { return c[1]; }).map(function (c) { return '<dt>' + c[0] + '</dt><dd>' + esc(c[1]) + '</dd>'; }).join('');
+      return '<article class="tarjeta" data-id="' + esc(a.id) + '"><div class="tarjeta-cab"><div><div class="titulo">' + esc(a.ref || '') + (a.viaje ? ' · ' + esc(limpiarNombreViaje(a.viaje, a.folio)) : '') + '</div>' +
+        '<div class="meta">' + esc(a.nivel === 2 ? 'Para dirección' : 'Para operaciones') + ' · ' + esc(hace(a.creado_en)) + '</div></div>' +
+        '<span class="pill ' + (a.nivel === 2 ? 'pill-alerta' : 'pill-indigo') + '">Nivel ' + esc(a.nivel) + '</span></div>' +
+        '<dl class="alerta-campos">' + campos + '</dl>' +
+        '<div class="acciones no-print"><button type="button" class="btn btn-secundario btn-chico" data-acc="tarea-resuelta">Atendida</button>' +
+        '<button type="button" class="btn btn-terciario btn-chico" data-acc="tarea-descartada">Descartar</button></div></article>';
+    }).join('');
   }
 
   function pintarAtencion(d) {
@@ -531,7 +560,7 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
       var ja = verJapones(), tit = (ja && t.titulo_ja) || t.titulo, det = (ja && t.detalle_ja) || t.detalle;
       return '<li data-id="' + esc(t.id) + '"><div class="tarea-cab"><strong' + (ja && t.titulo_ja ? ' lang="ja"' : '') + '>' + esc(tit) + '</strong><span class="prio' + (t.prioridad === 'alta' ? ' alta' : '') + '">' + esc(t.prioridad || '') + '</span></div>' +
         '<div class="meta">' + esc(ROLES[t.rol] || t.rol || '') + ' · ' + esc(hace(t.creado_en)) + (ref ? ' · ' + esc(ref) : '') + '</div>' +
-        (det ? '<details class="mas"><summary>' + (ja ? '詳細' : 'Detalle') + '</summary><div class="meta">' + esc(det) + '</div></details>' : '') +
+        (det ? '<details class="mas"><summary>' + (ja && t.detalle_ja ? '詳細' : 'Detalle') + '</summary><div class="meta">' + esc(det) + '</div></details>' : '') +
         '<div class="tarea-acciones">' +
         (t.asignar_folio ? '<form class="folio-form" data-opp="' + esc(t.entidad_id) + '"><input type="text" placeholder="EJ-26-045" aria-label="Folio ENSO" required><button class="btn btn-primario btn-chico" type="submit">Asignar folio</button></form>' : '') +
         '<button type="button" class="btn btn-secundario btn-chico" data-acc="tarea-resuelta">Resuelta</button>' +
