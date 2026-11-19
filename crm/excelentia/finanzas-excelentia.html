@@ -153,7 +153,7 @@ textarea{resize:vertical;min-height:70px}
 .btn-limpiar:hover{background:#f0f4ff;color:#1a3a6b}
 .tot-row td{background:#f0f6ff;border-top:2px solid #c8d9f0;font-weight:800;color:#1a2035;padding:.4rem .55rem}
 .tot-row .tot-lbl{color:#4a5068;font-weight:700}
-.rb-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
+.rb-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem}
 .rb-card{background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:.7rem .85rem;break-inside:avoid}
 .rb-card.saldado{border-color:#86efac;background:#f0fdf4}
 .rb-card-top{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.65rem}
@@ -288,7 +288,7 @@ textarea{resize:vertical;min-height:70px}
         <select class="filter-select" id="g-fSocio" onchange="filterGastos()">
           <option value="">Pagado por</option>
           <option value="fernando">Fernando</option>
-          <option value="juanjose">Juan José</option>
+          
           <option value="adolfo">Adolfo</option>
         </select>
         <select class="filter-select" id="g-fStatus" onchange="filterGastos()">
@@ -454,41 +454,6 @@ textarea{resize:vertical;min-height:70px}
       <div id="rb-mas-proy"></div>
     </div>
 
-    <!-- 2. Reembolso a socios -->
-    <h2 class="rb-titulo">🤝 Reembolso a socios</h2>
-
-    <div class="rb-nota">
-      <strong>Cómo funciona.</strong> La bolsa que se reparte es solo la iguala del Dr Andrés menos los gastos de ese mes.
-      Los anticipos de proyectos (Berimbau, 4pLogistics) no entran aquí; esos se reparten por separado.
-      Lo que sobra cada mes va primero a Fernando hasta liquidarlo; luego mitad y mitad entre Juan José y Adolfo;
-      cuando Adolfo quede saldado, todo pasa a Juan José; y ya liquidados los tres, se reparte en tres partes iguales.
-    </div>
-
-    <!-- 3. Tarjetas de los 3 socios -->
-    <div class="rb-cards" id="rb-tarjetas"></div>
-
-    <!-- 4. Captura manual de reembolsos -->
-    <div class="card">
-      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap">
-        <span>💵 Reembolsos registrados</span>
-      </div>
-      <div class="card-body" style="padding-bottom:0">
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th data-col onclick="ordenarReem('fecha')">Fecha<span class="sort-ind" id="sr-fecha"></span></th>
-              <th data-col onclick="ordenarReem('socio')">Socio<span class="sort-ind" id="sr-socio"></span></th>
-              <th class="num" data-col onclick="ordenarReem('monto_mxn')">Monto<span class="sort-ind" id="sr-monto_mxn"></span></th>
-              <th data-col onclick="ordenarReem('concepto')">Concepto<span class="sort-ind" id="sr-concepto"></span></th>
-              <th data-col onclick="ordenarReem('metodo')">Método<span class="sort-ind" id="sr-metodo"></span></th>
-                          </tr></thead>
-            <tbody id="rb-pagos"></tbody>
-            <tfoot id="rb-tot-reem"></tfoot>
-          </table>
-        </div>
-      </div>
-      <div id="rb-mas-reem"></div>
-    </div>
 
   </div>
 </div>
@@ -513,7 +478,6 @@ const TABLA_API = { finanzas_gastos: 'gastos', finanzas_ingresos: 'ingresos', pa
 // ═══════════════════════════════════════════════════════════════
 const USERS = {
   fernando: { nombre:'Fernando',  color:'#1a3a6b' },
-  juanjose: { nombre:'Juan José', color:'#7c3aed' },
   adolfo:   { nombre:'Adolfo',    color:'#059669' }
 };
 const CATEGORIAS = ['Infraestructura','IA','Herramientas','Nómina','Marketing','Operación','Viáticos','Educación','Otro'];
@@ -609,7 +573,7 @@ function fmt$(n){ return new Intl.NumberFormat('es-MX',{style:'currency',currenc
 function fmtDate(d){ if(!d)return''; const dt=new Date(String(d).slice(0,10)+'T12:00:00'); return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 function genId(p){ return `${p}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`; }
 function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function socioBadge(uid){ const u=USERS[uid]||{nombre:uid||'-'}; return `<span class="socio-nom">${u.nombre}</span>`; }
+function socioBadge(uid){ const u=USERS[uid]||{nombre:'—'}; return `<span class="socio-nom">${u.nombre}</span>`; }
 function statusBadge(s){
   const map={'Pagado':'badge-green','Pendiente':'badge-yellow','Por reembolsar':'badge-orange','Cobrado':'badge-green','Facturado':'badge-blue'};
   return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
@@ -908,10 +872,10 @@ function destroyCharts(){ Object.values(CHARTS).forEach(c=>{ if(c) c.destroy(); 
 // ═══════════════════════════════════════════════════════════════
 //  REEMBOLSO A SOCIOS
 //  Bolsa = iguala del Dr Andres menos los gastos de ese mes.
-//  Orden: Fernando -> (Juan Jose 50% + Adolfo 50%) -> el que quede -> tres iguales.
+//  Orden: Fernando -> Adolfo -> mitad y mitad.
 // ═══════════════════════════════════════════════════════════════
 const RB_CLIENTE = 'Dr Andrés';      // de que cliente sale la bolsa
-const RB_ORDEN   = ['fernando','juanjose','adolfo'];
+const RB_ORDEN   = ['fernando','adolfo'];
 
 // Lo que puso cada socio de su bolsa (gastos sin origen de fondos)
 function rbAportes(){
@@ -955,7 +919,7 @@ function renderReembolso(){
   const hasta    = rbHasta();
 
   // ── Tarjetas por socio ──
-  document.getElementById('rb-tarjetas').innerHTML = RB_ORDEN.map(u=>{
+  (document.getElementById('rb-tarjetas')||{}).innerHTML = RB_ORDEN.map(u=>{
     const puso  = aportes[u] || 0;
     const pag   = devuelto[u] || 0;
     const alMes = hasta[u] ? ` <span class="rb-hasta">· al cierre de ${mesLabel(hasta[u])}</span>` : '';
@@ -982,6 +946,7 @@ function renderReembolso(){
 
   // ── Reembolsos capturados ──
   const tb = document.getElementById('rb-pagos');
+  if(!tb) return;   // la sección de reembolsos ya no se muestra
   if(!rbSoloFiltro(PAGOS).length){
     tb.innerHTML = `<tr><td colspan="5" class="rb-vacio">${RB_FILTRO ? 'Sin reembolsos de '+USERS[RB_FILTRO].nombre+'.' : 'Aún no hay reembolsos registrados.'}</td></tr>`;
     pieLista('rb-mas-reem', 0, 0, 'verTodoReem');
@@ -1088,7 +1053,7 @@ function ppCambioIngreso(){
 }
 
 // ── Filtro por socio: afecta las dos tablas de esta pestaña ──
-const RB_ALFA = ['adolfo','fernando','juanjose'];   // orden alfabetico de los chips
+const RB_ALFA = ['adolfo','fernando'];   // orden alfabetico de los chips
 let RB_FILTRO = '';                                 // '' = todos
 
 function filtrarSocio(u){
@@ -1125,7 +1090,7 @@ function rbEnRango(lista){
 }
 // Nombre en las tablas de esta pestaña (texto plano, sin clic)
 function socioLink(uid){
-  const u = USERS[uid] || { nombre: uid || '-' };
+  const u = USERS[uid] || { nombre: '—' };
   return `<span class="socio-nom">${u.nombre}</span>`;
 }
 function renderChips(){
@@ -1145,8 +1110,7 @@ function renderChips(){
   const puso = rbAportes()[RB_FILTRO] || 0;
   r.className = 'rb-resumen on';
   r.innerHTML = `<strong>${nom}</strong> · Pagos de proyectos: <strong>${fmt$(sPP)}</strong> en ${pp.length} ` +
-                `movimiento${pp.length===1?'':'s'} · Reembolsos recibidos: <strong>${fmt$(sRE)}</strong> en ${re.length} ` +
-                `movimiento${re.length===1?'':'s'} · Le falta por recuperar: <strong>${fmt$(Math.max(0, puso - sRE))}</strong>`;
+                `movimiento${pp.length===1?'':'s'}`;
 }
 
 // ── Ordenamiento de las dos tablas de pagos ──
@@ -1164,7 +1128,7 @@ function ordenarReem(col){
 
 // Valor con el que se compara cada renglon
 function rbValor(p, col){
-  if(col === 'socio')   return (USERS[p.socio]?.nombre || p.socio || '').toLowerCase();
+  if(col === 'socio')   return (USERS[p.socio]?.nombre || '').toLowerCase();
   if(col === 'ingreso'){ const i = ppIngreso(p.ingreso_id); return (i ? (i.concepto||'') + ' ' + (i.cliente||'') : '').toLowerCase(); }
   if(col === 'base_calculo' || col === 'porcentaje' || col === 'monto_mxn') return parseFloat(p[col]||0);
   if(col === 'fecha') return String(p.fecha||'');
