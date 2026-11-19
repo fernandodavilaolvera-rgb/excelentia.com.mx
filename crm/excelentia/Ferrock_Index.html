@@ -256,8 +256,15 @@ footer{border-top:1px solid var(--border);padding:14px 24px;display:flex;align-i
 <script>
 const REPO    = 'fernandodavilaolvera-rgb/excelentia.com.mx';
 const BRANCH  = 'main';
-const BASE    = 'https://excelentia.com.mx';
+const SITIO   = 'https://excelentia.com.mx';
 const EXCLUDE = ['.git', 'node_modules'];
+
+/* Otros repos que también se listan, cada uno como su propia carpeta */
+const EXTRA_REPOS = [
+  { repo:'fernandodavilaolvera-rgb/spring-awakening-mexico', branch:'main',
+    carpeta:'spring-awakening-mexico', base:'https://springawakeningmexico.com',
+    label:'Spring Awakening México', icon:'🎭' },
+];
 const IMG_EXTS = ['png','jpg','jpeg','gif','svg','webp','ico'];
 
 const FOLDER_CFG = {
@@ -271,6 +278,7 @@ const FOLDER_CFG = {
   'legal':        { label:'Legal',             icon:'📄', desc:'/legal/' },
   'forms':        { label:'Formularios',       icon:'📋', desc:'/forms/' },
 };
+EXTRA_REPOS.forEach(x => { FOLDER_CFG[x.carpeta] = { label:x.label, icon:x.icon, desc:x.base.replace(/^https?:\/\//,'') }; });
 
 let allFiles  = [];
 let activeExt = 'all';
@@ -290,6 +298,9 @@ function extClass(ext) {
   return 'ext-other';
 }
 function fileUrl(path) {
+  const extra = EXTRA_REPOS.find(x => path.startsWith(x.carpeta + '/'));
+  const BASE  = extra ? extra.base : SITIO;
+  if (extra) path = path.slice(extra.carpeta.length + 1);
   const parts  = path.split('/');
   const name   = parts[parts.length - 1];
   const ext    = getExt(name);
@@ -598,8 +609,17 @@ async function loadRepo() {
     clearTimeout(corte);
     if (!r.ok) throw new Error('GitHub API error ' + r.status);
     const d  = await r.json();
-    fiGuardar(d.tree || []);
-    fiPintar(d.tree || [], new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }));
+    const extras = await Promise.all(EXTRA_REPOS.map(async x => {
+      try {
+        const rx = await fetch(`https://api.github.com/repos/${x.repo}/git/trees/${x.branch}?recursive=1`);
+        if (!rx.ok) return [];
+        const dx = await rx.json();
+        return (dx.tree || []).map(f => Object.assign({}, f, { path: x.carpeta + '/' + f.path }));
+      } catch (_) { return []; }
+    }));
+    const arbol = (d.tree || []).concat(...extras);
+    fiGuardar(arbol);
+    fiPintar(arbol, new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }));
   } catch (e) {
     clearTimeout(corte);
     const g = fiLeer();
