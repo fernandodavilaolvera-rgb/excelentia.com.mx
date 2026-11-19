@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conciliación de Pagos v7 · Logística Armada</title>
+<title>Conciliación de Pagos v8 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -273,6 +273,8 @@ tr.alt td{background:#f0f6ff}
 .rt{width:100%;border-collapse:collapse;font-size:12.5px}
 .rt th{background:#dce8f7;color:#1a3a6b;font-weight:700;text-align:left;padding:.45rem .55rem;white-space:nowrap}
 .rt th.num,.rt td.num{text-align:right}
+.rt .mr-n.elim{color:#c0392b;font-weight:700}
+.th-tot{display:block;margin-top:2px;font-size:11.5px;font-weight:800;color:#1a2035;letter-spacing:0;text-transform:none}.th-tot2{display:block;font-size:10px;font-weight:600;color:#4a5068;letter-spacing:0;text-transform:none}
 .rt th.ord{cursor:pointer}.rt th.ord:hover{background:#c9dbf2}.rt th.on{background:#c9dbf2}
 .rt td{border-bottom:1px solid #eef1f6;padding:.42rem .55rem;vertical-align:top}
 .rt tr:hover td{background:#e8f0fb}
@@ -324,7 +326,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Conciliación de Pagos · Logística Armada</h1>
-        <p>v5 · Viajes contra facturas de transportistas</p>
+        <p>v8 · Viajes contra facturas de transportistas</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -397,7 +399,7 @@ tr.alt td{background:#f0f6ff}
     </ul></div>
   </details>
 
-  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · versión 7 · 6-nov-2026 · versión para revisión</footer>
+  <footer>ExcelentIA · Conciliación de Pagos · Logística Armada · versión 8 · 19-nov-2026 · versión para revisión</footer>
 </div>
 
 <script>
@@ -464,6 +466,7 @@ function cruzar() {
   const F = {}, sinViaje = [];
   SRV.facturas.forEach(a => { try {
     const f = { idf: a[0], v: a[1], pr: a[2], folio: a[3], fecha: fechaOk(a[4]) || fechaOk(a[5]) || '', sub: a[6], tot: a[7], pagada: !!a[8], fPago: a[9], cuadra: a[10], activa: !!a[11], comp: a[12], mp: a[13] };
+    f.serv = /servicio/i.test(f.comp || ''); // v8: facturas del módulo de servicios (claves, almacenajes)
     f.vence = f.fecha ? sumar(f.fecha, cred) : '';
     f.vencida = !f.pagada && f.activa && f.vence && f.vence < hoy;
     f.diasV = f.vence ? dias(hoy, f.vence) : null;
@@ -475,6 +478,7 @@ function cruzar() {
     v.todas = F[v.id] || [];
     v.fac = v.todas.filter(f => f.activa);
     v.elim = v.todas.length - v.fac.length;
+    v.elimFol = v.todas.filter(f => !f.activa).map(f => f.folio || 'sin folio'); // v8
     v.facturado = v.fac.reduce((s, f) => s + f.sub, 0);
     v.comp = v.fac.filter(f => /si/i.test(f.comp)).reduce((s, f) => s + f.sub, 0);
     v.pagado = v.fac.filter(f => f.pagada).reduce((s, f) => s + f.sub, 0);
@@ -551,7 +555,7 @@ function pintar() {
   const nCu = vs.filter(v => v.estado === 'cuadra'), nNo = vs.filter(v => v.estado === 'nocuadra'), nSin = vs.filter(v => v.estado === 'sin'), nCs = vs.filter(v => v.estado === 'compsin');
   const pend = facs.filter(f => !f.pagada), venc = pend.filter(f => f.vencida);
   const VID = new Map(R.viajes.map(v => [v.id, v])); // v7
-  facs.forEach(f => { f.fc = facCli(f.v ? VID.get(f.v) : null); });
+  facs.forEach(f => { f.fc = f.v ? facCli(VID.get(f.v)) : f.serv ? { s: 'sv', t: 'servicio', l: 'Factura de tu módulo de servicios; no va ligada a un viaje' } : facCli(null); });
   const pendSi = pend.filter(f => f.fc.s === 'si'), pendNo = pend.filter(f => f.fc.s === 'no'), pendNd = pend.filter(f => f.fc.s === 'nd' || f.fc.s === 'sv');
   const mesHoy = R.hoy.slice(0, 7);
   const pagMes = facs.filter(f => f.pagada && (f.fPago || '').slice(0, 7) === mesHoy);
@@ -562,10 +566,11 @@ function pintar() {
   $('#rKpis').innerHTML = `
     <div class="pbox meta"><div class="lb">Cuadran</div><div class="vl">${nCu.length}</div><div class="hint">viajes con factura igual a lo registrado</div></div>
     <div class="pbox malbox"><div class="lb">No cuadran</div><div class="vl">${nNo.length}</div><div class="hint">${mny0(S(nNo.map(v => v.dif)))} de diferencia neta · ${comp.length} por complemento aparte</div></div>
-    <div class="pbox"><div class="lb">Sin factura del transportista</div><div class="vl">${nSinT.length}</div><div class="hint">${mny0(S(nSinT.map(v => v.debe)))} que el transportista todavía no factura en la plataforma · ${nSinT.filter(v => v.edad > 60).length} con más de 60 días${nSinP.length ? ' · aparte, ' + nSinP.length + ' de tu propia empresa' : ''}</div></div>
+    <div class="pbox"><div class="lb">Sin factura del transportista</div><div class="vl">${nSinT.length}</div><div class="hint">${mny0(S(nSinT.map(v => v.debe)))} que el transportista todavía no factura en la plataforma · ${nSinT.filter(v => v.edad > 60).length} con más de 60 días${nSinT.filter(v => v.elim).length ? ' · ' + nSinT.filter(v => v.elim).length + ' con factura eliminada' : ''}${nSinP.length ? ' · aparte, ' + nSinP.length + ' de tu propia empresa' : ''}</div></div>
     <div class="pbox costo"><div class="lb">Por pagar</div><div class="vl">${mny0(S(pend.map(f => f.sub)))}</div><div class="hint">${pend.length} facturas · ${venc.length} vencidas por ${mny0(S(venc.map(f => f.sub)))}</div></div>
     <div class="pbox"><div class="lb">Por pagar · ya facturado a tu cliente</div><div class="vl">${mny0(S(pendSi.map(f => f.sub)))}</div><div class="hint">${pendSi.length} facturas de transportistas de viajes que ya le cobraste a tu cliente</div></div>
-    <div class="pbox"><div class="lb">Por pagar · sin facturar a tu cliente</div><div class="vl">${mny0(S(pendNo.map(f => f.sub)))}</div><div class="hint">${pendNo.length} facturas de viajes que todavía no facturas${pendNd.length ? ' · ' + pendNd.length + ' sin dato (otros clientes)' : ''}</div></div>
+    <div class="pbox"><div class="lb">Por pagar · sin facturar a tu cliente</div><div class="vl">${mny0(S(pendNo.map(f => f.sub)))}</div><div class="hint">${pendNo.length} facturas de viajes que todavía no facturas</div></div>
+    ${pendNd.length ? `<div class="pbox"><div class="lb">Por pagar · sin dato del cliente</div><div class="vl">${mny0(S(pendNd.map(f => f.sub)))}</div><div class="hint">${pendNd.length} facturas: ${[pendNd.filter(f => f.fc.t === 'servicio').length ? pendNd.filter(f => f.fc.t === 'servicio').length + ' de servicios' : '', pendNd.filter(f => f.fc.s === 'nd').length ? pendNd.filter(f => f.fc.s === 'nd').length + ' de clientes sin reporte cargado (LYC)' : '', pendNd.filter(f => f.fc.s === 'sv' && f.fc.t !== 'servicio').length ? pendNd.filter(f => f.fc.s === 'sv' && f.fc.t !== 'servicio').length + ' sin viaje' : ''].filter(Boolean).join(', ')}; con las otras dos suma el Por pagar</div></div>` : ''}
     <div class="pbox"><div class="lb">Complementos sin factura</div><div class="vl">${nCs.length}</div><div class="hint">${mny0(S(nCs.map(v => v.falta)))} de casetas, maniobras o estadías que el transportista todavía no factura; el resto del viaje ya está facturado</div></div>
     <div class="pbox"><div class="lb">Pagado este mes</div><div class="vl">${mny0(S(pagMes.map(f => f.sub)))}</div><div class="hint">${pagMes.length} facturas marcadas como pagadas</div></div>`;
   const av = [];
@@ -580,7 +585,7 @@ function pintar() {
   const prop = nSinP.length;
   if (prop) av.push(['Viajes de tu propia empresa', prop + ' viajes los hizo tu propia empresa, por ' + mny0(S(nSinP.map(v => v.debe))) + '; no llevan factura de transportista, así que se muestran aparte y no cuentan como pendientes. Están en la pestaña Sin factura del transportista, botón Tu propia empresa.']);
   if (venc.length) { const P = {}; venc.forEach(f => P[f.pr] = (P[f.pr] || 0) + f.sub); const top = Object.entries(P).sort((a, b) => b[1] - a[1]).slice(0, 3); av.push(['Vencidas, por transportista', top.map(x => provTxt(x[0]) + ' ' + mny0(x[1])).join('; ') + '.']); }
-  if (R.sinViaje.length) av.push(['Facturas sin viaje', R.sinViaje.length === 1 ? 'Una factura activa no está ligada a un viaje (servicios); aparece en Por pagar.' : R.sinViaje.length + ' facturas activas no están ligadas a un viaje (servicios); aparecen en Por pagar.']);
+  if (R.sinViaje.length) { const ns = R.sinViaje.filter(f => f.serv).length, nv = R.sinViaje.length - ns; av.push(['Facturas sin viaje', (ns ? ns + (ns === 1 ? ' factura es' : ' facturas son') + ' de tu módulo de servicios' : '') + (ns && nv ? ' y ' : '') + (nv ? nv + (nv === 1 ? ' factura activa no está ligada' : ' facturas activas no están ligadas') + ' a un viaje' : '') + '; aparecen en Por pagar.']); }
   $('#rSalio').innerHTML = av.map(a => `<div class="aviso"><div class="t">${a[0]}</div><p>${a[1]}</p></div>`).join('') || '<p class="sub">Todo cuadra en este periodo.</p>';
 
   pintarTrans();
@@ -597,13 +602,13 @@ function pintar() {
   $('#csSub').textContent = nCs.length ? nCs.length + (nCs.length === 1 ? ' viaje' : ' viajes') + ' con el flete ya facturado y un complemento registrado sin factura, por ' + mny0(S(nCs.map(v => v.falta))) + '.' : 'Ningún viaje tiene complementos pendientes de facturar.';
   $('#tCs').innerHTML = nCs.length ? tablaViajes(nCs.slice().sort(ord), ['viaje', 'trans', 'debe', 'fact', 'falta', 'motivo']) : '';
   // v7: facturas de los transportistas, pendientes o pagadas, y si el viaje ya se le facturó a tu cliente
-  const PAGOS = [['pend', 'Pendientes de pago'], ['pag', 'Pagadas'], ['todas', 'Todas']];
+  const PAGOS = [['pend', 'Pendientes de pago'], ['venc', 'Vencidas'], ['pag', 'Pagadas'], ['todas', 'Todas']];
   const FCS = [['todo', 'Todo'], ['si', 'Ya facturado a tu cliente'], ['no', 'Sin facturar a tu cliente']];
   $('#fPago').innerHTML = '<span class="lbl">Pago</span>' + PAGOS.map(e => `<button class="emp ${CFG.pago === e[0] ? 'on' : ''}" data-p="${e[0]}">${e[1]}</button>`).join('');
   $('#fFcli').innerHTML = '<span class="lbl">Tu cliente</span>' + FCS.map(e => `<button class="emp ${CFG.fcli === e[0] ? 'on' : ''}" data-f="${e[0]}">${e[1]}</button>`).join('');
   $('#fPago').querySelectorAll('[data-p]').forEach(b => b.onclick = () => { CFG.pago = b.dataset.p; guardarCfg(); pintar(); });
   $('#fFcli').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { CFG.fcli = b.dataset.f; guardarCfg(); pintar(); });
-  let pp = facs.filter(f => f.activa && (CFG.pago === 'todas' || (CFG.pago === 'pag') === f.pagada));
+  let pp = facs.filter(f => f.activa && (CFG.pago === 'todas' || (CFG.pago === 'venc' ? f.vencida : (CFG.pago === 'pag') === f.pagada)));
   if (CFG.fcli !== 'todo') pp = pp.filter(f => f.fc.s === CFG.fcli);
   pp.sort((a, b) => a.pagada !== b.pagada ? (a.pagada ? 1 : -1) : a.pagada ? (b.fPago || '').localeCompare(a.fPago || '') : (a.vence || '').localeCompare(b.vence || ''));
   const ppP = pp.filter(f => !f.pagada), ppG = pp.filter(f => f.pagada);
@@ -613,7 +618,7 @@ function pintar() {
     (SRV.fcliMax ? ' Lo facturado a tu cliente sale de tus reportes cargados hasta ' + mesTxt(SRV.fcliMax) + '.' : '');
   $('#tPp').innerHTML = pp.length ? `<div class="tblwrap"><table class="rt"><thead><tr><th>Factura</th><th>Transportista</th><th>Viaje</th><th class="num">Subtotal</th><th class="num">Total</th><th>Vence o se pagó</th><th>Tu cliente</th><th>Cuadra</th></tr></thead><tbody>${pp.map(f => { try { return `<tr>
     <td>${esc(f.folio || 'sin folio')}<span class="mr-n">${fechaTxt(f.fecha)}${/si/i.test(f.comp) ? ' · complemento' : ''}</span></td><td>${esc(provTxt(f.pr))}</td>
-    <td>${f.v || '<span class="dim">sin viaje</span>'}</td><td class="num">${mny0(f.sub)}</td><td class="num">${mny0(f.tot)}</td>
+    <td>${f.v || (f.serv ? '<span class="dim">servicio</span>' : '<span class="dim">sin viaje</span>')}</td><td class="num">${mny0(f.sub)}</td><td class="num">${mny0(f.tot)}</td>
     ${f.pagada ? `<td><span class="fc-si">pagada</span><span class="mr-n">${f.fPago ? fechaTxt(f.fPago) : 'sin fecha de pago'}</span></td>` : `<td class="${f.vencida ? 'neg' : ''}">${fechaTxt(f.vence)}<span class="mr-n">${f.diasV == null ? '' : f.diasV < 0 ? 'vencida hace ' + (-f.diasV) + ' días' : 'en ' + f.diasV + ' días'}</span></td>`}
     <td>${fcliHtml(f.fc)}</td>
     <td>${f.cuadra === 'Si' ? 'sí' : f.cuadra === 'No' ? '<span class="neg">no</span>' : '<span class="dim">—</span>'}</td></tr>`; } catch (e) { return filaMala(8, f, e); } }).join('')}</tbody></table></div>` : '<p class="sub">No hay facturas con estos filtros.</p>';
@@ -625,13 +630,13 @@ function tablaViajes(lista, cols) {
   const H = { viaje: 'Viaje', trans: 'Transportista', debe: 'Se le debe', fact: 'Facturado', dif: 'Diferencia', motivo: 'Por qué', edad: 'Días sin factura', estatus: 'Estatus del viaje', pagado: 'Pagado', estado: 'Estado', falta: 'Falta facturar', fcli: 'Tu cliente' };
   const num = { debe: 1, fact: 1, dif: 1, edad: 1, pagado: 1, falta: 1 };
   const C = {
-    viaje: v => `${v.id}<span class="mr-n">${fechaTxt(v.fecha)} · ${esc(v.des)} · ${esc(v.uni)}${v.hijo ? ' · reparto de ' + v.padre : ''}</span>`,
+    viaje: v => `${v.id}<span class="mr-n">${fechaTxt(v.fecha)} · ${esc(v.des)} · ${esc(v.uni)}${v.hijo ? ' · reparto de ' + v.padre : ''}</span>${v.estado === 'sin' && v.elim ? '<span class="mr-n elim">factura eliminada: ' + esc(v.elimFol.join(', ')) + ' · reactívala o sube la correcta</span>' : ''}`,
     trans: v => esc(provTxt(v.pr)) + (v.propia ? '<span class="mr-n">tu propia empresa</span>' : '') + (v.repartos ? '<span class="mr-n">incluye ' + v.repartos.length + (v.repartos.length === 1 ? ' reparto' : ' repartos') + ': ' + v.repartos.join(', ') + '</span>' : ''),
     debe: v => mny0(v.debe), fact: v => mny0(v.facturado) + '<span class="mr-n">' + v.fac.length + ' factura' + (v.fac.length > 1 ? 's' : '') + (v.elim ? ' · ' + v.elim + ' eliminada' + (v.elim > 1 ? 's' : '') : '') + '</span>',
     dif: v => `<b class="${v.dif > 0 ? 'neg' : ''}">${(v.dif > 0 ? '+' : '') + mny0(v.dif)}</b>`,
     motivo: v => esc(v.motivo || ''), edad: v => v.edad == null ? '<span class="dim">—</span>' : `<span class="${v.edad > 60 ? 'neg' : ''}">${v.edad}</span>`, estatus: v => esc(v.st || '—'),
     pagado: v => mny0(v.pagado), falta: v => '<b>' + mny0(v.falta) + '</b>', fcli: v => fcliHtml(facCli(v)),
-    estado: v => ({ cuadra: 'cuadra', nocuadra: '<span class="neg">no cuadra</span>', compsin: 'falta factura del complemento<span class="mr-n">' + mny0(v.falta) + (conceptos(v.cn) ? ' · ' + esc(conceptos(v.cn)) : '') + '</span>', sin: 'sin factura', nada: '<span class="dim">sin cobro</span>', proceso: '<span class="dim">en proceso, todavía no se factura</span>', enpadre: '<span class="dim">facturado dentro del viaje ' + v.enPadre + '</span>' }[v.estado] || '') + (v.fac.length ? '<span class="mr-n">' + (v.pend ? 'por pagar ' + mny0(v.pend) : 'pagada') + '</span>' : '')
+    estado: v => ({ cuadra: 'cuadra', nocuadra: '<span class="neg">no cuadra</span>', compsin: 'falta factura del complemento<span class="mr-n">' + mny0(v.falta) + (conceptos(v.cn) ? ' · ' + esc(conceptos(v.cn)) : '') + '</span>', sin: v.elim ? '<span class="neg">factura eliminada</span><span class="mr-n">' + esc(v.elimFol.join(', ')) + ' · reactívala o sube la correcta</span>' : 'sin factura', nada: '<span class="dim">sin cobro</span>', proceso: '<span class="dim">en proceso, todavía no se factura</span>', enpadre: '<span class="dim">facturado dentro del viaje ' + v.enPadre + '</span>' }[v.estado] || '') + (v.fac.length ? '<span class="mr-n">' + (v.pend ? 'por pagar ' + mny0(v.pend) : 'pagada') + '</span>' : '')
   };
   return `<div class="tblwrap"><table class="rt"><thead><tr>${cols.map(c => `<th class="${num[c] ? 'num' : ''}">${H[c]}</th>`).join('')}</tr></thead><tbody>${lista.map(v => { try { return `<tr>${cols.map(c => `<td class="${num[c] ? 'num' : c === 'motivo' ? 'motivo' : ''}">${C[c](v)}</td>`).join('')}</tr>`; } catch (e) { return filaMala(cols.length, v, e); } }).join('')}</tbody></table></div>`;
 }
@@ -763,7 +768,7 @@ function estadoCuenta(pr) {
       <div class="pbox malbox"><div class="lb">No cuadran</div><div class="vl">${vs.filter(v => v.estado === 'nocuadra').length}</div><div class="hint">viajes por aclarar</div></div>
     </div>
     ${tablaViajes(vs, ['viaje', 'debe', 'fact', 'pagado', 'estado', 'fcli'])}
-    ${sv.length ? '<h3 class="mr-h3">Facturas sin viaje</h3><ul class="mr-sup">' + sv.map(f => '<li>' + esc(f.folio) + ' · ' + fechaTxt(f.fecha) + ' · ' + mny0(f.sub) + (f.pagada ? ' · pagada' : ' · por pagar') + '</li>').join('') + '</ul>' : ''}`;
+    ${sv.length ? '<h3 class="mr-h3">' + (sv.every(f => f.serv) ? 'Facturas de servicios' : sv.some(f => f.serv) ? 'Servicios y facturas sin viaje' : 'Facturas sin viaje') + '</h3><ul class="mr-sup">' + sv.map(f => '<li>' + esc(f.folio) + ' · ' + fechaTxt(f.fecha) + ' · ' + mny0(f.sub) + (f.serv ? ' · servicio' : ' · sin viaje') + (f.pagada ? ' · pagada' : ' · por pagar') + '</li>').join('') + '</ul>' : ''}`;
   $('#btnEcXls').onclick = () => excelPendientes([pr], $('#btnEcXls'));
   $('#btnEcPrint').onclick = () => { document.body.classList.add('solo-ec'); window.print(); setTimeout(() => document.body.classList.remove('solo-ec'), 500); };
   $('#btnEcCerrar').onclick = () => { EC = null; c.classList.add('hidden'); };
@@ -800,6 +805,44 @@ $('#gateEntrar').onclick = () => {
 $('#gateClave').onkeydown = e => { if (e.key === 'Enter') $('#gateEntrar').click(); };
 (function () { const c = claveGuardada(); if (!c) pedirClave(''); else cargar(c); })();
 
+/* v8 (19-nov): totales en los encabezados de todas las tablas.
+   Suma cada columna de números (dinero o conteo) y lo pone debajo del título; si la celda trae un monto chico abajo, también lo suma.
+   No suma días ni porcentajes. Se vuelve a calcular solo cada vez que una tabla se redibuja con otros filtros. */
+function numDeTexto(t) {
+  const m = String(t || '').replace(/−/g, '-').trim().match(/^([+-])?\s*\$?\s*(\d[\d,]*(?:\.\d+)?)/);
+  if (!m) return null;
+  const n = parseFloat(m[2].replace(/,/g, ''));
+  return m[1] === '-' ? -n : n;
+}
+function fmtTotal(n, dinero) { return dinero ? mny0(n) : Math.round(n).toLocaleString('es-MX'); }
+function totalesEnTablas() {
+  document.querySelectorAll('table.rt:not([data-tot])').forEach(t => {
+    t.setAttribute('data-tot', '1');
+    const ths = [...t.querySelectorAll('thead th')], filas = [...t.querySelectorAll('tbody tr')];
+    if (filas.length < 2) return;
+    ths.forEach((th, c) => {
+      const nom = th.textContent.trim();
+      if (!th.classList.contains('num') || /d[ií]as|%/i.test(nom)) return;
+      let tot = 0, sub = 0, dinero = false, hay = false, haySub = false;
+      filas.forEach(tr => {
+        if (tr.children.length !== ths.length) return;
+        const td = tr.children[c]; if (!td) return;
+        const cl = td.cloneNode(true); cl.querySelectorAll('.mr-n').forEach(x => x.remove());
+        const tx = cl.textContent.trim(), n = numDeTexto(tx);
+        if (n != null) { tot += n; hay = true; if (tx.indexOf('$') >= 0) dinero = true; }
+        const sp = td.querySelector('.mr-n');
+        if (sp && sp.textContent.indexOf('$') >= 0) { const s = numDeTexto(sp.textContent); if (s != null) { sub += s; haySub = true; } }
+      });
+      if (!hay) return;
+      th.insertAdjacentHTML('beforeend', '<span class="th-tot">' + fmtTotal(tot, dinero) + '</span>' + (haySub ? '<span class="th-tot2">' + mny0(sub) + '</span>' : ''));
+    });
+  });
+}
+(function () {
+  let pend = false;
+  new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; totalesEnTablas(); }); })
+    .observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 </body>
 </html>

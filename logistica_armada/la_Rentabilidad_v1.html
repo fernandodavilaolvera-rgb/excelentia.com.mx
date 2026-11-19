@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rentabilidad v3 · Logística Armada</title>
+<title>Rentabilidad v4 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -279,12 +279,13 @@ tr.alt td{background:#f0f6ff}
 .neg{color:#c0392b}
 .pbox.malbox{background:#fdecea;border-color:#f3c3bd}.pbox.malbox .vl{color:#c0392b}
 .gm{width:100%;max-width:720px;height:auto;display:block}
-.gm .bc{fill:#1e5096}.gm .bp{fill:#9fc2e7}.gm .tm{font-size:12px;fill:#4a5068;font-family:Manrope,sans-serif}
+.gm .bc{fill:#1e5096}.gm .bp{fill:#b3b9c6}.gm .rktop{fill:#1a3a6b}.gm .rkneg{fill:#c0392b}.gm .tv.neg{fill:#c0392b}.gm .tm{font-size:12px;fill:#4a5068;font-family:Manrope,sans-serif}
 .gm .tv{font-size:11.5px;font-weight:700;fill:#1a2035;font-family:Manrope,sans-serif}
 .gh .lab{font-size:11.5px;fill:#1a2035;font-family:Manrope,sans-serif}.gh .pc{font-size:11.5px;font-weight:700;fill:#1a2035;font-family:Manrope,sans-serif}.gh .pc.neg{fill:#c0392b}.gh .hb{cursor:pointer}.gh .hb:hover rect{opacity:.8}
 .gm .mb{cursor:pointer}.gm .mb:hover rect,.gm .mb.sel rect{opacity:.8;stroke:#0d1b3e;stroke-width:1}
 .leyenda{font-size:11.5px;color:#4a5068;margin-top:.3rem}
-.sq{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 .2rem 0 .5rem;vertical-align:-1px}.sq.bc{background:#1e5096}.sq.bp{background:#9fc2e7}
+.th-tot{display:block;margin-top:2px;font-size:11.5px;font-weight:800;color:#1a2035;letter-spacing:0;text-transform:none}.th-tot2{display:block;font-size:10px;font-weight:600;color:#4a5068;letter-spacing:0;text-transform:none}
+.sq{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 .2rem 0 .5rem;vertical-align:-1px}.sq.bc{background:#1e5096}.sq.bp{background:#b3b9c6}
 .chk{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:12.5px;margin:.2rem 0}
 .chk label{display:flex;align-items:center;gap:.3rem;font-weight:500;color:#1a2035}
 #estadoDatos{margin-top:.5rem}
@@ -314,7 +315,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Rentabilidad · Logística Armada</h1>
-        <p>v2 · Por cliente, ruta y transportista contra lo pagado</p>
+        <p>v4 · Por cliente, ruta y transportista contra lo pagado</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -377,7 +378,7 @@ tr.alt td{background:#f0f6ff}
   <details class="acc">
     <summary>De dónde sale cada número</summary>
     <div class="bd"><ul class="mr-sup">
-      <li><b>Cobrado:</b> tus reportes de facturación ya cargados (flete, maniobra y estadía, sin IVA).</li>
+      <li><b>Cobrado:</b> tus reportes de facturación ya cargados, columnas de costo (las amarillas: flete, maniobra y estadía), sin IVA; es lo que le facturas a 4PL.</li>
       <li><b>Pagado:</b> lo que tu plataforma tiene registrado para el transportista en ese viaje: flete (o lo pagado por rechazo), maniobras, estadías, custodia y costos extra.</li>
       <li><b>Solo el flete:</b> flete cobrado contra flete pagado. Se recomienda mientras muchas maniobras se paguen por fuera de la plataforma, porque contarlas cobradas y sin su pago infla el margen.</li>
       <li><b>Servicio:</b> un viaje padre con sus repartos se suma como uno solo; la ruta es la del padre.</li>
@@ -385,7 +386,7 @@ tr.alt td{background:#f0f6ff}
     </ul></div>
   </details>
 
-  <footer>ExcelentIA · Rentabilidad · Logística Armada · versión 3 · 16-oct-2026 · versión para revisión</footer>
+  <footer>ExcelentIA · Rentabilidad · Logística Armada · versión 4 · 19-nov-2026 · versión para revisión</footer>
 </div>
 
 <script>
@@ -512,7 +513,7 @@ function agrupar(items, llave, nombre) {
 function tabla(cont, filas, vista, colNom, extra) {
   const [c, dir] = ORDEN[vista];
   filas.sort((a, b) => ((a[c] == null ? -1e12 : a[c]) > (b[c] == null ? -1e12 : b[c]) ? 1 : -1) * dir);
-  const cols = [['nom', colNom], ['n', 'Servicios'], ['cob', 'Cobrado'], ['pag', 'Pagado'], ['mar', 'Margen'], ['pct', 'Margen %'], ['mal', 'Salieron mal']];
+  const cols = [['nom', colNom], ['n', vista === 'trans' ? 'Viajes' : 'Servicios'], ['cob', 'Cobrado'], ['pag', 'Pagado'], ['mar', 'Margen'], ['pct', 'Margen %'], ['mal', 'Salieron mal']];
   const th = cols.map(x => `<th class="${x[0] === 'nom' ? '' : 'num'} ord${x[0] === c ? ' on' : ''}" data-o="${x[0]}">${x[1]}${x[0] === c ? (dir < 0 ? ' ↓' : ' ↑') : ''}</th>`).join('');
   const tb = filas.map(g => `<tr><td>${esc(g.nom)}${g.prop ? '<span class="mr-n">' + g.prop + ' pagado' + (g.prop > 1 ? 's' : '') + ' a tu empresa</span>' : ''}</td>
     <td class="num">${g.n}</td><td class="num">${mny0(g.cob)}</td><td class="num">${mny0(g.pag)}</td>
@@ -624,8 +625,23 @@ function pintarMeses(listaPeriodo) {
       <text x="${x + bw / 2}" y="${H - 36 - hc}" text-anchor="middle" class="tv">${pct(o.pct)}</text></g>`;
   }).join('');
   $('#rMes').innerHTML = `<h3 class="mr-h3">Mes por mes</h3><div class="tblwrap"><svg class="gm" viewBox="0 0 ${W} ${H}" role="img" aria-label="Cobrado y pagado por mes">${barras}</svg></div>
-    <p class="leyenda"><span class="sq bc"></span> cobrado <span class="sq bp"></span> pagado · el porcentaje es el margen del mes · toca un mes para verlo solo</p>`;
+    <p class="leyenda"><span class="sq bc"></span> cobrado <span class="sq bp"></span> pagado · el porcentaje es el margen del mes · toca un mes para verlo solo</p>` + rankingMeses(ms, S);
   document.querySelectorAll('.mb').forEach(g => g.onclick = () => { MES = MES === g.dataset.mes ? 'todos' : g.dataset.mes; pintarFiltros(); pintar(); });
+}
+
+/* v4 (19-nov): los meses ordenados del de mayor margen al de menor */
+function rankingMeses(ms, S) {
+  const fs = ms.filter(m => S[m].pct != null).sort((a, b) => S[b].pct - S[a].pct);
+  if (fs.length < 2) return '';
+  const W = 640, L = 90, R = 150, fila = 26, H = fs.length * fila + 8, ancho = W - L - R;
+  const max = Math.max(...fs.map(m => Math.abs(S[m].pct)), 0.0001);
+  const barras = fs.map((m, i) => { const o = S[m], y = 4 + i * fila, w = Math.max(2, Math.abs(o.pct) / max * ancho), neg = o.pct < 0;
+    return `<g class="mb rk${MES === m ? ' sel' : ''}" data-mes="${m}"><title>${mesTxt(m)}: margen ${mny0(o.mar)} (${pct(o.pct)}) · cobrado ${mny0(o.cob)}, pagado ${mny0(o.pag)}</title>
+      <text x="${L - 8}" y="${y + 15}" text-anchor="end" class="tm">${i + 1}. ${mesTxt(m)}</text>
+      <rect x="${L}" y="${y + 4}" width="${w}" height="14" rx="2" class="${neg ? 'rkneg' : i === 0 ? 'rktop' : 'bc'}"></rect>
+      <text x="${L + w + 6}" y="${y + 15}" class="tv${neg ? ' neg' : ''}">${pct(o.pct)} · ${mny0(o.mar)}</text></g>`; }).join('');
+  return `<h3 class="mr-h3">Meses por margen</h3><div class="tblwrap"><svg class="gm" viewBox="0 0 ${W} ${H}" role="img" aria-label="Meses ordenados del mayor al menor margen">${barras}</svg></div>
+    <p class="leyenda">del mes con mayor margen al de menor · porcentaje sobre lo cobrado y margen en pesos · toca un mes para verlo solo</p>`;
 }
 
 function pintarFiltros() {
@@ -669,6 +685,44 @@ $('#gateEntrar').onclick = () => {
 $('#gateClave').onkeydown = e => { if (e.key === 'Enter') $('#gateEntrar').click(); };
 (function () { const c = claveGuardada(); if (!c) pedirClave(''); else cargar(c); })();
 
+/* v8 (19-nov): totales en los encabezados de todas las tablas.
+   Suma cada columna de números (dinero o conteo) y lo pone debajo del título; si la celda trae un monto chico abajo, también lo suma.
+   No suma días ni porcentajes. Se vuelve a calcular solo cada vez que una tabla se redibuja con otros filtros. */
+function numDeTexto(t) {
+  const m = String(t || '').replace(/−/g, '-').trim().match(/^([+-])?\s*\$?\s*(\d[\d,]*(?:\.\d+)?)/);
+  if (!m) return null;
+  const n = parseFloat(m[2].replace(/,/g, ''));
+  return m[1] === '-' ? -n : n;
+}
+function fmtTotal(n, dinero) { return dinero ? mny0(n) : Math.round(n).toLocaleString('es-MX'); }
+function totalesEnTablas() {
+  document.querySelectorAll('table.rt:not([data-tot])').forEach(t => {
+    t.setAttribute('data-tot', '1');
+    const ths = [...t.querySelectorAll('thead th')], filas = [...t.querySelectorAll('tbody tr')];
+    if (filas.length < 2) return;
+    ths.forEach((th, c) => {
+      const nom = th.textContent.trim();
+      if (!th.classList.contains('num') || /d[ií]as|%/i.test(nom)) return;
+      let tot = 0, sub = 0, dinero = false, hay = false, haySub = false;
+      filas.forEach(tr => {
+        if (tr.children.length !== ths.length) return;
+        const td = tr.children[c]; if (!td) return;
+        const cl = td.cloneNode(true); cl.querySelectorAll('.mr-n').forEach(x => x.remove());
+        const tx = cl.textContent.trim(), n = numDeTexto(tx);
+        if (n != null) { tot += n; hay = true; if (tx.indexOf('$') >= 0) dinero = true; }
+        const sp = td.querySelector('.mr-n');
+        if (sp && sp.textContent.indexOf('$') >= 0) { const s = numDeTexto(sp.textContent); if (s != null) { sub += s; haySub = true; } }
+      });
+      if (!hay) return;
+      th.insertAdjacentHTML('beforeend', '<span class="th-tot">' + fmtTotal(tot, dinero) + '</span>' + (haySub ? '<span class="th-tot2">' + mny0(sub) + '</span>' : ''));
+    });
+  });
+}
+(function () {
+  let pend = false;
+  new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; totalesEnTablas(); }); })
+    .observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 </body>
 </html>
