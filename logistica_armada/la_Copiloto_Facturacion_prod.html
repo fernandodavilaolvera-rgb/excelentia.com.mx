@@ -458,7 +458,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 22 (9-nov-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 23 (19-nov-2026)</footer>
 </div>
 
 <script>
@@ -803,12 +803,19 @@ function verificaPagado(o, lista) {
   if (o.padre || o.pag == null) return;
   const L = lista || VIAJES;
   const grupo = [o].concat((o.hijos || []).map(id => L.find(x => x.id === id)).filter(Boolean));
-  const pag = grupo.reduce((a, x) => a + (x.pag || 0), 0), ven = grupo.reduce((a, x) => a + (x.venta || 0), 0);
+  // v23 (19-nov): se compara contra lo que tú le facturas a 4PL (Costo flete, la columna amarilla), no contra el precio de 4PL
+  const pag = grupo.reduce((a, x) => a + (x.pag || 0), 0), ven = grupo.reduce((a, x) => a + (x.costo || 0), 0);
   if (pag > 0 && ven > 0 && pag > ven + 0.5) {
-    const nh = grupo.length - 1;
+    const nh = grupo.length - 1, hijos = grupo.slice(1);
+    const unSolo = nh > 0 && o.pag > 0 && hijos.every(x => !(x.pag > 0));
+    const minimo = Math.ceil(pag * 1.045);
     o.flags.push({ c: 'a', t: 'lo pagado supera el precio', dif: pag - ven,
-      d: 'Al transportista se le debe ' + mny0(pag) + ' de flete' + (nh ? (nh === 1 ? ' (con su reparto)' : ' (con sus ' + nh + ' repartos)') : '') +
-        ' y vas a cobrar ' + mny0(ven) + ' de flete; quedarías ' + mny0(pag - ven) + ' abajo. Revisa la tarifa antes de facturar.' });
+      d: unSolo
+        ? 'El transportista cobra un solo monto por toda la ruta: ' + mny0(pag) + ' por el viaje ' + o.id + ' y ' + (nh === 1 ? 'su reparto ' : 'sus ' + nh + ' repartos ') +
+          hijos.map(x => x.id + ' (' + x.destino + ')').join(', ') + '. Entre todos vas a cobrar ' + mny0(ven) + ' de flete; quedarías ' + mny0(pag - ven) +
+          ' abajo. Reparte el cobro entre los viajes antes de facturar; con tu margen de 4.5% la ruta debería cobrar al menos ' + mny0(minimo) + '.'
+        : 'Al transportista se le debe ' + mny0(pag) + ' de flete' + (nh ? (nh === 1 ? ' (con su reparto)' : ' (con sus ' + nh + ' repartos)') : '') +
+          ' y vas a cobrar ' + mny0(ven) + ' de flete; quedarías ' + mny0(pag - ven) + ' abajo. Revisa la tarifa antes de facturar; con tu margen de 4.5% serían al menos ' + mny0(minimo) + '.' });
     if (o.sem === 'g') { o.sem = 'a'; o.atencion = true; }
   }
 }
@@ -1046,7 +1053,7 @@ function pagSrc(o) {
   if (o.pag == null) return '';
   if (o.padre) return '<span class="src">va con el viaje ' + o.padre + '</span>';
   const f = o.flags.find(x => x.t === 'lo pagado supera el precio');
-  if (f) return '<span class="src">' + mny0(f.dif) + ' arriba del precio' + ((o.hijos || []).length ? ' · con repartos' : '') + '</span>';
+  if (f) return '<span class="src">' + mny0(f.dif) + ' arriba de lo que cobras' + ((o.hijos || []).length ? ' · toda la ruta con repartos' : '') + '</span>';
   return '';
 }
 

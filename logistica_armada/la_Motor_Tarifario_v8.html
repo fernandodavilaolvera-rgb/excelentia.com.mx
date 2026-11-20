@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Motor Tarifario v11 · Logística Armada</title>
+<title>Motor Tarifario v12 · Logística Armada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -115,6 +115,8 @@ tbody td b{color:#1a2035}
 .aviso{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:.8rem .95rem;margin:.9rem 0;max-width:720px}
 .aviso .t{font-size:12.5px;font-weight:800;color:#1a3a6b;margin-bottom:.25rem}
 .aviso p{font-size:12.5px;color:#4a5068}
+.aviso.perdida{background:#fdecea;border-color:#f3c2bc;border-left-color:#c0392b}.aviso.perdida .t{color:#c0392b}
+.pbox.mal{background:#fdecea;border-color:#f3c2bc}.pbox.mal .vl{color:#c0392b}
 .aviso.duda{background:#fdf6e3;border-color:#ecdcae;border-left-color:#b8860b}
 .aviso.duda .t{color:#8a6d0b}
 .aviso ul{margin:.4rem 0 0 1.1rem}
@@ -289,7 +291,7 @@ tr.alt td{background:#f0f6ff}
     <div class="hd-title">
       <div>
         <h1>Motor Tarifario · Logística Armada</h1>
-        <p>v11 · Cotizador, Proveedores y Margen por ruta</p>
+        <p>v12 · Cotizador, Proveedores y Margen por ruta</p>
       </div>
       <div class="logo-box-4pl">
         <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/logistica_armada/assets/Armada_logo.jpeg" alt="Logística Armada"
@@ -468,7 +470,7 @@ tr.alt td{background:#f0f6ff}
   </details>
   </div>
 
-  <footer>ExcelentIA · Motor Tarifario Logística Armada · versión 11 · 15-oct-2026 · versión para revisión</footer>
+  <footer>ExcelentIA · Motor Tarifario Logística Armada · versión 12 · 19-nov-2026 · versión para revisión</footer>
 </div>
 
 <script>
@@ -497,7 +499,7 @@ function perfilBase(nombre) {
     comisionOperador: 15,
     mantenimiento: 30,
     casetaPorKm: 1.10,
-    utilidad: { directo: 25, logistica: 15, piso: 10 },
+    utilidad: { directo: 25, logistica: 15, piso: 10, sub: 4.5 },
     costoFijo: 0,   // v9: sueldo, viaticos y minimo por viaje · por confirmar
     unidades: [
       { nombre: '1.5 toneladas',  rend: 9.5, ejes: 2, conf: false, casFactor: 1.0  },
@@ -719,7 +721,7 @@ function autocompletar(idInput) {
 const V = {
   origen: 'Tultepec', destino: '', unidad: 'Torton / rabón', via: 'cuota',
   km: 900, kmPatio: 0, casetas: 0, regreso: 'vacio', retorno: 0, cliente: 'logistica',
-  maniobra: 0, extras: 0, actual: 0, comIda: 0, comReg: 0, kmFuente: '', casetasFuente: ''
+  maniobra: 0, extras: 0, actual: 0, transp: 0, comIda: 0, comReg: 0, kmFuente: '', casetasFuente: ''
 };
 
 function renderViaje() {
@@ -764,8 +766,10 @@ function renderViaje() {
       <input id="vManiobra" type="number" value="${V.maniobra}"><span class="hint">se cobra aparte del flete</span></div>
     <div class="f"><label>Otros cargos</label>
       <input id="vExtras" type="number" value="${V.extras}"><span class="hint">estadías, pernocta, custodia</span></div>
+    <div class="f"><label>Lo que te cobra el transportista</label>
+      <input id="vTransp" type="number" value="${V.transp}"><span class="hint">su cotización del flete, con repartos si los incluye · te digo si te alcanza</span></div>
     <div class="f"><label>Tarifa que cobras hoy</label>
-      <input id="vActual" type="number" value="${V.actual}"><span class="hint">opcional · para comparar contra el cálculo</span></div>`;
+      <input id="vActual" type="number" value="${V.actual}"><span class="hint">lo que le cobras o piensas cobrarle a tu cliente · opcional</span></div>`;
 }
 
 function leerViaje() {
@@ -782,6 +786,7 @@ function leerViaje() {
   V.maniobra = num($('#vManiobra').value);
   V.extras = num($('#vExtras').value);
   V.actual = num($('#vActual').value);
+  V.transp = num(($('#vTransp') || {}).value);
   V.comIda = num($('#vComIda').value);
   V.comReg = 0; // v8: la comisión del operador es solo de ida
 }
@@ -931,7 +936,7 @@ function renderResultado(r, v, p) {
     const alto = dif > 0;
     const cerca = Math.abs(dif) / v.actual < 0.05;
     $('#calibra').innerHTML = `<div class="aviso ${utilReal <= 0 ? 'duda' : ''}">
-      <div class="t">Contra la tarifa que cobras hoy</div>
+      <div class="t">${v.transp > 0 ? 'Si lo operas con camión propio' : 'Contra la tarifa que cobras hoy'}</div>
       <p>A <b>${mny0(v.actual)}</b> este viaje deja <b>${mny0(utilReal)}</b> de utilidad, ${pct(utilPct)} sobre el precio.
       ${cerca ? 'Prácticamente coincide con lo que calcula el motor, así que los supuestos van bien.'
               : (alto ? 'Estás cobrando ' + mny0(dif) + ' por encima de lo que el motor recomienda; o la ruta da más de lo estimado, o algún costo está sobrado.'
@@ -939,6 +944,7 @@ function renderResultado(r, v, p) {
       ${utilReal <= 0 ? '<p><b>A ese precio el viaje no deja utilidad.</b> Vale la pena revisar los supuestos antes de concluir, porque puede ser un dato nuestro el que esté mal.</p>' : ''}
     </div>`;
   } else { $('#calibra').innerHTML = ''; }
+  if (v.transp > 0) $('#calibra').insertAdjacentHTML('afterbegin', htmlTransportista(r, v, p)); // v12
 
   const notas = [];
   const oc = r.casInfo;
@@ -996,6 +1002,27 @@ function renderResultado(r, v, p) {
     const msg = $('#casRealMsg');
     if (msg) msg.textContent = 'Listo. Se guardaron ' + mny0(imp) + (tramo === 'redondo' ? ' del viaje redondo' : ' de ida') + ' y el cálculo ya usa el dato real.';
   };
+}
+
+/* ---------- v12 (19-nov): lo que cobra el transportista ---------- */
+function margenSub(p) { return p.utilidad && p.utilidad.sub != null && !isNaN(p.utilidad.sub) ? Number(p.utilidad.sub) : 4.5; }
+function htmlTransportista(r, v, p) {
+  const q = v.transp, m = margenSub(p), conM = Math.ceil(q * (1 + m / 100)), precio = v.actual > 0 ? v.actual : 0;
+  const u = precio ? precio - q : null, up = precio ? u / precio : null;
+  const nivel = !precio ? '' : u < 0 ? 'pierde' : up < m / 100 ? 'justo' : 'bien';
+  const propio = r.detalle ? r.detalle.total : 0;
+  let alerta = '';
+  if (nivel === 'pierde') alerta = `<div class="aviso perdida"><div class="t">A ese precio pierdes ${mny0(-u)}</div>
+      <p>El transportista te cobra <b>${mny0(q)}</b> y tú cobras <b>${mny0(precio)}</b> de flete. Para no perder cobra al menos ${mny0(q)}; con tu margen de ${m}% serían <b>${mny0(conM)}</b>.</p>
+      <p>Si su cotización incluye repartos, cóbrale a tu cliente la suma de todos los viajes, no solo el principal.</p></div>`;
+  else if (nivel === 'justo') alerta = `<div class="aviso duda"><div class="t">Te deja menos de tu margen</div>
+      <p>A <b>${mny0(precio)}</b> ganas ${mny0(u)} (${pct(up)}); con tu margen de ${m}% serían <b>${mny0(conM)}</b>.</p></div>`;
+  return `<div class="precios">
+      <div class="pbox merc"><div class="lb">Te cobra el transportista</div><div class="vl">${mny0(q)}</div><div class="hint">su cotización del flete · es tu mínimo para no perder</div></div>
+      <div class="pbox meta"><div class="lb">Con tu margen de ${m}%</div><div class="vl">${mny0(conM)}</div><div class="hint">lo que conviene cobrar si lo subcontratas</div></div>
+      ${precio ? `<div class="pbox ${nivel === 'pierde' ? 'mal' : nivel === 'justo' ? 'piso' : 'costo'}"><div class="lb">Con lo que cobras</div><div class="vl">${(u < 0 ? '−' : '') + mny0(Math.abs(u))}</div><div class="hint">${pct(up)} sobre ${mny0(precio)}</div></div>` : ''}
+      ${propio ? `<div class="pbox costo"><div class="lb">Con camión propio · Motor</div><div class="vl">${mny0(propio)}</div><div class="hint">${propio < q ? 'te saldría ' + mny0(q - propio) + ' más barato operarlo tú' : 'subcontratarlo te sale ' + mny0(propio - q) + ' más barato'}</div></div>` : ''}
+    </div>${alerta}${!precio ? '<p class="hint" style="margin:.2rem 0 .6rem">Escribe en "Tarifa que cobras hoy" lo que le vas a cobrar a tu cliente y te digo cuánto te deja.</p>' : ''}`;
 }
 
 /* ---------- comparador ---------- */
@@ -1063,7 +1090,8 @@ function renderConfig() {
   $('#fUtilidad').innerHTML = `
     <div class="f"><label>Cliente directo</label><input id="uDir" type="number" step="0.5" value="${p.utilidad.directo}"><span class="hint">es donde más se gana</span></div>
     <div class="f"><label>Operador logístico</label><input id="uLog" type="number" step="0.5" value="${p.utilidad.logistica}"><span class="hint">dejan menos margen</span></div>
-    <div class="f"><label>Piso · lo mínimo aceptable <span class="porconf">por confirmar</span></label><input id="uPiso" type="number" step="0.5" value="${p.utilidad.piso}"><span class="hint">por debajo de esto no conviene tomar el viaje</span></div>`;
+    <div class="f"><label>Piso · lo mínimo aceptable <span class="porconf">por confirmar</span></label><input id="uPiso" type="number" step="0.5" value="${p.utilidad.piso}"><span class="hint">por debajo de esto no conviene tomar el viaje</span></div>
+    <div class="f"><label>Margen al subcontratar</label><input id="uSub" type="number" step="0.5" value="${margenSub(p)}"><span class="hint">lo que le sumas a la tarifa del transportista · en tu tarifario es 4.5%</span></div>`;
 
   $('#tblUnidades').innerHTML = `
     <thead><tr><th>Unidad</th><th>Rendimiento km/l</th><th>Ejes</th><th>Casetas ×</th><th></th></tr></thead>
@@ -1103,6 +1131,7 @@ function leerConfig() {
   p.utilidad.directo = num($('#uDir').value);
   p.utilidad.logistica = num($('#uLog').value);
   p.utilidad.piso = num($('#uPiso').value);
+  if ($('#uSub')) p.utilidad.sub = num($('#uSub').value);
   document.querySelectorAll('#tblUnidades [data-u]').forEach(el => {
     const u = p.unidades[Number(el.dataset.u)], k = el.dataset.k;
     if (!u) return;
@@ -1136,6 +1165,7 @@ async function buscarRuta() {
   $('#vKm').value = 0;
   $('#vCasetas').value = 0;
   $('#vActual').value = 0;
+  if ($('#vTransp')) $('#vTransp').value = 0;
   const cg = comisionGuardada(ori, des, $('#vUnidad').value);
   $('#vComIda').value = cg ? cg.ida : 0;
   $('#hCom').textContent = cg ? 'monto guardado para esta ruta' : 'monto de la ida · en cero se usa el porcentaje';
@@ -1971,7 +2001,7 @@ $('#btnCalc').onclick = () => {
   $('#cardRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 $('#btnLimpiar').onclick = () => {
-  V.destino = ''; V.km = 0; V.kmPatio = 0; V.casetas = 0; V.maniobra = 0; V.extras = 0; V.actual = 0; V.comIda = 0; V.comReg = 0; V.retorno = 0;
+  V.destino = ''; V.km = 0; V.kmPatio = 0; V.casetas = 0; V.maniobra = 0; V.extras = 0; V.actual = 0; V.transp = 0; V.comIda = 0; V.comReg = 0; V.retorno = 0;
   renderViaje(); enlazarViaje(); $('#cardRes').classList.add('hidden');
 };
 $('#btnImprimir').onclick = () => window.print();
