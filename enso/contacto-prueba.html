@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ENSO Japan · Contact (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F3EE;color:#1D1B19;font-family:'Zen Kaku Gothic New',system-ui,sans-serif;font-size:15px;line-height:1.5}
+header{background:#1D1B19;color:#F6F3EE;padding:18px 24px;font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:.08em}
+.aviso-prueba{max-width:720px;margin:20px auto 0;padding:10px 16px;border-radius:10px;background:#E3E8F0;color:#2E3F5C;font-size:13px}
+main{padding:32px 24px 60px}
+h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:40px;max-width:720px;margin:0 auto 8px}
+.intro{max-width:720px;margin:0 auto 24px;color:#5E584F}
+@media (max-width:600px){main{padding:24px 16px 40px}h1{font-size:32px}}
+@page{size:Letter;margin:13mm}
+@media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}a[href]:after{content:none!important}h1{break-after:avoid}p{orphans:3;widows:3}}
+</style>
+</head>
+<body>
+<header>ENSO Japan</header>
+<div class="aviso-prueba no-print">Preview page: every request sent here enters the ENSO OS memory as a new inquiry; please use a test name when trying it.</div>
+<main>
+<h1>Plan a trip to Japan with us</h1>
+<p class="intro">Travel advisors and travelers can write to us here; our team in Japan replies by email.</p>
+<!-- ENSO · Formulario de contacto (pegar donde va el formulario; no requiere nada más) -->
+<div id="enso-cf">
+<style>
+#enso-cf{max-width:720px;margin:0 auto;font-family:inherit;color:inherit}
+#enso-cf form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#enso-cf .c{display:flex;flex-direction:column;gap:6px}
+#enso-cf .full{grid-column:1/-1}
+#enso-cf label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+#enso-cf input,#enso-cf textarea{font:inherit;border:1px solid #cfc7ba;border-radius:8px;padding:12px 14px;background:#fff;color:#1d1b19;width:100%;box-sizing:border-box}
+#enso-cf textarea{min-height:140px;resize:vertical}
+#enso-cf .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+#enso-cf button{font:inherit;cursor:pointer;border:none;border-radius:999px;padding:14px 28px;background:#1d1b19;color:#fff;justify-self:start}
+#enso-cf button[disabled]{opacity:.6;cursor:wait}
+#enso-cf .msg{grid-column:1/-1;font-size:14px;min-height:1em}
+#enso-cf .msg.err{color:#8a2e1c}
+#enso-cf .ok{padding:28px;border:1px solid #cfc7ba;border-radius:12px;text-align:center}
+@media (max-width:600px){#enso-cf form{grid-template-columns:1fr}}
+</style>
+<form novalidate>
+  <div class="c"><label for="ecf-nombre" data-t="nombre"></label><input id="ecf-nombre" name="nombre" autocomplete="name" required maxlength="120"></div>
+  <div class="c"><label for="ecf-email" data-t="email"></label><input id="ecf-email" name="email" type="email" autocomplete="email" required maxlength="160"></div>
+  <div class="c"><label for="ecf-agencia" data-t="agencia"></label><input id="ecf-agencia" name="agencia" autocomplete="organization" maxlength="120"></div>
+  <div class="c"><label for="ecf-pais" data-t="pais"></label><input id="ecf-pais" name="pais" autocomplete="country-name" maxlength="60"></div>
+  <div class="c"><label for="ecf-fechas" data-t="fechas"></label><input id="ecf-fechas" name="fechas" maxlength="120"></div>
+  <div class="c"><label for="ecf-viajeros" data-t="viajeros"></label><input id="ecf-viajeros" name="viajeros" type="number" min="1" max="999" inputmode="numeric"></div>
+  <div class="c full"><label for="ecf-mensaje" data-t="mensaje"></label><textarea id="ecf-mensaje" name="mensaje" required maxlength="4000"></textarea></div>
+  <div class="hp" aria-hidden="true"><label for="ecf-sw">Website</label><input id="ecf-sw" name="sitio_web" tabindex="-1" autocomplete="off"></div>
+  <div class="msg" role="status" aria-live="polite"></div>
+  <button type="submit" data-t="enviar"></button>
+</form>
+<script>
+(function () {
+  var URL_ENSO = 'https://n8n.excelentia.com.mx/webhook/enso-contacto';
+  var T = {
+    en: { nombre: 'Name *', email: 'Email *', agencia: 'Agency (if you are a travel advisor)', pais: 'Country', fechas: 'Travel dates (approximate)', viajeros: 'Number of travelers', mensaje: 'Tell us about the trip *', enviar: 'Send', falta: 'Please complete your name, a valid email and a few words about the trip.', error: 'The message could not be sent; please try again in a moment or write to info@ensojapan.com.', gracias: '<strong>Thank you.</strong><br>We received your request and our team in Japan will reply by email shortly.' },
+    es: { nombre: 'Nombre *', email: 'Correo *', agencia: 'Agencia (si eres travel advisor)', pais: 'País', fechas: 'Fechas del viaje (aproximadas)', viajeros: 'Número de viajeros', mensaje: 'Cuéntanos del viaje *', enviar: 'Enviar', falta: 'Completa tu nombre, un correo válido y unas palabras sobre el viaje.', error: 'No se pudo enviar; intenta de nuevo en un momento o escribe a info@ensojapan.com.', gracias: '<strong>Gracias.</strong><br>Recibimos tu solicitud y nuestro equipo en Japón te responderá por correo.' },
+    pt: { nombre: 'Nome *', email: 'E-mail *', agencia: 'Agência (se você é agente de viagens)', pais: 'País', fechas: 'Datas da viagem (aproximadas)', viajeros: 'Número de viajantes', mensaje: 'Conte-nos sobre a viagem *', enviar: 'Enviar', falta: 'Preencha seu nome, um e-mail válido e algumas palavras sobre a viagem.', error: 'Não foi possível enviar; tente novamente em instantes ou escreva para info@ensojapan.com.', gracias: '<strong>Obrigado.</strong><br>Recebemos sua solicitação e nossa equipe no Japão responderá por e-mail.' }
+  };
+  var raiz = document.getElementById('enso-cf'), f = raiz.querySelector('form'), msg = raiz.querySelector('.msg');
+  var idioma = (raiz.getAttribute('data-idioma') || document.documentElement.lang || navigator.language || 'en').slice(0, 2).toLowerCase();
+  if (!T[idioma]) idioma = 'en';
+  var t = T[idioma];
+  raiz.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = t[e.getAttribute('data-t')]; });
+  f.addEventListener('input', function () { if (msg.className.indexOf('err') > -1) { msg.className = 'msg'; msg.textContent = ''; } });
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var d = {}; new FormData(f).forEach(function (v, k) { d[k] = String(v).trim(); });
+    d.idioma = idioma; d.pagina = location.href;
+    if (d.nombre.length < 2 || !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(d.email) || d.mensaje.length < 5) { msg.className = 'msg err'; msg.textContent = t.falta; return; }
+    var b = f.querySelector('button'); b.disabled = true; msg.className = 'msg'; msg.textContent = '';
+    fetch(URL_ENSO, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(d) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.ok) { f.insertAdjacentHTML('afterend', '<div class="ok">' + t.gracias + '</div>'); f.remove(); }
+        else { msg.className = 'msg err'; msg.textContent = (j && j.error === 'datos') ? t.falta : t.error; b.disabled = false; }
+      })
+      .catch(function () { msg.className = 'msg err'; msg.textContent = t.error; b.disabled = false; });
+  });
+})();
+</script>
+</div>
+
+</main>
+</body>
+</html>

@@ -134,6 +134,28 @@ details.mas[open] summary{margin-bottom:8px}
 .viaje-card .folio.pendiente{color:var(--bermellon)}
 .viaje-card .socio{font-weight:500}
 .viaje-card .det{font-size:13px;color:var(--texto2)}
+.viaje-card[data-viaje]{cursor:pointer;border:1px solid transparent;transition:border-color .15s,box-shadow .15s}
+.viaje-card[data-viaje]:hover,.viaje-card[data-viaje]:focus-visible{border-color:var(--indigo);box-shadow:0 2px 10px rgba(46,63,92,.12);outline:none}
+/* Ficha del viaje */
+.dialogo.ancho{max-width:720px;margin:0 auto}
+.ficha-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ficha-cab .folio{font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--indigo)}
+.ficha-cab .folio.pendiente{color:var(--bermellon)}
+.ficha-cerrar{background:none;border:none;font-size:26px;line-height:1;color:var(--texto2);cursor:pointer;padding:0 4px}
+.ficha-datos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin:0}
+.ficha-datos div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ficha-datos dt{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--texto3);font-weight:700}
+.ficha-datos dd{margin:0;font-size:14px;overflow-wrap:anywhere}
+.ficha-sec{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--borde);padding-top:14px}
+.ficha-sec h4{margin:0;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--texto2);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ficha-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ficha-lista li{background:var(--washi);border-radius:10px;padding:10px 12px;font-size:13px;display:flex;flex-direction:column;gap:3px}
+.ficha-lista .meta{font-size:12px;color:var(--texto3)}
+.ficha-lista .asunto{font-weight:700;font-size:13px;overflow-wrap:anywhere}
+.ficha-lista .dir{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--indigo)}
+.ficha-lista .dir.sal{color:var(--verde)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;background:var(--indigo-suave);color:var(--indigo);border-radius:999px;padding:3px 10px}
 .marca-viaje{align-self:flex-start;margin-top:4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--bermellon-suave);color:var(--bermellon);font-weight:700}
 
 footer{font-size:12px;color:var(--texto3);border-top:1px solid var(--borde);padding-top:16px}
@@ -155,6 +177,8 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
 
 /* Móvil */
 @media (max-width:600px){
+  .ficha-datos{grid-template-columns:1fr}
+  .dialogo.ancho{padding:18px}
   header{flex-direction:column;align-items:flex-start;padding:16px}
   nav{width:100%}
   nav a,nav button{padding:9px 12px;font-size:10px}
@@ -581,12 +605,69 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
           var fecha = v.fecha_llegada ? fechaCorta(v.fecha_llegada) + (v.fecha_salida ? ' – ' + fechaCorta(v.fecha_salida) : '') : '';
           var det = limpiarNombreViaje(v.nombre, v.folio) + (fecha ? ' · ' + fecha : '') + (v.pax ? ' · ' + v.pax + ' pax' : '');
           var marca = v.validacion === 'por_confirmar' ? 'Por confirmar' : (v.validacion === 'no_resuelta' ? 'Referencia no resuelta' : '');
-          return '<div class="viaje-card"><span class="folio' + (v.folio ? '' : ' pendiente') + '">' + esc(v.folio || 'Folio pendiente') + '</span>' +
+          return '<div class="viaje-card" data-viaje="' + esc(v.id) + '" role="button" tabindex="0" title="Ver la ficha del viaje"><span class="folio' + (v.folio ? '' : ' pendiente') + '">' + esc(v.folio || 'Folio pendiente') + '</span>' +
             '<span class="socio">' + esc(socio) + (v.red && v.cuenta_tipo !== 'red' ? ' <span class="det">· ' + esc(v.red) + '</span>' : '') + '</span>' +
             '<span class="det">' + esc(det) + '</span>' + (marca ? '<span class="marca-viaje">' + esc(marca) + '</span>' : '') + '</div>';
         }).join('') + '</div>';
     }).join('');
     $('tablero').innerHTML = html || '<div class="vacio">Sin viajes activos.</div>';
+  }
+
+  // ---------- ficha del viaje ----------
+  var CAMPOS_HIST = { estado: 'Etapa', folio: 'Folio', fecha_llegada: 'Llegada', fecha_salida: 'Salida', pax: 'Viajeros', cuenta_id: 'Agencia', contacto_principal_id: 'Contacto', resultado_comercial: 'Resultado', validacion: 'Validación', nombre: 'Nombre', pago_estado: 'Pago', presupuesto: 'Presupuesto' };
+  var ROL_PART = { advisor: 'Advisor', viajero: 'Viajero', pagador: 'Pagador', referente: 'Referente', administracion: 'Administración', otro: 'Otro' };
+  var ORIGEN = { correo: 'Correo', historial_folio: 'Historial de folios', lista_canonica: 'Lista de viajes', manual: 'Captura manual', sitio_web: 'Formulario del sitio web' };
+  function nombreEtapa(c) { var e = ((estado.datos && estado.datos.etapas) || []).filter(function (x) { return x.codigo === c; })[0]; return e ? e.nombre : c; }
+  function fechaHora(iso) {
+    if (!iso) return '';
+    try { return new Intl.DateTimeFormat('es-MX', { timeZone: 'Asia/Tokyo', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(iso)); } catch (e) { return iso; }
+  }
+  async function abrirFicha(id) {
+    abrirDialogo('<div class="ficha-cab"><h3>Ficha del viaje</h3><button type="button" class="ficha-cerrar" data-cerrar-ficha="1" aria-label="Cerrar">×</button></div><div class="cargando">Consultando la memoria…</div>', null, 'ancho');
+    try {
+      var j = await api({ accion: 'viaje', token: estado.token, id: id });
+      if ($('velo').hidden) return;
+      if (!j.ok) { $('velo').querySelector('.cargando').textContent = j.error || 'No se pudo abrir la ficha'; return; }
+      estado.ficha = j.viaje; pintarFicha(j.viaje);
+    } catch (e) { if (e.message !== 'sesion') { var c = $('velo').querySelector('.cargando'); if (c) c.textContent = 'Error de conexión; intenta de nuevo.'; } }
+  }
+  function pintarFicha(v) {
+    var ja = verJapones();
+    var fechas = v.fecha_llegada ? fechaCorta(v.fecha_llegada) + (v.fecha_salida ? ' – ' + fechaCorta(v.fecha_salida) : '') : 'Sin fechas';
+    var cuenta = v.cuenta ? v.cuenta.nombre + (v.cuenta.tipo === 'particular' ? ' (cliente directo)' : '') : 'Sin agencia ligada';
+    var dato = function (t, val) { return val ? '<div><dt>' + esc(t) + '</dt><dd>' + esc(val) + '</dd></div>' : ''; };
+    var marca = v.resultado ? 'Resultado: ' + v.resultado : (v.validacion === 'por_confirmar' ? 'Por confirmar' : (v.validacion === 'no_resuelta' ? 'Referencia no resuelta' : ''));
+    var hayJa = (v.correos || []).some(function (c) { return c.resumen_ja; }) || (v.pendientes || []).some(function (p) { return p.titulo_ja; });
+    var h = '<div class="ficha-cab"><div><div class="folio' + (v.folio ? '' : ' pendiente') + '">' + esc(v.folio || 'Folio pendiente') + ' · ' + esc(v.etapa || nombreEtapa(v.estado)) + '</div>' +
+      '<h3>' + esc(limpiarNombreViaje(v.nombre, v.folio)) + '</h3>' + (marca ? '<span class="marca-viaje">' + esc(marca) + '</span>' : '') + '</div>' +
+      '<button type="button" class="ficha-cerrar" data-cerrar-ficha="1" aria-label="Cerrar">×</button></div>';
+    h += '<dl class="ficha-datos">' + dato('Agencia', cuenta) + dato('Red', v.cuenta && v.cuenta.red) + dato('Contacto principal', v.contacto && v.contacto.nombre) +
+      dato('Fechas', fechas) + dato('Viajeros', v.pax ? v.pax + ' pax' : '') + dato('Presupuesto', v.presupuesto) + dato('Ocasión', v.ocasion) +
+      dato('Pago', v.pago) + dato('Origen', ORIGEN[v.origen] || v.origen) + dato('En esta etapa desde', v.estado_desde ? fechaCorta(v.estado_desde) : '') +
+      dato('Referencias anteriores', (v.alias || []).join(', ')) + dato('Correos ligados', String(v.total_correos || 0)) + '</dl>';
+    if ((v.intereses || []).length) h += '<div class="ficha-sec"><h4>Intereses</h4><div class="chips">' + v.intereses.map(function (i) { return '<span class="chip">' + esc(i) + '</span>'; }).join('') + '</div></div>';
+    if ((v.participantes || []).length) h += '<div class="ficha-sec"><h4>Personas en el viaje</h4><div class="chips">' + v.participantes.map(function (p) { return '<span class="chip">' + esc(p.nombre) + (p.rol && p.rol !== 'otro' ? ' · ' + esc(ROL_PART[p.rol] || p.rol) : '') + '</span>'; }).join('') + '</div></div>';
+    h += '<div class="ficha-sec"><h4>Pendientes abiertos · ' + (v.pendientes || []).length + (hayJa ? '<button type="button" class="filtro idioma' + (ja ? ' activo' : '') + '" data-ja-ficha="1">日本語</button>' : '') + '</h4>' +
+      ((v.pendientes || []).length ? '<ul class="ficha-lista">' + v.pendientes.map(function (p) {
+        var t = (ja && p.titulo_ja) || p.titulo;
+        return '<li><span' + (ja && p.titulo_ja ? ' lang="ja"' : '') + '>' + esc(t) + '</span><span class="meta">' + esc(ROLES[p.rol] || p.rol || '') + ' · prioridad ' + esc(p.prioridad || '') + ' · ' + esc(hace(p.creado_en)) + '</span></li>';
+      }).join('') + '</ul>' : '<div class="meta">Sin pendientes abiertos.</div>') + '</div>';
+    if ((v.notas || []).length) h += '<div class="ficha-sec"><h4>Notas fuera del correo</h4><ul class="ficha-lista">' + v.notas.map(function (n) {
+      return '<li><span class="meta">' + esc(fechaHora(n.fecha)) + ' · ' + esc(n.canal) + '</span><span style="white-space:pre-line">' + esc(n.resumen) + '</span></li>'; }).join('') + '</ul></div>';
+    var cs = v.correos || [];
+    h += '<div class="ficha-sec"><h4>Correos resumidos · ' + cs.length + (v.total_correos > cs.length ? ' de ' + v.total_correos : '') + '</h4>' +
+      (cs.length ? '<ul class="ficha-lista">' + cs.map(function (c) {
+        var r = (ja && c.resumen_ja) || c.resumen || '';
+        return '<li><span class="meta"><span class="dir' + (c.direccion === 'saliente' ? ' sal' : '') + '">' + (c.direccion === 'saliente' ? 'Enviado' : 'Recibido') + '</span> · ' + esc(fechaHora(c.fecha)) + (c.de ? ' · ' + esc(c.de) : '') + '</span>' +
+          '<span class="asunto">' + esc(c.asunto || '(sin asunto)') + '</span>' + (r ? '<span' + (ja && c.resumen_ja ? ' lang="ja"' : '') + '>' + esc(r) + '</span>' : '') + '</li>';
+      }).join('') + '</ul>' : '<div class="meta">Sin correos ligados todavía.</div>') + '</div>';
+    var hs = v.historial || [];
+    if (hs.length) h += '<div class="ficha-sec"><details class="mas"><summary>Historial de cambios · ' + hs.length + '</summary><ul class="historial">' + hs.map(function (x) {
+      if (x.campo === 'creado') return '<li>' + esc(fechaHora(x.fecha)) + ' · Se registró en la memoria' + (x.razon ? ' · ' + esc(x.razon) : '') + '</li>';
+      var antes = x.campo === 'estado' ? nombreEtapa(x.antes) : x.antes, despues = x.campo === 'estado' ? nombreEtapa(x.despues) : x.despues;
+      return '<li>' + esc(fechaHora(x.fecha)) + ' · <strong>' + esc(CAMPOS_HIST[x.campo] || x.campo) + '</strong>: ' + esc(antes || '—') + ' → ' + esc(despues || '—') + (x.razon ? ' · ' + esc(x.razon) : '') + '</li>';
+    }).join('') + '</ul></details></div>';
+    var d = $('velo').querySelector('.dialogo'); if (d) { var top = d.scrollTop; d.innerHTML = h; d.scrollTop = top; }
   }
 
   // ---------- eventos ----------
@@ -606,6 +687,11 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
       else if (acc === 'tarea-descartada') accion({ accion: 'tarea', id: id, estado: 'descartada' }, b);
       return;
     }
+    var vc = ev.target.closest('.viaje-card[data-viaje]');
+    if (vc) { abrirFicha(vc.getAttribute('data-viaje')); return; }
+    var fjf = ev.target.closest('[data-ja-ficha]');
+    if (fjf) { estado.ja = !verJapones(); try { localStorage.setItem('enso_ja', estado.ja ? '1' : '0'); } catch (e) {} if (estado.ficha) pintarFicha(estado.ficha); pintarTareas(estado.datos); return; }
+    if (ev.target.closest('[data-cerrar-ficha]')) { cerrarDialogo(); return; }
     var fj = ev.target.closest('.filtro[data-ja]');
     if (fj) { estado.ja = !verJapones(); try { localStorage.setItem('enso_ja', estado.ja ? '1' : '0'); } catch (e) {} pintarTareas(estado.datos); return; }
     var fr = ev.target.closest('.filtro');
@@ -660,15 +746,18 @@ body.solo-lectura .acciones,body.solo-lectura .tarea-acciones,body.solo-lectura 
   });
 
   // ---------- diálogos ----------
-  function abrirDialogo(html, alAbrir) {
-    var v = $('velo'); v.innerHTML = '<div class="dialogo" role="dialog" aria-modal="true">' + html + '</div>'; v.hidden = false;
+  function abrirDialogo(html, alAbrir, clase) {
+    var v = $('velo'); v.innerHTML = '<div class="dialogo' + (clase ? ' ' + clase : '') + '" role="dialog" aria-modal="true">' + html + '</div>'; v.hidden = false;
     var no = $('dlg-no'); if (no) no.addEventListener('click', cerrarDialogo);
     if (alAbrir) alAbrir();
     var primero = v.querySelector('input,textarea,button'); if (primero) primero.focus();
   }
-  function cerrarDialogo() { $('velo').hidden = true; $('velo').innerHTML = ''; }
+  function cerrarDialogo() { $('velo').hidden = true; $('velo').innerHTML = ''; estado.ficha = null; }
   $('velo').addEventListener('click', function (ev) { if (ev.target === $('velo')) cerrarDialogo(); });
-  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { cerrarDialogo(); cerrarMenu(); } });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') { cerrarDialogo(); cerrarMenu(); }
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('.viaje-card[data-viaje]')) { ev.preventDefault(); abrirFicha(ev.target.getAttribute('data-viaje')); }
+  });
   function confirmar(titulo, texto, boton, alAceptar) {
     abrirDialogo('<h3>' + esc(titulo) + '</h3><p class="porque">' + esc(texto) + '</p><div class="acciones"><button type="button" class="btn btn-primario" id="dlg-ok">' + esc(boton) + '</button><button type="button" class="btn btn-terciario" id="dlg-no">Cancelar</button></div>',
       function () { $('dlg-ok').addEventListener('click', function () { cerrarDialogo(); alAceptar(); }); });
