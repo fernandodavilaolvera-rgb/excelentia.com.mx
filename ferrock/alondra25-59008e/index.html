@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Inventario Alondra 25</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{font-family:'Manrope',sans-serif;color:#1a2035;background:#f5f6f8;margin:0;font-size:15px;line-height:1.45}
+main{max-width:720px;margin:0 auto;padding:16px}
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a3a6b 60%,#1e5096 100%);border-bottom:4px solid #4a9fd4;color:#fff;padding:22px 24px;border-radius:14px}
+header h1{margin:0;font-size:26px;font-weight:800}
+header p{margin:6px 0 0;color:#cfe0f5;font-size:14px}
+.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
+.meta div{background:#fff;border:1px solid #dde1e9;border-radius:10px;padding:9px 12px;font-weight:600;font-size:14px}
+.meta span{display:block;font-size:11px;color:#8a90a0;text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.card{background:#fff;border:1px solid #dde1e9;border-radius:14px;padding:16px 18px;margin:14px 0}
+.card h2{font-size:19px;margin:0 0 8px;color:#0d1b3e;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #4a9fd4;padding-bottom:5px}
+.card h2 small{font-size:12px;color:#8a90a0;font-weight:600}
+.card p{color:#4a5068;margin:6px 0}
+.intro{background:#eef4fc;border-left:4px solid #1a3a6b;border-radius:8px;padding:12px 14px;color:#1a2035}
+.note{background:#eef4fc;border-left:4px solid #1a3a6b;border-radius:6px;padding:9px 12px;margin:6px 0 10px;color:#4a5068;font-size:14px}
+.ac,.alert{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #dde1e9}
+.ac:first-of-type{border-top:0}
+.ac div,.alert div{color:#4a5068;font-size:14px}.ac b,.alert b{color:#1a2035}
+.alert{background:#f0f6ff;border:1px solid #c8d9f0;border-left:4px solid #4a9fd4;border-radius:8px;padding:10px 12px;margin:8px 0}
+.fotos{display:flex;gap:8px;margin-top:8px}.fotos img{width:120px;height:120px;object-fit:cover;border-radius:8px}
+.item{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #dde1e9}
+.item:first-child{border-top:0}
+.item:hover{background:#e8f0fb}
+.num{color:#8a90a0;font-size:12px;width:20px;text-align:center;flex-shrink:0}
+.item img{width:84px;height:84px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:zoom-in}
+.txt{flex:1;min-width:0}.txt b{display:block;font-size:15px}.txt small{color:#4a5068;font-size:12.5px}
+.ctl{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}
+.chk{display:inline-flex;align-items:center;gap:6px;background:#f5f6f8;border:1.5px solid #dde1e9;border-radius:20px;padding:5px 11px;cursor:pointer;font-size:12.5px;font-weight:700;color:#4a5068;white-space:nowrap;user-select:none}
+.chk input{width:17px;height:17px;accent-color:#1e5096;margin:0}
+.chk:has(input:checked){background:#e3f1e6;border-color:#3aa35a;color:#1f6b35}
+.precio{width:150px;border:1.5px solid #dde1e9;border-radius:8px;padding:6px 9px;font-family:inherit;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+figure{margin:0;text-align:center;border:1px solid #dde1e9;border-radius:10px;padding:6px}
+figure img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:zoom-in}
+figcaption{font-size:11px;color:#8a90a0;margin:2px 0 4px}
+figure .chk{font-size:11px;padding:4px 8px}
+textarea{width:100%;min-height:110px;border:1.5px solid #dde1e9;border-radius:10px;padding:10px;font-family:inherit;font-size:14px}
+.firmas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:56px}
+.firmas div{border-top:1.5px solid #1a2035;padding-top:6px;text-align:center}
+.firmas b{display:block}.firmas span{color:#8a90a0;font-size:13px}
+.fecha{text-align:center;margin-top:30px;color:#4a5068}
+.bar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid #dde1e9;border-radius:12px;padding:8px 12px;margin-bottom:10px;box-shadow:0 4px 14px rgba(13,27,62,.08)}
+.badge{font-size:13px;font-weight:700;color:#8a90a0}.badge.ok{color:#1f6b35}.badge.err{color:#b3261e}
+.prog{font-size:13px;color:#4a5068}
+.btn{background:#1a3a6b;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+#zoom{position:fixed;inset:0;background:rgba(13,27,62,.88);display:none;align-items:center;justify-content:center;z-index:9;padding:20px}
+#zoom img{max-width:100%;max-height:100%;border-radius:10px}
+@media (max-width:600px){
+ main{padding:10px}header{padding:16px}header h1{font-size:21px}
+ .meta{grid-template-columns:1fr}
+ .item{flex-wrap:wrap}.item img{width:70px;height:70px}
+ .ctl{width:100%;flex-direction:row;justify-content:flex-end;flex-wrap:wrap}
+ .precio{width:140px}
+ .ac,.alert{flex-direction:column;align-items:flex-start}
+ .grid{grid-template-columns:repeat(2,1fr)}
+ .firmas{grid-template-columns:1fr;gap:50px}
+}
+@page{size:Letter;margin:12mm 12mm 14mm}
+@media print{
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body{background:#fff;font-size:11pt}main{max-width:none;padding:0}
+ .no-print,#zoom{display:none!important}
+ section,.card,main,div{break-inside:auto}
+ .item,.ac,.alert,figure,.fotos,.firmas,.fecha,img{break-inside:avoid}
+ h1,h2,h3,h4,.card h2{break-after:avoid}
+ p,li{orphans:3;widows:3}
+ .item:hover{background:none}
+ .grid{grid-template-columns:repeat(4,1fr)}
+ .item img{width:70px;height:70px}
+ a[href]:after{content:none}
+}
+</style></head><body><main>
+<div class="bar no-print"><span class="badge" id="badge">Cargando…</span><span class="prog" id="prog"></span><button class="btn" onclick="window.print()">Imprimir / PDF</button></div>
+<header><h1>Inventario de la casa Alondra 25</h1><p>Lo que hay en la casa, en qué estado está y quién se hace cargo de cada cosa</p></header>
+<div class="meta"><div><span>Propietario</span>Taro Tsutsumi Tanabe</div><div><span>Inquilino</span>Fernando Dávila</div><div><span>Fecha</span>24 de noviembre de 2026</div></div>
+
+<section class="card"><div class="intro">Taro, este es el inventario de lo que hay en la casa; lo hice para que los dos tengamos claro qué hay, en qué estado está y quién se hace cargo de cada cosa. Palomea cada punto con el que estés de acuerdo y, en adornos y cuadros, los que quieras conservar; todo lo que marques se guarda solo y yo lo veo desde aquí. Si quieres decirme algo, al final hay un espacio para comentarios.</div></section>
+
+<section class="card"><h2>Acuerdos que te propongo</h2><div class="ac"><div><b>Muebles:</b> Por el momento te digo que sí a todos, si estás de acuerdo; estoy viendo cómo optimizar mi mudanza desde Veracruz, y si puedo usar algo que ya está en Alondra, lo de Veracruz lo vendo o lo regalo y la mudanza será más ligera.</div><label class="chk"><input type="checkbox" data-id="g1"><span>De acuerdo</span></label></div><div class="ac"><div><b>Aparatos:</b> También los quiero; si quieres ponerles un precio, escríbelo en cada uno.</div><label class="chk"><input type="checkbox" data-id="g2"><span>De acuerdo</span></label></div><div class="ac"><div><b>Adornos:</b> Palomea los adornos japoneses que quieras conservar; de los demás, algunos me los quedo y otros van a una venta de garage.</div><label class="chk"><input type="checkbox" data-id="g3"><span>De acuerdo</span></label></div><div class="ac"><div><b>Cuadros:</b> Yo no me quedo con ninguno; palomea los que quieras conservar y los demás van a una venta de garage.</div><label class="chk"><input type="checkbox" data-id="g4"><span>De acuerdo</span></label></div><div class="ac"><div><b>Trastes:</b> Si estás de acuerdo, los saco todos para una venta de garage.</div><label class="chk"><input type="checkbox" data-id="g5"><span>De acuerdo</span></label></div><div class="ac"><div><b>Libros y discos:</b> Tú decides qué hacemos con ellos.</div><label class="chk"><input type="checkbox" data-id="g6"><span>De acuerdo</span></label></div><div class="ac"><div><b>Fotos familiares y artículos personales:</b> Son tuyos y se quedan contigo.</div><label class="chk"><input type="checkbox" data-id="g7"><span>De acuerdo</span></label></div></section>
+
+<section class="card"><h2>Estado de la casa al recibirla</h2><div class="alert"><div><b>Cocina:</b> El techo tiene un hueco con el aplanado caído.</div><label class="chk"><input type="checkbox" data-id="e1"><span>De acuerdo</span></label></div><div class="alert"><div><b>Recámara adicional:</b> Tiene humedad en el techo por arreglar.</div><label class="chk"><input type="checkbox" data-id="e2"><span>De acuerdo</span></label></div><div class="alert"><div><b>Baño de arriba:</b> No tiene regadera.</div><label class="chk"><input type="checkbox" data-id="e3"><span>De acuerdo</span></label></div>
+<div class="fotos"><img src="img/3788.jpg" alt="Techo de la cocina"><img src="img/3789.jpg" alt="Techo de la cocina"></div>
+<p>Todo lo demás de este inventario está en buen estado.</p></section>
+
+<section class="card"><h2>Sala Comedor<small>16</small></h2>
+<div class="list"><div class="item"><span class="num">1</span><img src="img/3734.jpg" alt="Librero de madera oscura" loading="lazy">
+<div class="txt"><b>Librero de madera oscura</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala1"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">2</span><img src="img/3735.jpg" alt="Librero escalonado bajo la escalera" loading="lazy">
+<div class="txt"><b>Librero escalonado bajo la escalera</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala2"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">3</span><img src="img/3737.jpg" alt="Mesa de juego con paño verde" loading="lazy">
+<div class="txt"><b>Mesa de juego con paño verde</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala3"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">4</span><img src="img/3738.jpg" alt="Mueble bajo negro laqueado" loading="lazy">
+<div class="txt"><b>Mueble bajo negro laqueado</b><small>Cantidad: 1 · Estado: bueno · El estéreo que tiene encima va en Aparatos</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala4"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">5</span><img src="img/3739.jpg" alt="Sofá de 3 plazas de piel color vino" loading="lazy">
+<div class="txt"><b>Sofá de 3 plazas de piel color vino</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala5"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">6</span><img src="img/3740.jpg" alt="Sillones individuales de piel color vino" loading="lazy">
+<div class="txt"><b>Sillones individuales de piel color vino</b><small>Cantidad: 2 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala6"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">7</span><img src="img/3741.jpg" alt="Love seat de 2 plazas de piel color vino" loading="lazy">
+<div class="txt"><b>Love seat de 2 plazas de piel color vino</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala7"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">8</span><img src="img/3742.jpg" alt="Mesa de centro de madera con cubierta de vidrio" loading="lazy">
+<div class="txt"><b>Mesa de centro de madera con cubierta de vidrio</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala8"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">9</span><img src="img/3743.jpg" alt="Mesas laterales negras con lámpara de mesa" loading="lazy">
+<div class="txt"><b>Mesas laterales negras con lámpara de mesa</b><small>Cantidad: 2 · Estado: bueno · Incluye las 2 lámparas</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala9"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">10</span><img src="img/3747.jpg" alt="Comedor con cubierta de vidrio" loading="lazy">
+<div class="txt"><b>Comedor con cubierta de vidrio</b><small>Cantidad: 1 · Estado: bueno · Con 8 sillas tapizadas</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala10"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">11</span><img src="img/3751.jpg" alt="Aparador con vitrinas" loading="lazy">
+<div class="txt"><b>Aparador con vitrinas</b><small>Cantidad: 1 · Estado: bueno · La vajilla que guarda va aparte, en trastes</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala11"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">12</span><img src="img/3760.jpg" alt="Mueble bar con puertas caladas" loading="lazy">
+<div class="txt"><b>Mueble bar con puertas caladas</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala12"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">13</span><img src="img/3751.jpg" alt="Vajilla de porcelana" loading="lazy">
+<div class="txt"><b>Vajilla de porcelana</b><small>Cantidad: 1 · Estado: bueno · Trastes; si estás de acuerdo, va a la venta de garage</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala13"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">14</span><img src="img/3755.jpg" alt="Cubiertos" loading="lazy">
+<div class="txt"><b>Cubiertos</b><small>Cantidad: 1 · Estado: bueno · Trastes; si estás de acuerdo, va a la venta de garage</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala14"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">15</span><img src="img/3759.jpg" alt="Recipientes y platos" loading="lazy">
+<div class="txt"><b>Recipientes y platos</b><small>Cantidad: 1 · Estado: bueno · Trastes; si estás de acuerdo, va a la venta de garage</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala15"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">16</span><img src="img/3762.jpg" alt="Vasos, copas y cafetera" loading="lazy">
+<div class="txt"><b>Vasos, copas y cafetera</b><small>Cantidad: 1 · Estado: bueno · Trastes; si estás de acuerdo, va a la venta de garage</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="sala16"><span>De acuerdo</span></label></div></div></div></section><section class="card"><h2>Cocina y Antecomedor<small>5</small></h2>
+<div class="list"><div class="item"><span class="num">17</span><img src="img/3765.jpg" alt="Mesa redonda de antecomedor" loading="lazy">
+<div class="txt"><b>Mesa redonda de antecomedor</b><small>Cantidad: 1 · Estado: bueno · Con 4 sillas</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="cocina1"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">18</span><img src="img/3769.jpg" alt="Mesita auxiliar metálica" loading="lazy">
+<div class="txt"><b>Mesita auxiliar metálica</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="cocina2"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">19</span><img src="img/3769.jpg" alt="Platones de vidrio y regadera" loading="lazy">
+<div class="txt"><b>Platones de vidrio y regadera</b><small>Cantidad: 1 · Estado: bueno · Trastes; si estás de acuerdo, va a la venta de garage</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="cocina3"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">20</span><img src="img/3784.jpg" alt="Tablas de picar de madera" loading="lazy">
+<div class="txt"><b>Tablas de picar de madera</b><small>Cantidad: 1 · Estado: bueno · Trastes; si estás de acuerdo, va a la venta de garage</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="cocina4"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">21</span><img src="img/3787.jpg" alt="Juego de cuchillos con base" loading="lazy">
+<div class="txt"><b>Juego de cuchillos con base</b><small>Cantidad: 1 · Estado: bueno · Trastes; si estás de acuerdo, va a la venta de garage</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="cocina5"><span>De acuerdo</span></label></div></div></div></section><section class="card"><h2>Recámaras<small>18</small></h2>
+<div class="list"><div class="item"><span class="num">22</span><img src="img/3808.jpg" alt="Cama individual con cabecera de madera" loading="lazy">
+<div class="txt"><b>Cama individual con cabecera de madera</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec1"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">23</span><img src="img/3820.jpg" alt="Cama con cabecera" loading="lazy">
+<div class="txt"><b>Cama con cabecera</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec2"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">24</span><img src="img/3898.jpg" alt="Cabecera matrimonial con buró" loading="lazy">
+<div class="txt"><b>Cabecera matrimonial con buró</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec3"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">25</span><img src="img/E3809.jpg" alt="Tocador de madera con cubierta de vidrio" loading="lazy">
+<div class="txt"><b>Tocador de madera con cubierta de vidrio</b><small>Cantidad: 1 · Estado: bueno · Con banco tapizado</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec4"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">26</span><img src="img/E3895.jpg" alt="Cómoda larga con espejo" loading="lazy">
+<div class="txt"><b>Cómoda larga con espejo</b><small>Cantidad: 1 · Estado: bueno · La TV que tiene encima va en Aparatos</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec5"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">27</span><img src="img/3812.jpg" alt="Máquina de coser antigua con pedal" loading="lazy">
+<div class="txt"><b>Máquina de coser antigua con pedal</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec6"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">28</span><img src="img/3813.jpg" alt="Caja fuerte" loading="lazy">
+<div class="txt"><b>Caja fuerte</b><small>Cantidad: 1 · Estado: bueno · Dentro del clóset</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec7"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">29</span><img src="img/3823.jpg" alt="Escritorio con silla de oficina" loading="lazy">
+<div class="txt"><b>Escritorio con silla de oficina</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec8"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">30</span><img src="img/3823.jpg" alt="Monitor de computadora" loading="lazy">
+<div class="txt"><b>Monitor de computadora</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec9"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">31</span><img src="img/3823.jpg" alt="Andadera" loading="lazy">
+<div class="txt"><b>Andadera</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec10"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">32</span><img src="img/3822.jpg" alt="Bicicleta fija" loading="lazy">
+<div class="txt"><b>Bicicleta fija</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec11"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">33</span><img src="img/3843.jpg" alt="Sillón orejero tapizado" loading="lazy">
+<div class="txt"><b>Sillón orejero tapizado</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec12"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">34</span><img src="img/3840.jpg" alt="Sillón orejero tapizado con galán de noche" loading="lazy">
+<div class="txt"><b>Sillón orejero tapizado con galán de noche</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec13"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">35</span><img src="img/3848.jpg" alt="Mueble bajo con repisas" loading="lazy">
+<div class="txt"><b>Mueble bajo con repisas</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec14"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">36</span><img src="img/3852.jpg" alt="Librero de madera con puertas" loading="lazy">
+<div class="txt"><b>Librero de madera con puertas</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec15"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">37</span><img src="img/3865.jpg" alt="Librero bajo" loading="lazy">
+<div class="txt"><b>Librero bajo</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec16"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">38</span><img src="img/3866.jpg" alt="Librero de madera" loading="lazy">
+<div class="txt"><b>Librero de madera</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec17"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">39</span><img src="img/3861.jpg" alt="Mueble de TV" loading="lazy">
+<div class="txt"><b>Mueble de TV</b><small>Cantidad: 1 · Estado: bueno · La TV va en Aparatos</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="rec18"><span>De acuerdo</span></label></div></div></div></section><section class="card"><h2>Aparatos<small>7</small></h2>
+<div class="note">Quiero quedarme con los aparatos; si quieres ponerles un precio, escríbelo en cada uno y lo platicamos.</div><div class="list"><div class="item"><span class="num">40</span><img src="img/3750.jpg" alt="Estéreo Kenwood con 2 bocinas" loading="lazy">
+<div class="txt"><b>Estéreo Kenwood con 2 bocinas</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="apa1"><span>De acuerdo</span></label><input class="precio" type="text" inputmode="decimal" placeholder="Precio (opcional)" data-precio="apa1"></div></div><div class="item"><span class="num">41</span><img src="img/3781.jpg" alt="Horno de microondas" loading="lazy">
+<div class="txt"><b>Horno de microondas</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="apa2"><span>De acuerdo</span></label><input class="precio" type="text" inputmode="decimal" placeholder="Precio (opcional)" data-precio="apa2"></div></div><div class="item"><span class="num">42</span><img src="img/3787.jpg" alt="Horno tostador" loading="lazy">
+<div class="txt"><b>Horno tostador</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="apa3"><span>De acuerdo</span></label><input class="precio" type="text" inputmode="decimal" placeholder="Precio (opcional)" data-precio="apa3"></div></div><div class="item"><span class="num">43</span><img src="img/3904.jpg" alt="Lavadora" loading="lazy">
+<div class="txt"><b>Lavadora</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="apa4"><span>De acuerdo</span></label><input class="precio" type="text" inputmode="decimal" placeholder="Precio (opcional)" data-precio="apa4"></div></div><div class="item"><span class="num">44</span><img src="img/E3770.jpg" alt="Refrigerador" loading="lazy">
+<div class="txt"><b>Refrigerador</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="apa5"><span>De acuerdo</span></label><input class="precio" type="text" inputmode="decimal" placeholder="Precio (opcional)" data-precio="apa5"></div></div><div class="item"><span class="num">45</span><img src="img/3835.jpg" alt="TV Sharp" loading="lazy">
+<div class="txt"><b>TV Sharp</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="apa6"><span>De acuerdo</span></label><input class="precio" type="text" inputmode="decimal" placeholder="Precio (opcional)" data-precio="apa6"></div></div><div class="item"><span class="num">46</span><img src="img/E3895.jpg" alt="TV de pantalla plana" loading="lazy">
+<div class="txt"><b>TV de pantalla plana</b><small>Cantidad: 1 · Estado: bueno · En la cómoda de la recámara</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="apa7"><span>De acuerdo</span></label><input class="precio" type="text" inputmode="decimal" placeholder="Precio (opcional)" data-precio="apa7"></div></div></div></section><section class="card"><h2>Adornos<small>9</small></h2>
+<div class="note">Palomea los adornos que quieras conservar; de los demás, algunos me los quedo y otros van a una venta de garage.</div><div class="list"><div class="item"><span class="num">47</span><img src="img/3892.jpg" alt="Nicho con jarrones, figuras y cerámica" loading="lazy">
+<div class="txt"><b>Nicho con jarrones, figuras y cerámica</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado1"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">48</span><img src="img/3885.jpg" alt="Nicho japonés con pergamino, canasta y platón azul" loading="lazy">
+<div class="txt"><b>Nicho japonés con pergamino, canasta y platón azul</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado2"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">49</span><img src="img/3884.jpg" alt="Pergamino de caligrafía japonesa" loading="lazy">
+<div class="txt"><b>Pergamino de caligrafía japonesa</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado3"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">50</span><img src="img/3806.jpg" alt="Pergamino de caligrafía japonesa de la recámara" loading="lazy">
+<div class="txt"><b>Pergamino de caligrafía japonesa de la recámara</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado4"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">51</span><img src="img/E3754.jpg" alt="Vitrinas con muñecas japonesas" loading="lazy">
+<div class="txt"><b>Vitrinas con muñecas japonesas</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado5"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">52</span><img src="img/E3753.jpg" alt="Colección de jarrones y figuras sobre el aparador" loading="lazy">
+<div class="txt"><b>Colección de jarrones y figuras sobre el aparador</b><small>Cantidad: 1 · Estado: bueno · Aproximadamente 15 piezas</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado6"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">53</span><img src="img/3760.jpg" alt="Casco samurái" loading="lazy">
+<div class="txt"><b>Casco samurái</b><small>Cantidad: 1 · Estado: bueno · Encima del mueble bar</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado7"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">54</span><img src="img/3757.jpg" alt="Ave decorativa" loading="lazy">
+<div class="txt"><b>Ave decorativa</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado8"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">55</span><img src="img/3894.jpg" alt="Adorno colgante de madera" loading="lazy">
+<div class="txt"><b>Adorno colgante de madera</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="ado9"><span>Lo quiero conservar</span></label></div></div></div></section><section class="card"><h2>Libros y discos<small>2</small></h2>
+<div class="note">Tú decides qué hacemos con ellos; palomea si los quieres conservar o escríbeme en los comentarios.</div><div class="list"><div class="item"><span class="num">56</span><img src="img/3853.jpg" alt="Libros" loading="lazy">
+<div class="txt"><b>Libros</b><small>Cantidad: 1 · Estado: bueno · En los libreros de las recámaras</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="lib1"><span>Lo quiero conservar</span></label></div></div><div class="item"><span class="num">57</span><img src="img/3790.jpg" alt="Discos y álbumes del clóset de la cocina" loading="lazy">
+<div class="txt"><b>Discos y álbumes del clóset de la cocina</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="lib2"><span>Lo quiero conservar</span></label></div></div></div></section><section class="card"><h2>Tus artículos personales<small>3</small></h2>
+<div class="note">Son tuyos y se quedan contigo.</div><div class="list"><div class="item"><span class="num">58</span><img src="img/3850.jpg" alt="Fotos familiares" loading="lazy">
+<div class="txt"><b>Fotos familiares</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="per1"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">59</span><img src="img/3876.jpg" alt="Retratos enmarcados de niño" loading="lazy">
+<div class="txt"><b>Retratos enmarcados de niño</b><small>Cantidad: 2 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="per2"><span>De acuerdo</span></label></div></div><div class="item"><span class="num">60</span><img src="img/3800.jpg" alt="Placa de reconocimiento DAYCO" loading="lazy">
+<div class="txt"><b>Placa de reconocimiento DAYCO</b><small>Cantidad: 1 · Estado: bueno</small></div>
+<div class="ctl"><label class="chk"><input type="checkbox" data-id="per3"><span>De acuerdo</span></label></div></div></div></section><section class="card"><h2>Cuadros<small>31</small></h2>
+<div class="note">Yo no me quedo con ninguno; palomea los que quieras conservar y los demás van a una venta de garage. Todos están en buen estado.</div>
+<div class="grid"><figure><img src="img/3744.jpg" alt="Cuadro 3744" loading="lazy"><figcaption>3744</figcaption><label class="chk"><input type="checkbox" data-id="cu3744"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3745.jpg" alt="Cuadro 3745" loading="lazy"><figcaption>3745</figcaption><label class="chk"><input type="checkbox" data-id="cu3745"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3749.jpg" alt="Cuadro 3749" loading="lazy"><figcaption>3749</figcaption><label class="chk"><input type="checkbox" data-id="cu3749"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3794.jpg" alt="Cuadro 3794" loading="lazy"><figcaption>3794</figcaption><label class="chk"><input type="checkbox" data-id="cu3794"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3795.jpg" alt="Cuadro 3795" loading="lazy"><figcaption>3795</figcaption><label class="chk"><input type="checkbox" data-id="cu3795"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3796.jpg" alt="Cuadro 3796" loading="lazy"><figcaption>3796</figcaption><label class="chk"><input type="checkbox" data-id="cu3796"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3797.jpg" alt="Cuadro 3797" loading="lazy"><figcaption>3797</figcaption><label class="chk"><input type="checkbox" data-id="cu3797"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3798.jpg" alt="Cuadro 3798" loading="lazy"><figcaption>3798</figcaption><label class="chk"><input type="checkbox" data-id="cu3798"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3799.jpg" alt="Cuadro 3799" loading="lazy"><figcaption>3799</figcaption><label class="chk"><input type="checkbox" data-id="cu3799"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3801.jpg" alt="Cuadro 3801" loading="lazy"><figcaption>3801</figcaption><label class="chk"><input type="checkbox" data-id="cu3801"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3802.jpg" alt="Cuadro 3802" loading="lazy"><figcaption>3802</figcaption><label class="chk"><input type="checkbox" data-id="cu3802"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3803.jpg" alt="Cuadro 3803" loading="lazy"><figcaption>3803</figcaption><label class="chk"><input type="checkbox" data-id="cu3803"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3804.jpg" alt="Cuadro 3804" loading="lazy"><figcaption>3804</figcaption><label class="chk"><input type="checkbox" data-id="cu3804"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3805.jpg" alt="Cuadro 3805" loading="lazy"><figcaption>3805</figcaption><label class="chk"><input type="checkbox" data-id="cu3805"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3807.jpg" alt="Cuadro 3807" loading="lazy"><figcaption>3807</figcaption><label class="chk"><input type="checkbox" data-id="cu3807"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3817.jpg" alt="Cuadro 3817" loading="lazy"><figcaption>3817</figcaption><label class="chk"><input type="checkbox" data-id="cu3817"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3827.jpg" alt="Cuadro 3827" loading="lazy"><figcaption>3827</figcaption><label class="chk"><input type="checkbox" data-id="cu3827"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3828.jpg" alt="Cuadro 3828" loading="lazy"><figcaption>3828</figcaption><label class="chk"><input type="checkbox" data-id="cu3828"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3829.jpg" alt="Cuadro 3829" loading="lazy"><figcaption>3829</figcaption><label class="chk"><input type="checkbox" data-id="cu3829"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3830.jpg" alt="Cuadro 3830" loading="lazy"><figcaption>3830</figcaption><label class="chk"><input type="checkbox" data-id="cu3830"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3831.jpg" alt="Cuadro 3831" loading="lazy"><figcaption>3831</figcaption><label class="chk"><input type="checkbox" data-id="cu3831"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3832.jpg" alt="Cuadro 3832" loading="lazy"><figcaption>3832</figcaption><label class="chk"><input type="checkbox" data-id="cu3832"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3834.jpg" alt="Cuadro 3834" loading="lazy"><figcaption>3834</figcaption><label class="chk"><input type="checkbox" data-id="cu3834"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3836.jpg" alt="Cuadro 3836" loading="lazy"><figcaption>3836</figcaption><label class="chk"><input type="checkbox" data-id="cu3836"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3837.jpg" alt="Cuadro 3837" loading="lazy"><figcaption>3837</figcaption><label class="chk"><input type="checkbox" data-id="cu3837"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3838.jpg" alt="Cuadro 3838" loading="lazy"><figcaption>3838</figcaption><label class="chk"><input type="checkbox" data-id="cu3838"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3844.jpg" alt="Cuadro 3844" loading="lazy"><figcaption>3844</figcaption><label class="chk"><input type="checkbox" data-id="cu3844"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3864.jpg" alt="Cuadro 3864" loading="lazy"><figcaption>3864</figcaption><label class="chk"><input type="checkbox" data-id="cu3864"><span>Lo quiero conservar</span></label></figure><figure><img src="img/3879.jpg" alt="Cuadro 3879" loading="lazy"><figcaption>3879</figcaption><label class="chk"><input type="checkbox" data-id="cu3879"><span>Lo quiero conservar</span></label></figure><figure><img src="img/E3873.jpg" alt="Cuadro E3873" loading="lazy"><figcaption>E3873</figcaption><label class="chk"><input type="checkbox" data-id="cuE3873"><span>Lo quiero conservar</span></label></figure><figure><img src="img/E3900.jpg" alt="Cuadro E3900" loading="lazy"><figcaption>E3900</figcaption><label class="chk"><input type="checkbox" data-id="cuE3900"><span>Lo quiero conservar</span></label></figure></div></section>
+
+<section class="card"><h2>Comentarios</h2><textarea id="coment" placeholder="Escríbeme aquí lo que quieras comentar"></textarea></section>
+
+<section class="card"><h2>Firmas</h2><p>Los dos revisamos este inventario y estamos de acuerdo con lo que contiene.</p>
+<div class="firmas"><div><b>Taro Tsutsumi Tanabe</b><span>Propietario</span></div><div><b>Fernando Dávila</b><span>Inquilino</span></div></div>
+<div class="fecha">Fecha: ______________________________</div></section>
+</main>
+<div id="zoom" class="no-print" onclick="this.style.display='none'"><img alt=""></div>
+<script>
+const SB={url:'https://rcotlydvsubvdapubnkx.supabase.co',key:'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T'};
+const COD='alondra25-59008e';
+let S={checks:{},precios:{},coment:''},rev=0,timer=null;
+async function rpc(fn,body){
+  const r=await fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB.key,'Authorization':'Bearer '+SB.key},body:JSON.stringify(body)});
+  if(!r.ok) throw new Error('http '+r.status); return r.json();
+}
+const $=s=>document.querySelectorAll(s);
+function badge(t,c){const b=document.getElementById('badge');b.textContent=t;b.className='badge '+(c||'');}
+function prog(){const all=$('input[data-id]'),n=[...all].filter(i=>i.checked).length;document.getElementById('prog').textContent=n+' de '+all.length+' palomeados';}
+function paint(){
+  $('input[data-id]').forEach(i=>i.checked=!!S.checks[i.dataset.id]);
+  $('input[data-precio]').forEach(i=>{if(document.activeElement!==i)i.value=S.precios[i.dataset.precio]||'';});
+  const c=document.getElementById('coment'); if(document.activeElement!==c) c.value=S.coment||'';
+  prog();
+}
+async function pull(){
+  try{const res=await rpc('ferrock_pull',{p_codigo:COD,p_rev:0});const row=Array.isArray(res)?res[0]:res;
+    if(row&&row.payload){S=Object.assign({checks:{},precios:{},coment:''},row.payload);rev=row.rev;}
+    paint();badge('Guardado ✓','ok');
+  }catch(e){badge('Sin conexión','err');}
+}
+async function push(){
+  badge('Guardando…');
+  try{S.actualizado=new Date().toISOString();rev=await rpc('ferrock_push',{p_codigo:COD,p_payload:S});badge('Guardado ✓','ok');}
+  catch(e){badge('No se guardó; revisa tu conexión','err');}
+}
+function later(){clearTimeout(timer);timer=setTimeout(push,700);}
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.id){S.checks[t.dataset.id]=t.checked;prog();later();}});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset.precio!==undefined){S.precios[t.dataset.precio]=t.value;later();}if(t.id==='coment'){S.coment=t.value;later();}});
+document.addEventListener('click',e=>{const t=e.target;if(t.tagName==='IMG'&&t.closest('.item,figure,.fotos')){const z=document.getElementById('zoom');z.querySelector('img').src=t.src;z.style.display='flex';}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull();});
+prog();pull();
+</script></body></html>
