@@ -59,6 +59,11 @@ tr:last-child td{border-bottom:none}
 .celda-valor{font-weight:700;color:#059669;white-space:nowrap}
 .celda-num{white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums;color:#1a2035}
 th.th-num{text-align:right}
+.renov-proxima{color:#b45309;font-weight:700}
+.renov-vencida{color:#dc2626;font-weight:700}
+.util-neg{color:#dc2626}
+.form-sec{grid-column:1/-1;font-size:.72rem;font-weight:800;color:#1a3a6b;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid #dde1e9;padding-top:.7rem;margin-top:.2rem}
+.form-hint{font-size:.7rem;color:#8a90a0}
 .celda-prob{color:#4a5068}
 .celda-accion-txt{font-size:.78rem;color:#4a5068;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .celda-accion-fecha{font-size:.71rem;color:#8a90a0;margin-top:.1rem}
@@ -212,6 +217,11 @@ textarea{resize:vertical;min-height:70px}
             <th onclick="toggleSort('contratado')" data-col="contratado" class="th-num">Contratado <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('onboarding')" data-col="onboarding" class="th-num" title="Costo del desarrollo inicial">Onboarding <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('anualizado')" data-col="anualizado" class="th-num" title="Onboarding más los meses de fee mensual">Anualizado <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('fee')" data-col="fee" class="th-num" title="Fee mensual en pesos">Fee mensual <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('utilonb')" data-col="utilonb" class="th-num" title="Onboarding menos horas de desarrollo y seguimiento">Utilidad onboarding <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('utilfee')" data-col="utilfee" class="th-num" title="Fee mensual menos plataformas y consumo de IA, por mes">Utilidad fee/mes <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('inicioop')" data-col="inicioop" title="Inicio de operación (cobro del fee)">Inicio operación <span class="arrow">⇕</span></th>
+            <th onclick="toggleSort('fin12')" data-col="fin12" title="Fin de los 12 meses forzosos; en naranja cuando falta un mes">Fin 12 meses <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('cobrado')" data-col="cobrado" class="th-num">Cobrado <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('responsable')" data-col="responsable">Responsable <span class="arrow">⇕</span></th>
             <th onclick="toggleSort('accionfecha')" data-col="accionfecha">Próx. Acción <span class="arrow">⇕</span></th>
@@ -221,7 +231,7 @@ textarea{resize:vertical;min-height:70px}
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="12"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>
+          <tr><td colspan="17"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -284,6 +294,17 @@ textarea{resize:vertical;min-height:70px}
         <div class="form-group full"><label>Próxima acción</label><input type="text" id="p-prox-accion" placeholder="Ej: Enviar propuesta formal"></div>
         <div class="form-group"><label>Fecha próxima acción</label><input type="date" id="p-fecha-accion"></div>
         <div class="form-group"><label>Tags (separados por coma)</label><input type="text" id="p-tags" placeholder="Ej: automatización,whatsapp"></div>
+        <div class="form-sec">Dinero y operación</div>
+        <div class="form-group"><label>Onboarding (MXN, antes de IVA)</label><input type="number" id="p-onboarding" placeholder="0.00" step="500" min="0"><span class="form-hint">Si se deja vacío, se usa el valor estimado</span></div>
+        <div class="form-group"><label>Fee mensual (antes de IVA)</label>
+          <div style="display:flex;gap:.4rem"><input type="number" id="p-fee" placeholder="0.00" step="100" min="0" style="flex:1"><select id="p-fee-moneda" style="width:auto"><option>MXN</option><option>USD</option></select></div>
+          <span class="form-hint">Es el mismo de Facturación</span></div>
+        <div class="form-group"><label>Inicio de desarrollo</label><input type="date" id="p-inicio-dev"></div>
+        <div class="form-group"><label>Inicio de operación (cobro del fee)</label><input type="date" id="p-inicio-op"><span class="form-hint">Los 12 meses forzosos cuentan desde aquí</span></div>
+        <div class="form-group"><label>Horas de desarrollo (Fernando)</label><input type="number" id="p-horas-f" placeholder="0" step="1" min="0"></div>
+        <div class="form-group"><label>Horas de seguimiento (Adolfo)</label><input type="number" id="p-horas-a" placeholder="0" step="1" min="0"></div>
+        <div class="form-group"><label>Plataformas al mes (MXN)</label><input type="number" id="p-costo-plat" placeholder="0.00" step="50" min="0"></div>
+        <div class="form-group"><label>Consumo de IA al mes (MXN)</label><input type="number" id="p-costo-ia" placeholder="0.00" step="10" min="0"><span class="form-hint">Referencia: Consumo IA en Plat´s Info</span></div>
         <div class="form-group full"><label>Esquema de reparto</label>
           <select id="p-esquema" onchange="toggleReparto()">
             <option value="50_50">50 / 50 · Fernando y Adolfo</option>
@@ -613,8 +634,49 @@ function normalizeItem(p){
     Onboarding: toNum(p.Onboarding),
     Mensual: toNum(p.Mensual),
     Anualizado: toNum(p.Anualizado),
-    Cobrado: toNum(p.Cobrado)
+    Cobrado: toNum(p.Cobrado),
+    OnboardingCapturado: (p.OnboardingCapturado === null || p.OnboardingCapturado === undefined || p.OnboardingCapturado === '') ? '' : toNum(p.OnboardingCapturado),
+    FeeMonto: (p.FeeMonto === null || p.FeeMonto === undefined || p.FeeMonto === '') ? '' : toNum(p.FeeMonto),
+    FeeMoneda: toStr(p.FeeMoneda) || 'MXN',
+    InicioDesarrollo: toStr(p.InicioDesarrollo),
+    InicioOperacion: toStr(p.InicioOperacion),
+    FinForzoso: toStr(p.FinForzoso),
+    HorasFernando: toNum(p.HorasFernando),
+    HorasAdolfo: toNum(p.HorasAdolfo),
+    CostoPlataformas: toNum(p.CostoPlataformas),
+    CostoIA: toNum(p.CostoIA),
+    UtilidadOnboarding: toNum(p.UtilidadOnboarding),
+    UtilidadFee: (p.UtilidadFee === null || p.UtilidadFee === undefined) ? null : toNum(p.UtilidadFee),
+    TarifaFernando: toNum(p.TarifaFernando),
+    TarifaAdolfo: toNum(p.TarifaAdolfo),
+    TipoCambio: toNum(p.TipoCambio) || 17
   };
+}
+
+function horasTxt(p){
+  const f = p.HorasFernando || 0, a = p.HorasAdolfo || 0;
+  return `Desarrollo: ${f} h × ${fmt$(p.TarifaFernando)} · Seguimiento: ${a} h × ${fmt$(p.TarifaAdolfo)}`;
+}
+function costosTxt(p){
+  return `Plataformas ${fmt$(p.CostoPlataformas || 0)} + IA ${fmt$(p.CostoIA || 0)} al mes`;
+}
+function diasA(fecha){
+  if(!fecha) return null;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const [y,m,d] = fecha.slice(0,10).split('-').map(Number);
+  return Math.round((new Date(y, m-1, d) - hoy) / 86400000);
+}
+function claseRenov(p){
+  if(p.Status === 'perdido') return '';
+  const d = diasA(p.FinForzoso);
+  if(d === null) return '';
+  if(d < 0) return 'renov-vencida';
+  return d <= 31 ? 'renov-proxima' : '';
+}
+function tituloRenov(p){
+  const d = diasA(p.FinForzoso);
+  if(d === null) return '';
+  return d < 0 ? 'Ya terminaron los 12 meses forzosos' : (d <= 31 ? `Faltan ${d} días: buscar la renovación` : `Faltan ${d} días`);
 }
 
 function genId(){
@@ -684,7 +746,7 @@ async function logHistorial(accionTexto, proyecto, campo='', anterior='', nuevo=
 // ═══════════════════════════════════════
 async function cargarProyectos(){
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '<tr><td colspan="12"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>';
+  tbody.innerHTML = '<tr><td colspan="17"><div class="loading"><span class="spinner"></span>Cargando proyectos...</div></td></tr>';
   const res = await apiCall('get');
   ITEMS = (Array.isArray(res) ? res : []).map(normalizeItem);
   render();
@@ -748,6 +810,11 @@ function aplicarOrden(lista){
       case 'onboarding':   va = a.Onboarding; vb = b.Onboarding; break;
       case 'anualizado':   va = a.Anualizado; vb = b.Anualizado; break;
       case 'cobrado':      va = a.Cobrado;    vb = b.Cobrado;    break;
+      case 'fee':          va = a.Mensual;    vb = b.Mensual;    break;
+      case 'utilonb':      va = a.UtilidadOnboarding; vb = b.UtilidadOnboarding; break;
+      case 'utilfee':      va = a.UtilidadFee ?? -1e12; vb = b.UtilidadFee ?? -1e12; break;
+      case 'inicioop':     va = a.InicioOperacion || '9999'; vb = b.InicioOperacion || '9999'; break;
+      case 'fin12':        va = a.FinForzoso || '9999'; vb = b.FinForzoso || '9999'; break;
       case 'prob':         va = toNum(a.Probabilidad);  vb = toNum(b.Probabilidad);  break;
       case 'etapa':        va = ETAPAS.indexOf(a.Etapa); vb = ETAPAS.indexOf(b.Etapa); break;
       case 'accionfecha':  va = a.FechaAccion || '9999-99-99'; vb = b.FechaAccion || '9999-99-99'; break;
@@ -795,7 +862,7 @@ function renderResumen(){
 function renderTabla(lista){
   const tbody = document.getElementById('tbody');
   if(!lista.length){
-    tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state"><span>📋</span>Sin proyectos que coincidan</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="17"><div class="empty-state"><span>📋</span>Sin proyectos que coincidan</div></td></tr>';
     return;
   }
   tbody.innerHTML = lista.map(p => {
@@ -815,6 +882,11 @@ function renderTabla(lista){
       <td class="celda-num">${p.Contratado ? fmt$(p.Contratado) : '—'}</td>
       <td class="celda-num">${p.Onboarding ? fmt$(p.Onboarding) : '—'}</td>
       <td class="celda-num" title="${p.Mensual ? 'Fee mensual ' + fmt$(p.Mensual) : 'Sin fee mensual'}">${p.Anualizado ? fmt$(p.Anualizado) : '—'}</td>
+      <td class="celda-num" title="${p.FeeMonto && p.FeeMoneda === 'USD' ? 'USD ' + p.FeeMonto + ' al tipo de cambio ' + p.TipoCambio : ''}">${p.Mensual ? fmt$(p.Mensual) : '—'}</td>
+      <td class="celda-num ${p.UtilidadOnboarding < 0 ? 'util-neg' : ''}" title="${horasTxt(p)}">${p.Onboarding || p.HorasFernando || p.HorasAdolfo ? fmt$(p.UtilidadOnboarding) : '—'}</td>
+      <td class="celda-num ${p.UtilidadFee !== null && p.UtilidadFee < 0 ? 'util-neg' : ''}" title="${costosTxt(p)}">${p.UtilidadFee !== null ? fmt$(p.UtilidadFee) : '—'}</td>
+      <td style="white-space:nowrap">${p.InicioOperacion ? fmtDate(p.InicioOperacion) : '—'}</td>
+      <td style="white-space:nowrap" class="${claseRenov(p)}" title="${tituloRenov(p)}">${p.FinForzoso ? fmtDate(p.FinForzoso) : '—'}</td>
       <td class="celda-num">${p.Cobrado ? fmt$(p.Cobrado) : '—'}</td>
       <td><span class="resp-badge"><span class="resp-dot" style="background:${resp.color}"></span>${escHtml(resp.nombre)}</span></td>
       <td class="${vencido?'vencido':''}">
@@ -878,6 +950,16 @@ function abrirModal(id = null){
   document.getElementById('p-tags').value = p?.Tags || '';
   document.getElementById('p-drive').value = p?.DriveFolder || '';
   document.getElementById('p-notas').value = p?.Notas || '';
+  const vNum = v => (v === '' || v === null || v === undefined) ? '' : v;
+  document.getElementById('p-onboarding').value = p ? vNum(p.OnboardingCapturado) : '';
+  document.getElementById('p-fee').value = p ? vNum(p.FeeMonto) : '';
+  document.getElementById('p-fee-moneda').value = p?.FeeMoneda || 'MXN';
+  document.getElementById('p-inicio-dev').value = p?.InicioDesarrollo || '';
+  document.getElementById('p-inicio-op').value = p?.InicioOperacion || '';
+  document.getElementById('p-horas-f').value = p && p.HorasFernando ? p.HorasFernando : '';
+  document.getElementById('p-horas-a').value = p && p.HorasAdolfo ? p.HorasAdolfo : '';
+  document.getElementById('p-costo-plat').value = p && p.CostoPlataformas ? p.CostoPlataformas : '';
+  document.getElementById('p-costo-ia').value = p && p.CostoIA ? p.CostoIA : '';
   document.getElementById('p-esquema').value = p?.EsquemaReparto || '50_50';
   const rd = p?.RepartoDetalle || {};
   ['fernando','adolfo'].forEach(k => { document.getElementById('rp-'+k).value = rd[k] ?? ''; });
@@ -934,7 +1016,17 @@ async function guardarProyecto(){
     DriveFolder: document.getElementById('p-drive').value.trim(),
     Notas: document.getElementById('p-notas').value.trim(),
     EsquemaReparto: esquema,
-    RepartoDetalle: repartoDetalle
+    RepartoDetalle: repartoDetalle,
+    ConDinero: true,
+    OnboardingCapturado: document.getElementById('p-onboarding').value,
+    FeeMonto: document.getElementById('p-fee').value,
+    FeeMoneda: document.getElementById('p-fee-moneda').value,
+    InicioDesarrollo: document.getElementById('p-inicio-dev').value,
+    InicioOperacion: document.getElementById('p-inicio-op').value,
+    HorasFernando: document.getElementById('p-horas-f').value,
+    HorasAdolfo: document.getElementById('p-horas-a').value,
+    CostoPlataformas: document.getElementById('p-costo-plat').value,
+    CostoIA: document.getElementById('p-costo-ia').value
   };
 
   const esEdicion = !!editId;
@@ -956,6 +1048,7 @@ async function guardarProyecto(){
     }
     cerrarModal();
     render();
+    cargarProyectos();   // trae Anualizado, utilidades y fin de los 12 meses recalculados
   } else {
     showToast('Error al guardar — revisa tu conexión', 'err');
   }
