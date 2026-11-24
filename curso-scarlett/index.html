@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Curso ExcelentIA · Scarlett</title>
+<link rel="icon" href="../assets/ExcelentiA_favicon.png">
+<link rel="stylesheet" href="curso.css">
+</head>
+<body>
+
+<div class="gate">
+  <form class="gate-box" id="gateForm">
+    <div class="logo-box" style="display:inline-flex"><img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA"></div>
+    <h2>Curso ExcelentIA</h2>
+    <p>Escribe tu clave de acceso para entrar</p>
+    <input id="gateInput" type="password" placeholder="Clave" autocomplete="off" autofocus>
+    <div class="gate-err" id="gateErr"></div>
+    <button class="btn" type="submit">Entrar</button>
+  </form>
+</div>
+
+<div class="app">
+<header class="top">
+  <div class="top-in">
+    <div class="logo-header-wrap">
+      <div class="logo-box">
+        <img src="https://raw.githubusercontent.com/fernandodavilaolvera-rgb/excelentia.com.mx/main/assets/logo_excelentIA_clean.png" alt="ExcelentIA" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback">Excelent<span style="color:#4a9fd4">IA</span></span>
+      </div>
+      <span class="logo-slogan">Inteligencia Artificial con esencia Humana</span>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="kicker">Programa de formación</div>
+  <h1>Hola Scarlett, bienvenida a ExcelentIA 👋</h1>
+  <p>Este curso te lleva paso a paso desde cero hasta poder hacer propuestas, construir páginas web y cuidar que todas nuestras herramientas estén siempre al día; vas a tu ritmo, con unas 8 horas por semana durante unas 12 semanas.</p>
+  <div class="prog"><div id="progTotal"></div></div>
+  <div class="prog-txt" id="progTxt">0% del curso</div>
+</div>
+
+<main>
+  <section class="card">
+    <div class="card-h"><h2>Cómo funciona el curso</h2></div>
+    <div class="card-b">
+      <p>El curso está dividido en <b>etapas</b>, y cada etapa en <b>módulos</b>; todos los módulos tienen la misma forma:</p>
+      <ol class="pasos">
+        <li><b>Objetivo:</b> qué vas a poder hacer al terminar.</li>
+        <li><b>Lectura:</b> la explicación, corta y sin tecnicismos.</li>
+        <li><b>Palabras clave:</b> los términos que vas a escuchar todo el tiempo.</li>
+        <li><b>Ejercicio:</b> práctica en un espacio de prueba; nunca con clientes reales.</li>
+        <li><b>Quiz:</b> 5 preguntas para comprobar que quedó claro.</li>
+        <li><b>Entregable:</b> algo que haces tú y revisa Fer.</li>
+      </ol>
+      <div class="alerta">Cuando termines un módulo marca la palomita al final; tu avance se guarda en este navegador y aparece aquí arriba. Si te atoras en algo, anótalo y lo platicas con Fer; preguntar es parte del curso.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-h"><h2>Las etapas</h2><span class="tag">12 semanas</span></div>
+    <div id="etapas"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-h"><h2>Tu meta al terminar</h2></div>
+    <div class="card-b">
+      <ul>
+        <li>Hacer una <b>propuesta comercial</b> completa con el look de ExcelentIA, lista para PDF.</li>
+        <li>Crear y ajustar <b>páginas web</b> con ayuda de Claude y publicarlas en excelentia.com.mx.</li>
+        <li>Hacerte cargo de <b>Plat's Info</b>: revisar cada mes que todas las plataformas estén actualizadas, seguras y sin gastos raros.</li>
+      </ul>
+    </div>
+    <div class="nota">Este curso es interno y confidencial; no compartas la liga ni la clave con nadie fuera de ExcelentIA.</div>
+  </section>
+</main>
+<footer class="pie">ExcelentIA · Curso de formación interna · 2026</footer>
+</div>
+
+<script>
+var ETAPAS=[
+ {n:0,t:'Bienvenida a ExcelentIA',d:'Quiénes somos, qué hacemos, nuestros clientes y cómo trabajamos.',s:'Semana 1',url:'etapa-0.html',ids:['e0m1','e0m2','e0m3','e0m4','e0m5','e0quiz','e0ent']},
+ {n:1,t:'Glosario y fundamentos',d:'IA, prompts, agentes, automatizaciones, APIs, bases de datos, servidores y la web.',s:'Semanas 1–2'},
+ {n:2,t:'Herramientas del día a día',d:'Claude, Google Drive, Notion, GitHub, VS Code y gestor de contraseñas.',s:'Semanas 3–4'},
+ {n:3,t:'Documentos y propuestas',d:'El look Ferrock, cómo escribe Fer, propuestas, cotizaciones, contratos y órdenes del día.',s:'Semanas 5–7'},
+ {n:4,t:'Webs y HTMLs',d:'Cómo está hecha una página, editarla con Claude y publicarla en el sitio.',s:'Semanas 7–9'},
+ {n:5,t:"Plat's Info",d:'Cuidar las plataformas: actualizaciones, avisos de seguridad, consumo de IA y revisión mensual.',s:'Semanas 10–12'},
+ {n:6,t:'Introducción a n8n',d:'Cómo se construyen las automatizaciones; etapa para más adelante.',s:'Después'}
+];
+function CS_onOpen(){
+  var box=document.getElementById('etapas'),html='',todos=[];
+  ETAPAS.forEach(function(e){
+    if(e.url){
+      todos=todos.concat(e.ids);
+      var a=CS.avance(e.ids);
+      html+='<a class="etapa" href="'+e.url+'"><div class="num">'+e.n+'</div><div class="txt"><strong>'+e.t+'</strong><span>'+e.d+'</span></div><div class="meta">'+e.s+'<br><b style="color:#1a3a6b">'+a+'%</b><div class="prog mini"><div style="width:'+a+'%"></div></div></div></a>';
+    }else{
+      html+='<div class="etapa off"><div class="num">'+e.n+'</div><div class="txt"><strong>'+e.t+'</strong><span>'+e.d+'</span></div><div class="meta">'+e.s+'<br><span class="tag soon">Próximamente</span></div></div>';
+    }
+  });
+  box.innerHTML=html;
+  var total=ETAPAS.length*7, p=CS.progreso(), hechos=todos.filter(function(i){return p[i]}).length;
+  var pct=Math.round(hechos*100/total);
+  document.getElementById('progTotal').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=pct+'% del curso';
+}
+</script>
+<script src="curso.js"></script>
+</body>
+</html>
