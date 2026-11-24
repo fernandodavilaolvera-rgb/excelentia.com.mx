@@ -353,6 +353,13 @@ let sortCol   = 'FechaLimite';
 let sortDir   = 'asc';
 let modoEditar = false;
 let currentUser = 'fernando';
+// Quién está usando la página (la sesión manda). Solo Fernando maneja los pendientes de Fernando.
+function yo(){ return (window.CRM_AUTH && CRM_AUTH.usuario) || currentUser; }
+function puedeTocar(t){ return yo() === 'fernando' || (t && t.Asignado) !== 'fernando'; }
+function candadoFernando(){
+  const op = document.querySelector('#mAsignado option[value="fernando"]');
+  if (op) op.disabled = yo() !== 'fernando';
+}
 
 // ═══════════════════════════════════
 // INIT
@@ -762,7 +769,8 @@ function normalizar(raw) {
     Prioridad:   toStr(raw.Prioridad)   || 'Media',
     FechaLimite: toStr(raw.FechaLimite),
     Hora:        toStr(raw.Hora),
-    Status:      toStr(raw.Status)      || 'Pendiente'
+    Status:      toStr(raw.Status)      || 'Pendiente',
+    CreadoPor:   toStr(raw.CreadoPor)
   };
 }
 
@@ -917,9 +925,10 @@ function renderTabla() {
       <td style="font-size:.78rem;color:#4a5068;white-space:nowrap">${horaLabel}</td>
       <td>${badgeStatus(t.Status)}</td>
       <td>
-        <div class="actions-cell">
+        <div class="actions-cell">${puedeTocar(t) ? `
           <button class="btn-edit" title="Editar" onclick="abrirModalEditar('${escHtml(t.ID)}')">✏️</button>
-          <button class="btn-del" title="Eliminar" onclick="eliminarTarea('${escHtml(t.ID)}')">✕</button>
+          <button class="btn-del" title="Eliminar" onclick="eliminarTarea('${escHtml(t.ID)}')">✕</button>` :
+          `<span title="Solo Fernando puede cambiar sus pendientes" style="font-size:.8rem;color:#8a90a0">🔒</span>`}
         </div>
       </td>
     </tr>`;
@@ -956,7 +965,8 @@ function abrirModalNuevo() {
   document.getElementById('modalTitulo').textContent = '☑️ Nueva Tarea';
   document.getElementById('btnGuardar').textContent  = 'Guardar tarea';
   document.getElementById('mTitulo').value      = '';
-  document.getElementById('mAsignado').value    = currentUser;
+  candadoFernando();
+  document.getElementById('mAsignado').value    = yo() === 'fernando' ? 'fernando' : (USERS[yo()] ? yo() : 'adolfo');
   document.getElementById('mPrioridad').value   = 'Media';
   document.getElementById('mStatus').value      = 'Pendiente';
   document.getElementById('mFechaLimite').value = '';
@@ -974,8 +984,10 @@ function abrirModalNuevo() {
 function abrirModalEditar(id) {
   const t = ITEMS.find(x => x.ID === id);
   if (!t) return;
+  if (!puedeTocar(t)) { toast('Solo Fernando puede cambiar sus pendientes', 'err'); return; }
   modoEditar = true;
-  document.getElementById('modalTitulo').textContent = '✏️ Editar Tarea';
+  candadoFernando();
+  document.getElementById('modalTitulo').textContent = '✏️ Editar Tarea' + (t.CreadoPor && USERS[t.CreadoPor] ? ' · la creó ' + USERS[t.CreadoPor].nombre : '');
   document.getElementById('btnGuardar').textContent  = 'Guardar cambios';
   document.getElementById('mTitulo').value      = t.Titulo;
   document.getElementById('mAsignado').value    = t.Asignado || 'fernando';
@@ -1020,6 +1032,9 @@ function fijarSelect(selId, valor, mapaNombres) {
 async function guardarTarea() {
   const titulo = document.getElementById('mTitulo').value.trim();
   if (!titulo) { toast('El título es obligatorio', 'err'); return; }
+  if (yo() !== 'fernando' && document.getElementById('mAsignado').value === 'fernando') {
+    toast('Solo Fernando puede crear o asignarse pendientes', 'err'); return;
+  }
 
   const btn = document.getElementById('btnGuardar');
   btn.disabled = true;
@@ -1044,11 +1059,11 @@ async function guardarTarea() {
 
     if (modoEditar) {
       const idx = ITEMS.findIndex(x => x.ID === payload.ID);
-      if (idx !== -1) ITEMS[idx] = normalizar(payload);
+      if (idx !== -1) ITEMS[idx] = normalizar(Object.assign({ CreadoPor: ITEMS[idx].CreadoPor }, payload));
       toast('✅ Tarea actualizada');
       logHistorial('Actualizó tarea CRM', payload.Titulo);
     } else {
-      ITEMS.unshift(normalizar(payload));
+      ITEMS.unshift(normalizar(Object.assign({ CreadoPor: yo() }, payload)));
       toast('✅ Tarea creada');
       logHistorial('Creó tarea CRM', payload.Titulo);
     }
@@ -1068,6 +1083,7 @@ async function guardarTarea() {
 async function eliminarTarea(id) {
   const t = ITEMS.find(x => x.ID === id);
   if (!t) return;
+  if (!puedeTocar(t)) { toast('Solo Fernando puede cambiar sus pendientes', 'err'); return; }
   if (!confirm(`¿Eliminar la tarea "${t.Titulo}"?`)) return;
   try {
     await api(ENDPOINT, { accion: 'delete', ID: id });

@@ -67,6 +67,11 @@
     }).then(function (r) { return r.json(); });
   }
 
+  // Copia de las pantallas del CRM (abre aunque GitHub no conteste con datos móviles)
+  if ('serviceWorker' in navigator && window === window.top) {
+    try { navigator.serviceWorker.register(base + 'sw.js', { scope: base }).catch(function () {}); } catch (e) {}
+  }
+
   window.CRM_AUTH = {
     token: token,
     usuario: leer(KU),
