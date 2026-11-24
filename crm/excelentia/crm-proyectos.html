@@ -62,6 +62,8 @@ th.th-num{text-align:right}
 .renov-proxima{color:#b45309;font-weight:700}
 .renov-vencida{color:#dc2626;font-weight:700}
 .util-neg{color:#dc2626}
+.fee-futuro{color:#8a90a0;font-style:italic}
+.fee-futuro small{display:block;font-size:.66rem;font-style:normal;color:#8a90a0}
 .form-sec{grid-column:1/-1;font-size:.72rem;font-weight:800;color:#1a3a6b;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid #dde1e9;padding-top:.7rem;margin-top:.2rem}
 .form-hint{font-size:.7rem;color:#8a90a0}
 .celda-prob{color:#4a5068}
@@ -666,6 +668,15 @@ function diasA(fecha){
   const [y,m,d] = fecha.slice(0,10).split('-').map(Number);
   return Math.round((new Date(y, m-1, d) - hoy) / 86400000);
 }
+function feeFuturo(p){
+  const d = diasA(p.InicioOperacion);
+  return d !== null && d > 0;
+}
+function mesCorto(fecha){
+  const M = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const [y,m] = fecha.slice(0,10).split('-').map(Number);
+  return M[m-1] + ' ' + String(y).slice(2);
+}
 function claseRenov(p){
   if(p.Status === 'perdido') return '';
   const d = diasA(p.FinForzoso);
@@ -882,9 +893,9 @@ function renderTabla(lista){
       <td class="celda-num">${p.Contratado ? fmt$(p.Contratado) : '—'}</td>
       <td class="celda-num">${p.Onboarding ? fmt$(p.Onboarding) : '—'}</td>
       <td class="celda-num" title="${p.Mensual ? 'Fee mensual ' + fmt$(p.Mensual) : 'Sin fee mensual'}">${p.Anualizado ? fmt$(p.Anualizado) : '—'}</td>
-      <td class="celda-num" title="${p.FeeMonto && p.FeeMoneda === 'USD' ? 'USD ' + p.FeeMonto + ' al tipo de cambio ' + p.TipoCambio : ''}">${p.Mensual ? fmt$(p.Mensual) : '—'}</td>
+      <td class="celda-num ${feeFuturo(p) ? 'fee-futuro' : ''}" title="${feeFuturo(p) ? 'Aún no se cobra; empieza ' + fmtDate(p.InicioOperacion) + '. ' : ''}${p.FeeMonto && p.FeeMoneda === 'USD' ? 'USD ' + p.FeeMonto + ' al tipo de cambio ' + p.TipoCambio : ''}">${p.Mensual ? fmt$(p.Mensual) + (feeFuturo(p) ? `<small>desde ${mesCorto(p.InicioOperacion)}</small>` : '') : '—'}</td>
       <td class="celda-num ${p.UtilidadOnboarding < 0 ? 'util-neg' : ''}" title="${horasTxt(p)}">${p.Onboarding || p.HorasFernando || p.HorasAdolfo ? fmt$(p.UtilidadOnboarding) : '—'}</td>
-      <td class="celda-num ${p.UtilidadFee !== null && p.UtilidadFee < 0 ? 'util-neg' : ''}" title="${costosTxt(p)}">${p.UtilidadFee !== null ? fmt$(p.UtilidadFee) : '—'}</td>
+      <td class="celda-num ${feeFuturo(p) ? 'fee-futuro' : (p.UtilidadFee !== null && p.UtilidadFee < 0 ? 'util-neg' : '')}" title="${feeFuturo(p) ? 'Proyectada: el fee aún no se cobra. ' : ''}${costosTxt(p)}">${p.UtilidadFee !== null ? fmt$(p.UtilidadFee) + (feeFuturo(p) ? '<small>proyectada</small>' : '') : '—'}</td>
       <td style="white-space:nowrap">${p.InicioOperacion ? fmtDate(p.InicioOperacion) : '—'}</td>
       <td style="white-space:nowrap" class="${claseRenov(p)}" title="${tituloRenov(p)}">${p.FinForzoso ? fmtDate(p.FinForzoso) : '—'}</td>
       <td class="celda-num">${p.Cobrado ? fmt$(p.Cobrado) : '—'}</td>
