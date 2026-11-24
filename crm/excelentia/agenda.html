@@ -308,11 +308,64 @@ function cerrarRenovacion(ok){
   if(f) f(ok);
 }
 
+// La renovación de Google abre una ventanita que jala el foco a Chrome; por eso
+// SOLO se renueva cuando la Agenda está a la vista y Chrome tiene el foco.
+// Si no, se deja pendiente hasta que vuelvas a la Agenda.
+let renovPendiente = false;
+let ultimoIntento = 0;
+const ESPERA_REINTENTO_MS = 2 * 60 * 1000;
+
+function agendaEnUso(){
+  try{
+    if(document.visibilityState !== 'visible') return false;
+    const t = window.top;
+    if(t && t.document && !t.document.hasFocus()) return false;
+    const f = window.frameElement;
+    if(f && f.getClientRects().length === 0) return false;   // pestaña de la Agenda oculta en el CRM
+    return true;
+  }catch(e){
+    return document.visibilityState === 'visible' && document.hasFocus();
+  }
+}
+
+// Si otra pestaña ya renovó, se usa ese pase sin abrir ninguna ventana
+function adoptarTokenGuardado(){
+  const o = leerToken();
+  if(!o) return false;
+  accessToken = o.token;
+  if(o.email) userEmail = o.email;
+  programarRenovacion(Math.floor((o.exp - Date.now()) / 1000));
+  renovPendiente = false;
+  return true;
+}
+
+function renovarSiEnUso(){
+  if(adoptarTokenGuardado()) return;
+  if(!agendaEnUso()){ renovPendiente = true; return; }
+  if(Date.now() - ultimoIntento < ESPERA_REINTENTO_MS){ renovPendiente = true; return; }
+  ultimoIntento = Date.now();
+  renovPendiente = false;
+  renovarSilencioso().then(ok => { if(!ok) renovPendiente = true; });
+}
+
+function revisarPendiente(){ if(renovPendiente) renovarSiEnUso(); }
+
 function programarRenovacion(expiresInSec){
   if(timerRenov) clearTimeout(timerRenov);
-  const ms = Math.max((Number(expiresInSec || 3600) * 1000) - MARGEN_MS, 30000);
-  timerRenov = setTimeout(() => { renovarSilencioso(); }, ms);
+  const segs = Number(expiresInSec || 3600);
+  let ms = segs * 1000 - MARGEN_MS;
+  // Google a veces devuelve el mismo pase ya por vencer: se espera a que venza
+  // de verdad en vez de reintentar cada 30 segundos
+  if(ms < 60000) ms = Math.max(segs * 1000 + 5000, 60000);
+  timerRenov = setTimeout(renovarSiEnUso, ms);
 }
+
+window.addEventListener('storage', (e) => { if(e.key === LS_KEY && conectado) adoptarTokenGuardado(); });
+document.addEventListener('visibilitychange', revisarPendiente);
+window.addEventListener('focus', revisarPendiente);
+window.addEventListener('resize', revisarPendiente);            // la pestaña de la Agenda se vuelve a mostrar
+try{ window.top.addEventListener('focus', revisarPendiente); }catch(e){}
+document.addEventListener('pointerdown', revisarPendiente, true);
 
 // ════════════════════════════════════════════
 // GOOGLE IDENTITY SERVICES
@@ -352,6 +405,8 @@ async function arrancarSesion(){
     onConnected();          // si el token ya no sirve, el 401 lo renueva solo
     return;
   }
+  if(!agendaEnUso()){ renovPendiente = true; showDesconectado(); return; }
+  ultimoIntento = Date.now();
   const ok = await renovarSilencioso();
   if(!ok) showDesconectado();
 }
@@ -367,6 +422,7 @@ function desconectar(){
     google.accounts.oauth2.revoke(accessToken, () => {});
   }
   if(timerRenov) clearTimeout(timerRenov);
+  renovPendiente = false;
   borrarToken();
   olvidarCorreo();
   accessToken = null; userEmail = null; conectado = false;
