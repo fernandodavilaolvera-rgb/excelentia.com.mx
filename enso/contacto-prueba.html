@@ -21,12 +21,12 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:40px;max-wid
 </head>
 <body>
 <header>ENSO Japan</header>
-<div class="aviso-prueba no-print">Preview page: every request sent here enters the ENSO OS memory as a new inquiry; please use a test name when trying it.</div>
+<div class="aviso-prueba no-print">Preview page: requests sent from this page are marked as a test and do not enter ENSO OS as real inquiries.</div>
 <main>
 <h1>Plan a trip to Japan with us</h1>
 <p class="intro">Travel advisors and travelers can write to us here; our team in Japan replies by email.</p>
 <!-- ENSO · Formulario de contacto (pegar donde va el formulario; no requiere nada más) -->
-<div id="enso-cf">
+<div id="enso-cf" data-prueba="1" data-privacidad="https://ensojapan.com/privacy">
 <style>
 #enso-cf{max-width:720px;margin:0 auto;font-family:inherit;color:inherit}
 #enso-cf form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -40,10 +40,17 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:40px;max-wid
 #enso-cf button[disabled]{opacity:.6;cursor:wait}
 #enso-cf .msg{grid-column:1/-1;font-size:14px;min-height:1em}
 #enso-cf .msg.err{color:#8a2e1c}
+#enso-cf .tipo{display:flex;gap:18px;flex-wrap:wrap;border:none;padding:0;margin:0}
+#enso-cf .tipo legend{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8;margin-bottom:8px;padding:0}
+#enso-cf .tipo label{text-transform:none;letter-spacing:0;font-size:15px;opacity:1;display:flex;align-items:center;gap:8px;cursor:pointer}
+#enso-cf .tipo input{width:auto}
+#enso-cf .priv{grid-column:1/-1;font-size:12px;opacity:.75;margin:0}
+#enso-cf .priv a{color:inherit}
 #enso-cf .ok{padding:28px;border:1px solid #cfc7ba;border-radius:12px;text-align:center}
 @media (max-width:600px){#enso-cf form{grid-template-columns:1fr}}
 </style>
 <form novalidate>
+  <fieldset class="tipo full"><legend data-t="tipo"></legend><label><input type="radio" name="tipo" value="agencia" required> <span data-t="tipo_agencia"></span></label><label><input type="radio" name="tipo" value="viajero" required> <span data-t="tipo_viajero"></span></label></fieldset>
   <div class="c"><label for="ecf-nombre" data-t="nombre"></label><input id="ecf-nombre" name="nombre" autocomplete="name" required maxlength="120"></div>
   <div class="c"><label for="ecf-email" data-t="email"></label><input id="ecf-email" name="email" type="email" autocomplete="email" required maxlength="160"></div>
   <div class="c"><label for="ecf-agencia" data-t="agencia"></label><input id="ecf-agencia" name="agencia" autocomplete="organization" maxlength="120"></div>
@@ -52,6 +59,7 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:40px;max-wid
   <div class="c"><label for="ecf-viajeros" data-t="viajeros"></label><input id="ecf-viajeros" name="viajeros" type="number" min="1" max="999" inputmode="numeric"></div>
   <div class="c full"><label for="ecf-mensaje" data-t="mensaje"></label><textarea id="ecf-mensaje" name="mensaje" required maxlength="4000"></textarea></div>
   <div class="hp" aria-hidden="true"><label for="ecf-sw">Website</label><input id="ecf-sw" name="sitio_web" tabindex="-1" autocomplete="off"></div>
+  <p class="priv"><span data-t="priv"></span> <a target="_blank" rel="noopener" data-t="priv_liga"></a>.</p>
   <div class="msg" role="status" aria-live="polite"></div>
   <button type="submit" data-t="enviar"></button>
 </form>
@@ -59,20 +67,24 @@ h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:40px;max-wid
 (function () {
   var URL_ENSO = 'https://n8n.excelentia.com.mx/webhook/enso-contacto';
   var T = {
-    en: { nombre: 'Name *', email: 'Email *', agencia: 'Agency (if you are a travel advisor)', pais: 'Country', fechas: 'Travel dates (approximate)', viajeros: 'Number of travelers', mensaje: 'Tell us about the trip *', enviar: 'Send', falta: 'Please complete your name, a valid email and a few words about the trip.', error: 'The message could not be sent; please try again in a moment or write to info@ensojapan.com.', gracias: '<strong>Thank you.</strong><br>We received your request and our team in Japan will reply by email shortly.' },
-    es: { nombre: 'Nombre *', email: 'Correo *', agencia: 'Agencia (si eres travel advisor)', pais: 'País', fechas: 'Fechas del viaje (aproximadas)', viajeros: 'Número de viajeros', mensaje: 'Cuéntanos del viaje *', enviar: 'Enviar', falta: 'Completa tu nombre, un correo válido y unas palabras sobre el viaje.', error: 'No se pudo enviar; intenta de nuevo en un momento o escribe a info@ensojapan.com.', gracias: '<strong>Gracias.</strong><br>Recibimos tu solicitud y nuestro equipo en Japón te responderá por correo.' },
-    pt: { nombre: 'Nome *', email: 'E-mail *', agencia: 'Agência (se você é agente de viagens)', pais: 'País', fechas: 'Datas da viagem (aproximadas)', viajeros: 'Número de viajantes', mensaje: 'Conte-nos sobre a viagem *', enviar: 'Enviar', falta: 'Preencha seu nome, um e-mail válido e algumas palavras sobre a viagem.', error: 'Não foi possível enviar; tente novamente em instantes ou escreva para info@ensojapan.com.', gracias: '<strong>Obrigado.</strong><br>Recebemos sua solicitação e nossa equipe no Japão responderá por e-mail.' }
+    en: { tipo: 'I am writing as *', tipo_agencia: 'A travel agency or advisor', tipo_viajero: 'A traveler planning my own trip', priv: 'Your details are used only to reply to this request; see our', priv_liga: 'privacy notice', faltatipo: 'Please tell us whether you write from an agency or as a traveler.', nombre: 'Name *', email: 'Email *', agencia: 'Agency (if you are a travel advisor)', pais: 'Country', fechas: 'Travel dates (approximate)', viajeros: 'Number of travelers', mensaje: 'Tell us about the trip *', enviar: 'Send', falta: 'Please complete your name, a valid email and a few words about the trip.', error: 'The message could not be sent; please try again in a moment or write to info@ensojapan.com.', gracias: '<strong>Thank you.</strong><br>We received your request and our team in Japan will reply by email shortly.' },
+    es: { tipo: 'Escribo como *', tipo_agencia: 'Agencia o travel advisor', tipo_viajero: 'Viajero que planea su propio viaje', priv: 'Tus datos se usan solo para responder esta solicitud; consulta nuestro', priv_liga: 'aviso de privacidad', faltatipo: 'Indica si escribes desde una agencia o como viajero.', nombre: 'Nombre *', email: 'Correo *', agencia: 'Agencia (si eres travel advisor)', pais: 'País', fechas: 'Fechas del viaje (aproximadas)', viajeros: 'Número de viajeros', mensaje: 'Cuéntanos del viaje *', enviar: 'Enviar', falta: 'Completa tu nombre, un correo válido y unas palabras sobre el viaje.', error: 'No se pudo enviar; intenta de nuevo en un momento o escribe a info@ensojapan.com.', gracias: '<strong>Gracias.</strong><br>Recibimos tu solicitud y nuestro equipo en Japón te responderá por correo.' },
+    pt: { tipo: 'Escrevo como *', tipo_agencia: 'Agência ou agente de viagens', tipo_viajero: 'Viajante planejando minha própria viagem', priv: 'Seus dados são usados apenas para responder a esta solicitação; consulte nosso', priv_liga: 'aviso de privacidade', faltatipo: 'Indique se você escreve de uma agência ou como viajante.', nombre: 'Nome *', email: 'E-mail *', agencia: 'Agência (se você é agente de viagens)', pais: 'País', fechas: 'Datas da viagem (aproximadas)', viajeros: 'Número de viajantes', mensaje: 'Conte-nos sobre a viagem *', enviar: 'Enviar', falta: 'Preencha seu nome, um e-mail válido e algumas palavras sobre a viagem.', error: 'Não foi possível enviar; tente novamente em instantes ou escreva para info@ensojapan.com.', gracias: '<strong>Obrigado.</strong><br>Recebemos sua solicitação e nossa equipe no Japão responderá por e-mail.' }
   };
   var raiz = document.getElementById('enso-cf'), f = raiz.querySelector('form'), msg = raiz.querySelector('.msg');
   var idioma = (raiz.getAttribute('data-idioma') || document.documentElement.lang || navigator.language || 'en').slice(0, 2).toLowerCase();
   if (!T[idioma]) idioma = 'en';
   var t = T[idioma];
   raiz.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = t[e.getAttribute('data-t')]; });
+  var priv = raiz.getAttribute('data-privacidad'), lp = raiz.querySelector('.priv');
+  if (priv) lp.querySelector('a').href = priv; else lp.remove();
   f.addEventListener('input', function () { if (msg.className.indexOf('err') > -1) { msg.className = 'msg'; msg.textContent = ''; } });
   f.addEventListener('submit', function (ev) {
     ev.preventDefault();
     var d = {}; new FormData(f).forEach(function (v, k) { d[k] = String(v).trim(); });
     d.idioma = idioma; d.pagina = location.href;
+    if (raiz.getAttribute('data-prueba') === '1') d.prueba = true;
+    if (!d.tipo) { msg.className = 'msg err'; msg.textContent = t.faltatipo; return; }
     if (d.nombre.length < 2 || !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(d.email) || d.mensaje.length < 5) { msg.className = 'msg err'; msg.textContent = t.falta; return; }
     var b = f.querySelector('button'); b.disabled = true; msg.className = 'msg'; msg.textContent = '';
     fetch(URL_ENSO, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(d) })
