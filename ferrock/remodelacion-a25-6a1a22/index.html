@@ -87,6 +87,8 @@ tr.tot td{background:var(--papel);font-weight:800}
 .btn{background:var(--tinta);color:var(--blanco);border:0;border-radius:999px;padding:.6rem 1.1rem;font-weight:700;font-size:13.5px;white-space:nowrap}
 .btn.sec{background:transparent;color:var(--tinta);border:1px solid var(--tinta)}
 .btn.peligro{background:transparent;color:var(--error);border:1px solid var(--error)}
+.btn-ed:disabled{opacity:.5}
+#btnRec{font-size:16px;padding:.25rem .7rem;line-height:1.3}
 .btn-ed{background:none;border:1px solid var(--linea);border-radius:999px;padding:.35rem .8rem;font-size:13px;font-weight:600;color:var(--tinta2)}
 body.ed .btn-ed{background:var(--rosa-osc);color:#fff;border-color:var(--rosa-osc)}
 .solo-ed{display:none}body.ed .solo-ed{display:flex}
@@ -125,7 +127,7 @@ body.ed .tarea:hover,body.ed tr[data-t]:hover td,body.ed tr[data-g]:hover td{bac
  a[href]:after{content:none}
 }
 </style></head><body>
-<div class="barra"><div class="top"><div class="marca">Remodelación Alondra 25<small>Control de obra y gastos</small></div><span class="chip" id="chip">Cargando…</span><button class="btn-ed no-print" id="btnEd">Editar</button></div>
+<div class="barra"><div class="top"><div class="marca">Remodelación Alondra 25<small>Control de obra y gastos</small></div><span class="chip" id="chip">Cargando…</span><button class="btn-ed no-print" id="btnRec" aria-label="Recargar" title="Recargar">↻</button><button class="btn-ed no-print" id="btnEd">Editar</button></div>
 <nav class="tabs no-print" id="tabs"><button data-v="resumen" class="on">Resumen</button><button data-v="pendientes">Pendientes</button><button data-v="presupuesto">Presupuesto</button><button data-v="gastos">Gastos</button></nav></div>
 <main class="wrap">
 <section class="vista on" id="v-resumen"><h2>Resumen</h2><p class="ayuda">Tope de la remodelación, lo estimado, lo gastado y cómo vamos por fase.</p><div class="acciones solo-ed no-print"><button class="btn" onclick="abrirGasto()">+ Gasto</button><button class="btn sec" onclick="abrirAjustes()">Ajustes</button></div><div id="resumen"></div></section>
@@ -282,6 +284,7 @@ function abrirAjustes(){modal(`<h3>Ajustes</h3>
   <div class="pie-m"><button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="bOk">Guardar</button></div>`);
   $('bOk').onclick=async()=>{const t=num($('aTop').value),i=num($('aImp').value),j=num($('aTar').value);
     if(await guardar(X=>{if(t!=null)X.tope=t;if(i!=null)X.imprevistos_pct=i;if(j!=null)X.tarifa_jorge=j;}))cerrar();};}
+$('btnRec').onclick=async()=>{$('btnRec').disabled=true;$('chip').textContent='Recargando…';await cargar();$('btnRec').disabled=false;};
 $('velo').addEventListener('click',e=>{if(e.target.id==='velo')cerrar();});
 cargar();
 </script></body></html>
