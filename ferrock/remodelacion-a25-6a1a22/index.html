@@ -127,8 +127,8 @@ body.ed .tarea:hover,body.ed tr[data-t]:hover td,body.ed tr[data-g]:hover td{bac
 <main class="wrap">
 <section class="vista on" id="v-resumen"><h2>Resumen</h2><p class="ayuda">Tope de la remodelación, lo estimado, lo gastado y cómo vamos por fase.</p><div class="acciones solo-ed no-print"><button class="btn" onclick="abrirGasto()">+ Gasto</button><button class="btn sec" onclick="abrirAjustes()">Ajustes</button></div><div id="resumen"></div></section>
 <section class="vista" id="v-pendientes"><h2>Pendientes</h2><p class="ayuda">Los pasos de la obra en el orden en que conviene hacerlos.</p>
-<div class="acciones solo-ed no-print"><button class="btn" onclick="abrirTarea()">+ Paso</button><span class="ayuda" style="margin:0;align-self:center">Toca el círculo para cambiar el estado; toca el texto para editar.</span></div><div class="seg no-print" id="filtro"><button data-f="todos" class="on">Todos</button><button data-f="Jorge">Jorge</button><button data-f="Fer">Fer</button><button data-f="abiertos">Sin terminar</button></div><div id="pendientes"></div></section>
-<section class="vista" id="v-presupuesto"><h2>Presupuesto</h2><p class="ayuda">Costo estimado de cada paso, separado en material y mano de obra, contra lo que ya se gastó.</p><div class="acciones solo-ed no-print"><span class="ayuda" style="margin:0">Toca un paso para poner su estimado.</span></div><div id="presupuesto"></div></section>
+<div class="acciones solo-ed no-print"><button class="btn" onclick="abrirTarea()">+ Paso</button><span class="ayuda" style="margin:0;align-self:center">Toca el círculo para terminar un paso o regresarlo a pendiente; toca el texto para editarlo.</span></div><div class="seg no-print" id="filtro"><button data-f="todos" class="on">Todos</button><button data-f="Jorge">Jorge</button><button data-f="Fer">Fer</button><button data-f="abiertos">Sin terminar</button></div><div id="pendientes"></div></section>
+<section class="vista" id="v-presupuesto"><h2>Presupuesto</h2><p class="ayuda">Cuánto creemos que costará cada paso (material más mano de obra) contra lo que ya se gastó en él. Los pasos sin cotización dicen "por estimar".</p><div class="acciones solo-ed no-print"><span class="ayuda" style="margin:0">Toca un paso para poner su estimado.</span></div><div id="presupuesto"></div></section>
 <section class="vista" id="v-gastos"><h2>Gastos</h2><p class="ayuda">Todo lo que se ha pagado, del más reciente al más antiguo.</p><div class="acciones solo-ed no-print"><button class="btn" onclick="abrirGasto()">+ Gasto</button><span class="ayuda" style="margin:0;align-self:center">Toca un gasto para corregirlo o borrarlo.</span></div><div id="gastos"></div></section>
 <p class="pie" id="pie"></p>
 </main>
@@ -172,7 +172,7 @@ function pintar(){
   (D.fases||[]).forEach((f,i)=>{filas+=`<tr class="fase"><td colspan="5">${i+1}. ${esc(f)}</td></tr>`;
     T.filter(t=>t.fase===i).forEach(t=>{const e=estT(t),g=gastoT(t.id);totM+=e.mat||0;totO+=e.mo||0;totG+=g;
       const pe='<span class="pe">por estimar</span>';
-      filas+=`<tr data-t="${t.id}"><td>${esc(t.titulo)}<span class="sub">${esc(t.zona)}${t.dias?' · '+t.dias+' días de Jorge':''}</span></td><td class="m">${e.mat!=null?mx(e.mat):pe}</td><td class="m">${e.mo!=null?mx(e.mo):pe}</td><td class="m">${e.tot!=null?mx(e.tot):'—'}</td><td class="m ${e.tot!=null&&g>e.tot?'over':''}">${g?mx(g):'—'}</td></tr>`;});});
+      filas+=`<tr data-t="${t.id}"><td>${esc(t.titulo)}<span class="sub">${esc(t.zona)}${t.dias?' · '+t.dias+' días de Jorge':''}</span></td><td class="m">${e.mat!=null?mx(e.mat):'—'}</td><td class="m">${e.mo!=null?mx(e.mo):'—'}</td><td class="m">${e.tot!=null?mx(e.tot):pe}</td><td class="m ${e.tot!=null&&g>e.tot?'over':''}">${g?mx(g):'—'}</td></tr>`;});});
   filas+=`<tr class="tot"><td>Total</td><td class="m">${mx(totM)}</td><td class="m">${mx(totO)}</td><td class="m">${mx(totM+totO)}</td><td class="m">${mx(totG)}</td></tr>`;
   $('presupuesto').innerHTML=`<div class="tabla-w"><table><thead><tr><th>Paso</th><th class="m">Material</th><th class="m">Mano de obra</th><th class="m">Estimado</th><th class="m">Gastado</th></tr></thead><tbody>${filas}</tbody></table></div>
    <p class="ayuda" style="margin-top:.7rem">Mano de obra de Jorge calculada a ${mx(D.tarifa_jorge)} por día.</p>`;
@@ -183,16 +183,19 @@ function pintar(){
   if(D.actualizado)$('pie').textContent='Actualizado el '+new Date(D.actualizado).toLocaleString('es-MX',{dateStyle:'long',timeStyle:'short'});
 }
 let filtro='todos';
+function tarjetaT(t,conFase){const c=t.estado==='hecho'?'hecho':t.estado==='en proceso'?'proceso':'';
+  return `<div class="tarea ${c}" data-id="${t.id}"><span class="ic">${c==='hecho'?'✓':''}</span><div class="cuerpo"><div class="tt">${esc(t.titulo)}</div><div class="zona">${esc(t.zona)}${conFase?' · Fase '+(t.fase+1):''}</div>${t.nota?`<div class="nota">${esc(t.nota)}</div>`:''}
+    <div class="pills"><span class="pill ${(t.resp||'').includes('Jorge')?'jorge':'fer'}">${esc(t.resp)}</span>${c?`<span class="pill ${c}">${c==='hecho'?'Terminado':'En proceso'}</span>`:''}</div></div></div>`;}
 function pintarPend(){
-  const T=D.tareas||[];let h='';
-  (D.fases||[]).forEach((f,i)=>{let ts=T.filter(t=>t.fase===i);
-    if(filtro==='Jorge')ts=ts.filter(t=>(t.resp||'').includes('Jorge'));if(filtro==='Fer')ts=ts.filter(t=>(t.resp||'').includes('Fer'));if(filtro==='abiertos')ts=ts.filter(t=>t.estado!=='hecho');
-    if(!ts.length)return;const hh=T.filter(t=>t.fase===i&&t.estado==='hecho').length,tot=T.filter(t=>t.fase===i).length;
-    h+=`<div class="fase-t">${i+1}. ${esc(f)}<small>${hh} de ${tot}</small></div>`;
-    ts.forEach(t=>{const c=t.estado==='hecho'?'hecho':t.estado==='en proceso'?'proceso':'';
-      h+=`<div class="tarea ${c}" data-id="${t.id}"><span class="ic">${c==='hecho'?'✓':''}</span><div class="cuerpo"><div class="tt">${esc(t.titulo)}</div><div class="zona">${esc(t.zona)}</div>${t.nota?`<div class="nota">${esc(t.nota)}</div>`:''}
-      <div class="pills"><span class="pill ${(t.resp||'').includes('Jorge')?'jorge':'fer'}">${esc(t.resp)}</span>${c?`<span class="pill ${c}">${c==='hecho'?'Terminado':'En proceso'}</span>`:''}</div></div></div>`;});});
-  $('pendientes').innerHTML=h||'<div class="tarjeta vacio">No hay pasos con este filtro.</div>';
+  let T=D.tareas||[];let h='';
+  if(filtro==='Jorge')T=T.filter(t=>(t.resp||'').includes('Jorge'));if(filtro==='Fer')T=T.filter(t=>(t.resp||'').includes('Fer'));
+  (D.fases||[]).forEach((f,i)=>{const ts=T.filter(t=>t.fase===i&&t.estado!=='hecho');if(!ts.length)return;
+    const all=(D.tareas||[]).filter(t=>t.fase===i),hh=all.filter(t=>t.estado==='hecho').length;
+    h+=`<div class="fase-t">${i+1}. ${esc(f)}<small>${hh} de ${all.length}</small></div>`+ts.map(t=>tarjetaT(t)).join('');});
+  if(!h)h='<div class="tarjeta vacio">No hay pasos pendientes con este filtro.</div>';
+  const hechos=T.filter(t=>t.estado==='hecho');
+  if(filtro!=='abiertos'&&hechos.length)h+=`<div class="fase-t">Terminados<small>${hechos.length}</small></div>`+hechos.map(t=>tarjetaT(t,true)).join('');
+  $('pendientes').innerHTML=h;
 }
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.vista').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));window.scrollTo(0,0);});
@@ -223,7 +226,7 @@ const num=v=>{v=String(v||'').replace(/[$,\s]/g,'');return v===''?null:+v;};
 const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const ESTADOS=['pendiente','en proceso','hecho'];
 document.addEventListener('click',e=>{if(!document.body.classList.contains('ed'))return;
-  const ic=e.target.closest('.tarea .ic');if(ic){const id=ic.parentElement.dataset.id;guardar(X=>{const t=X.tareas.find(t=>t.id===id);t.estado=ESTADOS[(ESTADOS.indexOf(t.estado)+1)%3];});return;}
+  const ic=e.target.closest('.tarea .ic');if(ic){const id=ic.parentElement.dataset.id;guardar(X=>{const t=X.tareas.find(t=>t.id===id);t.estado=t.estado==='hecho'?'pendiente':'hecho';});return;}
   const tc=e.target.closest('.tarea .cuerpo');if(tc){abrirTarea(tc.parentElement.dataset.id);return;}
   const tr=e.target.closest('tr[data-t]');if(tr){abrirTarea(tr.dataset.t);return;}
   const gr=e.target.closest('tr[data-g]');if(gr){abrirGasto(gr.dataset.g);return;}});
