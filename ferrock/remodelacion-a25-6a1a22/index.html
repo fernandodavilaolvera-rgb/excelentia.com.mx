@@ -84,6 +84,25 @@ tr.tot td{background:var(--papel);font-weight:800}
 .over{color:var(--error);font-weight:700}
 .vacio{text-align:center;color:var(--gris);font-size:14px;padding:2rem 1rem}
 .pie{font-size:12px;color:var(--gris);text-align:center;margin-top:2rem}
+.btn{background:var(--tinta);color:var(--blanco);border:0;border-radius:999px;padding:.6rem 1.1rem;font-weight:700;font-size:13.5px;white-space:nowrap}
+.btn.sec{background:transparent;color:var(--tinta);border:1px solid var(--tinta)}
+.btn.peligro{background:transparent;color:var(--error);border:1px solid var(--error)}
+.btn-ed{background:none;border:1px solid var(--linea);border-radius:999px;padding:.35rem .8rem;font-size:13px;font-weight:600;color:var(--tinta2)}
+body.ed .btn-ed{background:var(--rosa-osc);color:#fff;border-color:var(--rosa-osc)}
+.solo-ed{display:none}body.ed .solo-ed{display:flex}
+.acciones{gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+body.ed .tarea .ic,body.ed .tarea .cuerpo,body.ed tr[data-t],body.ed tr[data-g]{cursor:pointer}
+body.ed .tarea:hover,body.ed tr[data-t]:hover td,body.ed tr[data-g]:hover td{background:var(--arena-claro)}
+.velo{position:fixed;inset:0;background:rgba(42,38,34,.45);display:none;align-items:flex-start;justify-content:center;padding:1rem;z-index:50;overflow-y:auto}
+.velo.on{display:flex}
+.modal{background:var(--blanco);border-radius:18px;max-width:520px;width:100%;padding:1.4rem;margin:auto;position:relative}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;margin-bottom:.8rem;padding-right:2rem}
+.cerrar-x{position:absolute;top:.8rem;right:.8rem;width:36px;height:36px;border-radius:50%;border:1px solid var(--linea);background:var(--blanco);font-size:16px}
+.campo{margin-bottom:.8rem}.campo label{display:block;font-size:13px;font-weight:700;margin-bottom:.3rem}
+.campo input,.campo select,.campo textarea{font:inherit;font-size:16px;color:var(--tinta);background:var(--blanco);border:1px solid var(--linea);border-radius:10px;padding:.6rem .8rem;width:100%;min-height:44px}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.pie-m{display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;margin-top:1rem}.pie-m .izq{margin-right:auto}
+.msg{font-size:13px;font-weight:600;color:var(--error);min-height:1.2em;margin-top:.4rem}
 @media (max-width:600px){
  .marca{font-size:1.35rem}.kpi .n{font-size:1.7rem}
  .mini{width:70px}
@@ -103,16 +122,17 @@ tr.tot td{background:var(--papel);font-weight:800}
  a[href]:after{content:none}
 }
 </style></head><body>
-<div class="barra"><div class="top"><div class="marca">Remodelación Alondra 25<small>Control de obra y gastos</small></div><span class="chip" id="chip">Cargando…</span></div>
+<div class="barra"><div class="top"><div class="marca">Remodelación Alondra 25<small>Control de obra y gastos</small></div><span class="chip" id="chip">Cargando…</span><button class="btn-ed no-print" id="btnEd">Editar</button></div>
 <nav class="tabs no-print" id="tabs"><button data-v="resumen" class="on">Resumen</button><button data-v="pendientes">Pendientes</button><button data-v="presupuesto">Presupuesto</button><button data-v="gastos">Gastos</button></nav></div>
 <main class="wrap">
-<section class="vista on" id="v-resumen"><h2>Resumen</h2><p class="ayuda">Tope de la remodelación, lo estimado, lo gastado y cómo vamos por fase.</p><div id="resumen"></div></section>
+<section class="vista on" id="v-resumen"><h2>Resumen</h2><p class="ayuda">Tope de la remodelación, lo estimado, lo gastado y cómo vamos por fase.</p><div class="acciones solo-ed no-print"><button class="btn" onclick="abrirGasto()">+ Gasto</button><button class="btn sec" onclick="abrirAjustes()">Ajustes</button></div><div id="resumen"></div></section>
 <section class="vista" id="v-pendientes"><h2>Pendientes</h2><p class="ayuda">Los pasos de la obra en el orden en que conviene hacerlos.</p>
-<div class="seg no-print" id="filtro"><button data-f="todos" class="on">Todos</button><button data-f="Jorge">Jorge</button><button data-f="Fer">Fer</button><button data-f="abiertos">Sin terminar</button></div><div id="pendientes"></div></section>
-<section class="vista" id="v-presupuesto"><h2>Presupuesto</h2><p class="ayuda">Costo estimado de cada paso, separado en material y mano de obra, contra lo que ya se gastó.</p><div id="presupuesto"></div></section>
-<section class="vista" id="v-gastos"><h2>Gastos</h2><p class="ayuda">Todo lo que se ha pagado, del más reciente al más antiguo.</p><div id="gastos"></div></section>
+<div class="acciones solo-ed no-print"><button class="btn" onclick="abrirTarea()">+ Paso</button><span class="ayuda" style="margin:0;align-self:center">Toca el círculo para cambiar el estado; toca el texto para editar.</span></div><div class="seg no-print" id="filtro"><button data-f="todos" class="on">Todos</button><button data-f="Jorge">Jorge</button><button data-f="Fer">Fer</button><button data-f="abiertos">Sin terminar</button></div><div id="pendientes"></div></section>
+<section class="vista" id="v-presupuesto"><h2>Presupuesto</h2><p class="ayuda">Costo estimado de cada paso, separado en material y mano de obra, contra lo que ya se gastó.</p><div class="acciones solo-ed no-print"><span class="ayuda" style="margin:0">Toca un paso para poner su estimado.</span></div><div id="presupuesto"></div></section>
+<section class="vista" id="v-gastos"><h2>Gastos</h2><p class="ayuda">Todo lo que se ha pagado, del más reciente al más antiguo.</p><div class="acciones solo-ed no-print"><button class="btn" onclick="abrirGasto()">+ Gasto</button><span class="ayuda" style="margin:0;align-self:center">Toca un gasto para corregirlo o borrarlo.</span></div><div id="gastos"></div></section>
 <p class="pie" id="pie"></p>
 </main>
+<div class="velo no-print" id="velo"><div class="modal"><button class="cerrar-x" onclick="cerrar()">✕</button><div id="mbody"></div></div></div>
 <script>
 const SB={url:'https://rcotlydvsubvdapubnkx.supabase.co',key:'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T'};
 const COD='remodelacion-a25-6a1a22';
@@ -121,9 +141,9 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const mx=n=>'$'+Math.round(n||0).toLocaleString('es-MX');
 const fecha=f=>{if(!f)return'';const d=new Date(f+'T12:00:00');return d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});};
-async function rpc(fn,body){const r=await fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB.key,'Authorization':'Bearer '+SB.key},body:JSON.stringify(body)});if(!r.ok)throw new Error(r.status);return r.json();}
+async function rpc(fn,body){const r=await fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB.key,'Authorization':'Bearer '+SB.key},body:JSON.stringify(body)});if(!r.ok){let m=r.status;try{m=(await r.json()).message||m}catch(e){}throw new Error(m);}return r.json();}
 async function cargar(){
-  try{const res=await rpc('ferrock_pull',{p_codigo:COD,p_rev:0});const row=Array.isArray(res)?res[0]:res;
+  try{const res=await rpc('ferrock_prot_pull',{p_codigo:COD});const row=Array.isArray(res)?res[0]:res;
     if(row&&row.payload){D=row.payload;pintar();$('chip').textContent='Al día';$('chip').className='chip';}
   }catch(e){$('chip').textContent='Sin conexión';$('chip').className='chip err';}
 }
@@ -152,13 +172,13 @@ function pintar(){
   (D.fases||[]).forEach((f,i)=>{filas+=`<tr class="fase"><td colspan="5">${i+1}. ${esc(f)}</td></tr>`;
     T.filter(t=>t.fase===i).forEach(t=>{const e=estT(t),g=gastoT(t.id);totM+=e.mat||0;totO+=e.mo||0;totG+=g;
       const pe='<span class="pe">por estimar</span>';
-      filas+=`<tr><td>${esc(t.titulo)}<span class="sub">${esc(t.zona)}${t.dias?' · '+t.dias+' días de Jorge':''}</span></td><td class="m">${e.mat!=null?mx(e.mat):pe}</td><td class="m">${e.mo!=null?mx(e.mo):pe}</td><td class="m">${e.tot!=null?mx(e.tot):'—'}</td><td class="m ${e.tot!=null&&g>e.tot?'over':''}">${g?mx(g):'—'}</td></tr>`;});});
+      filas+=`<tr data-t="${t.id}"><td>${esc(t.titulo)}<span class="sub">${esc(t.zona)}${t.dias?' · '+t.dias+' días de Jorge':''}</span></td><td class="m">${e.mat!=null?mx(e.mat):pe}</td><td class="m">${e.mo!=null?mx(e.mo):pe}</td><td class="m">${e.tot!=null?mx(e.tot):'—'}</td><td class="m ${e.tot!=null&&g>e.tot?'over':''}">${g?mx(g):'—'}</td></tr>`;});});
   filas+=`<tr class="tot"><td>Total</td><td class="m">${mx(totM)}</td><td class="m">${mx(totO)}</td><td class="m">${mx(totM+totO)}</td><td class="m">${mx(totG)}</td></tr>`;
   $('presupuesto').innerHTML=`<div class="tabla-w"><table><thead><tr><th>Paso</th><th class="m">Material</th><th class="m">Mano de obra</th><th class="m">Estimado</th><th class="m">Gastado</th></tr></thead><tbody>${filas}</tbody></table></div>
    <p class="ayuda" style="margin-top:.7rem">Mano de obra de Jorge calculada a ${mx(D.tarifa_jorge)} por día.</p>`;
   const tn=Object.fromEntries(T.map(t=>[t.id,t.titulo+' · '+t.zona]));
   const gs=[...G].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
-  $('gastos').innerHTML=gs.length?`<div class="tabla-w"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th class="m">Monto</th></tr></thead><tbody>${gs.map(g=>`<tr><td style="white-space:nowrap">${fecha(g.fecha)}</td><td>${esc(g.concepto)}<span class="sub">${esc(tn[g.tarea]||'Sin paso asignado')}${g.proveedor?' · '+esc(g.proveedor):''}${g.nota?' · '+esc(g.nota):''}</span></td><td>${esc(g.tipo)}</td><td class="m">${mx(g.monto)}</td></tr>`).join('')}
+  $('gastos').innerHTML=gs.length?`<div class="tabla-w"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th class="m">Monto</th></tr></thead><tbody>${gs.map(g=>`<tr data-g="${g.id}"><td style="white-space:nowrap">${fecha(g.fecha)}</td><td>${esc(g.concepto)}<span class="sub">${esc(tn[g.tarea]||'Sin paso asignado')}${g.proveedor?' · '+esc(g.proveedor):''}${g.nota?' · '+esc(g.nota):''}</span></td><td>${esc(g.tipo)}</td><td class="m">${mx(g.monto)}</td></tr>`).join('')}
    <tr class="tot"><td colspan="3">Total</td><td class="m">${mx(gas)}</td></tr></tbody></table></div>`:'<div class="tarjeta vacio">Todavía no hay gastos registrados.</div>';
   if(D.actualizado)$('pie').textContent='Actualizado el '+new Date(D.actualizado).toLocaleString('es-MX',{dateStyle:'long',timeStyle:'short'});
 }
@@ -170,7 +190,7 @@ function pintarPend(){
     if(!ts.length)return;const hh=T.filter(t=>t.fase===i&&t.estado==='hecho').length,tot=T.filter(t=>t.fase===i).length;
     h+=`<div class="fase-t">${i+1}. ${esc(f)}<small>${hh} de ${tot}</small></div>`;
     ts.forEach(t=>{const c=t.estado==='hecho'?'hecho':t.estado==='en proceso'?'proceso':'';
-      h+=`<div class="tarea ${c}"><span class="ic">${c==='hecho'?'✓':''}</span><div class="cuerpo"><div class="tt">${esc(t.titulo)}</div><div class="zona">${esc(t.zona)}</div>${t.nota?`<div class="nota">${esc(t.nota)}</div>`:''}
+      h+=`<div class="tarea ${c}" data-id="${t.id}"><span class="ic">${c==='hecho'?'✓':''}</span><div class="cuerpo"><div class="tt">${esc(t.titulo)}</div><div class="zona">${esc(t.zona)}</div>${t.nota?`<div class="nota">${esc(t.nota)}</div>`:''}
       <div class="pills"><span class="pill ${(t.resp||'').includes('Jorge')?'jorge':'fer'}">${esc(t.resp)}</span>${c?`<span class="pill ${c}">${c==='hecho'?'Terminado':'En proceso'}</span>`:''}</div></div></div>`;});});
   $('pendientes').innerHTML=h||'<div class="tarjeta vacio">No hay pasos con este filtro.</div>';
 }
@@ -178,5 +198,81 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)
   document.querySelectorAll('.vista').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));window.scrollTo(0,0);});
 $('filtro').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;filtro=b.dataset.f;document.querySelectorAll('#filtro button').forEach(x=>x.classList.toggle('on',x===b));if(D)pintarPend();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)cargar();});
+
+let PIN=null;try{PIN=localStorage.getItem('remo_pin')}catch(e){}
+function modoEd(on){document.body.classList.toggle('ed',on);$('btnEd').textContent=on?'Salir':'Editar';}
+if(PIN)modoEd(true);
+function cerrar(){$('velo').classList.remove('on');}
+function modal(h){$('mbody').innerHTML=h;$('velo').classList.add('on');}
+$('btnEd').onclick=()=>{if(document.body.classList.contains('ed')){PIN=null;try{localStorage.removeItem('remo_pin')}catch(e){};modoEd(false);return;}
+  modal(`<h3>Modo edición</h3><div class="campo"><label>Clave</label><input id="fPin" type="password" autocomplete="off"></div><div class="msg" id="mMsg"></div><div class="pie-m"><button class="btn" id="bPin">Entrar</button></div>`);
+  setTimeout(()=>$('fPin').focus(),50);
+  const go=async()=>{$('bPin').disabled=true;try{const ok=await rpc('ferrock_prot_check',{p_codigo:COD,p_pin:$('fPin').value});
+    if(ok){PIN=$('fPin').value;try{localStorage.setItem('remo_pin',PIN)}catch(e){};modoEd(true);cerrar();}else{$('mMsg').textContent='Clave incorrecta';}}catch(e){$('mMsg').textContent='Sin conexión';}$('bPin').disabled=false;};
+  $('bPin').onclick=go;$('fPin').onkeydown=e=>{if(e.key==='Enter')go();};};
+async function guardar(mut){
+  $('chip').textContent='Guardando…';
+  try{const res=await rpc('ferrock_prot_pull',{p_codigo:COD});const row=Array.isArray(res)?res[0]:res;const X=row.payload;
+    mut(X);X.actualizado=new Date().toISOString();
+    await rpc('ferrock_prot_push',{p_codigo:COD,p_pin:PIN,p_payload:X});D=X;pintar();$('chip').textContent='Guardado ✓';$('chip').className='chip';return true;
+  }catch(e){if(String(e.message).includes('clave')){PIN=null;try{localStorage.removeItem('remo_pin')}catch(_){};modoEd(false);alertar('La clave ya no es válida; vuelve a entrar.');}
+    else alertar('No se guardó; revisa tu conexión.');$('chip').textContent='Sin guardar';$('chip').className='chip err';return false;}
+}
+function alertar(t){modal(`<h3>Aviso</h3><p>${esc(t)}</p><div class="pie-m"><button class="btn" onclick="cerrar()">Entendido</button></div>`);}
+const num=v=>{v=String(v||'').replace(/[$,\s]/g,'');return v===''?null:+v;};
+const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const ESTADOS=['pendiente','en proceso','hecho'];
+document.addEventListener('click',e=>{if(!document.body.classList.contains('ed'))return;
+  const ic=e.target.closest('.tarea .ic');if(ic){const id=ic.parentElement.dataset.id;guardar(X=>{const t=X.tareas.find(t=>t.id===id);t.estado=ESTADOS[(ESTADOS.indexOf(t.estado)+1)%3];});return;}
+  const tc=e.target.closest('.tarea .cuerpo');if(tc){abrirTarea(tc.parentElement.dataset.id);return;}
+  const tr=e.target.closest('tr[data-t]');if(tr){abrirTarea(tr.dataset.t);return;}
+  const gr=e.target.closest('tr[data-g]');if(gr){abrirGasto(gr.dataset.g);return;}});
+function abrirTarea(id){const t=id?D.tareas.find(t=>t.id===id):{fase:0,resp:'Jorge',estado:'pendiente'};
+  const op=(arr,v)=>arr.map((x,i)=>`<option value="${typeof x==='string'&&arr===ESTADOS?x:i}" ${(arr===ESTADOS?x===v:i===v)?'selected':''}>${esc(arr===ESTADOS?x[0].toUpperCase()+x.slice(1):(i+1)+'. '+x)}</option>`).join('');
+  modal(`<h3>${id?'Editar paso':'Nuevo paso'}</h3>
+  <div class="campo"><label>Paso</label><input id="fTit" value="${esc(t.titulo)}"></div>
+  <div class="campo"><label>Zona</label><input id="fZon" value="${esc(t.zona)}"></div>
+  <div class="dos"><div class="campo"><label>Fase</label><select id="fFas">${op(D.fases,t.fase)}</select></div>
+  <div class="campo"><label>Estado</label><select id="fEst">${op(ESTADOS,t.estado)}</select></div></div>
+  <div class="campo"><label>Responsable</label><input id="fRes" value="${esc(t.resp)}" list="lres"><datalist id="lres"><option>Jorge</option><option>Fer</option><option>Jorge y jardinero</option><option>Fer y Mary</option></datalist></div>
+  <div class="dos"><div class="campo"><label>Material estimado</label><input id="fMat" inputmode="decimal" value="${t.mat??''}"></div>
+  <div class="campo"><label>Días de Jorge</label><input id="fDia" inputmode="decimal" value="${t.dias??''}"></div></div>
+  <div class="campo"><label>Mano de obra estimada (si no es por días)</label><input id="fMo" inputmode="decimal" value="${t.mo??''}"></div>
+  <div class="campo"><label>Nota</label><textarea id="fNot">${esc(t.nota)}</textarea></div>
+  <div class="msg" id="mMsg"></div>
+  <div class="pie-m">${id?'<button class="btn peligro izq" id="bDel">Borrar</button>':''}<button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="bOk">Guardar</button></div>`);
+  $('bOk').onclick=async()=>{const tit=$('fTit').value.trim();if(!tit){$('mMsg').textContent='Escribe el nombre del paso';return;}
+    const v={titulo:tit,zona:$('fZon').value.trim(),fase:+$('fFas').value,estado:$('fEst').value,resp:$('fRes').value.trim()||'Jorge',mat:num($('fMat').value),dias:num($('fDia').value),mo:num($('fMo').value),nota:$('fNot').value.trim()};
+    for(const k of ['mat','dias','mo','nota'])if(v[k]===null||v[k]==='')v[k]=undefined;
+    $('bOk').disabled=true;if(await guardar(X=>{if(id){const i=X.tareas.findIndex(t=>t.id===id);const o=Object.assign({},X.tareas[i],v);for(const k in o)if(o[k]===undefined)delete o[k];X.tareas[i]=o;}else{const o=Object.assign({id:nid('t')},v);for(const k in o)if(o[k]===undefined)delete o[k];X.tareas.push(o);}}))cerrar();};
+  if(id)$('bDel').onclick=async()=>{if((D.gastos||[]).some(g=>g.tarea===id)){$('mMsg').textContent='Este paso tiene gastos; muévelos a otro paso antes de borrarlo.';return;}
+    if($('bDel').dataset.ok!=='1'){$('bDel').dataset.ok='1';$('bDel').textContent='¿Seguro? Toca otra vez';return;}
+    if(await guardar(X=>{X.tareas=X.tareas.filter(t=>t.id!==id);}))cerrar();};}
+function abrirGasto(id){const g=id?D.gastos.find(g=>g.id===id):{fecha:new Date().toLocaleDateString('en-CA'),tipo:'Material'};
+  const ops=(D.fases||[]).map((f,i)=>`<optgroup label="${i+1}. ${esc(f)}">${D.tareas.filter(t=>t.fase===i).map(t=>`<option value="${t.id}" ${t.id===g.tarea?'selected':''}>${esc(t.titulo)} · ${esc(t.zona)}</option>`).join('')}</optgroup>`).join('');
+  modal(`<h3>${id?'Editar gasto':'Nuevo gasto'}</h3>
+  <div class="dos"><div class="campo"><label>Fecha</label><input id="gFec" type="date" value="${esc(g.fecha)}"></div>
+  <div class="campo"><label>Monto</label><input id="gMon" inputmode="decimal" value="${g.monto??''}" placeholder="$"></div></div>
+  <div class="campo"><label>Concepto</label><input id="gCon" value="${esc(g.concepto)}"></div>
+  <div class="campo"><label>Paso</label><select id="gTar"><option value="">Sin paso asignado</option>${ops}</select></div>
+  <div class="dos"><div class="campo"><label>Tipo</label><select id="gTip"><option ${g.tipo==='Material'?'selected':''}>Material</option><option ${g.tipo==='Mano de obra'?'selected':''}>Mano de obra</option></select></div>
+  <div class="campo"><label>Proveedor</label><input id="gPro" value="${esc(g.proveedor)}"></div></div>
+  <div class="campo"><label>Nota</label><input id="gNot" value="${esc(g.nota)}"></div>
+  <div class="msg" id="mMsg"></div>
+  <div class="pie-m">${id?'<button class="btn peligro izq" id="bDel">Borrar</button>':''}<button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="bOk">Guardar</button></div>`);
+  $('bOk').onclick=async()=>{const m=num($('gMon').value),c=$('gCon').value.trim();if(!m||!c){$('mMsg').textContent='Falta el concepto o el monto';return;}
+    const v={fecha:$('gFec').value,monto:m,concepto:c,tarea:$('gTar').value||undefined,tipo:$('gTip').value,proveedor:$('gPro').value.trim()||undefined,nota:$('gNot').value.trim()||undefined};
+    $('bOk').disabled=true;if(await guardar(X=>{X.gastos=X.gastos||[];const o=Object.assign({id:id||nid('g')},v);for(const k in o)if(o[k]===undefined)delete o[k];
+      if(id){const i=X.gastos.findIndex(x=>x.id===id);X.gastos[i]=o;}else X.gastos.push(o);}))cerrar();};
+  if(id)$('bDel').onclick=async()=>{if($('bDel').dataset.ok!=='1'){$('bDel').dataset.ok='1';$('bDel').textContent='¿Seguro? Toca otra vez';return;}
+    if(await guardar(X=>{X.gastos=X.gastos.filter(x=>x.id!==id);}))cerrar();};}
+function abrirAjustes(){modal(`<h3>Ajustes</h3>
+  <div class="campo"><label>Tope de la remodelación</label><input id="aTop" inputmode="decimal" value="${D.tope}"></div>
+  <div class="dos"><div class="campo"><label>Imprevistos (%)</label><input id="aImp" inputmode="decimal" value="${D.imprevistos_pct}"></div>
+  <div class="campo"><label>Tarifa de Jorge por día</label><input id="aTar" inputmode="decimal" value="${D.tarifa_jorge}"></div></div>
+  <div class="pie-m"><button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="bOk">Guardar</button></div>`);
+  $('bOk').onclick=async()=>{const t=num($('aTop').value),i=num($('aImp').value),j=num($('aTar').value);
+    if(await guardar(X=>{if(t!=null)X.tope=t;if(i!=null)X.imprevistos_pct=i;if(j!=null)X.tarifa_jorge=j;}))cerrar();};}
+$('velo').addEventListener('click',e=>{if(e.target.id==='velo')cerrar();});
 cargar();
 </script></body></html>
