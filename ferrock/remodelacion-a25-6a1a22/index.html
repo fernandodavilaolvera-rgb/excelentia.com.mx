@@ -166,7 +166,7 @@ let filtro='todos';
 function pintarPend(){
   const T=D.tareas||[];let h='';
   (D.fases||[]).forEach((f,i)=>{let ts=T.filter(t=>t.fase===i);
-    if(filtro==='Jorge')ts=ts.filter(t=>(t.resp||'').includes('Jorge'));if(filtro==='Fer')ts=ts.filter(t=>t.resp==='Fer');if(filtro==='abiertos')ts=ts.filter(t=>t.estado!=='hecho');
+    if(filtro==='Jorge')ts=ts.filter(t=>(t.resp||'').includes('Jorge'));if(filtro==='Fer')ts=ts.filter(t=>(t.resp||'').includes('Fer'));if(filtro==='abiertos')ts=ts.filter(t=>t.estado!=='hecho');
     if(!ts.length)return;const hh=T.filter(t=>t.fase===i&&t.estado==='hecho').length,tot=T.filter(t=>t.fase===i).length;
     h+=`<div class="fase-t">${i+1}. ${esc(f)}<small>${hh} de ${tot}</small></div>`;
     ts.forEach(t=>{const c=t.estado==='hecho'?'hecho':t.estado==='en proceso'?'proceso':'';
