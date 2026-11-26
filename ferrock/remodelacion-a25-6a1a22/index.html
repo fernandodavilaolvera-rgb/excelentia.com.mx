@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Remodelación Alondra 25</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#f4f1ea;--tinta:#2a2622;--tinta2:#5d5750;--gris:#9a938a;--linea:#ddd6ca;--blanco:#fffdf8;
+ --azul:#8aa5b5;--azul-osc:#3f5866;--azul-claro:#e3ebef;--rosa:#d4aab1;--rosa-osc:#b5655c;--rosa-claro:#f3e6e8;
+ --arena:#cdbb9c;--arena-claro:#efe7d8;--ok:#4f7a5a;--ok-claro:#e2ece4;--error:#a2463f;--oro:#c9952f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',sans-serif;color:var(--tinta);background:var(--papel);
+ background-image:radial-gradient(rgba(120,100,80,.05) 1px,transparent 1px);background-size:4px 4px;line-height:1.5;min-height:100vh}
+.wrap{max-width:720px;margin:0 auto;padding:0 1rem 5rem}
+button{font:inherit;cursor:pointer;color:inherit}
+.serif{font-family:'Cormorant Garamond',serif}
+.barra{position:sticky;top:0;z-index:20;background:rgba(244,241,234,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--linea)}
+.barra .top{display:flex;align-items:center;gap:.7rem;padding:.8rem 1rem .4rem;max-width:720px;margin:0 auto}
+.marca{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;line-height:1;margin-right:auto}
+.marca small{display:block;font-family:'Manrope',sans-serif;font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--tinta2);font-weight:600;margin-top:.25rem}
+.chip{background:var(--tinta);color:var(--blanco);border-radius:999px;padding:.35rem .9rem;font-size:12px;font-weight:700;white-space:nowrap}
+.chip.err{background:var(--error)}
+nav.tabs{display:flex;gap:.25rem;overflow-x:auto;padding:0 1rem .6rem;max-width:720px;margin:0 auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{background:none;border:0;font-size:14px;font-weight:600;color:var(--gris);padding:.45rem .85rem;border-radius:999px;white-space:nowrap}
+nav.tabs button.on{color:var(--tinta);background:var(--blanco);box-shadow:0 0 0 1px var(--linea)}
+.vista{display:none;padding-top:1.4rem}.vista.on{display:block}
+h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;line-height:1.1;margin-bottom:.3rem}
+.ayuda{color:var(--tinta2);font-size:14px;margin-bottom:1.1rem}
+.seccion-t{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tinta2);margin:1.6rem 0 .7rem}
+.tarjeta{background:var(--blanco);border:1px solid var(--linea);border-radius:4px 14px 14px 14px;padding:1.1rem 1.2rem;margin-bottom:.85rem}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem}
+.kpi{border-radius:4px 14px 14px 14px;padding:.9rem 1rem;border:1px solid var(--linea)}
+.kpi:nth-child(1){background:var(--azul-claro)}.kpi:nth-child(2){background:var(--arena-claro)}
+.kpi:nth-child(3){background:var(--rosa-claro)}.kpi:nth-child(4){background:var(--ok-claro)}
+.kpi .l{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--tinta2)}
+.kpi .n{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:600;line-height:1.1}
+.kpi .s{font-size:12px;color:var(--tinta2)}
+.medidor{height:14px;background:var(--linea);border-radius:999px;overflow:hidden;position:relative;margin:.6rem 0 .3rem}
+.medidor span{position:absolute;top:0;bottom:0;left:0;border-radius:999px}
+.medidor .est{background:var(--arena);opacity:.7}.medidor .gas{background:var(--ok)}
+.medidor.amarillo .gas{background:var(--oro)}.medidor.rojo .gas{background:var(--error)}
+.leyenda{display:flex;gap:1rem;flex-wrap:wrap;font-size:12px;color:var(--tinta2)}
+.leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:.35rem;vertical-align:-1px}
+.semaforo{font-weight:700;font-size:14px;margin-top:.6rem}
+.fase-res{display:flex;align-items:center;gap:.8rem;padding:.55rem 0;border-top:1px solid var(--linea);font-size:14px}
+.fase-res:first-child{border-top:0}
+.fase-res .nom{flex:1;font-weight:600}
+.mini{width:110px;height:8px;background:var(--linea);border-radius:999px;overflow:hidden}
+.mini span{display:block;height:100%;background:var(--ok)}
+.fase-res .c{font-size:12px;color:var(--gris);width:46px;text-align:right}
+.seg{display:inline-flex;background:var(--blanco);border:1px solid var(--linea);border-radius:999px;padding:3px;flex-wrap:wrap;margin-bottom:1rem}
+.seg button{border:0;background:none;border-radius:999px;padding:.4rem .9rem;font-size:13px;font-weight:700;color:var(--gris)}
+.seg button.on{background:var(--tinta);color:var(--blanco)}
+.fase-t{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;margin:1.3rem 0 .5rem;display:flex;justify-content:space-between;align-items:baseline}
+.fase-t small{font-family:'Manrope';font-size:12px;color:var(--gris);font-weight:600}
+.tarea{display:flex;gap:.8rem;align-items:flex-start;background:var(--blanco);border:1px solid var(--linea);border-radius:4px 14px 14px 14px;padding:.8rem 1rem;margin-bottom:.55rem}
+.tarea .ic{width:24px;height:24px;border-radius:50%;border:2px solid var(--linea);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
+.tarea.hecho .ic{background:var(--ok);border-color:var(--ok)}
+.tarea.proceso .ic{border-color:var(--oro);background:radial-gradient(var(--oro) 40%,transparent 45%)}
+.tarea.hecho .tt{text-decoration:line-through;color:var(--gris)}
+.tarea .cuerpo{flex:1;min-width:0}
+.tt{font-weight:700;font-size:14.5px;line-height:1.3}
+.zona{font-size:12.5px;color:var(--tinta2)}
+.nota{font-size:12.5px;color:var(--gris);margin-top:.2rem}
+.pills{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem}
+.pill{font-size:11px;font-weight:700;border-radius:999px;padding:.15rem .6rem;background:var(--papel);color:var(--tinta2);border:1px solid var(--linea)}
+.pill.jorge{background:var(--azul-claro);color:var(--azul-osc);border-color:transparent}
+.pill.fer{background:var(--rosa-claro);color:var(--rosa-osc);border-color:transparent}
+.pill.proceso{background:#f6ead0;color:#8a6414;border-color:transparent}
+.pill.hecho{background:var(--ok-claro);color:var(--ok);border-color:transparent}
+.tabla-w{background:var(--blanco);border:1px solid var(--linea);border-radius:14px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead{display:table-header-group}
+th{text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gris);font-weight:700;padding:.6rem .7rem;border-bottom:1px solid var(--linea);background:var(--papel);white-space:nowrap}
+td{padding:.55rem .7rem;border-bottom:1px solid var(--linea);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.m,th.m{text-align:right;white-space:nowrap}
+td .sub{display:block;font-size:12px;color:var(--gris)}
+tr.fase td{background:var(--arena-claro);font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--tinta2)}
+tr.tot td{background:var(--papel);font-weight:800}
+.pe{color:var(--gris);font-style:italic;font-size:12.5px}
+.over{color:var(--error);font-weight:700}
+.vacio{text-align:center;color:var(--gris);font-size:14px;padding:2rem 1rem}
+.pie{font-size:12px;color:var(--gris);text-align:center;margin-top:2rem}
+@media (max-width:600px){
+ .marca{font-size:1.35rem}.kpi .n{font-size:1.7rem}
+ .mini{width:70px}
+ table{font-size:12.5px}th,td{padding:.5rem}
+}
+@page{size:Letter;margin:12mm 12mm 14mm}
+@media print{
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body{background:#fff}
+ .no-print,nav.tabs{display:none!important}
+ .barra{position:static;border:0}
+ .vista{display:block!important;break-inside:auto}
+ main,section,div,.tabla-w{break-inside:auto}
+ .tarea,.kpi,tr,.fase-res{break-inside:avoid}
+ h2,h3,.fase-t,.seccion-t{break-after:avoid}
+ p,li{orphans:3;widows:3}
+ a[href]:after{content:none}
+}
+</style></head><body>
+<div class="barra"><div class="top"><div class="marca">Remodelación Alondra 25<small>Control de obra y gastos</small></div><span class="chip" id="chip">Cargando…</span></div>
+<nav class="tabs no-print" id="tabs"><button data-v="resumen" class="on">Resumen</button><button data-v="pendientes">Pendientes</button><button data-v="presupuesto">Presupuesto</button><button data-v="gastos">Gastos</button></nav></div>
+<main class="wrap">
+<section class="vista on" id="v-resumen"><h2>Resumen</h2><p class="ayuda">Tope de la remodelación, lo estimado, lo gastado y cómo vamos por fase.</p><div id="resumen"></div></section>
+<section class="vista" id="v-pendientes"><h2>Pendientes</h2><p class="ayuda">Los pasos de la obra en el orden en que conviene hacerlos.</p>
+<div class="seg no-print" id="filtro"><button data-f="todos" class="on">Todos</button><button data-f="Jorge">Jorge</button><button data-f="Fernando">Fernando</button><button data-f="abiertos">Sin terminar</button></div><div id="pendientes"></div></section>
+<section class="vista" id="v-presupuesto"><h2>Presupuesto</h2><p class="ayuda">Costo estimado de cada paso, separado en material y mano de obra, contra lo que ya se gastó.</p><div id="presupuesto"></div></section>
+<section class="vista" id="v-gastos"><h2>Gastos</h2><p class="ayuda">Todo lo que se ha pagado, del más reciente al más antiguo.</p><div id="gastos"></div></section>
+<p class="pie" id="pie"></p>
+</main>
+<script>
+const SB={url:'https://rcotlydvsubvdapubnkx.supabase.co',key:'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T'};
+const COD='remodelacion-a25-6a1a22';
+let D=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mx=n=>'$'+Math.round(n||0).toLocaleString('es-MX');
+const fecha=f=>{if(!f)return'';const d=new Date(f+'T12:00:00');return d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});};
+async function rpc(fn,body){const r=await fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB.key,'Authorization':'Bearer '+SB.key},body:JSON.stringify(body)});if(!r.ok)throw new Error(r.status);return r.json();}
+async function cargar(){
+  try{const res=await rpc('ferrock_pull',{p_codigo:COD,p_rev:0});const row=Array.isArray(res)?res[0]:res;
+    if(row&&row.payload){D=row.payload;pintar();$('chip').textContent='Al día';$('chip').className='chip';}
+  }catch(e){$('chip').textContent='Sin conexión';$('chip').className='chip err';}
+}
+function estT(t){const mo=(t.mo!=null)?t.mo:(t.dias?t.dias*(D.tarifa_jorge||0):null);return{mat:t.mat,mo,tot:(t.mat==null&&mo==null)?null:(t.mat||0)+(mo||0)};}
+function gastoT(id){return (D.gastos||[]).filter(g=>g.tarea===id).reduce((a,g)=>a+(+g.monto||0),0);}
+function pintar(){
+  const T=D.tareas||[],G=D.gastos||[],tope=D.tope||0,imp=tope*(D.imprevistos_pct||0)/100;
+  const est=T.reduce((a,t)=>a+(estT(t).tot||0),0),gas=G.reduce((a,g)=>a+(+g.monto||0),0);
+  const gMat=G.filter(g=>g.tipo==='Material').reduce((a,g)=>a+(+g.monto||0),0),gMo=gas-gMat;
+  const sinEst=T.filter(t=>estT(t).tot==null).length,hechas=T.filter(t=>t.estado==='hecho').length;
+  const pct=tope?gas/tope*100:0,pctE=tope?Math.min(est/tope*100,100):0,nivel=pct>=100?'rojo':pct>=80?'amarillo':'';
+  const sem=pct>=100?'🔴 Ya se pasó del tope':pct>=80?'🟡 Cuidado: se gastó más del 80% del tope':'🟢 Dentro del presupuesto';
+  let fases='';(D.fases||[]).forEach((f,i)=>{const ts=T.filter(t=>t.fase===i),h=ts.filter(t=>t.estado==='hecho').length,p=ts.length?h/ts.length*100:0;
+    fases+=`<div class="fase-res"><span class="nom">${i+1}. ${esc(f)}</span><span class="mini"><span style="width:${p}%"></span></span><span class="c">${h}/${ts.length}</span></div>`;});
+  $('resumen').innerHTML=`<div class="kpis">
+   <div class="kpi"><div class="l">Tope</div><div class="n">${mx(tope)}</div><div class="s">Colchón para imprevistos: ${mx(imp)} (${D.imprevistos_pct||0}%)</div></div>
+   <div class="kpi"><div class="l">Estimado</div><div class="n">${mx(est)}</div><div class="s">${sinEst?sinEst+' pasos sin estimar':'Todos los pasos estimados'}</div></div>
+   <div class="kpi"><div class="l">Gastado</div><div class="n">${mx(gas)}</div><div class="s">Material ${mx(gMat)} · Mano de obra ${mx(gMo)}</div></div>
+   <div class="kpi"><div class="l">Disponible</div><div class="n ${tope-gas<0?'over':''}">${mx(tope-gas)}</div><div class="s">${pct.toFixed(0)}% del tope gastado</div></div></div>
+   <div class="tarjeta" style="margin-top:.85rem"><div class="medidor ${nivel}"><span class="est" style="width:${pctE}%"></span><span class="gas" style="width:${Math.min(pct,100)}%"></span></div>
+   <div class="leyenda"><span><i style="background:var(--ok)"></i>Gastado</span><span><i style="background:var(--arena)"></i>Estimado</span><span>Tope ${mx(tope)}</span></div>
+   <div class="semaforo">${sem}</div>${est>tope?`<div class="semaforo over">El estimado ya supera el tope por ${mx(est-tope)}</div>`:''}</div>
+   <div class="seccion-t">Avance por fase · ${hechas} de ${T.length} pasos terminados</div><div class="tarjeta">${fases}</div>`;
+  pintarPend();
+  let filas='',totM=0,totO=0,totG=0;
+  (D.fases||[]).forEach((f,i)=>{filas+=`<tr class="fase"><td colspan="5">${i+1}. ${esc(f)}</td></tr>`;
+    T.filter(t=>t.fase===i).forEach(t=>{const e=estT(t),g=gastoT(t.id);totM+=e.mat||0;totO+=e.mo||0;totG+=g;
+      const pe='<span class="pe">por estimar</span>';
+      filas+=`<tr><td>${esc(t.titulo)}<span class="sub">${esc(t.zona)}${t.dias?' · '+t.dias+' días de Jorge':''}</span></td><td class="m">${e.mat!=null?mx(e.mat):pe}</td><td class="m">${e.mo!=null?mx(e.mo):pe}</td><td class="m">${e.tot!=null?mx(e.tot):'—'}</td><td class="m ${e.tot!=null&&g>e.tot?'over':''}">${g?mx(g):'—'}</td></tr>`;});});
+  filas+=`<tr class="tot"><td>Total</td><td class="m">${mx(totM)}</td><td class="m">${mx(totO)}</td><td class="m">${mx(totM+totO)}</td><td class="m">${mx(totG)}</td></tr>`;
+  $('presupuesto').innerHTML=`<div class="tabla-w"><table><thead><tr><th>Paso</th><th class="m">Material</th><th class="m">Mano de obra</th><th class="m">Estimado</th><th class="m">Gastado</th></tr></thead><tbody>${filas}</tbody></table></div>
+   <p class="ayuda" style="margin-top:.7rem">Mano de obra de Jorge calculada a ${mx(D.tarifa_jorge)} por día.</p>`;
+  const tn=Object.fromEntries(T.map(t=>[t.id,t.titulo+' · '+t.zona]));
+  const gs=[...G].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  $('gastos').innerHTML=gs.length?`<div class="tabla-w"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th class="m">Monto</th></tr></thead><tbody>${gs.map(g=>`<tr><td style="white-space:nowrap">${fecha(g.fecha)}</td><td>${esc(g.concepto)}<span class="sub">${esc(tn[g.tarea]||'Sin paso asignado')}${g.proveedor?' · '+esc(g.proveedor):''}${g.nota?' · '+esc(g.nota):''}</span></td><td>${esc(g.tipo)}</td><td class="m">${mx(g.monto)}</td></tr>`).join('')}
+   <tr class="tot"><td colspan="3">Total</td><td class="m">${mx(gas)}</td></tr></tbody></table></div>`:'<div class="tarjeta vacio">Todavía no hay gastos registrados.</div>';
+  if(D.actualizado)$('pie').textContent='Actualizado el '+new Date(D.actualizado).toLocaleString('es-MX',{dateStyle:'long',timeStyle:'short'});
+}
+let filtro='todos';
+function pintarPend(){
+  const T=D.tareas||[];let h='';
+  (D.fases||[]).forEach((f,i)=>{let ts=T.filter(t=>t.fase===i);
+    if(filtro==='Jorge'||filtro==='Fernando')ts=ts.filter(t=>t.resp===filtro);if(filtro==='abiertos')ts=ts.filter(t=>t.estado!=='hecho');
+    if(!ts.length)return;const hh=T.filter(t=>t.fase===i&&t.estado==='hecho').length,tot=T.filter(t=>t.fase===i).length;
+    h+=`<div class="fase-t">${i+1}. ${esc(f)}<small>${hh} de ${tot}</small></div>`;
+    ts.forEach(t=>{const c=t.estado==='hecho'?'hecho':t.estado==='en proceso'?'proceso':'';
+      h+=`<div class="tarea ${c}"><span class="ic">${c==='hecho'?'✓':''}</span><div class="cuerpo"><div class="tt">${esc(t.titulo)}</div><div class="zona">${esc(t.zona)}</div>${t.nota?`<div class="nota">${esc(t.nota)}</div>`:''}
+      <div class="pills"><span class="pill ${t.resp==='Jorge'?'jorge':'fer'}">${esc(t.resp)}</span>${c?`<span class="pill ${c}">${c==='hecho'?'Terminado':'En proceso'}</span>`:''}</div></div></div>`;});});
+  $('pendientes').innerHTML=h||'<div class="tarjeta vacio">No hay pasos con este filtro.</div>';
+}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.vista').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));window.scrollTo(0,0);});
+$('filtro').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;filtro=b.dataset.f;document.querySelectorAll('#filtro button').forEach(x=>x.classList.toggle('on',x===b));if(D)pintarPend();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)cargar();});
+cargar();
+</script></body></html>
