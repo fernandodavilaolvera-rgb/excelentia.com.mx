@@ -32,8 +32,8 @@ h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;line-he
 .tarjeta{background:var(--blanco);border:1px solid var(--linea);border-radius:4px 14px 14px 14px;padding:1.1rem 1.2rem;margin-bottom:.85rem}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem}
 .kpi{border-radius:4px 12px 12px 12px;padding:.55rem .7rem;border:1px solid var(--linea)}
-.kpi:nth-child(1){background:var(--azul-claro)}.kpi:nth-child(2){background:var(--arena-claro)}
-.kpi:nth-child(3){background:var(--rosa-claro)}.kpi:nth-child(4){background:var(--ok-claro)}
+.kpi:nth-child(1){background:var(--rosa-claro)}.kpi:nth-child(2){background:var(--ok-claro)}
+.kpi:nth-child(3){background:var(--azul-claro)}.kpi:nth-child(4){background:var(--arena-claro)}
 .kpi .l{font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--tinta2)}
 .kpi .n{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;line-height:1.15}
 .kpi .s{font-size:10.5px;color:var(--tinta2);line-height:1.3}
@@ -164,10 +164,10 @@ function pintar(){
   let fases='';(D.fases||[]).forEach((f,i)=>{const ts=T.filter(t=>t.fase===i),h=ts.filter(t=>t.estado==='hecho').length,p=ts.length?h/ts.length*100:0;
     fases+=`<div class="fase-res"><span class="nom">${i+1}. ${esc(f)}</span><span class="mini"><span style="width:${p}%"></span></span><span class="c">${h}/${ts.length}</span></div>`;});
   $('resumen').innerHTML=`<div class="kpis">
-   <div class="kpi"><div class="l">Tope</div><div class="n">${mx(tope)}</div><div class="s">Colchón para imprevistos: ${mx(imp)} (${D.imprevistos_pct||0}%)</div></div>
-   <div class="kpi"><div class="l">Estimado</div><div class="n">${mx(est)}</div><div class="s">${sinEst?sinEst+' pasos sin estimar':'Todos los pasos estimados'}</div></div>
    <div class="kpi"><div class="l">Gastado</div><div class="n">${mx(gas)}</div><div class="s">Material ${mx(gMat)} · Mano de obra ${mx(gMo)}</div></div>
-   <div class="kpi"><div class="l">Disponible</div><div class="n ${tope-gas<0?'over':''}">${mx(tope-gas)}</div><div class="s">${pct.toFixed(0)}% del tope gastado</div></div></div>
+   <div class="kpi"><div class="l">Disponible</div><div class="n ${tope-gas<0?'over':''}">${mx(tope-gas)}</div><div class="s">${pct.toFixed(0)}% del tope gastado</div></div>
+   <div class="kpi"><div class="l">Tope</div><div class="n">${mx(tope)}</div><div class="s">Colchón para imprevistos: ${mx(imp)} (${D.imprevistos_pct||0}%)</div></div>
+   <div class="kpi"><div class="l">Estimado</div><div class="n">${mx(est)}</div><div class="s">${sinEst?sinEst+' pasos sin estimar':'Todos los pasos estimados'}</div></div></div>
    <div class="tarjeta" style="margin-top:.85rem"><div class="medidor ${nivel}"><span class="est" style="width:${pctE}%"></span><span class="gas" style="width:${Math.min(pct,100)}%"></span></div>
    <div class="leyenda"><span><i style="background:var(--ok)"></i>Gastado</span><span><i style="background:var(--arena)"></i>Estimado</span><span>Tope ${mx(tope)}</span></div>
    <div class="semaforo">${sem}</div>${est>tope?`<div class="semaforo over">El estimado ya supera el tope por ${mx(est-tope)}</div>`:''}</div>
