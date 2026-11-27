@@ -2,7 +2,7 @@
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Remodelación Alondra 25</title>
+<title>Alondra 25 · Remodelación y mudanza</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -65,7 +65,7 @@ h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;line-he
 .zona{font-size:12.5px;color:var(--tinta2)}
 .nota{font-size:12.5px;color:var(--gris);margin-top:.2rem}
 .pills{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem}
-.pill{font-size:11px;font-weight:700;border-radius:999px;padding:.15rem .6rem;background:var(--papel);color:var(--tinta2);border:1px solid var(--linea)}
+.pill{white-space:nowrap;font-size:11px;font-weight:700;border-radius:999px;padding:.15rem .6rem;background:var(--papel);color:var(--tinta2);border:1px solid var(--linea)}
 .pill.jorge{background:var(--azul-claro);color:var(--azul-osc);border-color:transparent}
 .pill.fer{background:var(--rosa-claro);color:var(--rosa-osc);border-color:transparent}
 .pill.proceso{background:#f6ead0;color:#8a6414;border-color:transparent}
@@ -90,14 +90,16 @@ tr.tot td{background:var(--papel);font-weight:800}
 .btn-ed:disabled{opacity:.5}
 #btnRec{font-size:16px;padding:.25rem .7rem;line-height:1.3}
 .btn-ed{background:none;border:1px solid var(--linea);border-radius:999px;padding:.35rem .8rem;font-size:13px;font-weight:600;color:var(--tinta2)}
-body.ed .btn-ed{background:var(--rosa-osc);color:#fff;border-color:var(--rosa-osc)}
-.solo-ed{display:none}body.ed .solo-ed{display:flex}
+body.ed #btnEd{background:var(--rosa-osc);color:#fff;border-color:var(--rosa-osc)}
+.solo-ed,.solo-edm{display:none}body.ed.fer .solo-ed,body.ed .solo-edm{display:flex}
+.pill.comprado{background:var(--ok-claro);color:var(--ok);border-color:transparent}
+body.ed tr[data-m]{cursor:pointer}body.ed tr[data-m]:hover td{background:var(--arena-claro)}
 .mover{flex-direction:column;gap:.3rem;flex-shrink:0}
 .mover button{width:34px;height:30px;border-radius:8px;border:1px solid var(--linea);background:var(--papel);font-size:15px;font-weight:800;color:var(--tinta2)}
 .mover button:disabled{opacity:.3}
 .acciones{gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
-body.ed .tarea .ic,body.ed .tarea .cuerpo,body.ed tr[data-t],body.ed tr[data-g]{cursor:pointer}
-body.ed .tarea:hover,body.ed tr[data-t]:hover td,body.ed tr[data-g]:hover td{background:var(--arena-claro)}
+body.ed.fer .tarea .ic,body.ed.fer .tarea .cuerpo,body.ed.fer tr[data-t],body.ed.fer tr[data-g]{cursor:pointer}
+body.ed.fer .tarea:hover,body.ed.fer tr[data-t]:hover td,body.ed.fer tr[data-g]:hover td{background:var(--arena-claro)}
 .velo{position:fixed;inset:0;background:rgba(42,38,34,.45);display:none;align-items:flex-start;justify-content:center;padding:1rem;z-index:50;overflow-y:auto}
 .velo.on{display:flex}
 .modal{background:var(--blanco);border-radius:18px;max-width:520px;width:100%;padding:1.4rem;margin:auto;position:relative}
@@ -127,20 +129,22 @@ body.ed .tarea:hover,body.ed tr[data-t]:hover td,body.ed tr[data-g]:hover td{bac
  a[href]:after{content:none}
 }
 </style></head><body>
-<div class="barra"><div class="top"><div class="marca">Remodelación Alondra 25<small>Control de obra y gastos</small></div><span class="chip" id="chip">Cargando…</span><button class="btn-ed no-print" id="btnRec" aria-label="Recargar" title="Recargar">↻</button><button class="btn-ed no-print" id="btnEd">Editar</button></div>
-<nav class="tabs no-print" id="tabs"><button data-v="resumen" class="on">Resumen</button><button data-v="gastos">Gastos</button><button data-v="pendientes">Pendientes</button><button data-v="presupuesto">Presupuesto</button></nav></div>
+<div class="barra"><div class="top"><div class="marca">Alondra 25<small>Remodelación y mudanza</small></div><span class="chip" id="chip">Cargando…</span><button class="btn-ed no-print" id="btnRec" aria-label="Recargar" title="Recargar">↻</button><button class="btn-ed no-print" id="btnEd">Editar</button></div>
+<nav class="tabs no-print" id="tabs"><button data-v="resumen" class="on">Resumen</button><button data-v="gastos">Gastos</button><button data-v="pendientes">Pendientes</button><button data-v="presupuesto">Presupuesto</button><button data-v="mudanza">Mudanza</button></nav></div>
 <main class="wrap">
 <section class="vista on" id="v-resumen"><h2>Resumen</h2><p class="ayuda">Tope de la remodelación, lo estimado, lo gastado y cómo vamos por fase.</p><div class="acciones solo-ed no-print"><button class="btn" onclick="abrirGasto()">+ Gasto</button><button class="btn sec" onclick="abrirAjustes()">Ajustes</button></div><div id="resumen"></div></section>
 <section class="vista" id="v-gastos"><h2>Gastos</h2><p class="ayuda">Todo lo que se ha pagado, del más reciente al más antiguo.</p><div class="acciones solo-ed no-print"><button class="btn" onclick="abrirGasto()">+ Gasto</button><span class="ayuda" style="margin:0;align-self:center">Toca un gasto para corregirlo o borrarlo.</span></div><div id="gastos"></div></section>
 <section class="vista" id="v-pendientes"><h2>Pendientes</h2><p class="ayuda">Los pasos de la obra en el orden en que conviene hacerlos.</p>
 <div class="acciones solo-ed no-print"><button class="btn" onclick="abrirTarea()">+ Paso</button><span class="ayuda" style="margin:0;align-self:center">Toca el círculo para terminar un paso o regresarlo a pendiente; usa las flechas para ordenarlos por prioridad y toca el texto para editarlo.</span></div><div class="seg no-print" id="filtro"><button data-f="todos" class="on">Todos</button><button data-f="Jorge">Jorge</button><button data-f="Fer">Fer</button><button data-f="abiertos">Sin terminar</button></div><div id="pendientes"></div></section>
 <section class="vista" id="v-presupuesto"><h2>Presupuesto</h2><p class="ayuda">Cuánto creemos que costará cada paso (material más mano de obra) contra lo que ya se gastó en él. Los pasos sin cotización dicen "por estimar".</p><div class="acciones solo-ed no-print"><span class="ayuda" style="margin:0">Toca un paso para poner su estimado.</span></div><div id="presupuesto"></div></section>
+<section class="vista" id="v-mudanza"><h2>Mudanza</h2><p class="ayuda">La mudanza de la familia de Veracruz a Alondra 25; va aparte del presupuesto de la remodelación.</p>
+<div class="acciones solo-edm no-print"><button class="btn" onclick="abrirItem()">+ Concepto</button><button class="btn sec" onclick="abrirTopeM()">Presupuesto</button><span class="ayuda" style="margin:0;align-self:center">Toca un concepto para editarlo, marcarlo como comprado o borrarlo.</span></div><div id="mudanza"></div></section>
 <p class="pie" id="pie"></p>
 </main>
 <div class="velo no-print" id="velo"><div class="modal"><button class="cerrar-x" onclick="cerrar()">✕</button><div id="mbody"></div></div></div>
 <script>
 const SB={url:'https://rcotlydvsubvdapubnkx.supabase.co',key:'sb_publishable_cikBH4AxmpYZbk_gGNZelg_y-NBVX9T'};
-const COD='remodelacion-a25-6a1a22';
+const COD='remodelacion-a25-6a1a22',CODM='mudanza-a25-6a1a22';let M=null;
 let D=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -150,6 +154,7 @@ async function rpc(fn,body){const r=await fetch(SB.url+'/rest/v1/rpc/'+fn,{metho
 async function cargar(){
   try{const res=await rpc('ferrock_prot_pull',{p_codigo:COD});const row=Array.isArray(res)?res[0]:res;
     if(row&&row.payload){D=row.payload;pintar();$('chip').textContent='Al día';$('chip').className='chip';}
+    const rm=await rpc('ferrock_prot_pull',{p_codigo:CODM});const r2=Array.isArray(rm)?rm[0]:rm;if(r2&&r2.payload){M=r2.payload;pintarM();}
   }catch(e){$('chip').textContent='Sin conexión';$('chip').className='chip err';}
 }
 function estT(t){const mo=(t.mo!=null)?t.mo:(t.dias?t.dias*(D.tarifa_jorge||0):null);return{mat:t.mat,mo,tot:(t.mat==null&&mo==null)?null:(t.mat||0)+(mo||0)};}
@@ -207,22 +212,24 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)
 $('filtro').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;filtro=b.dataset.f;document.querySelectorAll('#filtro button').forEach(x=>x.classList.toggle('on',x===b));if(D)pintarPend();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)cargar();});
 
-let PIN=null;try{PIN=localStorage.getItem('remo_pin')}catch(e){}
-function modoEd(on){document.body.classList.toggle('ed',on);$('btnEd').textContent=on?'Salir':'Editar';}
+let PIN=null,ROL='fer';try{PIN=localStorage.getItem('remo_pin');ROL=localStorage.getItem('remo_rol')||'fer'}catch(e){}
+function modoEd(on){document.body.classList.toggle('ed',on);document.body.classList.toggle('fer',on&&ROL==='fer');$('btnEd').textContent=on?'Salir':'Editar';}
 if(PIN)modoEd(true);
 function cerrar(){$('velo').classList.remove('on');}
 function modal(h){$('mbody').innerHTML=h;$('velo').classList.add('on');}
 $('btnEd').onclick=()=>{if(document.body.classList.contains('ed')){PIN=null;try{localStorage.removeItem('remo_pin')}catch(e){};modoEd(false);return;}
   modal(`<h3>Modo edición</h3><div class="campo"><label>Clave</label><input id="fPin" type="password" autocomplete="off"></div><div class="msg" id="mMsg"></div><div class="pie-m"><button class="btn" id="bPin">Entrar</button></div>`);
   setTimeout(()=>$('fPin').focus(),50);
-  const go=async()=>{$('bPin').disabled=true;try{const ok=await rpc('ferrock_prot_check',{p_codigo:COD,p_pin:$('fPin').value});
-    if(ok){PIN=$('fPin').value;try{localStorage.setItem('remo_pin',PIN)}catch(e){};modoEd(true);cerrar();}else{$('mMsg').textContent='Clave incorrecta';}}catch(e){$('mMsg').textContent='Sin conexión';}$('bPin').disabled=false;};
+  const go=async()=>{$('bPin').disabled=true;try{const v=$('fPin').value;let rol=null;if(await rpc('ferrock_prot_check',{p_codigo:COD,p_pin:v}))rol='fer';else if(await rpc('ferrock_prot_check',{p_codigo:CODM,p_pin:v}))rol='mary';const ok=!!rol;
+    if(ok){PIN=v;ROL=rol;try{localStorage.setItem('remo_pin',PIN);localStorage.setItem('remo_rol',ROL)}catch(e){};modoEd(true);cerrar();if(rol==='mary')$('tabs').querySelector('[data-v=mudanza]').click();}else{$('mMsg').textContent='Clave incorrecta';}}catch(e){$('mMsg').textContent='Sin conexión';}$('bPin').disabled=false;};
   $('bPin').onclick=go;$('fPin').onkeydown=e=>{if(e.key==='Enter')go();};};
-async function guardar(mut){
+async function guardar(mut){return guardarEn(COD,mut,X=>{D=X;pintar();});}
+async function guardarM(mut){return guardarEn(CODM,mut,X=>{M=X;pintarM();});}
+async function guardarEn(cod,mut,fin){
   $('chip').textContent='Guardando…';
-  try{const res=await rpc('ferrock_prot_pull',{p_codigo:COD});const row=Array.isArray(res)?res[0]:res;const X=row.payload;
+  try{const res=await rpc('ferrock_prot_pull',{p_codigo:cod});const row=Array.isArray(res)?res[0]:res;const X=row.payload;
     mut(X);X.actualizado=new Date().toISOString();
-    await rpc('ferrock_prot_push',{p_codigo:COD,p_pin:PIN,p_payload:X});D=X;pintar();$('chip').textContent='Guardado ✓';$('chip').className='chip';return true;
+    await rpc('ferrock_prot_push',{p_codigo:cod,p_pin:PIN,p_payload:X});fin(X);$('chip').textContent='Guardado ✓';$('chip').className='chip';return true;
   }catch(e){if(String(e.message).includes('clave')){PIN=null;try{localStorage.removeItem('remo_pin')}catch(_){};modoEd(false);alertar('La clave ya no es válida; vuelve a entrar.');}
     else alertar('No se guardó; revisa tu conexión.');$('chip').textContent='Sin guardar';$('chip').className='chip err';return false;}
 }
@@ -231,6 +238,8 @@ const num=v=>{v=String(v||'').replace(/[$,\s]/g,'');return v===''?null:+v;};
 const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const ESTADOS=['pendiente','en proceso','hecho'];
 document.addEventListener('click',e=>{if(!document.body.classList.contains('ed'))return;
+  const mr=e.target.closest('tr[data-m]');if(mr){abrirItem(mr.dataset.m);return;}
+  if(!document.body.classList.contains('fer'))return;
   const mv=e.target.closest('[data-mv]');if(mv){const id=mv.closest('.tarea').dataset.id,d=+mv.dataset.mv;
     guardar(X=>{const t=X.tareas.find(t=>t.id===id);const idx=X.tareas.map((x,i)=>i).filter(i=>X.tareas[i].fase===t.fase&&X.tareas[i].estado!=='hecho');
       const a=idx.indexOf(X.tareas.indexOf(t)),b=a+d;if(b<0||b>=idx.length)return;const i1=idx[a],i2=idx[b];[X.tareas[i1],X.tareas[i2]]=[X.tareas[i2],X.tareas[i1]];});return;}
@@ -285,6 +294,32 @@ function abrirAjustes(){modal(`<h3>Ajustes</h3>
   $('bOk').onclick=async()=>{const t=num($('aTop').value),i=num($('aImp').value),j=num($('aTar').value);
     if(await guardar(X=>{if(t!=null)X.tope=t;if(i!=null)X.imprevistos_pct=i;if(j!=null)X.tarifa_jorge=j;}))cerrar();};}
 $('btnRec').onclick=async()=>{$('btnRec').disabled=true;$('chip').textContent='Recargando…';await cargar();$('btnRec').disabled=false;};
+function pintarM(){if(!M)return;const I=M.items||[],tot=i=>(+i.cantidad||1)*(+i.costo||0);
+  const todo=I.reduce((a,i)=>a+tot(i),0),comp=I.filter(i=>i.estado==='Comprado').reduce((a,i)=>a+tot(i),0),tope=M.tope||0;
+  const filas=I.map(i=>`<tr data-m="${i.id}"><td><b>${esc(i.concepto)}</b><span class="sub">${esc(i.caracteristicas)}${i.tienda?(i.caracteristicas?' · ':'')+esc(i.tienda):''}</span></td><td class="m">${esc(i.cantidad||1)}</td><td class="m">${mx(i.costo)}</td><td class="m">${mx(tot(i))}</td><td><span class="pill ${i.estado==='Comprado'?'comprado':''}">${esc(i.estado||'Por comprar')}</span></td></tr>`).join('');
+  $('mudanza').innerHTML=`<div class="kpis"><div class="kpi"><div class="l">Comprado</div><div class="n">${mx(comp)}</div><div class="s">Ya pagado</div></div>
+   <div class="kpi"><div class="l">Disponible</div><div class="n ${tope-todo<0?'over':''}">${mx(tope-todo)}</div><div class="s">Presupuesto menos todo lo anotado</div></div>
+   <div class="kpi"><div class="l">Presupuesto</div><div class="n">${mx(tope)}</div><div class="s">Costo estimado de la mudanza</div></div>
+   <div class="kpi"><div class="l">Anotado</div><div class="n">${mx(todo)}</div><div class="s">${I.length} conceptos; por comprar ${mx(todo-comp)}</div></div></div>
+   <div class="seccion-t">Conceptos</div>${I.length?`<div class="tabla-w"><table><thead><tr><th>Concepto</th><th class="m">Cant.</th><th class="m">Costo</th><th class="m">Total</th><th>Estado</th></tr></thead><tbody>${filas}<tr class="tot"><td colspan="3">Total</td><td class="m">${mx(todo)}</td><td></td></tr></tbody></table></div>`:'<div class="tarjeta vacio">Todavía no hay conceptos.</div>'}`;}
+function abrirItem(id){const i=id?M.items.find(x=>x.id===id):{cantidad:1,estado:'Por comprar'};
+  modal(`<h3>${id?'Editar concepto':'Nuevo concepto'}</h3>
+  <div class="campo"><label>Concepto</label><input id="iCon" value="${esc(i.concepto)}"></div>
+  <div class="dos"><div class="campo"><label>Cantidad</label><input id="iCan" inputmode="decimal" value="${i.cantidad??1}"></div>
+  <div class="campo"><label>Costo por pieza</label><input id="iCos" inputmode="decimal" value="${i.costo??''}" placeholder="$"></div></div>
+  <div class="campo"><label>Características</label><textarea id="iCar">${esc(i.caracteristicas)}</textarea></div>
+  <div class="dos"><div class="campo"><label>Tienda</label><input id="iTie" value="${esc(i.tienda)}"></div>
+  <div class="campo"><label>Estado</label><select id="iEst"><option ${i.estado!=='Comprado'?'selected':''}>Por comprar</option><option ${i.estado==='Comprado'?'selected':''}>Comprado</option></select></div></div>
+  <div class="msg" id="mMsg"></div>
+  <div class="pie-m">${id?'<button class="btn peligro izq" id="bDel">Borrar</button>':''}<button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="bOk">Guardar</button></div>`);
+  $('bOk').onclick=async()=>{const c=$('iCon').value.trim();if(!c){$('mMsg').textContent='Escribe el concepto';return;}
+    const v={concepto:c,cantidad:num($('iCan').value)||1,costo:num($('iCos').value)||0,caracteristicas:$('iCar').value.trim(),tienda:$('iTie').value.trim(),estado:$('iEst').value};
+    $('bOk').disabled=true;if(await guardarM(X=>{X.items=X.items||[];if(id){const k=X.items.findIndex(x=>x.id===id);X.items[k]=Object.assign({id},v);}else X.items.push(Object.assign({id:nid('m')},v));}))cerrar();};
+  if(id)$('bDel').onclick=async()=>{if($('bDel').dataset.ok!=='1'){$('bDel').dataset.ok='1';$('bDel').textContent='¿Seguro? Toca otra vez';return;}
+    if(await guardarM(X=>{X.items=X.items.filter(x=>x.id!==id);}))cerrar();};}
+function abrirTopeM(){modal(`<h3>Presupuesto de la mudanza</h3><div class="campo"><label>Costo estimado</label><input id="mTop" inputmode="decimal" value="${M.tope}"></div>
+  <div class="pie-m"><button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="bOk">Guardar</button></div>`);
+  $('bOk').onclick=async()=>{const t=num($('mTop').value);if(t!=null&&await guardarM(X=>{X.tope=t;}))cerrar();};}
 $('velo').addEventListener('click',e=>{if(e.target.id==='velo')cerrar();});
 cargar();
 </script></body></html>
