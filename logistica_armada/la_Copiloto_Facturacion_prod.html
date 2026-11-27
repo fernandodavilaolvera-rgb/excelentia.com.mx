@@ -177,6 +177,18 @@ tr:hover td.hi{background:#fdf0d8}
 .marg-neg{color:#c9392b;font-weight:800}
 .marg-ok{color:#2e9e5b;font-weight:700}
 tfoot td{background:#dce8f7;font-weight:800;border-top:2px solid #c8d9f0}
+/* v25: tabla con encabezado y totales fijos al bajar */
+.tblscroll{max-height:78vh;overflow:auto}
+#tbl thead{position:sticky;top:0;z-index:3}
+#tbl thead th{position:static}
+#tbl tr.tot td{background:#eef4fc;font-weight:800;border-bottom:2px solid #c8d9f0;font-size:12px;white-space:nowrap}
+#tbl tr.tot td.num{text-align:right}
+.buscar{display:flex;align-items:center;gap:.5rem;max-width:720px;margin:0 0 .7rem}
+.buscar input{flex:1;font-family:inherit;font-size:13px;border:1px solid #dde1e9;border-radius:8px;padding:.45rem .65rem;background:#fff;color:#1a2035}
+.buscar input:focus{outline:none;border-color:#4a9fd4;background:#f0f6ff}
+.buscar .n{font-size:11.5px;color:#4a5068;white-space:nowrap}
+.kpi.arm{border-left:3px solid #e0a02c}
+.kpi.pl4{border-left:3px solid #4a9fd4}
 
 /* GRAFICAS */
 .chart{margin-bottom:1.4rem}
@@ -243,6 +255,8 @@ tfoot td{background:#dce8f7;font-weight:800;border-top:2px solid #c8d9f0}
   h1,h2,h3,h4{break-after:avoid}
   p,li{orphans:3;widows:3}
   thead{display:table-header-group}
+  .tblscroll{max-height:none;overflow:visible}
+  #tbl thead{position:static}
   #cardLoad,.toolbar,#toolbar,.tabs,.btn,.no-print{display:none!important}
   a[href]:after{content:none}
 }
@@ -399,7 +413,8 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
       <div class="card">
         <h2 id="tblAnchor">Viajes <span class="n" id="periodo"></span></h2>
         <div class="toolbar" id="toolbar"></div>
-        <div class="tblwrap"><table id="tbl"></table></div>
+        <div class="buscar no-print"><input type="search" id="qBus" placeholder="Buscar en todos los viajes por ID, destino, transportista o cliente" autocomplete="off"><span class="n" id="qBusN"></span></div>
+        <div class="tblwrap tblscroll"><table id="tbl"></table></div>
         <p class="memline" style="text-align:left" id="tblFoot"></p>
       <div class="pospbox hidden no-print" id="pospBox"></div>
       </div>
@@ -459,7 +474,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 24 (26-nov-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 25 (27-nov-2026)</footer>
 </div>
 
 <script>
@@ -588,6 +603,9 @@ function recalcular(o) {
   o.totalVenta = (o.venta || 0) + (o.manVenta || 0) + (o.estVenta || 0);
   o.totalCosto = (o.costo || 0) + (o.man || 0) + (o.est || 0);
   o.margenPct = o.totalVenta ? o.margen / o.totalVenta * 100 : 0;
+  // v25: margen de Armada = lo que factura Armada (amarillas) menos lo que se le debe al transportista
+  o.margA = o.debe != null ? Math.round((o.totalCosto - o.debe) * 100) / 100 : null;
+  o.margAPct = o.margA != null && o.totalCosto ? o.margA / o.totalCosto * 100 : 0;
   // alerta de margen: se evalúa en cada recálculo y se refresca la bandera
   o.flags = o.flags.filter(f => f.t !== 'precio por debajo del costo' && f.t !== 'viaje sin margen');
   if (o.totalVenta || o.totalCosto) {
@@ -640,6 +658,12 @@ function probManiobra(dest, uni, t) {
   return { man: MAN_COSTO[uni], n, k: Math.max(1, Math.round(k)), todas: true };
 }
 
+// v25: lo aprendido no manda si parece un rechazo cobrado doble o una tarifa de ruteo de un reparto
+function memSospechosa(t, cz) {
+  if (!t || !cz) return false;
+  const r = t.m / cz;
+  return (r > 1.9 && r < 2.1) || t.m === 800 || t.m === 1100;
+}
 function procesarBase(lista) {
   const out = lista.map(b => {
     const dest = norm(b.destino), uni = norm(b.unidad);
@@ -655,7 +679,7 @@ function procesarBase(lista) {
     let costo = null, venta = null, sC = 'g', srcC = '', srcV = '', fijo = false;
 
     if (cz != null) {
-      if (t && (t.n >= 2 || t.f === 'facturado') && firme && Math.abs(t.m - cz) / Math.max(cz, 1) > 0.10) { // v15: solo con histórico firme
+      if (t && (t.n >= 2 || t.f === 'facturado') && firme && !memSospechosa(t, cz) && Math.abs(t.m - cz) / Math.max(cz, 1) > 0.10) { // v15: solo con histórico firme
         costo = t.m;
         if (otroOrigen) { srcC = hist + ' · no sale de 4PL';
           flags.push({ c: 'b', auto: 1, t: 'no sale de 4PL', d: 'Sale de ' + b.origen + '. Se cobró como las veces anteriores (' + mny0(t.m) + '); la zona de la plataforma daría ' + mny0(cz) + '.' });
@@ -732,8 +756,12 @@ function procesarBase(lista) {
       zona: b.zona, zonaNombre: zonaTxt, ventaFija: fijo ? venta : null, srcVFija: srcV,
       otroOrigen, padre: esSi(b.esReparto) ? String(parseInt(b.padre, 10) || '') : '',
       sinHist: !t, // v18: el destino no aparece en lo aprendido
-      pag: num(b.pag) // v17: flete que se le debe al transportista (no se enseña en la tabla, solo avisa)
+      pag: num(b.pag), // v17: flete que se le debe al transportista
+      debe: num(b.debe), prov: b.prov || '', // v25: todo lo que se le debe (flete, maniobra, estadía, complementos) y quién hizo el viaje
+      rech: esSi(b.rech) ? (b.tipoRech || 'Si') : ''
     };
+    if (o.rech) o.flags.push({ c: 'b', auto: 1, t: 'rechazo', l: 'rechazo ' + String(o.rech === 'Si' ? '' : o.rech).toLowerCase(),
+      d: 'La plataforma marca rechazo' + (o.rech === 'Si' ? '' : ' ' + o.rech.toLowerCase()) + '. Si se cobra doble, usa el botón flete ×2; este precio no se aprende para la ruta.' });
     return o;
   });
   // v15: el padre dice cuáles son sus hijos
@@ -854,22 +882,37 @@ const COL_SIG = { 'lo pagado supera el precio': 'costo', 'destino nuevo': 'costo
 const sinMargen = v => v.margen <= 0 && !!(v.totalVenta || v.totalCosto);
 const tieneSenal = (v, s) => s === '__neg' ? sinMargen(v) : v.flags.some(f => f.t === s);
 // vistos = base + filtro por tipo de señal (alimenta la tabla y la exportación)
-const vistos = () => base().filter(v => !FSIG || tieneSenal(v, FSIG));
+const vistos = () => base().filter(v => !FSIG || (!v.acepto && tieneSenal(v, FSIG)));
+// v25: buscador en todos los viajes, sin importar los filtros
+let QBUS = '';
+function buscaEn(o, q) {
+  if (String(o.id).indexOf(q) >= 0) return true;
+  return norm([o.destino, o.origen, o.cliente, o.prov, o.folio, o.pedido, o.unidad, o.zonaNombre].concat(o.flags.map(f => (f.l || '') + ' ' + f.t)).join(' ')).indexOf(q) >= 0;
+}
+const enTabla = () => { const q = norm(QBUS); return q ? VIAJES.filter(o => !o.pospuesto && buscaEn(o, q)) : vistos(); };
 
 /* ---------- KPIs ---------- */
 function renderKpis() {
   const v = base();
-  const venta = v.reduce((a, x) => a + x.totalVenta, 0);
-  const costo = v.reduce((a, x) => a + x.totalCosto, 0);
-  const marg = venta - costo, at = v.filter(x => x.atencion).length;
-  const nNeg = v.filter(sinMargen).length;
+  const f4 = v.reduce((a, x) => a + x.totalVenta, 0);   // lo que factura 4PL (azules)
+  const fa = v.reduce((a, x) => a + x.totalCosto, 0);   // lo que factura Armada (amarillas)
+  const m4 = f4 - fa, at = v.filter(x => x.atencion).length;
+  const conDebe = v.filter(x => x.debe != null), sinDebe = v.length - conDebe.length;
+  const cc = conDebe.reduce((a, x) => a + x.debe, 0);
+  const faC = conDebe.reduce((a, x) => a + x.totalCosto, 0), ma = faC - cc;
+  const nNeg = v.filter(x => !x.acepto && sinMargen(x)).length;
+  const nNegA = conDebe.filter(x => !x.acepto && x.margA < 0).length;
   $('#kpis').innerHTML = `
   <div class="kpi acc"><div class="lb">Viajes ${periodoTxt()}</div><div class="vl">${v.length}</div>
-    <div class="hint">${v.length - at} listos sin tocarse</div></div>
-  <div class="kpi"><div class="lb">Precio a facturar</div><div class="vl">${mny0(venta)}</div><div class="hint">lo que se le cobra al cliente</div></div>
-  <div class="kpi"><div class="lb">Costo de compra</div><div class="vl">${mny0(costo)}</div><div class="hint">lo que se paga a transportistas</div></div>
-  <div class="kpi ${marg <= 0 ? 'warn' : ''}"><div class="lb">Margen</div><div class="vl">${mny0(marg)}</div>
-    <div class="hint">${venta ? (marg / venta * 100).toFixed(2) : '0'}% sobre el precio${nNeg ? ' · ' + nNeg + ' viaje(s) en pérdida' : ''}</div></div>
+    <div class="hint">${v.length - at} listos</div></div>
+  <div class="kpi arm"><div class="lb">Total factura Armada</div><div class="vl">${mny0(fa)}</div><div class="hint">lo que le facturas a 4PL (columnas amarillas)</div></div>
+  <div class="kpi pl4"><div class="lb">Total factura 4PL</div><div class="vl">${mny0(f4)}</div><div class="hint">lo que 4PL le factura a su cliente</div></div>
+  <div class="kpi ${m4 <= 0 ? 'warn' : ''}"><div class="lb">Margen 4PL</div><div class="vl">${mny0(m4)}</div>
+    <div class="hint">${f4 ? (m4 / f4 * 100).toFixed(2) : '0'}% sobre la factura de 4PL${nNeg ? ' · ' + nNeg + ' viaje(s) sin margen' : ''}</div></div>
+  <div class="kpi"><div class="lb">Costo de compra</div><div class="vl">${conDebe.length ? mny0(cc) : '—'}</div>
+    <div class="hint">${conDebe.length ? 'lo que se les debe a los transportistas' + (sinDebe ? ' · faltan ' + sinDebe + ' viaje(s)' : '') : 'vuelve a traer los viajes de la plataforma para verlo'}</div></div>
+  <div class="kpi arm ${conDebe.length && ma <= 0 ? 'warn' : ''}"><div class="lb">Margen Armada</div><div class="vl">${conDebe.length ? mny0(ma) : '—'}</div>
+    <div class="hint">${conDebe.length ? (faC ? (ma / faC * 100).toFixed(1) : '0') + '% sobre tu factura' + (nNegA ? ' · ' + nNegA + ' viaje(s) en pérdida' : '') : 'factura Armada menos costo de compra'}</div></div>
   <div class="kpi ${at ? 'warn' : ''}"><div class="lb">Requieren atención</div><div class="vl">${at}</div>
     <div class="hint">viajes por revisar · ${(at / (v.length || 1) * 100).toFixed(0)}% del total</div></div>
 `;
@@ -878,7 +921,7 @@ function renderKpis() {
 /* ---------- alertas ---------- */
 function agrupa(fl) {
   const g = {};
-  base().forEach(v => v.flags.filter(fl).forEach(f => {
+  base().filter(v => !v.acepto).forEach(v => v.flags.filter(fl).forEach(f => {
     if (!g[f.t]) g[f.t] = { c: f.c, t: f.t, d: f.d, n: 0, vj: new Set() };
     g[f.t].n++; g[f.t].vj.add(v.id);
   }));
@@ -891,7 +934,7 @@ const cardAlert = i => `<div class="alert ${i.c === 'r' ? 'red' : (i.c === 'a' ?
 
 function renderAlerts() {
   const dec = agrupa(f => !f.auto), aut = agrupa(f => f.auto);
-  const neg = base().filter(sinMargen);
+  const neg = base().filter(v => !v.acepto && sinMargen(v));
   // la señal de margen se presenta agrupada y con el monto en riesgo
   const iNeg = dec.findIndex(x => x.t === 'precio por debajo del costo' || x.t === 'viaje sin margen');
   if (iNeg >= 0) dec.splice(iNeg, 1);
@@ -907,11 +950,11 @@ function renderAlerts() {
   // v17: la tarjeta de lo pagado resume el total, no el primer viaje
   const iPag = dec.find(x => x.t === 'lo pagado supera el precio');
   if (iPag) {
-    const dif = base().reduce((a, v) => a + v.flags.filter(f => f.t === 'lo pagado supera el precio').reduce((b, f) => b + (f.dif || 0), 0), 0);
+    const dif = base().filter(v => !v.acepto).reduce((a, v) => a + v.flags.filter(f => f.t === 'lo pagado supera el precio').reduce((b, f) => b + (f.dif || 0), 0), 0);
     iPag.d = 'Lo que se le debe al transportista de flete es mayor a lo que vas a cobrar; entre todos quedarías ' + mny0(dif) + ' abajo. Revisa la tarifa antes de facturar.';
   }
   const tot = dec.reduce((a, x) => a + x.n, 0);
-  const vj = new Set(); base().forEach(v => { if (v.flags.some(f => !f.auto) || sinMargen(v)) vj.add(v.id); });
+  const vj = new Set(); base().filter(v => !v.acepto).forEach(v => { if (v.flags.some(f => !f.auto) || sinMargen(v)) vj.add(v.id); });
   $('#alertSub').textContent = dec.length
     ? 'El motor resolvió lo mecánico. Quedan ' + tot + ' señales repartidas en ' + vj.size + ' viajes. Haz clic en una tarjeta para verlos en la tabla.'
     : 'Nada pendiente: todos los viajes tienen tarifa confirmada por histórico.';
@@ -995,18 +1038,19 @@ let CIERRE_PEND = null; // si el guardado falla, se puede reintentar
 async function cerrarMes() {
   const lista = listaCierre();
   if (!lista.length) { alert('No hay viajes para cerrar.'); return; }
-  const mes = mesDeCierre(lista), tot = lista.reduce((a, o) => a + (o.totalVenta || 0), 0);
+  const mes = mesDeCierre(lista), tot = lista.reduce((a, o) => a + (o.totalVenta || 0), 0), totA = lista.reduce((a, o) => a + (o.totalCosto || 0), 0);
+  const totTxt = mny0(totA) + ' facturado por Armada (' + mny0(tot) + ' de 4PL)';
   const rojos = lista.filter(o => o.sem === 'r').length, amb = lista.filter(o => o.sem === 'a').length;
   const aviso = (rojos || amb) ? '\n\nTodavía hay ' + (rojos ? rojos + ' en rojo' : '') + (rojos && amb ? ' y ' : '') + (amb ? amb + ' en ámbar' : '') + '; se guardan tal como están.' : '';
   if (PRACTICA) {
-    if (!confirm('Modo práctica: se descarga el Excel de ' + mesLabel(mes) + ' con ' + lista.length + ' viajes por ' + mny0(tot) + '.' + aviso + '\n\nNo se mueve el corte ni se guarda nada. ¿Sigo?')) return;
+    if (!confirm('Modo práctica: se descarga el Excel de ' + mesLabel(mes) + ' con ' + lista.length + ' viajes por ' + totTxt + '.' + aviso + '\n\nNo se mueve el corte ni se guarda nada. ¿Sigo?')) return;
     if (!(await exportar(lista, 'practica'))) return;
-    alert('Listo, práctica terminada.\n\nEn el cierre real se habrían guardado ' + lista.length + ' viajes de ' + mesLabel(mes) + ' por ' + mny0(tot) + '.');
+    alert('Listo, práctica terminada.\n\nEn el cierre real se habrían guardado ' + lista.length + ' viajes de ' + mesLabel(mes) + ' por ' + totTxt + '.');
     return;
   }
   if (DEMO) { await exportar(lista, 'cerrar'); return; }
   if (!USUARIO) { const q = prompt('¿Quién está facturando? Se guarda junto con el cierre.', ''); if (q && q.trim()) guardarUsuario(q.trim()); }
-  if (!confirm('Vas a cerrar la facturación de ' + mesLabel(mes) + ': ' + lista.length + ' viajes por ' + mny0(tot) + ' (sin IVA).' + aviso +
+  if (!confirm('Vas a cerrar la facturación de ' + mesLabel(mes) + ': ' + lista.length + ' viajes por ' + totTxt + ', sin IVA.' + aviso +
     '\n\nSe descarga el Excel, el corte avanza y lo facturado queda guardado para Conciliación, Rentabilidad y el Motor. Si después corriges algo, vuelves a cerrar y se reemplaza. ¿Sigo?')) return;
   if (!(await exportar(lista, 'cerrar'))) return;
   await guardarFacturado(lista, mes);
@@ -1025,7 +1069,7 @@ async function guardarFacturado(lista, mes) {
     CIERRE_PEND = null; GUARDADO_EN = new Date().toISOString();
     M.facturados = [...new Set((M.facturados || []).concat(viajes.map(v => Number(v.id))))];
     AVANCE_DESC = GUARDADO_EN; guardarAvance(); renderToolbar();
-    alert('Mes cerrado.\n\nSe guardaron ' + d.viajes + ' viajes de ' + mesLabel(d.mes) + ' por ' + mny0(d.precio) + (d.reemplazados ? ' (' + d.reemplazados + (d.reemplazados === 1 ? ' ya estaba y se reemplazó)' : ' ya estaban y se reemplazaron)') : '') +
+    alert('Mes cerrado.\n\nSe guardaron ' + d.viajes + ' viajes de ' + mesLabel(d.mes) + ' por ' + mny0(lista.reduce((a, o) => a + (o.totalCosto || 0), 0)) + ' facturado por Armada' + (d.reemplazados ? ' (' + d.reemplazados + (d.reemplazados === 1 ? ' ya estaba y se reemplazó)' : ' ya estaban y se reemplazaron)') : '') +
       '.\nConciliación, Rentabilidad y el Motor ya los toman, y la memoria aprendió lo de este mes.');
   } else {
     renderToolbar();
@@ -1065,8 +1109,8 @@ const COLS = [
   { k: 'unidad', t: 'Unidad' }, { k: 'fecha', t: 'Fecha' },
   { k: 'man', t: 'Costo maniobra', n: 1 }, { k: 'manVenta', t: 'Precio maniobra', n: 1 },
   { k: 'est', t: 'Costo estadía', n: 1 }, { k: 'estVenta', t: 'Precio estadía', n: 1 },
-  { k: 'costo', t: 'Costo flete', n: 1 }, { k: 'venta', t: 'Precio flete', n: 1 }, { k: 'pag', t: 'Se le debe (flete)', n: 1 },
-  { k: 'margen', t: 'Margen', n: 1 }, { k: 'flags', t: 'Notas' }
+  { k: 'costo', t: 'Costo flete', n: 1 }, { k: 'venta', t: 'Precio flete', n: 1 }, { k: 'debe', t: 'Se le debe', n: 1 },
+  { k: 'margA', t: 'Margen Armada', n: 1 }, { k: 'margen', t: 'Margen 4PL', n: 1 }, { k: 'flags', t: 'Notas' }
 ];
 const PRIO = ['__neg', 'lo pagado supera el precio', 'destino nuevo', 'zona en duda', 'zona por revisar', 'sin tarifa en la zona', 'tarifa editada', 'costos extra', 'tarifa inconsistente', 'maniobra faltante', 'destino sin histórico'];
 function prioridad(v) {
@@ -1085,18 +1129,28 @@ function ordenar(a, b) {
   return String(x).localeCompare(String(y), 'es') * d;
 }
 function renderTabla() {
-  const v = vistos().slice().sort(ordenar);
+  const v = enTabla().slice().sort(ordenar);
   const hi = FSIG ? COL_SIG[FSIG] : null;
   const sum = f => v.reduce((a, x) => a + (x[f] || 0), 0);
+  const hayDebe = v.some(x => x.debe != null);
+  const totales = cls => `<tr class="${cls}">
+    <td colspan="5">${cls === 'tot' ? 'Totales' : 'Subtotales'} (${v.length} viajes)</td>
+    <td class="num">${mny(sum('man'))}</td><td class="num">${mny(sum('manVenta'))}</td>
+    <td class="num">${mny(sum('est'))}</td><td class="num">${mny(sum('estVenta'))}</td>
+    <td class="num">${mny(sum('costo'))}</td><td class="num">${mny(sum('venta'))}</td>
+    <td class="num">${hayDebe ? mny(v.reduce((a, x) => a + (x.debe != null ? x.debe : (x.pag || 0)), 0)) : mny(sum('pag'))}</td>
+    <td class="num">${hayDebe ? mny(sum('margA')) : '—'}</td>
+    <td class="num">${mny(sum('margen'))}</td><td></td></tr>`;
+  const qn = $('#qBusN'); if (qn) qn.textContent = QBUS ? v.length + ' viaje(s) en toda la carga' : '';
   const ar = k => SORT.k === k ? `<span class="ar">${SORT.dir === 1 ? '▲' : '▼'}</span>` : '';
   $('#tbl').innerHTML = `
-  <thead><tr>${COLS.map(c => `<th class="${c.n ? 'num' : ''}${hi === c.k ? ' hi' : ''}" data-k="${c.k}">${c.t} ${ar(c.k)}</th>`).join('')}</tr></thead>
+  <thead><tr>${COLS.map(c => `<th class="${c.n ? 'num' : ''}${hi === c.k ? ' hi' : ''}" data-k="${c.k}">${c.t} ${ar(c.k)}</th>`).join('')}</tr>${v.length ? totales('tot') : ''}</thead>
   <tbody>${v.length ? v.map(o => `
     <tr class="st-${o.sem}" data-id="${o.id}">
       <td><span class="sem ${o.sem}"></span></td>
       <td><b>${o.id}</b></td>
       <td class="dest" title="${o.destino}">${o.destino}${o.otroOrigen ? `<span class="src">sale de ${o.origen}</span>` : ''}</td>
-      <td style="white-space:nowrap">${o.unidad}</td>
+      <td style="white-space:nowrap">${o.unidad}${o.prov ? '<span class="src">' + o.prov + '</span>' : ''}</td>
       <td style="white-space:nowrap">${o.fecha}</td>
       <td class="num${hi === 'man' ? ' hi' : ''}"><input class="inp ${o.editM ? 'edited' : ''}" data-k="man" value="${o.man == null ? '' : o.man}"></td>
       <td class="num">${mny(o.manVenta)}</td>
@@ -1104,17 +1158,13 @@ function renderTabla() {
       <td class="num">${mny(o.estVenta)}</td>
       <td class="num${hi === 'costo' ? ' hi' : ''}"><input class="inp ${o.editC ? 'edited' : ''}" data-k="costo" value="${o.costo == null ? '' : o.costo}"><span class="src">${o.srcC}</span></td>
       <td class="num">${mny(o.venta)}<span class="src">${o.srcV}</span></td>
-      <td class="num${o.flags.some(f => f.t === 'lo pagado supera el precio') ? ' marg-neg' : ''}">${o.pag == null ? '' : mny(o.pag)}${pagSrc(o)}</td>
+      <td class="num${o.flags.some(f => f.t === 'lo pagado supera el precio') ? ' marg-neg' : ''}">${o.debe != null ? mny(o.debe) : (o.pag == null ? '' : mny(o.pag))}${o.debe != null && o.pag != null && Math.abs(o.debe - o.pag) > 0.5 ? '<span class="src">flete ' + mny0(o.pag) + '</span>' : ''}${pagSrc(o)}</td>
+      <td class="num ${o.margA == null ? '' : (o.margA < 0 ? 'marg-neg' : 'marg-ok')}">${o.margA == null ? '—' : mny(o.margA)}${o.margA == null ? '' : '<span class="src">' + o.margAPct.toFixed(1) + '%</span>'}</td>
       <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
       <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.atencion || o.acepto ? (o.acepto ? '<button class="mini ok" data-acc="acepto" title="Lo aceptaste tal como está; toca para deshacer">aceptado ✓ · deshacer</button>' : '<button class="mini acepto" data-acc="acepto" title="Lo facturas tal como está aunque tenga avisos; pasa a verde">Acepto el viaje</button>') : ''}${o.costo && !o.padre ? (o.doble ? '<button class="mini" data-acc="doble" title="Regresar al flete sencillo">quitar ×2</button>' : '<button class="mini" data-acc="doble" title="Cobrar el flete doble (dos vueltas o dos unidades)">flete ×2</button>') : ''}${o.flags.some(f => f.t === 'maniobra faltante') ? '<button class="mini ok" data-acc="aceptarMan" title="La maniobra propuesta es correcta">aceptar maniobra</button>' : ''}${o.flags.some(f => f.t === 'estadía con tu tabla') ? '<button class="mini ok" data-acc="aceptarEst" title="La estadía propuesta es correcta">aceptar estadía</button>' : ''}${o.flags.some(f => f.t === 'tarifa de ruteo') ? '<button class="mini ok" data-acc="aceptarRuteo" title="La tarifa de ruteo es correcta">aceptar ruteo</button>' : ''}${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
-    </tr>`).join('') : '<tr><td colspan="14" class="empty">No hay viajes con este filtro.</td></tr>'}</tbody>
-  <tfoot><tr>
-    <td colspan="5">Subtotales (${v.length} viajes)</td>
-    <td class="num">${mny(sum('man'))}</td><td class="num">${mny(sum('manVenta'))}</td>
-    <td class="num">${mny(sum('est'))}</td><td class="num">${mny(sum('estVenta'))}</td>
-    <td class="num">${mny(sum('costo'))}</td><td class="num">${mny(sum('venta'))}</td><td class="num">${mny(sum('pag'))}</td>
-    <td class="num">${mny(sum('margen'))}</td><td></td></tr></tfoot>`;
-  document.querySelectorAll('#tbl th').forEach(th => th.onclick = () => {
+    </tr>`).join('') : '<tr><td colspan="15" class="empty">' + (QBUS ? 'Ningún viaje coincide con «' + QBUS + '».' : 'No hay viajes con este filtro.') + '</td></tr>'}</tbody>
+  <tfoot>${totales('')}</tfoot>`;
+  document.querySelectorAll('#tbl th[data-k]').forEach(th => th.onclick = () => {
     const k = th.dataset.k;
     SORT = { k, dir: SORT.k === k ? -SORT.dir : 1 };
     renderTabla();
@@ -1129,7 +1179,8 @@ function renderTabla() {
     if (e.target.dataset.acc === 'ahora') { o.citaSig = false; o.flags = o.flags.filter(f => f.t !== 'cita del mes siguiente'); recalcular(o); redraw(); }
     else posponer(o, true);
   });
-  document.querySelectorAll('#tbl .inp').forEach(inp => inp.addEventListener('change', e => {
+  const aplicarEdicion = e => {
+    if (e.target.dataset.hecho) return; e.target.dataset.hecho = '1';
     const o = VIAJES.find(x => x.id === e.target.closest('tr').dataset.id); if (!o) return;
     const n = num(e.target.value), k = e.target.dataset.k;
     if (k === 'est') { o.est = n; o.editE = true; o.flags = o.flags.filter(f => f.t !== 'estadía con tu tabla'); recalcular(o); redraw(); return; } // v20: la estadía no toca los avisos
@@ -1137,11 +1188,16 @@ function renderTabla() {
     else { o.man = n; o.editM = true; o.sM = 'g'; o.srcM = 'confirmado por ti'; }
     o.flags = o.flags.filter(f => f.auto || f.t === 'precio por debajo del costo' || f.t === 'viaje sin margen');
     recalcular(o); redraw();
-  }));
+  };
+  // v25: Enter confirma el dato aunque el número sea el mismo
+  document.querySelectorAll('#tbl .inp').forEach(inp => {
+    inp.addEventListener('change', aplicarEdicion);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); aplicarEdicion(e); } });
+  });
   $('#tblFoot').textContent = hi
     ? (hi === 'man' ? 'Confirma o borra la columna Costo maniobra resaltada. El precio se recalcula solo.'
                     : 'Corrige la columna Costo flete resaltada. El precio y el margen se recalculan solos.')
-    : 'Costo es lo que se paga al transportista; precio es lo que se le cobra al cliente. Las celdas blancas son editables: al cambiar un costo, el precio se recalcula solo. Haz clic en cualquier encabezado para ordenar (el primero ordena por prioridad de atención).';
+    : 'Costo es lo que tú le facturas a 4PL (columnas amarillas); precio es lo que 4PL le factura a su cliente (azules); Se le debe es lo que cobra el transportista (flete, maniobra, estadía y complementos). Margen Armada = Costo − Se le debe; Margen 4PL = Precio − Costo. Las celdas blancas son editables: escribe el monto y Enter para confirmarlo, aunque sea el mismo; el precio se recalcula solo. El viaje está listo cuando el punto junto al ID está verde. Haz clic en cualquier encabezado para ordenar (el primero ordena por prioridad de atención).';
 }
 
 /* ---------- gráficas ---------- */
@@ -1719,7 +1775,8 @@ const terminado = s => /complet|finaliz|entreg/i.test(String(s || ''));
 let REV_ABIERTA_EN = null;
 const itAcc = (acc, txt, i) => { if (i) { i.acc = acc; i.accTxt = txt; } return i; };
 function armarRevision() {
-  const L = VIAJES.filter(o => !o.pospuesto), ids = new Set(L.map(o => o.id));
+  const L0 = VIAJES.filter(o => !o.pospuesto), ids = new Set(L0.map(o => o.id));
+  const L = L0.filter(o => !o.acepto); // v25: lo aceptado ya no se pide revisar
   const tiene = (o, t) => o.flags.some(f => f.t === t);
   const fl = (o, t) => o.flags.find(f => f.t === t);
   const vj = (o, extra) => ({ id: o.id, txt: o.destino + ' · ' + o.unidad + (extra ? ' · ' + extra : '') });
@@ -1759,7 +1816,7 @@ function armarRevision() {
   const pend = L.filter(o => o.status && !terminado(o.status));
   const tocar = new Set();
   plataforma.concat(decide).forEach(i => i.vj.forEach(v => tocar.add(v.id)));
-  return { total: L.length, listos: L.filter(o => !tocar.has(o.id)).length, plataforma, decide,
+  return { total: L0.length, listos: L0.filter(o => !tocar.has(o.id)).length, plataforma, decide,
     pend: pend.length ? { c: 'b', t: 'Viajes que todavía no terminan', d: 'Están asignados, en ruta o por confirmar. Si los cobras ahora, cualquier costo que aparezca después ya no entraría.',
       vj: pend.map(o => vj(o, o.status + ' · cita ' + o.fecha)) } : null };
 }
@@ -1841,7 +1898,11 @@ function respaldoCopia(t, ok) {
 }
 
 /* ---------- flujo ---------- */
-function redraw() { renderRevStrip(); renderKpis(); renderAlerts(); renderToolbar(); renderTabla(); renderPospuestos(); renderCharts(); pintarJulio(); guardarAvance(); }
+function enlazarBuscar() {
+  const q = $('#qBus'); if (!q || q.dataset.ok) return; q.dataset.ok = '1';
+  q.addEventListener('input', () => { QBUS = q.value.trim(); renderTabla(); });
+}
+function redraw() { enlazarBuscar(); renderRevStrip(); renderKpis(); renderAlerts(); renderToolbar(); renderTabla(); renderPospuestos(); renderCharts(); pintarJulio(); guardarAvance(); }
 
 /* ---------- v16: viajes pasados al mes siguiente (se guardan en el servidor) ---------- */
 let MES_P = '';
