@@ -137,8 +137,8 @@ body.ed.fer .tarea:hover,body.ed.fer tr[data-t]:hover td,body.ed.fer tr[data-g]:
 <section class="vista" id="v-pendientes"><h2>Pendientes</h2><p class="ayuda">Los pasos de la obra en el orden en que conviene hacerlos.</p>
 <div class="acciones solo-ed no-print"><button class="btn" onclick="abrirTarea()">+ Paso</button><span class="ayuda" style="margin:0;align-self:center">Toca el círculo para terminar un paso o regresarlo a pendiente; usa las flechas para ordenarlos por prioridad y toca el texto para editarlo.</span></div><div class="seg no-print" id="filtro"><button data-f="todos" class="on">Todos</button><button data-f="Jorge">Jorge</button><button data-f="Fer">Fer</button><button data-f="abiertos">Sin terminar</button></div><div id="pendientes"></div></section>
 <section class="vista" id="v-presupuesto"><h2>Presupuesto</h2><p class="ayuda">Cuánto creemos que costará cada paso (material más mano de obra) contra lo que ya se gastó en él. Los pasos sin cotización dicen "por estimar".</p><div class="acciones solo-ed no-print"><span class="ayuda" style="margin:0">Toca un paso para poner su estimado.</span></div><div id="presupuesto"></div></section>
-<section class="vista" id="v-mudanza"><h2>Mudanza</h2><p class="ayuda">La mudanza de la familia de Veracruz a Alondra 25; va aparte del presupuesto de la remodelación.</p>
-<div class="acciones solo-edm no-print"><button class="btn" onclick="abrirItem()">+ Concepto</button><button class="btn sec" onclick="abrirTopeM()">Presupuesto</button><span class="ayuda" style="margin:0;align-self:center">Toca un concepto para editarlo, marcarlo como comprado o borrarlo.</span></div><div id="mudanza"></div></section>
+<section class="vista" id="v-mudanza"><h2>Mudanza</h2><p class="ayuda">Lo que cuesta traer a la familia de Veracruz a Alondra 25: el flete y lo que haga falta para empacar. Va aparte de la remodelación.</p>
+<div class="acciones solo-edm no-print"><button class="btn" onclick="abrirItem()">+ Concepto</button><span class="ayuda" style="margin:0;align-self:center">Toca un concepto para editarlo, marcarlo como pagado o borrarlo.</span></div><div id="mudanza"></div></section>
 <p class="pie" id="pie"></p>
 </main>
 <div class="velo no-print" id="velo"><div class="modal"><button class="cerrar-x" onclick="cerrar()">✕</button><div id="mbody"></div></div></div>
@@ -295,21 +295,21 @@ function abrirAjustes(){modal(`<h3>Ajustes</h3>
     if(await guardar(X=>{if(t!=null)X.tope=t;if(i!=null)X.imprevistos_pct=i;if(j!=null)X.tarifa_jorge=j;}))cerrar();};}
 $('btnRec').onclick=async()=>{$('btnRec').disabled=true;$('chip').textContent='Recargando…';await cargar();$('btnRec').disabled=false;};
 function pintarM(){if(!M)return;const I=M.items||[],tot=i=>(+i.cantidad||1)*(+i.costo||0);
-  const todo=I.reduce((a,i)=>a+tot(i),0),comp=I.filter(i=>i.estado==='Comprado').reduce((a,i)=>a+tot(i),0),tope=M.tope||0;
-  const filas=I.map(i=>`<tr data-m="${i.id}"><td><b>${esc(i.concepto)}</b><span class="sub">${esc(i.caracteristicas)}${i.tienda?(i.caracteristicas?' · ':'')+esc(i.tienda):''}</span></td><td class="m">${esc(i.cantidad||1)}</td><td class="m">${mx(i.costo)}</td><td class="m">${mx(tot(i))}</td><td><span class="pill ${i.estado==='Comprado'?'comprado':''}">${esc(i.estado||'Por comprar')}</span></td></tr>`).join('');
-  $('mudanza').innerHTML=`<div class="kpis"><div class="kpi"><div class="l">Comprado</div><div class="n">${mx(comp)}</div><div class="s">Ya pagado</div></div>
-   <div class="kpi"><div class="l">Disponible</div><div class="n ${tope-todo<0?'over':''}">${mx(tope-todo)}</div><div class="s">Presupuesto menos todo lo anotado</div></div>
-   <div class="kpi"><div class="l">Presupuesto</div><div class="n">${mx(tope)}</div><div class="s">Costo estimado de la mudanza</div></div>
-   <div class="kpi"><div class="l">Anotado</div><div class="n">${mx(todo)}</div><div class="s">${I.length} conceptos; por comprar ${mx(todo-comp)}</div></div></div>
+  const todo=I.reduce((a,i)=>a+tot(i),0),pag=I.filter(i=>i.estado==='Pagado'||i.estado==='Comprado').reduce((a,i)=>a+tot(i),0);
+  const filas=I.map(i=>{const ok=i.estado==='Pagado'||i.estado==='Comprado';return `<tr data-m="${i.id}"><td><b>${esc(i.concepto)}</b><span class="sub">${esc(i.caracteristicas)}${i.tienda?(i.caracteristicas?' · ':'')+esc(i.tienda):''}</span></td><td class="m">${esc(i.cantidad||1)}</td><td class="m">${mx(i.costo)}</td><td class="m">${mx(tot(i))}</td><td><span class="pill ${ok?'comprado':''}">${ok?'Pagado':'Pendiente'}</span></td></tr>`;}).join('');
+  $('mudanza').innerHTML=`<div class="kpis"><div class="kpi"><div class="l">Pagado</div><div class="n">${mx(pag)}</div><div class="s">Lo que ya se pagó</div></div>
+   <div class="kpi"><div class="l">Por pagar</div><div class="n">${mx(todo-pag)}</div><div class="s">Lo que falta pagar</div></div>
+   <div class="kpi"><div class="l">Total</div><div class="n">${mx(todo)}</div><div class="s">Costo de la mudanza</div></div>
+   <div class="kpi"><div class="l">Conceptos</div><div class="n">${I.length}</div><div class="s">${I.filter(i=>i.estado==='Pagado'||i.estado==='Comprado').length} pagados</div></div></div>
    <div class="seccion-t">Conceptos</div>${I.length?`<div class="tabla-w"><table><thead><tr><th>Concepto</th><th class="m">Cant.</th><th class="m">Costo</th><th class="m">Total</th><th>Estado</th></tr></thead><tbody>${filas}<tr class="tot"><td colspan="3">Total</td><td class="m">${mx(todo)}</td><td></td></tr></tbody></table></div>`:'<div class="tarjeta vacio">Todavía no hay conceptos.</div>'}`;}
-function abrirItem(id){const i=id?M.items.find(x=>x.id===id):{cantidad:1,estado:'Por comprar'};
+function abrirItem(id){const i=id?M.items.find(x=>x.id===id):{cantidad:1,estado:'Pendiente'};
   modal(`<h3>${id?'Editar concepto':'Nuevo concepto'}</h3>
   <div class="campo"><label>Concepto</label><input id="iCon" value="${esc(i.concepto)}"></div>
   <div class="dos"><div class="campo"><label>Cantidad</label><input id="iCan" inputmode="decimal" value="${i.cantidad??1}"></div>
   <div class="campo"><label>Costo por pieza</label><input id="iCos" inputmode="decimal" value="${i.costo??''}" placeholder="$"></div></div>
   <div class="campo"><label>Características</label><textarea id="iCar">${esc(i.caracteristicas)}</textarea></div>
-  <div class="dos"><div class="campo"><label>Tienda</label><input id="iTie" value="${esc(i.tienda)}"></div>
-  <div class="campo"><label>Estado</label><select id="iEst"><option ${i.estado!=='Comprado'?'selected':''}>Por comprar</option><option ${i.estado==='Comprado'?'selected':''}>Comprado</option></select></div></div>
+  <div class="dos"><div class="campo"><label>Tienda o proveedor</label><input id="iTie" value="${esc(i.tienda)}"></div>
+  <div class="campo"><label>Estado</label><select id="iEst"><option ${!(i.estado==='Pagado'||i.estado==='Comprado')?'selected':''}>Pendiente</option><option ${(i.estado==='Pagado'||i.estado==='Comprado')?'selected':''}>Pagado</option></select></div></div>
   <div class="msg" id="mMsg"></div>
   <div class="pie-m">${id?'<button class="btn peligro izq" id="bDel">Borrar</button>':''}<button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="bOk">Guardar</button></div>`);
   $('bOk').onclick=async()=>{const c=$('iCon').value.trim();if(!c){$('mMsg').textContent='Escribe el concepto';return;}
@@ -317,9 +317,6 @@ function abrirItem(id){const i=id?M.items.find(x=>x.id===id):{cantidad:1,estado:
     $('bOk').disabled=true;if(await guardarM(X=>{X.items=X.items||[];if(id){const k=X.items.findIndex(x=>x.id===id);X.items[k]=Object.assign({id},v);}else X.items.push(Object.assign({id:nid('m')},v));}))cerrar();};
   if(id)$('bDel').onclick=async()=>{if($('bDel').dataset.ok!=='1'){$('bDel').dataset.ok='1';$('bDel').textContent='¿Seguro? Toca otra vez';return;}
     if(await guardarM(X=>{X.items=X.items.filter(x=>x.id!==id);}))cerrar();};}
-function abrirTopeM(){modal(`<h3>Presupuesto de la mudanza</h3><div class="campo"><label>Costo estimado</label><input id="mTop" inputmode="decimal" value="${M.tope}"></div>
-  <div class="pie-m"><button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="bOk">Guardar</button></div>`);
-  $('bOk').onclick=async()=>{const t=num($('mTop').value);if(t!=null&&await guardarM(X=>{X.tope=t;}))cerrar();};}
 $('velo').addEventListener('click',e=>{if(e.target.id==='velo')cerrar();});
 cargar();
 </script></body></html>
