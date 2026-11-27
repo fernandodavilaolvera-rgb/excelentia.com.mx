@@ -189,6 +189,15 @@ tfoot td{background:#dce8f7;font-weight:800;border-top:2px solid #c8d9f0}
 .buscar .n{font-size:11.5px;color:#4a5068;white-space:nowrap}
 .kpi.arm{border-left:3px solid #e0a02c}
 .kpi.pl4{border-left:3px solid #4a9fd4}
+/* v26: nota al aceptar y detalle con IA */
+.mini.info{font-weight:800;font-style:italic;font-family:Georgia,serif;min-width:22px}
+.mini.info.tiene{background:#1a3a6b;color:#fff;border-color:#1a3a6b}
+.nota-ac{font-size:10.5px;color:#2e6b45;display:block;margin-top:.15rem;white-space:normal;max-width:260px}
+.det-item{border:1px solid #dde1e9;border-left:3px solid #4a9fd4;border-radius:9px;padding:.6rem .75rem;margin-bottom:.6rem;font-size:13px;line-height:1.42;color:#1a2035}
+.det-item .hd{font-size:11px;color:#8a90a0;margin-bottom:.25rem;display:flex;gap:.5rem;align-items:center}
+.det-item .hd .sp{flex:1}
+.det-hist{font-size:11.5px;color:#4a5068;background:#eef4fc;border-radius:7px;padding:.35rem .55rem;margin-top:.4rem}
+@media print{.det-item{break-inside:avoid}}
 
 /* GRAFICAS */
 .chart{margin-bottom:1.4rem}
@@ -474,7 +483,7 @@ tr.rev-hi td{background:#fff4d6!important;transition:background .4s}
     </div>
   </section>
 
-  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 25 (27-nov-2026)</footer>
+  <footer>ExcelentIA · Copiloto de Facturación 4PL · versión 26 (27-nov-2026)</footer>
 </div>
 
 <script>
@@ -991,6 +1000,7 @@ function renderToolbar() {
      <button class="btn green" id="btnCerrar" title="Descarga el Excel, mueve el corte y guarda lo facturado">${PRACTICA ? 'Cerrar el mes · práctica' : 'Cerrar el mes'} (${listaCierre().length})</button>
      <button class="btn ghost" id="btnXlsx" title="Solo descarga el Excel de lo que ves; no mueve el corte ni guarda nada">Descargar sin cerrar</button>
      ${CIERRE_PEND ? '<button class="btn" id="btnReintentar">Reintentar guardar</button>' : ''}
+     <button class="btn ghost" id="btnDetalle" title="Analiza con IA los viajes que requieren atención: quién lo hizo, su factura, el histórico y qué conviene hacer">Generar detalle (${base().filter(v => v.atencion).length})</button>
      <button class="btn ghost" id="btnReset">Cargar otros viajes</button>`;
   document.querySelectorAll('#toolbar [data-m]').forEach(c => c.onclick = () => { setMes(c.dataset.m); redraw(); });
   const f1 = $('#fd1'), f2 = $('#fd2');
@@ -1003,6 +1013,7 @@ function renderToolbar() {
   $('#btnCerrar').onclick = cerrarMes;
   const br = $('#btnReintentar'); if (br) br.onclick = () => guardarFacturado(CIERRE_PEND.lista, CIERRE_PEND.mes);
   $('#btnReset').onclick = reset;
+  $('#btnDetalle').onclick = () => generarDetalle(base().filter(v => v.atencion));
 }
 
 /* ---------- v22: modo práctica, flete doble y cerrar el mes ---------- */
@@ -1161,7 +1172,7 @@ function renderTabla() {
       <td class="num${o.flags.some(f => f.t === 'lo pagado supera el precio') ? ' marg-neg' : ''}">${o.debe != null ? mny(o.debe) : (o.pag == null ? '' : mny(o.pag))}${o.debe != null && o.pag != null && Math.abs(o.debe - o.pag) > 0.5 ? '<span class="src">flete ' + mny0(o.pag) + '</span>' : ''}${pagSrc(o)}</td>
       <td class="num ${o.margA == null ? '' : (o.margA < 0 ? 'marg-neg' : 'marg-ok')}">${o.margA == null ? '—' : mny(o.margA)}${o.margA == null ? '' : '<span class="src">' + o.margAPct.toFixed(1) + '%</span>'}</td>
       <td class="num ${o.margen <= 0 ? 'marg-neg' : 'marg-ok'}">${mny(o.margen)}<span class="src">${o.margenPct.toFixed(1)}%</span></td>
-      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.atencion || o.acepto ? (o.acepto ? '<button class="mini ok" data-acc="acepto" title="Lo aceptaste tal como está; toca para deshacer">aceptado ✓ · deshacer</button>' : '<button class="mini acepto" data-acc="acepto" title="Lo facturas tal como está aunque tenga avisos; pasa a verde">Acepto el viaje</button>') : ''}${o.costo && !o.padre ? (o.doble ? '<button class="mini" data-acc="doble" title="Regresar al flete sencillo">quitar ×2</button>' : '<button class="mini" data-acc="doble" title="Cobrar el flete doble (dos vueltas o dos unidades)">flete ×2</button>') : ''}${o.flags.some(f => f.t === 'maniobra faltante') ? '<button class="mini ok" data-acc="aceptarMan" title="La maniobra propuesta es correcta">aceptar maniobra</button>' : ''}${o.flags.some(f => f.t === 'estadía con tu tabla') ? '<button class="mini ok" data-acc="aceptarEst" title="La estadía propuesta es correcta">aceptar estadía</button>' : ''}${o.flags.some(f => f.t === 'tarifa de ruteo') ? '<button class="mini ok" data-acc="aceptarRuteo" title="La tarifa de ruteo es correcta">aceptar ruteo</button>' : ''}${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span></td>
+      <td>${o.flags.map(f => `<span class="flag ${f.c}" title="${f.d}">${f.l || f.t}</span>`).join('')}<span class="acciones">${o.atencion || o.acepto ? (o.acepto ? '<button class="mini ok" data-acc="acepto" title="Lo aceptaste tal como está; toca para deshacer">aceptado ✓ · deshacer</button>' : '<button class="mini acepto" data-acc="acepto" title="Lo facturas tal como está aunque tenga avisos; pasa a verde">Acepto el viaje</button>') : ''}<button class="mini info${o.detalle ? ' tiene' : ''}" data-acc="info" title="${o.detalle ? 'Ver el detalle del viaje' : 'Generar el detalle de este viaje con IA'}">i</button>${o.costo && !o.padre ? (o.doble ? '<button class="mini" data-acc="doble" title="Regresar al flete sencillo">quitar ×2</button>' : '<button class="mini" data-acc="doble" title="Cobrar el flete doble (dos vueltas o dos unidades)">flete ×2</button>') : ''}${o.flags.some(f => f.t === 'maniobra faltante') ? '<button class="mini ok" data-acc="aceptarMan" title="La maniobra propuesta es correcta">aceptar maniobra</button>' : ''}${o.flags.some(f => f.t === 'estadía con tu tabla') ? '<button class="mini ok" data-acc="aceptarEst" title="La estadía propuesta es correcta">aceptar estadía</button>' : ''}${o.flags.some(f => f.t === 'tarifa de ruteo') ? '<button class="mini ok" data-acc="aceptarRuteo" title="La tarifa de ruteo es correcta">aceptar ruteo</button>' : ''}${o.citaSig ? '<button class="mini" data-acc="ahora">cobrar ahora</button>' : ''}<button class="mini" data-acc="posponer" title="Sale de este reporte y entra en el del mes siguiente">pasar al mes siguiente</button></span>${o.acepto && o.nota ? '<span class="nota-ac">motivo: ' + esc(o.nota) + '</span>' : ''}</td>
     </tr>`).join('') : '<tr><td colspan="15" class="empty">' + (QBUS ? 'Ningún viaje coincide con «' + QBUS + '».' : 'No hay viajes con este filtro.') + '</td></tr>'}</tbody>
   <tfoot>${totales('')}</tfoot>`;
   document.querySelectorAll('#tbl th[data-k]').forEach(th => th.onclick = () => {
@@ -1175,7 +1186,8 @@ function renderTabla() {
     if (e.target.dataset.acc === 'aceptarRuteo') { aceptarRuteo(o); redraw(); return; }
     if (e.target.dataset.acc === 'aceptarEst') { aceptarEstadia(o); redraw(); return; }
     if (e.target.dataset.acc === 'doble') { fleteDoble(o); redraw(); return; }
-    if (e.target.dataset.acc === 'acepto') { o.acepto = !o.acepto; recalcular(o); redraw(); return; }
+    if (e.target.dataset.acc === 'acepto') { aceptarViaje(o); return; }
+    if (e.target.dataset.acc === 'info') { verDetalle(o); return; }
     if (e.target.dataset.acc === 'ahora') { o.citaSig = false; o.flags = o.flags.filter(f => f.t !== 'cita del mes siguiente'); recalcular(o); redraw(); }
     else posponer(o, true);
   });
@@ -1897,6 +1909,93 @@ function respaldoCopia(t, ok) {
   document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); ok(); } catch (e) { alert('No se pudo copiar; usa Imprimir.'); } ta.remove();
 }
 
+/* ---------- v26: aceptar con motivo y detalle con IA ---------- */
+const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+async function postFlujo(cuerpo, ms) {
+  const ac = new AbortController(), to = setTimeout(() => ac.abort(), ms || 20000);
+  try {
+    const res = await fetch(VIAJES_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ clave: leerClave() }, cuerpo)), signal: ac.signal });
+    return res.ok ? await res.json() : null;
+  } catch (e) { return null; } finally { clearTimeout(to); }
+}
+async function aceptarViaje(o) {
+  if (o.acepto) {
+    o.acepto = false; o.nota = ''; recalcular(o); redraw();
+    if (!PRACTICA && !DEMO) postFlujo({ modo: 'nota', usuario: USUARIO || '', viajes: [{ id: o.id, accion: 'deshacer' }] });
+    return;
+  }
+  const q = prompt('Viaje ' + o.id + ': escribe el motivo para tu historial (por ejemplo "no había transporte"). Puedes dejarlo en blanco.', '');
+  if (q === null) return; // canceló
+  o.acepto = true; o.nota = q.trim().slice(0, 500); o.notaFecha = new Date().toISOString();
+  recalcular(o); redraw();
+  if (PRACTICA || DEMO) return;
+  const d = await postFlujo({ modo: 'nota', usuario: USUARIO || '', viajes: [{ id: o.id, accion: 'acepto', nota: o.nota }] });
+  if (!d || !d.ok) alert('El viaje quedó aceptado en este equipo, pero el motivo no se pudo guardar en el servidor. Revisa tu conexión; si vuelves a tocar "deshacer" y aceptar, se intenta de nuevo.');
+}
+async function leerNotas() {
+  const ids = VIAJES.map(o => o.id).filter(x => /^\d+$/.test(x));
+  if (!ids.length) return;
+  const d = await postFlujo({ modo: 'nota', viajes: [], leer: ids });
+  if (!d || !d.ok || !Array.isArray(d.notas)) return;
+  const por = {}; d.notas.forEach(n => { (por[n.id] = por[n.id] || []).push(n); });
+  VIAJES.forEach(o => { if (por[o.id]) o.hist = por[o.id]; });
+}
+function compactoIA(o) {
+  return { id: o.id, destino: o.destino, origen: o.origen, unidad: o.unidad, fecha: o.fecha, status: o.status, prov: o.prov, zona: o.zonaNombre,
+    costo: o.costo, venta: o.venta, man: o.man, manVenta: o.manVenta, est: o.est, estVenta: o.estVenta, debe: o.debe, pag: o.pag, margA: o.margA,
+    srcC: o.srcC, srcM: o.srcM, padre: o.padre, hijos: (o.hijos || []).join(', '), rech: o.rech, acepto: !!o.acepto, nota: o.nota || '',
+    avisos: o.flags.map(f => (f.l || f.t) + ': ' + (f.d || '')) };
+}
+let DET_CORRIENDO = false;
+async function generarDetalle(lista, unico) {
+  if (DET_CORRIENDO) { alert('Ya se está generando un detalle; espera a que termine.'); return; }
+  lista = lista.filter(o => /^\d+$/.test(o.id));
+  if (!lista.length) { alert('No hay viajes que requieran atención en lo que estás viendo.'); return; }
+  if (!unico && !confirm('Se va a analizar con IA ' + lista.length + ' viaje(s) que requieren atención: quién lo hizo, su factura, el histórico y qué conviene hacer. Tarda unos ' + Math.max(1, Math.ceil(lista.length / 25)) + ' minuto(s). ¿Sigo?')) return;
+  DET_CORRIENDO = true;
+  const bt = $('#btnDetalle'); if (bt) { bt.disabled = true; bt.textContent = 'Generando detalle…'; }
+  if (unico) pintarDetalle([unico], 'Generando el detalle del viaje ' + unico.id + '…');
+  let ok = 0, fallos = 0;
+  for (let i = 0; i < lista.length; i += 25) {
+    const parte = lista.slice(i, i + 25);
+    if (bt) bt.textContent = 'Generando detalle… ' + Math.min(i + 25, lista.length) + ' de ' + lista.length;
+    const d = await postFlujo({ modo: 'detalle', viajes: parte.map(compactoIA) }, 240000);
+    if (d && d.ok && Array.isArray(d.detalles)) {
+      d.detalles.forEach(x => { const o = VIAJES.find(v => v.id === x.id); if (o) { o.detalle = { texto: x.texto, generado: d.generado }; ok++; } });
+    } else fallos += parte.length;
+  }
+  DET_CORRIENDO = false; guardarAvance(); redraw();
+  if (unico) { pintarDetalle([unico]); if (!unico.detalle) alert('No se pudo generar el detalle. Revisa tu conexión e intenta de nuevo.'); return; }
+  pintarDetalle(lista.filter(o => o.detalle));
+  if (fallos) alert('Se generó el detalle de ' + ok + ' viaje(s); ' + fallos + ' no se pudieron. Vuelve a tocar "Generar detalle" para intentarlo de nuevo.');
+}
+function verDetalle(o) {
+  if (o.detalle) pintarDetalle([o]); else generarDetalle([o], o);
+}
+function textoDetalle(lista) { return lista.filter(o => o.detalle).map(o => o.detalle.texto).join('\n\n'); }
+function pintarDetalle(lista, cargando) {
+  const ov = $('#detOv'); if (!ov) return;
+  const item = o => `<div class="det-item"><div class="hd"><b>${o.id}</b><span>${esc(o.destino)} · ${esc(o.unidad)}</span><span class="sp"></span>${o.detalle ? '<button class="mini" data-copia="' + o.id + '">Copiar</button>' : ''}</div>
+    ${o.detalle ? esc(o.detalle.texto) : (cargando ? 'Generando…' : 'Sin detalle todavía.')}
+    ${(o.hist || []).length ? '<div class="det-hist">Historial: ' + o.hist.map(n => esc(n.fecha) + ' · ' + (n.accion === 'acepto' ? 'aceptado' : 'deshecho') + (n.nota ? ': ' + esc(n.nota) : '') + (n.usuario ? ' (' + esc(n.usuario) + ')' : '')).join(' · ') + '</div>' : ''}</div>`;
+  const gen = lista.find(o => o.detalle);
+  ov.innerHTML = `<div class="rev-box"><div class="rev-hd"><h3>${lista.length === 1 ? 'Detalle del viaje ' + lista[0].id : 'Detalle de ' + lista.length + ' viajes'}</h3>
+    <p>${cargando ? esc(cargando) + ' Puede tardar hasta un minuto.' : 'Generado con IA' + (gen ? ' el ' + esc(gen.detalle.generado) : '') + ' con la plataforma, tus facturas y lo que has facturado antes; revísalo antes de decidir.'}</p></div>
+    <div class="rev-bd">${lista.map(item).join('')}</div>
+    <div class="rev-ft">${!cargando && lista.length === 1 && lista[0].detalle ? '<button class="btn ghost" id="detOtra">Volver a generar</button>' : ''}${!cargando && lista.length > 1 ? '<button class="btn ghost" id="detCopy">Copiar todo</button>' : ''}<button class="btn" id="detClose">Cerrar</button></div></div>`;
+  ov.classList.remove('hidden');
+  $('#detClose').onclick = () => { ov.classList.add('hidden'); ov.innerHTML = ''; };
+  ov.onclick = e => { if (e.target === ov) $('#detClose').onclick(); };
+  const dc = $('#detCopy'); if (dc) dc.onclick = () => copiarTexto(textoDetalle(lista), dc);
+  const dr = $('#detOtra'); if (dr) dr.onclick = () => { const o = lista[0]; o.detalle = null; generarDetalle([o], o); };
+  ov.querySelectorAll('[data-copia]').forEach(b => b.onclick = () => { const o = lista.find(x => x.id === b.dataset.copia); if (o && o.detalle) copiarTexto(o.detalle.texto, b); });
+}
+function copiarTexto(t, b) {
+  const prev = b.textContent, ok = () => { b.textContent = 'Copiado'; setTimeout(() => { b.textContent = prev; }, 1800); };
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(ok, () => respaldoCopia(t, ok)); return; } } catch (e) { }
+  respaldoCopia(t, ok);
+}
+
 /* ---------- flujo ---------- */
 function enlazarBuscar() {
   const q = $('#qBus'); if (!q || q.dataset.ok) return; q.dataset.ok = '1';
@@ -2029,6 +2128,7 @@ function arrancar(rows, desde) {
   $('#cardLoad').classList.add('hidden'); $('#results').classList.remove('hidden');
   redraw(); window.scrollTo({ top: 0, behavior: 'smooth' });
   if (FUENTE === 'base' && !DEMO) abrirRevision(); // v18
+  if (FUENTE === 'base' && !DEMO) leerNotas(); // v26
 }
 
 function pintarMemLine() {
@@ -2087,5 +2187,6 @@ $('#btnDemoJul').onclick = () => {
 
 </script>
 <div class="rev-ov hidden" id="revOv" role="dialog" aria-modal="true"></div>
+<div class="rev-ov hidden no-print" id="detOv" role="dialog" aria-modal="true"></div>
 </body>
 </html>
